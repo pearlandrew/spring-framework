@@ -1,0 +1,25 @@
+{
+  try {
+    SpelExpressionParser parser=new SpelExpressionParser();
+    StandardEvaluationContext ctx=new StandardEvaluationContext();
+    ctx.registerFunction("functionTakesColour",ExpressionLanguageScenarioTests.class.getDeclaredMethod("functionTakesColour",Color.class));
+    Expression expr=parser.parseExpression("#functionTakesColour('orange')");
+    try {
+      Object value=expr.getValue(ctx);
+      fail("Should have failed, no type converter registered");
+    }
+ catch (    EvaluationException ee) {
+    }
+    ctx.addTypeConverter(new StringToColorConverter());
+    Object value=expr.getValue(ctx);
+    assertEquals(Color.orange,value);
+  }
+ catch (  EvaluationException ee) {
+    ee.printStackTrace();
+    fail("Unexpected Exception: " + ee.getMessage());
+  }
+catch (  ParseException pe) {
+    pe.printStackTrace();
+    fail("Unexpected Exception: " + pe.getMessage());
+  }
+}

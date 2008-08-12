@@ -1,0 +1,22 @@
+{
+  if (getChildCount() == 1) {
+    return getChild(0).isWritable(state);
+  }
+  Object ctx=getChild(0).getValue(state);
+  for (int i=1; i < getChildCount() - 1; i++) {
+    try {
+      state.pushActiveContextObject(ctx);
+      ctx=getChild(i).getValue(state);
+    }
+  finally {
+      state.popActiveContextObject();
+    }
+  }
+  try {
+    state.pushActiveContextObject(ctx);
+    return getChild(getChildCount() - 1).isWritable(state);
+  }
+  finally {
+    state.popActiveContextObject();
+  }
+}

@@ -1,0 +1,11 @@
+{
+  SpelExpressionParser parser=new SpelExpressionParser();
+  StandardEvaluationContext ctx=new StandardEvaluationContext();
+  ctx.insertMethodResolver(0,new MyMethodResolver());
+  Expression expr=parser.parseExpression("(hasRole(3) or (#a <  1.042)) and hasIpAddress('10.10.0.0/16')");
+  Boolean value=null;
+  ctx.setVariable("a",1.0d);
+  ctx.setRootObject(new Supervisor("Ben"));
+  value=(Boolean)expr.getValue(ctx,Boolean.class);
+  assertTrue(value);
+}

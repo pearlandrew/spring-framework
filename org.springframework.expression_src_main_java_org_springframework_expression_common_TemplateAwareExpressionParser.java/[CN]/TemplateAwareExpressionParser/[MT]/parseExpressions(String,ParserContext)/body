@@ -1,0 +1,44 @@
+{
+  List<Expression> expressions=new LinkedList<Expression>();
+  int startIdx=0;
+  String prefix=context.getExpressionPrefix();
+  String suffix=context.getExpressionSuffix();
+  while (startIdx < expressionString.length()) {
+    int prefixIndex=expressionString.indexOf(prefix,startIdx);
+    if (prefixIndex >= startIdx) {
+      if (prefixIndex > startIdx) {
+        expressions.add(new LiteralExpression(expressionString.substring(startIdx,prefixIndex)));
+        startIdx=prefixIndex;
+      }
+      int nextPrefixIndex=expressionString.indexOf(prefix,prefixIndex + prefix.length());
+      int suffixIndex;
+      if (nextPrefixIndex == -1) {
+        suffixIndex=expressionString.lastIndexOf(suffix);
+      }
+ else {
+        suffixIndex=expressionString.lastIndexOf(suffix,nextPrefixIndex);
+      }
+      if (suffixIndex < (prefixIndex + prefix.length())) {
+        throw new ParseException(expressionString,"No ending suffix '" + suffix + "' for expression starting at character "+ prefixIndex+ ": "+ expressionString.substring(prefixIndex),null);
+      }
+ else       if (suffixIndex == prefixIndex + prefix.length()) {
+        throw new ParseException(expressionString,"No expression defined within delimiter '" + prefix + suffix+ "' at character "+ prefixIndex,null);
+      }
+ else {
+        String expr=expressionString.substring(prefixIndex + prefix.length(),suffixIndex);
+        expressions.add(doParseExpression(expr,context));
+        startIdx=suffixIndex + suffix.length();
+      }
+    }
+ else {
+      if (startIdx == 0) {
+        expressions.add(doParseExpression(expressionString,context));
+      }
+ else {
+        expressions.add(new LiteralExpression(expressionString.substring(startIdx)));
+      }
+      startIdx=expressionString.length();
+    }
+  }
+  return expressions.toArray(new Expression[expressions.size()]);
+}

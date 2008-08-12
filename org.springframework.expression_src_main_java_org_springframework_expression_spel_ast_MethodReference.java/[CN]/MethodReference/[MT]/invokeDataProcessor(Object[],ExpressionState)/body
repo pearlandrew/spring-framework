@@ -1,0 +1,134 @@
+{
+  DataProcessor processor=registeredProcessers.get(name);
+  Object target=state.getActiveContextObject();
+  boolean wasArray=false;
+  Class<?> arrayElementType=null;
+  Collection<Object> dataToProcess=null;
+  if (target instanceof Collection) {
+    dataToProcess=(Collection<Object>)target;
+  }
+ else {
+    wasArray=true;
+    arrayElementType=target.getClass().getComponentType();
+    if (arrayElementType.equals(Integer.TYPE)) {
+      int[] data=(int[])target;
+      dataToProcess=new ArrayList<Object>();
+      for (int i=0; i < data.length; i++) {
+        dataToProcess.add(data[i]);
+      }
+    }
+ else     if (arrayElementType.equals(Byte.TYPE)) {
+      byte[] data=(byte[])target;
+      dataToProcess=new ArrayList<Object>();
+      for (int i=0; i < data.length; i++) {
+        dataToProcess.add(data[i]);
+      }
+    }
+ else     if (arrayElementType.equals(Character.TYPE)) {
+      char[] data=(char[])target;
+      dataToProcess=new ArrayList<Object>();
+      for (int i=0; i < data.length; i++) {
+        dataToProcess.add(data[i]);
+      }
+    }
+ else     if (arrayElementType.equals(Double.TYPE)) {
+      double[] data=(double[])target;
+      dataToProcess=new ArrayList<Object>();
+      for (int i=0; i < data.length; i++) {
+        dataToProcess.add(data[i]);
+      }
+    }
+ else     if (arrayElementType.equals(Long.TYPE)) {
+      long[] data=(long[])target;
+      dataToProcess=new ArrayList<Object>();
+      for (int i=0; i < data.length; i++) {
+        dataToProcess.add(data[i]);
+      }
+    }
+ else     if (arrayElementType.equals(Float.TYPE)) {
+      float[] data=(float[])target;
+      dataToProcess=new ArrayList<Object>();
+      for (int i=0; i < data.length; i++) {
+        dataToProcess.add(data[i]);
+      }
+    }
+ else     if (arrayElementType.equals(Short.TYPE)) {
+      short[] data=(short[])target;
+      dataToProcess=new ArrayList<Object>();
+      for (int i=0; i < data.length; i++) {
+        dataToProcess.add(data[i]);
+      }
+    }
+ else     if (arrayElementType.equals(Boolean.TYPE)) {
+      boolean[] data=(boolean[])target;
+      dataToProcess=new ArrayList<Object>();
+      for (int i=0; i < data.length; i++) {
+        dataToProcess.add(data[i]);
+      }
+    }
+ else {
+      dataToProcess=Arrays.asList((Object[])target);
+    }
+  }
+  Object result=processor.process(dataToProcess,arguments,state);
+  if (wasArray && (result instanceof Collection)) {
+    Collection c=(Collection)result;
+    if (arrayElementType.equals(Integer.TYPE)) {
+      int[] newArray=(int[])Array.newInstance(arrayElementType,c.size());
+      int idx=0;
+      for (      Object i : c)       newArray[idx++]=((Integer)i).intValue();
+      return newArray;
+    }
+ else     if (arrayElementType.equals(Byte.TYPE)) {
+      byte[] newArray=(byte[])Array.newInstance(arrayElementType,c.size());
+      int idx=0;
+      for (      Object i : c)       newArray[idx++]=((Byte)i).byteValue();
+      return newArray;
+    }
+ else     if (arrayElementType.equals(Character.TYPE)) {
+      char[] newArray=(char[])Array.newInstance(arrayElementType,c.size());
+      int idx=0;
+      for (      Object i : c)       newArray[idx++]=((Character)i).charValue();
+      return newArray;
+    }
+ else     if (arrayElementType.equals(Double.TYPE)) {
+      double[] newArray=(double[])Array.newInstance(arrayElementType,c.size());
+      int idx=0;
+      for (      Object i : c)       newArray[idx++]=((Double)i).doubleValue();
+      return newArray;
+    }
+ else     if (arrayElementType.equals(Long.TYPE)) {
+      long[] newArray=(long[])Array.newInstance(arrayElementType,c.size());
+      int idx=0;
+      for (      Object i : c)       newArray[idx++]=((Long)i).longValue();
+      return newArray;
+    }
+ else     if (arrayElementType.equals(Float.TYPE)) {
+      float[] newArray=(float[])Array.newInstance(arrayElementType,c.size());
+      int idx=0;
+      for (      Object i : c)       newArray[idx++]=((Float)i).floatValue();
+      return newArray;
+    }
+ else     if (arrayElementType.equals(Short.TYPE)) {
+      short[] newArray=(short[])Array.newInstance(arrayElementType,c.size());
+      int idx=0;
+      for (      Object i : c)       newArray[idx++]=((Short)i).shortValue();
+      return newArray;
+    }
+ else     if (arrayElementType.equals(Boolean.TYPE)) {
+      boolean[] newArray=(boolean[])Array.newInstance(arrayElementType,c.size());
+      int idx=0;
+      for (      Object i : c)       newArray[idx++]=((Boolean)i).booleanValue();
+      return newArray;
+    }
+ else {
+      Object[] newArray=(Object[])Array.newInstance(arrayElementType,c.size());
+      int idx=0;
+      for (      Object i : c) {
+        newArray[idx++]=i;
+      }
+      return newArray;
+    }
+  }
+  return result;
+}

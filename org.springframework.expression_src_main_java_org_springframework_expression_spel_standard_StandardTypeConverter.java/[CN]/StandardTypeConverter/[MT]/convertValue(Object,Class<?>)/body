@@ -1,0 +1,33 @@
+{
+  if (value == null || value.getClass() == targetType)   return value;
+  Map<Class<?>,StandardIndividualTypeConverter> possibleConvertersToTheTargetType=converters.get(targetType);
+  if (possibleConvertersToTheTargetType == null && targetType.isPrimitive()) {
+    if (targetType == Integer.TYPE)     possibleConvertersToTheTargetType=converters.get(Integer.class);
+ else     if (targetType == Boolean.TYPE)     possibleConvertersToTheTargetType=converters.get(Boolean.class);
+ else     if (targetType == Short.TYPE)     possibleConvertersToTheTargetType=converters.get(Short.class);
+ else     if (targetType == Long.TYPE)     possibleConvertersToTheTargetType=converters.get(Long.class);
+ else     if (targetType == Character.TYPE)     possibleConvertersToTheTargetType=converters.get(Character.class);
+ else     if (targetType == Double.TYPE)     possibleConvertersToTheTargetType=converters.get(Double.class);
+ else     if (targetType == Float.TYPE)     possibleConvertersToTheTargetType=converters.get(Float.class);
+ else     if (targetType == Byte.TYPE)     possibleConvertersToTheTargetType=converters.get(Byte.class);
+  }
+  Object result=null;
+  if (possibleConvertersToTheTargetType != null) {
+    StandardIndividualTypeConverter aConverter=possibleConvertersToTheTargetType.get(value.getClass());
+    if (aConverter != null) {
+      try {
+        result=aConverter.convert(value);
+      }
+ catch (      EvaluationException ee) {
+        if (ee instanceof SpelException) {
+          throw (SpelException)ee;
+        }
+ else {
+          throw new SpelException(SpelMessages.PROBLEM_DURING_TYPE_CONVERSION,ee.getMessage());
+        }
+      }
+    }
+  }
+  if (result != null)   return result;
+  throw new SpelException(SpelMessages.TYPE_CONVERSION_ERROR,value.getClass(),targetType);
+}

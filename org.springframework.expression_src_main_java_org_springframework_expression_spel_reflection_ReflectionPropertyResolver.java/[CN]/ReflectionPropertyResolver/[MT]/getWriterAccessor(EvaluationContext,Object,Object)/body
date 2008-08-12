@@ -1,0 +1,18 @@
+{
+  if (target == null) {
+    return null;
+  }
+  Class<?> relevantClass=(target instanceof Class ? (Class<?>)target : target.getClass());
+  if (!(name instanceof String)) {
+    return null;
+  }
+  Field field=ReflectionUtils.findField((String)name,relevantClass);
+  if (field != null) {
+    return new ReflectionPropertyWriterExecutor((String)name,field);
+  }
+  Method m=ReflectionUtils.findSetterForProperty((String)name,relevantClass);
+  if (m != null) {
+    return new ReflectionPropertyWriterExecutor((String)name,m);
+  }
+  return null;
+}

@@ -1,0 +1,25 @@
+{
+  long starttime=0;
+  long endtime=0;
+  starttime=System.currentTimeMillis();
+  for (int i=0; i < ITERATIONS; i++) {
+    Expression expr=(Expression)parser.parseExpression("getPlaceOfBirth().getCity()");
+    if (expr == null)     fail("Parser returned null for expression");
+    Object value=expr.getValue(eContext);
+  }
+  endtime=System.currentTimeMillis();
+  long freshParseTime=endtime - starttime;
+  Expression expr=(Expression)parser.parseExpression("getPlaceOfBirth().getCity()");
+  if (expr == null)   fail("Parser returned null for expression");
+  starttime=System.currentTimeMillis();
+  for (int i=0; i < ITERATIONS; i++) {
+    Object value=expr.getValue(eContext);
+  }
+  endtime=System.currentTimeMillis();
+  long reuseTime=endtime - starttime;
+  if (reuseTime > freshParseTime) {
+    System.out.println("Fresh parse every time, ITERATIONS iterations = " + freshParseTime + "ms");
+    System.out.println("Reuse SpelExpression, ITERATIONS iterations = " + reuseTime + "ms");
+    fail("Should have been quicker to reuse!");
+  }
+}

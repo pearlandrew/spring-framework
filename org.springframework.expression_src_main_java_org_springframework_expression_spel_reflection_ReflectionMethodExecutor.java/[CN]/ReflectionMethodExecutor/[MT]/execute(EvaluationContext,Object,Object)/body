@@ -1,0 +1,24 @@
+{
+  if (argsRequiringConversion != null && arguments != null) {
+    ReflectionUtils.convertArguments(m.getParameterTypes(),m.isVarArgs(),context.getTypeUtils().getTypeConverter(),argsRequiringConversion,arguments);
+  }
+  if (m.isVarArgs()) {
+    arguments=ReflectionUtils.setupArgumentsForVarargsInvocation(m.getParameterTypes(),arguments);
+  }
+  try {
+    if (!m.isAccessible()) {
+      m.setAccessible(true);
+    }
+    return m.invoke(target,arguments);
+  }
+ catch (  IllegalArgumentException e) {
+    throw new AccessException("Problem invoking method '" + m.getName() + "' on '"+ target.getClass()+ "': "+ e.getMessage(),e);
+  }
+catch (  IllegalAccessException e) {
+    throw new AccessException("Problem invoking method '" + m.getName() + "' on '"+ target.getClass()+ "': "+ e.getMessage(),e);
+  }
+catch (  InvocationTargetException e) {
+    e.getCause().printStackTrace();
+    throw new AccessException("Problem invoking method '" + m.getName() + "' on '"+ target.getClass()+ "': "+ e.getMessage(),e);
+  }
+}

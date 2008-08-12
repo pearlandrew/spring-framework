@@ -1,0 +1,32 @@
+{
+  try {
+    SpelExpression e=(SpelExpression)parser.parseExpression(expression);
+    if (e == null) {
+      fail("Parser returned null for expression");
+    }
+    if (DEBUG) {
+      SpelUtilities.printAbstractSyntaxTree(System.out,e);
+    }
+    Object value=e.getValue(eContext);
+    if (value == null) {
+      if (expectedValue == null)       return;
+      assertEquals("Expression returned null value, but expected '" + expectedValue + "'",expectedValue,null);
+    }
+    Class<? extends Object> resultType=value.getClass();
+    assertEquals("Did not get expected value for expression '" + expression + "'.",expectedValue,ExpressionTestCase.stringValueOf(value));
+    assertEquals("Type of the result was not as expected.  Expected '" + expectedClassOfResult + "' but result was of type '"+ resultType+ "'",expectedClassOfResult.equals(resultType),true);
+    boolean isWritable=e.isWritable(eContext);
+    if (isWritable != shouldBeWritable) {
+      if (shouldBeWritable)       fail("Expected the expression to be writable but it is not");
+ else       fail("Expected the expression to be readonly but it is not");
+    }
+  }
+ catch (  EvaluationException ee) {
+    ee.printStackTrace();
+    fail("Unexpected Exception: " + ee.getMessage());
+  }
+catch (  ParseException pe) {
+    pe.printStackTrace();
+    fail("Unexpected Exception: " + pe.getMessage());
+  }
+}

@@ -1,0 +1,29 @@
+{
+  Object o=state.lookupLocalVariable(name);
+  if (o == null) {
+    throw new SpelException(SpelMessages.FUNCTION_NOT_DEFINED,name);
+  }
+  if (!(o instanceof Lambda)) {
+    throw new SpelException(SpelMessages.FUNCTION_REFERENCE_CANNOT_BE_INVOKED,name,o.getClass().getName());
+  }
+  Object[] arguments=new Object[getChildCount()];
+  for (int i=0; i < arguments.length; i++) {
+    arguments[i]=getChild(i).getValue(state);
+  }
+  Lambda lambdaExpression=(Lambda)o;
+  List<String> args=lambdaExpression.getArguments();
+  Map<String,Object> argMap=new HashMap<String,Object>();
+  if (args.size() != arguments.length) {
+    throw new SpelException(getCharPositionInLine(),SpelMessages.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION,arguments.length,args.size());
+  }
+  for (int i=0; i < args.size(); i++) {
+    argMap.put(args.get(i),arguments[i]);
+  }
+  try {
+    state.enterScope(argMap);
+    return ((SpelNode)lambdaExpression.getExpression()).getValue(state);
+  }
+  finally {
+    state.exitScope();
+  }
+}

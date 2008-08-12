@@ -1,0 +1,26 @@
+{
+  try {
+    SpelExpressionParser parser=new SpelExpressionParser();
+    StandardEvaluationContext ctx=new StandardEvaluationContext();
+    ctx.addPropertyAccessor(new VegetableColourAccessor());
+    Expression expr=parser.parseExpression("pea");
+    Object value=expr.getValue(ctx);
+    assertEquals(Color.green,value);
+    try {
+      expr.setValue(ctx,Color.blue);
+      fail("Should not be allowed to set peas to be blue !");
+    }
+ catch (    EvaluationException ee) {
+      SpelException ele=(SpelException)ee;
+      assertEquals(ele.getMessageUnformatted(),SpelMessages.PROPERTY_OR_FIELD_SETTER_NOT_FOUND);
+    }
+  }
+ catch (  EvaluationException ee) {
+    ee.printStackTrace();
+    fail("Unexpected Exception: " + ee.getMessage());
+  }
+catch (  ParseException pe) {
+    pe.printStackTrace();
+    fail("Unexpected Exception: " + pe.getMessage());
+  }
+}

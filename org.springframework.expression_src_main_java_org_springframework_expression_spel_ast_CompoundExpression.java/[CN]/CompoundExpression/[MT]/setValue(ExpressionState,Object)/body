@@ -1,0 +1,23 @@
+{
+  if (getChildCount() == 1) {
+    getChild(0).setValue(state,value);
+    return;
+  }
+  Object ctx=getChild(0).getValue(state);
+  for (int i=1; i < getChildCount() - 1; i++) {
+    try {
+      state.pushActiveContextObject(ctx);
+      ctx=getChild(i).getValue(state);
+    }
+  finally {
+      state.popActiveContextObject();
+    }
+  }
+  try {
+    state.pushActiveContextObject(ctx);
+    getChild(getChildCount() - 1).setValue(state,value);
+  }
+  finally {
+    state.popActiveContextObject();
+  }
+}

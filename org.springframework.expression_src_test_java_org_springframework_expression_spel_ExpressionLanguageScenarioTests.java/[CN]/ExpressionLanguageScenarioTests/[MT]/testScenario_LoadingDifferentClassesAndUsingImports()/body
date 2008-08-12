@@ -1,0 +1,20 @@
+{
+  try {
+    SpelExpressionParser parser=new SpelExpressionParser();
+    StandardEvaluationContext ctx=new StandardEvaluationContext();
+    ctx.setClasspath("target/test-classes/testcode.jar");
+    ctx.registerImport("a.b.c");
+    Expression expr=parser.parseExpression("new PackagedType().sayHi('Andy')");
+    Object value=expr.getValue(ctx);
+    assertEquals("Hi! Andy",value);
+    assertEquals(String.class,value.getClass());
+  }
+ catch (  EvaluationException ee) {
+    ee.printStackTrace();
+    fail("Unexpected Exception: " + ee.getMessage());
+  }
+catch (  ParseException pe) {
+    pe.printStackTrace();
+    fail("Unexpected Exception: " + pe.getMessage());
+  }
+}

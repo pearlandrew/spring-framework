@@ -1,0 +1,26 @@
+{
+  Object contextObject=state.getActiveContextObject();
+  EvaluationContext eContext=state.getEvaluationContext();
+  if (contextObject == null) {
+    throw new SpelException(SpelMessages.ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT,Utils.formatMethodForMessage(name,argumentTypes));
+  }
+  List<MethodResolver> mResolvers=eContext.getMethodResolvers();
+  if (mResolvers != null) {
+    for (    MethodResolver methodResolver : mResolvers) {
+      try {
+        MethodExecutor cEx=methodResolver.resolve(state.getEvaluationContext(),contextObject,name,argumentTypes);
+        if (cEx != null)         return cEx;
+      }
+ catch (      AccessException e) {
+        Throwable cause=e.getCause();
+        if (cause instanceof SpelException) {
+          throw (SpelException)cause;
+        }
+ else {
+          throw new SpelException(cause,SpelMessages.PROBLEM_LOCATING_METHOD,name,contextObject.getClass());
+        }
+      }
+    }
+  }
+  throw new SpelException(SpelMessages.METHOD_NOT_FOUND,Utils.formatMethodForMessage(name,argumentTypes),Utils.formatClassnameForMessage(contextObject instanceof Class ? ((Class<?>)contextObject) : contextObject.getClass()));
+}

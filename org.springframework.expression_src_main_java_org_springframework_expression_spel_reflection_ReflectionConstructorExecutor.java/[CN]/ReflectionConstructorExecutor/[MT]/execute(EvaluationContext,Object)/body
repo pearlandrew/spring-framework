@@ -1,0 +1,26 @@
+{
+  if (argsRequiringConversion != null && arguments != null) {
+    ReflectionUtils.convertArguments(c.getParameterTypes(),c.isVarArgs(),context.getTypeUtils().getTypeConverter(),argsRequiringConversion,arguments);
+  }
+  if (c.isVarArgs()) {
+    arguments=ReflectionUtils.setupArgumentsForVarargsInvocation(c.getParameterTypes(),arguments);
+  }
+  try {
+    if (!c.isAccessible()) {
+      c.setAccessible(true);
+    }
+    return c.newInstance(arguments);
+  }
+ catch (  IllegalArgumentException e) {
+    throw new AccessException("Problem invoking constructor on '" + c + "' : "+ e.getMessage(),e);
+  }
+catch (  InstantiationException e) {
+    throw new AccessException("Problem invoking constructor on '" + c + "' : "+ e.getMessage(),e);
+  }
+catch (  IllegalAccessException e) {
+    throw new AccessException("Problem invoking constructor on '" + c + "' : "+ e.getMessage(),e);
+  }
+catch (  InvocationTargetException e) {
+    throw new AccessException("Problem invoking constructor on '" + c + "' : "+ e.getMessage(),e);
+  }
+}

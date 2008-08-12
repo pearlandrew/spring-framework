@@ -1,0 +1,29 @@
+{
+  Object[] arguments=new Object[getChildCount() - 1];
+  Class<?>[] argumentTypes=new Class[getChildCount() - 1];
+  for (int i=0; i < arguments.length; i++) {
+    Object childValue=getChild(i + 1).getValue(state);
+    arguments[i]=childValue;
+    argumentTypes[i]=childValue.getClass();
+  }
+  if (cachedExecutor != null) {
+    try {
+      return cachedExecutor.execute(state.getEvaluationContext(),arguments);
+    }
+ catch (    AccessException ae) {
+    }
+  }
+  String typename=(String)getChild(0).getValue(state);
+  cachedExecutor=findExecutorForConstructor(typename,argumentTypes,state);
+  try {
+    return cachedExecutor.execute(state.getEvaluationContext(),arguments);
+  }
+ catch (  AccessException ae) {
+    throw new SpelException(ae,SpelMessages.EXCEPTION_DURING_CONSTRUCTOR_INVOCATION,typename,ae.getMessage());
+  }
+ finally {
+    if (!useCaching) {
+      cachedExecutor=null;
+    }
+  }
+}

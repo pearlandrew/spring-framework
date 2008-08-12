@@ -1,0 +1,18 @@
+{
+  if (formatter == null) {
+    if (getChildCount() > 1) {
+      formatter=new SimpleDateFormat((String)getChild(1).getValue(state));
+    }
+ else {
+      formatter=DateFormat.getDateTimeInstance();
+    }
+  }
+  String valueToParse=(String)getChild(0).getValue(state);
+  try {
+    formattedDate=formatter.parse(valueToParse);
+  }
+ catch (  ParseException e) {
+    throw new SpelException(getCharPositionInLine(),e,SpelMessages.DATE_CANNOT_BE_PARSED,valueToParse,(formatter instanceof SimpleDateFormat ? ((SimpleDateFormat)formatter).toLocalizedPattern() : formatter));
+  }
+  return formattedDate;
+}

@@ -1,0 +1,107 @@
+{
+  Object intendedArrayType=getChild(0).getValue(state);
+  if (!(intendedArrayType instanceof String)) {
+    throw new SpelException(getChild(0).getCharPositionInLine(),SpelMessages.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION,Utils.formatClassnameForMessage(intendedArrayType.getClass()));
+  }
+  String type=(String)intendedArrayType;
+  Class<?> componentType=null;
+  TypeCode arrayTypeCode=TypeCode.forName(type);
+  if (arrayTypeCode == TypeCode.OBJECT) {
+    componentType=state.findType(type);
+  }
+ else {
+    componentType=arrayTypeCode.getType();
+  }
+  Object newArray=null;
+  if (getChild(1).getChildCount() == 0) {
+    if (getChildCount() < 3) {
+      throw new SpelException(getCharPositionInLine(),SpelMessages.NO_SIZE_OR_INITIALIZER_FOR_ARRAY_CONSTRUCTION);
+    }
+    int arraySize=getChild(2).getChildCount();
+    newArray=Array.newInstance(componentType,arraySize);
+  }
+ else {
+    int dimensions=getChild(1).getChildCount();
+    if (dimensions == 1) {
+      Object o=getChild(1).getValue(state);
+      int arraySize=state.toInteger(o);
+      if (getChildCount() == 3) {
+        int initializerLength=getChild(2).getChildCount();
+        if (initializerLength != arraySize) {
+          throw new SpelException(getChild(2).getCharPositionInLine(),SpelMessages.INITIALIZER_LENGTH_INCORRECT,initializerLength,arraySize);
+        }
+      }
+      newArray=Array.newInstance(componentType,arraySize);
+    }
+ else {
+      int[] dims=new int[dimensions];
+      for (int d=0; d < dimensions; d++) {
+        dims[d]=state.toInteger(getChild(1).getChild(d).getValue(state));
+      }
+      newArray=Array.newInstance(componentType,dims);
+    }
+  }
+  if (getChildCount() == 3) {
+    SpelNode initializer=getChild(2);
+    if (arrayTypeCode == TypeCode.OBJECT) {
+      Object[] newObjectArray=(Object[])newArray;
+      for (int i=0; i < newObjectArray.length; i++) {
+        SpelNode elementNode=initializer.getChild(i);
+        Object arrayEntry=elementNode.getValue(state);
+        if (!componentType.isAssignableFrom(arrayEntry.getClass())) {
+          throw new SpelException(elementNode.getCharPositionInLine(),SpelMessages.INCORRECT_ELEMENT_TYPE_FOR_ARRAY,componentType.getName(),arrayEntry.getClass().getName());
+        }
+        newObjectArray[i]=arrayEntry;
+      }
+    }
+ else     if (arrayTypeCode == TypeCode.INT) {
+      int[] newIntArray=(int[])newArray;
+      for (int i=0; i < newIntArray.length; i++) {
+        newIntArray[i]=state.toInteger(initializer.getChild(i).getValue(state));
+      }
+    }
+ else     if (arrayTypeCode == TypeCode.BOOLEAN) {
+      boolean[] newBooleanArray=(boolean[])newArray;
+      for (int i=0; i < newBooleanArray.length; i++) {
+        newBooleanArray[i]=state.toBoolean(initializer.getChild(i).getValue(state));
+      }
+    }
+ else     if (arrayTypeCode == TypeCode.CHAR) {
+      char[] newCharArray=(char[])newArray;
+      for (int i=0; i < newCharArray.length; i++) {
+        newCharArray[i]=state.toCharacter(initializer.getChild(i).getValue(state));
+      }
+    }
+ else     if (arrayTypeCode == TypeCode.SHORT) {
+      short[] newShortArray=(short[])newArray;
+      for (int i=0; i < newShortArray.length; i++) {
+        newShortArray[i]=state.toShort(initializer.getChild(i).getValue(state));
+      }
+    }
+ else     if (arrayTypeCode == TypeCode.LONG) {
+      long[] newLongArray=(long[])newArray;
+      for (int i=0; i < newLongArray.length; i++) {
+        newLongArray[i]=state.toLong(initializer.getChild(i).getValue(state));
+      }
+    }
+ else     if (arrayTypeCode == TypeCode.FLOAT) {
+      float[] newFloatArray=(float[])newArray;
+      for (int i=0; i < newFloatArray.length; i++) {
+        newFloatArray[i]=state.toFloat(initializer.getChild(i).getValue(state));
+      }
+    }
+ else     if (arrayTypeCode == TypeCode.DOUBLE) {
+      double[] newDoubleArray=(double[])newArray;
+      for (int i=0; i < newDoubleArray.length; i++) {
+        newDoubleArray[i]=state.toDouble(initializer.getChild(i).getValue(state));
+      }
+    }
+ else     if (arrayTypeCode == TypeCode.BYTE) {
+      byte[] newByteArray=(byte[])newArray;
+      for (int i=0; i < newByteArray.length; i++) {
+        newByteArray[i]=state.toByte(initializer.getChild(i).getValue(state));
+      }
+    }
+  }
+  return newArray;
+}

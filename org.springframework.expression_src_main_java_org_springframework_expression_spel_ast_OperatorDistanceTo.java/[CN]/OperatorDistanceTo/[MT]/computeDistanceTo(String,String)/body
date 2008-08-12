@@ -1,0 +1,32 @@
+{
+  if (from.equals(to))   return 0;
+  int[][] d=new int[from.length() + 1][to.length() + 1];
+  for (int i=0; i <= from.length(); i++)   d[i][0]=i;
+  for (int j=0; j <= to.length(); j++)   d[0][j]=j;
+  for (int i=1; i <= from.length(); i++) {
+    for (int j=1; j <= to.length(); j++) {
+      int cost;
+      if (from.charAt(i - 1) == to.charAt(j - 1))       cost=0;
+ else       cost=1;
+      d[i][j]=min(d[i - 1][j] + 1,d[i][j - 1] + 1,d[i - 1][j - 1] + cost);
+    }
+  }
+  if (DEBUG) {
+    System.out.print("    ");
+    for (int j=0; j < from.length(); j++) {
+      System.out.print(from.charAt(j) + " ");
+    }
+    System.out.println();
+    for (int j=0; j < to.length() + 1; j++) {
+      System.out.print((j > 0 ? to.charAt(j - 1) : " ") + " ");
+      for (int i=0; i < from.length() + 1; i++) {
+        System.out.print(d[i][j]);
+        if (i == from.length() && j == to.length())         System.out.print("<");
+ else         if (i == from.length() - 1 && j == to.length())         System.out.print(">");
+ else         System.out.print(" ");
+      }
+      System.out.println();
+    }
+  }
+  return d[from.length()][to.length()];
+}

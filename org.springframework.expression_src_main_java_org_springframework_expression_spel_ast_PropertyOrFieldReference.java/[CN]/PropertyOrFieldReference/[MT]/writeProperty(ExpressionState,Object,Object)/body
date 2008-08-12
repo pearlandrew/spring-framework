@@ -1,0 +1,48 @@
+{
+  Object contextObject=state.getActiveContextObject();
+  EvaluationContext eContext=state.getEvaluationContext();
+  if (cachedWriterExecutor != null) {
+    try {
+      cachedWriterExecutor.execute(state.getEvaluationContext(),contextObject,newValue);
+      return;
+    }
+ catch (    AccessException ae) {
+    }
+  }
+  Class<?> contextObjectClass=getObjectClass(contextObject);
+  List<PropertyAccessor> accessorsToTry=getPropertyAccessorsToTry(contextObjectClass,state);
+  if (accessorsToTry != null) {
+    try {
+      for (      PropertyAccessor accessor : accessorsToTry) {
+        if (accessor instanceof CacheablePropertyAccessor) {
+          cachedWriterExecutor=((CacheablePropertyAccessor)accessor).getWriterAccessor(eContext,contextObject,name);
+          if (cachedWriterExecutor != null) {
+            try {
+              cachedWriterExecutor.execute(state.getEvaluationContext(),contextObject,newValue);
+              return;
+            }
+ catch (            AccessException ae) {
+              cachedWriterExecutor=null;
+              throw ae;
+            }
+ finally {
+              if (!useCaching) {
+                cachedWriterExecutor=null;
+              }
+            }
+          }
+        }
+ else {
+          if (accessor.canWrite(eContext,contextObject,name)) {
+            accessor.write(eContext,contextObject,name,newValue);
+            return;
+          }
+        }
+      }
+    }
+ catch (    AccessException ae) {
+      throw new SpelException(getCharPositionInLine(),ae,SpelMessages.EXCEPTION_DURING_PROPERTY_WRITE,name,ae.getMessage());
+    }
+  }
+  throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_SETTER_NOT_FOUND,name,Utils.formatClassnameForMessage(contextObjectClass));
+}

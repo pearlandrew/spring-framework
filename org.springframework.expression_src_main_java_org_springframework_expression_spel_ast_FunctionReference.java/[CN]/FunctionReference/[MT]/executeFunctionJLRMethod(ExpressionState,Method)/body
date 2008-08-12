@@ -1,0 +1,29 @@
+{
+  Object[] functionArgs=getArguments(state);
+  if (m.getParameterTypes().length != functionArgs.length) {
+    throw new SpelException(SpelMessages.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION,functionArgs.length,m.getParameterTypes().length);
+  }
+  Class<?>[] expectedParams=m.getParameterTypes();
+  Object[] argsToPass=new Object[functionArgs.length];
+  TypeConverter converter=state.getEvaluationContext().getTypeUtils().getTypeConverter();
+  for (int arg=0; arg < argsToPass.length; arg++) {
+    if (functionArgs[arg] == null || functionArgs[arg].getClass() == expectedParams[arg]) {
+      argsToPass[arg]=functionArgs[arg];
+    }
+ else {
+      argsToPass[arg]=converter.convertValue(functionArgs[arg],expectedParams[arg]);
+    }
+  }
+  try {
+    return m.invoke(m.getClass(),argsToPass);
+  }
+ catch (  IllegalArgumentException e) {
+    throw new SpelException(getCharPositionInLine(),e,SpelMessages.EXCEPTION_DURING_FUNCTION_CALL,name,e.getMessage());
+  }
+catch (  IllegalAccessException e) {
+    throw new SpelException(getCharPositionInLine(),e,SpelMessages.EXCEPTION_DURING_FUNCTION_CALL,name,e.getMessage());
+  }
+catch (  InvocationTargetException e) {
+    throw new SpelException(getCharPositionInLine(),e,SpelMessages.EXCEPTION_DURING_FUNCTION_CALL,name,e.getMessage());
+  }
+}

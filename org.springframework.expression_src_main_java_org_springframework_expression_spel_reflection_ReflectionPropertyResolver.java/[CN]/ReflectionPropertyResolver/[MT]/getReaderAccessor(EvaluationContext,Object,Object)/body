@@ -1,0 +1,22 @@
+{
+  if (target == null) {
+    return null;
+  }
+  Class<?> relevantClass=(target instanceof Class ? (Class<?>)target : target.getClass());
+  if (!(name instanceof String)) {
+    return null;
+  }
+  String propertyName=(String)name;
+  if (relevantClass.isArray() && propertyName.equals("length")) {
+    return new ReflectionPropertyReaderExecutorForArrayLength();
+  }
+  Field field=ReflectionUtils.findField(propertyName,relevantClass);
+  if (field != null) {
+    return new ReflectionPropertyReaderExecutor(propertyName,field);
+  }
+  Method m=ReflectionUtils.findGetterForProperty(propertyName,relevantClass);
+  if (m != null) {
+    return new ReflectionPropertyReaderExecutor(propertyName,m);
+  }
+  return null;
+}

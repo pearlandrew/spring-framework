@@ -1,0 +1,24 @@
+{
+  EvaluationContext eContext=state.getEvaluationContext();
+  List<ConstructorResolver> cResolvers=eContext.getConstructorResolvers();
+  if (cResolvers != null) {
+    for (    ConstructorResolver ctorResolver : cResolvers) {
+      try {
+        ConstructorExecutor cEx=ctorResolver.resolve(state.getEvaluationContext(),typename,argumentTypes);
+        if (cEx != null) {
+          return cEx;
+        }
+      }
+ catch (      AccessException e) {
+        Throwable cause=e.getCause();
+        if (cause instanceof SpelException) {
+          throw (SpelException)cause;
+        }
+ else {
+          throw new SpelException(cause,SpelMessages.PROBLEM_LOCATING_CONSTRUCTOR,typename,Utils.formatMethodForMessage("",argumentTypes));
+        }
+      }
+    }
+  }
+  throw new SpelException(SpelMessages.CONSTRUCTOR_NOT_FOUND,typename,Utils.formatMethodForMessage("",argumentTypes));
+}

@@ -1,0 +1,48 @@
+{
+  Constructor[] ctors=type.getConstructors();
+  Constructor closeMatch=null;
+  Integer[] argsToConvert=null;
+  Constructor matchRequiringConversion=null;
+  for (int i=0; i < ctors.length; i++) {
+    Constructor ctor=ctors[i];
+    if (ctor.isVarArgs() && argumentTypes.length >= (ctor.getParameterTypes().length - 1)) {
+      ArgumentsMatchInfo matchInfo=compareArgumentsVarargs(ctor.getParameterTypes(),argumentTypes,typeConverter,conversionAllowed);
+      if (matchInfo != null) {
+        if (matchInfo.kind == ArgsMatchKind.EXACT) {
+          return new DiscoveredConstructor(ctor,null);
+        }
+ else         if (matchInfo.kind == ArgsMatchKind.CLOSE) {
+          closeMatch=ctor;
+        }
+ else         if (matchInfo.kind == ArgsMatchKind.REQUIRES_CONVERSION) {
+          argsToConvert=matchInfo.argsRequiringConversion;
+          matchRequiringConversion=ctor;
+        }
+      }
+    }
+ else     if (ctor.getParameterTypes().length == argumentTypes.length) {
+      ArgumentsMatchInfo matchInfo=compareArguments(ctor.getParameterTypes(),argumentTypes,typeConverter,conversionAllowed);
+      if (matchInfo != null) {
+        if (matchInfo.kind == ArgsMatchKind.EXACT) {
+          return new DiscoveredConstructor(ctor,null);
+        }
+ else         if (matchInfo.kind == ArgsMatchKind.CLOSE) {
+          closeMatch=ctor;
+        }
+ else         if (matchInfo.kind == ArgsMatchKind.REQUIRES_CONVERSION) {
+          argsToConvert=matchInfo.argsRequiringConversion;
+          matchRequiringConversion=ctor;
+        }
+      }
+    }
+  }
+  if (closeMatch != null) {
+    return new DiscoveredConstructor(closeMatch,null);
+  }
+ else   if (matchRequiringConversion != null) {
+    return new DiscoveredConstructor(matchRequiringConversion,argsToConvert);
+  }
+ else {
+    return null;
+  }
+}

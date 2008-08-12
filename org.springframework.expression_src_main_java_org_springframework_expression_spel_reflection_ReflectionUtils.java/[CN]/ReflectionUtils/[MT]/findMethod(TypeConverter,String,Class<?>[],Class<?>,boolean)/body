@@ -1,0 +1,52 @@
+{
+  Method[] methods=type.getMethods();
+  Method closeMatch=null;
+  Integer[] argsToConvert=null;
+  boolean multipleOptions=false;
+  Method matchRequiringConversion=null;
+  for (int i=0; i < methods.length; i++) {
+    Method method=methods[i];
+    if (method.isBridge()) {
+      continue;
+    }
+    if (method.getName().equals(name)) {
+      ArgumentsMatchInfo matchInfo=null;
+      if (method.isVarArgs() && argumentTypes.length >= (method.getParameterTypes().length - 1)) {
+        matchInfo=compareArgumentsVarargs(method.getParameterTypes(),argumentTypes,typeConverter,conversionAllowed);
+      }
+ else       if (method.getParameterTypes().length == argumentTypes.length) {
+        matchInfo=compareArguments(method.getParameterTypes(),argumentTypes,typeConverter,conversionAllowed);
+      }
+      if (matchInfo != null) {
+        if (matchInfo.kind == ArgsMatchKind.EXACT) {
+          return new DiscoveredMethod(method,null);
+        }
+ else         if (matchInfo.kind == ArgsMatchKind.CLOSE) {
+          if (matchRequiringConversion != null) {
+            int stop=1;
+          }
+          closeMatch=method;
+        }
+ else         if (matchInfo.kind == ArgsMatchKind.REQUIRES_CONVERSION) {
+          if (matchRequiringConversion != null) {
+            multipleOptions=true;
+          }
+          argsToConvert=matchInfo.argsRequiringConversion;
+          matchRequiringConversion=method;
+        }
+      }
+    }
+  }
+  if (closeMatch != null) {
+    return new DiscoveredMethod(closeMatch,null);
+  }
+ else   if (matchRequiringConversion != null) {
+    if (multipleOptions) {
+      throw new SpelException(SpelMessages.MULTIPLE_POSSIBLE_METHODS,name);
+    }
+    return new DiscoveredMethod(matchRequiringConversion,argsToConvert);
+  }
+ else {
+    return null;
+  }
+}

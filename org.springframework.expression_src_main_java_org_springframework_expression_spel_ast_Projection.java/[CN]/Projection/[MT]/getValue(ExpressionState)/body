@@ -1,0 +1,39 @@
+{
+  Object operand=state.getActiveContextObject();
+  if (operand instanceof Map) {
+    Map<?,?> mapdata=(Map<?,?>)operand;
+    List<Object> result=new ArrayList<Object>();
+    for (    Object k : mapdata.keySet()) {
+      try {
+        state.pushActiveContextObject(new KeyValuePair(k,mapdata.get(k)));
+        result.add(getChild(0).getValue(state));
+      }
+  finally {
+        state.popActiveContextObject();
+      }
+    }
+    return result;
+  }
+ else   if (operand instanceof Collection) {
+    List<Object> data=new ArrayList<Object>();
+    data.addAll((Collection<?>)operand);
+    List<Object> result=new ArrayList<Object>();
+    int idx=0;
+    for (    Object element : data) {
+      try {
+        state.pushActiveContextObject(element);
+        state.enterScope("index",idx);
+        result.add(getChild(0).getValue(state));
+      }
+  finally {
+        state.exitScope();
+        state.popActiveContextObject();
+      }
+      idx++;
+    }
+    return result;
+  }
+ else {
+    throw new SpelException(SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE,operand.getClass().getName());
+  }
+}
