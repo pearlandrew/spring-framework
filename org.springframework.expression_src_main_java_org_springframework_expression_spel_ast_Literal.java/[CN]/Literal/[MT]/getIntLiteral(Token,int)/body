@@ -1,0 +1,30 @@
+{
+  String numberString=numberToken.getText();
+  boolean isLong=false;
+  boolean isHex=(radix == 16);
+  if (numberString.length() > 0) {
+    isLong=numberString.endsWith("L") || numberString.endsWith("l");
+  }
+  if (isLong || isHex) {
+    int len=numberString.length();
+    numberString=numberString.substring((isHex ? 2 : 0),isLong ? len - 1 : len);
+  }
+  if (isLong) {
+    try {
+      long value=Long.parseLong(numberString,radix);
+      return new LongLiteral(numberToken,value);
+    }
+ catch (    NumberFormatException nfe) {
+      throw new InternalELException(new SpelException(numberToken.getCharPositionInLine(),nfe,SpelMessages.NOT_A_LONG,numberToken.getText()));
+    }
+  }
+ else {
+    try {
+      int value=Integer.parseInt(numberString,radix);
+      return new IntLiteral(numberToken,value);
+    }
+ catch (    NumberFormatException nfe) {
+      throw new InternalELException(new SpelException(numberToken.getCharPositionInLine(),nfe,SpelMessages.NOT_AN_INTEGER,numberToken.getText()));
+    }
+  }
+}
