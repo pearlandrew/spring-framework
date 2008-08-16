@@ -1,15 +1,36 @@
 {
-  if (value == null)   return "null";
+  if (value == null) {
+    return "null";
+  }
   if (value.getClass().isArray()) {
     StringBuilder sb=new StringBuilder();
     if (value.getClass().getComponentType().isPrimitive()) {
-      int[] l=(int[])value;
-      sb.append("int[").append(l.length).append("]{");
-      for (int j=0; j < l.length; j++) {
-        if (j > 0)         sb.append(",");
-        sb.append(stringValueOf(l[j]));
+      Class<?> primitiveType=value.getClass().getComponentType();
+      if (primitiveType == Integer.TYPE) {
+        int[] l=(int[])value;
+        sb.append("int[").append(l.length).append("]{");
+        for (int j=0; j < l.length; j++) {
+          if (j > 0) {
+            sb.append(",");
+          }
+          sb.append(stringValueOf(l[j]));
+        }
+        sb.append("}");
       }
-      sb.append("}");
+ else       if (primitiveType == Long.TYPE) {
+        long[] l=(long[])value;
+        sb.append("long[").append(l.length).append("]{");
+        for (int j=0; j < l.length; j++) {
+          if (j > 0) {
+            sb.append(",");
+          }
+          sb.append(stringValueOf(l[j]));
+        }
+        sb.append("}");
+      }
+ else {
+        throw new RuntimeException("Please implement support for type " + primitiveType.getName() + " in ExpressionTestCase.stringValueOf()");
+      }
     }
  else {
       List<Object> l=Arrays.asList((Object[])value);
