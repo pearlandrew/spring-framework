@@ -1,7 +1,7 @@
 {
   SpelNode leftOp=getLeftOperand();
   SpelNode rightOp=getRightOperand();
-  Object left=leftOp.getValue(state);
+  Object left=leftOp.getValue(state,String.class);
   Object right=getRightOperand().getValue(state);
   try {
     if (!(left instanceof String)) {
@@ -10,7 +10,10 @@
     if (!(right instanceof String)) {
       throw new SpelException(rightOp.getCharPositionInLine(),SpelMessages.INVALID_SECOND_OPERAND_FOR_LIKE_OPERATOR,right);
     }
-    Pattern pattern=Pattern.compile((String)right);
+    String likePattern=(String)right;
+    likePattern=likePattern.replace('_','.');
+    likePattern=likePattern.replaceAll("%",".*");
+    Pattern pattern=Pattern.compile(likePattern);
     Matcher matcher=pattern.matcher((String)left);
     return matcher.matches();
   }
