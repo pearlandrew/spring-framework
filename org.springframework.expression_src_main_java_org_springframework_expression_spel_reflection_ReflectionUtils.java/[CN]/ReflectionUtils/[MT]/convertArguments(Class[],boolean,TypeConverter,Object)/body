@@ -11,13 +11,19 @@
  else {
       targetType=parameterTypes[i];
     }
+    if (converter == null) {
+      throw new SpelException(SpelMessages.PROBLEM_DURING_TYPE_CONVERSION,"No converter available to convert '" + arguments[i] + " to type '"+ targetType+ "'");
+    }
     try {
       if (arguments[i] != null && arguments[i].getClass() != targetType) {
         arguments[i]=converter.convertValue(arguments[i],targetType);
       }
     }
  catch (    EvaluationException e) {
-      throw new SpelException(e,SpelMessages.PROBLEM_DURING_TYPE_CONVERSION,"Converter failed to convert '" + arguments[i] + " to type '"+ targetType+ "'");
+      if (!(e instanceof SpelException)) {
+        throw new SpelException(e,SpelMessages.PROBLEM_DURING_TYPE_CONVERSION,"Converter failed to convert '" + arguments[i].getClass().getName() + "' to type '"+ targetType+ "'");
+      }
+      throw e;
     }
   }
 }
