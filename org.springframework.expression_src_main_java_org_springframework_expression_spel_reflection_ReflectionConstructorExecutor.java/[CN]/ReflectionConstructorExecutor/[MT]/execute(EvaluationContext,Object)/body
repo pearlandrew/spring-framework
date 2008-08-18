@@ -1,6 +1,11 @@
 {
   if (argsRequiringConversion != null && arguments != null) {
-    ReflectionUtils.convertArguments(c.getParameterTypes(),c.isVarArgs(),context.getTypeUtils().getTypeConverter(),argsRequiringConversion,arguments);
+    try {
+      ReflectionUtils.convertArguments(c.getParameterTypes(),c.isVarArgs(),context.getTypeUtils().getTypeConverter(),argsRequiringConversion,arguments);
+    }
+ catch (    EvaluationException ex) {
+      throw new AccessException("Problem invoking constructor on '" + c + "': "+ ex.getMessage(),ex);
+    }
   }
   if (c.isVarArgs()) {
     arguments=ReflectionUtils.setupArgumentsForVarargsInvocation(c.getParameterTypes(),arguments);

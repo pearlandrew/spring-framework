@@ -1,6 +1,11 @@
 {
   if (argsRequiringConversion != null && arguments != null) {
-    ReflectionUtils.convertArguments(m.getParameterTypes(),m.isVarArgs(),context.getTypeUtils().getTypeConverter(),argsRequiringConversion,arguments);
+    try {
+      ReflectionUtils.convertArguments(m.getParameterTypes(),m.isVarArgs(),context.getTypeUtils().getTypeConverter(),argsRequiringConversion,arguments);
+    }
+ catch (    EvaluationException ex) {
+      throw new AccessException("Problem invoking method '" + m.getName() + "' on '"+ target.getClass()+ "': "+ ex.getMessage(),ex);
+    }
   }
   if (m.isVarArgs()) {
     arguments=ReflectionUtils.setupArgumentsForVarargsInvocation(m.getParameterTypes(),arguments);
