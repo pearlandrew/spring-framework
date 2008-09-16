@@ -10,13 +10,13 @@
   if (relevantClass.isArray() && propertyName.equals("length")) {
     return new ReflectionPropertyReaderExecutorForArrayLength();
   }
-  Field field=ReflectionUtils.findField(propertyName,relevantClass);
-  if (field != null) {
-    return new ReflectionPropertyReaderExecutor(propertyName,field);
-  }
-  Method m=ReflectionUtils.findGetterForProperty(propertyName,relevantClass);
+  Method m=ReflectionUtils.findGetterForProperty(propertyName,relevantClass,target instanceof Class);
   if (m != null) {
     return new ReflectionPropertyReaderExecutor(propertyName,m);
+  }
+  Field field=ReflectionUtils.findField(propertyName,relevantClass,target instanceof Class);
+  if (field != null) {
+    return new ReflectionPropertyReaderExecutor(propertyName,field);
   }
   return null;
 }
