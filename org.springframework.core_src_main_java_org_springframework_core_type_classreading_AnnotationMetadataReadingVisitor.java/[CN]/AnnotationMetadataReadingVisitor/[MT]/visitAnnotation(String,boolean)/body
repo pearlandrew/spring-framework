@@ -1,0 +1,33 @@
+{
+  final String className=Type.getType(desc).getClassName();
+  final Map<String,Object> attributes=new LinkedHashMap<String,Object>();
+  return new EmptyVisitor(){
+    public void visit(    String name,    Object value){
+      attributes.put(name,value);
+    }
+    public void visitEnd(){
+      try {
+        Class annotationClass=classLoader.loadClass(className);
+        Method[] annotationAttributes=annotationClass.getMethods();
+        for (int i=0; i < annotationAttributes.length; i++) {
+          Method annotationAttribute=annotationAttributes[i];
+          String attributeName=annotationAttribute.getName();
+          Object defaultValue=annotationAttribute.getDefaultValue();
+          if (defaultValue != null && !attributes.containsKey(attributeName)) {
+            attributes.put(attributeName,defaultValue);
+          }
+        }
+        Annotation[] metaAnnotations=annotationClass.getAnnotations();
+        Set<String> metaAnnotationTypeNames=new HashSet<String>();
+        for (        Annotation metaAnnotation : metaAnnotations) {
+          metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
+        }
+        metaAnnotationMap.put(className,metaAnnotationTypeNames);
+      }
+ catch (      ClassNotFoundException ex) {
+      }
+      attributesMap.put(className,attributes);
+    }
+  }
+;
+}
