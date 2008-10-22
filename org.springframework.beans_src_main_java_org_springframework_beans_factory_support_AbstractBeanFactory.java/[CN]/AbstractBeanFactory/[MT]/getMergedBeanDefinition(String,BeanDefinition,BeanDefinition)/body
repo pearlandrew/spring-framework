@@ -1,0 +1,42 @@
+{
+synchronized (this.mergedBeanDefinitions) {
+    RootBeanDefinition mbd=null;
+    if (containingBd == null) {
+      mbd=(RootBeanDefinition)this.mergedBeanDefinitions.get(beanName);
+    }
+    if (mbd == null) {
+      if (bd.getParentName() == null) {
+        mbd=new RootBeanDefinition(bd);
+      }
+ else {
+        BeanDefinition pbd=null;
+        try {
+          String parentBeanName=transformedBeanName(bd.getParentName());
+          if (!beanName.equals(parentBeanName)) {
+            pbd=getMergedBeanDefinition(parentBeanName);
+          }
+ else {
+            if (getParentBeanFactory() instanceof ConfigurableBeanFactory) {
+              pbd=((ConfigurableBeanFactory)getParentBeanFactory()).getMergedBeanDefinition(parentBeanName);
+            }
+ else {
+              throw new NoSuchBeanDefinitionException(bd.getParentName(),"Parent name '" + bd.getParentName() + "' is equal to bean name '"+ beanName+ "': cannot be resolved without an AbstractBeanFactory parent");
+            }
+          }
+        }
+ catch (        NoSuchBeanDefinitionException ex) {
+          throw new BeanDefinitionStoreException(bd.getResourceDescription(),beanName,"Could not resolve parent bean definition '" + bd.getParentName() + "'",ex);
+        }
+        mbd=new RootBeanDefinition(pbd);
+        mbd.overrideFrom(bd);
+      }
+      if (containingBd != null && !containingBd.isSingleton() && mbd.isSingleton()) {
+        mbd.setScope(containingBd.getScope());
+      }
+      if (containingBd == null && isCacheBeanMetadata() && isBeanEligibleForMetadataCaching(beanName)) {
+        this.mergedBeanDefinitions.put(beanName,mbd);
+      }
+    }
+    return mbd;
+  }
+}

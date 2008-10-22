@@ -1,0 +1,29 @@
+{
+  if (value == null && this.nullAsEmptyCollection) {
+    super.setValue(createCollection(this.collectionType,0));
+  }
+ else   if (value == null || (this.collectionType.isInstance(value) && !alwaysCreateNewCollection())) {
+    super.setValue(value);
+  }
+ else   if (value instanceof Collection) {
+    Collection source=(Collection)value;
+    Collection target=createCollection(this.collectionType,source.size());
+    for (Iterator it=source.iterator(); it.hasNext(); ) {
+      target.add(convertElement(it.next()));
+    }
+    super.setValue(target);
+  }
+ else   if (value.getClass().isArray()) {
+    int length=Array.getLength(value);
+    Collection target=createCollection(this.collectionType,length);
+    for (int i=0; i < length; i++) {
+      target.add(convertElement(Array.get(value,i)));
+    }
+    super.setValue(target);
+  }
+ else {
+    Collection target=createCollection(this.collectionType,1);
+    target.add(convertElement(value));
+    super.setValue(target);
+  }
+}

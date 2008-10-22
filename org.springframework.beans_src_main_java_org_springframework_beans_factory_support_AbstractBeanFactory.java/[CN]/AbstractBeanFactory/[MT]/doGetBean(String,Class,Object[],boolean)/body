@@ -1,0 +1,99 @@
+{
+  final String beanName=transformedBeanName(name);
+  Object bean=null;
+  Object sharedInstance=getSingleton(beanName);
+  if (sharedInstance != null && args == null) {
+    if (logger.isDebugEnabled()) {
+      if (isSingletonCurrentlyInCreation(beanName)) {
+        logger.debug("Returning eagerly cached instance of singleton bean '" + beanName + "' that is not fully initialized yet - a consequence of a circular reference");
+      }
+ else {
+        logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
+      }
+    }
+    bean=getObjectForBeanInstance(sharedInstance,name,beanName,null);
+  }
+ else {
+    if (isPrototypeCurrentlyInCreation(beanName)) {
+      throw new BeanCurrentlyInCreationException(beanName);
+    }
+    BeanFactory parentBeanFactory=getParentBeanFactory();
+    if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
+      String nameToLookup=originalBeanName(name);
+      if (args != null) {
+        return parentBeanFactory.getBean(nameToLookup,args);
+      }
+ else {
+        return parentBeanFactory.getBean(nameToLookup,requiredType);
+      }
+    }
+    if (!typeCheckOnly) {
+      markBeanAsCreated(beanName);
+    }
+    final RootBeanDefinition mbd=getMergedLocalBeanDefinition(beanName);
+    checkMergedBeanDefinition(mbd,beanName,args);
+    String[] dependsOn=mbd.getDependsOn();
+    if (dependsOn != null) {
+      for (int i=0; i < dependsOn.length; i++) {
+        String dependsOnBean=dependsOn[i];
+        getBean(dependsOnBean);
+        registerDependentBean(dependsOnBean,beanName);
+      }
+    }
+    if (mbd.isSingleton()) {
+      sharedInstance=getSingleton(beanName,new ObjectFactory(){
+        public Object getObject() throws BeansException {
+          try {
+            return createBean(beanName,mbd,args);
+          }
+ catch (          BeansException ex) {
+            destroySingleton(beanName);
+            throw ex;
+          }
+        }
+      }
+);
+      bean=getObjectForBeanInstance(sharedInstance,name,beanName,mbd);
+    }
+ else     if (mbd.isPrototype()) {
+      Object prototypeInstance=null;
+      try {
+        beforePrototypeCreation(beanName);
+        prototypeInstance=createBean(beanName,mbd,args);
+      }
+  finally {
+        afterPrototypeCreation(beanName);
+      }
+      bean=getObjectForBeanInstance(prototypeInstance,name,beanName,mbd);
+    }
+ else {
+      String scopeName=mbd.getScope();
+      final Scope scope=(Scope)this.scopes.get(scopeName);
+      if (scope == null) {
+        throw new IllegalStateException("No Scope registered for scope '" + scopeName + "'");
+      }
+      try {
+        Object scopedInstance=scope.get(beanName,new ObjectFactory(){
+          public Object getObject() throws BeansException {
+            beforePrototypeCreation(beanName);
+            try {
+              return createBean(beanName,mbd,args);
+            }
+  finally {
+              afterPrototypeCreation(beanName);
+            }
+          }
+        }
+);
+        bean=getObjectForBeanInstance(scopedInstance,name,beanName,mbd);
+      }
+ catch (      IllegalStateException ex) {
+        throw new BeanCreationException(beanName,"Scope '" + scopeName + "' is not active for the current thread; "+ "consider defining a scoped proxy for this bean if you intend to refer to it from a singleton",ex);
+      }
+    }
+  }
+  if (requiredType != null && bean != null && !requiredType.isAssignableFrom(bean.getClass())) {
+    throw new BeanNotOfRequiredTypeException(name,requiredType,bean.getClass());
+  }
+  return bean;
+}

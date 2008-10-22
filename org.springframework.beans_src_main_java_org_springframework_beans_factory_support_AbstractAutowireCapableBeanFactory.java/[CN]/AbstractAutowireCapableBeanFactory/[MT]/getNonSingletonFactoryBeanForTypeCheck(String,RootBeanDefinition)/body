@@ -1,0 +1,18 @@
+{
+  if (isPrototypeCurrentlyInCreation(beanName)) {
+    return null;
+  }
+  Object instance=null;
+  try {
+    beforePrototypeCreation(beanName);
+    instance=resolveBeforeInstantiation(beanName,mbd);
+    if (instance == null) {
+      BeanWrapper bw=createBeanInstance(beanName,mbd,null);
+      instance=bw.getWrappedInstance();
+    }
+  }
+  finally {
+    afterPrototypeCreation(beanName);
+  }
+  return getFactoryBean(beanName,instance);
+}

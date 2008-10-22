@@ -1,0 +1,36 @@
+{
+  if (value instanceof BeanDefinition) {
+    visitBeanDefinition((BeanDefinition)value);
+  }
+ else   if (value instanceof BeanDefinitionHolder) {
+    visitBeanDefinition(((BeanDefinitionHolder)value).getBeanDefinition());
+  }
+ else   if (value instanceof RuntimeBeanReference) {
+    RuntimeBeanReference ref=(RuntimeBeanReference)value;
+    String newBeanName=resolveStringValue(ref.getBeanName());
+    if (!newBeanName.equals(ref.getBeanName())) {
+      return new RuntimeBeanReference(newBeanName);
+    }
+  }
+ else   if (value instanceof List) {
+    visitList((List)value);
+  }
+ else   if (value instanceof Set) {
+    visitSet((Set)value);
+  }
+ else   if (value instanceof Map) {
+    visitMap((Map)value);
+  }
+ else   if (value instanceof TypedStringValue) {
+    TypedStringValue typedStringValue=(TypedStringValue)value;
+    String stringValue=typedStringValue.getValue();
+    if (stringValue != null) {
+      String visitedString=resolveStringValue(stringValue);
+      typedStringValue.setValue(visitedString);
+    }
+  }
+ else   if (value instanceof String) {
+    return resolveStringValue((String)value);
+  }
+  return value;
+}

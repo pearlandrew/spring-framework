@@ -1,0 +1,31 @@
+{
+  Assert.hasText(beanName,"'beanName' must not be empty");
+  Assert.notNull(beanDefinition,"BeanDefinition must not be null");
+  if (beanDefinition instanceof AbstractBeanDefinition) {
+    try {
+      ((AbstractBeanDefinition)beanDefinition).validate();
+    }
+ catch (    BeanDefinitionValidationException ex) {
+      throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(),beanName,"Validation of bean definition failed",ex);
+    }
+  }
+synchronized (this.beanDefinitionMap) {
+    Object oldBeanDefinition=this.beanDefinitionMap.get(beanName);
+    if (oldBeanDefinition != null) {
+      if (!this.allowBeanDefinitionOverriding) {
+        throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(),beanName,"Cannot register bean definition [" + beanDefinition + "] for bean '"+ beanName+ "': There is already ["+ oldBeanDefinition+ "] bound.");
+      }
+ else {
+        if (this.logger.isInfoEnabled()) {
+          this.logger.info("Overriding bean definition for bean '" + beanName + "': replacing ["+ oldBeanDefinition+ "] with ["+ beanDefinition+ "]");
+        }
+      }
+    }
+ else {
+      this.beanDefinitionNames.add(beanName);
+      this.frozenBeanDefinitionNames=null;
+    }
+    this.beanDefinitionMap.put(beanName,beanDefinition);
+    resetBeanDefinition(beanName);
+  }
+}

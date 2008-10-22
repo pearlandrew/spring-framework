@@ -1,0 +1,86 @@
+{
+  String defaultKeyTypeClassName=mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
+  String defaultValueTypeClassName=mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
+  List entryEles=DomUtils.getChildElementsByTagName(mapEle,ENTRY_ELEMENT);
+  ManagedMap map=new ManagedMap(entryEles.size());
+  map.setMergeEnabled(parseMergeAttribute(mapEle));
+  map.setSource(extractSource(mapEle));
+  for (Iterator it=entryEles.iterator(); it.hasNext(); ) {
+    Element entryEle=(Element)it.next();
+    NodeList entrySubNodes=entryEle.getChildNodes();
+    Element keyEle=null;
+    Element valueEle=null;
+    for (int j=0; j < entrySubNodes.getLength(); j++) {
+      Node node=entrySubNodes.item(j);
+      if (node instanceof Element) {
+        Element candidateEle=(Element)node;
+        if (DomUtils.nodeNameEquals(candidateEle,KEY_ELEMENT)) {
+          if (keyEle != null) {
+            error("<entry> element is only allowed to contain one <key> sub-element",entryEle);
+          }
+ else {
+            keyEle=candidateEle;
+          }
+        }
+ else {
+          if (valueEle != null) {
+            error("<entry> element must not contain more than one value sub-element",entryEle);
+          }
+ else {
+            valueEle=candidateEle;
+          }
+        }
+      }
+    }
+    Object key=null;
+    boolean hasKeyAttribute=entryEle.hasAttribute(KEY_ATTRIBUTE);
+    boolean hasKeyRefAttribute=entryEle.hasAttribute(KEY_REF_ATTRIBUTE);
+    if ((hasKeyAttribute && hasKeyRefAttribute) || ((hasKeyAttribute || hasKeyRefAttribute)) && keyEle != null) {
+      error("<entry> element is only allowed to contain either " + "a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element",entryEle);
+    }
+    if (hasKeyAttribute) {
+      key=buildTypedStringValueForMap(entryEle.getAttribute(KEY_ATTRIBUTE),defaultKeyTypeClassName,entryEle);
+    }
+ else     if (hasKeyRefAttribute) {
+      String refName=entryEle.getAttribute(KEY_REF_ATTRIBUTE);
+      if (!StringUtils.hasText(refName)) {
+        error("<entry> element contains empty 'key-ref' attribute",entryEle);
+      }
+      RuntimeBeanReference ref=new RuntimeBeanReference(refName);
+      ref.setSource(extractSource(entryEle));
+      key=ref;
+    }
+ else     if (keyEle != null) {
+      key=parseKeyElement(keyEle,bd,defaultKeyTypeClassName);
+    }
+ else {
+      error("<entry> element must specify a key",entryEle);
+    }
+    Object value=null;
+    boolean hasValueAttribute=entryEle.hasAttribute(VALUE_ATTRIBUTE);
+    boolean hasValueRefAttribute=entryEle.hasAttribute(VALUE_REF_ATTRIBUTE);
+    if ((hasValueAttribute && hasValueRefAttribute) || ((hasValueAttribute || hasValueRefAttribute)) && valueEle != null) {
+      error("<entry> element is only allowed to contain either " + "'value' attribute OR 'value-ref' attribute OR <value> sub-element",entryEle);
+    }
+    if (hasValueAttribute) {
+      value=buildTypedStringValueForMap(entryEle.getAttribute(VALUE_ATTRIBUTE),defaultValueTypeClassName,entryEle);
+    }
+ else     if (hasValueRefAttribute) {
+      String refName=entryEle.getAttribute(VALUE_REF_ATTRIBUTE);
+      if (!StringUtils.hasText(refName)) {
+        error("<entry> element contains empty 'value-ref' attribute",entryEle);
+      }
+      RuntimeBeanReference ref=new RuntimeBeanReference(refName);
+      ref.setSource(extractSource(entryEle));
+      value=ref;
+    }
+ else     if (valueEle != null) {
+      value=parsePropertySubElement(valueEle,bd,defaultValueTypeClassName);
+    }
+ else {
+      error("<entry> element must specify a value",entryEle);
+    }
+    map.put(key,value);
+  }
+  return map;
+}

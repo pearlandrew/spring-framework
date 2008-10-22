@@ -1,0 +1,21 @@
+{
+  if (classLoader == null) {
+    return;
+  }
+synchronized (classCache) {
+    for (Iterator it=classCache.keySet().iterator(); it.hasNext(); ) {
+      Class beanClass=(Class)it.next();
+      if (isUnderneathClassLoader(beanClass.getClassLoader(),classLoader)) {
+        it.remove();
+      }
+    }
+  }
+synchronized (acceptedClassLoaders) {
+    for (Iterator it=acceptedClassLoaders.iterator(); it.hasNext(); ) {
+      ClassLoader registeredLoader=(ClassLoader)it.next();
+      if (isUnderneathClassLoader(registeredLoader,classLoader)) {
+        it.remove();
+      }
+    }
+  }
+}

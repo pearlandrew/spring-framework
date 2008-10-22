@@ -1,0 +1,28 @@
+{
+  if (this.beanPostProcessors != null && !this.beanPostProcessors.isEmpty()) {
+    for (int i=this.beanPostProcessors.size() - 1; i >= 0; i--) {
+      ((DestructionAwareBeanPostProcessor)this.beanPostProcessors.get(i)).postProcessBeforeDestruction(this.bean,this.beanName);
+    }
+  }
+  boolean isDisposableBean=(this.bean instanceof DisposableBean);
+  if (isDisposableBean && this.invokeDisposableBean) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Invoking destroy() on bean with name '" + this.beanName + "'");
+    }
+    try {
+      ((DisposableBean)this.bean).destroy();
+    }
+ catch (    Throwable ex) {
+      String msg="Invocation of destroy method failed on bean with name '" + this.beanName + "'";
+      if (logger.isDebugEnabled()) {
+        logger.warn(msg,ex);
+      }
+ else {
+        logger.warn(msg + ": " + ex);
+      }
+    }
+  }
+  if (this.destroyMethodName != null && !(isDisposableBean && "destroy".equals(this.destroyMethodName))) {
+    invokeCustomDestroyMethod();
+  }
+}

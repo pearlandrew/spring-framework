@@ -1,0 +1,30 @@
+{
+  if (this.customQualifierTypes != null) {
+    if (!(beanFactory instanceof DefaultListableBeanFactory)) {
+      throw new IllegalStateException("CustomAutowireConfigurer needs to operate on a DefaultListableBeanFactory");
+    }
+    DefaultListableBeanFactory dlbf=(DefaultListableBeanFactory)beanFactory;
+    if (!(dlbf.getAutowireCandidateResolver() instanceof QualifierAnnotationAutowireCandidateResolver)) {
+      throw new IllegalStateException("CustomAutowireConfigurer needs to operate on a QualifierAnnotationAutowireCandidateResolver");
+    }
+    QualifierAnnotationAutowireCandidateResolver resolver=(QualifierAnnotationAutowireCandidateResolver)dlbf.getAutowireCandidateResolver();
+    for (Iterator it=this.customQualifierTypes.iterator(); it.hasNext(); ) {
+      Class customType=null;
+      Object value=it.next();
+      if (value instanceof Class) {
+        customType=(Class)value;
+      }
+ else       if (value instanceof String) {
+        String className=(String)value;
+        customType=ClassUtils.resolveClassName(className,this.beanClassLoader);
+      }
+ else {
+        throw new IllegalArgumentException("Invalid value [" + value + "] for custom qualifier type: needs to be Class or String.");
+      }
+      if (!Annotation.class.isAssignableFrom(customType)) {
+        throw new IllegalArgumentException("Qualifier type [" + customType.getName() + "] needs to be annotation type");
+      }
+      resolver.addQualifierType(customType);
+    }
+  }
+}

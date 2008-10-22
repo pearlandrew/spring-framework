@@ -1,0 +1,30 @@
+{
+  List propertyAccessExceptions=null;
+  List propertyValues=(pvs instanceof MutablePropertyValues ? ((MutablePropertyValues)pvs).getPropertyValueList() : Arrays.asList(pvs.getPropertyValues()));
+  for (Iterator it=propertyValues.iterator(); it.hasNext(); ) {
+    PropertyValue pv=(PropertyValue)it.next();
+    try {
+      setPropertyValue(pv);
+    }
+ catch (    NotWritablePropertyException ex) {
+      if (!ignoreUnknown) {
+        throw ex;
+      }
+    }
+catch (    NullValueInNestedPathException ex) {
+      if (!ignoreInvalid) {
+        throw ex;
+      }
+    }
+catch (    PropertyAccessException ex) {
+      if (propertyAccessExceptions == null) {
+        propertyAccessExceptions=new LinkedList();
+      }
+      propertyAccessExceptions.add(ex);
+    }
+  }
+  if (propertyAccessExceptions != null) {
+    PropertyAccessException[] paeArray=(PropertyAccessException[])propertyAccessExceptions.toArray(new PropertyAccessException[propertyAccessExceptions.size()]);
+    throw new PropertyBatchUpdateException(paeArray);
+  }
+}

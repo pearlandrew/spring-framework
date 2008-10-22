@@ -1,0 +1,12 @@
+{
+  super(propertyName,null,null);
+  this.beanClass=beanClass;
+  Method readMethodToUse=BridgeMethodResolver.findBridgedMethod(readMethod);
+  Method writeMethodToUse=BridgeMethodResolver.findBridgedMethod(writeMethod);
+  if (writeMethodToUse == null && readMethodToUse != null) {
+    writeMethodToUse=ClassUtils.getMethodIfAvailable(this.beanClass,"set" + StringUtils.capitalize(getName()),new Class[]{readMethodToUse.getReturnType()});
+  }
+  this.readMethod=readMethodToUse;
+  this.writeMethod=writeMethodToUse;
+  this.propertyEditorClass=propertyEditorClass;
+}

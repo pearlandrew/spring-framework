@@ -1,0 +1,70 @@
+{
+  String propertyName=tokens.canonicalName;
+  String actualName=tokens.actualName;
+  PropertyDescriptor pd=getCachedIntrospectionResults().getPropertyDescriptor(actualName);
+  if (pd == null || pd.getReadMethod() == null) {
+    throw new NotReadablePropertyException(getRootClass(),this.nestedPath + propertyName);
+  }
+  Method readMethod=pd.getReadMethod();
+  try {
+    if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+      readMethod.setAccessible(true);
+    }
+    Object value=readMethod.invoke(this.object,(Object[])null);
+    if (tokens.keys != null) {
+      for (int i=0; i < tokens.keys.length; i++) {
+        String key=tokens.keys[i];
+        if (value == null) {
+          throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + propertyName,"Cannot access indexed value of property referenced in indexed " + "property path '" + propertyName + "': returned null");
+        }
+ else         if (value.getClass().isArray()) {
+          value=Array.get(value,Integer.parseInt(key));
+        }
+ else         if (value instanceof List) {
+          List list=(List)value;
+          value=list.get(Integer.parseInt(key));
+        }
+ else         if (value instanceof Set) {
+          Set set=(Set)value;
+          int index=Integer.parseInt(key);
+          if (index < 0 || index >= set.size()) {
+            throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Cannot get element with index " + index + " from Set of size "+ set.size()+ ", accessed using property path '"+ propertyName+ "'");
+          }
+          Iterator it=set.iterator();
+          for (int j=0; it.hasNext(); j++) {
+            Object elem=it.next();
+            if (j == index) {
+              value=elem;
+              break;
+            }
+          }
+        }
+ else         if (value instanceof Map) {
+          Map map=(Map)value;
+          Class mapKeyType=null;
+          if (JdkVersion.isAtLeastJava15()) {
+            mapKeyType=GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(),i + 1);
+          }
+          Object convertedMapKey=this.typeConverterDelegate.convertIfNecessary(key,mapKeyType);
+          value=map.get(convertedMapKey);
+        }
+ else {
+          throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Property referenced in indexed property path '" + propertyName + "' is neither an array nor a List nor a Set nor a Map; returned value was ["+ value+ "]");
+        }
+      }
+    }
+    return value;
+  }
+ catch (  InvocationTargetException ex) {
+    throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Getter for property '" + actualName + "' threw exception",ex);
+  }
+catch (  IllegalAccessException ex) {
+    throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Illegal attempt to get property '" + actualName + "' threw exception",ex);
+  }
+catch (  IndexOutOfBoundsException ex) {
+    throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Index of out of bounds in property path '" + propertyName + "'",ex);
+  }
+catch (  NumberFormatException ex) {
+    throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Invalid index in property path '" + propertyName + "'",ex);
+  }
+}

@@ -1,0 +1,43 @@
+{
+synchronized (this.bfgInstancesByKey) {
+    BeanFactoryGroup bfg=(BeanFactoryGroup)this.bfgInstancesByKey.get(this.resourceLocation);
+    if (bfg != null) {
+      bfg.refCount++;
+    }
+ else {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Factory group with resource name [" + this.resourceLocation + "] requested. Creating new instance.");
+      }
+      BeanFactory groupContext=createDefinition(this.resourceLocation,factoryKey);
+      bfg=new BeanFactoryGroup();
+      bfg.definition=groupContext;
+      bfg.refCount=1;
+      this.bfgInstancesByKey.put(this.resourceLocation,bfg);
+      this.bfgInstancesByObj.put(groupContext,bfg);
+      try {
+        initializeDefinition(groupContext);
+      }
+ catch (      BeansException ex) {
+        this.bfgInstancesByKey.remove(this.resourceLocation);
+        this.bfgInstancesByObj.remove(groupContext);
+        throw new BootstrapException("Unable to initialize group definition. " + "Group resource name [" + this.resourceLocation + "], factory key ["+ factoryKey+ "]",ex);
+      }
+    }
+    try {
+      BeanFactory beanFactory=null;
+      if (factoryKey != null) {
+        beanFactory=(BeanFactory)bfg.definition.getBean(factoryKey,BeanFactory.class);
+      }
+ else       if (bfg.definition instanceof ListableBeanFactory) {
+        beanFactory=(BeanFactory)BeanFactoryUtils.beanOfType((ListableBeanFactory)bfg.definition,BeanFactory.class);
+      }
+ else {
+        throw new IllegalStateException("Factory key is null, and underlying factory is not a ListableBeanFactory: " + bfg.definition);
+      }
+      return new CountingBeanFactoryReference(beanFactory,bfg.definition);
+    }
+ catch (    BeansException ex) {
+      throw new BootstrapException("Unable to return specified BeanFactory instance: factory key [" + factoryKey + "], from group with resource name ["+ this.resourceLocation+ "]",ex);
+    }
+  }
+}

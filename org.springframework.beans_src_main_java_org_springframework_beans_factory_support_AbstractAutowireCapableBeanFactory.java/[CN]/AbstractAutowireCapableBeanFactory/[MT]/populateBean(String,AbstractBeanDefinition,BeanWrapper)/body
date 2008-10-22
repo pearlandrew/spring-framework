@@ -1,0 +1,58 @@
+{
+  PropertyValues pvs=mbd.getPropertyValues();
+  if (bw == null) {
+    if (!pvs.isEmpty()) {
+      throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Cannot apply property values to null instance");
+    }
+ else {
+      return;
+    }
+  }
+  boolean continueWithPropertyPopulation=true;
+  if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+    for (Iterator it=getBeanPostProcessors().iterator(); it.hasNext(); ) {
+      BeanPostProcessor beanProcessor=(BeanPostProcessor)it.next();
+      if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
+        InstantiationAwareBeanPostProcessor ibp=(InstantiationAwareBeanPostProcessor)beanProcessor;
+        if (!ibp.postProcessAfterInstantiation(bw.getWrappedInstance(),beanName)) {
+          continueWithPropertyPopulation=false;
+          break;
+        }
+      }
+    }
+  }
+  if (!continueWithPropertyPopulation) {
+    return;
+  }
+  if (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME || mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
+    MutablePropertyValues newPvs=new MutablePropertyValues(pvs);
+    if (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
+      autowireByName(beanName,mbd,bw,newPvs);
+    }
+    if (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
+      autowireByType(beanName,mbd,bw,newPvs);
+    }
+    pvs=newPvs;
+  }
+  boolean hasInstAwareBpps=hasInstantiationAwareBeanPostProcessors();
+  boolean needsDepCheck=(mbd.getDependencyCheck() != RootBeanDefinition.DEPENDENCY_CHECK_NONE);
+  if (hasInstAwareBpps || needsDepCheck) {
+    PropertyDescriptor[] filteredPds=filterPropertyDescriptorsForDependencyCheck(bw);
+    if (hasInstAwareBpps) {
+      for (Iterator it=getBeanPostProcessors().iterator(); it.hasNext(); ) {
+        BeanPostProcessor beanProcessor=(BeanPostProcessor)it.next();
+        if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
+          InstantiationAwareBeanPostProcessor ibp=(InstantiationAwareBeanPostProcessor)beanProcessor;
+          pvs=ibp.postProcessPropertyValues(pvs,filteredPds,bw.getWrappedInstance(),beanName);
+          if (pvs == null) {
+            return;
+          }
+        }
+      }
+    }
+    if (needsDepCheck) {
+      checkDependencies(beanName,mbd,filteredPds,pvs);
+    }
+  }
+  applyPropertyValues(beanName,mbd,bw,pvs);
+}

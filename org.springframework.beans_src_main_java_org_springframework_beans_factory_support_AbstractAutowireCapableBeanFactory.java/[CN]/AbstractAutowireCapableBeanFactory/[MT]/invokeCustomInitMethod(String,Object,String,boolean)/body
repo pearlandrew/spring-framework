@@ -1,0 +1,24 @@
+{
+  Method initMethod=BeanUtils.findMethod(bean.getClass(),initMethodName,null);
+  if (initMethod == null) {
+    if (enforceInitMethod) {
+      throw new NoSuchMethodException("Couldn't find an init method named '" + initMethodName + "' on bean with name '"+ beanName+ "'");
+    }
+ else {
+      if (logger.isDebugEnabled()) {
+        logger.debug("No default init method named '" + initMethodName + "' found on bean with name '"+ beanName+ "'");
+      }
+      return;
+    }
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Invoking init method  '" + initMethodName + "' on bean with name '"+ beanName+ "'");
+  }
+  ReflectionUtils.makeAccessible(initMethod);
+  try {
+    initMethod.invoke(bean,(Object[])null);
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+}

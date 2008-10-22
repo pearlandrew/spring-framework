@@ -1,0 +1,33 @@
+{
+  InputSource source=super.resolveEntity(publicId,systemId);
+  if (source == null && systemId != null) {
+    String resourcePath=null;
+    try {
+      String decodedSystemId=URLDecoder.decode(systemId);
+      String givenUrl=new URL(decodedSystemId).toString();
+      String systemRootUrl=new File("").toURL().toString();
+      if (givenUrl.startsWith(systemRootUrl)) {
+        resourcePath=givenUrl.substring(systemRootUrl.length());
+      }
+    }
+ catch (    Exception ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Could not resolve XML entity [" + systemId + "] against system root URL",ex);
+      }
+      resourcePath=systemId;
+    }
+    if (resourcePath != null) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Trying to locate XML entity [" + systemId + "] as resource ["+ resourcePath+ "]");
+      }
+      Resource resource=this.resourceLoader.getResource(resourcePath);
+      source=new InputSource(resource.getInputStream());
+      source.setPublicId(publicId);
+      source.setSystemId(systemId);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Found XML entity [" + systemId + "]: "+ resource);
+      }
+    }
+  }
+  return source;
+}

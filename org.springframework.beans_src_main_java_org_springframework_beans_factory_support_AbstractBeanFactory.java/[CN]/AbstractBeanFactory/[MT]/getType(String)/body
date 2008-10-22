@@ -1,0 +1,31 @@
+{
+  String beanName=transformedBeanName(name);
+  Object beanInstance=getSingleton(beanName,false);
+  if (beanInstance != null) {
+    if (beanInstance instanceof FactoryBean && !BeanFactoryUtils.isFactoryDereference(name)) {
+      return getTypeForFactoryBean((FactoryBean)beanInstance);
+    }
+ else {
+      return beanInstance.getClass();
+    }
+  }
+ else {
+    BeanFactory parentBeanFactory=getParentBeanFactory();
+    if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
+      return parentBeanFactory.getType(originalBeanName(name));
+    }
+    RootBeanDefinition mbd=getMergedLocalBeanDefinition(beanName);
+    Class beanClass=predictBeanType(beanName,mbd,null);
+    if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
+      if (!BeanFactoryUtils.isFactoryDereference(name)) {
+        return getTypeForFactoryBean(beanName,mbd);
+      }
+ else {
+        return beanClass;
+      }
+    }
+ else {
+      return (!BeanFactoryUtils.isFactoryDereference(name) ? beanClass : null);
+    }
+  }
+}

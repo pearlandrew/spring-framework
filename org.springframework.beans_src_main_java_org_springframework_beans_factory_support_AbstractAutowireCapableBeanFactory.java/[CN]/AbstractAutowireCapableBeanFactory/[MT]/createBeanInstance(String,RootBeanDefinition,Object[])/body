@@ -1,0 +1,19 @@
+{
+  Class beanClass=resolveBeanClass(mbd,beanName);
+  if (mbd.getFactoryMethodName() != null) {
+    return instantiateUsingFactoryMethod(beanName,mbd,args);
+  }
+  if (mbd.resolvedConstructorOrFactoryMethod != null) {
+    if (mbd.constructorArgumentsResolved) {
+      return autowireConstructor(beanName,mbd,null,args);
+    }
+ else {
+      return instantiateBean(beanName,mbd);
+    }
+  }
+  Constructor[] ctors=determineConstructorsFromBeanPostProcessors(beanClass,beanName);
+  if (ctors != null || mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR || mbd.hasConstructorArgumentValues() || !ObjectUtils.isEmpty(args)) {
+    return autowireConstructor(beanName,mbd,ctors,args);
+  }
+  return instantiateBean(beanName,mbd);
+}

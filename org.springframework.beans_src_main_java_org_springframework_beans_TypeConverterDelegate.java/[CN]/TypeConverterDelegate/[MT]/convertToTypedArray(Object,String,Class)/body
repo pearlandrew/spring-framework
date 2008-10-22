@@ -1,0 +1,30 @@
+{
+  if (input instanceof Collection) {
+    Collection coll=(Collection)input;
+    Object result=Array.newInstance(componentType,coll.size());
+    int i=0;
+    for (Iterator it=coll.iterator(); it.hasNext(); i++) {
+      Object value=convertIfNecessary(buildIndexedPropertyName(propertyName,i),null,it.next(),componentType);
+      Array.set(result,i,value);
+    }
+    return result;
+  }
+ else   if (input.getClass().isArray()) {
+    if (componentType.equals(input.getClass().getComponentType()) && !this.propertyEditorRegistry.hasCustomEditorForElement(componentType,propertyName)) {
+      return input;
+    }
+    int arrayLength=Array.getLength(input);
+    Object result=Array.newInstance(componentType,arrayLength);
+    for (int i=0; i < arrayLength; i++) {
+      Object value=convertIfNecessary(buildIndexedPropertyName(propertyName,i),null,Array.get(input,i),componentType);
+      Array.set(result,i,value);
+    }
+    return result;
+  }
+ else {
+    Object result=Array.newInstance(componentType,1);
+    Object value=convertIfNecessary(buildIndexedPropertyName(propertyName,0),null,input,componentType);
+    Array.set(result,0,value);
+    return result;
+  }
+}

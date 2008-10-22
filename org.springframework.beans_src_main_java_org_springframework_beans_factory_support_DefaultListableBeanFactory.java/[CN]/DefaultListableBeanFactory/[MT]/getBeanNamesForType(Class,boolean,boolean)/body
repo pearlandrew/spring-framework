@@ -1,0 +1,58 @@
+{
+  List result=new ArrayList();
+  String[] beanDefinitionNames=getBeanDefinitionNames();
+  for (int i=0; i < beanDefinitionNames.length; i++) {
+    String beanName=beanDefinitionNames[i];
+    if (!isAlias(beanName)) {
+      try {
+        RootBeanDefinition mbd=getMergedLocalBeanDefinition(beanName);
+        if (!mbd.isAbstract() && (allowEagerInit || ((mbd.hasBeanClass() || !mbd.isLazyInit() || this.allowEagerClassLoading)) && !requiresEagerInitForType(mbd.getFactoryBeanName()))) {
+          boolean isFactoryBean=isFactoryBean(beanName,mbd);
+          boolean matchFound=(allowEagerInit || !isFactoryBean || containsSingleton(beanName)) && (includeNonSingletons || isSingleton(beanName)) && isTypeMatch(beanName,type);
+          if (!matchFound && isFactoryBean) {
+            beanName=FACTORY_BEAN_PREFIX + beanName;
+            matchFound=(includeNonSingletons || mbd.isSingleton()) && isTypeMatch(beanName,type);
+          }
+          if (matchFound) {
+            result.add(beanName);
+          }
+        }
+      }
+ catch (      CannotLoadBeanClassException ex) {
+        if (allowEagerInit) {
+          throw ex;
+        }
+        if (this.logger.isDebugEnabled()) {
+          this.logger.debug("Ignoring bean class loading failure for bean '" + beanName + "'",ex);
+        }
+        onSuppressedException(ex);
+      }
+catch (      BeanDefinitionStoreException ex) {
+        if (allowEagerInit) {
+          throw ex;
+        }
+        if (this.logger.isDebugEnabled()) {
+          this.logger.debug("Ignoring unresolvable metadata in bean definition '" + beanName + "'",ex);
+        }
+        onSuppressedException(ex);
+      }
+    }
+  }
+  String[] singletonNames=getSingletonNames();
+  for (int i=0; i < singletonNames.length; i++) {
+    String beanName=singletonNames[i];
+    if (!containsBeanDefinition(beanName)) {
+      if (isFactoryBean(beanName)) {
+        if ((includeNonSingletons || isSingleton(beanName)) && isTypeMatch(beanName,type)) {
+          result.add(beanName);
+          continue;
+        }
+        beanName=FACTORY_BEAN_PREFIX + beanName;
+      }
+      if (isTypeMatch(beanName,type)) {
+        result.add(beanName);
+      }
+    }
+  }
+  return StringUtils.toStringArray(result);
+}

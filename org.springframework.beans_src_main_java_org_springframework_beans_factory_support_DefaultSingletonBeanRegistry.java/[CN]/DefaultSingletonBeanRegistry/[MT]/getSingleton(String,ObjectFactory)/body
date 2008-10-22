@@ -1,0 +1,38 @@
+{
+  Assert.notNull(beanName,"'beanName' must not be null");
+synchronized (this.singletonObjects) {
+    Object singletonObject=this.singletonObjects.get(beanName);
+    if (singletonObject == null) {
+      if (this.singletonsCurrentlyInDestruction) {
+        throw new BeanCreationNotAllowedException(beanName,"Singleton bean creation not allowed while the singletons of this factory are in destruction " + "(Do not request a bean from a BeanFactory in a destroy method implementation!)");
+      }
+      if (logger.isDebugEnabled()) {
+        logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
+      }
+      beforeSingletonCreation(beanName);
+      boolean recordSuppressedExceptions=(this.suppressedExceptions == null);
+      if (recordSuppressedExceptions) {
+        this.suppressedExceptions=new LinkedHashSet();
+      }
+      try {
+        singletonObject=singletonFactory.getObject();
+      }
+ catch (      BeanCreationException ex) {
+        if (recordSuppressedExceptions) {
+          for (Iterator it=this.suppressedExceptions.iterator(); it.hasNext(); ) {
+            ex.addRelatedCause((Exception)it.next());
+          }
+        }
+        throw ex;
+      }
+ finally {
+        if (recordSuppressedExceptions) {
+          this.suppressedExceptions=null;
+        }
+        afterSingletonCreation(beanName);
+      }
+      addSingleton(beanName,singletonObject);
+    }
+    return (singletonObject != NULL_OBJECT ? singletonObject : null);
+  }
+}

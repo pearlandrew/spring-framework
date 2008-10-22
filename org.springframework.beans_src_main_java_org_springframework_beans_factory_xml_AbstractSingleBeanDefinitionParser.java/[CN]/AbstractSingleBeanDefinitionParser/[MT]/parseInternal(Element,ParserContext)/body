@@ -1,0 +1,26 @@
+{
+  BeanDefinitionBuilder builder=BeanDefinitionBuilder.genericBeanDefinition();
+  String parentName=getParentName(element);
+  if (parentName != null) {
+    builder.getRawBeanDefinition().setParentName(parentName);
+  }
+  Class beanClass=getBeanClass(element);
+  if (beanClass != null) {
+    builder.getRawBeanDefinition().setBeanClass(beanClass);
+  }
+ else {
+    String beanClassName=getBeanClassName(element);
+    if (beanClassName != null) {
+      builder.getRawBeanDefinition().setBeanClassName(beanClassName);
+    }
+  }
+  builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
+  if (parserContext.isNested()) {
+    builder.setScope(parserContext.getContainingBeanDefinition().getScope());
+  }
+  if (parserContext.isDefaultLazyInit()) {
+    builder.setLazyInit(true);
+  }
+  doParse(element,parserContext,builder);
+  return builder.getBeanDefinition();
+}

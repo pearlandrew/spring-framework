@@ -1,0 +1,19 @@
+{
+  if (logger.isTraceEnabled()) {
+    logger.trace("Trying to resolve XML entity with public id [" + publicId + "] and system id ["+ systemId+ "]");
+  }
+  if (systemId != null) {
+    String resourceLocation=getSchemaMapping(systemId);
+    if (resourceLocation != null) {
+      Resource resource=new ClassPathResource(resourceLocation,this.classLoader);
+      InputSource source=new InputSource(resource.getInputStream());
+      source.setPublicId(publicId);
+      source.setSystemId(systemId);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Found XML schema [" + systemId + "] in classpath: "+ resourceLocation);
+      }
+      return source;
+    }
+  }
+  return null;
+}

@@ -1,0 +1,65 @@
+{
+  if (value instanceof RuntimeBeanReference) {
+    RuntimeBeanReference ref=(RuntimeBeanReference)value;
+    return resolveReference(argName,ref);
+  }
+ else   if (value instanceof RuntimeBeanNameReference) {
+    String ref=((RuntimeBeanNameReference)value).getBeanName();
+    if (!this.beanFactory.containsBean(ref)) {
+      throw new BeanDefinitionStoreException("Invalid bean name '" + ref + "' in bean reference for "+ argName);
+    }
+    return ref;
+  }
+ else   if (value instanceof BeanDefinitionHolder) {
+    BeanDefinitionHolder bdHolder=(BeanDefinitionHolder)value;
+    return resolveInnerBean(argName,bdHolder.getBeanName(),bdHolder.getBeanDefinition());
+  }
+ else   if (value instanceof BeanDefinition) {
+    BeanDefinition bd=(BeanDefinition)value;
+    return resolveInnerBean(argName,"(inner bean)",bd);
+  }
+ else   if (value instanceof ManagedList) {
+    return resolveManagedList(argName,(List)value);
+  }
+ else   if (value instanceof ManagedSet) {
+    return resolveManagedSet(argName,(Set)value);
+  }
+ else   if (value instanceof ManagedMap) {
+    return resolveManagedMap(argName,(Map)value);
+  }
+ else   if (value instanceof ManagedProperties) {
+    Properties original=(Properties)value;
+    Properties copy=new Properties();
+    for (Iterator it=original.entrySet().iterator(); it.hasNext(); ) {
+      Map.Entry propEntry=(Map.Entry)it.next();
+      Object propKey=propEntry.getKey();
+      Object propValue=propEntry.getValue();
+      if (propKey instanceof TypedStringValue) {
+        propKey=((TypedStringValue)propKey).getValue();
+      }
+      if (propValue instanceof TypedStringValue) {
+        propValue=((TypedStringValue)propValue).getValue();
+      }
+      copy.put(propKey,propValue);
+    }
+    return copy;
+  }
+ else   if (value instanceof TypedStringValue) {
+    TypedStringValue typedStringValue=(TypedStringValue)value;
+    try {
+      Class resolvedTargetType=resolveTargetType(typedStringValue);
+      if (resolvedTargetType != null) {
+        return this.typeConverter.convertIfNecessary(typedStringValue.getValue(),resolvedTargetType);
+      }
+ else {
+        return typedStringValue.getValue();
+      }
+    }
+ catch (    Throwable ex) {
+      throw new BeanCreationException(this.beanDefinition.getResourceDescription(),this.beanName,"Error converting typed String value for " + argName,ex);
+    }
+  }
+ else {
+    return value;
+  }
+}

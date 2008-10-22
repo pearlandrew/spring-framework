@@ -1,0 +1,13 @@
+{
+  boolean isInitializingBean=(bean instanceof InitializingBean);
+  if (isInitializingBean && (mbd == null || !mbd.isExternallyManagedInitMethod("afterPropertiesSet"))) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Invoking afterPropertiesSet() on bean with name '" + beanName + "'");
+    }
+    ((InitializingBean)bean).afterPropertiesSet();
+  }
+  String initMethodName=(mbd != null ? mbd.getInitMethodName() : null);
+  if (initMethodName != null && !(isInitializingBean && "afterPropertiesSet".equals(initMethodName)) && !mbd.isExternallyManagedInitMethod(initMethodName)) {
+    invokeCustomInitMethod(beanName,bean,initMethodName,mbd.isEnforceInitMethod());
+  }
+}

@@ -1,0 +1,14 @@
+{
+  if (!mbd.isPrototype() && requiresDestruction(bean,mbd)) {
+    if (mbd.isSingleton()) {
+      registerDisposableBean(beanName,new DisposableBeanAdapter(bean,beanName,mbd,getBeanPostProcessors()));
+    }
+ else {
+      Scope scope=(Scope)this.scopes.get(mbd.getScope());
+      if (scope == null) {
+        throw new IllegalStateException("No Scope registered for scope '" + mbd.getScope() + "'");
+      }
+      scope.registerDestructionCallback(beanName,new DisposableBeanAdapter(bean,beanName,mbd,getBeanPostProcessors()));
+    }
+  }
+}

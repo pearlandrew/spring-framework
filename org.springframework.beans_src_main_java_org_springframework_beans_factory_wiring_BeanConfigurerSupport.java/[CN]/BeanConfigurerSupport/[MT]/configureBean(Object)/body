@@ -1,0 +1,40 @@
+{
+  if (this.beanFactory == null) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("BeanFactory has not been set on " + ClassUtils.getShortName(getClass()) + ": "+ "Make sure this configurer runs in a Spring container. Unable to configure bean of type ["+ ClassUtils.getDescriptiveType(beanInstance)+ "]. Proceeding without injection.");
+    }
+    return;
+  }
+  BeanWiringInfo bwi=this.beanWiringInfoResolver.resolveWiringInfo(beanInstance);
+  if (bwi == null) {
+    return;
+  }
+  try {
+    if (bwi.indicatesAutowiring() || (bwi.isDefaultBeanName() && !this.beanFactory.containsBean(bwi.getBeanName()))) {
+      this.beanFactory.autowireBeanProperties(beanInstance,bwi.getAutowireMode(),bwi.getDependencyCheck());
+      Object result=this.beanFactory.initializeBean(beanInstance,bwi.getBeanName());
+      checkExposedObject(result,beanInstance);
+    }
+ else {
+      Object result=this.beanFactory.configureBean(beanInstance,bwi.getBeanName());
+      checkExposedObject(result,beanInstance);
+    }
+  }
+ catch (  BeanCreationException ex) {
+    Throwable rootCause=ex.getMostSpecificCause();
+    if (rootCause instanceof BeanCurrentlyInCreationException) {
+      BeanCreationException bce=(BeanCreationException)rootCause;
+      if (this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
+        String msg=ClassUtils.getShortName(getClass()) + " failed to create target bean '" + bce.getBeanName()+ "' while configuring object of type ["+ beanInstance.getClass().getName()+ "] (probably due to a circular reference). "+ "Proceeding without injection.";
+        if (logger.isDebugEnabled()) {
+          logger.debug(msg,ex);
+        }
+ else         if (logger.isInfoEnabled()) {
+          logger.info(msg);
+        }
+        return;
+      }
+    }
+    throw ex;
+  }
+}

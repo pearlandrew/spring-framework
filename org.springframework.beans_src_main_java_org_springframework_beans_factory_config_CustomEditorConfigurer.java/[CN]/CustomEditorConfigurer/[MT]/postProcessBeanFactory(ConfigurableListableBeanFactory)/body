@@ -1,0 +1,47 @@
+{
+  if (this.propertyEditorRegistrars != null) {
+    for (int i=0; i < this.propertyEditorRegistrars.length; i++) {
+      beanFactory.addPropertyEditorRegistrar(this.propertyEditorRegistrars[i]);
+    }
+  }
+  if (this.customEditors != null) {
+    for (Iterator it=this.customEditors.entrySet().iterator(); it.hasNext(); ) {
+      Map.Entry entry=(Map.Entry)it.next();
+      Object key=entry.getKey();
+      Object value=entry.getValue();
+      Class requiredType=null;
+      try {
+        if (key instanceof Class) {
+          requiredType=(Class)key;
+        }
+ else         if (key instanceof String) {
+          requiredType=ClassUtils.forName((String)key,this.beanClassLoader);
+        }
+ else {
+          throw new IllegalArgumentException("Invalid key [" + key + "] for custom editor: needs to be Class or String.");
+        }
+        if (value instanceof PropertyEditor) {
+          beanFactory.registerCustomEditor(requiredType,(PropertyEditor)value);
+        }
+ else         if (value instanceof Class) {
+          beanFactory.registerCustomEditor(requiredType,(Class)value);
+        }
+ else         if (value instanceof String) {
+          Class editorClass=ClassUtils.forName((String)value,this.beanClassLoader);
+          beanFactory.registerCustomEditor(requiredType,editorClass);
+        }
+ else {
+          throw new IllegalArgumentException("Mapped value [" + value + "] for custom editor key ["+ key+ "] is not of required type ["+ PropertyEditor.class.getName()+ "] or a corresponding Class or String value indicating a PropertyEditor implementation");
+        }
+      }
+ catch (      ClassNotFoundException ex) {
+        if (this.ignoreUnresolvableEditors) {
+          logger.info("Skipping editor [" + value + "] for required type ["+ key+ "]: "+ (requiredType != null ? "editor" : "required type")+ " class not found.");
+        }
+ else {
+          throw new FatalBeanException((requiredType != null ? "Editor" : "Required type") + " class not found",ex);
+        }
+      }
+    }
+  }
+}

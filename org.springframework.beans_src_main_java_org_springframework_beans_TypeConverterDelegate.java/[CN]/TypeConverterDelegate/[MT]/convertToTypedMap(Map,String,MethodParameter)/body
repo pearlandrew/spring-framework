@@ -1,0 +1,50 @@
+{
+  Class keyType=null;
+  Class valueType=null;
+  if (methodParam != null && JdkVersion.isAtLeastJava15()) {
+    keyType=GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
+    valueType=GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
+  }
+  if (keyType == null && valueType == null && !this.propertyEditorRegistry.hasCustomEditorForElement(null,propertyName)) {
+    return original;
+  }
+  Map convertedCopy=null;
+  Iterator it=null;
+  try {
+    it=original.entrySet().iterator();
+    if (it == null) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Map of type [" + original.getClass().getName() + "] returned null Iterator - injecting original Map as-is");
+      }
+    }
+    convertedCopy=CollectionFactory.createApproximateMap(original,original.size());
+  }
+ catch (  Throwable ex) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Cannot access Map of type [" + original.getClass().getName() + "] - injecting original Map as-is",ex);
+    }
+    return original;
+  }
+  boolean actuallyConverted=false;
+  while (it.hasNext()) {
+    Map.Entry entry=(Map.Entry)it.next();
+    Object key=entry.getKey();
+    Object value=entry.getValue();
+    String keyedPropertyName=buildKeyedPropertyName(propertyName,key);
+    if (methodParam != null) {
+      methodParam.increaseNestingLevel();
+      methodParam.setTypeIndexForCurrentLevel(0);
+    }
+    Object convertedKey=convertIfNecessary(keyedPropertyName,null,key,keyType,null,methodParam);
+    if (methodParam != null) {
+      methodParam.setTypeIndexForCurrentLevel(1);
+    }
+    Object convertedValue=convertIfNecessary(keyedPropertyName,null,value,valueType,null,methodParam);
+    if (methodParam != null) {
+      methodParam.decreaseNestingLevel();
+    }
+    convertedCopy.put(convertedKey,convertedValue);
+    actuallyConverted=actuallyConverted || (key != convertedKey) || (value != convertedValue);
+  }
+  return (actuallyConverted ? convertedCopy : original);
+}

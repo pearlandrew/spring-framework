@@ -1,0 +1,12 @@
+{
+  int dependencyCheck=mbd.getDependencyCheck();
+  for (int i=0; i < pds.length; i++) {
+    if (pds[i].getWriteMethod() != null && !pvs.contains(pds[i].getName())) {
+      boolean isSimple=BeanUtils.isSimpleProperty(pds[i].getPropertyType());
+      boolean unsatisfied=(dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_ALL) || (isSimple && dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_SIMPLE) || (!isSimple && dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
+      if (unsatisfied) {
+        throw new UnsatisfiedDependencyException(mbd.getResourceDescription(),beanName,pds[i].getName(),"Set this property value or disable dependency checking for this bean.");
+      }
+    }
+  }
+}

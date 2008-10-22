@@ -1,0 +1,75 @@
+{
+  if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
+    bd.setScope(ele.getAttribute(SCOPE_ATTRIBUTE));
+    if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
+      error("Specify either 'scope' or 'singleton', not both",ele);
+    }
+  }
+ else   if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
+    bd.setScope(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)) ? BeanDefinition.SCOPE_SINGLETON : BeanDefinition.SCOPE_PROTOTYPE);
+  }
+ else   if (containingBean != null) {
+    bd.setScope(containingBean.getScope());
+  }
+  if (ele.hasAttribute(ABSTRACT_ATTRIBUTE)) {
+    bd.setAbstract(TRUE_VALUE.equals(ele.getAttribute(ABSTRACT_ATTRIBUTE)));
+  }
+  String lazyInit=ele.getAttribute(LAZY_INIT_ATTRIBUTE);
+  if (DEFAULT_VALUE.equals(lazyInit) && bd.isSingleton()) {
+    lazyInit=this.defaults.getLazyInit();
+  }
+  bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
+  String autowire=ele.getAttribute(AUTOWIRE_ATTRIBUTE);
+  bd.setAutowireMode(getAutowireMode(autowire));
+  String dependencyCheck=ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
+  bd.setDependencyCheck(getDependencyCheck(dependencyCheck));
+  if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
+    String dependsOn=ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
+    bd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn,BEAN_NAME_DELIMITERS));
+  }
+  String autowireCandidate=ele.getAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE);
+  if ("".equals(autowireCandidate) || DEFAULT_VALUE.equals(autowireCandidate)) {
+    String candidatePattern=this.defaults.getAutowireCandidates();
+    if (candidatePattern != null) {
+      String[] patterns=StringUtils.commaDelimitedListToStringArray(candidatePattern);
+      bd.setAutowireCandidate(PatternMatchUtils.simpleMatch(patterns,beanName));
+    }
+  }
+ else {
+    bd.setAutowireCandidate(TRUE_VALUE.equals(autowireCandidate));
+  }
+  if (ele.hasAttribute(PRIMARY_ATTRIBUTE)) {
+    bd.setPrimary(TRUE_VALUE.equals(ele.getAttribute(PRIMARY_ATTRIBUTE)));
+  }
+  if (ele.hasAttribute(INIT_METHOD_ATTRIBUTE)) {
+    String initMethodName=ele.getAttribute(INIT_METHOD_ATTRIBUTE);
+    if (!"".equals(initMethodName)) {
+      bd.setInitMethodName(initMethodName);
+    }
+  }
+ else {
+    if (this.defaults.getInitMethod() != null) {
+      bd.setInitMethodName(this.defaults.getInitMethod());
+      bd.setEnforceInitMethod(false);
+    }
+  }
+  if (ele.hasAttribute(DESTROY_METHOD_ATTRIBUTE)) {
+    String destroyMethodName=ele.getAttribute(DESTROY_METHOD_ATTRIBUTE);
+    if (!"".equals(destroyMethodName)) {
+      bd.setDestroyMethodName(destroyMethodName);
+    }
+  }
+ else {
+    if (this.defaults.getDestroyMethod() != null) {
+      bd.setDestroyMethodName(this.defaults.getDestroyMethod());
+      bd.setEnforceDestroyMethod(false);
+    }
+  }
+  if (ele.hasAttribute(FACTORY_METHOD_ATTRIBUTE)) {
+    bd.setFactoryMethodName(ele.getAttribute(FACTORY_METHOD_ATTRIBUTE));
+  }
+  if (ele.hasAttribute(FACTORY_BEAN_ATTRIBUTE)) {
+    bd.setFactoryBeanName(ele.getAttribute(FACTORY_BEAN_ATTRIBUTE));
+  }
+  return bd;
+}

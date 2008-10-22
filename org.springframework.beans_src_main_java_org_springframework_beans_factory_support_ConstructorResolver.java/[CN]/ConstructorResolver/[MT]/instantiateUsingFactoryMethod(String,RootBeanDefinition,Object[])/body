@@ -1,0 +1,134 @@
+{
+  BeanWrapperImpl bw=new BeanWrapperImpl();
+  this.beanFactory.initBeanWrapper(bw);
+  Class factoryClass=null;
+  Object factoryBean=null;
+  boolean isStatic=true;
+  String factoryBeanName=mbd.getFactoryBeanName();
+  if (factoryBeanName != null) {
+    if (factoryBeanName.equals(beanName)) {
+      throw new BeanDefinitionStoreException(mbd.getResourceDescription(),beanName,"factory-bean reference points back to the same bean definition");
+    }
+    factoryBean=this.beanFactory.getBean(factoryBeanName);
+    if (factoryBean == null) {
+      throw new BeanCreationException(mbd.getResourceDescription(),beanName,"factory-bean '" + factoryBeanName + "' returned null");
+    }
+    factoryClass=factoryBean.getClass();
+    isStatic=false;
+  }
+ else {
+    factoryClass=mbd.getBeanClass();
+  }
+  Method factoryMethodToUse=null;
+  Object[] argsToUse=null;
+  if (explicitArgs != null) {
+    argsToUse=explicitArgs;
+  }
+ else {
+    factoryMethodToUse=(Method)mbd.resolvedConstructorOrFactoryMethod;
+    if (factoryMethodToUse != null) {
+      argsToUse=mbd.resolvedConstructorArguments;
+      if (argsToUse == null) {
+        Class[] paramTypes=factoryMethodToUse.getParameterTypes();
+        Object[] argsToResolve=mbd.preparedConstructorArguments;
+        TypeConverter converter=(this.typeConverter != null ? this.typeConverter : bw);
+        BeanDefinitionValueResolver valueResolver=new BeanDefinitionValueResolver(this.beanFactory,beanName,mbd,converter);
+        argsToUse=new Object[argsToResolve.length];
+        for (int i=0; i < argsToResolve.length; i++) {
+          Object argValue=argsToResolve[i];
+          MethodParameter methodParam=new MethodParameter(factoryMethodToUse,i);
+          if (JdkVersion.isAtLeastJava15()) {
+            GenericTypeResolver.resolveParameterType(methodParam,factoryClass);
+          }
+          if (argValue instanceof AutowiredArgumentMarker) {
+            argValue=resolveAutowiredArgument(methodParam,beanName,null,converter);
+          }
+ else           if (argValue instanceof BeanMetadataElement) {
+            argValue=valueResolver.resolveValueIfNecessary("factory method argument",argValue);
+          }
+          argsToUse[i]=converter.convertIfNecessary(argValue,paramTypes[i],methodParam);
+        }
+      }
+    }
+  }
+  if (factoryMethodToUse == null) {
+    Method[] candidates=ReflectionUtils.getAllDeclaredMethods(factoryClass);
+    boolean autowiring=(mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+    int minTypeDiffWeight=Integer.MAX_VALUE;
+    ConstructorArgumentValues resolvedValues=null;
+    int minNrOfArgs=0;
+    if (explicitArgs != null) {
+      minNrOfArgs=explicitArgs.length;
+    }
+ else {
+      ConstructorArgumentValues cargs=mbd.getConstructorArgumentValues();
+      resolvedValues=new ConstructorArgumentValues();
+      minNrOfArgs=resolveConstructorArguments(beanName,mbd,bw,cargs,resolvedValues);
+    }
+    List causes=null;
+    for (int i=0; i < candidates.length; i++) {
+      Method candidate=candidates[i];
+      Class[] paramTypes=candidate.getParameterTypes();
+      if (Modifier.isStatic(candidate.getModifiers()) == isStatic && candidate.getName().equals(mbd.getFactoryMethodName()) && paramTypes.length >= minNrOfArgs) {
+        ArgumentsHolder args=null;
+        if (resolvedValues != null) {
+          try {
+            args=createArgumentArray(beanName,mbd,resolvedValues,bw,paramTypes,candidate,autowiring);
+          }
+ catch (          UnsatisfiedDependencyException ex) {
+            if (this.beanFactory.logger.isTraceEnabled()) {
+              this.beanFactory.logger.trace("Ignoring factory method [" + candidate + "] of bean '"+ beanName+ "': "+ ex);
+            }
+            if (i == candidates.length - 1 && factoryMethodToUse == null) {
+              if (causes != null) {
+                for (Iterator it=causes.iterator(); it.hasNext(); ) {
+                  this.beanFactory.onSuppressedException((Exception)it.next());
+                }
+              }
+              throw ex;
+            }
+ else {
+              if (causes == null) {
+                causes=new LinkedList();
+              }
+              causes.add(ex);
+              continue;
+            }
+          }
+        }
+ else {
+          if (paramTypes.length != explicitArgs.length) {
+            continue;
+          }
+          args=new ArgumentsHolder(explicitArgs);
+        }
+        int typeDiffWeight=args.getTypeDifferenceWeight(paramTypes);
+        if (typeDiffWeight < minTypeDiffWeight) {
+          factoryMethodToUse=candidate;
+          argsToUse=args.arguments;
+          minTypeDiffWeight=typeDiffWeight;
+        }
+      }
+    }
+    if (factoryMethodToUse == null) {
+      throw new BeanCreationException(mbd.getResourceDescription(),beanName,"No matching factory method found: " + (mbd.getFactoryBeanName() != null ? "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") + "factory method '"+ mbd.getFactoryMethodName()+ "'");
+    }
+    if (void.class.equals(factoryMethodToUse.getReturnType())) {
+      throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Invalid factory method '" + mbd.getFactoryMethodName() + "': needs to have a non-void return type!");
+    }
+    if (explicitArgs == null) {
+      mbd.resolvedConstructorOrFactoryMethod=factoryMethodToUse;
+    }
+  }
+  try {
+    Object beanInstance=this.instantiationStrategy.instantiate(mbd,beanName,this.beanFactory,factoryBean,factoryMethodToUse,argsToUse);
+    if (beanInstance == null) {
+      return null;
+    }
+    bw.setWrappedInstance(beanInstance);
+    return bw;
+  }
+ catch (  Throwable ex) {
+    throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Instantiation of bean failed",ex);
+  }
+}

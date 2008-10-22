@@ -1,0 +1,24 @@
+{
+  if (requiredType == null) {
+    return null;
+  }
+  PropertyEditor editor=(PropertyEditor)this.customEditors.get(requiredType);
+  if (editor == null) {
+    if (this.customEditorCache != null) {
+      editor=(PropertyEditor)this.customEditorCache.get(requiredType);
+    }
+    if (editor == null) {
+      for (Iterator it=this.customEditors.keySet().iterator(); it.hasNext() && editor == null; ) {
+        Object key=it.next();
+        if (key instanceof Class && ((Class)key).isAssignableFrom(requiredType)) {
+          editor=(PropertyEditor)this.customEditors.get(key);
+          if (this.customEditorCache == null) {
+            this.customEditorCache=new HashMap();
+          }
+          this.customEditorCache.put(requiredType,editor);
+        }
+      }
+    }
+  }
+  return editor;
+}

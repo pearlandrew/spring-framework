@@ -1,0 +1,19 @@
+{
+  if (node instanceof Attr) {
+    Attr attr=(Attr)node;
+    String propertyName=attr.getLocalName();
+    String propertyValue=attr.getValue();
+    MutablePropertyValues pvs=definition.getBeanDefinition().getPropertyValues();
+    if (pvs.contains(propertyName)) {
+      parserContext.getReaderContext().error("Property '" + propertyName + "' is already defined using "+ "both <property> and inline syntax. Only one approach may be used per property.",attr);
+    }
+    if (propertyName.endsWith(REF_SUFFIX)) {
+      propertyName=propertyName.substring(0,propertyName.length() - REF_SUFFIX.length());
+      pvs.addPropertyValue(Conventions.attributeNameToPropertyName(propertyName),new RuntimeBeanReference(propertyValue));
+    }
+ else {
+      pvs.addPropertyValue(Conventions.attributeNameToPropertyName(propertyName),propertyValue);
+    }
+  }
+  return definition;
+}

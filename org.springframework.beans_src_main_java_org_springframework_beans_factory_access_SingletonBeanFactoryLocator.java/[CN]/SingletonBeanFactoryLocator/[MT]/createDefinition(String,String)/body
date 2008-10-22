@@ -1,0 +1,19 @@
+{
+  DefaultListableBeanFactory factory=new DefaultListableBeanFactory();
+  XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(factory);
+  ResourcePatternResolver resourcePatternResolver=new PathMatchingResourcePatternResolver();
+  try {
+    Resource[] configResources=resourcePatternResolver.getResources(resourceLocation);
+    if (configResources.length == 0) {
+      throw new FatalBeanException("Unable to find resource for specified definition. " + "Group resource name [" + this.resourceLocation + "], factory key ["+ factoryKey+ "]");
+    }
+    reader.loadBeanDefinitions(configResources);
+  }
+ catch (  IOException ex) {
+    throw new BeanDefinitionStoreException("Error accessing bean definition resource [" + this.resourceLocation + "]",ex);
+  }
+catch (  BeanDefinitionStoreException ex) {
+    throw new FatalBeanException("Unable to load group definition: " + "group resource name [" + this.resourceLocation + "], factory key ["+ factoryKey+ "]",ex);
+  }
+  return factory;
+}

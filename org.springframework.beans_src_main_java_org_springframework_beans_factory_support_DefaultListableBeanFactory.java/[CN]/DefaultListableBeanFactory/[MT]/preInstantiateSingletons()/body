@@ -1,0 +1,22 @@
+{
+  if (this.logger.isInfoEnabled()) {
+    this.logger.info("Pre-instantiating singletons in " + this);
+  }
+synchronized (this.beanDefinitionMap) {
+    for (Iterator it=this.beanDefinitionNames.iterator(); it.hasNext(); ) {
+      String beanName=(String)it.next();
+      RootBeanDefinition bd=getMergedLocalBeanDefinition(beanName);
+      if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+        if (isFactoryBean(beanName)) {
+          FactoryBean factory=(FactoryBean)getBean(FACTORY_BEAN_PREFIX + beanName);
+          if (factory instanceof SmartFactoryBean && ((SmartFactoryBean)factory).isEagerInit()) {
+            getBean(beanName);
+          }
+        }
+ else {
+          getBean(beanName);
+        }
+      }
+    }
+  }
+}

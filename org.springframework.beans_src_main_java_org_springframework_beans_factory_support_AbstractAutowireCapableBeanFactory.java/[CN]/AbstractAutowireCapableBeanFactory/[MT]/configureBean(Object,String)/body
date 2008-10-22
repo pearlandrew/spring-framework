@@ -1,0 +1,19 @@
+{
+  markBeanAsCreated(beanName);
+  BeanDefinition mbd=getMergedBeanDefinition(beanName);
+  RootBeanDefinition bd=null;
+  if (mbd instanceof RootBeanDefinition) {
+    RootBeanDefinition rbd=(RootBeanDefinition)mbd;
+    if (SCOPE_PROTOTYPE.equals(rbd.getScope())) {
+      bd=rbd;
+    }
+  }
+  if (bd == null) {
+    bd=new RootBeanDefinition(mbd);
+    bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+  }
+  BeanWrapper bw=new BeanWrapperImpl(existingBean);
+  initBeanWrapper(bw);
+  populateBean(beanName,bd,bw);
+  return initializeBean(beanName,existingBean,bd);
+}

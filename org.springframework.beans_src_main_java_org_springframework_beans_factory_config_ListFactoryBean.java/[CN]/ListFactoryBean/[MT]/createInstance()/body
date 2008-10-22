@@ -1,0 +1,26 @@
+{
+  if (this.sourceList == null) {
+    throw new IllegalArgumentException("'sourceList' is required");
+  }
+  List result=null;
+  if (this.targetListClass != null) {
+    result=(List)BeanUtils.instantiateClass(this.targetListClass);
+  }
+ else {
+    result=new ArrayList(this.sourceList.size());
+  }
+  Class valueType=null;
+  if (this.targetListClass != null && JdkVersion.isAtLeastJava15()) {
+    valueType=GenericCollectionTypeResolver.getCollectionType(this.targetListClass);
+  }
+  if (valueType != null) {
+    TypeConverter converter=getBeanTypeConverter();
+    for (Iterator it=this.sourceList.iterator(); it.hasNext(); ) {
+      result.add(converter.convertIfNecessary(it.next(),valueType));
+    }
+  }
+ else {
+    result.addAll(this.sourceList);
+  }
+  return result;
+}

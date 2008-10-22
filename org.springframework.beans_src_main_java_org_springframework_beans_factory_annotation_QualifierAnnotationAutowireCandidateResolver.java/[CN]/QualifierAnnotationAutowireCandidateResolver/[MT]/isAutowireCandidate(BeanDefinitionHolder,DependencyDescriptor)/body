@@ -1,0 +1,55 @@
+{
+  if (!bdHolder.getBeanDefinition().isAutowireCandidate()) {
+    return false;
+  }
+  if (descriptor == null || ObjectUtils.isEmpty(descriptor.getAnnotations())) {
+    return true;
+  }
+  AbstractBeanDefinition bd=(AbstractBeanDefinition)bdHolder.getBeanDefinition();
+  SimpleTypeConverter typeConverter=new SimpleTypeConverter();
+  Annotation[] annotations=(Annotation[])descriptor.getAnnotations();
+  for (  Annotation annotation : annotations) {
+    Class<? extends Annotation> type=annotation.annotationType();
+    if (isQualifier(type)) {
+      AutowireCandidateQualifier qualifier=bd.getQualifier(type.getName());
+      if (qualifier == null) {
+        qualifier=bd.getQualifier(ClassUtils.getShortName(type));
+      }
+      if (qualifier == null && bd.hasBeanClass()) {
+        Class<?> beanClass=bd.getBeanClass();
+        Annotation targetAnnotation=beanClass.getAnnotation(type);
+        if (targetAnnotation != null && targetAnnotation.equals(annotation)) {
+          return true;
+        }
+      }
+      Map<String,Object> attributes=AnnotationUtils.getAnnotationAttributes(annotation);
+      if (attributes.isEmpty() && qualifier == null) {
+        return false;
+      }
+      for (      Map.Entry<String,Object> entry : attributes.entrySet()) {
+        String attributeName=entry.getKey();
+        Object expectedValue=entry.getValue();
+        Object actualValue=null;
+        if (qualifier != null) {
+          actualValue=qualifier.getAttribute(attributeName);
+        }
+        if (actualValue == null) {
+          actualValue=bd.getAttribute(attributeName);
+        }
+        if (actualValue == null && attributeName.equals(AutowireCandidateQualifier.VALUE_KEY) && (expectedValue.equals(bdHolder.getBeanName()) || ObjectUtils.containsElement(bdHolder.getAliases(),expectedValue))) {
+          continue;
+        }
+        if (actualValue == null && qualifier != null) {
+          actualValue=AnnotationUtils.getDefaultValue(annotation,attributeName);
+        }
+        if (actualValue != null) {
+          actualValue=typeConverter.convertIfNecessary(actualValue,expectedValue.getClass());
+        }
+        if (!expectedValue.equals(actualValue)) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}

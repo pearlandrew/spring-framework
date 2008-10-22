@@ -1,0 +1,170 @@
+{
+  String propertyName=tokens.canonicalName;
+  String actualName=tokens.actualName;
+  if (tokens.keys != null) {
+    PropertyTokenHolder getterTokens=new PropertyTokenHolder();
+    getterTokens.canonicalName=tokens.canonicalName;
+    getterTokens.actualName=tokens.actualName;
+    getterTokens.keys=new String[tokens.keys.length - 1];
+    System.arraycopy(tokens.keys,0,getterTokens.keys,0,tokens.keys.length - 1);
+    Object propValue=null;
+    try {
+      propValue=getPropertyValue(getterTokens);
+    }
+ catch (    NotReadablePropertyException ex) {
+      throw new NotWritablePropertyException(getRootClass(),this.nestedPath + propertyName,"Cannot access indexed value in property referenced " + "in indexed property path '" + propertyName + "'",ex);
+    }
+    String key=tokens.keys[tokens.keys.length - 1];
+    if (propValue == null) {
+      throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + propertyName,"Cannot access indexed value in property referenced " + "in indexed property path '" + propertyName + "': returned null");
+    }
+ else     if (propValue.getClass().isArray()) {
+      Class requiredType=propValue.getClass().getComponentType();
+      int arrayIndex=Integer.parseInt(key);
+      Object oldValue=null;
+      try {
+        if (isExtractOldValueForEditor()) {
+          oldValue=Array.get(propValue,arrayIndex);
+        }
+        Object convertedValue=this.typeConverterDelegate.convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType);
+        Array.set(propValue,Integer.parseInt(key),convertedValue);
+      }
+ catch (      IllegalArgumentException ex) {
+        PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
+        throw new TypeMismatchException(pce,requiredType,ex);
+      }
+catch (      IndexOutOfBoundsException ex) {
+        throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Invalid array index in property path '" + propertyName + "'",ex);
+      }
+    }
+ else     if (propValue instanceof List) {
+      PropertyDescriptor pd=getCachedIntrospectionResults().getPropertyDescriptor(actualName);
+      Class requiredType=null;
+      if (JdkVersion.isAtLeastJava15()) {
+        requiredType=GenericCollectionTypeResolver.getCollectionReturnType(pd.getReadMethod(),tokens.keys.length);
+      }
+      List list=(List)propValue;
+      int index=Integer.parseInt(key);
+      Object oldValue=null;
+      if (isExtractOldValueForEditor() && index < list.size()) {
+        oldValue=list.get(index);
+      }
+      try {
+        Object convertedValue=this.typeConverterDelegate.convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType);
+        if (index < list.size()) {
+          list.set(index,convertedValue);
+        }
+ else         if (index >= list.size()) {
+          for (int i=list.size(); i < index; i++) {
+            try {
+              list.add(null);
+            }
+ catch (            NullPointerException ex) {
+              throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Cannot set element with index " + index + " in List of size "+ list.size()+ ", accessed using property path '"+ propertyName+ "': List does not support filling up gaps with null elements");
+            }
+          }
+          list.add(convertedValue);
+        }
+      }
+ catch (      IllegalArgumentException ex) {
+        PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
+        throw new TypeMismatchException(pce,requiredType,ex);
+      }
+    }
+ else     if (propValue instanceof Map) {
+      PropertyDescriptor pd=getCachedIntrospectionResults().getPropertyDescriptor(actualName);
+      Class mapKeyType=null;
+      Class mapValueType=null;
+      if (JdkVersion.isAtLeastJava15()) {
+        mapKeyType=GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(),tokens.keys.length);
+        mapValueType=GenericCollectionTypeResolver.getMapValueReturnType(pd.getReadMethod(),tokens.keys.length);
+      }
+      Map map=(Map)propValue;
+      Object convertedMapKey=null;
+      Object convertedMapValue=null;
+      try {
+        convertedMapKey=this.typeConverterDelegate.convertIfNecessary(key,mapKeyType);
+      }
+ catch (      IllegalArgumentException ex) {
+        PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,null,pv.getValue());
+        throw new TypeMismatchException(pce,mapKeyType,ex);
+      }
+      Object oldValue=null;
+      if (isExtractOldValueForEditor()) {
+        oldValue=map.get(convertedMapKey);
+      }
+      try {
+        convertedMapValue=this.typeConverterDelegate.convertIfNecessary(propertyName,oldValue,pv.getValue(),mapValueType,null,new MethodParameter(pd.getReadMethod(),-1,tokens.keys.length + 1));
+      }
+ catch (      IllegalArgumentException ex) {
+        PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
+        throw new TypeMismatchException(pce,mapValueType,ex);
+      }
+      map.put(convertedMapKey,convertedMapValue);
+    }
+ else {
+      throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Property referenced in indexed property path '" + propertyName + "' is neither an array nor a List nor a Map; returned value was ["+ pv.getValue()+ "]");
+    }
+  }
+ else {
+    PropertyDescriptor pd=pv.resolvedDescriptor;
+    if (pd == null || !pd.getWriteMethod().getDeclaringClass().isInstance(this.object)) {
+      pd=getCachedIntrospectionResults().getPropertyDescriptor(actualName);
+      if (pd == null || pd.getWriteMethod() == null) {
+        PropertyMatches matches=PropertyMatches.forProperty(propertyName,getRootClass());
+        throw new NotWritablePropertyException(getRootClass(),this.nestedPath + propertyName,matches.buildErrorMessage(),matches.getPossibleMatches());
+      }
+      pv.getOriginalPropertyValue().resolvedDescriptor=pd;
+    }
+    Object oldValue=null;
+    try {
+      Object originalValue=pv.getValue();
+      Object valueToApply=originalValue;
+      if (!Boolean.FALSE.equals(pv.conversionNecessary)) {
+        if (pv.isConverted()) {
+          valueToApply=pv.getConvertedValue();
+        }
+ else {
+          if (isExtractOldValueForEditor() && pd.getReadMethod() != null) {
+            Method readMethod=pd.getReadMethod();
+            if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+              readMethod.setAccessible(true);
+            }
+            try {
+              oldValue=readMethod.invoke(this.object,new Object[0]);
+            }
+ catch (            Exception ex) {
+              if (logger.isDebugEnabled()) {
+                logger.debug("Could not read previous value of property '" + this.nestedPath + propertyName+ "'",ex);
+              }
+            }
+          }
+          valueToApply=this.typeConverterDelegate.convertIfNecessary(oldValue,originalValue,pd);
+        }
+        pv.getOriginalPropertyValue().conversionNecessary=Boolean.valueOf(valueToApply != originalValue);
+      }
+      Method writeMethod=pd.getWriteMethod();
+      if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
+        writeMethod.setAccessible(true);
+      }
+      writeMethod.invoke(this.object,new Object[]{valueToApply});
+    }
+ catch (    InvocationTargetException ex) {
+      PropertyChangeEvent propertyChangeEvent=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
+      if (ex.getTargetException() instanceof ClassCastException) {
+        throw new TypeMismatchException(propertyChangeEvent,pd.getPropertyType(),ex.getTargetException());
+      }
+ else {
+        throw new MethodInvocationException(propertyChangeEvent,ex.getTargetException());
+      }
+    }
+catch (    IllegalArgumentException ex) {
+      PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
+      throw new TypeMismatchException(pce,pd.getPropertyType(),ex);
+    }
+catch (    IllegalAccessException ex) {
+      PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
+      throw new MethodInvocationException(pce,ex);
+    }
+  }
+}

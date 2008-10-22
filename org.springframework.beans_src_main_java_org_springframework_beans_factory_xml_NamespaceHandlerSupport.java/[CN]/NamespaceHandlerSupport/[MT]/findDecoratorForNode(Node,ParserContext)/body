@@ -1,0 +1,16 @@
+{
+  BeanDefinitionDecorator decorator=null;
+  if (node instanceof Element) {
+    decorator=(BeanDefinitionDecorator)this.decorators.get(node.getLocalName());
+  }
+ else   if (node instanceof Attr) {
+    decorator=(BeanDefinitionDecorator)this.attributeDecorators.get(node.getLocalName());
+  }
+ else {
+    parserContext.getReaderContext().fatal("Cannot decorate based on Nodes of type [" + node.getClass().getName() + "]",node);
+  }
+  if (decorator == null) {
+    parserContext.getReaderContext().fatal("Cannot locate BeanDefinitionDecorator for " + (node instanceof Element ? "element" : "attribute") + " ["+ node.getLocalName()+ "]",node);
+  }
+  return decorator;
+}

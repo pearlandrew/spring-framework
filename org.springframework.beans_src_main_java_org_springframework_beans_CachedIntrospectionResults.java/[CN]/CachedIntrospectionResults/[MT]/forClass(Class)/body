@@ -1,0 +1,24 @@
+{
+  CachedIntrospectionResults results=null;
+  Object value=classCache.get(beanClass);
+  if (value instanceof Reference) {
+    Reference ref=(Reference)value;
+    results=(CachedIntrospectionResults)ref.get();
+  }
+ else {
+    results=(CachedIntrospectionResults)value;
+  }
+  if (results == null) {
+    results=new CachedIntrospectionResults(beanClass);
+    if (ClassUtils.isCacheSafe(beanClass,CachedIntrospectionResults.class.getClassLoader()) || isClassLoaderAccepted(beanClass.getClassLoader())) {
+      classCache.put(beanClass,results);
+    }
+ else {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
+      }
+      classCache.put(beanClass,new WeakReference(results));
+    }
+  }
+  return results;
+}

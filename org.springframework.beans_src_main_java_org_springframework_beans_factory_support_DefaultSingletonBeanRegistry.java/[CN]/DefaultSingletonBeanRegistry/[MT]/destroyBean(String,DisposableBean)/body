@@ -1,0 +1,38 @@
+{
+  Set dependencies=(Set)this.dependentBeanMap.remove(beanName);
+  if (dependencies != null) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Retrieved dependent beans for bean '" + beanName + "': "+ dependencies);
+    }
+    for (Iterator it=dependencies.iterator(); it.hasNext(); ) {
+      String dependentBeanName=(String)it.next();
+      destroySingleton(dependentBeanName);
+    }
+  }
+  if (bean != null) {
+    try {
+      bean.destroy();
+    }
+ catch (    Throwable ex) {
+      logger.error("Destroy method on bean with name '" + beanName + "' threw an exception",ex);
+    }
+  }
+  Set containedBeans=(Set)this.containedBeanMap.remove(beanName);
+  if (containedBeans != null) {
+    for (Iterator it=containedBeans.iterator(); it.hasNext(); ) {
+      String containedBeanName=(String)it.next();
+      destroySingleton(containedBeanName);
+    }
+  }
+synchronized (this.dependentBeanMap) {
+    for (Iterator it=this.dependentBeanMap.entrySet().iterator(); it.hasNext(); ) {
+      Map.Entry entry=(Map.Entry)it.next();
+      Set dependenciesToClean=(Set)entry.getValue();
+      dependenciesToClean.remove(beanName);
+      if (dependenciesToClean.isEmpty()) {
+        it.remove();
+      }
+    }
+  }
+  this.dependenciesForBeanMap.remove(beanName);
+}

@@ -1,0 +1,43 @@
+{
+  Class elementType=null;
+  if (methodParam != null && JdkVersion.isAtLeastJava15()) {
+    elementType=GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
+  }
+  if (elementType == null && !this.propertyEditorRegistry.hasCustomEditorForElement(null,propertyName)) {
+    return original;
+  }
+  Collection convertedCopy=null;
+  Iterator it=null;
+  try {
+    it=original.iterator();
+    if (it == null) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Collection of type [" + original.getClass().getName() + "] returned null Iterator - injecting original Collection as-is");
+      }
+      return original;
+    }
+    convertedCopy=CollectionFactory.createApproximateCollection(original,original.size());
+  }
+ catch (  Throwable ex) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Cannot access Collection of type [" + original.getClass().getName() + "] - injecting original Collection as-is",ex);
+    }
+    return original;
+  }
+  boolean actuallyConverted=false;
+  int i=0;
+  for (; it.hasNext(); i++) {
+    Object element=it.next();
+    String indexedPropertyName=buildIndexedPropertyName(propertyName,i);
+    if (methodParam != null) {
+      methodParam.increaseNestingLevel();
+    }
+    Object convertedElement=convertIfNecessary(indexedPropertyName,null,element,elementType,null,methodParam);
+    if (methodParam != null) {
+      methodParam.decreaseNestingLevel();
+    }
+    convertedCopy.add(convertedElement);
+    actuallyConverted=actuallyConverted || (element != convertedElement);
+  }
+  return (actuallyConverted ? convertedCopy : original);
+}

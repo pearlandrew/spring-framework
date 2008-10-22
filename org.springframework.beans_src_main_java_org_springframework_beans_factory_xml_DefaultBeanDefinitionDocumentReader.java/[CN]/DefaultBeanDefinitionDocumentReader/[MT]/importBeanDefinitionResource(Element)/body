@@ -1,0 +1,38 @@
+{
+  String location=ele.getAttribute(RESOURCE_ATTRIBUTE);
+  if (!StringUtils.hasText(location)) {
+    getReaderContext().error("Resource location must not be empty",ele);
+    return;
+  }
+  location=SystemPropertyUtils.resolvePlaceholders(location);
+  if (ResourcePatternUtils.isUrl(location)) {
+    try {
+      Set actualResources=new LinkedHashSet(4);
+      int importCount=getReaderContext().getReader().loadBeanDefinitions(location,actualResources);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Imported " + importCount + " bean definitions from URL location ["+ location+ "]");
+      }
+      Resource[] actResArray=(Resource[])actualResources.toArray(new Resource[actualResources.size()]);
+      getReaderContext().fireImportProcessed(location,actResArray,extractSource(ele));
+    }
+ catch (    BeanDefinitionStoreException ex) {
+      getReaderContext().error("Failed to import bean definitions from URL location [" + location + "]",ele,ex);
+    }
+  }
+ else {
+    try {
+      Resource relativeResource=getReaderContext().getResource().createRelative(location);
+      int importCount=getReaderContext().getReader().loadBeanDefinitions(relativeResource);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Imported " + importCount + " bean definitions from relative location ["+ location+ "]");
+      }
+      getReaderContext().fireImportProcessed(location,new Resource[]{relativeResource},extractSource(ele));
+    }
+ catch (    IOException ex) {
+      getReaderContext().error("Invalid relative resource location [" + location + "] to import bean definitions from",ele,ex);
+    }
+catch (    BeanDefinitionStoreException ex) {
+      getReaderContext().error("Failed to import bean definitions from relative location [" + location + "]",ele,ex);
+    }
+  }
+}

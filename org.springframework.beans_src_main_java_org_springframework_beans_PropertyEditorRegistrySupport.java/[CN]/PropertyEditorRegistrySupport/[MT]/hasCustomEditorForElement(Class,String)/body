@@ -1,0 +1,20 @@
+{
+  if (this.customEditors == null) {
+    return false;
+  }
+  if (propertyPath != null && this.propertySpecificEditorsRegistered) {
+    for (Iterator it=this.customEditors.entrySet().iterator(); it.hasNext(); ) {
+      Map.Entry entry=(Map.Entry)it.next();
+      if (entry.getKey() instanceof String) {
+        String regPath=(String)entry.getKey();
+        if (PropertyAccessorUtils.matchesProperty(regPath,propertyPath)) {
+          CustomEditorHolder editorHolder=(CustomEditorHolder)entry.getValue();
+          if (editorHolder.getPropertyEditor(elementType) != null) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return (elementType != null && this.customEditors.containsKey(elementType));
+}

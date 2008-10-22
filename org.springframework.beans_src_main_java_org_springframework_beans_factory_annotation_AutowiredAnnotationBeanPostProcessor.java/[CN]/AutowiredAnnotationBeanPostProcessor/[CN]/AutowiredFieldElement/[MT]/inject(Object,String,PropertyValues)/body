@@ -1,0 +1,48 @@
+{
+  Field field=(Field)this.member;
+  try {
+    Object value=null;
+    if (this.cached) {
+      if (this.cachedFieldValue instanceof DependencyDescriptor) {
+        DependencyDescriptor descriptor=(DependencyDescriptor)this.cachedFieldValue;
+        TypeConverter typeConverter=beanFactory.getTypeConverter();
+        value=beanFactory.resolveDependency(descriptor,beanName,null,typeConverter);
+      }
+ else       if (this.cachedFieldValue instanceof RuntimeBeanReference) {
+        value=beanFactory.getBean(((RuntimeBeanReference)this.cachedFieldValue).getBeanName());
+      }
+ else {
+        value=this.cachedFieldValue;
+      }
+    }
+ else {
+      Set<String> autowiredBeanNames=new LinkedHashSet<String>(1);
+      TypeConverter typeConverter=beanFactory.getTypeConverter();
+      DependencyDescriptor descriptor=new DependencyDescriptor(field,this.required);
+      this.cachedFieldValue=descriptor;
+      value=beanFactory.resolveDependency(descriptor,beanName,autowiredBeanNames,typeConverter);
+      if (value != null) {
+        registerDependentBeans(beanName,autowiredBeanNames);
+        if (autowiredBeanNames.size() == 1) {
+          String autowiredBeanName=autowiredBeanNames.iterator().next();
+          if (beanFactory.containsBean(autowiredBeanName)) {
+            if (beanFactory.isTypeMatch(autowiredBeanName,field.getType())) {
+              this.cachedFieldValue=new RuntimeBeanReference(autowiredBeanName);
+            }
+          }
+        }
+      }
+ else {
+        this.cachedFieldValue=null;
+      }
+      this.cached=true;
+    }
+    if (value != null) {
+      ReflectionUtils.makeAccessible(field);
+      field.set(bean,value);
+    }
+  }
+ catch (  Throwable ex) {
+    throw new BeanCreationException("Could not autowire field: " + field,ex);
+  }
+}

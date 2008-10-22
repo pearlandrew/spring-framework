@@ -1,0 +1,20 @@
+{
+synchronized (bfgInstancesByKey) {
+    BeanFactory savedRef=this.groupContextRef;
+    if (savedRef != null) {
+      this.groupContextRef=null;
+      BeanFactoryGroup bfg=(BeanFactoryGroup)bfgInstancesByObj.get(savedRef);
+      if (bfg != null) {
+        bfg.refCount--;
+        if (bfg.refCount == 0) {
+          destroyDefinition(savedRef,resourceLocation);
+          bfgInstancesByKey.remove(resourceLocation);
+          bfgInstancesByObj.remove(savedRef);
+        }
+      }
+ else {
+        logger.warn("Tried to release a SingletonBeanFactoryLocator group definition " + "more times than it has actually been used. Resource name [" + resourceLocation + "]");
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  if (BeanFactoryUtils.isFactoryDereference(name) && !(beanInstance instanceof FactoryBean)) {
+    throw new BeanIsNotAFactoryException(transformedBeanName(name),beanInstance.getClass());
+  }
+  if (!(beanInstance instanceof FactoryBean) || BeanFactoryUtils.isFactoryDereference(name)) {
+    return beanInstance;
+  }
+  Object object=null;
+  if (mbd == null) {
+    object=getCachedObjectForFactoryBean(beanName);
+  }
+  if (object == null) {
+    FactoryBean factory=(FactoryBean)beanInstance;
+    if (mbd == null && containsBeanDefinition(beanName)) {
+      mbd=getMergedLocalBeanDefinition(beanName);
+    }
+    boolean synthetic=(mbd != null && mbd.isSynthetic());
+    object=getObjectFromFactoryBean(factory,beanName,!synthetic);
+  }
+  return object;
+}

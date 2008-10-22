@@ -1,0 +1,28 @@
+{
+  boolean isFactoryType=(type != null && FactoryBean.class.isAssignableFrom(type));
+  Map matches=new HashMap();
+  Iterator it=this.beans.entrySet().iterator();
+  while (it.hasNext()) {
+    Map.Entry entry=(Map.Entry)it.next();
+    String beanName=(String)entry.getKey();
+    Object beanInstance=entry.getValue();
+    if (beanInstance instanceof FactoryBean && !isFactoryType) {
+      if (includeFactoryBeans) {
+        FactoryBean factory=(FactoryBean)beanInstance;
+        Class objectType=factory.getObjectType();
+        if ((includeNonSingletons || factory.isSingleton()) && objectType != null && type.isAssignableFrom(objectType)) {
+          matches.put(beanName,getBean(beanName));
+        }
+      }
+    }
+ else {
+      if (type.isInstance(beanInstance)) {
+        if (isFactoryType) {
+          beanName=FACTORY_BEAN_PREFIX + beanName;
+        }
+        matches.put(beanName,beanInstance);
+      }
+    }
+  }
+  return matches;
+}

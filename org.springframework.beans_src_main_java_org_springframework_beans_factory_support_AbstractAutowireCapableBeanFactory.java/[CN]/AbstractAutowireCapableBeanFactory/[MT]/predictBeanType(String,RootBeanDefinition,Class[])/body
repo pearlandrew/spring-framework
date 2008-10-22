@@ -1,0 +1,22 @@
+{
+  Class beanClass=null;
+  if (mbd.getFactoryMethodName() != null) {
+    beanClass=getTypeForFactoryMethod(beanName,mbd,typesToMatch);
+  }
+ else {
+    beanClass=resolveBeanClass(mbd,beanName,typesToMatch);
+  }
+  if (beanClass != null && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+    for (Iterator it=getBeanPostProcessors().iterator(); it.hasNext(); ) {
+      BeanPostProcessor bp=(BeanPostProcessor)it.next();
+      if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
+        SmartInstantiationAwareBeanPostProcessor ibp=(SmartInstantiationAwareBeanPostProcessor)bp;
+        Class processedType=ibp.predictBeanType(beanClass,beanName);
+        if (processedType != null) {
+          return processedType;
+        }
+      }
+    }
+  }
+  return beanClass;
+}

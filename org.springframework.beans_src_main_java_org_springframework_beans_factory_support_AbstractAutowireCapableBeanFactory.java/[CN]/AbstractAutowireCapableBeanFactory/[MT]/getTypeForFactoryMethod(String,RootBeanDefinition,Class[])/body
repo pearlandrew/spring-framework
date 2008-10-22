@@ -1,0 +1,33 @@
+{
+  Class factoryClass=null;
+  boolean isStatic=true;
+  String factoryBeanName=mbd.getFactoryBeanName();
+  if (factoryBeanName != null) {
+    if (factoryBeanName.equals(beanName)) {
+      throw new BeanDefinitionStoreException(mbd.getResourceDescription(),beanName,"factory-bean reference points back to the same bean definition");
+    }
+    factoryClass=getType(factoryBeanName);
+    isStatic=false;
+  }
+ else {
+    factoryClass=resolveBeanClass(mbd,beanName,typesToMatch);
+  }
+  if (factoryClass == null) {
+    return null;
+  }
+  int minNrOfArgs=mbd.getConstructorArgumentValues().getArgumentCount();
+  Method[] candidates=ReflectionUtils.getAllDeclaredMethods(factoryClass);
+  Set returnTypes=new HashSet(1);
+  for (int i=0; i < candidates.length; i++) {
+    Method factoryMethod=candidates[i];
+    if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic && factoryMethod.getName().equals(mbd.getFactoryMethodName()) && factoryMethod.getParameterTypes().length >= minNrOfArgs) {
+      returnTypes.add(factoryMethod.getReturnType());
+    }
+  }
+  if (returnTypes.size() == 1) {
+    return (Class)returnTypes.iterator().next();
+  }
+ else {
+    return null;
+  }
+}

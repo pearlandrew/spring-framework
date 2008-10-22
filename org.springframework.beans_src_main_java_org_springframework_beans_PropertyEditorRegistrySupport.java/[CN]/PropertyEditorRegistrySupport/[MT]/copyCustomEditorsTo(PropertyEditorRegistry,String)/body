@@ -1,0 +1,30 @@
+{
+  String actualPropertyName=(nestedProperty != null ? PropertyAccessorUtils.getPropertyName(nestedProperty) : null);
+  if (this.customEditors != null) {
+    for (Iterator it=this.customEditors.entrySet().iterator(); it.hasNext(); ) {
+      Map.Entry entry=(Map.Entry)it.next();
+      if (entry.getKey() instanceof Class) {
+        Class requiredType=(Class)entry.getKey();
+        PropertyEditor editor=(PropertyEditor)entry.getValue();
+        target.registerCustomEditor(requiredType,editor);
+      }
+ else       if (entry.getKey() instanceof String) {
+        String editorPath=(String)entry.getKey();
+        CustomEditorHolder editorHolder=(CustomEditorHolder)entry.getValue();
+        if (nestedProperty != null) {
+          int pos=PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(editorPath);
+          if (pos != -1) {
+            String editorNestedProperty=editorPath.substring(0,pos);
+            String editorNestedPath=editorPath.substring(pos + 1);
+            if (editorNestedProperty.equals(nestedProperty) || editorNestedProperty.equals(actualPropertyName)) {
+              target.registerCustomEditor(editorHolder.getRegisteredType(),editorNestedPath,editorHolder.getPropertyEditor());
+            }
+          }
+        }
+ else {
+          target.registerCustomEditor(editorHolder.getRegisteredType(),editorPath,editorHolder.getPropertyEditor());
+        }
+      }
+    }
+  }
+}

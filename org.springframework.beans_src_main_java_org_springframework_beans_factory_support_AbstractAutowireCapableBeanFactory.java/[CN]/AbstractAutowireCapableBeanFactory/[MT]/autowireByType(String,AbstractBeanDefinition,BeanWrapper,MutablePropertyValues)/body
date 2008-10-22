@@ -1,0 +1,32 @@
+{
+  TypeConverter converter=getCustomTypeConverter();
+  if (converter == null) {
+    converter=bw;
+  }
+  Set autowiredBeanNames=new LinkedHashSet(4);
+  String[] propertyNames=unsatisfiedNonSimpleProperties(mbd,bw);
+  for (int i=0; i < propertyNames.length; i++) {
+    String propertyName=propertyNames[i];
+    try {
+      PropertyDescriptor pd=bw.getPropertyDescriptor(propertyName);
+      MethodParameter methodParam=BeanUtils.getWriteMethodParameter(pd);
+      boolean eager=!PriorityOrdered.class.isAssignableFrom(bw.getWrappedClass());
+      DependencyDescriptor desc=new DependencyDescriptor(methodParam,false,eager);
+      Object autowiredArgument=resolveDependency(desc,beanName,autowiredBeanNames,converter);
+      if (autowiredArgument != null) {
+        pvs.addPropertyValue(propertyName,autowiredArgument);
+      }
+      for (Iterator it=autowiredBeanNames.iterator(); it.hasNext(); ) {
+        String autowiredBeanName=(String)it.next();
+        registerDependentBean(autowiredBeanName,beanName);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Autowiring by type from bean name '" + beanName + "' via property '"+ propertyName+ "' to bean named '"+ autowiredBeanName+ "'");
+        }
+      }
+      autowiredBeanNames.clear();
+    }
+ catch (    BeansException ex) {
+      throw new UnsatisfiedDependencyException(mbd.getResourceDescription(),beanName,propertyName,ex);
+    }
+  }
+}

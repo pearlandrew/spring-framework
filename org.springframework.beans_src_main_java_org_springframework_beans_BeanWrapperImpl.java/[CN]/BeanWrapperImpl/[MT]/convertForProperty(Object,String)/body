@@ -1,0 +1,13 @@
+{
+  PropertyDescriptor pd=getCachedIntrospectionResults().getPropertyDescriptor(propertyName);
+  if (pd == null) {
+    throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"No property '" + propertyName + "' found");
+  }
+  try {
+    return this.typeConverterDelegate.convertIfNecessary(null,value,pd);
+  }
+ catch (  IllegalArgumentException ex) {
+    PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,null,value);
+    throw new TypeMismatchException(pce,pd.getPropertyType(),ex);
+  }
+}

@@ -1,0 +1,12 @@
+{
+  Set<String> excluded=new HashSet<String>(Arrays.asList(excludedProperties));
+  Method[] annotationProperties=ann.annotationType().getDeclaredMethods();
+  BeanWrapper bw=PropertyAccessorFactory.forBeanPropertyAccess(bean);
+  for (  Method annotationProperty : annotationProperties) {
+    String propertyName=annotationProperty.getName();
+    if ((!excluded.contains(propertyName)) && bw.isWritableProperty(propertyName)) {
+      Object value=ReflectionUtils.invokeMethod(annotationProperty,ann);
+      bw.setPropertyValue(propertyName,value);
+    }
+  }
+}

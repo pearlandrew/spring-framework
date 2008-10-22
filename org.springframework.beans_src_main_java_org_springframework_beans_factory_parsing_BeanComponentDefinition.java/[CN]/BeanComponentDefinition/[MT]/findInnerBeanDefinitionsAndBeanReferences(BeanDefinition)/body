@@ -1,0 +1,20 @@
+{
+  List innerBeans=new ArrayList();
+  List references=new ArrayList();
+  PropertyValues propertyValues=beanDefinition.getPropertyValues();
+  for (int i=0; i < propertyValues.getPropertyValues().length; i++) {
+    PropertyValue propertyValue=propertyValues.getPropertyValues()[i];
+    Object value=propertyValue.getValue();
+    if (value instanceof BeanDefinitionHolder) {
+      innerBeans.add(((BeanDefinitionHolder)value).getBeanDefinition());
+    }
+ else     if (value instanceof BeanDefinition) {
+      innerBeans.add(value);
+    }
+ else     if (value instanceof BeanReference) {
+      references.add(value);
+    }
+  }
+  this.innerBeanDefinitions=(BeanDefinition[])innerBeans.toArray(new BeanDefinition[innerBeans.size()]);
+  this.beanReferences=(BeanReference[])references.toArray(new BeanReference[references.size()]);
+}

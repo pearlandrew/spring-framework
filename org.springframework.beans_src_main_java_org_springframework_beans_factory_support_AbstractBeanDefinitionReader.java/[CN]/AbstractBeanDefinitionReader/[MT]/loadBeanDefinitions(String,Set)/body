@@ -1,0 +1,35 @@
+{
+  ResourceLoader resourceLoader=getResourceLoader();
+  if (resourceLoader == null) {
+    throw new BeanDefinitionStoreException("Cannot import bean definitions from location [" + location + "]: no ResourceLoader available");
+  }
+  if (resourceLoader instanceof ResourcePatternResolver) {
+    try {
+      Resource[] resources=((ResourcePatternResolver)resourceLoader).getResources(location);
+      int loadCount=loadBeanDefinitions(resources);
+      if (actualResources != null) {
+        for (int i=0; i < resources.length; i++) {
+          actualResources.add(resources[i]);
+        }
+      }
+      if (logger.isDebugEnabled()) {
+        logger.debug("Loaded " + loadCount + " bean definitions from location pattern ["+ location+ "]");
+      }
+      return loadCount;
+    }
+ catch (    IOException ex) {
+      throw new BeanDefinitionStoreException("Could not resolve bean definition resource pattern [" + location + "]",ex);
+    }
+  }
+ else {
+    Resource resource=resourceLoader.getResource(location);
+    int loadCount=loadBeanDefinitions(resource);
+    if (actualResources != null) {
+      actualResources.add(resource);
+    }
+    if (logger.isDebugEnabled()) {
+      logger.debug("Loaded " + loadCount + " bean definitions from location ["+ location+ "]");
+    }
+    return loadCount;
+  }
+}

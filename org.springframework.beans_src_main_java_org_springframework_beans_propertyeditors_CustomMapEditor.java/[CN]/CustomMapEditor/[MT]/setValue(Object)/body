@@ -1,0 +1,20 @@
+{
+  if (value == null && this.nullAsEmptyMap) {
+    super.setValue(createMap(this.mapType,0));
+  }
+ else   if (value == null || (this.mapType.isInstance(value) && !alwaysCreateNewMap())) {
+    super.setValue(value);
+  }
+ else   if (value instanceof Map) {
+    Map source=(Map)value;
+    Map target=createMap(this.mapType,source.size());
+    for (Iterator it=source.entrySet().iterator(); it.hasNext(); ) {
+      Map.Entry entry=(Map.Entry)it.next();
+      target.put(convertKey(entry.getKey()),convertValue(entry.getValue()));
+    }
+    super.setValue(target);
+  }
+ else {
+    throw new IllegalArgumentException("Value cannot be converted to Map: " + value);
+  }
+}

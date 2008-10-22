@@ -1,0 +1,42 @@
+{
+  String beanName=transformedBeanName(name);
+  Class typeToMatch=(targetType != null ? targetType : Object.class);
+  Object beanInstance=getSingleton(beanName,false);
+  if (beanInstance != null) {
+    if (beanInstance instanceof FactoryBean) {
+      if (!BeanFactoryUtils.isFactoryDereference(name)) {
+        Class type=getTypeForFactoryBean((FactoryBean)beanInstance);
+        return (type != null && typeToMatch.isAssignableFrom(type));
+      }
+ else {
+        return typeToMatch.isAssignableFrom(beanInstance.getClass());
+      }
+    }
+ else {
+      return !BeanFactoryUtils.isFactoryDereference(name) && typeToMatch.isAssignableFrom(beanInstance.getClass());
+    }
+  }
+ else {
+    BeanFactory parentBeanFactory=getParentBeanFactory();
+    if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
+      return parentBeanFactory.isTypeMatch(originalBeanName(name),targetType);
+    }
+    RootBeanDefinition mbd=getMergedLocalBeanDefinition(beanName);
+    Class beanClass=predictBeanType(beanName,mbd,new Class[]{FactoryBean.class,typeToMatch});
+    if (beanClass == null) {
+      return false;
+    }
+    if (FactoryBean.class.isAssignableFrom(beanClass)) {
+      if (!BeanFactoryUtils.isFactoryDereference(name)) {
+        Class type=getTypeForFactoryBean(beanName,mbd);
+        return (type != null && typeToMatch.isAssignableFrom(type));
+      }
+ else {
+        return typeToMatch.isAssignableFrom(beanClass);
+      }
+    }
+ else {
+      return !BeanFactoryUtils.isFactoryDereference(name) && typeToMatch.isAssignableFrom(beanClass);
+    }
+  }
+}

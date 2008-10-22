@@ -1,0 +1,27 @@
+{
+  if (this.nestedBeanWrappers == null) {
+    this.nestedBeanWrappers=new HashMap();
+  }
+  PropertyTokenHolder tokens=getPropertyNameTokens(nestedProperty);
+  String canonicalName=tokens.canonicalName;
+  Object propertyValue=getPropertyValue(tokens);
+  if (propertyValue == null) {
+    throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + canonicalName);
+  }
+  BeanWrapperImpl nestedBw=(BeanWrapperImpl)this.nestedBeanWrappers.get(canonicalName);
+  if (nestedBw == null || nestedBw.getWrappedInstance() != propertyValue) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Creating new nested BeanWrapper for property '" + canonicalName + "'");
+    }
+    nestedBw=newNestedBeanWrapper(propertyValue,this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR);
+    copyDefaultEditorsTo(nestedBw);
+    copyCustomEditorsTo(nestedBw,canonicalName);
+    this.nestedBeanWrappers.put(canonicalName,nestedBw);
+  }
+ else {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Using cached nested BeanWrapper for property '" + canonicalName + "'");
+    }
+  }
+  return nestedBw;
+}

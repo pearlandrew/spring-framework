@@ -1,0 +1,69 @@
+{
+  if (pvs == null || pvs.isEmpty()) {
+    return;
+  }
+  MutablePropertyValues mpvs=null;
+  List original=null;
+  if (pvs instanceof MutablePropertyValues) {
+    mpvs=(MutablePropertyValues)pvs;
+    if (mpvs.isConverted()) {
+      try {
+        bw.setPropertyValues(mpvs);
+        return;
+      }
+ catch (      BeansException ex) {
+        throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Error setting property values",ex);
+      }
+    }
+    original=mpvs.getPropertyValueList();
+  }
+ else {
+    original=Arrays.asList(pvs.getPropertyValues());
+  }
+  TypeConverter converter=getCustomTypeConverter();
+  if (converter == null) {
+    converter=bw;
+  }
+  BeanDefinitionValueResolver valueResolver=new BeanDefinitionValueResolver(this,beanName,mbd,converter);
+  List deepCopy=new ArrayList(original.size());
+  boolean resolveNecessary=false;
+  for (Iterator it=original.iterator(); it.hasNext(); ) {
+    PropertyValue pv=(PropertyValue)it.next();
+    if (pv.isConverted()) {
+      deepCopy.add(pv);
+    }
+ else {
+      String propertyName=pv.getName();
+      Object originalValue=pv.getValue();
+      Object resolvedValue=valueResolver.resolveValueIfNecessary(pv,originalValue);
+      Object convertedValue=resolvedValue;
+      boolean convertible=bw.isWritableProperty(propertyName) && !PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName);
+      if (convertible) {
+        convertedValue=convertForProperty(resolvedValue,propertyName,bw,converter);
+      }
+      if (resolvedValue == originalValue) {
+        if (convertible) {
+          pv.setConvertedValue(convertedValue);
+        }
+        deepCopy.add(pv);
+      }
+ else       if (originalValue instanceof TypedStringValue && convertible) {
+        pv.setConvertedValue(convertedValue);
+        deepCopy.add(pv);
+      }
+ else {
+        resolveNecessary=true;
+        deepCopy.add(new PropertyValue(pv,convertedValue));
+      }
+    }
+  }
+  if (mpvs != null && !resolveNecessary) {
+    mpvs.setConverted();
+  }
+  try {
+    bw.setPropertyValues(new MutablePropertyValues(deepCopy));
+  }
+ catch (  BeansException ex) {
+    throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Error setting property values",ex);
+  }
+}

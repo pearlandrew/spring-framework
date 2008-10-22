@@ -1,0 +1,86 @@
+{
+  if (this.skip == null && this.pd != null && pvs != null && pvs.contains(this.pd.getName())) {
+    this.skip=Boolean.TRUE;
+  }
+  if (this.skip != null && this.skip.booleanValue()) {
+    return;
+  }
+  Method method=(Method)this.member;
+  try {
+    Object[] arguments=null;
+    if (this.cached) {
+      if (this.cachedMethodArguments != null) {
+        arguments=new Object[this.cachedMethodArguments.length];
+        for (int i=0; i < arguments.length; i++) {
+          Object cachedArg=this.cachedMethodArguments[i];
+          if (cachedArg instanceof DependencyDescriptor) {
+            DependencyDescriptor descriptor=(DependencyDescriptor)cachedArg;
+            TypeConverter typeConverter=beanFactory.getTypeConverter();
+            arguments[i]=beanFactory.resolveDependency(descriptor,beanName,null,typeConverter);
+          }
+ else           if (cachedArg instanceof RuntimeBeanReference) {
+            arguments[i]=beanFactory.getBean(((RuntimeBeanReference)cachedArg).getBeanName());
+          }
+ else {
+            arguments[i]=cachedArg;
+          }
+        }
+      }
+    }
+ else {
+      Class[] paramTypes=method.getParameterTypes();
+      arguments=new Object[paramTypes.length];
+      Set<String> autowiredBeanNames=new LinkedHashSet<String>(arguments.length);
+      TypeConverter typeConverter=beanFactory.getTypeConverter();
+      this.cachedMethodArguments=new Object[arguments.length];
+      for (int i=0; i < arguments.length; i++) {
+        MethodParameter methodParam=new MethodParameter(method,i);
+        GenericTypeResolver.resolveParameterType(methodParam,bean.getClass());
+        DependencyDescriptor descriptor=new DependencyDescriptor(methodParam,this.required);
+        this.cachedMethodArguments[i]=descriptor;
+        arguments[i]=beanFactory.resolveDependency(descriptor,beanName,autowiredBeanNames,typeConverter);
+        if (arguments[i] == null) {
+          arguments=null;
+          break;
+        }
+      }
+      if (arguments != null) {
+        registerDependentBeans(beanName,autowiredBeanNames);
+        if (autowiredBeanNames.size() == paramTypes.length) {
+          Iterator<String> it=autowiredBeanNames.iterator();
+          for (int i=0; i < paramTypes.length; i++) {
+            String autowiredBeanName=it.next();
+            if (beanFactory.containsBean(autowiredBeanName)) {
+              if (beanFactory.isTypeMatch(autowiredBeanName,paramTypes[i])) {
+                this.cachedMethodArguments[i]=new RuntimeBeanReference(autowiredBeanName);
+              }
+            }
+ else {
+              this.cachedMethodArguments[i]=arguments[i];
+            }
+          }
+        }
+      }
+ else {
+        this.cachedMethodArguments=null;
+      }
+      this.cached=true;
+    }
+    if (this.skip == null) {
+      if (this.pd != null && pvs instanceof MutablePropertyValues) {
+        ((MutablePropertyValues)pvs).registerProcessedProperty(this.pd.getName());
+      }
+      this.skip=Boolean.FALSE;
+    }
+    if (arguments != null) {
+      ReflectionUtils.makeAccessible(method);
+      method.invoke(bean,arguments);
+    }
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+catch (  Throwable ex) {
+    throw new BeanCreationException("Could not autowire method: " + method,ex);
+  }
+}

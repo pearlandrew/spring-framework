@@ -1,0 +1,22 @@
+{
+  if (beanDefinition.getMethodOverrides().isEmpty()) {
+    Constructor constructorToUse=(Constructor)beanDefinition.resolvedConstructorOrFactoryMethod;
+    if (constructorToUse == null) {
+      Class clazz=beanDefinition.getBeanClass();
+      if (clazz.isInterface()) {
+        throw new BeanInstantiationException(clazz,"Specified class is an interface");
+      }
+      try {
+        constructorToUse=clazz.getDeclaredConstructor((Class[])null);
+        beanDefinition.resolvedConstructorOrFactoryMethod=constructorToUse;
+      }
+ catch (      Exception ex) {
+        throw new BeanInstantiationException(clazz,"No default constructor found",ex);
+      }
+    }
+    return BeanUtils.instantiateClass(constructorToUse,null);
+  }
+ else {
+    return instantiateWithMethodInjection(beanDefinition,beanName,owner);
+  }
+}

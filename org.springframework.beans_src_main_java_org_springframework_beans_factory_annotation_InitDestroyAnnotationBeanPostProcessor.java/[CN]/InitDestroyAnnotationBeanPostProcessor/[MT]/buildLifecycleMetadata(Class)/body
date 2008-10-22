@@ -1,0 +1,26 @@
+{
+  final LifecycleMetadata newMetadata=new LifecycleMetadata();
+  final boolean debug=logger.isDebugEnabled();
+  ReflectionUtils.doWithMethods(clazz,new ReflectionUtils.MethodCallback(){
+    public void doWith(    Method method){
+      if (initAnnotationType != null) {
+        if (method.getAnnotation(initAnnotationType) != null) {
+          newMetadata.addInitMethod(method);
+          if (debug) {
+            logger.debug("Found init method on class [" + clazz.getName() + "]: "+ method);
+          }
+        }
+      }
+      if (destroyAnnotationType != null) {
+        if (method.getAnnotation(destroyAnnotationType) != null) {
+          newMetadata.addDestroyMethod(method);
+          if (debug) {
+            logger.debug("Found destroy method on class [" + clazz.getName() + "]: "+ method);
+          }
+        }
+      }
+    }
+  }
+);
+  return newMetadata;
+}

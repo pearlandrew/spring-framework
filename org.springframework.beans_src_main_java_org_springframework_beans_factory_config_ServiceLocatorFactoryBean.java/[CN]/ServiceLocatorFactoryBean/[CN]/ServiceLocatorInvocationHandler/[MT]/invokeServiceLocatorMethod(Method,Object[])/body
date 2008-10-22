@@ -1,0 +1,18 @@
+{
+  Class serviceLocatorMethodReturnType=getServiceLocatorMethodReturnType(method);
+  try {
+    String beanName=tryGetBeanName(args);
+    if (StringUtils.hasLength(beanName)) {
+      return beanFactory.getBean(beanName,serviceLocatorMethodReturnType);
+    }
+ else {
+      return BeanFactoryUtils.beanOfTypeIncludingAncestors(beanFactory,serviceLocatorMethodReturnType);
+    }
+  }
+ catch (  BeansException ex) {
+    if (serviceLocatorExceptionConstructor != null) {
+      throw createServiceLocatorException(serviceLocatorExceptionConstructor,ex);
+    }
+    throw ex;
+  }
+}
