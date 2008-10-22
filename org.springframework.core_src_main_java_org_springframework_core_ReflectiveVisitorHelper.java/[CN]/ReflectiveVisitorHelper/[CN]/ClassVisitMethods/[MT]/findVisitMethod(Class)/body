@@ -1,0 +1,26 @@
+{
+  if (rootArgumentType == Object.class) {
+    return null;
+  }
+  LinkedList classQueue=new LinkedList();
+  classQueue.addFirst(rootArgumentType);
+  while (!classQueue.isEmpty()) {
+    Class argumentType=(Class)classQueue.removeLast();
+    try {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Looking for method " + VISIT_METHOD + "("+ argumentType+ ")");
+      }
+      return findVisitMethod(this.visitorClass,argumentType);
+    }
+ catch (    NoSuchMethodException e) {
+      if (!argumentType.isInterface() && (argumentType.getSuperclass() != Object.class)) {
+        classQueue.addFirst(argumentType.getSuperclass());
+      }
+      Class[] interfaces=argumentType.getInterfaces();
+      for (int i=0; i < interfaces.length; i++) {
+        classQueue.addFirst(interfaces[i]);
+      }
+    }
+  }
+  return findDefaultVisitMethod();
+}

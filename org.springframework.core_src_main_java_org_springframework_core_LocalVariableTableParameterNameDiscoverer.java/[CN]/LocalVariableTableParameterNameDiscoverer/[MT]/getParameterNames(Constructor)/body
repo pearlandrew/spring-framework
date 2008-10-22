@@ -1,0 +1,17 @@
+{
+  String[] paramNames=(String[])this.parameterNamesCache.get(ctor);
+  if (paramNames == null) {
+    try {
+      paramNames=visitConstructor(ctor).getParameterNames();
+      if (paramNames != null) {
+        this.parameterNamesCache.put(ctor,paramNames);
+      }
+    }
+ catch (    IOException ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("IOException whilst attempting to read '.class' file for class [" + ctor.getDeclaringClass().getName() + "] - unable to determine parameter names for constructor: "+ ctor,ex);
+      }
+    }
+  }
+  return paramNames;
+}

@@ -1,0 +1,50 @@
+{
+  if (!(ptype.getRawType() instanceof Class)) {
+    return null;
+  }
+  Class rawType=(Class)ptype.getRawType();
+  Type[] paramTypes=ptype.getActualTypeArguments();
+  if (nestingLevel - currentLevel > 0) {
+    int nextLevel=currentLevel + 1;
+    Integer currentTypeIndex=(methodParam != null ? methodParam.getTypeIndexForLevel(nextLevel) : null);
+    int indexToUse=(currentTypeIndex != null ? currentTypeIndex.intValue() : paramTypes.length - 1);
+    Type paramType=paramTypes[indexToUse];
+    return extractType(methodParam,paramType,source,typeIndex,nestingLevel,nextLevel);
+  }
+  if (source != null && !source.isAssignableFrom(rawType)) {
+    return null;
+  }
+  Class fromSuperclassOrInterface=extractTypeFromClass(methodParam,rawType,source,typeIndex,nestingLevel,currentLevel);
+  if (fromSuperclassOrInterface != null) {
+    return fromSuperclassOrInterface;
+  }
+  if (paramTypes == null || typeIndex >= paramTypes.length) {
+    return null;
+  }
+  Type paramType=paramTypes[typeIndex];
+  if (paramType instanceof TypeVariable && methodParam != null && methodParam.typeVariableMap != null) {
+    Type mappedType=(Type)methodParam.typeVariableMap.get(paramType);
+    if (mappedType != null) {
+      paramType=mappedType;
+    }
+  }
+  if (paramType instanceof WildcardType) {
+    Type[] lowerBounds=((WildcardType)paramType).getLowerBounds();
+    if (lowerBounds != null && lowerBounds.length > 0) {
+      paramType=lowerBounds[0];
+    }
+  }
+  if (paramType instanceof ParameterizedType) {
+    paramType=((ParameterizedType)paramType).getRawType();
+  }
+  if (paramType instanceof GenericArrayType) {
+    Type compType=((GenericArrayType)paramType).getGenericComponentType();
+    if (compType instanceof Class) {
+      return Array.newInstance((Class)compType,0).getClass();
+    }
+  }
+ else   if (paramType instanceof Class) {
+    return (Class)paramType;
+  }
+  return null;
+}

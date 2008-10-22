@@ -1,0 +1,24 @@
+{
+  Type[] genericParameters=genericMethod.getGenericParameterTypes();
+  Class[] candidateParameters=candidateMethod.getParameterTypes();
+  if (genericParameters.length != candidateParameters.length) {
+    return false;
+  }
+  for (int i=0; i < genericParameters.length; i++) {
+    Type genericParameter=genericParameters[i];
+    Class candidateParameter=candidateParameters[i];
+    if (candidateParameter.isArray()) {
+      Type rawType=GenericTypeResolver.getRawType(genericParameter,typeVariableMap);
+      if (rawType instanceof GenericArrayType) {
+        if (!candidateParameter.getComponentType().equals(GenericTypeResolver.resolveType(((GenericArrayType)rawType).getGenericComponentType(),typeVariableMap))) {
+          return false;
+        }
+        break;
+      }
+    }
+    if (!candidateParameter.equals(GenericTypeResolver.resolveType(genericParameter,typeVariableMap))) {
+      return false;
+    }
+  }
+  return true;
+}

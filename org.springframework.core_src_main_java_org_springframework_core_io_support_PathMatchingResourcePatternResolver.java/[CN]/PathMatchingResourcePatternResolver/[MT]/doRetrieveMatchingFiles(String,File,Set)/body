@@ -1,0 +1,19 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Searching directory [" + dir.getAbsolutePath() + "] for files matching pattern ["+ fullPattern+ "]");
+  }
+  File[] dirContents=dir.listFiles();
+  if (dirContents == null) {
+    throw new IOException("Could not retrieve contents of directory [" + dir.getAbsolutePath() + "]");
+  }
+  for (int i=0; i < dirContents.length; i++) {
+    File content=dirContents[i];
+    String currPath=StringUtils.replace(content.getAbsolutePath(),File.separator,"/");
+    if (content.isDirectory() && getPathMatcher().matchStart(fullPattern,currPath + "/")) {
+      doRetrieveMatchingFiles(fullPattern,content,result);
+    }
+    if (getPathMatcher().match(fullPattern,currPath)) {
+      result.add(content);
+    }
+  }
+}

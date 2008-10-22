@@ -1,0 +1,36 @@
+{
+  if (value instanceof Collection || (value instanceof Object[] && !(value instanceof Resource[]))) {
+    Collection input=(value instanceof Collection ? (Collection)value : Arrays.asList((Object[])value));
+    List merged=new ArrayList();
+    for (Iterator it=input.iterator(); it.hasNext(); ) {
+      Object element=it.next();
+      if (element instanceof String) {
+        String pattern=resolvePath((String)element).trim();
+        try {
+          Resource[] resources=this.resourcePatternResolver.getResources(pattern);
+          for (int i=0; i < resources.length; i++) {
+            Resource resource=resources[i];
+            if (!merged.contains(resource)) {
+              merged.add(resource);
+            }
+          }
+        }
+ catch (        IOException ex) {
+          throw new IllegalArgumentException("Could not resolve resource location pattern [" + pattern + "]: "+ ex.getMessage());
+        }
+      }
+ else       if (element instanceof Resource) {
+        if (!merged.contains(element)) {
+          merged.add(element);
+        }
+      }
+ else {
+        throw new IllegalArgumentException("Cannot convert element [" + element + "] to ["+ Resource.class.getName()+ "]: only location String and Resource object supported");
+      }
+    }
+    super.setValue(merged.toArray(new Resource[merged.size()]));
+  }
+ else {
+    super.setValue(value);
+  }
+}

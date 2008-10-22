@@ -1,0 +1,16 @@
+{
+  Class valueClass=value.getClass();
+  if (Proxy.isProxyClass(valueClass)) {
+    Class[] ifcs=valueClass.getInterfaces();
+    for (int i=0; i < ifcs.length; i++) {
+      Class ifc=ifcs[i];
+      if (!ignoredInterfaces.contains(ifc)) {
+        return ifc;
+      }
+    }
+  }
+ else   if (valueClass.getName().lastIndexOf('$') != -1 && valueClass.getDeclaringClass() == null) {
+    valueClass=valueClass.getSuperclass();
+  }
+  return valueClass;
+}

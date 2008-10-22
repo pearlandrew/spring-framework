@@ -1,0 +1,14 @@
+{
+  if (JdkVersion.isAtLeastJava15()) {
+    logger.trace("Creating [java.util.concurrent.ConcurrentHashMap]");
+    return JdkConcurrentCollectionFactory.createConcurrentHashMap(initialCapacity);
+  }
+ else   if (backportConcurrentAvailable) {
+    logger.trace("Creating [edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap]");
+    return BackportConcurrentCollectionFactory.createConcurrentHashMap(initialCapacity);
+  }
+ else {
+    logger.debug("Falling back to plain synchronized [java.util.HashMap] for concurrent map");
+    return Collections.synchronizedMap(new HashMap(initialCapacity));
+  }
+}

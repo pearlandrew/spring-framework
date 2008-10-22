@@ -1,0 +1,19 @@
+{
+  String rootDirPath=determineRootDir(locationPattern);
+  String subPattern=locationPattern.substring(rootDirPath.length());
+  Resource[] rootDirResources=getResources(rootDirPath);
+  Set result=new LinkedHashSet(16);
+  for (int i=0; i < rootDirResources.length; i++) {
+    Resource rootDirResource=resolveRootDirResource(rootDirResources[i]);
+    if (isJarResource(rootDirResource)) {
+      result.addAll(doFindPathMatchingJarResources(rootDirResource,subPattern));
+    }
+ else {
+      result.addAll(doFindPathMatchingFileResources(rootDirResource,subPattern));
+    }
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Resolved location pattern [" + locationPattern + "] to resources "+ result);
+  }
+  return (Resource[])result.toArray(new Resource[result.size()]);
+}

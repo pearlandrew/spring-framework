@@ -1,0 +1,18 @@
+{
+  do {
+    Field[] fields=targetClass.getDeclaredFields();
+    for (int i=0; i < fields.length; i++) {
+      if (ff != null && !ff.matches(fields[i])) {
+        continue;
+      }
+      try {
+        fc.doWith(fields[i]);
+      }
+ catch (      IllegalAccessException ex) {
+        throw new IllegalStateException("Shouldn't be illegal to access field '" + fields[i].getName() + "': "+ ex);
+      }
+    }
+    targetClass=targetClass.getSuperclass();
+  }
+ while (targetClass != null && targetClass != Object.class);
+}

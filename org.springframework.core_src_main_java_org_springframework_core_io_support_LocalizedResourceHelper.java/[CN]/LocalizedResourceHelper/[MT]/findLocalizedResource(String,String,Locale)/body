@@ -1,0 +1,27 @@
+{
+  Assert.notNull(name,"Name must not be null");
+  Assert.notNull(extension,"Extension must not be null");
+  Resource resource=null;
+  if (locale != null) {
+    String lang=locale.getLanguage();
+    String country=locale.getCountry();
+    String variant=locale.getVariant();
+    if (variant.length() > 0) {
+      String location=name + this.separator + lang+ this.separator+ country+ this.separator+ variant+ extension;
+      resource=this.resourceLoader.getResource(location);
+    }
+    if ((resource == null || !resource.exists()) && country.length() > 0) {
+      String location=name + this.separator + lang+ this.separator+ country+ extension;
+      resource=this.resourceLoader.getResource(location);
+    }
+    if ((resource == null || !resource.exists()) && lang.length() > 0) {
+      String location=name + this.separator + lang+ extension;
+      resource=this.resourceLoader.getResource(location);
+    }
+  }
+  if (resource == null || !resource.exists()) {
+    String location=name + extension;
+    resource=this.resourceLoader.getResource(location);
+  }
+  return resource;
+}

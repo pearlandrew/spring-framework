@@ -1,0 +1,17 @@
+{
+  String[] paramNames=(String[])this.parameterNamesCache.get(method);
+  if (paramNames == null) {
+    try {
+      paramNames=visitMethod(method).getParameterNames();
+      if (paramNames != null) {
+        this.parameterNamesCache.put(method,paramNames);
+      }
+    }
+ catch (    IOException ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("IOException whilst attempting to read '.class' file for class [" + method.getDeclaringClass().getName() + "] - unable to determine parameter names for method: "+ method,ex);
+      }
+    }
+  }
+  return paramNames;
+}

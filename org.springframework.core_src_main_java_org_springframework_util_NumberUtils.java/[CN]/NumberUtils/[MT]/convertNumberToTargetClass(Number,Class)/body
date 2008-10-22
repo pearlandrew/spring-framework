@@ -1,0 +1,51 @@
+{
+  Assert.notNull(number,"Number must not be null");
+  Assert.notNull(targetClass,"Target class must not be null");
+  if (targetClass.isInstance(number)) {
+    return number;
+  }
+ else   if (targetClass.equals(Byte.class)) {
+    long value=number.longValue();
+    if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
+      raiseOverflowException(number,targetClass);
+    }
+    return new Byte(number.byteValue());
+  }
+ else   if (targetClass.equals(Short.class)) {
+    long value=number.longValue();
+    if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
+      raiseOverflowException(number,targetClass);
+    }
+    return new Short(number.shortValue());
+  }
+ else   if (targetClass.equals(Integer.class)) {
+    long value=number.longValue();
+    if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+      raiseOverflowException(number,targetClass);
+    }
+    return new Integer(number.intValue());
+  }
+ else   if (targetClass.equals(Long.class)) {
+    return new Long(number.longValue());
+  }
+ else   if (targetClass.equals(BigInteger.class)) {
+    if (number instanceof BigDecimal) {
+      return ((BigDecimal)number).toBigInteger();
+    }
+ else {
+      return BigInteger.valueOf(number.longValue());
+    }
+  }
+ else   if (targetClass.equals(Float.class)) {
+    return new Float(number.floatValue());
+  }
+ else   if (targetClass.equals(Double.class)) {
+    return new Double(number.doubleValue());
+  }
+ else   if (targetClass.equals(BigDecimal.class)) {
+    return new BigDecimal(number.toString());
+  }
+ else {
+    throw new IllegalArgumentException("Could not convert number [" + number + "] of type ["+ number.getClass().getName()+ "] to unknown target class ["+ targetClass.getName()+ "]");
+  }
+}

@@ -1,0 +1,13 @@
+{
+  if (JdkVersion.isAtLeastJava15()) {
+    logger.trace("Creating [java.util.concurrent.CopyOnWriteArraySet]");
+    return JdkConcurrentCollectionFactory.createCopyOnWriteArraySet();
+  }
+ else   if (backportConcurrentAvailable) {
+    logger.trace("Creating [edu.emory.mathcs.backport.java.util.concurrent.CopyOnWriteArraySet]");
+    return BackportConcurrentCollectionFactory.createCopyOnWriteArraySet();
+  }
+ else {
+    throw new IllegalStateException("Cannot create CopyOnWriteArraySet - " + "neither JDK 1.5 nor backport-concurrent available on the classpath");
+  }
+}

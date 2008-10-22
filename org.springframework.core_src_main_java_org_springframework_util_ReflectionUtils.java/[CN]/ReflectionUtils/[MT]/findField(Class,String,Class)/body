@@ -1,0 +1,16 @@
+{
+  Assert.notNull(clazz,"Class must not be null");
+  Assert.isTrue(name != null || type != null,"Either name or type of the field must be specified");
+  Class searchType=clazz;
+  while (!Object.class.equals(searchType) && searchType != null) {
+    Field[] fields=searchType.getDeclaredFields();
+    for (int i=0; i < fields.length; i++) {
+      Field field=fields[i];
+      if ((name == null || name.equals(field.getName())) && (type == null || type.equals(field.getType()))) {
+        return field;
+      }
+    }
+    searchType=searchType.getSuperclass();
+  }
+  return null;
+}

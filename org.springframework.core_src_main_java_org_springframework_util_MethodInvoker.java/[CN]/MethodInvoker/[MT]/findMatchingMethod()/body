@@ -1,0 +1,22 @@
+{
+  String targetMethod=getTargetMethod();
+  Object[] arguments=getArguments();
+  int argCount=arguments.length;
+  Method[] candidates=ReflectionUtils.getAllDeclaredMethods(getTargetClass());
+  int minTypeDiffWeight=Integer.MAX_VALUE;
+  Method matchingMethod=null;
+  for (int i=0; i < candidates.length; i++) {
+    Method candidate=candidates[i];
+    if (candidate.getName().equals(targetMethod)) {
+      Class[] paramTypes=candidate.getParameterTypes();
+      if (paramTypes.length == argCount) {
+        int typeDiffWeight=getTypeDifferenceWeight(paramTypes,arguments);
+        if (typeDiffWeight < minTypeDiffWeight) {
+          minTypeDiffWeight=typeDiffWeight;
+          matchingMethod=candidate;
+        }
+      }
+    }
+  }
+  return matchingMethod;
+}
