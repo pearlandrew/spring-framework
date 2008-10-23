@@ -1,0 +1,22 @@
+{
+  try {
+synchronized (this.scriptClassMonitor) {
+      if (this.scriptClass == null || scriptSource.isModified()) {
+        this.wasModifiedForTypeCheck=true;
+        this.scriptClass=getGroovyClassLoader().parseClass(scriptSource.getScriptAsString(),scriptSource.suggestedClassName());
+        if (Script.class.isAssignableFrom(this.scriptClass)) {
+          Object result=executeScript(scriptSource,this.scriptClass);
+          this.scriptResultClass=(result != null ? result.getClass() : null);
+          this.cachedResult=new CachedResultHolder(result);
+        }
+ else {
+          this.scriptResultClass=this.scriptClass;
+        }
+      }
+      return this.scriptResultClass;
+    }
+  }
+ catch (  CompilationFailedException ex) {
+    throw new ScriptCompilationException(scriptSource,ex);
+  }
+}

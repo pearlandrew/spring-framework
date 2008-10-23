@@ -1,0 +1,47 @@
+{
+  checkService();
+  if (this.serviceName == null) {
+    throw new IllegalArgumentException("Property 'serviceName' is required");
+  }
+  if (this.clientSocketFactory instanceof RMIServerSocketFactory) {
+    this.serverSocketFactory=(RMIServerSocketFactory)this.clientSocketFactory;
+  }
+  if ((this.clientSocketFactory != null && this.serverSocketFactory == null) || (this.clientSocketFactory == null && this.serverSocketFactory != null)) {
+    throw new IllegalArgumentException("Both RMIClientSocketFactory and RMIServerSocketFactory or none required");
+  }
+  if (this.registryClientSocketFactory instanceof RMIServerSocketFactory) {
+    this.registryServerSocketFactory=(RMIServerSocketFactory)this.registryClientSocketFactory;
+  }
+  if (this.registryClientSocketFactory == null && this.registryServerSocketFactory != null) {
+    throw new IllegalArgumentException("RMIServerSocketFactory without RMIClientSocketFactory for registry not supported");
+  }
+  if (this.registry == null) {
+    this.registry=getRegistry(this.registryHost,this.registryPort,this.registryClientSocketFactory,this.registryServerSocketFactory);
+  }
+  this.exportedObject=getObjectToExport();
+  if (logger.isInfoEnabled()) {
+    logger.info("Binding service '" + this.serviceName + "' to RMI registry: "+ this.registry);
+  }
+  if (this.clientSocketFactory != null) {
+    UnicastRemoteObject.exportObject(this.exportedObject,this.servicePort,this.clientSocketFactory,this.serverSocketFactory);
+  }
+ else {
+    UnicastRemoteObject.exportObject(this.exportedObject,this.servicePort);
+  }
+  try {
+    if (this.replaceExistingBinding) {
+      this.registry.rebind(this.serviceName,this.exportedObject);
+    }
+ else {
+      this.registry.bind(this.serviceName,this.exportedObject);
+    }
+  }
+ catch (  AlreadyBoundException ex) {
+    unexportObjectSilently();
+    throw new IllegalStateException("Already an RMI object bound for name '" + this.serviceName + "': "+ ex.toString());
+  }
+catch (  RemoteException ex) {
+    unexportObjectSilently();
+    throw ex;
+  }
+}

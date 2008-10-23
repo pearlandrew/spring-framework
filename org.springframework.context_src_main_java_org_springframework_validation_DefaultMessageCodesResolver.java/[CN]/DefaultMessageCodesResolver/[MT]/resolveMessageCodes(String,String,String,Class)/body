@@ -1,0 +1,22 @@
+{
+  List codeList=new ArrayList();
+  List fieldList=new ArrayList();
+  buildFieldList(field,fieldList);
+  for (Iterator it=fieldList.iterator(); it.hasNext(); ) {
+    String fieldInList=(String)it.next();
+    codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + objectName+ CODE_SEPARATOR+ fieldInList));
+  }
+  int dotIndex=field.lastIndexOf('.');
+  if (dotIndex != -1) {
+    buildFieldList(field.substring(dotIndex + 1),fieldList);
+  }
+  for (Iterator it=fieldList.iterator(); it.hasNext(); ) {
+    String fieldInList=(String)it.next();
+    codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + fieldInList));
+  }
+  if (fieldType != null) {
+    codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + fieldType.getName()));
+  }
+  codeList.add(postProcessMessageCode(errorCode));
+  return StringUtils.toStringArray(codeList);
+}

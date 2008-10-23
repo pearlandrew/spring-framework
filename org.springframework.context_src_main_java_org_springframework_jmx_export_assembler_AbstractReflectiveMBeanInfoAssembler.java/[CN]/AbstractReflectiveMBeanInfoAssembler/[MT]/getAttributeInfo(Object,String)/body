@@ -1,0 +1,33 @@
+{
+  PropertyDescriptor[] props=BeanUtils.getPropertyDescriptors(getClassToExpose(managedBean));
+  List infos=new ArrayList();
+  for (int i=0; i < props.length; i++) {
+    Method getter=props[i].getReadMethod();
+    if (getter != null && getter.getDeclaringClass() == Object.class) {
+      continue;
+    }
+    if (getter != null && !includeReadAttribute(getter,beanKey)) {
+      getter=null;
+    }
+    Method setter=props[i].getWriteMethod();
+    if (setter != null && !includeWriteAttribute(setter,beanKey)) {
+      setter=null;
+    }
+    if (getter != null || setter != null) {
+      String attrName=JmxUtils.getAttributeName(props[i],isUseStrictCasing());
+      String description=getAttributeDescription(props[i],beanKey);
+      ModelMBeanAttributeInfo info=new ModelMBeanAttributeInfo(attrName,description,getter,setter);
+      Descriptor desc=info.getDescriptor();
+      if (getter != null) {
+        desc.setField(FIELD_GET_METHOD,getter.getName());
+      }
+      if (setter != null) {
+        desc.setField(FIELD_SET_METHOD,setter.getName());
+      }
+      populateAttributeDescriptor(desc,getter,setter,beanKey);
+      info.setDescriptor(desc);
+      infos.add(info);
+    }
+  }
+  return (ModelMBeanAttributeInfo[])infos.toArray(new ModelMBeanAttributeInfo[infos.size()]);
+}

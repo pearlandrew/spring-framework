@@ -1,0 +1,20 @@
+{
+  if (clazz.getSuperclass() == null) {
+    return null;
+  }
+  Class[] implementedInterfaces=clazz.getInterfaces();
+  for (int x=0; x < implementedInterfaces.length; x++) {
+    Class iface=implementedInterfaces[x];
+    boolean isMxBean=iface.getName().endsWith(MXBEAN_SUFFIX);
+    if (mxBeanAnnotationAvailable) {
+      Boolean checkResult=MXBeanChecker.hasMXBeanAnnotation(iface);
+      if (checkResult != null) {
+        isMxBean=checkResult.booleanValue();
+      }
+    }
+    if (isMxBean) {
+      return iface;
+    }
+  }
+  return getMXBeanInterface(clazz.getSuperclass());
+}

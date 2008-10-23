@@ -1,0 +1,30 @@
+{
+  if (this.beans == null) {
+    this.beans=new HashMap();
+    if (this.autodetectMode == null) {
+      this.autodetectMode=new Integer(AUTODETECT_ALL);
+    }
+  }
+  int mode=(this.autodetectMode != null ? this.autodetectMode.intValue() : AUTODETECT_NONE);
+  if (mode != AUTODETECT_NONE) {
+    if (this.beanFactory == null) {
+      throw new MBeanExportException("Cannot autodetect MBeans if not running in a BeanFactory");
+    }
+    if (mode == AUTODETECT_MBEAN || mode == AUTODETECT_ALL) {
+      this.logger.debug("Autodetecting user-defined JMX MBeans");
+      autodetectMBeans();
+    }
+    if ((mode == AUTODETECT_ASSEMBLER || mode == AUTODETECT_ALL) && this.assembler instanceof AutodetectCapableMBeanInfoAssembler) {
+      autodetectBeans((AutodetectCapableMBeanInfoAssembler)this.assembler);
+    }
+  }
+  if (!this.beans.isEmpty()) {
+    for (Iterator it=this.beans.entrySet().iterator(); it.hasNext(); ) {
+      Map.Entry entry=(Map.Entry)it.next();
+      Assert.notNull(entry.getKey(),"Beans key must not be null");
+      String beanKey=entry.getKey().toString();
+      Object value=entry.getValue();
+      registerBeanNameOrInstance(value,beanKey);
+    }
+  }
+}

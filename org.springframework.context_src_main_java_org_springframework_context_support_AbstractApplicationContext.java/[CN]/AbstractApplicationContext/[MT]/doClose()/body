@@ -1,0 +1,24 @@
+{
+  if (isActive()) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Closing " + this);
+    }
+    try {
+      publishEvent(new ContextClosedEvent(this));
+    }
+ catch (    Throwable ex) {
+      logger.error("Exception thrown from ApplicationListener handling ContextClosedEvent",ex);
+    }
+    Map lifecycleBeans=getLifecycleBeans();
+    for (Iterator it=new LinkedHashSet(lifecycleBeans.keySet()).iterator(); it.hasNext(); ) {
+      String beanName=(String)it.next();
+      doStop(lifecycleBeans,beanName);
+    }
+    destroyBeans();
+    closeBeanFactory();
+    onClose();
+synchronized (this.activeMonitor) {
+      this.active=false;
+    }
+  }
+}

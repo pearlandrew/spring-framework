@@ -1,0 +1,13 @@
+{
+  Assert.hasText(scriptSource,"Script source must not be empty");
+  Interpreter interpreter=new Interpreter();
+  Object result=interpreter.eval(scriptSource);
+  if (result != null) {
+    return result;
+  }
+ else {
+    Assert.notEmpty(scriptInterfaces,"Given script requires a script proxy: At least one script interface is required.");
+    XThis xt=(XThis)interpreter.eval("return this");
+    return Proxy.newProxyInstance(classLoader,scriptInterfaces,new BshObjectInvocationHandler(xt));
+  }
+}

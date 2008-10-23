@@ -1,0 +1,23 @@
+{
+synchronized (this.preparationMonitor) {
+    if (this.server != null) {
+      this.serverToUse=this.server;
+    }
+ else {
+      this.serverToUse=null;
+      this.serverToUse=this.connector.connect(this.serviceUrl,this.environment,this.agentId);
+    }
+    this.invocationHandler=null;
+    if (this.useStrictCasing) {
+      if (JdkVersion.isAtLeastJava16()) {
+        this.invocationHandler=new MBeanServerInvocationHandler(this.serverToUse,this.objectName,(this.managementInterface != null && JMX.isMXBeanInterface(this.managementInterface)));
+      }
+ else {
+        this.invocationHandler=new MBeanServerInvocationHandler(this.serverToUse,this.objectName);
+      }
+    }
+ else {
+      retrieveMBeanInfo();
+    }
+  }
+}

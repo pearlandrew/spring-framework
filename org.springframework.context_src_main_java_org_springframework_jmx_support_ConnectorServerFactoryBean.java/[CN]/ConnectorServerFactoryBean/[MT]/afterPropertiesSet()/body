@@ -1,0 +1,38 @@
+{
+  if (this.server == null) {
+    this.server=JmxUtils.locateMBeanServer();
+  }
+  JMXServiceURL url=new JMXServiceURL(this.serviceUrl);
+  this.connectorServer=JMXConnectorServerFactory.newJMXConnectorServer(url,this.environment,this.server);
+  if (this.objectName != null) {
+    doRegister(this.connectorServer,this.objectName);
+  }
+  try {
+    if (this.threaded) {
+      Thread connectorThread=new Thread(){
+        public void run(){
+          try {
+            connectorServer.start();
+          }
+ catch (          IOException ex) {
+            throw new JmxException("Could not start JMX connector server after delay",ex);
+          }
+        }
+      }
+;
+      connectorThread.setName("JMX Connector Thread [" + this.serviceUrl + "]");
+      connectorThread.setDaemon(this.daemon);
+      connectorThread.start();
+    }
+ else {
+      this.connectorServer.start();
+    }
+    if (logger.isInfoEnabled()) {
+      logger.info("JMX connector server started: " + this.connectorServer);
+    }
+  }
+ catch (  IOException ex) {
+    unregisterBeans();
+    throw ex;
+  }
+}

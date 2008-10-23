@@ -1,0 +1,16 @@
+{
+  if (msg == null || (!this.alwaysUseMessageFormat && (args == null || args.length == 0))) {
+    return msg;
+  }
+  MessageFormat messageFormat=null;
+synchronized (this.cachedMessageFormats) {
+    messageFormat=(MessageFormat)this.cachedMessageFormats.get(msg);
+    if (messageFormat == null) {
+      messageFormat=createMessageFormat(msg,locale);
+      this.cachedMessageFormats.put(msg,messageFormat);
+    }
+  }
+synchronized (messageFormat) {
+    return messageFormat.format(resolveArguments(args,locale));
+  }
+}

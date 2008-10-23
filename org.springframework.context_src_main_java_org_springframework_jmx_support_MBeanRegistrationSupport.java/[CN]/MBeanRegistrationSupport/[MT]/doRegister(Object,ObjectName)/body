@@ -1,0 +1,35 @@
+{
+  ObjectInstance registeredBean=null;
+  try {
+    registeredBean=this.server.registerMBean(mbean,objectName);
+  }
+ catch (  InstanceAlreadyExistsException ex) {
+    if (this.registrationBehavior == REGISTRATION_IGNORE_EXISTING) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Ignoring existing MBean at [" + objectName + "]");
+      }
+    }
+ else     if (this.registrationBehavior == REGISTRATION_REPLACE_EXISTING) {
+      try {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Replacing existing MBean at [" + objectName + "]");
+        }
+        this.server.unregisterMBean(objectName);
+        registeredBean=this.server.registerMBean(mbean,objectName);
+      }
+ catch (      InstanceNotFoundException ex2) {
+        logger.error("Unable to replace existing MBean at [" + objectName + "]",ex2);
+        throw ex;
+      }
+    }
+ else {
+      throw ex;
+    }
+  }
+  ObjectName actualObjectName=(registeredBean != null ? registeredBean.getObjectName() : null);
+  if (actualObjectName == null) {
+    actualObjectName=objectName;
+  }
+  this.registeredBeans.add(actualObjectName);
+  onRegister(actualObjectName,mbean);
+}

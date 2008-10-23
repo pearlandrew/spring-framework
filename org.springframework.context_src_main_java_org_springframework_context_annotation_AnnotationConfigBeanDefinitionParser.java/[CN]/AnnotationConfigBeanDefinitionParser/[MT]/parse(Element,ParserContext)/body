@@ -1,0 +1,11 @@
+{
+  Object source=parserContext.extractSource(element);
+  Set<BeanDefinitionHolder> processorDefinitions=AnnotationConfigUtils.registerAnnotationConfigProcessors(parserContext.getRegistry(),source);
+  CompositeComponentDefinition compDefinition=new CompositeComponentDefinition(element.getTagName(),source);
+  parserContext.pushContainingComponent(compDefinition);
+  for (  BeanDefinitionHolder processorDefinition : processorDefinitions) {
+    parserContext.registerComponent(new BeanComponentDefinition(processorDefinition));
+  }
+  parserContext.popAndRegisterContainingComponent();
+  return null;
+}

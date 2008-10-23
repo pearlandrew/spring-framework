@@ -1,0 +1,22 @@
+{
+  Class managedClass=AopUtils.getTargetClass(managedBean);
+  ManagedResource mr=this.attributeSource.getManagedResource(managedClass);
+  if (mr != null && StringUtils.hasText(mr.getObjectName())) {
+    return ObjectNameManager.getInstance(mr.getObjectName());
+  }
+ else {
+    try {
+      return ObjectNameManager.getInstance(beanKey);
+    }
+ catch (    MalformedObjectNameException ex) {
+      String domain=this.defaultDomain;
+      if (domain == null) {
+        domain=ClassUtils.getPackageName(managedClass);
+      }
+      Hashtable properties=new Hashtable();
+      properties.put("type",ClassUtils.getShortName(managedClass));
+      properties.put("name",beanKey);
+      return ObjectNameManager.getInstance(domain,properties);
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  String value=resolveScriptSource(element,parserContext.getReaderContext());
+  if (value == null) {
+    return null;
+  }
+  LangNamespaceUtils.registerScriptFactoryPostProcessorIfNecessary(parserContext.getRegistry());
+  GenericBeanDefinition bd=new GenericBeanDefinition();
+  bd.setBeanClassName(this.scriptFactoryClassName);
+  bd.setSource(parserContext.extractSource(element));
+  String scope=element.getAttribute(SCOPE_ATTRIBUTE);
+  if (StringUtils.hasLength(scope)) {
+    bd.setScope(scope);
+  }
+  String autowire=element.getAttribute(AUTOWIRE_ATTRIBUTE);
+  int autowireMode=parserContext.getDelegate().getAutowireMode(autowire);
+  if (autowireMode == GenericBeanDefinition.AUTOWIRE_AUTODETECT) {
+    autowireMode=GenericBeanDefinition.AUTOWIRE_BY_TYPE;
+  }
+ else   if (autowireMode == GenericBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
+    autowireMode=GenericBeanDefinition.AUTOWIRE_NO;
+  }
+  bd.setAutowireMode(autowireMode);
+  String dependencyCheck=element.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
+  bd.setDependencyCheck(parserContext.getDelegate().getDependencyCheck(dependencyCheck));
+  BeanDefinitionDefaults beanDefinitionDefaults=parserContext.getDelegate().getBeanDefinitionDefaults();
+  String initMethod=element.getAttribute(INIT_METHOD_ATTRIBUTE);
+  if (StringUtils.hasLength(initMethod)) {
+    bd.setInitMethodName(initMethod);
+  }
+ else   if (beanDefinitionDefaults.getInitMethodName() != null) {
+    bd.setInitMethodName(beanDefinitionDefaults.getInitMethodName());
+  }
+  String destroyMethod=element.getAttribute(DESTROY_METHOD_ATTRIBUTE);
+  if (StringUtils.hasLength(destroyMethod)) {
+    bd.setDestroyMethodName(destroyMethod);
+  }
+ else   if (beanDefinitionDefaults.getDestroyMethodName() != null) {
+    bd.setDestroyMethodName(beanDefinitionDefaults.getDestroyMethodName());
+  }
+  String refreshCheckDelay=element.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
+  if (StringUtils.hasText(refreshCheckDelay)) {
+    bd.setAttribute(ScriptFactoryPostProcessor.REFRESH_CHECK_DELAY_ATTRIBUTE,new Long(refreshCheckDelay));
+  }
+  ConstructorArgumentValues cav=bd.getConstructorArgumentValues();
+  int constructorArgNum=0;
+  cav.addIndexedArgumentValue(constructorArgNum++,value);
+  if (element.hasAttribute(SCRIPT_INTERFACES_ATTRIBUTE)) {
+    cav.addIndexedArgumentValue(constructorArgNum++,element.getAttribute(SCRIPT_INTERFACES_ATTRIBUTE));
+  }
+  if (element.hasAttribute(CUSTOMIZER_REF_ATTRIBUTE)) {
+    String customizerBeanName=element.getAttribute(CUSTOMIZER_REF_ATTRIBUTE);
+    cav.addIndexedArgumentValue(constructorArgNum++,new RuntimeBeanReference(customizerBeanName));
+  }
+  parserContext.getDelegate().parsePropertyElements(element,bd);
+  return bd;
+}

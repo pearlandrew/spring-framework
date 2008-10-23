@@ -1,0 +1,15 @@
+{
+  super.afterPropertiesSet();
+  if (this.proxyInterfaces != null || !this.lookupOnStartup || !this.cache || this.exposeAccessContext) {
+    if (this.defaultObject != null) {
+      throw new IllegalArgumentException("'defaultObject' is not supported in combination with 'proxyInterface'");
+    }
+    this.jndiObject=JndiObjectProxyFactory.createJndiObjectProxy(this);
+  }
+ else {
+    if (this.defaultObject != null && getExpectedType() != null && !getExpectedType().isInstance(this.defaultObject)) {
+      throw new IllegalArgumentException("Default object [" + this.defaultObject + "] of type ["+ this.defaultObject.getClass().getName()+ "] is not of expected type ["+ getExpectedType().getName()+ "]");
+    }
+    this.jndiObject=lookupWithFallback();
+  }
+}

@@ -1,0 +1,12 @@
+{
+  ProxyFactory proxyFactory=new ProxyFactory();
+  proxyFactory.setTargetSource(ts);
+  if (interfaces == null) {
+    interfaces=ClassUtils.getAllInterfacesForClass(ts.getTargetClass(),this.beanClassLoader);
+  }
+  proxyFactory.setInterfaces(interfaces);
+  DelegatingIntroductionInterceptor introduction=new DelegatingIntroductionInterceptor(ts);
+  introduction.suppressInterface(TargetSource.class);
+  proxyFactory.addAdvice(introduction);
+  return proxyFactory.getProxy(this.beanClassLoader);
+}

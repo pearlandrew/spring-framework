@@ -1,0 +1,26 @@
+{
+synchronized (this.cachedResourceBundles) {
+    Map localeMap=(Map)this.cachedResourceBundles.get(basename);
+    if (localeMap != null) {
+      ResourceBundle bundle=(ResourceBundle)localeMap.get(locale);
+      if (bundle != null) {
+        return bundle;
+      }
+    }
+    try {
+      ResourceBundle bundle=doGetBundle(basename,locale);
+      if (localeMap == null) {
+        localeMap=new HashMap();
+        this.cachedResourceBundles.put(basename,localeMap);
+      }
+      localeMap.put(locale,bundle);
+      return bundle;
+    }
+ catch (    MissingResourceException ex) {
+      if (logger.isWarnEnabled()) {
+        logger.warn("ResourceBundle [" + basename + "] not found for MessageSource: "+ ex.getMessage());
+      }
+      return null;
+    }
+  }
+}

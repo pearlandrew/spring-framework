@@ -1,0 +1,20 @@
+{
+  Set<BeanDefinitionHolder> beanDefinitions=new LinkedHashSet<BeanDefinitionHolder>();
+  for (int i=0; i < basePackages.length; i++) {
+    Set<BeanDefinition> candidates=findCandidateComponents(basePackages[i]);
+    for (    BeanDefinition candidate : candidates) {
+      String beanName=this.beanNameGenerator.generateBeanName(candidate,this.registry);
+      if (candidate instanceof AbstractBeanDefinition) {
+        postProcessBeanDefinition((AbstractBeanDefinition)candidate,beanName);
+      }
+      ScopeMetadata scopeMetadata=this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+      if (checkCandidate(beanName,candidate)) {
+        BeanDefinitionHolder definitionHolder=new BeanDefinitionHolder(candidate,beanName);
+        definitionHolder=applyScope(definitionHolder,scopeMetadata);
+        beanDefinitions.add(definitionHolder);
+        registerBeanDefinition(definitionHolder,this.registry);
+      }
+    }
+  }
+  return beanDefinitions;
+}

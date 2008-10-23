@@ -1,0 +1,29 @@
+{
+  try {
+    Class scriptClassToExecute=null;
+synchronized (this.scriptClassMonitor) {
+      this.wasModifiedForTypeCheck=false;
+      if (this.cachedResult != null) {
+        Object result=this.cachedResult.object;
+        this.cachedResult=null;
+        return result;
+      }
+      if (this.scriptClass == null || scriptSource.isModified()) {
+        this.scriptClass=getGroovyClassLoader().parseClass(scriptSource.getScriptAsString(),scriptSource.suggestedClassName());
+        if (Script.class.isAssignableFrom(this.scriptClass)) {
+          Object result=executeScript(scriptSource,this.scriptClass);
+          this.scriptResultClass=(result != null ? result.getClass() : null);
+          return result;
+        }
+ else {
+          this.scriptResultClass=this.scriptClass;
+        }
+      }
+      scriptClassToExecute=this.scriptClass;
+    }
+    return executeScript(scriptSource,scriptClassToExecute);
+  }
+ catch (  CompilationFailedException ex) {
+    throw new ScriptCompilationException(scriptSource,ex);
+  }
+}

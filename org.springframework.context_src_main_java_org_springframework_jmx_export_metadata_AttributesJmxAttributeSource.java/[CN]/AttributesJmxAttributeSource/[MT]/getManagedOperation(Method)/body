@@ -1,0 +1,17 @@
+{
+  Assert.notNull(this.attributes,"'attributes' is required");
+  PropertyDescriptor pd=BeanUtils.findPropertyForMethod(method);
+  if (pd != null) {
+    throw new InvalidMetadataException("The ManagedOperation attribute is not valid for JavaBean properties: " + "use ManagedAttribute instead");
+  }
+  Collection attrs=this.attributes.getAttributes(method,ManagedOperation.class);
+  if (attrs.isEmpty()) {
+    return null;
+  }
+ else   if (attrs.size() == 1) {
+    return (ManagedOperation)attrs.iterator().next();
+  }
+ else {
+    throw new InvalidMetadataException("A Method can have only one ManagedAttribute attribute");
+  }
+}

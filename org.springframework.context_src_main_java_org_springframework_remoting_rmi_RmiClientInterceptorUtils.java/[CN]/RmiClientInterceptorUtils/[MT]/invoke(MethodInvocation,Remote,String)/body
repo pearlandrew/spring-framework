@@ -1,0 +1,15 @@
+{
+  try {
+    return invokeRemoteMethod(invocation,stub);
+  }
+ catch (  InvocationTargetException ex) {
+    Throwable targetEx=ex.getTargetException();
+    if (targetEx instanceof RemoteException) {
+      RemoteException rex=(RemoteException)targetEx;
+      throw convertRmiAccessException(invocation.getMethod(),rex,serviceName);
+    }
+ else {
+      throw targetEx;
+    }
+  }
+}

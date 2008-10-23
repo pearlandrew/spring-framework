@@ -1,0 +1,18 @@
+{
+  for (Iterator it=this.registeredNotificationListeners.entrySet().iterator(); it.hasNext(); ) {
+    Map.Entry entry=(Map.Entry)it.next();
+    NotificationListenerBean bean=(NotificationListenerBean)entry.getKey();
+    ObjectName[] mappedObjectNames=(ObjectName[])entry.getValue();
+    for (int j=0; j < mappedObjectNames.length; j++) {
+      try {
+        this.server.removeNotificationListener(mappedObjectNames[j],bean.getNotificationListener(),bean.getNotificationFilter(),bean.getHandback());
+      }
+ catch (      Exception ex) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Unable to unregister NotificationListener",ex);
+        }
+      }
+    }
+  }
+  this.registeredNotificationListeners.clear();
+}

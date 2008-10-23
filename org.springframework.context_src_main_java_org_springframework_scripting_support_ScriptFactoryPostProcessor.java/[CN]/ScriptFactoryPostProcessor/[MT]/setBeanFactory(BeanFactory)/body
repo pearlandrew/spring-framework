@@ -1,0 +1,14 @@
+{
+  if (!(beanFactory instanceof ConfigurableBeanFactory)) {
+    throw new IllegalStateException("ScriptFactoryPostProcessor doesn't work with a BeanFactory " + "which does not implement ConfigurableBeanFactory: " + beanFactory.getClass());
+  }
+  this.beanFactory=(ConfigurableBeanFactory)beanFactory;
+  this.scriptBeanFactory.setParentBeanFactory(this.beanFactory);
+  this.scriptBeanFactory.copyConfigurationFrom(this.beanFactory);
+  for (Iterator it=this.scriptBeanFactory.getBeanPostProcessors().iterator(); it.hasNext(); ) {
+    BeanPostProcessor postProcessor=(BeanPostProcessor)it.next();
+    if (postProcessor instanceof AopInfrastructureBean) {
+      it.remove();
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  if (this.properties == null) {
+    return null;
+  }
+synchronized (this.cachedMessageFormats) {
+    Map localeMap=(Map)this.cachedMessageFormats.get(code);
+    if (localeMap != null) {
+      MessageFormat result=(MessageFormat)localeMap.get(locale);
+      if (result != null) {
+        return result;
+      }
+    }
+    String msg=this.properties.getProperty(code);
+    if (msg != null) {
+      if (localeMap == null) {
+        localeMap=new HashMap();
+        this.cachedMessageFormats.put(code,localeMap);
+      }
+      MessageFormat result=createMessageFormat(msg,locale);
+      localeMap.put(locale,result);
+      return result;
+    }
+    return null;
+  }
+}

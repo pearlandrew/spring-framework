@@ -1,0 +1,21 @@
+{
+  BeanDefinitionParser parser=null;
+  if (JdkVersion.isAtLeastJava15()) {
+    try {
+      Class parserClass=ClassUtils.forName(parserClassName,ContextNamespaceHandler.class.getClassLoader());
+      parser=(BeanDefinitionParser)parserClass.newInstance();
+    }
+ catch (    Throwable ex) {
+      throw new IllegalStateException("Unable to create Java 1.5 dependent parser: " + parserClassName,ex);
+    }
+  }
+ else {
+    parser=new BeanDefinitionParser(){
+      public BeanDefinition parse(      Element element,      ParserContext parserContext){
+        throw new IllegalStateException("Context namespace element '" + elementName + "' and its parser class ["+ parserClassName+ "] are only available on JDK 1.5 and higher");
+      }
+    }
+;
+  }
+  registerBeanDefinitionParser(elementName,parser);
+}

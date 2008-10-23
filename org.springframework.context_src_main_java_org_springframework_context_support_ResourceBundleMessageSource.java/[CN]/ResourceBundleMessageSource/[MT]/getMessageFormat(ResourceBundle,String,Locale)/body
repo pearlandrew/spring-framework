@@ -1,0 +1,30 @@
+{
+synchronized (this.cachedBundleMessageFormats) {
+    Map codeMap=(Map)this.cachedBundleMessageFormats.get(bundle);
+    Map localeMap=null;
+    if (codeMap != null) {
+      localeMap=(Map)codeMap.get(code);
+      if (localeMap != null) {
+        MessageFormat result=(MessageFormat)localeMap.get(locale);
+        if (result != null) {
+          return result;
+        }
+      }
+    }
+    String msg=getStringOrNull(bundle,code);
+    if (msg != null) {
+      if (codeMap == null) {
+        codeMap=new HashMap();
+        this.cachedBundleMessageFormats.put(bundle,codeMap);
+      }
+      if (localeMap == null) {
+        localeMap=new HashMap();
+        codeMap.put(code,localeMap);
+      }
+      MessageFormat result=createMessageFormat(msg,locale);
+      localeMap.put(locale,result);
+      return result;
+    }
+    return null;
+  }
+}

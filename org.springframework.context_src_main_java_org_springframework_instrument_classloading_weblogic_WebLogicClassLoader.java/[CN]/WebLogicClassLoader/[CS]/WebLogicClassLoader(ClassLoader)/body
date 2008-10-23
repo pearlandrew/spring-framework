@@ -1,0 +1,16 @@
+{
+  Class wlGenericClassLoaderClass=null;
+  try {
+    wlGenericClassLoaderClass=classLoader.loadClass(GENERIC_CLASS_LOADER_NAME);
+    this.wlPreProcessorClass=classLoader.loadClass(CLASS_PRE_PROCESSOR_NAME);
+    this.addPreProcessorMethod=classLoader.getClass().getMethod("addInstanceClassPreProcessor",this.wlPreProcessorClass);
+    this.getClassFinderMethod=classLoader.getClass().getMethod("getClassFinder");
+    this.getParentMethod=classLoader.getClass().getMethod("getParent");
+    this.wlGenericClassLoaderConstructor=wlGenericClassLoaderClass.getConstructor(this.getClassFinderMethod.getReturnType(),ClassLoader.class);
+  }
+ catch (  Exception ex) {
+    throw new IllegalStateException("Could not initialize WebLogic ClassLoader because WebLogic 10 API classes are not available",ex);
+  }
+  Assert.isInstanceOf(wlGenericClassLoaderClass,classLoader,"ClassLoader must be instance of [" + wlGenericClassLoaderClass.getName() + "]");
+  this.internalClassLoader=classLoader;
+}

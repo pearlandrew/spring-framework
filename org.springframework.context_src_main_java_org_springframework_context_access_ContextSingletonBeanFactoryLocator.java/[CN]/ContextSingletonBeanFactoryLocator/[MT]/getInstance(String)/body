@@ -1,0 +1,20 @@
+{
+  String resourceLocation=selector;
+  if (resourceLocation == null) {
+    resourceLocation=DEFAULT_RESOURCE_LOCATION;
+  }
+  if (!ResourcePatternUtils.isUrl(resourceLocation)) {
+    resourceLocation=ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + resourceLocation;
+  }
+synchronized (instances) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("ContextSingletonBeanFactoryLocator.getInstance(): instances.hashCode=" + instances.hashCode() + ", instances="+ instances);
+    }
+    BeanFactoryLocator bfl=(BeanFactoryLocator)instances.get(resourceLocation);
+    if (bfl == null) {
+      bfl=new ContextSingletonBeanFactoryLocator(resourceLocation);
+      instances.put(resourceLocation,bfl);
+    }
+    return bfl;
+  }
+}

@@ -1,0 +1,23 @@
+{
+synchronized (this.startupShutdownMonitor) {
+    prepareRefresh();
+    ConfigurableListableBeanFactory beanFactory=obtainFreshBeanFactory();
+    prepareBeanFactory(beanFactory);
+    try {
+      postProcessBeanFactory(beanFactory);
+      invokeBeanFactoryPostProcessors(beanFactory);
+      registerBeanPostProcessors(beanFactory);
+      initMessageSource();
+      initApplicationEventMulticaster();
+      onRefresh();
+      registerListeners();
+      finishBeanFactoryInitialization(beanFactory);
+      finishRefresh();
+    }
+ catch (    BeansException ex) {
+      beanFactory.destroySingletons();
+      cancelRefresh(ex);
+      throw ex;
+    }
+  }
+}

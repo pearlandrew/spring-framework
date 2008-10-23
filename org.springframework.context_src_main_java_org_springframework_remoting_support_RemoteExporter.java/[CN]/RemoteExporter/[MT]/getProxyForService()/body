@@ -1,0 +1,17 @@
+{
+  checkService();
+  checkServiceInterface();
+  ProxyFactory proxyFactory=new ProxyFactory();
+  proxyFactory.addInterface(getServiceInterface());
+  if (this.registerTraceInterceptor != null ? this.registerTraceInterceptor.booleanValue() : this.interceptors == null) {
+    proxyFactory.addAdvice(new RemoteInvocationTraceInterceptor(getExporterName()));
+  }
+  if (this.interceptors != null) {
+    AdvisorAdapterRegistry adapterRegistry=GlobalAdvisorAdapterRegistry.getInstance();
+    for (int i=0; i < this.interceptors.length; i++) {
+      proxyFactory.addAdvisor(adapterRegistry.wrap(this.interceptors[i]));
+    }
+  }
+  proxyFactory.setTarget(getService());
+  return proxyFactory.getProxy(getBeanClassLoader());
+}

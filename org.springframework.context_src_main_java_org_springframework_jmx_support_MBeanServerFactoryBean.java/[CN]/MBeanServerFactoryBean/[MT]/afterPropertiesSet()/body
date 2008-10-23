@@ -1,0 +1,17 @@
+{
+  if (this.locateExistingServerIfPossible || this.agentId != null) {
+    try {
+      this.server=locateMBeanServer(this.agentId);
+    }
+ catch (    MBeanServerNotFoundException ex) {
+      if (this.agentId != null) {
+        throw ex;
+      }
+      logger.info("No existing MBeanServer found - creating new one");
+    }
+  }
+  if (this.server == null) {
+    this.server=createMBeanServer(this.defaultDomain,this.registerWithFactory);
+    this.newlyRegistered=this.registerWithFactory;
+  }
+}

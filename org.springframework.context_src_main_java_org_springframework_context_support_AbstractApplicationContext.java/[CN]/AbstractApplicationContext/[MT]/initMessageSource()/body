@@ -1,0 +1,24 @@
+{
+  ConfigurableListableBeanFactory beanFactory=getBeanFactory();
+  if (beanFactory.containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
+    this.messageSource=(MessageSource)beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME,MessageSource.class);
+    if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource) {
+      HierarchicalMessageSource hms=(HierarchicalMessageSource)this.messageSource;
+      if (hms.getParentMessageSource() == null) {
+        hms.setParentMessageSource(getInternalParentMessageSource());
+      }
+    }
+    if (logger.isDebugEnabled()) {
+      logger.debug("Using MessageSource [" + this.messageSource + "]");
+    }
+  }
+ else {
+    DelegatingMessageSource dms=new DelegatingMessageSource();
+    dms.setParentMessageSource(getInternalParentMessageSource());
+    this.messageSource=dms;
+    beanFactory.registerSingleton(MESSAGE_SOURCE_BEAN_NAME,this.messageSource);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME + "': using default ["+ this.messageSource+ "]");
+    }
+  }
+}

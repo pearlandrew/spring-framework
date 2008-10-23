@@ -1,0 +1,25 @@
+{
+  beanFactory.setBeanClassLoader(getClassLoader());
+  beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this));
+  beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+  beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
+  beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
+  beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
+  beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
+  beanFactory.registerResolvableDependency(BeanFactory.class,beanFactory);
+  beanFactory.registerResolvableDependency(ResourceLoader.class,this);
+  beanFactory.registerResolvableDependency(ApplicationEventPublisher.class,this);
+  beanFactory.registerResolvableDependency(ApplicationContext.class,this);
+  if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME) && JdkVersion.isAtLeastJava15()) {
+    try {
+      Class ltwapClass=ClassUtils.forName("org.springframework.context.weaving.LoadTimeWeaverAwareProcessor",AbstractApplicationContext.class.getClassLoader());
+      BeanPostProcessor ltwap=(BeanPostProcessor)BeanUtils.instantiateClass(ltwapClass);
+      ((BeanFactoryAware)ltwap).setBeanFactory(beanFactory);
+      beanFactory.addBeanPostProcessor(ltwap);
+    }
+ catch (    ClassNotFoundException ex) {
+      throw new IllegalStateException("Spring's LoadTimeWeaverAwareProcessor class is not available");
+    }
+    beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
+  }
+}

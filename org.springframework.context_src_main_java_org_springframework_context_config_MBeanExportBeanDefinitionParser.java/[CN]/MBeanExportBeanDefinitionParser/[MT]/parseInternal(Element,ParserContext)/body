@@ -1,0 +1,30 @@
+{
+  String beanClassName=(JdkVersion.isAtLeastJava15() ? "org.springframework.jmx.export.annotation.AnnotationMBeanExporter" : "org.springframework.jmx.export.MBeanExporter");
+  BeanDefinitionBuilder builder=BeanDefinitionBuilder.rootBeanDefinition(beanClassName);
+  builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
+  String defaultDomain=element.getAttribute(DEFAULT_DOMAIN_ATTRIBUTE);
+  if (StringUtils.hasText(defaultDomain)) {
+    builder.addPropertyValue("defaultDomain",defaultDomain);
+  }
+  String serverBeanName=element.getAttribute(SERVER_ATTRIBUTE);
+  if (StringUtils.hasText(serverBeanName)) {
+    builder.addPropertyReference("server",serverBeanName);
+  }
+ else {
+    AbstractBeanDefinition specialServer=MBeanServerBeanDefinitionParser.findServerForSpecialEnvironment();
+    if (specialServer != null) {
+      builder.addPropertyValue("server",specialServer);
+    }
+  }
+  String registration=element.getAttribute(REGISTRATION_ATTRIBUTE);
+  int registrationBehavior=MBeanRegistrationSupport.REGISTRATION_FAIL_ON_EXISTING;
+  if (REGISTRATION_IGNORE_EXISTING.equals(registration)) {
+    registrationBehavior=MBeanRegistrationSupport.REGISTRATION_IGNORE_EXISTING;
+  }
+ else   if (REGISTRATION_REPLACE_EXISTING.equals(registration)) {
+    registrationBehavior=MBeanRegistrationSupport.REGISTRATION_REPLACE_EXISTING;
+  }
+  builder.addPropertyValue("registrationBehavior",new Integer(registrationBehavior));
+  return builder.getBeanDefinition();
+}

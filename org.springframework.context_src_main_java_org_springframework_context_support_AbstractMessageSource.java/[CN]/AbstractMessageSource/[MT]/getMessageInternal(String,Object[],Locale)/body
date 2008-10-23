@@ -1,0 +1,25 @@
+{
+  if (code == null) {
+    return null;
+  }
+  if (locale == null) {
+    locale=Locale.getDefault();
+  }
+  Object[] argsToUse=args;
+  if (!isAlwaysUseMessageFormat() && ObjectUtils.isEmpty(args)) {
+    String message=resolveCodeWithoutArguments(code,locale);
+    if (message != null) {
+      return message;
+    }
+  }
+ else {
+    argsToUse=resolveArguments(args,locale);
+    MessageFormat messageFormat=resolveCode(code,locale);
+    if (messageFormat != null) {
+synchronized (messageFormat) {
+        return messageFormat.format(argsToUse);
+      }
+    }
+  }
+  return getMessageFromParent(code,argsToUse,locale);
+}

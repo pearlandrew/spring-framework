@@ -1,0 +1,23 @@
+{
+  if (this.cacheMillis < 0) {
+    PropertiesHolder propHolder=getMergedProperties(locale);
+    MessageFormat result=propHolder.getMessageFormat(code,locale);
+    if (result != null) {
+      return result;
+    }
+  }
+ else {
+    for (int i=0; i < this.basenames.length; i++) {
+      List filenames=calculateAllFilenames(this.basenames[i],locale);
+      for (int j=0; j < filenames.size(); j++) {
+        String filename=(String)filenames.get(j);
+        PropertiesHolder propHolder=getProperties(filename);
+        MessageFormat result=propHolder.getMessageFormat(code,locale);
+        if (result != null) {
+          return result;
+        }
+      }
+    }
+  }
+  return null;
+}

@@ -1,0 +1,39 @@
+{
+  try {
+    if (mapValue instanceof String) {
+      if (this.beanFactory == null) {
+        throw new MBeanExportException("Cannot resolve bean names if not running in a BeanFactory");
+      }
+      String beanName=(String)mapValue;
+      if (isBeanDefinitionLazyInit(this.beanFactory,beanName)) {
+        ObjectName objectName=registerLazyInit(beanName,beanKey);
+        replaceNotificationListenerBeanNameKeysIfNecessary(beanName,objectName);
+        return objectName;
+      }
+ else {
+        Object bean=this.beanFactory.getBean(beanName);
+        ObjectName objectName=registerBeanInstance(bean,beanKey);
+        replaceNotificationListenerBeanNameKeysIfNecessary(beanName,objectName);
+        return objectName;
+      }
+    }
+ else {
+      if (this.beanFactory != null) {
+        Map beansOfSameType=this.beanFactory.getBeansOfType(mapValue.getClass(),false,false);
+        for (Iterator iterator=beansOfSameType.entrySet().iterator(); iterator.hasNext(); ) {
+          Map.Entry entry=(Map.Entry)iterator.next();
+          if (entry.getValue() == mapValue) {
+            String beanName=(String)entry.getKey();
+            ObjectName objectName=registerBeanInstance(mapValue,beanKey);
+            replaceNotificationListenerBeanNameKeysIfNecessary(beanName,objectName);
+            return objectName;
+          }
+        }
+      }
+      return registerBeanInstance(mapValue,beanKey);
+    }
+  }
+ catch (  Exception ex) {
+    throw new UnableToRegisterMBeanException("Unable to register MBean [" + mapValue + "] with key '"+ beanKey+ "'",ex);
+  }
+}

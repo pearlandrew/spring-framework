@@ -1,0 +1,26 @@
+{
+  ClassLoader originalClassLoader=ClassUtils.overrideThreadContextClassLoader(this.beanClassLoader);
+  try {
+    return lookup();
+  }
+ catch (  TypeMismatchNamingException ex) {
+    throw ex;
+  }
+catch (  NamingException ex) {
+    if (this.defaultObject != null) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("JNDI lookup failed - returning specified default object instead",ex);
+      }
+ else       if (logger.isInfoEnabled()) {
+        logger.info("JNDI lookup failed - returning specified default object instead: " + ex);
+      }
+      return this.defaultObject;
+    }
+    throw ex;
+  }
+ finally {
+    if (originalClassLoader != null) {
+      Thread.currentThread().setContextClassLoader(originalClassLoader);
+    }
+  }
+}

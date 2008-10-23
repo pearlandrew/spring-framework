@@ -1,0 +1,31 @@
+{
+  Object stub=null;
+  try {
+    stub=getStub();
+  }
+ catch (  NamingException ex) {
+    throw new RemoteLookupFailureException("JNDI lookup for RMI service [" + getJndiName() + "] failed",ex);
+  }
+  try {
+    return doInvoke(invocation,stub);
+  }
+ catch (  RemoteConnectFailureException ex) {
+    return handleRemoteConnectFailure(invocation,ex);
+  }
+catch (  RemoteException ex) {
+    if (isConnectFailure(ex)) {
+      return handleRemoteConnectFailure(invocation,ex);
+    }
+ else {
+      throw ex;
+    }
+  }
+catch (  SystemException ex) {
+    if (isConnectFailure(ex)) {
+      return handleRemoteConnectFailure(invocation,ex);
+    }
+ else {
+      throw ex;
+    }
+  }
+}

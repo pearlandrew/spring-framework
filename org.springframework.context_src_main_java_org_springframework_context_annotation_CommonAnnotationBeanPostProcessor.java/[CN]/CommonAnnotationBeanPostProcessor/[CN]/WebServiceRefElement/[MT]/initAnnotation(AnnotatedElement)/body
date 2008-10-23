@@ -1,0 +1,28 @@
+{
+  WebServiceRef resource=ae.getAnnotation(WebServiceRef.class);
+  String resourceName=resource.name();
+  Class resourceType=resource.type();
+  this.isDefaultName=!StringUtils.hasLength(resourceName);
+  if (this.isDefaultName) {
+    resourceName=this.member.getName();
+    if (this.member instanceof Method && resourceName.startsWith("set") && resourceName.length() > 3) {
+      resourceName=Introspector.decapitalize(resourceName.substring(3));
+    }
+  }
+  if (resourceType != null && !Object.class.equals(resourceType)) {
+    checkResourceType(resourceType);
+  }
+ else {
+    resourceType=getResourceType();
+  }
+  this.name=resourceName;
+  this.elementType=resourceType;
+  if (Service.class.isAssignableFrom(resourceType)) {
+    this.lookupType=resourceType;
+  }
+ else {
+    this.lookupType=(!Object.class.equals(resource.value()) ? resource.value() : Service.class);
+  }
+  this.mappedName=resource.mappedName();
+  this.wsdlLocation=resource.wsdlLocation();
+}

@@ -1,0 +1,15 @@
+{
+  if (this.server == null) {
+    this.server=JmxUtils.locateMBeanServer();
+  }
+  try {
+    logger.info("Registering beans for JMX exposure on startup");
+    registerBeans();
+    registerNotificationListeners();
+  }
+ catch (  RuntimeException ex) {
+    unregisterNotificationListeners();
+    unregisterBeans();
+    throw ex;
+  }
+}

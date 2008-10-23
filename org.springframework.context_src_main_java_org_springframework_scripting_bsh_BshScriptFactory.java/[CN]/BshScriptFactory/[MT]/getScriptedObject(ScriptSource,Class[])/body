@@ -1,0 +1,33 @@
+{
+  try {
+    Class clazz=null;
+synchronized (this.scriptClassMonitor) {
+      boolean requiresScriptEvaluation=(this.wasModifiedForTypeCheck && this.scriptClass == null);
+      this.wasModifiedForTypeCheck=false;
+      if (scriptSource.isModified() || requiresScriptEvaluation) {
+        Object result=BshScriptUtils.evaluateBshScript(scriptSource.getScriptAsString(),actualInterfaces,this.beanClassLoader);
+        if (result instanceof Class) {
+          this.scriptClass=(Class)result;
+        }
+ else {
+          return result;
+        }
+      }
+      clazz=this.scriptClass;
+    }
+    if (clazz != null) {
+      try {
+        return clazz.newInstance();
+      }
+ catch (      Throwable ex) {
+        throw new ScriptCompilationException(scriptSource,"Could not instantiate script class: " + clazz.getName(),ex);
+      }
+    }
+ else {
+      return BshScriptUtils.createBshObject(scriptSource.getScriptAsString(),actualInterfaces,this.beanClassLoader);
+    }
+  }
+ catch (  EvalError ex) {
+    throw new ScriptCompilationException(scriptSource,ex);
+  }
+}

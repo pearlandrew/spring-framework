@@ -1,0 +1,19 @@
+{
+  if (isSingleton(name)) {
+    Object jndiObject=doGetSingleton(name,null);
+    return (jndiObject != null ? jndiObject.getClass() : null);
+  }
+ else {
+synchronized (this.resourceTypes) {
+      if (this.resourceTypes.containsKey(name)) {
+        return (Class)this.resourceTypes.get(name);
+      }
+ else {
+        Object jndiObject=lookup(name,null);
+        Class type=(jndiObject != null ? jndiObject.getClass() : null);
+        this.resourceTypes.put(name,type);
+        return type;
+      }
+    }
+  }
+}

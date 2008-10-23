@@ -1,0 +1,32 @@
+{
+synchronized (this.cachedFilenames) {
+    Map localeMap=(Map)this.cachedFilenames.get(basename);
+    if (localeMap != null) {
+      List filenames=(List)localeMap.get(locale);
+      if (filenames != null) {
+        return filenames;
+      }
+    }
+    List filenames=new ArrayList(7);
+    filenames.addAll(calculateFilenamesForLocale(basename,locale));
+    if (this.fallbackToSystemLocale && !locale.equals(Locale.getDefault())) {
+      List fallbackFilenames=calculateFilenamesForLocale(basename,Locale.getDefault());
+      for (Iterator it=fallbackFilenames.iterator(); it.hasNext(); ) {
+        String fallbackFilename=(String)it.next();
+        if (!filenames.contains(fallbackFilename)) {
+          filenames.add(fallbackFilename);
+        }
+      }
+    }
+    filenames.add(basename);
+    if (localeMap != null) {
+      localeMap.put(locale,filenames);
+    }
+ else {
+      localeMap=new HashMap();
+      localeMap.put(locale,filenames);
+      this.cachedFilenames.put(basename,localeMap);
+    }
+    return filenames;
+  }
+}

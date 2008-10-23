@@ -1,0 +1,24 @@
+{
+  Class[] ifaces=null;
+  if (this.resolvedInterfaceMappings != null) {
+    ifaces=(Class[])this.resolvedInterfaceMappings.get(beanKey);
+  }
+  if (ifaces == null) {
+    ifaces=this.managedInterfaces;
+    if (ifaces == null) {
+      ifaces=ClassUtils.getAllInterfacesForClass(method.getDeclaringClass());
+    }
+  }
+  if (ifaces != null) {
+    for (int i=0; i < ifaces.length; i++) {
+      Method[] methods=ifaces[i].getMethods();
+      for (int j=0; j < methods.length; j++) {
+        Method ifaceMethod=methods[j];
+        if (ifaceMethod.getName().equals(method.getName()) && Arrays.equals(ifaceMethod.getParameterTypes(),method.getParameterTypes())) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}

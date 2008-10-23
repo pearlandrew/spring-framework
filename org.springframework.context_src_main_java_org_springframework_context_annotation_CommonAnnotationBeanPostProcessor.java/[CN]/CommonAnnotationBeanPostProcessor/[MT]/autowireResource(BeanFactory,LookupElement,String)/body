@@ -1,0 +1,20 @@
+{
+  Object resource=null;
+  Set<String> autowiredBeanNames=null;
+  String name=element.name;
+  if (this.fallbackToDefaultTypeMatch && element.isDefaultName && factory instanceof AutowireCapableBeanFactory&& !factory.containsBean(name)) {
+    autowiredBeanNames=new LinkedHashSet<String>();
+    resource=((AutowireCapableBeanFactory)factory).resolveDependency(element.getDependencyDescriptor(),requestingBeanName,autowiredBeanNames,null);
+  }
+ else {
+    resource=factory.getBean(name,element.lookupType);
+    autowiredBeanNames=Collections.singleton(name);
+  }
+  if (factory instanceof ConfigurableBeanFactory) {
+    ConfigurableBeanFactory beanFactory=(ConfigurableBeanFactory)factory;
+    for (    String autowiredBeanName : autowiredBeanNames) {
+      beanFactory.registerDependentBean(autowiredBeanName,requestingBeanName);
+    }
+  }
+  return resource;
+}

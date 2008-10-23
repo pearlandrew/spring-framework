@@ -1,0 +1,17 @@
+{
+  try {
+    if (classLoader.getClass().getName().startsWith("weblogic")) {
+      return new WebLogicLoadTimeWeaver(classLoader);
+    }
+ else     if (classLoader.getClass().getName().startsWith("oracle")) {
+      return new OC4JLoadTimeWeaver(classLoader);
+    }
+ else     if (classLoader.getClass().getName().startsWith("com.sun.enterprise")) {
+      return new GlassFishLoadTimeWeaver(classLoader);
+    }
+  }
+ catch (  IllegalStateException ex) {
+    logger.info("Could not obtain server-specific LoadTimeWeaver: " + ex.getMessage());
+  }
+  return null;
+}

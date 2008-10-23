@@ -1,0 +1,24 @@
+{
+  try {
+    if (result == null) {
+      return null;
+    }
+    if (ClassUtils.isAssignableValue(targetClass,result)) {
+      return result;
+    }
+    if (result instanceof CompositeData) {
+      Method fromMethod=targetClass.getMethod("from",new Class[]{CompositeData.class});
+      return ReflectionUtils.invokeMethod(fromMethod,null,new Object[]{result});
+    }
+ else     if (result instanceof TabularData) {
+      Method fromMethod=targetClass.getMethod("from",new Class[]{TabularData.class});
+      return ReflectionUtils.invokeMethod(fromMethod,null,new Object[]{result});
+    }
+ else {
+      throw new InvocationFailureException("Incompatible result value [" + result + "] for target type ["+ targetClass.getName()+ "]");
+    }
+  }
+ catch (  NoSuchMethodException ex) {
+    throw new InvocationFailureException("Could not obtain 'find(CompositeData)' / 'find(TabularData)' method on target type [" + targetClass.getName() + "] for conversion of MXBean data structure ["+ result+ "]");
+  }
+}

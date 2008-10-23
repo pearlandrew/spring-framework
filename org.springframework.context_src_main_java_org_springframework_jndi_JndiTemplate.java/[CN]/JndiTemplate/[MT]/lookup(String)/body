@@ -1,0 +1,15 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Looking up JNDI object with name [" + name + "]");
+  }
+  return execute(new JndiCallback(){
+    public Object doInContext(    Context ctx) throws NamingException {
+      Object located=ctx.lookup(name);
+      if (located == null) {
+        throw new NameNotFoundException("JNDI object with [" + name + "] not found: JNDI implementation returned null");
+      }
+      return located;
+    }
+  }
+);
+}

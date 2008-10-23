@@ -1,0 +1,23 @@
+{
+  EJB resource=ae.getAnnotation(EJB.class);
+  String resourceBeanName=resource.beanName();
+  String resourceName=resource.name();
+  this.isDefaultName=!StringUtils.hasLength(resourceName);
+  if (this.isDefaultName) {
+    resourceName=this.member.getName();
+    if (this.member instanceof Method && resourceName.startsWith("set") && resourceName.length() > 3) {
+      resourceName=Introspector.decapitalize(resourceName.substring(3));
+    }
+  }
+  Class resourceType=resource.beanInterface();
+  if (resourceType != null && !Object.class.equals(resourceType)) {
+    checkResourceType(resourceType);
+  }
+ else {
+    resourceType=getResourceType();
+  }
+  this.beanName=resourceBeanName;
+  this.name=resourceName;
+  this.lookupType=resourceType;
+  this.mappedName=resource.mappedName();
+}

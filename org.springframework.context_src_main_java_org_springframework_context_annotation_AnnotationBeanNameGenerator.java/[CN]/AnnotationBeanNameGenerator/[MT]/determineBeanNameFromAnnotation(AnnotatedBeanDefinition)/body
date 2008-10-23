@@ -1,0 +1,18 @@
+{
+  AnnotationMetadata amd=annotatedDef.getMetadata();
+  Set<String> types=amd.getAnnotationTypes();
+  String beanName=null;
+  for (  String type : types) {
+    Map<String,Object> attributes=amd.getAnnotationAttributes(type);
+    if (isStereotypeWithNameValue(type,amd.getMetaAnnotationTypes(type),attributes)) {
+      String value=(String)attributes.get("value");
+      if (StringUtils.hasLength(value)) {
+        if (beanName != null && !value.equals(beanName)) {
+          throw new IllegalStateException("Stereotype annotations suggest inconsistent " + "component names: '" + beanName + "' versus '"+ value+ "'");
+        }
+        beanName=value;
+      }
+    }
+  }
+  return beanName;
+}
