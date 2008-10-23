@@ -1,0 +1,19 @@
+{
+  if (adviceObject instanceof Advisor) {
+    return (Advisor)adviceObject;
+  }
+  if (!(adviceObject instanceof Advice)) {
+    throw new UnknownAdviceTypeException(adviceObject);
+  }
+  Advice advice=(Advice)adviceObject;
+  if (advice instanceof MethodInterceptor) {
+    return new DefaultPointcutAdvisor(advice);
+  }
+  for (int i=0; i < this.adapters.size(); i++) {
+    AdvisorAdapter adapter=(AdvisorAdapter)this.adapters.get(i);
+    if (adapter.supportsAdvice(advice)) {
+      return new DefaultPointcutAdvisor(advice);
+    }
+  }
+  throw new UnknownAdviceTypeException(advice);
+}

@@ -1,0 +1,19 @@
+{
+  AbstractBeanFactoryBasedTargetSource targetSource=createBeanFactoryBasedTargetSource(beanClass,beanName);
+  if (targetSource == null) {
+    return null;
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Configuring AbstractBeanFactoryBasedTargetSource: " + targetSource);
+  }
+  DefaultListableBeanFactory internalBeanFactory=getInternalBeanFactoryForBean(beanName);
+  BeanDefinition bd=this.beanFactory.getMergedBeanDefinition(beanName);
+  GenericBeanDefinition bdCopy=new GenericBeanDefinition(bd);
+  if (isPrototypeBased()) {
+    bdCopy.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+  }
+  internalBeanFactory.registerBeanDefinition(beanName,bdCopy);
+  targetSource.setTargetBeanName(beanName);
+  targetSource.setBeanFactory(internalBeanFactory);
+  return targetSource;
+}

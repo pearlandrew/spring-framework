@@ -1,0 +1,36 @@
+{
+  String[] advisorNames=null;
+synchronized (this) {
+    advisorNames=this.cachedAdvisorBeanNames;
+    if (advisorNames == null) {
+      advisorNames=BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory,Advisor.class,true,false);
+      this.cachedAdvisorBeanNames=advisorNames;
+    }
+  }
+  if (advisorNames.length == 0) {
+    return new LinkedList();
+  }
+  List advisors=new LinkedList();
+  for (int i=0; i < advisorNames.length; i++) {
+    String name=advisorNames[i];
+    if (isEligibleBean(name) && !this.beanFactory.isCurrentlyInCreation(name)) {
+      try {
+        advisors.add(this.beanFactory.getBean(name));
+      }
+ catch (      BeanCreationException ex) {
+        Throwable rootCause=ex.getMostSpecificCause();
+        if (rootCause instanceof BeanCurrentlyInCreationException) {
+          BeanCreationException bce=(BeanCreationException)rootCause;
+          if (this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
+            if (logger.isDebugEnabled()) {
+              logger.debug("Ignoring currently created advisor '" + name + "': "+ ex.getMessage());
+            }
+            continue;
+          }
+        }
+        throw ex;
+      }
+    }
+  }
+  return advisors;
+}

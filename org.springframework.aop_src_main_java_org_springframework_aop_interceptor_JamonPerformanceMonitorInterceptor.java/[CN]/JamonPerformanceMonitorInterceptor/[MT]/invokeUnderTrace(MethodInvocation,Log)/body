@@ -1,0 +1,13 @@
+{
+  String name=createInvocationTraceName(invocation);
+  Monitor monitor=MonitorFactory.start(name);
+  try {
+    return invocation.proceed();
+  }
+  finally {
+    monitor.stop();
+    if (!this.trackAllInvocations || isLogEnabled(logger)) {
+      logger.trace("JAMon performance statistics for method [" + name + "]:\n"+ monitor);
+    }
+  }
+}

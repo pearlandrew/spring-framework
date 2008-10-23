@@ -1,0 +1,48 @@
+{
+  MethodInvocation invocation=null;
+  Object oldProxy=null;
+  boolean setProxyContext=false;
+  TargetSource targetSource=this.advised.targetSource;
+  Class targetClass=null;
+  Object target=null;
+  try {
+    if (!this.equalsDefined && AopUtils.isEqualsMethod(method)) {
+      return (equals(args[0]) ? Boolean.TRUE : Boolean.FALSE);
+    }
+    if (!this.hashCodeDefined && AopUtils.isHashCodeMethod(method)) {
+      return new Integer(hashCode());
+    }
+    if (!this.advised.opaque && method.getDeclaringClass().isInterface() && method.getDeclaringClass().isAssignableFrom(Advised.class)) {
+      return AopUtils.invokeJoinpointUsingReflection(this.advised,method,args);
+    }
+    Object retVal=null;
+    if (this.advised.exposeProxy) {
+      oldProxy=AopContext.setCurrentProxy(proxy);
+      setProxyContext=true;
+    }
+    target=targetSource.getTarget();
+    if (target != null) {
+      targetClass=target.getClass();
+    }
+    List chain=this.advised.getInterceptorsAndDynamicInterceptionAdvice(method,targetClass);
+    if (chain.isEmpty()) {
+      retVal=AopUtils.invokeJoinpointUsingReflection(target,method,args);
+    }
+ else {
+      invocation=new ReflectiveMethodInvocation(proxy,target,method,args,targetClass,chain);
+      retVal=invocation.proceed();
+    }
+    if (retVal != null && retVal == target && method.getReturnType().isInstance(proxy) && !RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass())) {
+      retVal=proxy;
+    }
+    return retVal;
+  }
+  finally {
+    if (target != null && !targetSource.isStatic()) {
+      targetSource.releaseTarget(target);
+    }
+    if (setProxyContext) {
+      AopContext.setCurrentProxy(oldProxy);
+    }
+  }
+}

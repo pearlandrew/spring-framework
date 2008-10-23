@@ -1,0 +1,17 @@
+{
+  if (isFrozen()) {
+    throw new AopConfigException("Cannot add advisor: Configuration is frozen.");
+  }
+  if (!ObjectUtils.isEmpty(advisors)) {
+    for (int i=0; i < advisors.length; i++) {
+      Advisor advisor=advisors[i];
+      if (advisor instanceof IntroductionAdvisor) {
+        validateIntroductionAdvisor((IntroductionAdvisor)advisor);
+      }
+      Assert.notNull(advisor,"Advisor must not be null");
+      this.advisors.add(advisor);
+    }
+    updateAdvisorArray();
+    adviceChanged();
+  }
+}

@@ -1,0 +1,19 @@
+{
+  this.annotation=aspectjAnnotation;
+  for (  Class type : annotationTypes.keySet()) {
+    if (type.isInstance(this.annotation)) {
+      this.annotationType=annotationTypes.get(type);
+      break;
+    }
+  }
+  if (this.annotationType == null) {
+    throw new IllegalStateException("Unknown annotation type: " + this.annotation.toString());
+  }
+  try {
+    this.expression=resolveExpression();
+    this.argNames=(String)this.annotation.getClass().getMethod("argNames",(Class[])null).invoke(this.annotation);
+  }
+ catch (  Exception ex) {
+    throw new IllegalArgumentException(aspectjAnnotation + " cannot be an AspectJ annotation",ex);
+  }
+}

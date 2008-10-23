@@ -1,0 +1,55 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Creating CGLIB2 proxy: target source is " + this.advised.getTargetSource());
+  }
+  try {
+    Class rootClass=this.advised.getTargetClass();
+    Assert.state(rootClass != null,"Target class must be available for creating a CGLIB proxy");
+    Class proxySuperClass=rootClass;
+    if (AopUtils.isCglibProxyClass(rootClass)) {
+      proxySuperClass=rootClass.getSuperclass();
+      Class[] additionalInterfaces=rootClass.getInterfaces();
+      for (int i=0; i < additionalInterfaces.length; i++) {
+        Class additionalInterface=additionalInterfaces[i];
+        this.advised.addInterface(additionalInterface);
+      }
+    }
+    validateClassIfNecessary(proxySuperClass);
+    Enhancer enhancer=createEnhancer();
+    if (classLoader != null) {
+      enhancer.setClassLoader(classLoader);
+      if (classLoader instanceof SmartClassLoader && ((SmartClassLoader)classLoader).isClassReloadable(proxySuperClass)) {
+        enhancer.setUseCache(false);
+      }
+    }
+    enhancer.setSuperclass(proxySuperClass);
+    enhancer.setStrategy(new UndeclaredThrowableStrategy(UndeclaredThrowableException.class));
+    enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
+    enhancer.setInterceptDuringConstruction(false);
+    Callback[] callbacks=getCallbacks(rootClass);
+    enhancer.setCallbacks(callbacks);
+    enhancer.setCallbackFilter(new ProxyCallbackFilter(this.advised.getConfigurationOnlyCopy(),this.fixedInterceptorMap,this.fixedInterceptorOffset));
+    Class[] types=new Class[callbacks.length];
+    for (int x=0; x < types.length; x++) {
+      types[x]=callbacks[x].getClass();
+    }
+    enhancer.setCallbackTypes(types);
+    Object proxy;
+    if (this.constructorArgs != null) {
+      proxy=enhancer.create(this.constructorArgTypes,this.constructorArgs);
+    }
+ else {
+      proxy=enhancer.create();
+    }
+    return proxy;
+  }
+ catch (  CodeGenerationException ex) {
+    throw new AopConfigException("Could not generate CGLIB subclass of class [" + this.advised.getTargetClass() + "]: "+ "Common causes of this problem include using a final class or a non-visible class",ex);
+  }
+catch (  IllegalArgumentException ex) {
+    throw new AopConfigException("Could not generate CGLIB subclass of class [" + this.advised.getTargetClass() + "]: "+ "Common causes of this problem include using a final class or a non-visible class",ex);
+  }
+catch (  Exception ex) {
+    throw new AopConfigException("Unexpected AOP exception",ex);
+  }
+}

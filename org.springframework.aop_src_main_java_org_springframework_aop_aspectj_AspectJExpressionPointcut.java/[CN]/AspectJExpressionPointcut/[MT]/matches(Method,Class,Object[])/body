@@ -1,0 +1,38 @@
+{
+  checkReadyToMatch();
+  ShadowMatch shadowMatch=null;
+  ShadowMatch originalShadowMatch=null;
+  try {
+    shadowMatch=getShadowMatch(AopUtils.getMostSpecificMethod(method,targetClass),method);
+    originalShadowMatch=getShadowMatch(method,method);
+  }
+ catch (  ReflectionWorld.ReflectionWorldException ex) {
+    return false;
+  }
+  ProxyMethodInvocation pmi=null;
+  Object targetObject=null;
+  Object thisObject=null;
+  try {
+    MethodInvocation mi=ExposeInvocationInterceptor.currentInvocation();
+    targetObject=mi.getThis();
+    if (!(mi instanceof ProxyMethodInvocation)) {
+      throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
+    }
+    pmi=(ProxyMethodInvocation)mi;
+    thisObject=pmi.getProxy();
+  }
+ catch (  IllegalStateException ex) {
+    logger.debug("Couldn't access current invocation - matching with limited context: " + ex);
+  }
+  JoinPointMatch joinPointMatch=shadowMatch.matchesJoinPoint(thisObject,targetObject,args);
+  if (pmi != null) {
+    RuntimeTestWalker originalMethodResidueTest=new RuntimeTestWalker(originalShadowMatch);
+    if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject.getClass())) {
+      return false;
+    }
+  }
+  if (joinPointMatch.matches() && pmi != null) {
+    bindParameters(pmi,joinPointMatch);
+  }
+  return joinPointMatch.matches();
+}

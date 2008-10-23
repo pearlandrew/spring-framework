@@ -1,0 +1,39 @@
+{
+  calculateArgumentBindings();
+  Object[] adviceInvocationArgs=new Object[this.adviceInvocationArgumentCount];
+  int numBound=0;
+  if (this.joinPointArgumentIndex != -1) {
+    adviceInvocationArgs[this.joinPointArgumentIndex]=jp;
+    numBound++;
+  }
+ else   if (this.joinPointStaticPartArgumentIndex != -1) {
+    adviceInvocationArgs[this.joinPointStaticPartArgumentIndex]=jp.getStaticPart();
+    numBound++;
+  }
+  if (!CollectionUtils.isEmpty(this.argumentBindings)) {
+    if (jpMatch != null) {
+      PointcutParameter[] parameterBindings=jpMatch.getParameterBindings();
+      for (int i=0; i < parameterBindings.length; i++) {
+        PointcutParameter parameter=parameterBindings[i];
+        String name=parameter.getName();
+        Integer index=(Integer)this.argumentBindings.get(name);
+        adviceInvocationArgs[index.intValue()]=parameter.getBinding();
+        numBound++;
+      }
+    }
+    if (this.returningName != null) {
+      Integer index=(Integer)this.argumentBindings.get(this.returningName);
+      adviceInvocationArgs[index.intValue()]=returnValue;
+      numBound++;
+    }
+    if (this.throwingName != null) {
+      Integer index=(Integer)this.argumentBindings.get(this.throwingName);
+      adviceInvocationArgs[index.intValue()]=ex;
+      numBound++;
+    }
+  }
+  if (numBound != this.adviceInvocationArgumentCount) {
+    throw new IllegalStateException("Required to bind " + this.adviceInvocationArgumentCount + " arguments, but only bound "+ numBound+ " (JoinPointMatch "+ (jpMatch == null ? "was NOT" : "WAS")+ " bound in invocation)");
+  }
+  return adviceInvocationArgs;
+}

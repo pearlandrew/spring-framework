@@ -1,0 +1,33 @@
+{
+  if (this.target == null) {
+    throw new IllegalArgumentException("Property 'target' is required");
+  }
+  if (this.target instanceof String) {
+    throw new IllegalArgumentException("'target' needs to be a bean reference, not a bean name as value");
+  }
+  if (this.proxyClassLoader == null) {
+    this.proxyClassLoader=ClassUtils.getDefaultClassLoader();
+  }
+  ProxyFactory proxyFactory=new ProxyFactory();
+  if (this.preInterceptors != null) {
+    for (int i=0; i < this.preInterceptors.length; i++) {
+      proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(this.preInterceptors[i]));
+    }
+  }
+  proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(createMainInterceptor()));
+  if (this.postInterceptors != null) {
+    for (int i=0; i < this.postInterceptors.length; i++) {
+      proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(this.postInterceptors[i]));
+    }
+  }
+  proxyFactory.copyFrom(this);
+  TargetSource targetSource=createTargetSource(this.target);
+  proxyFactory.setTargetSource(targetSource);
+  if (this.proxyInterfaces != null) {
+    proxyFactory.setInterfaces(this.proxyInterfaces);
+  }
+ else   if (!isProxyTargetClass()) {
+    proxyFactory.setInterfaces(ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass(),this.proxyClassLoader));
+  }
+  this.proxy=getProxy(proxyFactory);
+}

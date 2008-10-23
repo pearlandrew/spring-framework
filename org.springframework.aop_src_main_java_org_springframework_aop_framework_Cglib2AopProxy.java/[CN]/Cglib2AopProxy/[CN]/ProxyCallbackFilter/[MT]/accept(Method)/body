@@ -1,0 +1,72 @@
+{
+  if (AopUtils.isFinalizeMethod(method)) {
+    logger.debug("Found finalize() method - using NO_OVERRIDE");
+    return NO_OVERRIDE;
+  }
+  if (!this.advised.isOpaque() && method.getDeclaringClass().isInterface() && method.getDeclaringClass().isAssignableFrom(Advised.class)) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Method is declared on Advised interface: " + method);
+    }
+    return DISPATCH_ADVISED;
+  }
+  if (AopUtils.isEqualsMethod(method)) {
+    logger.debug("Found 'equals' method: " + method);
+    return INVOKE_EQUALS;
+  }
+  if (AopUtils.isHashCodeMethod(method)) {
+    logger.debug("Found 'hashCode' method: " + method);
+    return INVOKE_HASHCODE;
+  }
+  Class targetClass=this.advised.getTargetClass();
+  List chain=this.advised.getInterceptorsAndDynamicInterceptionAdvice(method,targetClass);
+  boolean haveAdvice=!chain.isEmpty();
+  boolean exposeProxy=this.advised.isExposeProxy();
+  boolean isStatic=this.advised.getTargetSource().isStatic();
+  boolean isFrozen=this.advised.isFrozen();
+  if (haveAdvice || !isFrozen) {
+    if (exposeProxy) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Must expose proxy on advised method: " + method);
+      }
+      return AOP_PROXY;
+    }
+    String key=method.toString();
+    if (isStatic && isFrozen && this.fixedInterceptorMap.containsKey(key)) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Method has advice and optimisations are enabled: " + method);
+      }
+      int index=((Integer)this.fixedInterceptorMap.get(key)).intValue();
+      return (index + this.fixedInterceptorOffset);
+    }
+ else {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Unable to apply any optimisations to advised method: " + method);
+      }
+      return AOP_PROXY;
+    }
+  }
+ else {
+    if (exposeProxy || !isStatic) {
+      return INVOKE_TARGET;
+    }
+    Class returnType=method.getReturnType();
+    if (targetClass == returnType) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Method " + method + "has return type same as target type (may return this) - using INVOKE_TARGET");
+      }
+      return INVOKE_TARGET;
+    }
+ else     if (returnType.isPrimitive() || !returnType.isAssignableFrom(targetClass)) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Method " + method + " has return type that ensures this cannot be returned- using DISPATCH_TARGET");
+      }
+      return DISPATCH_TARGET;
+    }
+ else {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Method " + method + "has return type that is assignable from the target type (may return this) - "+ "using INVOKE_TARGET");
+      }
+      return INVOKE_TARGET;
+    }
+  }
+}

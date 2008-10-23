@@ -1,0 +1,20 @@
+{
+  String originalBeanName=definition.getBeanName();
+  BeanDefinition targetDefinition=definition.getBeanDefinition();
+  RootBeanDefinition scopedProxyDefinition=new RootBeanDefinition(ScopedProxyFactoryBean.class);
+  scopedProxyDefinition.setOriginatingBeanDefinition(definition.getBeanDefinition());
+  scopedProxyDefinition.setSource(definition.getSource());
+  scopedProxyDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  String targetBeanName=getTargetBeanName(originalBeanName);
+  scopedProxyDefinition.getPropertyValues().addPropertyValue("targetBeanName",targetBeanName);
+  if (proxyTargetClass) {
+    targetDefinition.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE,Boolean.TRUE);
+  }
+ else {
+    scopedProxyDefinition.getPropertyValues().addPropertyValue("proxyTargetClass",Boolean.FALSE);
+  }
+  scopedProxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
+  targetDefinition.setAutowireCandidate(false);
+  registry.registerBeanDefinition(targetBeanName,targetDefinition);
+  return new BeanDefinitionHolder(scopedProxyDefinition,originalBeanName,definition.getAliases());
+}

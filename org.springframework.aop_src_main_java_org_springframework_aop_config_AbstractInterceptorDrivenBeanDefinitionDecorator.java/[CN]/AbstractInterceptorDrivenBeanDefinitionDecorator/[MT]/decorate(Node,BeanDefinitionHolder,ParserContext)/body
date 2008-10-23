@@ -1,0 +1,21 @@
+{
+  BeanDefinitionRegistry registry=parserContext.getRegistry();
+  String existingBeanName=definitionHolder.getBeanName();
+  BeanDefinition existingDefinition=definitionHolder.getBeanDefinition();
+  BeanDefinition interceptorDefinition=createInterceptorDefinition(node);
+  String interceptorName=existingBeanName + "." + getInterceptorNameSuffix(interceptorDefinition);
+  BeanDefinitionReaderUtils.registerBeanDefinition(new BeanDefinitionHolder(interceptorDefinition,interceptorName),registry);
+  BeanDefinitionHolder result=definitionHolder;
+  if (!isProxyFactoryBeanDefinition(existingDefinition)) {
+    RootBeanDefinition proxyDefinition=new RootBeanDefinition();
+    proxyDefinition.setBeanClass(ProxyFactoryBean.class);
+    MutablePropertyValues mpvs=new MutablePropertyValues();
+    proxyDefinition.setPropertyValues(mpvs);
+    mpvs.addPropertyValue("target",existingDefinition);
+    ManagedList interceptorList=new ManagedList();
+    mpvs.addPropertyValue("interceptorNames",interceptorList);
+    result=new BeanDefinitionHolder(proxyDefinition,existingBeanName);
+  }
+  addInterceptorNameToList(interceptorName,result.getBeanDefinition());
+  return result;
+}

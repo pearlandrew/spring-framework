@@ -1,0 +1,21 @@
+{
+  Object cacheKey=getCacheKey(beanClass,beanName);
+  if (!this.targetSourcedBeans.contains(cacheKey)) {
+    if (this.advisedBeans.contains(cacheKey) || this.nonAdvisedBeans.contains(cacheKey)) {
+      return null;
+    }
+    if (isInfrastructureClass(beanClass,beanName) || shouldSkip(beanClass,beanName)) {
+      this.nonAdvisedBeans.add(cacheKey);
+      return null;
+    }
+  }
+  TargetSource targetSource=getCustomTargetSource(beanClass,beanName);
+  if (targetSource != null) {
+    this.targetSourcedBeans.add(beanName);
+    Object[] specificInterceptors=getAdvicesAndAdvisorsForBean(beanClass,beanName,targetSource);
+    Object proxy=createProxy(beanClass,beanName,specificInterceptors,targetSource);
+    this.proxyTypes.put(cacheKey,proxy.getClass());
+    return proxy;
+  }
+  return null;
+}

@@ -1,0 +1,18 @@
+{
+  List partiallyComparableAdvisors=new LinkedList();
+  for (Iterator it=advisors.iterator(); it.hasNext(); ) {
+    Advisor element=(Advisor)it.next();
+    PartiallyComparableAdvisorHolder advisor=new PartiallyComparableAdvisorHolder(element,DEFAULT_PRECEDENCE_COMPARATOR);
+    partiallyComparableAdvisors.add(advisor);
+  }
+  List sorted=PartialOrder.sort(partiallyComparableAdvisors);
+  if (sorted == null) {
+    throw new IllegalArgumentException("Advice precedence circularity error");
+  }
+  List result=new LinkedList();
+  for (Iterator it=sorted.iterator(); it.hasNext(); ) {
+    PartiallyComparableAdvisorHolder pcAdvisor=(PartiallyComparableAdvisorHolder)it.next();
+    result.add(pcAdvisor.getAdvisor());
+  }
+  return result;
+}

@@ -1,0 +1,23 @@
+{
+  if (other == this) {
+    return true;
+  }
+  if (other == null) {
+    return false;
+  }
+  JdkDynamicAopProxy otherProxy=null;
+  if (other instanceof JdkDynamicAopProxy) {
+    otherProxy=(JdkDynamicAopProxy)other;
+  }
+ else   if (Proxy.isProxyClass(other.getClass())) {
+    InvocationHandler ih=Proxy.getInvocationHandler(other);
+    if (!(ih instanceof JdkDynamicAopProxy)) {
+      return false;
+    }
+    otherProxy=(JdkDynamicAopProxy)ih;
+  }
+ else {
+    return false;
+  }
+  return AopProxyUtils.equalsInProxy(this.advised,otherProxy.advised);
+}

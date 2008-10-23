@@ -1,0 +1,55 @@
+{
+  Class<?> candidateAspectClass=aif.getAspectMetadata().getAspectClass();
+  validate(candidateAspectClass);
+  AspectJAnnotation<?> aspectJAnnotation=AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
+  if (aspectJAnnotation == null) {
+    return null;
+  }
+  if (!isAspect(candidateAspectClass)) {
+    throw new AopConfigException("Advice must be declared inside an aspect type: " + "Offending method '" + candidateAdviceMethod + "' in class ["+ candidateAspectClass.getName()+ "]");
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Found AspectJ method: " + candidateAdviceMethod);
+  }
+  AbstractAspectJAdvice springAdvice;
+switch (aspectJAnnotation.getAnnotationType()) {
+case AtBefore:
+    springAdvice=new AspectJMethodBeforeAdvice(candidateAdviceMethod,ajexp,aif);
+  break;
+case AtAfter:
+springAdvice=new AspectJAfterAdvice(candidateAdviceMethod,ajexp,aif);
+break;
+case AtAfterReturning:
+springAdvice=new AspectJAfterReturningAdvice(candidateAdviceMethod,ajexp,aif);
+AfterReturning afterReturningAnnotation=(AfterReturning)aspectJAnnotation.getAnnotation();
+if (StringUtils.hasText(afterReturningAnnotation.returning())) {
+springAdvice.setReturningName(afterReturningAnnotation.returning());
+}
+break;
+case AtAfterThrowing:
+springAdvice=new AspectJAfterThrowingAdvice(candidateAdviceMethod,ajexp,aif);
+AfterThrowing afterThrowingAnnotation=(AfterThrowing)aspectJAnnotation.getAnnotation();
+if (StringUtils.hasText(afterThrowingAnnotation.throwing())) {
+springAdvice.setThrowingName(afterThrowingAnnotation.throwing());
+}
+break;
+case AtAround:
+springAdvice=new AspectJAroundAdvice(candidateAdviceMethod,ajexp,aif);
+break;
+case AtPointcut:
+if (logger.isDebugEnabled()) {
+logger.debug("Processing pointcut '" + candidateAdviceMethod.getName() + "'");
+}
+return null;
+default :
+throw new UnsupportedOperationException("Unsupported advice type on method " + candidateAdviceMethod);
+}
+springAdvice.setAspectName(aspectName);
+springAdvice.setDeclarationOrder(declarationOrderInAspect);
+String[] argNames=this.parameterNameDiscoverer.getParameterNames(candidateAdviceMethod);
+if (argNames != null) {
+springAdvice.setArgumentNamesFromStringArray(argNames);
+}
+springAdvice.calculateArgumentBindings();
+return springAdvice;
+}

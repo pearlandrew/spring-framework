@@ -1,0 +1,16 @@
+{
+  if (logger.isTraceEnabled()) {
+    logger.trace("Creating copy of prototype ProxyFactoryBean config: " + this);
+  }
+  ProxyCreatorSupport copy=new ProxyCreatorSupport(getAopProxyFactory());
+  TargetSource targetSource=freshTargetSource();
+  copy.copyConfigurationFrom(this,targetSource,freshAdvisorChain());
+  if (this.autodetectInterfaces && getProxiedInterfaces().length == 0 && !isProxyTargetClass()) {
+    copy.setInterfaces(ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass(),this.proxyClassLoader));
+  }
+  copy.setFrozen(this.freezeProxy);
+  if (logger.isTraceEnabled()) {
+    logger.trace("Using ProxyCreatorSupport copy: " + copy);
+  }
+  return getProxy(copy.createAopProxy());
+}

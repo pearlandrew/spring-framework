@@ -1,0 +1,24 @@
+{
+  try {
+    this.parseState.push(new AdviceEntry(adviceElement.getLocalName()));
+    RootBeanDefinition methodDefinition=new RootBeanDefinition(MethodLocatingFactoryBean.class);
+    methodDefinition.getPropertyValues().addPropertyValue("targetBeanName",aspectName);
+    methodDefinition.getPropertyValues().addPropertyValue("methodName",adviceElement.getAttribute("method"));
+    methodDefinition.setSynthetic(true);
+    RootBeanDefinition aspectFactoryDef=new RootBeanDefinition(SimpleBeanFactoryAwareAspectInstanceFactory.class);
+    aspectFactoryDef.getPropertyValues().addPropertyValue("aspectBeanName",aspectName);
+    aspectFactoryDef.setSynthetic(true);
+    AbstractBeanDefinition adviceDef=createAdviceDefinition(adviceElement,parserContext,aspectName,order,methodDefinition,aspectFactoryDef,beanDefinitions,beanReferences);
+    RootBeanDefinition advisorDefinition=new RootBeanDefinition(AspectJPointcutAdvisor.class);
+    advisorDefinition.setSource(parserContext.extractSource(adviceElement));
+    advisorDefinition.getConstructorArgumentValues().addGenericArgumentValue(adviceDef);
+    if (aspectElement.hasAttribute(ORDER_PROPERTY)) {
+      advisorDefinition.getPropertyValues().addPropertyValue(ORDER_PROPERTY,aspectElement.getAttribute(ORDER_PROPERTY));
+    }
+    parserContext.getReaderContext().registerWithGeneratedName(advisorDefinition);
+    return advisorDefinition;
+  }
+  finally {
+    this.parseState.pop();
+  }
+}

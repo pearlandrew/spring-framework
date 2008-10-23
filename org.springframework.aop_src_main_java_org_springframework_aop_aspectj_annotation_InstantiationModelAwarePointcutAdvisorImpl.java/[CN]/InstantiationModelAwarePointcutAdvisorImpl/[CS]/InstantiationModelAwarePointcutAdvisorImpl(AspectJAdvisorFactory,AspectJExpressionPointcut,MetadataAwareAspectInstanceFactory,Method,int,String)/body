@@ -1,0 +1,18 @@
+{
+  this.declaredPointcut=ajexp;
+  this.method=method;
+  this.atAspectJAdvisorFactory=af;
+  this.aspectInstanceFactory=aif;
+  this.declarationOrder=declarationOrderInAspect;
+  this.aspectName=aspectName;
+  if (aif.getAspectMetadata().isLazilyInstantiated()) {
+    Pointcut preInstantiationPointcut=Pointcuts.union(aif.getAspectMetadata().getPerClausePointcut(),this.declaredPointcut);
+    this.pointcut=new PerTargetInstantiationModelPointcut(this.declaredPointcut,preInstantiationPointcut,aif);
+    this.lazy=true;
+  }
+ else {
+    this.instantiatedAdvice=instantiateAdvice(this.declaredPointcut);
+    this.pointcut=declaredPointcut;
+    this.lazy=false;
+  }
+}

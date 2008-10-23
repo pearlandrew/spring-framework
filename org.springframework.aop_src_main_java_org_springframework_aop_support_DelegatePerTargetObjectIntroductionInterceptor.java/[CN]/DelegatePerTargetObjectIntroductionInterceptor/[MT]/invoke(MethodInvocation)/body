@@ -1,0 +1,11 @@
+{
+  if (isMethodOnIntroducedInterface(mi)) {
+    Object delegate=getIntroductionDelegateFor(mi.getThis());
+    Object retVal=AopUtils.invokeJoinpointUsingReflection(delegate,mi.getMethod(),mi.getArguments());
+    if (retVal == delegate && mi instanceof ProxyMethodInvocation) {
+      retVal=((ProxyMethodInvocation)mi).getProxy();
+    }
+    return retVal;
+  }
+  return doProceed(mi);
+}

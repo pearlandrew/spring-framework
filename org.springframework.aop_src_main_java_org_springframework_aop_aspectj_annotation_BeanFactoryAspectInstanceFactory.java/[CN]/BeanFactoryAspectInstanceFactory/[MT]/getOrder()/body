@@ -1,0 +1,13 @@
+{
+  Class type=this.beanFactory.getType(this.name);
+  if (type != null) {
+    if (Ordered.class.isAssignableFrom(type) && this.beanFactory.isSingleton(this.name)) {
+      return ((Ordered)this.beanFactory.getBean(this.name)).getOrder();
+    }
+    Order order=(Order)type.getAnnotation(Order.class);
+    if (order != null) {
+      return order.value();
+    }
+  }
+  return Ordered.LOWEST_PRECEDENCE;
+}

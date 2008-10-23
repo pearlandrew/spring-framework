@@ -1,0 +1,74 @@
+{
+  this.argumentTypes=method.getParameterTypes();
+  this.numberOfRemainingUnboundArguments=this.argumentTypes.length;
+  this.parameterNameBindings=new String[this.numberOfRemainingUnboundArguments];
+  this.algorithmicStep=STEP_JOIN_POINT_BINDING;
+  int minimumNumberUnboundArgs=0;
+  if (this.returningName != null) {
+    minimumNumberUnboundArgs++;
+  }
+  if (this.throwingName != null) {
+    minimumNumberUnboundArgs++;
+  }
+  if (this.numberOfRemainingUnboundArguments < minimumNumberUnboundArgs) {
+    throw new IllegalStateException("Not enough arguments in method to satisfy binding of returning and throwing variables");
+  }
+  try {
+    while ((this.numberOfRemainingUnboundArguments > 0) && (this.algorithmicStep < STEP_FINISHED)) {
+switch (this.algorithmicStep++) {
+case STEP_JOIN_POINT_BINDING:
+        if (!maybeBindThisJoinPoint()) {
+          maybeBindThisJoinPointStaticPart();
+        }
+      break;
+case STEP_THROWING_BINDING:
+    maybeBindThrowingVariable();
+  break;
+case STEP_ANNOTATION_BINDING:
+maybeBindAnnotationsFromPointcutExpression();
+break;
+case STEP_RETURNING_BINDING:
+maybeBindReturningVariable();
+break;
+case STEP_PRIMITIVE_ARGS_BINDING:
+maybeBindPrimitiveArgsFromPointcutExpression();
+break;
+case STEP_THIS_TARGET_ARGS_BINDING:
+maybeBindThisOrTargetOrArgsFromPointcutExpression();
+break;
+case STEP_REFERENCE_PCUT_BINDING:
+maybeBindReferencePointcutParameter();
+break;
+default :
+throw new IllegalStateException("Unknown algorithmic step: " + (this.algorithmicStep - 1));
+}
+}
+}
+ catch (AmbiguousBindingException ambigEx) {
+if (this.raiseExceptions) {
+throw ambigEx;
+}
+ else {
+return null;
+}
+}
+catch (IllegalArgumentException ex) {
+if (this.raiseExceptions) {
+throw ex;
+}
+ else {
+return null;
+}
+}
+if (this.numberOfRemainingUnboundArguments == 0) {
+return this.parameterNameBindings;
+}
+ else {
+if (this.raiseExceptions) {
+throw new IllegalStateException("Failed to bind all argument names: " + this.numberOfRemainingUnboundArguments + " argument(s) could not be bound");
+}
+ else {
+return null;
+}
+}
+}

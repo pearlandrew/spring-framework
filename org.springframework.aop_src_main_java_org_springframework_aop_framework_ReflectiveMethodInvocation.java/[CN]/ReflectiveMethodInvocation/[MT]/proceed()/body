@@ -1,0 +1,18 @@
+{
+  if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
+    return invokeJoinpoint();
+  }
+  Object interceptorOrInterceptionAdvice=this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
+  if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
+    InterceptorAndDynamicMethodMatcher dm=(InterceptorAndDynamicMethodMatcher)interceptorOrInterceptionAdvice;
+    if (dm.methodMatcher.matches(this.method,this.targetClass,this.arguments)) {
+      return dm.interceptor.invoke(this);
+    }
+ else {
+      return proceed();
+    }
+  }
+ else {
+    return ((MethodInterceptor)interceptorOrInterceptionAdvice).invoke(this);
+  }
+}

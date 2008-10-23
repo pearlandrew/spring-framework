@@ -1,0 +1,18 @@
+{
+synchronized (this.shadowMapCache) {
+    ShadowMatch shadowMatch=(ShadowMatch)this.shadowMapCache.get(targetMethod);
+    if (shadowMatch == null) {
+      try {
+        shadowMatch=this.pointcutExpression.matchesMethodExecution(targetMethod);
+      }
+ catch (      ReflectionWorld.ReflectionWorldException ex) {
+        if (targetMethod == originalMethod) {
+          throw ex;
+        }
+        shadowMatch=this.pointcutExpression.matchesMethodExecution(originalMethod);
+      }
+      this.shadowMapCache.put(targetMethod,shadowMatch);
+    }
+    return shadowMatch;
+  }
+}

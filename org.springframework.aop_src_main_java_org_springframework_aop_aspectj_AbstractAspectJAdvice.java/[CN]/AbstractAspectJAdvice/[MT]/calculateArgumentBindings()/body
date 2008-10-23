@@ -1,0 +1,17 @@
+{
+  if (this.argumentsIntrospected || this.adviceInvocationArgumentCount == 0) {
+    return;
+  }
+  int numUnboundArgs=this.adviceInvocationArgumentCount;
+  Class[] parameterTypes=this.aspectJAdviceMethod.getParameterTypes();
+  if (maybeBindJoinPoint(parameterTypes[0]) || maybeBindProceedingJoinPoint(parameterTypes[0])) {
+    numUnboundArgs--;
+  }
+ else   if (maybeBindJoinPointStaticPart(parameterTypes[0])) {
+    numUnboundArgs--;
+  }
+  if (numUnboundArgs > 0) {
+    bindArgumentsByName(numUnboundArgs);
+  }
+  this.argumentsIntrospected=true;
+}

@@ -1,0 +1,16 @@
+{
+  String advisedBeanName=getCurrentProxiedBeanName();
+  if (advisedBeanName == null) {
+    return FuzzyBoolean.MAYBE;
+  }
+  if (BeanFactoryUtils.isGeneratedBeanName(advisedBeanName)) {
+    return FuzzyBoolean.NO;
+  }
+  if (targetType != null) {
+    boolean isFactory=FactoryBean.class.isAssignableFrom(targetType);
+    return FuzzyBoolean.fromBoolean(matchesBeanName(isFactory ? BeanFactory.FACTORY_BEAN_PREFIX + advisedBeanName : advisedBeanName));
+  }
+ else {
+    return FuzzyBoolean.fromBoolean(matchesBeanName(advisedBeanName) || matchesBeanName(BeanFactory.FACTORY_BEAN_PREFIX + advisedBeanName));
+  }
+}

@@ -1,0 +1,20 @@
+{
+  this.argumentNames=new String[args.length];
+  for (int i=0; i < args.length; i++) {
+    this.argumentNames[i]=StringUtils.trimWhitespace(args[i]);
+    if (!isVariableName(this.argumentNames[i])) {
+      throw new IllegalArgumentException("'argumentNames' property of AbstractAspectJAdvice contains an argument name '" + this.argumentNames[i] + "' that is not a valid Java identifier");
+    }
+  }
+  if (argumentNames != null) {
+    if (aspectJAdviceMethod.getParameterTypes().length == argumentNames.length + 1) {
+      Class firstArgType=aspectJAdviceMethod.getParameterTypes()[0];
+      if (firstArgType == JoinPoint.class || firstArgType == ProceedingJoinPoint.class || firstArgType == JoinPoint.StaticPart.class) {
+        String[] oldNames=argumentNames;
+        argumentNames=new String[oldNames.length + 1];
+        argumentNames[0]="THIS_JOIN_POINT";
+        System.arraycopy(oldNames,0,argumentNames,1,oldNames.length);
+      }
+    }
+  }
+}

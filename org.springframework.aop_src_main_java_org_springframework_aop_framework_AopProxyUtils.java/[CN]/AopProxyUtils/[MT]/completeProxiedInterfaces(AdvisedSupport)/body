@@ -1,0 +1,27 @@
+{
+  Class[] specifiedInterfaces=advised.getProxiedInterfaces();
+  if (specifiedInterfaces.length == 0) {
+    Class targetClass=advised.getTargetClass();
+    if (targetClass != null && targetClass.isInterface()) {
+      specifiedInterfaces=new Class[]{targetClass};
+    }
+  }
+  boolean addSpringProxy=!advised.isInterfaceProxied(SpringProxy.class);
+  boolean addAdvised=!advised.isOpaque() && !advised.isInterfaceProxied(Advised.class);
+  int nonUserIfcCount=0;
+  if (addSpringProxy) {
+    nonUserIfcCount++;
+  }
+  if (addAdvised) {
+    nonUserIfcCount++;
+  }
+  Class[] proxiedInterfaces=new Class[specifiedInterfaces.length + nonUserIfcCount];
+  System.arraycopy(specifiedInterfaces,0,proxiedInterfaces,0,specifiedInterfaces.length);
+  if (addSpringProxy) {
+    proxiedInterfaces[specifiedInterfaces.length]=SpringProxy.class;
+  }
+  if (addAdvised) {
+    proxiedInterfaces[proxiedInterfaces.length - 1]=Advised.class;
+  }
+  return proxiedInterfaces;
+}

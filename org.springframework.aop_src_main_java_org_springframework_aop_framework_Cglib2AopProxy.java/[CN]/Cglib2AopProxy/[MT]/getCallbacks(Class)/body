@@ -1,0 +1,38 @@
+{
+  boolean exposeProxy=this.advised.isExposeProxy();
+  boolean isFrozen=this.advised.isFrozen();
+  boolean isStatic=this.advised.getTargetSource().isStatic();
+  Callback aopInterceptor=new DynamicAdvisedInterceptor(this.advised);
+  Callback targetInterceptor=null;
+  if (exposeProxy) {
+    targetInterceptor=isStatic ? (Callback)new StaticUnadvisedExposedInterceptor(this.advised.getTargetSource().getTarget()) : (Callback)new DynamicUnadvisedExposedInterceptor(this.advised.getTargetSource());
+  }
+ else {
+    targetInterceptor=isStatic ? (Callback)new StaticUnadvisedInterceptor(this.advised.getTargetSource().getTarget()) : (Callback)new DynamicUnadvisedInterceptor(this.advised.getTargetSource());
+  }
+  Callback targetDispatcher=isStatic ? (Callback)new StaticDispatcher(this.advised.getTargetSource().getTarget()) : new SerializableNoOp();
+  Callback[] mainCallbacks=new Callback[]{aopInterceptor,targetInterceptor,new SerializableNoOp(),targetDispatcher,this.advisedDispatcher,new EqualsInterceptor(this.advised),new HashCodeInterceptor(this.advised)};
+  Callback[] callbacks;
+  if (isStatic && isFrozen) {
+    Method[] methods=rootClass.getMethods();
+    Callback[] fixedCallbacks=new Callback[methods.length];
+    this.fixedInterceptorMap=new HashMap(methods.length);
+    for (int x=0; x < methods.length; x++) {
+      List chain=this.advised.getInterceptorsAndDynamicInterceptionAdvice(methods[x],rootClass);
+      fixedCallbacks[x]=new FixedChainStaticTargetInterceptor(chain,this.advised.getTargetSource().getTarget(),this.advised.getTargetClass());
+      this.fixedInterceptorMap.put(methods[x].toString(),new Integer(x));
+    }
+    callbacks=new Callback[mainCallbacks.length + fixedCallbacks.length];
+    for (int x=0; x < mainCallbacks.length; x++) {
+      callbacks[x]=mainCallbacks[x];
+    }
+    for (int x=0; x < fixedCallbacks.length; x++) {
+      callbacks[x + mainCallbacks.length]=fixedCallbacks[x];
+    }
+    this.fixedInterceptorOffset=mainCallbacks.length;
+  }
+ else {
+    callbacks=mainCallbacks;
+  }
+  return callbacks;
+}
