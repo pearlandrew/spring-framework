@@ -1,0 +1,15 @@
+{
+  Object actualKey=TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
+  Assert.notNull(value,"Value must not be null");
+  Map map=(Map)resources.get();
+  if (map == null) {
+    map=new HashMap();
+    resources.set(map);
+  }
+  if (map.put(actualKey,value) != null) {
+    throw new IllegalStateException("Already value [" + map.get(actualKey) + "] for key ["+ actualKey+ "] bound to thread ["+ Thread.currentThread().getName()+ "]");
+  }
+  if (logger.isTraceEnabled()) {
+    logger.trace("Bound value [" + value + "] for key ["+ actualKey+ "] to thread ["+ Thread.currentThread().getName()+ "]");
+  }
+}

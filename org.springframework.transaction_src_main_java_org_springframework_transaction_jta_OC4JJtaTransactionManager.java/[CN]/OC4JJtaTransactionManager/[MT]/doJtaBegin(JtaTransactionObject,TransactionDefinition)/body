@@ -1,0 +1,36 @@
+{
+  int timeout=determineTimeout(definition);
+  applyTimeout(txObject,timeout);
+  if (this.beginWithNameMethod != null && definition.getName() != null) {
+    try {
+      this.beginWithNameMethod.invoke(txObject.getUserTransaction(),new Object[]{definition.getName()});
+    }
+ catch (    InvocationTargetException ex) {
+      throw new TransactionSystemException("OC4J's UserTransaction.begin(String) method failed",ex.getTargetException());
+    }
+catch (    Exception ex) {
+      throw new TransactionSystemException("Could not invoke OC4J's UserTransaction.begin(String) method",ex);
+    }
+  }
+ else {
+    txObject.getUserTransaction().begin();
+  }
+  if (this.setTransactionIsolationMethod != null) {
+    if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+      try {
+        Transaction tx=getTransactionManager().getTransaction();
+        Integer isolationLevel=new Integer(definition.getIsolationLevel());
+        this.setTransactionIsolationMethod.invoke(tx,new Object[]{isolationLevel});
+      }
+ catch (      InvocationTargetException ex) {
+        throw new TransactionSystemException("OC4J's Transaction.setTransactionIsolation(int) method failed",ex.getTargetException());
+      }
+catch (      Exception ex) {
+        throw new TransactionSystemException("Could not invoke OC4J's Transaction.setTransactionIsolation(int) method",ex);
+      }
+    }
+  }
+ else {
+    applyIsolationLevel(txObject,definition.getIsolationLevel());
+  }
+}

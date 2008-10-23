@@ -1,0 +1,23 @@
+{
+  if (txAttr != null && txAttr.getName() == null) {
+    txAttr=new DelegatingTransactionAttribute(txAttr){
+      public String getName(){
+        return joinpointIdentification;
+      }
+    }
+;
+  }
+  TransactionStatus status=null;
+  if (txAttr != null) {
+    PlatformTransactionManager tm=getTransactionManager();
+    if (tm != null) {
+      status=tm.getTransaction(txAttr);
+    }
+ else {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Skipping transactional joinpoint [" + joinpointIdentification + "] because no transaction manager has been configured");
+      }
+    }
+  }
+  return prepareTransactionInfo(txAttr,joinpointIdentification,status);
+}

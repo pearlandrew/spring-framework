@@ -1,0 +1,16 @@
+{
+  if (resourcesHolder != null) {
+    Object suspendedResources=resourcesHolder.suspendedResources;
+    if (suspendedResources != null) {
+      doResume(transaction,suspendedResources);
+    }
+    List suspendedSynchronizations=resourcesHolder.suspendedSynchronizations;
+    if (suspendedSynchronizations != null) {
+      TransactionSynchronizationManager.setActualTransactionActive(resourcesHolder.wasActive);
+      TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(resourcesHolder.isolationLevel);
+      TransactionSynchronizationManager.setCurrentTransactionReadOnly(resourcesHolder.readOnly);
+      TransactionSynchronizationManager.setCurrentTransactionName(resourcesHolder.name);
+      doResumeSynchronization(suspendedSynchronizations);
+    }
+  }
+}

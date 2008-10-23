@@ -1,0 +1,36 @@
+{
+  try {
+    Class userTransactionClass=getClass().getClassLoader().loadClass(USER_TRANSACTION_CLASS_NAME);
+    this.weblogicUserTransactionAvailable=userTransactionClass.isInstance(getUserTransaction());
+    if (this.weblogicUserTransactionAvailable) {
+      this.beginWithNameMethod=userTransactionClass.getMethod("begin",new Class[]{String.class});
+      this.beginWithNameAndTimeoutMethod=userTransactionClass.getMethod("begin",new Class[]{String.class,int.class});
+      logger.info("Support for WebLogic transaction names available");
+    }
+ else {
+      logger.info("Support for WebLogic transaction names not available");
+    }
+    Class transactionManagerClass=null;
+    try {
+      transactionManagerClass=getClass().getClassLoader().loadClass(CLIENT_TRANSACTION_MANAGER_CLASS_NAME);
+      logger.debug("WebLogic 8.1+ ClientTransactionManager found");
+    }
+ catch (    ClassNotFoundException ex) {
+      transactionManagerClass=getClass().getClassLoader().loadClass(TRANSACTION_MANAGER_CLASS_NAME);
+      logger.debug("WebLogic 7.0 TransactionManager found");
+    }
+    this.weblogicTransactionManagerAvailable=transactionManagerClass.isInstance(getTransactionManager());
+    if (this.weblogicTransactionManagerAvailable) {
+      Class transactionClass=getClass().getClassLoader().loadClass(TRANSACTION_CLASS_NAME);
+      this.forceResumeMethod=transactionManagerClass.getMethod("forceResume",new Class[]{Transaction.class});
+      this.setPropertyMethod=transactionClass.getMethod("setProperty",new Class[]{String.class,Serializable.class});
+      logger.debug("Support for WebLogic forceResume available");
+    }
+ else {
+      logger.warn("Support for WebLogic forceResume not available");
+    }
+  }
+ catch (  Exception ex) {
+    throw new TransactionSystemException("Could not initialize WebLogicJtaTransactionManager because WebLogic API classes are not available",ex);
+  }
+}

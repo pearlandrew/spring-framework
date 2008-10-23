@@ -1,0 +1,25 @@
+{
+  if (logger.isTraceEnabled()) {
+    logger.trace("Applying rules to determine whether transaction should rollback on " + ex);
+  }
+  RollbackRuleAttribute winner=null;
+  int deepest=Integer.MAX_VALUE;
+  if (this.rollbackRules != null) {
+    for (Iterator it=this.rollbackRules.iterator(); it.hasNext(); ) {
+      RollbackRuleAttribute rule=(RollbackRuleAttribute)it.next();
+      int depth=rule.getDepth(ex);
+      if (depth >= 0 && depth < deepest) {
+        deepest=depth;
+        winner=rule;
+      }
+    }
+  }
+  if (logger.isTraceEnabled()) {
+    logger.trace("Winning rollback rule is: " + winner);
+  }
+  if (winner == null) {
+    logger.trace("No relevant rollback rule found: applying default rules");
+    return super.rollbackOn(ex);
+  }
+  return !(winner instanceof NoRollbackRuleAttribute);
+}

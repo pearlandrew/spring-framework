@@ -1,0 +1,25 @@
+{
+  Class transactionManagerClass=null;
+  Class transactionClass=null;
+  try {
+    transactionManagerClass=getClass().getClassLoader().loadClass(TRANSACTION_MANAGER_CLASS_NAME);
+    transactionClass=getClass().getClassLoader().loadClass(TRANSACTION_CLASS_NAME);
+  }
+ catch (  ClassNotFoundException ex) {
+    try {
+      transactionManagerClass=getClass().getClassLoader().loadClass(FALLBACK_TRANSACTION_MANAGER_CLASS_NAME);
+      transactionClass=getClass().getClassLoader().loadClass(FALLBACK_TRANSACTION_CLASS_NAME);
+    }
+ catch (    ClassNotFoundException ex2) {
+      throw new TransactionSystemException("Could not initialize OC4JJtaTransactionManager because OC4J API classes are not available",ex);
+    }
+  }
+  if (transactionManagerClass.isInstance(getUserTransaction())) {
+    this.beginWithNameMethod=ClassUtils.getMethodIfAvailable(transactionManagerClass,"begin",new Class[]{String.class});
+    this.setTransactionIsolationMethod=ClassUtils.getMethodIfAvailable(transactionClass,"setTransactionIsolation",new Class[]{int.class});
+    logger.info("Support for OC4J transaction names and isolation levels available");
+  }
+ else {
+    logger.info("Support for OC4J transaction names and isolation levels not available");
+  }
+}

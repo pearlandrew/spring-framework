@@ -1,0 +1,69 @@
+{
+  if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NEVER) {
+    throw new IllegalTransactionStateException("Existing transaction found for transaction marked with propagation 'never'");
+  }
+  if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
+    if (debugEnabled) {
+      logger.debug("Suspending current transaction");
+    }
+    Object suspendedResources=suspend(transaction);
+    boolean newSynchronization=(getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
+    return newTransactionStatus(definition,null,false,newSynchronization,debugEnabled,suspendedResources);
+  }
+  if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) {
+    if (debugEnabled) {
+      logger.debug("Suspending current transaction, creating new transaction with name [" + definition.getName() + "]");
+    }
+    SuspendedResourcesHolder suspendedResources=suspend(transaction);
+    try {
+      doBegin(transaction,definition);
+    }
+ catch (    RuntimeException beginEx) {
+      resumeAfterBeginException(transaction,suspendedResources,beginEx);
+      throw beginEx;
+    }
+catch (    Error beginErr) {
+      resumeAfterBeginException(transaction,suspendedResources,beginErr);
+      throw beginErr;
+    }
+    boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+    return newTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,suspendedResources);
+  }
+  if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
+    if (!isNestedTransactionAllowed()) {
+      throw new NestedTransactionNotSupportedException("Transaction manager does not allow nested transactions by default - " + "specify 'nestedTransactionAllowed' property with value 'true'");
+    }
+    if (debugEnabled) {
+      logger.debug("Creating nested transaction with name [" + definition.getName() + "]");
+    }
+    if (useSavepointForNestedTransaction()) {
+      DefaultTransactionStatus status=newTransactionStatus(definition,transaction,false,false,debugEnabled,null);
+      status.createAndHoldSavepoint();
+      return status;
+    }
+ else {
+      doBegin(transaction,definition);
+      boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+      return newTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,null);
+    }
+  }
+  if (debugEnabled) {
+    logger.debug("Participating in existing transaction");
+  }
+  if (isValidateExistingTransaction()) {
+    if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+      Integer currentIsolationLevel=TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
+      if (currentIsolationLevel == null || currentIsolationLevel.intValue() != definition.getIsolationLevel()) {
+        Constants isoConstants=DefaultTransactionDefinition.constants;
+        throw new IllegalTransactionStateException("Participating transaction with definition [" + definition + "] specifies isolation level which is incompatible with existing transaction: "+ (currentIsolationLevel != null ? isoConstants.toCode(currentIsolationLevel,DefaultTransactionDefinition.PREFIX_ISOLATION) : "(unknown)"));
+      }
+    }
+    if (!definition.isReadOnly()) {
+      if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+        throw new IllegalTransactionStateException("Participating transaction with definition [" + definition + "] is not marked as read-only but existing transaction is");
+      }
+    }
+  }
+  boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+  return newTransactionStatus(definition,transaction,false,newSynchronization,debugEnabled,null);
+}

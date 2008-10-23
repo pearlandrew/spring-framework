@@ -1,0 +1,17 @@
+{
+  MethodMapTransactionAttributeSource source=new MethodMapTransactionAttributeSource();
+  if (StringUtils.hasLength(text)) {
+    PropertiesEditor propertiesEditor=new PropertiesEditor();
+    propertiesEditor.setAsText(text);
+    Properties props=(Properties)propertiesEditor.getValue();
+    TransactionAttributeEditor tae=new TransactionAttributeEditor();
+    for (Iterator iter=props.keySet().iterator(); iter.hasNext(); ) {
+      String name=(String)iter.next();
+      String value=props.getProperty(name);
+      tae.setAsText(value);
+      TransactionAttribute attr=(TransactionAttribute)tae.getValue();
+      source.addTransactionalMethod(name,attr);
+    }
+  }
+  setValue(source);
+}

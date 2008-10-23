@@ -1,0 +1,18 @@
+{
+  try {
+    boolean readOnly=TransactionSynchronizationManager.isCurrentTransactionReadOnly();
+    this.springSynchronization.beforeCommit(readOnly);
+  }
+ catch (  RuntimeException ex) {
+    setRollbackOnlyIfPossible();
+    throw ex;
+  }
+catch (  Error err) {
+    setRollbackOnlyIfPossible();
+    throw err;
+  }
+ finally {
+    this.beforeCompletionCalled=true;
+    this.springSynchronization.beforeCompletion();
+  }
+}

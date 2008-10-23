@@ -1,0 +1,56 @@
+{
+  if (executionContext != null && executionContext.getXid() != null) {
+    throw new WorkException("SimpleTaskWorkManager does not supported imported XIDs: " + executionContext.getXid());
+  }
+  WorkListener workListenerToUse=workListener;
+  if (workListenerToUse == null) {
+    workListenerToUse=new WorkAdapter();
+  }
+  boolean isAsync=(taskExecutor instanceof AsyncTaskExecutor);
+  DelegatingWorkAdapter workHandle=new DelegatingWorkAdapter(work,workListenerToUse,!isAsync);
+  try {
+    if (isAsync) {
+      ((AsyncTaskExecutor)taskExecutor).execute(workHandle,startTimeout);
+    }
+ else {
+      taskExecutor.execute(workHandle);
+    }
+  }
+ catch (  TaskTimeoutException ex) {
+    WorkException wex=new WorkRejectedException("TaskExecutor rejected Work because of timeout: " + work,ex);
+    wex.setErrorCode(WorkException.START_TIMED_OUT);
+    workListenerToUse.workRejected(new WorkEvent(this,WorkEvent.WORK_REJECTED,work,wex));
+    throw wex;
+  }
+catch (  TaskRejectedException ex) {
+    WorkException wex=new WorkRejectedException("TaskExecutor rejected Work: " + work,ex);
+    wex.setErrorCode(WorkException.INTERNAL);
+    workListenerToUse.workRejected(new WorkEvent(this,WorkEvent.WORK_REJECTED,work,wex));
+    throw wex;
+  }
+catch (  Throwable ex) {
+    WorkException wex=new WorkException("TaskExecutor failed to execute Work: " + work,ex);
+    wex.setErrorCode(WorkException.INTERNAL);
+    throw wex;
+  }
+  if (isAsync) {
+    workListenerToUse.workAccepted(new WorkEvent(this,WorkEvent.WORK_ACCEPTED,work,null));
+  }
+  if (blockUntilStarted) {
+    long acceptanceTime=System.currentTimeMillis();
+synchronized (workHandle.monitor) {
+      try {
+        while (!workHandle.started) {
+          workHandle.monitor.wait();
+        }
+      }
+ catch (      InterruptedException ex) {
+        Thread.currentThread().interrupt();
+      }
+    }
+    return (System.currentTimeMillis() - acceptanceTime);
+  }
+ else {
+    return WorkManager.UNKNOWN;
+  }
+}

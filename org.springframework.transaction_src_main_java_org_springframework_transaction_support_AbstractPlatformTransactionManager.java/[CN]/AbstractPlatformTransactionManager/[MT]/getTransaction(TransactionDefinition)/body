@@ -1,0 +1,39 @@
+{
+  Object transaction=doGetTransaction();
+  boolean debugEnabled=logger.isDebugEnabled();
+  if (definition == null) {
+    definition=new DefaultTransactionDefinition();
+  }
+  if (isExistingTransaction(transaction)) {
+    return handleExistingTransaction(definition,transaction,debugEnabled);
+  }
+  if (definition.getTimeout() < TransactionDefinition.TIMEOUT_DEFAULT) {
+    throw new InvalidTimeoutException("Invalid transaction timeout",definition.getTimeout());
+  }
+  if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {
+    throw new IllegalTransactionStateException("No existing transaction found for transaction marked with propagation 'mandatory'");
+  }
+ else   if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED || definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW || definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
+    SuspendedResourcesHolder suspendedResources=suspend(null);
+    if (debugEnabled) {
+      logger.debug("Creating new transaction with name [" + definition.getName() + "]: "+ definition);
+    }
+    try {
+      doBegin(transaction,definition);
+    }
+ catch (    RuntimeException ex) {
+      resume(null,suspendedResources);
+      throw ex;
+    }
+catch (    Error err) {
+      resume(null,suspendedResources);
+      throw err;
+    }
+    boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+    return newTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,suspendedResources);
+  }
+ else {
+    boolean newSynchronization=(getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
+    return newTransactionStatus(definition,null,true,newSynchronization,debugEnabled,null);
+  }
+}

@@ -1,0 +1,23 @@
+{
+  if (method.getName().equals("equals")) {
+    return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+  }
+ else   if (method.getName().equals("hashCode")) {
+    return new Integer(System.identityHashCode(proxy));
+  }
+ else   if (method.getName().equals("getLocalTransaction")) {
+    if (ConnectionFactoryUtils.isConnectionTransactional(this.target,this.connectionFactory)) {
+      throw new javax.resource.spi.IllegalStateException("Local transaction handling not allowed within a managed transaction");
+    }
+  }
+ else   if (method.getName().equals("close")) {
+    ConnectionFactoryUtils.doReleaseConnection(this.target,this.connectionFactory);
+    return null;
+  }
+  try {
+    return method.invoke(this.target,args);
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+}

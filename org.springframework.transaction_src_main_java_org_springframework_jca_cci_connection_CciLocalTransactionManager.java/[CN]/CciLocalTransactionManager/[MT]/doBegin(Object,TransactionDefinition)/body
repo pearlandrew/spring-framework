@@ -1,0 +1,30 @@
+{
+  CciLocalTransactionObject txObject=(CciLocalTransactionObject)transaction;
+  Connection con=null;
+  try {
+    con=getConnectionFactory().getConnection();
+    if (logger.isDebugEnabled()) {
+      logger.debug("Acquired Connection [" + con + "] for local CCI transaction");
+    }
+    txObject.setConnectionHolder(new ConnectionHolder(con));
+    txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
+    con.getLocalTransaction().begin();
+    int timeout=determineTimeout(definition);
+    if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+      txObject.getConnectionHolder().setTimeoutInSeconds(timeout);
+    }
+    TransactionSynchronizationManager.bindResource(getConnectionFactory(),txObject.getConnectionHolder());
+  }
+ catch (  NotSupportedException ex) {
+    ConnectionFactoryUtils.releaseConnection(con,getConnectionFactory());
+    throw new CannotCreateTransactionException("CCI Connection does not support local transactions",ex);
+  }
+catch (  LocalTransactionException ex) {
+    ConnectionFactoryUtils.releaseConnection(con,getConnectionFactory());
+    throw new CannotCreateTransactionException("Could not begin local CCI transaction",ex);
+  }
+catch (  ResourceException ex) {
+    ConnectionFactoryUtils.releaseConnection(con,getConnectionFactory());
+    throw new TransactionSystemException("Unexpected failure on begin of CCI local transaction",ex);
+  }
+}

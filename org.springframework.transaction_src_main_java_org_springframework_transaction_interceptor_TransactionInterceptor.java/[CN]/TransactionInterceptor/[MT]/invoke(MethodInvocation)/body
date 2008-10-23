@@ -1,0 +1,59 @@
+{
+  Class targetClass=(invocation.getThis() != null ? invocation.getThis().getClass() : null);
+  final TransactionAttribute txAttr=getTransactionAttributeSource().getTransactionAttribute(invocation.getMethod(),targetClass);
+  final String joinpointIdentification=methodIdentification(invocation.getMethod());
+  if (txAttr == null || !(getTransactionManager() instanceof CallbackPreferringPlatformTransactionManager)) {
+    TransactionInfo txInfo=createTransactionIfNecessary(txAttr,joinpointIdentification);
+    Object retVal=null;
+    try {
+      retVal=invocation.proceed();
+    }
+ catch (    Throwable ex) {
+      completeTransactionAfterThrowing(txInfo,ex);
+      throw ex;
+    }
+ finally {
+      cleanupTransactionInfo(txInfo);
+    }
+    commitTransactionAfterReturning(txInfo);
+    return retVal;
+  }
+ else {
+    try {
+      Object result=((CallbackPreferringPlatformTransactionManager)getTransactionManager()).execute(txAttr,new TransactionCallback(){
+        public Object doInTransaction(        TransactionStatus status){
+          TransactionInfo txInfo=prepareTransactionInfo(txAttr,joinpointIdentification,status);
+          try {
+            return invocation.proceed();
+          }
+ catch (          Throwable ex) {
+            if (txAttr.rollbackOn(ex)) {
+              if (ex instanceof RuntimeException) {
+                throw (RuntimeException)ex;
+              }
+ else {
+                throw new ThrowableHolderException(ex);
+              }
+            }
+ else {
+              return new ThrowableHolder(ex);
+            }
+          }
+ finally {
+            cleanupTransactionInfo(txInfo);
+          }
+        }
+      }
+);
+      if (result instanceof ThrowableHolder) {
+        throw ((ThrowableHolder)result).getThrowable();
+      }
+ else {
+        return result;
+      }
+    }
+ catch (    ThrowableHolderException ex) {
+      throw ex.getCause();
+    }
+  }
+}

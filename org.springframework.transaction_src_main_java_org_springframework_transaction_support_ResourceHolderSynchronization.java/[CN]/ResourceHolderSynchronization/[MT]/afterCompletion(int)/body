@@ -1,0 +1,21 @@
+{
+  if (shouldUnbindAtCompletion()) {
+    boolean releaseNecessary=false;
+    if (this.holderActive) {
+      this.holderActive=false;
+      TransactionSynchronizationManager.unbindResourceIfPossible(this.resourceKey);
+      this.resourceHolder.unbound();
+      releaseNecessary=true;
+    }
+ else {
+      releaseNecessary=!shouldReleaseBeforeCompletion();
+    }
+    if (releaseNecessary) {
+      releaseResource(this.resourceHolder,this.resourceKey);
+    }
+  }
+ else {
+    cleanupResource(this.resourceHolder,this.resourceKey,(status == STATUS_COMMITTED));
+  }
+  this.resourceHolder.reset();
+}

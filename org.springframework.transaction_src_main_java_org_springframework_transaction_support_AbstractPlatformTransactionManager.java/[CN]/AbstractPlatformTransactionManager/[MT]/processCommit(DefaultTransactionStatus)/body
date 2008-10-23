@@ -1,0 +1,66 @@
+{
+  try {
+    boolean beforeCompletionInvoked=false;
+    try {
+      prepareForCommit(status);
+      triggerBeforeCommit(status);
+      triggerBeforeCompletion(status);
+      beforeCompletionInvoked=true;
+      boolean globalRollbackOnly=false;
+      if (status.isNewTransaction() || isFailEarlyOnGlobalRollbackOnly()) {
+        globalRollbackOnly=status.isGlobalRollbackOnly();
+      }
+      if (status.hasSavepoint()) {
+        if (status.isDebug()) {
+          logger.debug("Releasing transaction savepoint");
+        }
+        status.releaseHeldSavepoint();
+      }
+ else       if (status.isNewTransaction()) {
+        if (status.isDebug()) {
+          logger.debug("Initiating transaction commit");
+        }
+        doCommit(status);
+      }
+      if (globalRollbackOnly) {
+        throw new UnexpectedRollbackException("Transaction silently rolled back because it has been marked as rollback-only");
+      }
+    }
+ catch (    UnexpectedRollbackException ex) {
+      triggerAfterCompletion(status,TransactionSynchronization.STATUS_ROLLED_BACK);
+      throw ex;
+    }
+catch (    TransactionException ex) {
+      if (isRollbackOnCommitFailure()) {
+        doRollbackOnCommitException(status,ex);
+      }
+ else {
+        triggerAfterCompletion(status,TransactionSynchronization.STATUS_UNKNOWN);
+      }
+      throw ex;
+    }
+catch (    RuntimeException ex) {
+      if (!beforeCompletionInvoked) {
+        triggerBeforeCompletion(status);
+      }
+      doRollbackOnCommitException(status,ex);
+      throw ex;
+    }
+catch (    Error err) {
+      if (!beforeCompletionInvoked) {
+        triggerBeforeCompletion(status);
+      }
+      doRollbackOnCommitException(status,err);
+      throw err;
+    }
+    try {
+      triggerAfterCommit(status);
+    }
+  finally {
+      triggerAfterCompletion(status,TransactionSynchronization.STATUS_COMMITTED);
+    }
+  }
+  finally {
+    cleanupAfterCompletion(status);
+  }
+}

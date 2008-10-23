@@ -1,0 +1,74 @@
+{
+  if (definition == null) {
+    definition=new DefaultTransactionDefinition();
+  }
+  if (definition.getTimeout() < TransactionDefinition.TIMEOUT_DEFAULT) {
+    throw new InvalidTimeoutException("Invalid transaction timeout",definition.getTimeout());
+  }
+  int pb=definition.getPropagationBehavior();
+  boolean existingTx=(this.uowManager.getUOWStatus() != UOWSynchronizationRegistry.UOW_STATUS_NONE && this.uowManager.getUOWType() != UOWSynchronizationRegistry.UOW_TYPE_LOCAL_TRANSACTION);
+  int uowType=UOWSynchronizationRegistry.UOW_TYPE_GLOBAL_TRANSACTION;
+  boolean joinTx=false;
+  boolean newSynch=false;
+  if (existingTx) {
+    if (pb == TransactionDefinition.PROPAGATION_NEVER) {
+      throw new IllegalTransactionStateException("Transaction propagation 'never' but existing transaction found");
+    }
+    if (pb == TransactionDefinition.PROPAGATION_NESTED) {
+      throw new NestedTransactionNotSupportedException("Transaction propagation 'nested' not supported for WebSphere UOW transactions");
+    }
+    if (pb == TransactionDefinition.PROPAGATION_SUPPORTS || pb == TransactionDefinition.PROPAGATION_REQUIRED || pb == TransactionDefinition.PROPAGATION_MANDATORY) {
+      joinTx=true;
+      newSynch=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+    }
+ else     if (pb == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
+      uowType=UOWSynchronizationRegistry.UOW_TYPE_LOCAL_TRANSACTION;
+      newSynch=(getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
+    }
+ else {
+      newSynch=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+    }
+  }
+ else {
+    if (pb == TransactionDefinition.PROPAGATION_MANDATORY) {
+      throw new IllegalTransactionStateException("Transaction propagation 'mandatory' but no existing transaction found");
+    }
+    if (pb == TransactionDefinition.PROPAGATION_SUPPORTS || pb == TransactionDefinition.PROPAGATION_NOT_SUPPORTED || pb == TransactionDefinition.PROPAGATION_NEVER) {
+      uowType=UOWSynchronizationRegistry.UOW_TYPE_LOCAL_TRANSACTION;
+      newSynch=(getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
+    }
+ else {
+      newSynch=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+    }
+  }
+  boolean debug=logger.isDebugEnabled();
+  if (debug) {
+    logger.debug("Creating new transaction with name [" + definition.getName() + "]: "+ definition);
+  }
+  SuspendedResourcesHolder suspendedResources=(existingTx && !joinTx ? suspend(null) : null);
+  try {
+    if (definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
+      this.uowManager.setUOWTimeout(uowType,definition.getTimeout());
+    }
+    if (debug) {
+      logger.debug("Invoking WebSphere UOW action: type=" + uowType + ", join="+ joinTx);
+    }
+    UOWActionAdapter action=new UOWActionAdapter(definition,callback,(uowType == UOWManager.UOW_TYPE_GLOBAL_TRANSACTION),!joinTx,newSynch,debug);
+    this.uowManager.runUnderUOW(uowType,joinTx,action);
+    if (debug) {
+      logger.debug("Returned from WebSphere UOW action: type=" + uowType + ", join="+ joinTx);
+    }
+    return action.getResult();
+  }
+ catch (  UOWException ex) {
+    throw new TransactionSystemException("UOWManager transaction processing failed",ex);
+  }
+catch (  UOWActionException ex) {
+    throw new TransactionSystemException("UOWManager threw unexpected UOWActionException",ex);
+  }
+ finally {
+    if (suspendedResources != null) {
+      resume(null,suspendedResources);
+    }
+  }
+}

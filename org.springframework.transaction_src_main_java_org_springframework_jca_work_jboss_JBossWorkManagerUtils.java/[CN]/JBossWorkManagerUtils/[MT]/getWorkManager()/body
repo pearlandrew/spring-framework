@@ -1,0 +1,14 @@
+{
+  try {
+    Class mbeanClass=JBossWorkManagerUtils.class.getClassLoader().loadClass(JBOSS_WORK_MANAGER_MBEAN_CLASS_NAME);
+    InitialContext jndiContext=new InitialContext();
+    MBeanServerConnection mconn=(MBeanServerConnection)jndiContext.lookup(MBEAN_SERVER_CONNECTION_JNDI_NAME);
+    ObjectName objectName=ObjectName.getInstance(WORK_MANAGER_OBJECT_NAME);
+    Object workManagerMBean=MBeanServerInvocationHandler.newProxyInstance(mconn,objectName,mbeanClass,false);
+    Method getInstanceMethod=workManagerMBean.getClass().getMethod("getInstance",new Class[0]);
+    return (WorkManager)getInstanceMethod.invoke(workManagerMBean,new Object[0]);
+  }
+ catch (  Exception ex) {
+    throw new IllegalStateException("Could not initialize JBossWorkManagerTaskExecutor because JBoss API is not available: " + ex);
+  }
+}

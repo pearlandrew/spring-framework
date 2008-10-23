@@ -1,0 +1,26 @@
+{
+  if (methodMap != null) {
+    Iterator it=methodMap.entrySet().iterator();
+    while (it.hasNext()) {
+      Map.Entry entry=(Map.Entry)it.next();
+      Object key=entry.getKey();
+      if (!(key instanceof String)) {
+        throw new IllegalArgumentException("Invalid method map key [" + key + "]: only Strings allowed");
+      }
+      Object value=entry.getValue();
+      TransactionAttribute attr=null;
+      if (value instanceof TransactionAttribute) {
+        attr=(TransactionAttribute)value;
+      }
+ else       if (value instanceof String) {
+        TransactionAttributeEditor editor=new TransactionAttributeEditor();
+        editor.setAsText((String)value);
+        attr=(TransactionAttribute)editor.getValue();
+      }
+ else {
+        throw new IllegalArgumentException("Value [" + value + "] is neither of type ["+ TransactionAttribute.class.getName()+ "] nor a String");
+      }
+      addTransactionalMethod((String)key,attr);
+    }
+  }
+}

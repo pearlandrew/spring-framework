@@ -1,0 +1,48 @@
+{
+  List methods=DomUtils.getChildElementsByTagName(attrEle,"method");
+  ManagedMap transactionAttributeMap=new ManagedMap(methods.size());
+  transactionAttributeMap.setSource(parserContext.extractSource(attrEle));
+  for (int i=0; i < methods.size(); i++) {
+    Element methodEle=(Element)methods.get(i);
+    String name=methodEle.getAttribute("name");
+    TypedStringValue nameHolder=new TypedStringValue(name);
+    nameHolder.setSource(parserContext.extractSource(methodEle));
+    RuleBasedTransactionAttribute attribute=new RuleBasedTransactionAttribute();
+    String propagation=methodEle.getAttribute(PROPAGATION);
+    String isolation=methodEle.getAttribute(ISOLATION);
+    String timeout=methodEle.getAttribute(TIMEOUT);
+    String readOnly=methodEle.getAttribute(READ_ONLY);
+    if (StringUtils.hasText(propagation)) {
+      attribute.setPropagationBehaviorName(RuleBasedTransactionAttribute.PREFIX_PROPAGATION + propagation);
+    }
+    if (StringUtils.hasText(isolation)) {
+      attribute.setIsolationLevelName(RuleBasedTransactionAttribute.PREFIX_ISOLATION + isolation);
+    }
+    if (StringUtils.hasText(timeout)) {
+      try {
+        attribute.setTimeout(Integer.parseInt(timeout));
+      }
+ catch (      NumberFormatException ex) {
+        parserContext.getReaderContext().error("Timeout must be an integer value: [" + timeout + "]",methodEle);
+      }
+    }
+    if (StringUtils.hasText(readOnly)) {
+      attribute.setReadOnly(Boolean.valueOf(methodEle.getAttribute(READ_ONLY)).booleanValue());
+    }
+    List rollbackRules=new LinkedList();
+    if (methodEle.hasAttribute(ROLLBACK_FOR)) {
+      String rollbackForValue=methodEle.getAttribute(ROLLBACK_FOR);
+      addRollbackRuleAttributesTo(rollbackRules,rollbackForValue);
+    }
+    if (methodEle.hasAttribute(NO_ROLLBACK_FOR)) {
+      String noRollbackForValue=methodEle.getAttribute(NO_ROLLBACK_FOR);
+      addNoRollbackRuleAttributesTo(rollbackRules,noRollbackForValue);
+    }
+    attribute.setRollbackRules(rollbackRules);
+    transactionAttributeMap.put(nameHolder,attribute);
+  }
+  RootBeanDefinition attributeSourceDefinition=new RootBeanDefinition(NameMatchTransactionAttributeSource.class);
+  attributeSourceDefinition.setSource(parserContext.extractSource(attrEle));
+  attributeSourceDefinition.getPropertyValues().addPropertyValue(NAME_MAP,transactionAttributeMap);
+  return attributeSourceDefinition;
+}

@@ -1,0 +1,14 @@
+{
+  loadWebLogicTransactionHelperClass();
+  try {
+    logger.debug("Retrieving JTA TransactionManager from WebLogic TransactionHelper/TxHelper");
+    Method getTransactionManagerMethod=this.transactionHelperClass.getMethod("getTransactionManager",new Class[0]);
+    return (TransactionManager)getTransactionManagerMethod.invoke(this.transactionHelper,new Object[0]);
+  }
+ catch (  InvocationTargetException ex) {
+    throw new TransactionSystemException("WebLogic's TransactionHelper/TxHelper.getTransactionManager() method failed",ex.getTargetException());
+  }
+catch (  Exception ex) {
+    throw new TransactionSystemException("Could not invoke WebLogic's TransactionHelper/TxHelper.getTransactionManager() method",ex);
+  }
+}

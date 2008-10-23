@@ -1,0 +1,41 @@
+{
+  Assert.state(this.workManager != null,"No WorkManager specified");
+  Work work=new DelegatingWork(task);
+  try {
+    if (this.blockUntilCompleted) {
+      if (startTimeout != TIMEOUT_INDEFINITE || this.workListener != null) {
+        this.workManager.doWork(work,startTimeout,null,this.workListener);
+      }
+ else {
+        this.workManager.doWork(work);
+      }
+    }
+ else     if (this.blockUntilStarted) {
+      if (startTimeout != TIMEOUT_INDEFINITE || this.workListener != null) {
+        this.workManager.startWork(work,startTimeout,null,this.workListener);
+      }
+ else {
+        this.workManager.startWork(work);
+      }
+    }
+ else {
+      if (startTimeout != TIMEOUT_INDEFINITE || this.workListener != null) {
+        this.workManager.scheduleWork(work,startTimeout,null,this.workListener);
+      }
+ else {
+        this.workManager.scheduleWork(work);
+      }
+    }
+  }
+ catch (  WorkRejectedException ex) {
+    if (WorkException.START_TIMED_OUT.equals(ex.getErrorCode())) {
+      throw new TaskTimeoutException("JCA WorkManager rejected task because of timeout: " + task,ex);
+    }
+ else {
+      throw new TaskRejectedException("JCA WorkManager rejected task: " + task,ex);
+    }
+  }
+catch (  WorkException ex) {
+    throw new SchedulingException("Could not schedule task on JCA WorkManager",ex);
+  }
+}

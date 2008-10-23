@@ -1,0 +1,14 @@
+{
+  if (status.isNewSynchronization()) {
+    List synchronizations=TransactionSynchronizationManager.getSynchronizations();
+    if (!status.hasTransaction() || status.isNewTransaction()) {
+      if (status.isDebug()) {
+        logger.trace("Triggering afterCompletion synchronization");
+      }
+      invokeAfterCompletion(synchronizations,completionStatus);
+    }
+ else {
+      registerAfterCompletionWithExistingTransaction(status.getTransaction(),synchronizations);
+    }
+  }
+}

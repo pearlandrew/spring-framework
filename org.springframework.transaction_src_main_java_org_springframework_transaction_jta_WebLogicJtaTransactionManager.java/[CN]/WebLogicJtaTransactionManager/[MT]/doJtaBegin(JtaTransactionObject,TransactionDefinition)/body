@@ -1,0 +1,41 @@
+{
+  int timeout=determineTimeout(definition);
+  if (this.weblogicUserTransactionAvailable && definition.getName() != null) {
+    try {
+      if (timeout > TransactionDefinition.TIMEOUT_DEFAULT) {
+        this.beginWithNameAndTimeoutMethod.invoke(txObject.getUserTransaction(),new Object[]{definition.getName(),new Integer(timeout)});
+      }
+ else {
+        this.beginWithNameMethod.invoke(txObject.getUserTransaction(),new Object[]{definition.getName()});
+      }
+    }
+ catch (    InvocationTargetException ex) {
+      throw new TransactionSystemException("WebLogic's UserTransaction.begin() method failed",ex.getTargetException());
+    }
+catch (    Exception ex) {
+      throw new TransactionSystemException("Could not invoke WebLogic's UserTransaction.begin() method",ex);
+    }
+  }
+ else {
+    applyTimeout(txObject,timeout);
+    txObject.getUserTransaction().begin();
+  }
+  if (this.weblogicTransactionManagerAvailable) {
+    if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+      try {
+        Transaction tx=getTransactionManager().getTransaction();
+        Integer isolationLevel=new Integer(definition.getIsolationLevel());
+        this.setPropertyMethod.invoke(tx,new Object[]{ISOLATION_LEVEL_KEY,isolationLevel});
+      }
+ catch (      InvocationTargetException ex) {
+        throw new TransactionSystemException("WebLogic's Transaction.setProperty(String, Serializable) method failed",ex.getTargetException());
+      }
+catch (      Exception ex) {
+        throw new TransactionSystemException("Could not invoke WebLogic's Transaction.setProperty(String, Serializable) method",ex);
+      }
+    }
+  }
+ else {
+    applyIsolationLevel(txObject,definition.getIsolationLevel());
+  }
+}

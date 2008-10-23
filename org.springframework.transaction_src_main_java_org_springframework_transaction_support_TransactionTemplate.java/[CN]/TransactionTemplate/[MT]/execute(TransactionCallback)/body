@@ -1,0 +1,22 @@
+{
+  if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager) {
+    return ((CallbackPreferringPlatformTransactionManager)this.transactionManager).execute(this,action);
+  }
+ else {
+    TransactionStatus status=this.transactionManager.getTransaction(this);
+    Object result=null;
+    try {
+      result=action.doInTransaction(status);
+    }
+ catch (    RuntimeException ex) {
+      rollbackOnException(status,ex);
+      throw ex;
+    }
+catch (    Error err) {
+      rollbackOnException(status,err);
+      throw err;
+    }
+    this.transactionManager.commit(status);
+    return result;
+  }
+}

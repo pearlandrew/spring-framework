@@ -1,0 +1,12 @@
+{
+  this.beforeDeliveryCalled=true;
+  try {
+    this.transactionDelegate.beginTransaction();
+  }
+ catch (  Throwable ex) {
+    throw new ApplicationServerInternalException("Failed to begin transaction",ex);
+  }
+  Thread currentThread=Thread.currentThread();
+  this.previousContextClassLoader=currentThread.getContextClassLoader();
+  currentThread.setContextClassLoader(getEndpointClassLoader());
+}

@@ -1,0 +1,47 @@
+{
+  try {
+    try {
+      triggerBeforeCompletion(status);
+      if (status.hasSavepoint()) {
+        if (status.isDebug()) {
+          logger.debug("Rolling back transaction to savepoint");
+        }
+        status.rollbackToHeldSavepoint();
+      }
+ else       if (status.isNewTransaction()) {
+        if (status.isDebug()) {
+          logger.debug("Initiating transaction rollback");
+        }
+        doRollback(status);
+      }
+ else       if (status.hasTransaction()) {
+        if (status.isLocalRollbackOnly() || isGlobalRollbackOnParticipationFailure()) {
+          if (status.isDebug()) {
+            logger.debug("Participating transaction failed - marking existing transaction as rollback-only");
+          }
+          doSetRollbackOnly(status);
+        }
+ else {
+          if (status.isDebug()) {
+            logger.debug("Participating transaction failed - letting transaction originator decide on rollback");
+          }
+        }
+      }
+ else {
+        logger.debug("Should roll back transaction but cannot - no transaction available");
+      }
+    }
+ catch (    RuntimeException ex) {
+      triggerAfterCompletion(status,TransactionSynchronization.STATUS_UNKNOWN);
+      throw ex;
+    }
+catch (    Error err) {
+      triggerAfterCompletion(status,TransactionSynchronization.STATUS_UNKNOWN);
+      throw err;
+    }
+    triggerAfterCompletion(status,TransactionSynchronization.STATUS_ROLLED_BACK);
+  }
+  finally {
+    cleanupAfterCompletion(status);
+  }
+}

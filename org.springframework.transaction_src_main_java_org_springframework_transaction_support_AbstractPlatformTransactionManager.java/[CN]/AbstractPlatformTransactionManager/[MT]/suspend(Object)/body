@@ -1,0 +1,35 @@
+{
+  if (TransactionSynchronizationManager.isSynchronizationActive()) {
+    List suspendedSynchronizations=doSuspendSynchronization();
+    try {
+      Object suspendedResources=null;
+      if (transaction != null) {
+        suspendedResources=doSuspend(transaction);
+      }
+      String name=TransactionSynchronizationManager.getCurrentTransactionName();
+      TransactionSynchronizationManager.setCurrentTransactionName(null);
+      boolean readOnly=TransactionSynchronizationManager.isCurrentTransactionReadOnly();
+      TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+      Integer isolationLevel=TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
+      TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(null);
+      boolean wasActive=TransactionSynchronizationManager.isActualTransactionActive();
+      TransactionSynchronizationManager.setActualTransactionActive(false);
+      return new SuspendedResourcesHolder(suspendedResources,suspendedSynchronizations,name,readOnly,isolationLevel,wasActive);
+    }
+ catch (    RuntimeException ex) {
+      doResumeSynchronization(suspendedSynchronizations);
+      throw ex;
+    }
+catch (    Error err) {
+      doResumeSynchronization(suspendedSynchronizations);
+      throw err;
+    }
+  }
+ else   if (transaction != null) {
+    Object suspendedResources=doSuspend(transaction);
+    return new SuspendedResourcesHolder(suspendedResources);
+  }
+ else {
+    return null;
+  }
+}

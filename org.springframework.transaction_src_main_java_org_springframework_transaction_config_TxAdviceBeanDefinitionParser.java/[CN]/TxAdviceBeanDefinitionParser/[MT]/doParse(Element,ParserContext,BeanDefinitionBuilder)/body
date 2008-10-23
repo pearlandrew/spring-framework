@@ -1,0 +1,17 @@
+{
+  String transactionManagerName=(element.hasAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE) ? element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE) : "transactionManager");
+  builder.addPropertyReference(TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY,transactionManagerName);
+  List txAttributes=DomUtils.getChildElementsByTagName(element,ATTRIBUTES);
+  if (txAttributes.size() > 1) {
+    parserContext.getReaderContext().error("Element <attributes> is allowed at most once inside element <advice>",element);
+  }
+ else   if (txAttributes.size() == 1) {
+    Element attributeSourceElement=(Element)txAttributes.get(0);
+    RootBeanDefinition attributeSourceDefinition=parseAttributeSource(attributeSourceElement,parserContext);
+    builder.addPropertyValue(TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE,attributeSourceDefinition);
+  }
+ else {
+    Class sourceClass=TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();
+    builder.addPropertyValue(TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE,new RootBeanDefinition(sourceClass));
+  }
+}
