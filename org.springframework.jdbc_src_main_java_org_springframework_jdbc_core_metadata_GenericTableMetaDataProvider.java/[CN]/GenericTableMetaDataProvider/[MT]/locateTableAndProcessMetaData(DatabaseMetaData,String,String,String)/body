@@ -1,0 +1,58 @@
+{
+  Map<String,TableMetaData> tableMeta=new HashMap<String,TableMetaData>();
+  ResultSet tables=null;
+  try {
+    tables=databaseMetaData.getTables(catalogNameToUse(catalogName),schemaNameToUse(schemaName),tableNameToUse(tableName),null);
+    while (tables != null && tables.next()) {
+      TableMetaData tmd=new TableMetaData();
+      tmd.setCatalogName(tables.getString("TABLE_CAT"));
+      tmd.setSchemaName(tables.getString("TABLE_SCHEM"));
+      tmd.setTableName(tables.getString("TABLE_NAME"));
+      tmd.setType(tables.getString("TABLE_TYPE"));
+      if (tmd.getSchemaName() == null) {
+        tableMeta.put(userName.toUpperCase(),tmd);
+      }
+ else {
+        tableMeta.put(tmd.getSchemaName().toUpperCase(),tmd);
+      }
+    }
+  }
+ catch (  SQLException se) {
+    logger.warn("Error while accessing table meta data results" + se.getMessage());
+  }
+ finally {
+    if (tables != null) {
+      try {
+        tables.close();
+      }
+ catch (      SQLException e) {
+        logger.warn("Error while closing table meta data reults" + e.getMessage());
+      }
+    }
+  }
+  if (tableMeta.size() < 1) {
+    logger.warn("Unable to locate table meta data for '" + tableName + "' -- column names must be provided");
+  }
+ else {
+    TableMetaData tmd=null;
+    if (schemaName == null) {
+      tmd=tableMeta.get(userName.toUpperCase());
+      if (tmd == null) {
+        tmd=tableMeta.get("PUBLIC");
+        if (tmd == null) {
+          tmd=tableMeta.get("DBO");
+        }
+        if (tmd == null) {
+          throw new DataAccessResourceFailureException("Unable to locate table meta data for '" + tableName + "' in the default schema");
+        }
+      }
+    }
+ else {
+      tmd=tableMeta.get(schemaName.toUpperCase());
+      if (tmd == null) {
+        throw new DataAccessResourceFailureException("Unable to locate table meta data for '" + tableName + "' in the '"+ schemaName+ "' schema");
+      }
+    }
+    processTableColumns(databaseMetaData,tmd);
+  }
+}

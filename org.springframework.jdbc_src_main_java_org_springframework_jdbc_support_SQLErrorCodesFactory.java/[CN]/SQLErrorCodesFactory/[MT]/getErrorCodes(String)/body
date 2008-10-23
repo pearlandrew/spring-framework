@@ -1,0 +1,23 @@
+{
+  Assert.notNull(dbName,"Database product name must not be null");
+  SQLErrorCodes sec=(SQLErrorCodes)this.errorCodesMap.get(dbName);
+  if (sec == null) {
+    for (Iterator it=this.errorCodesMap.values().iterator(); it.hasNext(); ) {
+      SQLErrorCodes candidate=(SQLErrorCodes)it.next();
+      if (PatternMatchUtils.simpleMatch(candidate.getDatabaseProductNames(),dbName)) {
+        sec=candidate;
+        break;
+      }
+    }
+  }
+  if (sec != null) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("SQL error codes for '" + dbName + "' found");
+    }
+    return sec;
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("SQL error codes for '" + dbName + "' not found");
+  }
+  return new SQLErrorCodes();
+}

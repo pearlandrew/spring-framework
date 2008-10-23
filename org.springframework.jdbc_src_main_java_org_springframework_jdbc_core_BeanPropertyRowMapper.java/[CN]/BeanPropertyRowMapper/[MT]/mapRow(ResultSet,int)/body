@@ -1,0 +1,32 @@
+{
+  Assert.state(this.mappedClass != null,"Mapped class was not specified");
+  Object mappedObject=BeanUtils.instantiateClass(this.mappedClass);
+  BeanWrapper bw=PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
+  initBeanWrapper(bw);
+  ResultSetMetaData rsmd=rs.getMetaData();
+  int columnCount=rsmd.getColumnCount();
+  Set populatedProperties=(isCheckFullyPopulated() ? new HashSet() : null);
+  for (int index=1; index <= columnCount; index++) {
+    String column=JdbcUtils.lookupColumnName(rsmd,index).toLowerCase();
+    PropertyDescriptor pd=(PropertyDescriptor)this.mappedFields.get(column);
+    if (pd != null) {
+      try {
+        Object value=getColumnValue(rs,index,pd);
+        if (logger.isDebugEnabled() && rowNumber == 0) {
+          logger.debug("Mapping column '" + column + "' to property '"+ pd.getName()+ "' of type "+ pd.getPropertyType());
+        }
+        bw.setPropertyValue(pd.getName(),value);
+        if (populatedProperties != null) {
+          populatedProperties.add(pd.getName());
+        }
+      }
+ catch (      NotWritablePropertyException ex) {
+        throw new DataRetrievalFailureException("Unable to map column " + column + " to property "+ pd.getName(),ex);
+      }
+    }
+  }
+  if (populatedProperties != null && !populatedProperties.equals(this.mappedProperties)) {
+    throw new InvalidDataAccessApiUsageException("Given ResultSet does not contain all fields " + "necessary to populate object of class [" + this.mappedClass + "]: "+ this.mappedProperties);
+  }
+  return mappedObject;
+}

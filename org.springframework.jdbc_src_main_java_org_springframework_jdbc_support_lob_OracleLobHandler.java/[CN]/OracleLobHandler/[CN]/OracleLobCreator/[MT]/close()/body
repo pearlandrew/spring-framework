@@ -1,0 +1,16 @@
+{
+  try {
+    for (Iterator it=this.createdLobs.iterator(); it.hasNext(); ) {
+      Object lob=it.next();
+      Method freeTemporary=lob.getClass().getMethod("freeTemporary",new Class[0]);
+      freeTemporary.invoke(lob,new Object[0]);
+      it.remove();
+    }
+  }
+ catch (  InvocationTargetException ex) {
+    logger.error("Could not free Oracle LOB",ex.getTargetException());
+  }
+catch (  Exception ex) {
+    throw new DataAccessResourceFailureException("Could not free Oracle LOB",ex);
+  }
+}

@@ -1,0 +1,30 @@
+{
+  ResultSet tableColumns=null;
+  String metaDataCatalogName=metaDataCatalogNameToUse(tmd.getCatalogName());
+  String metaDataSchemaName=metaDataSchemaNameToUse(tmd.getSchemaName());
+  String metaDataTableName=tableNameToUse(tmd.getTableName());
+  if (logger.isDebugEnabled()) {
+    logger.debug("Retrieving metadata for " + metaDataCatalogName + "/"+ metaDataSchemaName+ "/"+ metaDataTableName);
+  }
+  try {
+    tableColumns=databaseMetaData.getColumns(metaDataCatalogName,metaDataSchemaName,metaDataTableName,null);
+    while (tableColumns.next()) {
+      TableParameterMetaData meta=new TableParameterMetaData(tableColumns.getString("COLUMN_NAME"),tableColumns.getInt("DATA_TYPE"),tableColumns.getBoolean("NULLABLE"));
+      insertParameterMetaData.add(meta);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Retrieved metadata: " + meta.getParameterName() + " "+ meta.getSqlType()+ " "+ meta.isNullable());
+      }
+    }
+  }
+ catch (  SQLException se) {
+    logger.warn("Error while retreiving metadata for procedure columns: " + se.getMessage());
+  }
+ finally {
+    try {
+      if (tableColumns != null)       tableColumns.close();
+    }
+ catch (    SQLException se) {
+      logger.warn("Problem closing resultset for procedure column metadata " + se.getMessage());
+    }
+  }
+}

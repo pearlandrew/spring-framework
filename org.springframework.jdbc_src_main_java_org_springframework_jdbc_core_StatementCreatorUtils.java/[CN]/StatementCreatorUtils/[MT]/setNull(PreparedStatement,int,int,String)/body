@@ -1,0 +1,32 @@
+{
+  if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
+    boolean useSetObject=false;
+    sqlType=Types.NULL;
+    try {
+      DatabaseMetaData dbmd=ps.getConnection().getMetaData();
+      String databaseProductName=dbmd.getDatabaseProductName();
+      String jdbcDriverName=dbmd.getDriverName();
+      if (databaseProductName.startsWith("Informix") || jdbcDriverName.startsWith("Microsoft SQL Server")) {
+        useSetObject=true;
+      }
+ else       if (databaseProductName.startsWith("DB2") || jdbcDriverName.startsWith("jConnect") || jdbcDriverName.startsWith("SQLServer")|| jdbcDriverName.startsWith("Apache Derby Embedded")) {
+        sqlType=Types.VARCHAR;
+      }
+    }
+ catch (    Throwable ex) {
+      logger.debug("Could not check database or driver name",ex);
+    }
+    if (useSetObject) {
+      ps.setObject(paramIndex,null);
+    }
+ else {
+      ps.setNull(paramIndex,sqlType);
+    }
+  }
+ else   if (typeName != null) {
+    ps.setNull(paramIndex,sqlType,typeName);
+  }
+ else {
+    ps.setNull(paramIndex,sqlType);
+  }
+}

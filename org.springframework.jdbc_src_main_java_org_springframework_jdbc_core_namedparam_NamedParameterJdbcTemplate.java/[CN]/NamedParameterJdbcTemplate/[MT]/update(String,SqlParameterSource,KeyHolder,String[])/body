@@ -1,0 +1,14 @@
+{
+  ParsedSql parsedSql=getParsedSql(sql);
+  String sqlToUse=NamedParameterUtils.substituteNamedParameters(parsedSql,paramSource);
+  Object[] params=NamedParameterUtils.buildValueArray(parsedSql,paramSource,null);
+  int[] paramTypes=NamedParameterUtils.buildSqlTypeArray(parsedSql,paramSource);
+  PreparedStatementCreatorFactory pscf=new PreparedStatementCreatorFactory(sqlToUse,paramTypes);
+  if (keyColumnNames != null) {
+    pscf.setGeneratedKeysColumnNames(keyColumnNames);
+  }
+ else {
+    pscf.setReturnGeneratedKeys(true);
+  }
+  return getJdbcOperations().update(pscf.newPreparedStatementCreator(params),generatedKeyHolder);
+}

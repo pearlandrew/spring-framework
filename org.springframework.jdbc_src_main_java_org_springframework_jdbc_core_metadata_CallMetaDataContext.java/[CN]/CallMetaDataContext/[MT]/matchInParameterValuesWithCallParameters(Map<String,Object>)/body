@@ -1,0 +1,48 @@
+{
+  if (!this.metaDataProvider.isProcedureColumnMetaDataUsed()) {
+    return inParameters;
+  }
+  Map<String,String> callParameterNames=new HashMap<String,String>(this.callParameters.size());
+  for (  SqlParameter parameter : this.callParameters) {
+    if (parameter.isInputValueProvided()) {
+      String parameterName=parameter.getName();
+      String parameterNameToMatch=this.metaDataProvider.parameterNameToUse(parameterName);
+      if (parameterNameToMatch != null) {
+        callParameterNames.put(parameterNameToMatch.toLowerCase(),parameterName);
+      }
+    }
+  }
+  Map<String,Object> matchedParameters=new HashMap<String,Object>(inParameters.size());
+  for (  String parameterName : inParameters.keySet()) {
+    String parameterNameToMatch=this.metaDataProvider.parameterNameToUse(parameterName);
+    String callParameterName=callParameterNames.get(parameterNameToMatch.toLowerCase());
+    if (callParameterName == null) {
+      if (logger.isDebugEnabled()) {
+        Object value=inParameters.get(parameterName);
+        if (value instanceof SqlParameterValue) {
+          value=((SqlParameterValue)value).getValue();
+        }
+        if (value != null) {
+          logger.debug("Unable to locate the corresponding IN or IN-OUT parameter for \"" + parameterName + "\" in the parameters used: "+ callParameterNames.keySet());
+        }
+      }
+    }
+ else {
+      matchedParameters.put(callParameterName,inParameters.get(parameterName));
+    }
+  }
+  if (matchedParameters.size() < callParameterNames.size()) {
+    for (    String parameterName : callParameterNames.keySet()) {
+      String parameterNameToMatch=this.metaDataProvider.parameterNameToUse(parameterName);
+      String callParameterName=callParameterNames.get(parameterNameToMatch.toLowerCase());
+      if (!matchedParameters.containsKey(callParameterName)) {
+        logger.warn("Unable to locate the corresponding parameter value for '" + parameterName + "' within the parameter values provided: "+ inParameters.keySet());
+      }
+    }
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Matching " + inParameters.keySet() + " with "+ callParameterNames.values());
+    logger.debug("Found match for " + matchedParameters.keySet());
+  }
+  return matchedParameters;
+}

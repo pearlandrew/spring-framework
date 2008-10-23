@@ -1,0 +1,17 @@
+{
+  ConnectionHolder conHolder=getConnectionHolderForSavepoint();
+  try {
+    if (!conHolder.supportsSavepoints()) {
+      throw new NestedTransactionNotSupportedException("Cannot create a nested transaction because savepoints are not supported by your JDBC driver");
+    }
+  }
+ catch (  Throwable ex) {
+    throw new NestedTransactionNotSupportedException("Cannot create a nested transaction because your JDBC driver is not a JDBC 3.0 driver",ex);
+  }
+  try {
+    return conHolder.createSavepoint();
+  }
+ catch (  Throwable ex) {
+    throw new CannotCreateTransactionException("Could not create JDBC savepoint",ex);
+  }
+}

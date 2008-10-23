@@ -1,0 +1,69 @@
+{
+  if (method.getName().equals("equals")) {
+    return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+  }
+ else   if (method.getName().equals("hashCode")) {
+    return new Integer(System.identityHashCode(proxy));
+  }
+ else   if (method.getName().equals("getTargetConnection")) {
+    return getTargetConnection(method);
+  }
+  if (!hasTargetConnection()) {
+    if (method.getName().equals("toString")) {
+      return "Lazy Connection proxy for target DataSource [" + getTargetDataSource() + "]";
+    }
+ else     if (method.getName().equals("isReadOnly")) {
+      return this.readOnly;
+    }
+ else     if (method.getName().equals("setReadOnly")) {
+      this.readOnly=(Boolean)args[0];
+      return null;
+    }
+ else     if (method.getName().equals("getTransactionIsolation")) {
+      if (this.transactionIsolation != null) {
+        return this.transactionIsolation;
+      }
+    }
+ else     if (method.getName().equals("setTransactionIsolation")) {
+      this.transactionIsolation=(Integer)args[0];
+      return null;
+    }
+ else     if (method.getName().equals("getAutoCommit")) {
+      if (this.autoCommit != null) {
+        return this.autoCommit;
+      }
+    }
+ else     if (method.getName().equals("setAutoCommit")) {
+      this.autoCommit=(Boolean)args[0];
+      return null;
+    }
+ else     if (method.getName().equals("commit")) {
+      return null;
+    }
+ else     if (method.getName().equals("rollback")) {
+      return null;
+    }
+ else     if (method.getName().equals("getWarnings")) {
+      return null;
+    }
+ else     if (method.getName().equals("clearWarnings")) {
+      return null;
+    }
+ else     if (method.getName().equals("isClosed")) {
+      return (this.closed ? Boolean.TRUE : Boolean.FALSE);
+    }
+ else     if (method.getName().equals("close")) {
+      this.closed=true;
+      return null;
+    }
+ else     if (this.closed) {
+      throw new SQLException("Illegal operation: connection is closed");
+    }
+  }
+  try {
+    return method.invoke(getTargetConnection(method),args);
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+}

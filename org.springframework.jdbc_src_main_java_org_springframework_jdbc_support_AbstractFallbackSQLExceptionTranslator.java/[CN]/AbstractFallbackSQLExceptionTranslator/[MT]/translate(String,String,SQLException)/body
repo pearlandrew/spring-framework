@@ -1,0 +1,18 @@
+{
+  Assert.notNull(ex,"Cannot translate a null SQLException");
+  if (task == null) {
+    task="";
+  }
+  if (sql == null) {
+    sql="";
+  }
+  DataAccessException dex=doTranslate(task,sql,ex);
+  if (dex != null) {
+    return dex;
+  }
+  SQLExceptionTranslator fallback=getFallbackTranslator();
+  if (fallback != null) {
+    return fallback.translate(task,sql,ex);
+  }
+  return new UncategorizedSQLException(task,sql,ex);
+}

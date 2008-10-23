@@ -1,0 +1,17 @@
+{
+  super.afterPropertiesSet();
+  if (this.defaultAutoCommit == null || this.defaultTransactionIsolation == null) {
+    try {
+      Connection con=getTargetDataSource().getConnection();
+      try {
+        checkDefaultConnectionProperties(con);
+      }
+  finally {
+        con.close();
+      }
+    }
+ catch (    SQLException ex) {
+      logger.warn("Could not retrieve default auto-commit and transaction isolation settings",ex);
+    }
+  }
+}

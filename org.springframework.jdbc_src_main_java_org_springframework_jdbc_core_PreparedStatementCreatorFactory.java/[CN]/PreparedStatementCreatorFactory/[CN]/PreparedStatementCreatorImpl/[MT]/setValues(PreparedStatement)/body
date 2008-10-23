@@ -1,0 +1,41 @@
+{
+  PreparedStatement psToUse=ps;
+  if (nativeJdbcExtractor != null) {
+    psToUse=nativeJdbcExtractor.getNativePreparedStatement(ps);
+  }
+  int sqlColIndx=1;
+  for (int i=0; i < this.parameters.size(); i++) {
+    Object in=this.parameters.get(i);
+    SqlParameter declaredParameter=null;
+    if (in instanceof SqlParameterValue) {
+      SqlParameterValue paramValue=(SqlParameterValue)in;
+      in=paramValue.getValue();
+      declaredParameter=paramValue;
+    }
+ else {
+      if (declaredParameters.size() <= i) {
+        throw new InvalidDataAccessApiUsageException("SQL [" + sql + "]: unable to access parameter number "+ (i + 1)+ " given only "+ declaredParameters.size()+ " parameters");
+      }
+      declaredParameter=(SqlParameter)declaredParameters.get(i);
+    }
+    if (in instanceof Collection && declaredParameter.getSqlType() != Types.ARRAY) {
+      Collection entries=(Collection)in;
+      for (Iterator it=entries.iterator(); it.hasNext(); ) {
+        Object entry=it.next();
+        if (entry instanceof Object[]) {
+          Object[] valueArray=((Object[])entry);
+          for (int k=0; k < valueArray.length; k++) {
+            Object argValue=valueArray[k];
+            StatementCreatorUtils.setParameterValue(psToUse,sqlColIndx++,declaredParameter,argValue);
+          }
+        }
+ else {
+          StatementCreatorUtils.setParameterValue(psToUse,sqlColIndx++,declaredParameter,entry);
+        }
+      }
+    }
+ else {
+      StatementCreatorUtils.setParameterValue(psToUse,sqlColIndx++,declaredParameter,in);
+    }
+  }
+}

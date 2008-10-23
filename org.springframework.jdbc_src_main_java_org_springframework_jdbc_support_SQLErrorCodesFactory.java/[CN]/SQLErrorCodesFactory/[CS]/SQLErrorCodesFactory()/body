@@ -1,0 +1,28 @@
+{
+  Map errorCodes=null;
+  try {
+    DefaultListableBeanFactory lbf=new DefaultListableBeanFactory();
+    XmlBeanDefinitionReader bdr=new XmlBeanDefinitionReader(lbf);
+    Resource resource=loadResource(SQL_ERROR_CODE_DEFAULT_PATH);
+    if (resource != null && resource.exists()) {
+      bdr.loadBeanDefinitions(resource);
+    }
+ else {
+      logger.warn("Default sql-error-codes.xml not found (should be included in spring.jar)");
+    }
+    resource=loadResource(SQL_ERROR_CODE_OVERRIDE_PATH);
+    if (resource != null && resource.exists()) {
+      bdr.loadBeanDefinitions(resource);
+      logger.info("Found custom sql-error-codes.xml file at the root of the classpath");
+    }
+    errorCodes=lbf.getBeansOfType(SQLErrorCodes.class,true,false);
+    if (logger.isInfoEnabled()) {
+      logger.info("SQLErrorCodes loaded: " + errorCodes.keySet());
+    }
+  }
+ catch (  BeansException ex) {
+    logger.warn("Error loading SQL error codes from config file",ex);
+    errorCodes=Collections.EMPTY_MAP;
+  }
+  this.errorCodesMap=errorCodes;
+}

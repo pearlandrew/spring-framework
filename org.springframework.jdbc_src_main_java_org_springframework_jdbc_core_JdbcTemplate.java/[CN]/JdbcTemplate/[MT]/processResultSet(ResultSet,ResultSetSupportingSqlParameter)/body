@@ -1,0 +1,30 @@
+{
+  if (rs == null) {
+    return Collections.EMPTY_MAP;
+  }
+  Map returnedResults=new HashMap();
+  try {
+    ResultSet rsToUse=rs;
+    if (this.nativeJdbcExtractor != null) {
+      rsToUse=this.nativeJdbcExtractor.getNativeResultSet(rs);
+    }
+    if (param.getRowMapper() != null) {
+      RowMapper rowMapper=param.getRowMapper();
+      Object result=(new RowMapperResultSetExtractor(rowMapper)).extractData(rsToUse);
+      returnedResults.put(param.getName(),result);
+    }
+ else     if (param.getRowCallbackHandler() != null) {
+      RowCallbackHandler rch=param.getRowCallbackHandler();
+      (new RowCallbackHandlerResultSetExtractor(rch)).extractData(rsToUse);
+      returnedResults.put(param.getName(),"ResultSet returned from stored procedure was processed");
+    }
+ else     if (param.getResultSetExtractor() != null) {
+      Object result=param.getResultSetExtractor().extractData(rsToUse);
+      returnedResults.put(param.getName(),result);
+    }
+  }
+  finally {
+    JdbcUtils.closeResultSet(rs);
+  }
+  return returnedResults;
+}

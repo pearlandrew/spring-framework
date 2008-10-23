@@ -1,0 +1,24 @@
+{
+  if (method.getName().equals("getTargetConnection")) {
+    return this.target;
+  }
+ else   if (method.getName().equals("equals")) {
+    return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+  }
+ else   if (method.getName().equals("hashCode")) {
+    return new Integer(System.identityHashCode(proxy));
+  }
+ else   if (method.getName().equals("close")) {
+    return null;
+  }
+  try {
+    Object retVal=method.invoke(this.target,args);
+    if (retVal instanceof Statement) {
+      applyStatementSettings(((Statement)retVal));
+    }
+    return retVal;
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+}

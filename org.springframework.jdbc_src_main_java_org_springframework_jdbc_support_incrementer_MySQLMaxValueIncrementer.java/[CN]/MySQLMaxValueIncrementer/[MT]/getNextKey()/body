@@ -1,0 +1,34 @@
+{
+  if (this.maxId == this.nextId) {
+    Connection con=DataSourceUtils.getConnection(getDataSource());
+    Statement stmt=null;
+    try {
+      stmt=con.createStatement();
+      DataSourceUtils.applyTransactionTimeout(stmt,getDataSource());
+      String columnName=getColumnName();
+      stmt.executeUpdate("update " + getIncrementerName() + " set "+ columnName+ " = last_insert_id("+ columnName+ " + "+ getCacheSize()+ ")");
+      ResultSet rs=stmt.executeQuery(VALUE_SQL);
+      try {
+        if (!rs.next()) {
+          throw new DataAccessResourceFailureException("last_insert_id() failed after executing an update");
+        }
+        this.maxId=rs.getLong(1);
+      }
+  finally {
+        JdbcUtils.closeResultSet(rs);
+      }
+      this.nextId=this.maxId - getCacheSize() + 1;
+    }
+ catch (    SQLException ex) {
+      throw new DataAccessResourceFailureException("Could not obtain last_insert_id()",ex);
+    }
+ finally {
+      JdbcUtils.closeStatement(stmt);
+      DataSourceUtils.releaseConnection(con,getDataSource());
+    }
+  }
+ else {
+    this.nextId++;
+  }
+  return this.nextId;
+}

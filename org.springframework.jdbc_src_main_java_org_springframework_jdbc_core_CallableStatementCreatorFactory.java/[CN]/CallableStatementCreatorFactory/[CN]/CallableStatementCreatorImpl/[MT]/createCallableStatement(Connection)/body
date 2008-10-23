@@ -1,0 +1,54 @@
+{
+  if (this.inParameterMapper != null) {
+    this.inParameters=this.inParameterMapper.createMap(con);
+  }
+ else {
+    if (this.inParameters == null) {
+      throw new InvalidDataAccessApiUsageException("A ParameterMapper or a Map of parameters must be provided");
+    }
+  }
+  CallableStatement cs=null;
+  if (resultSetType == ResultSet.TYPE_FORWARD_ONLY && !updatableResults) {
+    cs=con.prepareCall(callString);
+  }
+ else {
+    cs=con.prepareCall(callString,resultSetType,updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
+  }
+  CallableStatement csToUse=cs;
+  if (nativeJdbcExtractor != null) {
+    csToUse=nativeJdbcExtractor.getNativeCallableStatement(cs);
+  }
+  int sqlColIndx=1;
+  for (int i=0; i < declaredParameters.size(); i++) {
+    SqlParameter declaredParam=(SqlParameter)declaredParameters.get(i);
+    if (!declaredParam.isResultsParameter()) {
+      Object inValue=this.inParameters.get(declaredParam.getName());
+      if (declaredParam instanceof ResultSetSupportingSqlParameter) {
+        if (declaredParam instanceof SqlOutParameter) {
+          if (declaredParam.getTypeName() != null) {
+            cs.registerOutParameter(sqlColIndx,declaredParam.getSqlType(),declaredParam.getTypeName());
+          }
+ else {
+            if (declaredParam.getScale() != null) {
+              cs.registerOutParameter(sqlColIndx,declaredParam.getSqlType(),declaredParam.getScale().intValue());
+            }
+ else {
+              cs.registerOutParameter(sqlColIndx,declaredParam.getSqlType());
+            }
+          }
+          if (declaredParam.isInputValueProvided()) {
+            StatementCreatorUtils.setParameterValue(csToUse,sqlColIndx,declaredParam,inValue);
+          }
+        }
+      }
+ else {
+        if (!this.inParameters.containsKey(declaredParam.getName())) {
+          throw new InvalidDataAccessApiUsageException("Required input parameter '" + declaredParam.getName() + "' is missing");
+        }
+        StatementCreatorUtils.setParameterValue(csToUse,sqlColIndx,declaredParam,inValue);
+      }
+      sqlColIndx++;
+    }
+  }
+  return cs;
+}

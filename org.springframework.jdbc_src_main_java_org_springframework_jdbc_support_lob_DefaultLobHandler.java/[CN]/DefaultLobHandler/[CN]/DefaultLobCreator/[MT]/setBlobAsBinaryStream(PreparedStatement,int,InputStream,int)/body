@@ -1,0 +1,24 @@
+{
+  if (streamAsLob) {
+    if (binaryStream != null) {
+      ps.setBlob(paramIndex,binaryStream,contentLength);
+    }
+ else {
+      ps.setBlob(paramIndex,(Blob)null);
+    }
+  }
+ else   if (wrapAsLob) {
+    if (binaryStream != null) {
+      ps.setBlob(paramIndex,new PassThroughBlob(binaryStream,contentLength));
+    }
+ else {
+      ps.setBlob(paramIndex,(Blob)null);
+    }
+  }
+ else {
+    ps.setBinaryStream(paramIndex,binaryStream,contentLength);
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug(binaryStream != null ? "Set binary stream for BLOB with length " + contentLength : "Set BLOB to null");
+  }
+}

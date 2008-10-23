@@ -1,0 +1,27 @@
+{
+  if (streamAsLob || wrapAsLob) {
+    if (asciiStream != null) {
+      try {
+        Reader reader=new InputStreamReader(asciiStream,"US-ASCII");
+        if (streamAsLob) {
+          ps.setClob(paramIndex,reader,contentLength);
+        }
+ else {
+          ps.setClob(paramIndex,new PassThroughClob(reader,contentLength));
+        }
+      }
+ catch (      UnsupportedEncodingException ex) {
+        throw new SQLException("US-ASCII encoding not supported: " + ex);
+      }
+    }
+ else {
+      ps.setClob(paramIndex,(Clob)null);
+    }
+  }
+ else {
+    ps.setAsciiStream(paramIndex,asciiStream,contentLength);
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug(asciiStream != null ? "Set ASCII stream for CLOB with length " + contentLength : "Set CLOB to null");
+  }
+}

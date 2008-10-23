@@ -1,0 +1,19 @@
+{
+  Assert.notNull(sql,"SQL must not be null");
+  if (logger.isDebugEnabled()) {
+    logger.debug("Executing SQL update [" + sql + "]");
+  }
+class UpdateStatementCallback implements StatementCallback, SqlProvider {
+    public Object doInStatement(    Statement stmt) throws SQLException {
+      int rows=stmt.executeUpdate(sql);
+      if (logger.isDebugEnabled()) {
+        logger.debug("SQL update affected " + rows + " rows");
+      }
+      return new Integer(rows);
+    }
+    public String getSql(){
+      return sql;
+    }
+  }
+  return ((Integer)execute(new UpdateStatementCallback())).intValue();
+}

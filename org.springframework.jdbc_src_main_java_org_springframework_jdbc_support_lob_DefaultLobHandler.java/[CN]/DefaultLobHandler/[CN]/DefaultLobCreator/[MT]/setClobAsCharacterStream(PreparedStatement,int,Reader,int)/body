@@ -1,0 +1,24 @@
+{
+  if (streamAsLob) {
+    if (characterStream != null) {
+      ps.setClob(paramIndex,characterStream,contentLength);
+    }
+ else {
+      ps.setClob(paramIndex,(Clob)null);
+    }
+  }
+ else   if (wrapAsLob) {
+    if (characterStream != null) {
+      ps.setClob(paramIndex,new PassThroughClob(characterStream,contentLength));
+    }
+ else {
+      ps.setClob(paramIndex,(Clob)null);
+    }
+  }
+ else {
+    ps.setCharacterStream(paramIndex,characterStream,contentLength);
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug(characterStream != null ? "Set character stream for CLOB with length " + contentLength : "Set CLOB to null");
+  }
+}

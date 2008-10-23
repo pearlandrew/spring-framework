@@ -1,0 +1,35 @@
+{
+  Assert.notEmpty(sql,"SQL array must not be empty");
+  if (logger.isDebugEnabled()) {
+    logger.debug("Executing SQL batch update of " + sql.length + " statements");
+  }
+class BatchUpdateStatementCallback implements StatementCallback, SqlProvider {
+    private String currSql;
+    public Object doInStatement(    Statement stmt) throws SQLException, DataAccessException {
+      int[] rowsAffected=new int[sql.length];
+      if (JdbcUtils.supportsBatchUpdates(stmt.getConnection())) {
+        for (int i=0; i < sql.length; i++) {
+          this.currSql=sql[i];
+          stmt.addBatch(sql[i]);
+        }
+        rowsAffected=stmt.executeBatch();
+      }
+ else {
+        for (int i=0; i < sql.length; i++) {
+          this.currSql=sql[i];
+          if (!stmt.execute(sql[i])) {
+            rowsAffected[i]=stmt.getUpdateCount();
+          }
+ else {
+            throw new InvalidDataAccessApiUsageException("Invalid batch SQL statement: " + sql[i]);
+          }
+        }
+      }
+      return rowsAffected;
+    }
+    public String getSql(){
+      return currSql;
+    }
+  }
+  return (int[])execute(new BatchUpdateStatementCallback());
+}

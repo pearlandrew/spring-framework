@@ -1,0 +1,17 @@
+{
+  if (con == null) {
+    return null;
+  }
+  Connection targetCon=DataSourceUtils.getTargetConnection(con);
+  Connection nativeCon=doGetNativeConnection(targetCon);
+  if (nativeCon == targetCon) {
+    DatabaseMetaData metaData=targetCon.getMetaData();
+    if (metaData != null) {
+      Connection metaCon=metaData.getConnection();
+      if (metaCon != null && metaCon != targetCon) {
+        nativeCon=doGetNativeConnection(metaCon);
+      }
+    }
+  }
+  return nativeCon;
+}

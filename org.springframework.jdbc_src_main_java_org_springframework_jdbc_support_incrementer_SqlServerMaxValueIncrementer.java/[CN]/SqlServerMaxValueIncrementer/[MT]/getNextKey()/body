@@ -1,0 +1,35 @@
+{
+  if (this.nextValueIndex < 0 || this.nextValueIndex >= getCacheSize()) {
+    Connection con=DataSourceUtils.getConnection(getDataSource());
+    Statement stmt=null;
+    try {
+      stmt=con.createStatement();
+      DataSourceUtils.applyTransactionTimeout(stmt,getDataSource());
+      this.valueCache=new long[getCacheSize()];
+      this.nextValueIndex=0;
+      for (int i=0; i < getCacheSize(); i++) {
+        stmt.executeUpdate("insert into " + getIncrementerName() + " default values");
+        ResultSet rs=stmt.executeQuery("select @@identity");
+        try {
+          if (!rs.next()) {
+            throw new DataAccessResourceFailureException("@@identity failed after executing an update");
+          }
+          this.valueCache[i]=rs.getLong(1);
+        }
+  finally {
+          JdbcUtils.closeResultSet(rs);
+        }
+      }
+      long maxValue=this.valueCache[(this.valueCache.length - 1)];
+      stmt.executeUpdate("delete from " + getIncrementerName() + " where "+ getColumnName()+ " < "+ maxValue);
+    }
+ catch (    SQLException ex) {
+      throw new DataAccessResourceFailureException("Could not increment identity",ex);
+    }
+ finally {
+      JdbcUtils.closeStatement(stmt);
+      DataSourceUtils.releaseConnection(con,getDataSource());
+    }
+  }
+  return this.valueCache[this.nextValueIndex++];
+}

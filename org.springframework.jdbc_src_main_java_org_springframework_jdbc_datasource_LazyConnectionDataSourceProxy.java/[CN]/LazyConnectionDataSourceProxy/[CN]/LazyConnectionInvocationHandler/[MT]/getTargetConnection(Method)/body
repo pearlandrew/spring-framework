@@ -1,0 +1,24 @@
+{
+  if (this.target == null) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Connecting to database for operation '" + operation.getName() + "'");
+    }
+    this.target=(this.username != null) ? getTargetDataSource().getConnection(this.username,this.password) : getTargetDataSource().getConnection();
+    checkDefaultConnectionProperties(this.target);
+    if (this.readOnly.booleanValue()) {
+      this.target.setReadOnly(this.readOnly.booleanValue());
+    }
+    if (this.transactionIsolation != null && !this.transactionIsolation.equals(defaultTransactionIsolation())) {
+      this.target.setTransactionIsolation(this.transactionIsolation.intValue());
+    }
+    if (this.autoCommit != null && this.autoCommit.booleanValue() != this.target.getAutoCommit()) {
+      this.target.setAutoCommit(this.autoCommit.booleanValue());
+    }
+  }
+ else {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Using existing database connection for operation '" + operation.getName() + "'");
+    }
+  }
+  return this.target;
+}

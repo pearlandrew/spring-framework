@@ -1,0 +1,22 @@
+{
+  if (TransactionSynchronizationManager.isSynchronizationActive()) {
+    logger.debug("Registering Spring transaction synchronization for LobCreator");
+    TransactionSynchronizationManager.registerSynchronization(new SpringLobCreatorSynchronization(lobCreator));
+  }
+ else {
+    if (jtaTransactionManager != null) {
+      try {
+        int jtaStatus=jtaTransactionManager.getStatus();
+        if (jtaStatus == Status.STATUS_ACTIVE || jtaStatus == Status.STATUS_MARKED_ROLLBACK) {
+          logger.debug("Registering JTA transaction synchronization for LobCreator");
+          jtaTransactionManager.getTransaction().registerSynchronization(new JtaLobCreatorSynchronization(lobCreator));
+          return;
+        }
+      }
+ catch (      Throwable ex) {
+        throw new TransactionSystemException("Could not register synchronization with JTA TransactionManager",ex);
+      }
+    }
+    throw new IllegalStateException("Active Spring transaction synchronization or active " + "JTA transaction with specified [javax.transaction.TransactionManager] required");
+  }
+}

@@ -1,0 +1,54 @@
+{
+  ResultSet procs=null;
+  String metaDataCatalogName=metaDataCatalogNameToUse(catalogName);
+  String metaDataSchemaName=metaDataSchemaNameToUse(schemaName);
+  String metaDataProcedureName=procedureNameToUse(procedureName);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Retrieving metadata for " + metaDataCatalogName + "/"+ metaDataSchemaName+ "/"+ metaDataProcedureName);
+  }
+  try {
+    procs=databaseMetaData.getProcedures(metaDataCatalogName,metaDataSchemaName,metaDataProcedureName);
+    List found=new ArrayList();
+    while (procs.next()) {
+      found.add(procs.getString("PROCEDURE_CAT") + "." + procs.getString("PROCEDURE_SCHEM")+ "."+ procs.getString("PROCEDURE_NAME"));
+    }
+    procs.close();
+    if (found.size() > 1) {
+      throw new InvalidDataAccessApiUsageException("Unable to determine the correct call signature - " + "multiple procedures/functions/signatures for " + metaDataProcedureName + " found "+ found);
+    }
+    if (found.size() < 1) {
+      if (metaDataProcedureName.contains(".") && !StringUtils.hasText(metaDataCatalogName)) {
+        String packageName=metaDataProcedureName.substring(0,metaDataProcedureName.indexOf("."));
+        throw new InvalidDataAccessApiUsageException("Unable to determine the correct call signature for " + metaDataProcedureName + " - package name should be specified separately using "+ "'.withCatalogName(\""+ packageName+ "\")'");
+      }
+    }
+    procs=databaseMetaData.getProcedureColumns(metaDataCatalogName,metaDataSchemaName,metaDataProcedureName,null);
+    while (procs.next()) {
+      String columnName=procs.getString("COLUMN_NAME");
+      int columnType=procs.getInt("COLUMN_TYPE");
+      if (columnName == null && (columnType == DatabaseMetaData.procedureColumnIn || columnType == DatabaseMetaData.procedureColumnInOut || columnType == DatabaseMetaData.procedureColumnOut)) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Skipping metadata for: " + columnName + " "+ columnType+ " "+ procs.getInt("DATA_TYPE")+ " "+ procs.getString("TYPE_NAME")+ " "+ procs.getBoolean("NULLABLE")+ " (probably a member of a collection)");
+        }
+      }
+ else {
+        CallParameterMetaData meta=new CallParameterMetaData(columnName,columnType,procs.getInt("DATA_TYPE"),procs.getString("TYPE_NAME"),procs.getBoolean("NULLABLE"));
+        callParameterMetaData.add(meta);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Retrieved metadata: " + meta.getParameterName() + " "+ meta.getParameterType()+ " "+ meta.getSqlType()+ " "+ meta.getTypeName()+ " "+ meta.isNullable());
+        }
+      }
+    }
+  }
+ catch (  SQLException se) {
+    logger.warn("Error while retreiving metadata for procedure columns: " + se.getMessage());
+  }
+ finally {
+    try {
+      if (procs != null)       procs.close();
+    }
+ catch (    SQLException se) {
+      logger.warn("Problem closing resultset for procedure column metadata " + se.getMessage());
+    }
+  }
+}

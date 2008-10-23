@@ -1,0 +1,19 @@
+{
+  if (generatedKeyNames.length > 0) {
+    generatedKeyColumnsUsed=true;
+  }
+  if (declaredColumns.size() > 0) {
+    return new ArrayList<String>(declaredColumns);
+  }
+  Set keys=new HashSet(generatedKeyNames.length);
+  for (  String key : generatedKeyNames) {
+    keys.add(key.toUpperCase());
+  }
+  List<String> columns=new ArrayList<String>();
+  for (  TableParameterMetaData meta : metaDataProvider.getTableParameterMetaData()) {
+    if (!keys.contains(meta.getParameterName().toUpperCase())) {
+      columns.add(meta.getParameterName());
+    }
+  }
+  return columns;
+}

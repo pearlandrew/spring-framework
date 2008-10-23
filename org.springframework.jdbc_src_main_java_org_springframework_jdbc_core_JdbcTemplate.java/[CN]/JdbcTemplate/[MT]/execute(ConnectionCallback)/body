@@ -1,0 +1,22 @@
+{
+  Assert.notNull(action,"Callback object must not be null");
+  Connection con=DataSourceUtils.getConnection(getDataSource());
+  try {
+    Connection conToUse=con;
+    if (this.nativeJdbcExtractor != null) {
+      conToUse=this.nativeJdbcExtractor.getNativeConnection(con);
+    }
+ else {
+      conToUse=createConnectionProxy(con);
+    }
+    return action.doInConnection(conToUse);
+  }
+ catch (  SQLException ex) {
+    DataSourceUtils.releaseConnection(con,getDataSource());
+    con=null;
+    throw getExceptionTranslator().translate("ConnectionCallback",getSql(action),ex);
+  }
+ finally {
+    DataSourceUtils.releaseConnection(con,getDataSource());
+  }
+}

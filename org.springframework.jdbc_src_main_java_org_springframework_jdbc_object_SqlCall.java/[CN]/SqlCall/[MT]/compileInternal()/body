@@ -1,0 +1,37 @@
+{
+  if (isSqlReadyForUse()) {
+    this.callString=getSql();
+  }
+ else {
+    List parameters=getDeclaredParameters();
+    int parameterCount=0;
+    if (isFunction()) {
+      this.callString="{? = call " + getSql() + "(";
+      parameterCount=-1;
+    }
+ else {
+      this.callString="{call " + getSql() + "(";
+    }
+    for (int i=0; i < parameters.size(); i++) {
+      SqlParameter parameter=(SqlParameter)parameters.get(i);
+      if (!(parameter.isResultsParameter())) {
+        if (parameterCount > 0) {
+          this.callString+=", ";
+        }
+        if (parameterCount >= 0) {
+          this.callString+="?";
+        }
+        parameterCount++;
+      }
+    }
+    this.callString+=")}";
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Compiled stored procedure. Call string is [" + getCallString() + "]");
+  }
+  this.callableStatementFactory=new CallableStatementCreatorFactory(getCallString(),getDeclaredParameters());
+  this.callableStatementFactory.setResultSetType(getResultSetType());
+  this.callableStatementFactory.setUpdatableResults(isUpdatableResults());
+  this.callableStatementFactory.setNativeJdbcExtractor(getJdbcTemplate().getNativeJdbcExtractor());
+  onCompileInternal();
+}

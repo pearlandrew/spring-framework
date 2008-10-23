@@ -1,0 +1,51 @@
+{
+  Assert.notNull(sql,"SQL must not be null");
+  Set namedParameters=new HashSet();
+  ParsedSql parsedSql=new ParsedSql(sql);
+  char[] statement=sql.toCharArray();
+  int namedParameterCount=0;
+  int unnamedParameterCount=0;
+  int totalParameterCount=0;
+  int i=0;
+  while (i < statement.length) {
+    int skipToPosition=skipCommentsAndQuotes(statement,i);
+    if (i != skipToPosition) {
+      if (skipToPosition >= statement.length) {
+        break;
+      }
+      i=skipToPosition;
+    }
+    char c=statement[i];
+    if (c == ':' || c == '&') {
+      int j=i + 1;
+      if (j < statement.length && statement[j] == ':' && c == ':') {
+        i=i + 2;
+        continue;
+      }
+      while (j < statement.length && !isParameterSeparator(statement[j])) {
+        j++;
+      }
+      if (j - i > 1) {
+        String parameter=sql.substring(i + 1,j);
+        if (!namedParameters.contains(parameter)) {
+          namedParameters.add(parameter);
+          namedParameterCount++;
+        }
+        parsedSql.addNamedParameter(parameter,i,j);
+        totalParameterCount++;
+      }
+      i=j - 1;
+    }
+ else {
+      if (c == '?') {
+        unnamedParameterCount++;
+        totalParameterCount++;
+      }
+    }
+    i++;
+  }
+  parsedSql.setNamedParameterCount(namedParameterCount);
+  parsedSql.setUnnamedParameterCount(unnamedParameterCount);
+  parsedSql.setTotalParameterCount(totalParameterCount);
+  return parsedSql;
+}

@@ -1,0 +1,16 @@
+{
+  if (con == null) {
+    return;
+  }
+  if (dataSource != null) {
+    ConnectionHolder conHolder=(ConnectionHolder)TransactionSynchronizationManager.getResource(dataSource);
+    if (conHolder != null && connectionEquals(conHolder,con)) {
+      conHolder.released();
+      return;
+    }
+  }
+  if (!(dataSource instanceof SmartDataSource) || ((SmartDataSource)dataSource).shouldClose(con)) {
+    logger.debug("Returning JDBC Connection to DataSource");
+    con.close();
+  }
+}

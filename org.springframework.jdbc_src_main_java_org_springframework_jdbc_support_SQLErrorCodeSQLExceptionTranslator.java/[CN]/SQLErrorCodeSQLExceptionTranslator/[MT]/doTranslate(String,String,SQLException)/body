@@ -1,0 +1,87 @@
+{
+  SQLException sqlEx=ex;
+  if (sqlEx instanceof BatchUpdateException && sqlEx.getNextException() != null) {
+    SQLException nestedSqlEx=sqlEx.getNextException();
+    if (nestedSqlEx.getErrorCode() > 0 || nestedSqlEx.getSQLState() != null) {
+      logger.debug("Using nested SQLException from the BatchUpdateException");
+      sqlEx=nestedSqlEx;
+    }
+  }
+  DataAccessException dex=customTranslate(task,sql,sqlEx);
+  if (dex != null) {
+    return dex;
+  }
+  if (this.sqlErrorCodes != null) {
+    String errorCode=null;
+    if (this.sqlErrorCodes.isUseSqlStateForTranslation()) {
+      errorCode=sqlEx.getSQLState();
+    }
+ else {
+      errorCode=Integer.toString(sqlEx.getErrorCode());
+    }
+    if (errorCode != null) {
+      CustomSQLErrorCodesTranslation[] customTranslations=this.sqlErrorCodes.getCustomTranslations();
+      if (customTranslations != null) {
+        for (int i=0; i < customTranslations.length; i++) {
+          CustomSQLErrorCodesTranslation customTranslation=customTranslations[i];
+          if (Arrays.binarySearch(customTranslation.getErrorCodes(),errorCode) >= 0) {
+            if (customTranslation.getExceptionClass() != null) {
+              DataAccessException customException=createCustomException(task,sql,sqlEx,customTranslation.getExceptionClass());
+              if (customException != null) {
+                logTranslation(task,sql,sqlEx,true);
+                return customException;
+              }
+            }
+          }
+        }
+      }
+      if (Arrays.binarySearch(this.sqlErrorCodes.getBadSqlGrammarCodes(),errorCode) >= 0) {
+        logTranslation(task,sql,sqlEx,false);
+        return new BadSqlGrammarException(task,sql,sqlEx);
+      }
+ else       if (Arrays.binarySearch(this.sqlErrorCodes.getInvalidResultSetAccessCodes(),errorCode) >= 0) {
+        logTranslation(task,sql,sqlEx,false);
+        return new InvalidResultSetAccessException(task,sql,sqlEx);
+      }
+ else       if (Arrays.binarySearch(this.sqlErrorCodes.getDataIntegrityViolationCodes(),errorCode) >= 0) {
+        logTranslation(task,sql,sqlEx,false);
+        return new DataIntegrityViolationException(buildMessage(task,sql,sqlEx),sqlEx);
+      }
+ else       if (Arrays.binarySearch(this.sqlErrorCodes.getPermissionDeniedCodes(),errorCode) >= 0) {
+        logTranslation(task,sql,sqlEx,false);
+        return new PermissionDeniedDataAccessException(buildMessage(task,sql,sqlEx),sqlEx);
+      }
+ else       if (Arrays.binarySearch(this.sqlErrorCodes.getDataAccessResourceFailureCodes(),errorCode) >= 0) {
+        logTranslation(task,sql,sqlEx,false);
+        return new DataAccessResourceFailureException(buildMessage(task,sql,sqlEx),sqlEx);
+      }
+ else       if (Arrays.binarySearch(this.sqlErrorCodes.getTransientDataAccessResourceCodes(),errorCode) >= 0) {
+        logTranslation(task,sql,sqlEx,false);
+        return new TransientDataAccessResourceException(buildMessage(task,sql,sqlEx),sqlEx);
+      }
+ else       if (Arrays.binarySearch(this.sqlErrorCodes.getCannotAcquireLockCodes(),errorCode) >= 0) {
+        logTranslation(task,sql,sqlEx,false);
+        return new CannotAcquireLockException(buildMessage(task,sql,sqlEx),sqlEx);
+      }
+ else       if (Arrays.binarySearch(this.sqlErrorCodes.getDeadlockLoserCodes(),errorCode) >= 0) {
+        logTranslation(task,sql,sqlEx,false);
+        return new DeadlockLoserDataAccessException(buildMessage(task,sql,sqlEx),sqlEx);
+      }
+ else       if (Arrays.binarySearch(this.sqlErrorCodes.getCannotSerializeTransactionCodes(),errorCode) >= 0) {
+        logTranslation(task,sql,sqlEx,false);
+        return new CannotSerializeTransactionException(buildMessage(task,sql,sqlEx),sqlEx);
+      }
+    }
+  }
+  if (logger.isDebugEnabled()) {
+    String codes=null;
+    if (this.sqlErrorCodes != null && this.sqlErrorCodes.isUseSqlStateForTranslation()) {
+      codes="SQL state '" + sqlEx.getSQLState() + "', error code '"+ sqlEx.getErrorCode();
+    }
+ else {
+      codes="Error code '" + sqlEx.getErrorCode() + "'";
+    }
+    logger.debug("Unable to translate SQLException with " + codes + ", will now try the fallback translator");
+  }
+  return null;
+}

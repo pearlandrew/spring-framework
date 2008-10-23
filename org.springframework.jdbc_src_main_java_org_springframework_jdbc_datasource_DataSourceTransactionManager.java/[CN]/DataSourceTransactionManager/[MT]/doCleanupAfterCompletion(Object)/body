@@ -1,0 +1,23 @@
+{
+  DataSourceTransactionObject txObject=(DataSourceTransactionObject)transaction;
+  if (txObject.isNewConnectionHolder()) {
+    TransactionSynchronizationManager.unbindResource(this.dataSource);
+  }
+  Connection con=txObject.getConnectionHolder().getConnection();
+  try {
+    if (txObject.isMustRestoreAutoCommit()) {
+      con.setAutoCommit(true);
+    }
+    DataSourceUtils.resetConnectionAfterTransaction(con,txObject.getPreviousIsolationLevel());
+  }
+ catch (  Throwable ex) {
+    logger.debug("Could not reset JDBC Connection after transaction",ex);
+  }
+  if (txObject.isNewConnectionHolder()) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Releasing JDBC Connection [" + con + "] after transaction");
+    }
+    DataSourceUtils.releaseConnection(con,this.dataSource);
+  }
+  txObject.getConnectionHolder().clear();
+}

@@ -1,0 +1,15 @@
+{
+  this.callMetaDataContext.initializeMetaData(getJdbcTemplate().getDataSource());
+  for (  Map.Entry<String,ParameterizedRowMapper> entry : this.declaredRowMappers.entrySet()) {
+    SqlParameter resultSetParameter=this.callMetaDataContext.createReturnResultSetParameter(entry.getKey(),entry.getValue());
+    this.declaredParameters.add(resultSetParameter);
+  }
+  callMetaDataContext.processParameters(this.declaredParameters);
+  this.callString=this.callMetaDataContext.createCallString();
+  if (logger.isDebugEnabled()) {
+    logger.debug("Compiled stored procedure. Call string is [" + this.callString + "]");
+  }
+  this.callableStatementFactory=new CallableStatementCreatorFactory(getCallString(),this.callMetaDataContext.getCallParameters());
+  this.callableStatementFactory.setNativeJdbcExtractor(getJdbcTemplate().getNativeJdbcExtractor());
+  onCompileInternal();
+}

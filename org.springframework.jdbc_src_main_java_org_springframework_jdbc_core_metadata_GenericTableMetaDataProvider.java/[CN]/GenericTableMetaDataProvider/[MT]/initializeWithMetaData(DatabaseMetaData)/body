@@ -1,0 +1,47 @@
+{
+  try {
+    if (databaseMetaData.supportsGetGeneratedKeys()) {
+      logger.debug("GetGeneratedKeys is supported");
+      setGetGeneratedKeysSupported(true);
+    }
+ else {
+      logger.debug("GetGeneratedKeys is not supported");
+      setGetGeneratedKeysSupported(false);
+    }
+  }
+ catch (  SQLException se) {
+    logger.warn("Error retrieving 'DatabaseMetaData.getGeneratedKeys' - " + se.getMessage());
+  }
+  try {
+    String databaseProductName=databaseMetaData.getDatabaseProductName();
+    if (productsNotSupportingGeneratedKeysColumnNameArray.contains(databaseProductName)) {
+      logger.debug("GeneratedKeysColumnNameArray is not supported for " + databaseProductName);
+      setGeneratedKeysColumnNameArraySupported(false);
+    }
+ else {
+      logger.debug("GeneratedKeysColumnNameArray is supported for " + databaseProductName);
+      setGeneratedKeysColumnNameArraySupported(true);
+    }
+  }
+ catch (  SQLException se) {
+    logger.warn("Error retrieving 'DatabaseMetaData.getDatabaseProductName' - " + se.getMessage());
+  }
+  try {
+    databaseVersion=databaseMetaData.getDatabaseProductVersion();
+  }
+ catch (  SQLException se) {
+    logger.warn("Error retrieving 'DatabaseMetaData.getDatabaseProductVersion' - " + se.getMessage());
+  }
+  try {
+    setStoresUpperCaseIdentifiers(databaseMetaData.storesUpperCaseIdentifiers());
+  }
+ catch (  SQLException se) {
+    logger.warn("Error retrieving 'DatabaseMetaData.storesUpperCaseIdentifiers' - " + se.getMessage());
+  }
+  try {
+    setStoresLowerCaseIdentifiers(databaseMetaData.storesLowerCaseIdentifiers());
+  }
+ catch (  SQLException se) {
+    logger.warn("Error retrieving 'DatabaseMetaData.storesLowerCaseIdentifiers' - " + se.getMessage());
+  }
+}

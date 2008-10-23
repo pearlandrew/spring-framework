@@ -1,0 +1,15 @@
+{
+  Assert.hasText(driverClassName,"Property 'driverClassName' must not be empty");
+  String driverClassNameToUse=driverClassName.trim();
+  try {
+    Class.forName(driverClassNameToUse,true,ClassUtils.getDefaultClassLoader());
+  }
+ catch (  ClassNotFoundException ex) {
+    IllegalStateException ise=new IllegalStateException("Could not load JDBC driver class [" + driverClassNameToUse + "]");
+    ise.initCause(ex);
+    throw ise;
+  }
+  if (logger.isInfoEnabled()) {
+    logger.info("Loaded JDBC driver: " + driverClassNameToUse);
+  }
+}

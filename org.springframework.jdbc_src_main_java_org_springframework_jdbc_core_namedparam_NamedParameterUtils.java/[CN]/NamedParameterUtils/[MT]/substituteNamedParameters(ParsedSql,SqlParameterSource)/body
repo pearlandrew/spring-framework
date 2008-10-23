@@ -1,0 +1,50 @@
+{
+  String originalSql=parsedSql.getOriginalSql();
+  StringBuffer actualSql=new StringBuffer();
+  List paramNames=parsedSql.getParameterNames();
+  int lastIndex=0;
+  for (int i=0; i < paramNames.size(); i++) {
+    String paramName=(String)paramNames.get(i);
+    int[] indexes=parsedSql.getParameterIndexes(i);
+    int startIndex=indexes[0];
+    int endIndex=indexes[1];
+    actualSql.append(originalSql.substring(lastIndex,startIndex));
+    if (paramSource != null && paramSource.hasValue(paramName)) {
+      Object value=paramSource.getValue(paramName);
+      if (value instanceof Collection) {
+        Iterator entryIter=((Collection)value).iterator();
+        int k=0;
+        while (entryIter.hasNext()) {
+          if (k > 0) {
+            actualSql.append(", ");
+          }
+          k++;
+          Object entryItem=entryIter.next();
+          if (entryItem instanceof Object[]) {
+            Object[] expressionList=(Object[])entryItem;
+            actualSql.append("(");
+            for (int m=0; m < expressionList.length; m++) {
+              if (m > 0) {
+                actualSql.append(", ");
+              }
+              actualSql.append("?");
+            }
+            actualSql.append(")");
+          }
+ else {
+            actualSql.append("?");
+          }
+        }
+      }
+ else {
+        actualSql.append("?");
+      }
+    }
+ else {
+      actualSql.append("?");
+    }
+    lastIndex=endIndex;
+  }
+  actualSql.append(originalSql.substring(lastIndex,originalSql.length()));
+  return actualSql.toString();
+}

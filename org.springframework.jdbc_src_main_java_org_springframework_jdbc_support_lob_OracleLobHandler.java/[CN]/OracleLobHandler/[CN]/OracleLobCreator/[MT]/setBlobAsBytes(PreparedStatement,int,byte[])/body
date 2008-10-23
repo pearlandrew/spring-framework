@@ -1,0 +1,20 @@
+{
+  if (content != null) {
+    Blob blob=(Blob)createLob(ps,false,new LobCallback(){
+      public void populateLob(      Object lob) throws Exception {
+        Method methodToInvoke=lob.getClass().getMethod("getBinaryOutputStream",new Class[0]);
+        OutputStream out=(OutputStream)methodToInvoke.invoke(lob,(Object[])null);
+        FileCopyUtils.copy(content,out);
+      }
+    }
+);
+    ps.setBlob(paramIndex,blob);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Set bytes for Oracle BLOB with length " + blob.length());
+    }
+  }
+ else {
+    ps.setBlob(paramIndex,(Blob)null);
+    logger.debug("Set Oracle BLOB to null");
+  }
+}

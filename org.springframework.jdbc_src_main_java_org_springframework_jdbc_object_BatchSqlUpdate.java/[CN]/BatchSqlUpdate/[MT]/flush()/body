@@ -1,0 +1,24 @@
+{
+  if (this.parameterQueue.isEmpty()) {
+    return new int[0];
+  }
+  int[] rowsAffected=getJdbcTemplate().batchUpdate(getSql(),new BatchPreparedStatementSetter(){
+    public int getBatchSize(){
+      return parameterQueue.size();
+    }
+    public void setValues(    PreparedStatement ps,    int index) throws SQLException {
+      Object[] params=(Object[])parameterQueue.removeFirst();
+      newPreparedStatementSetter(params).setValues(ps);
+    }
+  }
+);
+  if (this.trackRowsAffected) {
+    for (int i=0; i < rowsAffected.length; i++) {
+      this.rowsAffected.add(new Integer(rowsAffected[i]));
+    }
+  }
+  for (int i=0; i < rowsAffected.length; i++) {
+    checkRowsAffected(rowsAffected[i]);
+  }
+  return rowsAffected;
+}

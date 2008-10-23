@@ -1,0 +1,35 @@
+{
+  String callString;
+  int parameterCount=0;
+  String catalogNameToUse=null;
+  String schemaNameToUse=null;
+  if (this.metaDataProvider.isSupportsSchemasInProcedureCalls() && !this.metaDataProvider.isSupportsCatalogsInProcedureCalls()) {
+    schemaNameToUse=this.metaDataProvider.catalogNameToUse(this.getCatalogName());
+    catalogNameToUse=this.metaDataProvider.schemaNameToUse(this.getSchemaName());
+  }
+ else {
+    catalogNameToUse=this.metaDataProvider.catalogNameToUse(this.getCatalogName());
+    schemaNameToUse=this.metaDataProvider.schemaNameToUse(this.getSchemaName());
+  }
+  String procedureNameToUse=this.metaDataProvider.procedureNameToUse(this.getProcedureName());
+  if (this.isFunction() || this.isReturnValueRequired()) {
+    callString="{? = call " + (catalogNameToUse != null && catalogNameToUse.length() > 0 ? catalogNameToUse + "." : "") + (schemaNameToUse != null && schemaNameToUse.length() > 0 ? schemaNameToUse + "." : "")+ procedureNameToUse+ "(";
+    parameterCount=-1;
+  }
+ else {
+    callString="{call " + (catalogNameToUse != null && catalogNameToUse.length() > 0 ? catalogNameToUse + "." : "") + (schemaNameToUse != null && schemaNameToUse.length() > 0 ? schemaNameToUse + "." : "")+ procedureNameToUse+ "(";
+  }
+  for (  SqlParameter parameter : this.callParameters) {
+    if (!(parameter.isResultsParameter())) {
+      if (parameterCount > 0) {
+        callString+=", ";
+      }
+      if (parameterCount >= 0) {
+        callString+="?";
+      }
+      parameterCount++;
+    }
+  }
+  callString+=")}";
+  return callString;
+}
