@@ -1,0 +1,20 @@
+{
+  if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
+    throw new ServletException("OncePerRequestFilter just supports HTTP requests");
+  }
+  HttpServletRequest httpRequest=(HttpServletRequest)request;
+  HttpServletResponse httpResponse=(HttpServletResponse)response;
+  String alreadyFilteredAttributeName=getAlreadyFilteredAttributeName();
+  if (request.getAttribute(alreadyFilteredAttributeName) != null || shouldNotFilter(httpRequest)) {
+    filterChain.doFilter(request,response);
+  }
+ else {
+    request.setAttribute(alreadyFilteredAttributeName,Boolean.TRUE);
+    try {
+      doFilterInternal(httpRequest,httpResponse,filterChain);
+    }
+  finally {
+      request.removeAttribute(alreadyFilteredAttributeName);
+    }
+  }
+}

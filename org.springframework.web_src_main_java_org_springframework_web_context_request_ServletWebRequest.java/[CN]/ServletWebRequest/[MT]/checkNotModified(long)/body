@@ -1,0 +1,15 @@
+{
+  if (lastModifiedTimestamp >= 0 && !this.notModified && (this.response == null || !this.response.containsHeader(HEADER_LAST_MODIFIED))) {
+    long ifModifiedSince=getRequest().getDateHeader(HEADER_IF_MODIFIED_SINCE);
+    this.notModified=(ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
+    if (this.response != null) {
+      if (this.notModified) {
+        this.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+      }
+ else {
+        this.response.setDateHeader(HEADER_LAST_MODIFIED,lastModifiedTimestamp);
+      }
+    }
+  }
+  return this.notModified;
+}

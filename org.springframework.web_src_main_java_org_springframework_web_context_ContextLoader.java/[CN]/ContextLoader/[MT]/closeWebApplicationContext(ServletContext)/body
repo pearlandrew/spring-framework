@@ -1,0 +1,15 @@
+{
+  servletContext.log("Closing Spring root WebApplicationContext");
+  try {
+    if (this.context instanceof ConfigurableWebApplicationContext) {
+      ((ConfigurableWebApplicationContext)this.context).close();
+    }
+  }
+  finally {
+    currentContextPerThread.remove(Thread.currentThread().getContextClassLoader());
+    servletContext.removeAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+    if (this.parentContextRef != null) {
+      this.parentContextRef.release();
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  if (getServiceName() == null && getJaxRpcServiceInterface() == null) {
+    throw new IllegalArgumentException("Either 'serviceName' or 'jaxRpcServiceInterface' is required");
+  }
+  if (getJaxRpcServiceInterface() != null) {
+    if (getWsdlDocumentUrl() != null || getJaxRpcServiceProperties() != null) {
+      return serviceFactory.loadService(getWsdlDocumentUrl(),getJaxRpcServiceInterface(),getJaxRpcServiceProperties());
+    }
+    return serviceFactory.loadService(getJaxRpcServiceInterface());
+  }
+  QName serviceQName=getQName(getServiceName());
+  if (getJaxRpcServiceProperties() != null) {
+    return serviceFactory.loadService(getWsdlDocumentUrl(),serviceQName,getJaxRpcServiceProperties());
+  }
+  if (getWsdlDocumentUrl() != null) {
+    return serviceFactory.createService(getWsdlDocumentUrl(),serviceQName);
+  }
+  return serviceFactory.createService(serviceQName);
+}

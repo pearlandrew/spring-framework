@@ -1,0 +1,13 @@
+{
+  if (getServiceInterface() == null) {
+    throw new IllegalArgumentException("Property 'serviceInterface' is required");
+  }
+  Service serviceToUse=getJaxWsService();
+  if (serviceToUse == null) {
+    serviceToUse=createJaxWsService();
+  }
+  this.portQName=getQName(getPortName() != null ? getPortName() : getServiceInterface().getName());
+  Object stub=(getPortName() != null ? serviceToUse.getPort(this.portQName,getServiceInterface()) : serviceToUse.getPort(getServiceInterface()));
+  preparePortStub(stub);
+  this.portStub=stub;
+}

@@ -1,0 +1,18 @@
+{
+  String[] beanNames=this.beanFactory.getBeanNamesForType(Object.class,false,false);
+  for (  String beanName : beanNames) {
+    Class<?> type=this.beanFactory.getType(beanName);
+    WebService annotation=type.getAnnotation(WebService.class);
+    if (annotation != null) {
+      Endpoint endpoint=Endpoint.create(this.beanFactory.getBean(beanName));
+      if (this.endpointProperties != null) {
+        endpoint.setProperties(this.endpointProperties);
+      }
+      if (this.executor != null) {
+        endpoint.setExecutor(this.executor);
+      }
+      publishEndpoint(endpoint,annotation);
+      this.publishedEndpoints.add(endpoint);
+    }
+  }
+}

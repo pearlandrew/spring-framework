@@ -1,0 +1,34 @@
+{
+  if (servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE) != null) {
+    throw new IllegalStateException("Cannot initialize context because there is already a root application context present - " + "check whether you have multiple ContextLoader* definitions in your web.xml!");
+  }
+  servletContext.log("Initializing Spring root WebApplicationContext");
+  if (logger.isInfoEnabled()) {
+    logger.info("Root WebApplicationContext: initialization started");
+  }
+  long startTime=System.currentTimeMillis();
+  try {
+    ApplicationContext parent=loadParentContext(servletContext);
+    this.context=createWebApplicationContext(servletContext,parent);
+    servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,this.context);
+    currentContextPerThread.put(Thread.currentThread().getContextClassLoader(),this.context);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Published root WebApplicationContext as ServletContext attribute with name [" + WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "]");
+    }
+    if (logger.isInfoEnabled()) {
+      long elapsedTime=System.currentTimeMillis() - startTime;
+      logger.info("Root WebApplicationContext: initialization completed in " + elapsedTime + " ms");
+    }
+    return this.context;
+  }
+ catch (  RuntimeException ex) {
+    logger.error("Context initialization failed",ex);
+    servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,ex);
+    throw ex;
+  }
+catch (  Error err) {
+    logger.error("Context initialization failed",err);
+    servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,err);
+    throw err;
+  }
+}

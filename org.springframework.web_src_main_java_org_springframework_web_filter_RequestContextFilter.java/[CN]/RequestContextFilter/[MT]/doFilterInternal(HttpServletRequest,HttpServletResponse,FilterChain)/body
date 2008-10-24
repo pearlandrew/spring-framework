@@ -1,0 +1,19 @@
+{
+  ServletRequestAttributes attributes=new ServletRequestAttributes(request);
+  LocaleContextHolder.setLocale(request.getLocale(),this.threadContextInheritable);
+  RequestContextHolder.setRequestAttributes(attributes,this.threadContextInheritable);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Bound request context to thread: " + request);
+  }
+  try {
+    filterChain.doFilter(request,response);
+  }
+  finally {
+    RequestContextHolder.resetRequestAttributes();
+    LocaleContextHolder.resetLocaleContext();
+    attributes.requestCompleted();
+    if (logger.isDebugEnabled()) {
+      logger.debug("Cleared thread-bound request context: " + request);
+    }
+  }
+}

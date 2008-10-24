@@ -1,0 +1,48 @@
+{
+  InputStream isToUse=inputStream;
+  OutputStream osToUse=outputStream;
+  if (this.debugLogger != null && this.debugLogger.isDebugEnabled()) {
+    PrintWriter debugWriter=new PrintWriter(new CommonsLogWriter(this.debugLogger));
+    isToUse=new HessianDebugInputStream(inputStream,debugWriter);
+    if (debugOutputStreamAvailable) {
+      osToUse=DebugStreamFactory.createDebugOutputStream(outputStream,debugWriter);
+    }
+  }
+  Hessian2Input in=new Hessian2Input(isToUse);
+  if (this.serializerFactory != null) {
+    in.setSerializerFactory(this.serializerFactory);
+  }
+  int code=in.read();
+  if (code != 'c') {
+    throw new IOException("expected 'c' in hessian input at " + code);
+  }
+  AbstractHessianOutput out=null;
+  int major=in.read();
+  int minor=in.read();
+  if (major >= 2) {
+    out=new Hessian2Output(osToUse);
+  }
+ else {
+    out=new HessianOutput(osToUse);
+  }
+  if (this.serializerFactory != null) {
+    out.setSerializerFactory(this.serializerFactory);
+  }
+  try {
+    this.skeleton.invoke(in,out);
+  }
+  finally {
+    try {
+      in.close();
+      isToUse.close();
+    }
+ catch (    IOException ex) {
+    }
+    try {
+      out.close();
+      osToUse.close();
+    }
+ catch (    IOException ex) {
+    }
+  }
+}

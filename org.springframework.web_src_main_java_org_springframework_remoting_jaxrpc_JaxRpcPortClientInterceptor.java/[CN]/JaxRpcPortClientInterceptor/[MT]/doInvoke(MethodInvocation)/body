@@ -1,0 +1,26 @@
+{
+  Remote stub=getPortStub();
+  try {
+    if (stub != null) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Invoking operation '" + invocation.getMethod().getName() + "' on JAX-RPC port stub");
+      }
+      return doInvoke(invocation,stub);
+    }
+ else {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Invoking operation '" + invocation.getMethod().getName() + "' as JAX-RPC dynamic call");
+      }
+      return performJaxRpcCall(invocation,this.serviceToUse);
+    }
+  }
+ catch (  RemoteException ex) {
+    throw handleRemoteException(invocation.getMethod(),ex);
+  }
+catch (  SOAPFaultException ex) {
+    throw new JaxRpcSoapFaultException(ex);
+  }
+catch (  JAXRPCException ex) {
+    throw new RemoteProxyFailureException("Invalid JAX-RPC call configuration",ex);
+  }
+}

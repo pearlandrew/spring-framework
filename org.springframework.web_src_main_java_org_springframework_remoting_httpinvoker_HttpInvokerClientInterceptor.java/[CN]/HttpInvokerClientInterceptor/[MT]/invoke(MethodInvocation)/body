@@ -1,0 +1,24 @@
+{
+  if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
+    return "HTTP invoker proxy for service URL [" + getServiceUrl() + "]";
+  }
+  RemoteInvocation invocation=createRemoteInvocation(methodInvocation);
+  RemoteInvocationResult result=null;
+  try {
+    result=executeRequest(invocation,methodInvocation);
+  }
+ catch (  Throwable ex) {
+    throw convertHttpInvokerAccessException(ex);
+  }
+  try {
+    return recreateRemoteInvocationResult(result);
+  }
+ catch (  Throwable ex) {
+    if (result.hasInvocationTargetException()) {
+      throw ex;
+    }
+ else {
+      throw new RemoteInvocationFailureException("Invocation of method [" + methodInvocation.getMethod() + "] failed in HTTP invoker remote service at ["+ getServiceUrl()+ "]",ex);
+    }
+  }
+}

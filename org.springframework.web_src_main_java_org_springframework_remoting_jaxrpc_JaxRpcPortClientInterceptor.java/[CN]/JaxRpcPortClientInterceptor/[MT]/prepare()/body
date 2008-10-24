@@ -1,0 +1,48 @@
+{
+  if (getPortName() == null) {
+    throw new IllegalArgumentException("Property 'portName' is required");
+  }
+synchronized (this.preparationMonitor) {
+    this.serviceToUse=null;
+    this.portQName=getQName(getPortName());
+    try {
+      Service service=getJaxRpcService();
+      if (service == null) {
+        service=createJaxRpcService();
+      }
+ else {
+        postProcessJaxRpcService(service);
+      }
+      Class portInterface=getPortInterface();
+      if (portInterface != null && !alwaysUseJaxRpcCall()) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Creating JAX-RPC proxy for JAX-RPC port [" + this.portQName + "], using port interface ["+ portInterface.getName()+ "]");
+        }
+        Remote remoteObj=service.getPort(this.portQName,portInterface);
+        if (logger.isDebugEnabled()) {
+          Class serviceInterface=getServiceInterface();
+          if (serviceInterface != null) {
+            boolean isImpl=serviceInterface.isInstance(remoteObj);
+            logger.debug("Using service interface [" + serviceInterface.getName() + "] for JAX-RPC port ["+ this.portQName+ "] - "+ (!isImpl ? "not" : "")+ " directly implemented");
+          }
+        }
+        if (!(remoteObj instanceof Stub)) {
+          throw new RemoteLookupFailureException("Port stub of class [" + remoteObj.getClass().getName() + "] is not a valid JAX-RPC stub: it does not implement interface [javax.xml.rpc.Stub]");
+        }
+        Stub stub=(Stub)remoteObj;
+        preparePortStub(stub);
+        postProcessPortStub(stub);
+        this.portStub=remoteObj;
+      }
+ else {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Using JAX-RPC dynamic calls for JAX-RPC port [" + this.portQName + "]");
+        }
+      }
+      this.serviceToUse=service;
+    }
+ catch (    ServiceException ex) {
+      throw new RemoteLookupFailureException("Failed to initialize service for JAX-RPC port [" + this.portQName + "]",ex);
+    }
+  }
+}

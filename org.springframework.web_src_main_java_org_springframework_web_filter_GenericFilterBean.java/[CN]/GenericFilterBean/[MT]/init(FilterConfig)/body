@@ -1,0 +1,24 @@
+{
+  Assert.notNull(filterConfig,"FilterConfig must not be null");
+  if (logger.isDebugEnabled()) {
+    logger.debug("Initializing filter '" + filterConfig.getFilterName() + "'");
+  }
+  this.filterConfig=filterConfig;
+  try {
+    PropertyValues pvs=new FilterConfigPropertyValues(filterConfig,this.requiredProperties);
+    BeanWrapper bw=PropertyAccessorFactory.forBeanPropertyAccess(this);
+    ResourceLoader resourceLoader=new ServletContextResourceLoader(filterConfig.getServletContext());
+    bw.registerCustomEditor(Resource.class,new ResourceEditor(resourceLoader));
+    initBeanWrapper(bw);
+    bw.setPropertyValues(pvs,true);
+  }
+ catch (  BeansException ex) {
+    String msg="Failed to set bean properties on filter '" + filterConfig.getFilterName() + "': "+ ex.getMessage();
+    logger.error(msg,ex);
+    throw new NestedServletException(msg,ex);
+  }
+  initFilterBean();
+  if (logger.isDebugEnabled()) {
+    logger.debug("Filter '" + filterConfig.getFilterName() + "' configured successfully");
+  }
+}

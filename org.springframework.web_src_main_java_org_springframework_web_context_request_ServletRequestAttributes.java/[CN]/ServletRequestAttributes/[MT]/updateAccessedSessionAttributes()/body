@@ -1,0 +1,21 @@
+{
+  this.session=this.request.getSession(false);
+synchronized (this.sessionAttributesToUpdate) {
+    if (this.session != null) {
+      try {
+        for (Iterator it=this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext(); ) {
+          Map.Entry entry=(Map.Entry)it.next();
+          String name=(String)entry.getKey();
+          Object newValue=entry.getValue();
+          Object oldValue=this.session.getAttribute(name);
+          if (oldValue == newValue) {
+            this.session.setAttribute(name,newValue);
+          }
+        }
+      }
+ catch (      IllegalStateException ex) {
+      }
+    }
+    this.sessionAttributesToUpdate.clear();
+  }
+}

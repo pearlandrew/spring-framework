@@ -1,0 +1,17 @@
+{
+  if (!"POST".equals(exchange.getRequestMethod())) {
+    exchange.getResponseHeaders().set("Allow","POST");
+    exchange.sendResponseHeaders(405,-1);
+    return;
+  }
+  ByteArrayOutputStream output=new ByteArrayOutputStream(1024);
+  try {
+    invoke(exchange.getRequestBody(),output);
+  }
+ catch (  Throwable ex) {
+    exchange.sendResponseHeaders(500,-1);
+    throw new IOException("Hessian skeleton invocation failed",ex);
+  }
+  exchange.sendResponseHeaders(200,output.size());
+  FileCopyUtils.copy(output.toByteArray(),exchange.getResponseBody());
+}

@@ -1,0 +1,27 @@
+{
+  if (this.hessianProxy == null) {
+    throw new IllegalStateException("HessianClientInterceptor is not properly initialized - " + "invoke 'prepare' before attempting any operations");
+  }
+  ClassLoader originalClassLoader=overrideThreadContextClassLoader();
+  try {
+    return invocation.getMethod().invoke(this.hessianProxy,invocation.getArguments());
+  }
+ catch (  InvocationTargetException ex) {
+    if (ex.getTargetException() instanceof HessianRuntimeException) {
+      HessianRuntimeException hre=(HessianRuntimeException)ex.getTargetException();
+      Throwable rootCause=(hre.getRootCause() != null ? hre.getRootCause() : hre);
+      throw convertHessianAccessException(rootCause);
+    }
+ else     if (ex.getTargetException() instanceof UndeclaredThrowableException) {
+      UndeclaredThrowableException utex=(UndeclaredThrowableException)ex.getTargetException();
+      throw convertHessianAccessException(utex.getUndeclaredThrowable());
+    }
+    throw ex.getTargetException();
+  }
+catch (  Throwable ex) {
+    throw new RemoteProxyFailureException("Failed to invoke Hessian proxy for remote service [" + getServiceUrl() + "]",ex);
+  }
+ finally {
+    resetThreadContextClassLoader(originalClassLoader);
+  }
+}

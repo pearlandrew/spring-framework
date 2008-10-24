@@ -1,0 +1,16 @@
+{
+  boolean isConnectFailure=isConnectFailure(ex);
+  if (isConnectFailure && this.refreshServiceAfterConnectFailure) {
+    reset();
+  }
+  Throwable cause=ex.getCause();
+  if (cause != null && ReflectionUtils.declaresException(method,cause.getClass())) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Rethrowing wrapped exception of type [" + cause.getClass().getName() + "] as-is");
+    }
+    return ex.getCause();
+  }
+ else {
+    return RmiClientInterceptorUtils.convertRmiAccessException(method,ex,isConnectFailure,this.portQName.toString());
+  }
+}

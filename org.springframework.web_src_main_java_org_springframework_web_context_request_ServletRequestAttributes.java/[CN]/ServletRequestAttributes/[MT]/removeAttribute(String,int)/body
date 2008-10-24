@@ -1,0 +1,22 @@
+{
+  if (scope == SCOPE_REQUEST) {
+    if (isRequestActive()) {
+      this.request.removeAttribute(name);
+      removeRequestDestructionCallback(name);
+    }
+  }
+ else {
+    HttpSession session=getSession(false);
+    if (session != null) {
+synchronized (this.sessionAttributesToUpdate) {
+        this.sessionAttributesToUpdate.remove(name);
+      }
+      try {
+        session.removeAttribute(name);
+        session.removeAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name);
+      }
+ catch (      IllegalStateException ex) {
+      }
+    }
+  }
+}
