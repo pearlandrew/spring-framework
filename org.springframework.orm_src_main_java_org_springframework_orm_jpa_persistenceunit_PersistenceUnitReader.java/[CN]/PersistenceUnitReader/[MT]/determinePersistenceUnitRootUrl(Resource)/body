@@ -1,0 +1,23 @@
+{
+  URL originalURL=resource.getURL();
+  String urlToString=originalURL.toExternalForm();
+  if (ResourceUtils.isJarURL(originalURL)) {
+    return ResourceUtils.extractJarFileURL(originalURL);
+  }
+ else {
+    if (!urlToString.contains(META_INF)) {
+      if (logger.isInfoEnabled()) {
+        logger.info(resource.getFilename() + " should be located inside META-INF directory; cannot determine persistence unit root URL for " + resource);
+      }
+      return null;
+    }
+    if (urlToString.lastIndexOf(META_INF) == urlToString.lastIndexOf('/') - (1 + META_INF.length())) {
+      if (logger.isInfoEnabled()) {
+        logger.info(resource.getFilename() + " is not located in the root of META-INF directory; cannot determine persistence unit root URL for " + resource);
+      }
+      return null;
+    }
+    String persistenceUnitRoot=urlToString.substring(0,urlToString.lastIndexOf(META_INF));
+    return new URL(persistenceUnitRoot);
+  }
+}

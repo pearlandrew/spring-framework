@@ -1,0 +1,17 @@
+{
+  String participateAttributeName=getParticipateAttributeName();
+  Integer count=(Integer)request.getAttribute(participateAttributeName,WebRequest.SCOPE_REQUEST);
+  if (count != null) {
+    if (count.intValue() > 1) {
+      request.setAttribute(participateAttributeName,new Integer(count.intValue() - 1),WebRequest.SCOPE_REQUEST);
+    }
+ else {
+      request.removeAttribute(participateAttributeName,WebRequest.SCOPE_REQUEST);
+    }
+  }
+ else {
+    EntityManagerHolder emHolder=(EntityManagerHolder)TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
+    logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewInterceptor");
+    EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
+  }
+}

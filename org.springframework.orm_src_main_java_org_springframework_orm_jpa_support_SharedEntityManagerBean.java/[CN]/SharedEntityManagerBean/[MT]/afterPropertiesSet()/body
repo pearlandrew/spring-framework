@@ -1,0 +1,30 @@
+{
+  EntityManagerFactory emf=getEntityManagerFactory();
+  if (emf == null) {
+    throw new IllegalArgumentException("entityManagerFactory is required");
+  }
+  Class[] ifcs=null;
+  if (emf instanceof EntityManagerFactoryInfo) {
+    EntityManagerFactoryInfo emfInfo=(EntityManagerFactoryInfo)emf;
+    if (this.entityManagerInterface == null) {
+      this.entityManagerInterface=emfInfo.getEntityManagerInterface();
+      if (this.entityManagerInterface == null) {
+        this.entityManagerInterface=EntityManager.class;
+      }
+    }
+    JpaDialect jpaDialect=emfInfo.getJpaDialect();
+    if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
+      ifcs=new Class[]{this.entityManagerInterface,EntityManagerPlus.class};
+    }
+ else {
+      ifcs=new Class[]{this.entityManagerInterface};
+    }
+  }
+ else {
+    if (this.entityManagerInterface == null) {
+      this.entityManagerInterface=EntityManager.class;
+    }
+    ifcs=new Class[]{this.entityManagerInterface};
+  }
+  this.shared=SharedEntityManagerCreator.createSharedEntityManager(emf,getJpaPropertyMap(),ifcs);
+}

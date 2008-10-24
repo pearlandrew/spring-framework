@@ -1,0 +1,11 @@
+{
+  Assert.notNull(emfInfo,"EntityManagerFactoryInfo must not be null");
+  JpaDialect jpaDialect=emfInfo.getJpaDialect();
+  EntityManagerPlusOperations plusOperations=null;
+  if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
+    plusOperations=jpaDialect.getEntityManagerPlusOperations(rawEntityManager);
+  }
+  PersistenceUnitInfo pui=emfInfo.getPersistenceUnitInfo();
+  Boolean jta=(pui != null ? pui.getTransactionType() == PersistenceUnitTransactionType.JTA : null);
+  return createProxy(rawEntityManager,emfInfo.getEntityManagerInterface(),emfInfo.getBeanClassLoader(),plusOperations,jpaDialect,jta,containerManaged);
+}

@@ -1,0 +1,16 @@
+{
+  Assert.notNull(action,"Callback object must not be null");
+  Session session=SessionFactoryUtils.getSession(getSessionFactory(),this.allowCreate);
+  try {
+    return action.doInTopLink(session);
+  }
+ catch (  TopLinkException ex) {
+    throw convertTopLinkAccessException(ex);
+  }
+catch (  RuntimeException ex) {
+    throw ex;
+  }
+ finally {
+    SessionFactoryUtils.releaseSession(session,getSessionFactory());
+  }
+}

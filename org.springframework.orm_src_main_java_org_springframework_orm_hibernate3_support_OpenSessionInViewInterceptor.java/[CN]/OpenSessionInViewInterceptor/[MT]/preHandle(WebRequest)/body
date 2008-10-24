@@ -1,0 +1,19 @@
+{
+  if ((isSingleSession() && TransactionSynchronizationManager.hasResource(getSessionFactory())) || SessionFactoryUtils.isDeferredCloseActive(getSessionFactory())) {
+    String participateAttributeName=getParticipateAttributeName();
+    Integer count=(Integer)request.getAttribute(participateAttributeName,WebRequest.SCOPE_REQUEST);
+    int newCount=(count != null) ? count.intValue() + 1 : 1;
+    request.setAttribute(getParticipateAttributeName(),new Integer(newCount),WebRequest.SCOPE_REQUEST);
+  }
+ else {
+    if (isSingleSession()) {
+      logger.debug("Opening single Hibernate Session in OpenSessionInViewInterceptor");
+      Session session=SessionFactoryUtils.getSession(getSessionFactory(),getEntityInterceptor(),getJdbcExceptionTranslator());
+      applyFlushMode(session,false);
+      TransactionSynchronizationManager.bindResource(getSessionFactory(),new SessionHolder(session));
+    }
+ else {
+      SessionFactoryUtils.initDeferredClose(getSessionFactory());
+    }
+  }
+}

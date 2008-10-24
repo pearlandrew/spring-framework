@@ -1,0 +1,11 @@
+{
+  Assert.isTrue(keys != null && keys.length > 0,"Non-empty keys or id is required");
+  ReadObjectQuery query=new ReadObjectQuery(entityClass);
+  query.setSelectionKey(new Vector(Arrays.asList(keys)));
+  Object result=executeQuery(query,enforceReadOnly);
+  if (result == null) {
+    Object identifier=(keys.length == 1 ? keys[0] : StringUtils.arrayToCommaDelimitedString(keys));
+    throw new ObjectRetrievalFailureException(entityClass,identifier);
+  }
+  return result;
+}

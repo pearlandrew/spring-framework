@@ -1,0 +1,44 @@
+{
+  if (method.getName().equals("equals")) {
+    return (proxy == args[0]);
+  }
+ else   if (method.getName().equals("hashCode")) {
+    return hashCode();
+  }
+ else   if (method.getName().equals("getTargetEntityManager")) {
+    return this.target;
+  }
+ else   if (method.getName().equals("isOpen")) {
+    if (this.containerManaged) {
+      return true;
+    }
+  }
+ else   if (method.getName().equals("close")) {
+    if (this.containerManaged) {
+      throw new IllegalStateException("Invalid usage: Cannot close a container-managed EntityManager");
+    }
+  }
+ else   if (method.getName().equals("getTransaction")) {
+    if (this.containerManaged) {
+      throw new IllegalStateException("Cannot execute getTransaction() on a container-managed EntityManager");
+    }
+  }
+ else   if (method.getName().equals("joinTransaction")) {
+    doJoinTransaction(true);
+    return null;
+  }
+  if (this.containerManaged && method.getDeclaringClass().isInterface()) {
+    doJoinTransaction(false);
+  }
+  try {
+    if (method.getDeclaringClass().equals(EntityManagerPlusOperations.class)) {
+      return method.invoke(this.plusOperations,args);
+    }
+ else {
+      return method.invoke(this.target,args);
+    }
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+}

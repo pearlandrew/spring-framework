@@ -1,0 +1,14 @@
+{
+  String[] beanNames=BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory,EntityManagerFactory.class);
+  if (beanNames.length == 1) {
+    String unitName=beanNames[0];
+    EntityManagerFactory emf=(EntityManagerFactory)this.beanFactory.getBean(unitName);
+    if (this.beanFactory instanceof ConfigurableBeanFactory) {
+      ((ConfigurableBeanFactory)this.beanFactory).registerDependentBean(unitName,requestingBeanName);
+    }
+    return emf;
+  }
+ else {
+    throw new NoSuchBeanDefinitionException(EntityManagerFactory.class,"expected single bean but found " + beanNames.length);
+  }
+}

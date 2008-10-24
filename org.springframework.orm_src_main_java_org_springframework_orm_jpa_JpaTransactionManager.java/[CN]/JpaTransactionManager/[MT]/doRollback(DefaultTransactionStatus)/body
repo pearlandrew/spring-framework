@@ -1,0 +1,20 @@
+{
+  JpaTransactionObject txObject=(JpaTransactionObject)status.getTransaction();
+  if (status.isDebug()) {
+    logger.debug("Rolling back JPA transaction on EntityManager [" + txObject.getEntityManagerHolder().getEntityManager() + "]");
+  }
+  try {
+    EntityTransaction tx=txObject.getEntityManagerHolder().getEntityManager().getTransaction();
+    if (tx.isActive()) {
+      tx.rollback();
+    }
+  }
+ catch (  PersistenceException ex) {
+    throw new TransactionSystemException("Could not roll back JPA transaction",ex);
+  }
+ finally {
+    if (!txObject.isNewEntityManagerHolder()) {
+      txObject.getEntityManagerHolder().getEntityManager().clear();
+    }
+  }
+}

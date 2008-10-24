@@ -1,0 +1,52 @@
+{
+  if (method.getName().equals("equals")) {
+    return (proxy == args[0]);
+  }
+ else   if (method.getName().equals("hashCode")) {
+    return hashCode();
+  }
+ else   if (method.getName().equals("toString")) {
+    return "Shared EntityManager proxy for target factory [" + this.targetFactory + "]";
+  }
+ else   if (method.getName().equals("isOpen")) {
+    return true;
+  }
+ else   if (method.getName().equals("close")) {
+    return null;
+  }
+ else   if (method.getName().equals("getTransaction")) {
+    throw new IllegalStateException("Not allowed to create transaction on shared EntityManager - " + "use Spring transactions or EJB CMT instead");
+  }
+ else   if (method.getName().equals("joinTransaction")) {
+    throw new IllegalStateException("Not allowed to join transaction on shared EntityManager - " + "use Spring transactions or EJB CMT instead");
+  }
+  EntityManager target=EntityManagerFactoryUtils.doGetTransactionalEntityManager(this.targetFactory,this.properties);
+  if (method.getName().equals("getTargetEntityManager")) {
+    if (target == null) {
+      throw new IllegalStateException("No transactional EntityManager available");
+    }
+    return target;
+  }
+  boolean isNewEm=false;
+  if (target == null) {
+    logger.debug("Creating new EntityManager for shared EntityManager invocation");
+    target=(!CollectionUtils.isEmpty(this.properties) ? this.targetFactory.createEntityManager(this.properties) : this.targetFactory.createEntityManager());
+    isNewEm=true;
+  }
+  try {
+    Object result=method.invoke(target,args);
+    if (isNewEm && result instanceof Query) {
+      result=Proxy.newProxyInstance(Query.class.getClassLoader(),new Class[]{Query.class},new DeferredQueryInvocationHandler((Query)result,target));
+      isNewEm=false;
+    }
+    return result;
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+ finally {
+    if (isNewEm) {
+      EntityManagerFactoryUtils.closeEntityManager(target);
+    }
+  }
+}

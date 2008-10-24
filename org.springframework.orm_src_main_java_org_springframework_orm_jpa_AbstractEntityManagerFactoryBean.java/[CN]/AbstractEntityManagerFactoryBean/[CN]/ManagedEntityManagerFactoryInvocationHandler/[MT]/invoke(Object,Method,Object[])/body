@@ -1,0 +1,25 @@
+{
+  try {
+    if (method.getName().equals("equals")) {
+      return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+    }
+ else     if (method.getName().equals("hashCode")) {
+      return new Integer(System.identityHashCode(proxy));
+    }
+ else     if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
+      return method.invoke(this.entityManagerFactoryInfo,args);
+    }
+ else     if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {
+      return method.invoke(this.entityManagerFactoryPlusOperations,args);
+    }
+    Object retVal=method.invoke(this.targetEntityManagerFactory,args);
+    if (retVal instanceof EntityManager) {
+      EntityManager rawEntityManager=(EntityManager)retVal;
+      retVal=ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager,this.entityManagerFactoryInfo);
+    }
+    return retVal;
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+}

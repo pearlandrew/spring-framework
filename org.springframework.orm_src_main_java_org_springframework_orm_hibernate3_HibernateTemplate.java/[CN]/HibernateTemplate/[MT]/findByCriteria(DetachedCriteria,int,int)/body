@@ -1,0 +1,17 @@
+{
+  Assert.notNull(criteria,"DetachedCriteria must not be null");
+  return (List)executeWithNativeSession(new HibernateCallback(){
+    public Object doInHibernate(    Session session) throws HibernateException {
+      Criteria executableCriteria=criteria.getExecutableCriteria(session);
+      prepareCriteria(executableCriteria);
+      if (firstResult >= 0) {
+        executableCriteria.setFirstResult(firstResult);
+      }
+      if (maxResults > 0) {
+        executableCriteria.setMaxResults(maxResults);
+      }
+      return executableCriteria.list();
+    }
+  }
+);
+}

@@ -1,0 +1,18 @@
+{
+  if (TransactionSynchronizationManager.hasResource(getEntityManagerFactory())) {
+    String participateAttributeName=getParticipateAttributeName();
+    Integer count=(Integer)request.getAttribute(participateAttributeName,WebRequest.SCOPE_REQUEST);
+    int newCount=(count != null) ? count.intValue() + 1 : 1;
+    request.setAttribute(getParticipateAttributeName(),new Integer(newCount),WebRequest.SCOPE_REQUEST);
+  }
+ else {
+    logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewInterceptor");
+    try {
+      EntityManager em=createEntityManager();
+      TransactionSynchronizationManager.bindResource(getEntityManagerFactory(),new EntityManagerHolder(em));
+    }
+ catch (    PersistenceException ex) {
+      throw new DataAccessResourceFailureException("Could not create JPA EntityManager",ex);
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  if (this.earlyFlushBeforeCommit) {
+    HibernateTransactionObject txObject=(HibernateTransactionObject)status.getTransaction();
+    Session session=txObject.getSessionHolder().getSession();
+    if (!session.getFlushMode().lessThan(FlushMode.COMMIT)) {
+      logger.debug("Performing an early flush for Hibernate transaction");
+      try {
+        session.flush();
+      }
+ catch (      HibernateException ex) {
+        throw convertHibernateAccessException(ex);
+      }
+ finally {
+        session.setFlushMode(FlushMode.NEVER);
+      }
+    }
+  }
+}

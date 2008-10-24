@@ -1,0 +1,19 @@
+{
+  DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
+  dbf.setNamespaceAware(true);
+  Resource schemaLocation=findSchemaResource();
+  if (schemaLocation != null) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Found schema resource: " + schemaLocation.getURL());
+    }
+    dbf.setValidating(true);
+    dbf.setAttribute(JAXP_SCHEMA_LANGUAGE,XMLConstants.W3C_XML_SCHEMA_NS_URI);
+    dbf.setAttribute(JAXP_SCHEMA_SOURCE,schemaLocation.getURL().toString());
+  }
+ else {
+    logger.debug("Schema resource [" + SCHEMA_NAME + "] not found - falling back to XML parsing without schema validation");
+  }
+  DocumentBuilder parser=dbf.newDocumentBuilder();
+  parser.setErrorHandler(handler);
+  return parser.parse(stream);
+}

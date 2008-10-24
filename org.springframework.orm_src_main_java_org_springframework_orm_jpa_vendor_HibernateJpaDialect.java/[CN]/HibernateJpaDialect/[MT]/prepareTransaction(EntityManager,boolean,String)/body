@@ -1,0 +1,16 @@
+{
+  Session session=getSession(entityManager);
+  FlushMode flushMode=session.getFlushMode();
+  FlushMode previousFlushMode=null;
+  if (readOnly) {
+    session.setFlushMode(FlushMode.MANUAL);
+    previousFlushMode=flushMode;
+  }
+ else {
+    if (flushMode.lessThan(FlushMode.COMMIT)) {
+      session.setFlushMode(FlushMode.AUTO);
+      previousFlushMode=flushMode;
+    }
+  }
+  return new SessionTransactionData(session,previousFlushMode);
+}

@@ -1,0 +1,30 @@
+{
+  PersistenceUnitManager managerToUse=this.persistenceUnitManager;
+  if (this.persistenceUnitManager == null) {
+    this.internalPersistenceUnitManager.afterPropertiesSet();
+    managerToUse=this.internalPersistenceUnitManager;
+  }
+  this.persistenceUnitInfo=determinePersistenceUnitInfo(managerToUse);
+  JpaVendorAdapter jpaVendorAdapter=getJpaVendorAdapter();
+  if (jpaVendorAdapter != null && this.persistenceUnitInfo instanceof MutablePersistenceUnitInfo) {
+    ((MutablePersistenceUnitInfo)this.persistenceUnitInfo).setPersistenceProviderPackageName(jpaVendorAdapter.getPersistenceProviderRootPackage());
+  }
+  PersistenceProvider provider=getPersistenceProvider();
+  if (provider == null) {
+    String providerClassName=this.persistenceUnitInfo.getPersistenceProviderClassName();
+    if (providerClassName == null) {
+      throw new IllegalArgumentException("No PersistenceProvider specified in EntityManagerFactory configuration, " + "and chosen PersistenceUnitInfo does not specify a provider class name either");
+    }
+    Class providerClass=ClassUtils.resolveClassName(providerClassName,getBeanClassLoader());
+    provider=(PersistenceProvider)BeanUtils.instantiateClass(providerClass);
+  }
+  if (provider == null) {
+    throw new IllegalStateException("Unable to determine persistence provider. " + "Please check configuration of " + getClass().getName() + "; "+ "ideally specify the appropriate JpaVendorAdapter class for this provider.");
+  }
+  if (logger.isInfoEnabled()) {
+    logger.info("Building JPA container EntityManagerFactory for persistence unit '" + this.persistenceUnitInfo.getPersistenceUnitName() + "'");
+  }
+  this.nativeEntityManagerFactory=provider.createContainerEntityManagerFactory(this.persistenceUnitInfo,getJpaPropertyMap());
+  postProcessEntityManagerFactory(this.nativeEntityManagerFactory,this.persistenceUnitInfo);
+  return this.nativeEntityManagerFactory;
+}

@@ -1,0 +1,21 @@
+{
+  Class[] emIfcs=null;
+  if (emf instanceof EntityManagerFactoryInfo) {
+    EntityManagerFactoryInfo emfInfo=(EntityManagerFactoryInfo)emf;
+    Class emIfc=emfInfo.getEntityManagerInterface();
+    if (emIfc == null) {
+      emIfc=EntityManager.class;
+    }
+    JpaDialect jpaDialect=emfInfo.getJpaDialect();
+    if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
+      emIfcs=new Class[]{emIfc,EntityManagerPlus.class};
+    }
+ else {
+      emIfcs=new Class[]{emIfc};
+    }
+  }
+ else {
+    emIfcs=new Class[]{EntityManager.class};
+  }
+  return createSharedEntityManager(emf,properties,emIfcs);
+}

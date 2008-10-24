@@ -1,0 +1,15 @@
+{
+  Assert.notNull(sessionFactory,"No SessionFactory specified");
+  Map holderMap=(Map)deferredCloseHolder.get();
+  if (holderMap == null || !holderMap.containsKey(sessionFactory)) {
+    throw new IllegalStateException("Deferred close not active for SessionFactory [" + sessionFactory + "]");
+  }
+  logger.debug("Processing deferred close of Hibernate Sessions");
+  Set sessions=(Set)holderMap.remove(sessionFactory);
+  for (Iterator it=sessions.iterator(); it.hasNext(); ) {
+    closeSession((Session)it.next());
+  }
+  if (holderMap.isEmpty()) {
+    deferredCloseHolder.set(null);
+  }
+}

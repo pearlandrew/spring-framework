@@ -1,0 +1,15 @@
+{
+  Assert.notNull(rawEm,"EntityManager must not be null");
+  Set<Class> ifcs=new LinkedHashSet<Class>();
+  if (emIfc != null) {
+    ifcs.add(emIfc);
+  }
+ else {
+    ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(rawEm.getClass(),cl));
+  }
+  ifcs.add(EntityManagerProxy.class);
+  if (plusOperations != null) {
+    ifcs.add(EntityManagerPlusOperations.class);
+  }
+  return (EntityManager)Proxy.newProxyInstance((cl != null ? cl : ExtendedEntityManagerCreator.class.getClassLoader()),ifcs.toArray(new Class[ifcs.size()]),new ExtendedEntityManagerInvocationHandler(rawEm,plusOperations,exceptionTranslator,jta,containerManaged));
+}

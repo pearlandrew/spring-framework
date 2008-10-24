@@ -1,0 +1,20 @@
+{
+  Assert.notNull(sessionFactory,"No SessionFactory specified");
+  SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.getResource(sessionFactory);
+  if (sessionHolder != null) {
+    return sessionHolder.getSession();
+  }
+  if (!allowCreate && !TransactionSynchronizationManager.isSynchronizationActive()) {
+    throw new IllegalStateException("No TopLink Session bound to thread, " + "and configuration does not allow creation of non-transactional one here");
+  }
+  logger.debug("Creating TopLink Session");
+  Session session=sessionFactory.createSession();
+  if (TransactionSynchronizationManager.isSynchronizationActive()) {
+    logger.debug("Registering new Spring transaction synchronization for new TopLink Session");
+    sessionHolder=new SessionHolder(session);
+    sessionHolder.setSynchronizedWithTransaction(true);
+    TransactionSynchronizationManager.registerSynchronization(new SessionSynchronization(sessionHolder,sessionFactory));
+    TransactionSynchronizationManager.bindResource(sessionFactory,sessionHolder);
+  }
+  return session;
+}

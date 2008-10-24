@@ -1,0 +1,39 @@
+{
+  if (this.jpaVendorAdapter != null) {
+    if (this.persistenceProvider == null) {
+      this.persistenceProvider=this.jpaVendorAdapter.getPersistenceProvider();
+    }
+    Map vendorPropertyMap=this.jpaVendorAdapter.getJpaPropertyMap();
+    if (vendorPropertyMap != null) {
+      for (Iterator it=vendorPropertyMap.entrySet().iterator(); it.hasNext(); ) {
+        Map.Entry entry=(Map.Entry)it.next();
+        if (!this.jpaPropertyMap.containsKey(entry.getKey())) {
+          this.jpaPropertyMap.put(entry.getKey(),entry.getValue());
+        }
+      }
+    }
+    if (this.entityManagerFactoryInterface == null) {
+      this.entityManagerFactoryInterface=this.jpaVendorAdapter.getEntityManagerFactoryInterface();
+      if (!ClassUtils.isVisible(this.entityManagerFactoryInterface,this.beanClassLoader)) {
+        this.entityManagerFactoryInterface=EntityManagerFactory.class;
+      }
+    }
+    if (this.entityManagerInterface == null) {
+      this.entityManagerInterface=this.jpaVendorAdapter.getEntityManagerInterface();
+      if (!ClassUtils.isVisible(this.entityManagerInterface,this.beanClassLoader)) {
+        this.entityManagerInterface=EntityManager.class;
+      }
+    }
+    if (this.jpaDialect == null) {
+      this.jpaDialect=this.jpaVendorAdapter.getJpaDialect();
+    }
+  }
+  this.nativeEntityManagerFactory=createNativeEntityManagerFactory();
+  if (this.nativeEntityManagerFactory == null) {
+    throw new IllegalStateException("JPA PersistenceProvider returned null EntityManagerFactory - check your JPA provider setup!");
+  }
+  if (this.jpaVendorAdapter != null) {
+    this.jpaVendorAdapter.postProcessEntityManagerFactory(this.nativeEntityManagerFactory);
+  }
+  this.entityManagerFactory=createEntityManagerFactoryProxy(this.nativeEntityManagerFactory);
+}

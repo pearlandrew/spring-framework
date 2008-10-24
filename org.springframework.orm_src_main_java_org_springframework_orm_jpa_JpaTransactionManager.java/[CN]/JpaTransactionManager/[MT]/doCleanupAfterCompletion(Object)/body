@@ -1,0 +1,27 @@
+{
+  JpaTransactionObject txObject=(JpaTransactionObject)transaction;
+  if (txObject.isNewEntityManagerHolder()) {
+    TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
+  }
+  txObject.getEntityManagerHolder().clear();
+  if (txObject.hasConnectionHolder()) {
+    TransactionSynchronizationManager.unbindResource(getDataSource());
+    try {
+      getJpaDialect().releaseJdbcConnection(txObject.getConnectionHolder().getConnectionHandle(),txObject.getEntityManagerHolder().getEntityManager());
+    }
+ catch (    Exception ex) {
+      logger.error("Could not close JDBC connection after transaction",ex);
+    }
+  }
+  getJpaDialect().cleanupTransaction(txObject.getTransactionData());
+  if (txObject.isNewEntityManagerHolder()) {
+    EntityManager em=txObject.getEntityManagerHolder().getEntityManager();
+    if (logger.isDebugEnabled()) {
+      logger.debug("Closing JPA EntityManager [" + em + "] after transaction");
+    }
+    EntityManagerFactoryUtils.closeEntityManager(em);
+  }
+ else {
+    logger.debug("Not closing pre-bound JPA EntityManager after transaction");
+  }
+}

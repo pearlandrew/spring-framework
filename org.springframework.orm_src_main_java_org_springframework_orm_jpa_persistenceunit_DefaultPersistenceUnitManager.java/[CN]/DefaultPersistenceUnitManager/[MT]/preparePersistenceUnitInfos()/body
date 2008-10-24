@@ -1,0 +1,24 @@
+{
+  this.persistenceUnitInfoNames.clear();
+  this.persistenceUnitInfos.clear();
+  SpringPersistenceUnitInfo[] puis=readPersistenceUnitInfos();
+  for (int i=0; i < puis.length; i++) {
+    SpringPersistenceUnitInfo pui=puis[i];
+    if (pui.getPersistenceUnitRootUrl() == null) {
+      pui.setPersistenceUnitRootUrl(determineDefaultPersistenceUnitRootUrl());
+    }
+    if (pui.getNonJtaDataSource() == null) {
+      pui.setNonJtaDataSource(this.defaultDataSource);
+    }
+    if (this.loadTimeWeaver != null) {
+      pui.init(this.loadTimeWeaver);
+    }
+ else {
+      pui.init(this.resourcePatternResolver.getClassLoader());
+    }
+    postProcessPersistenceUnitInfo(pui);
+    String name=pui.getPersistenceUnitName();
+    this.persistenceUnitInfoNames.add(name);
+    this.persistenceUnitInfos.put(name,pui);
+  }
+}

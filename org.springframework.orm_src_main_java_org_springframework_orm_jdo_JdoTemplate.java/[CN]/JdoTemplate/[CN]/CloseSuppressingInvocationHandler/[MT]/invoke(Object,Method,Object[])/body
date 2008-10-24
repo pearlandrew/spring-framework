@@ -1,0 +1,21 @@
+{
+  if (method.getName().equals("equals")) {
+    return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+  }
+ else   if (method.getName().equals("hashCode")) {
+    return new Integer(System.identityHashCode(proxy));
+  }
+ else   if (method.getName().equals("close")) {
+    return null;
+  }
+  try {
+    Object retVal=method.invoke(this.target,args);
+    if (retVal instanceof Query) {
+      prepareQuery(((Query)retVal));
+    }
+    return retVal;
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+}

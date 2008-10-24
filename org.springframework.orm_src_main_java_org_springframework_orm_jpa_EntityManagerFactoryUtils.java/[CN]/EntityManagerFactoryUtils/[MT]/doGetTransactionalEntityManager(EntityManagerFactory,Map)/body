@@ -1,0 +1,32 @@
+{
+  Assert.notNull(emf,"No EntityManagerFactory specified");
+  EntityManagerHolder emHolder=(EntityManagerHolder)TransactionSynchronizationManager.getResource(emf);
+  if (emHolder != null) {
+    if (!emHolder.isSynchronizedWithTransaction() && TransactionSynchronizationManager.isSynchronizationActive()) {
+      try {
+        emHolder.getEntityManager().joinTransaction();
+      }
+ catch (      TransactionRequiredException ex) {
+        logger.debug("Could not join JTA transaction because none was active",ex);
+      }
+      Object transactionData=prepareTransaction(emHolder.getEntityManager(),emf);
+      TransactionSynchronizationManager.registerSynchronization(new EntityManagerSynchronization(emHolder,emf,transactionData,false));
+      emHolder.setSynchronizedWithTransaction(true);
+    }
+    return emHolder.getEntityManager();
+  }
+  if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+    return null;
+  }
+  logger.debug("Opening JPA EntityManager");
+  EntityManager em=(!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
+  if (TransactionSynchronizationManager.isSynchronizationActive()) {
+    logger.debug("Registering transaction synchronization for JPA EntityManager");
+    emHolder=new EntityManagerHolder(em);
+    Object transactionData=prepareTransaction(em,emf);
+    TransactionSynchronizationManager.registerSynchronization(new EntityManagerSynchronization(emHolder,emf,transactionData,true));
+    emHolder.setSynchronizedWithTransaction(true);
+    TransactionSynchronizationManager.bindResource(emf,emHolder);
+  }
+  return em;
+}

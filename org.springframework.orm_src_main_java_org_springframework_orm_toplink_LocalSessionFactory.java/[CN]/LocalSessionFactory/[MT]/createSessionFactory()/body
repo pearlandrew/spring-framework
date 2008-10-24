@@ -1,0 +1,30 @@
+{
+  if (logger.isInfoEnabled()) {
+    logger.info("Initializing TopLink SessionFactory from [" + this.configLocation + "]");
+  }
+  ClassLoader classLoader=(this.sessionClassLoader != null ? this.sessionClassLoader : ClassUtils.getDefaultClassLoader());
+  DatabaseSession session=loadDatabaseSession(this.configLocation,this.sessionName,classLoader);
+  if (session == null) {
+    throw new IllegalStateException("A session named '" + this.sessionName + "' could not be loaded from resource ["+ this.configLocation+ "] using ClassLoader ["+ classLoader+ "]. "+ "This is most likely a deployment issue: Can the class loader access the resource?");
+  }
+  DatabaseLogin login=(this.databaseLogin != null ? this.databaseLogin : session.getLogin());
+  if (this.loginPropertyMap != null) {
+    PropertyAccessorFactory.forBeanPropertyAccess(login).setPropertyValues(this.loginPropertyMap);
+  }
+  if (this.dataSource != null) {
+    login.setConnector(new JNDIConnector(this.dataSource));
+    login.setUsesExternalConnectionPooling(true);
+  }
+  if (this.databasePlatform != null) {
+    login.usePlatform(this.databasePlatform);
+  }
+  if (this.databaseLogin != null) {
+    setDatabaseLogin(session,this.databaseLogin);
+  }
+  if (this.sessionLog != null) {
+    session.setSessionLog(this.sessionLog);
+    session.logMessages();
+  }
+  session.login();
+  return newSessionFactory(session);
+}

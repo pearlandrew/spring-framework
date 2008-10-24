@@ -1,0 +1,29 @@
+{
+  SpringPersistenceUnitInfo unitInfo=new SpringPersistenceUnitInfo();
+  unitInfo.setPersistenceUnitName(persistenceUnit.getAttribute(UNIT_NAME).trim());
+  String txType=persistenceUnit.getAttribute(TRANSACTION_TYPE).trim();
+  if (StringUtils.hasText(txType)) {
+    unitInfo.setTransactionType(PersistenceUnitTransactionType.valueOf(txType));
+  }
+  String jtaDataSource=DomUtils.getChildElementValueByTagName(persistenceUnit,JTA_DATA_SOURCE);
+  if (StringUtils.hasText(jtaDataSource)) {
+    unitInfo.setJtaDataSource(this.dataSourceLookup.getDataSource(jtaDataSource.trim()));
+  }
+  String nonJtaDataSource=DomUtils.getChildElementValueByTagName(persistenceUnit,NON_JTA_DATA_SOURCE);
+  if (StringUtils.hasText(nonJtaDataSource)) {
+    unitInfo.setNonJtaDataSource(this.dataSourceLookup.getDataSource(nonJtaDataSource.trim()));
+  }
+  String provider=DomUtils.getChildElementValueByTagName(persistenceUnit,PROVIDER);
+  if (StringUtils.hasText(provider)) {
+    unitInfo.setPersistenceProviderClassName(provider.trim());
+  }
+  Element excludeUnlistedClasses=DomUtils.getChildElementByTagName(persistenceUnit,EXCLUDE_UNLISTED_CLASSES);
+  if (excludeUnlistedClasses != null) {
+    unitInfo.setExcludeUnlistedClasses(true);
+  }
+  parseMappingFiles(persistenceUnit,unitInfo);
+  parseJarFiles(persistenceUnit,unitInfo);
+  parseClass(persistenceUnit,unitInfo);
+  parseProperty(persistenceUnit,unitInfo);
+  return unitInfo;
+}

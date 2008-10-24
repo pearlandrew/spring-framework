@@ -1,0 +1,19 @@
+{
+  if (method.getName().equals("equals")) {
+    return (proxy == args[0]);
+  }
+ else   if (method.getName().equals("hashCode")) {
+    return hashCode();
+  }
+  try {
+    return method.invoke(this.target,args);
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+ finally {
+    if (method.getName().equals("getResultList") || method.getName().equals("getSingleResult") || method.getName().equals("executeUpdate")) {
+      EntityManagerFactoryUtils.closeEntityManager(this.em);
+    }
+  }
+}

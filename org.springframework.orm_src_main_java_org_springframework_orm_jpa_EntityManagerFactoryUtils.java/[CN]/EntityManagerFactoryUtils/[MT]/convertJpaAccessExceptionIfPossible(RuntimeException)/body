@@ -1,0 +1,30 @@
+{
+  if (ex instanceof IllegalStateException) {
+    return new InvalidDataAccessApiUsageException(ex.getMessage(),ex);
+  }
+  if (ex instanceof IllegalArgumentException) {
+    return new InvalidDataAccessApiUsageException(ex.getMessage(),ex);
+  }
+  if (ex instanceof EntityNotFoundException) {
+    return new JpaObjectRetrievalFailureException((EntityNotFoundException)ex);
+  }
+  if (ex instanceof NoResultException) {
+    return new EmptyResultDataAccessException(ex.getMessage(),1);
+  }
+  if (ex instanceof NonUniqueResultException) {
+    return new IncorrectResultSizeDataAccessException(ex.getMessage(),1);
+  }
+  if (ex instanceof OptimisticLockException) {
+    return new JpaOptimisticLockingFailureException((OptimisticLockException)ex);
+  }
+  if (ex instanceof EntityExistsException) {
+    return new DataIntegrityViolationException(ex.getMessage(),ex);
+  }
+  if (ex instanceof TransactionRequiredException) {
+    return new InvalidDataAccessApiUsageException(ex.getMessage(),ex);
+  }
+  if (ex instanceof PersistenceException) {
+    return new JpaSystemException((PersistenceException)ex);
+  }
+  return null;
+}

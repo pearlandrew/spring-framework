@@ -1,0 +1,37 @@
+{
+  SessionFactory sessionFactory=lookupSessionFactory(request);
+  boolean participate=false;
+  if (isSingleSession()) {
+    if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
+      participate=true;
+    }
+ else {
+      logger.debug("Opening single Hibernate Session in OpenSessionInViewFilter");
+      Session session=getSession(sessionFactory);
+      TransactionSynchronizationManager.bindResource(sessionFactory,new SessionHolder(session));
+    }
+  }
+ else {
+    if (SessionFactoryUtils.isDeferredCloseActive(sessionFactory)) {
+      participate=true;
+    }
+ else {
+      SessionFactoryUtils.initDeferredClose(sessionFactory);
+    }
+  }
+  try {
+    filterChain.doFilter(request,response);
+  }
+  finally {
+    if (!participate) {
+      if (isSingleSession()) {
+        SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.unbindResource(sessionFactory);
+        logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
+        closeSession(sessionHolder.getSession(),sessionFactory);
+      }
+ else {
+        SessionFactoryUtils.processDeferredClose(sessionFactory);
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  if (this.lobHandler != null) {
+    configTimeLobHandlerHolder.set(this.lobHandler);
+  }
+  try {
+    this.sqlMapClient=buildSqlMapClient(this.configLocations,this.mappingLocations,this.sqlMapClientProperties);
+    if (this.dataSource != null) {
+      TransactionConfig transactionConfig=(TransactionConfig)this.transactionConfigClass.newInstance();
+      DataSource dataSourceToUse=this.dataSource;
+      if (this.useTransactionAwareDataSource && !(this.dataSource instanceof TransactionAwareDataSourceProxy)) {
+        dataSourceToUse=new TransactionAwareDataSourceProxy(this.dataSource);
+      }
+      transactionConfig.setDataSource(dataSourceToUse);
+      transactionConfig.initialize(this.transactionConfigProperties);
+      applyTransactionConfig(this.sqlMapClient,transactionConfig);
+    }
+  }
+  finally {
+    if (this.lobHandler != null) {
+      configTimeLobHandlerHolder.set(null);
+    }
+  }
+}

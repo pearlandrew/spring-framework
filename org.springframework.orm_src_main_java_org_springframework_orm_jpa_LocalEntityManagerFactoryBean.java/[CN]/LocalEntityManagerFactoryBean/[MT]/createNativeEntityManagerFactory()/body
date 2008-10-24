@@ -1,0 +1,16 @@
+{
+  if (logger.isInfoEnabled()) {
+    logger.info("Building JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
+  }
+  PersistenceProvider provider=getPersistenceProvider();
+  if (provider != null) {
+    EntityManagerFactory emf=provider.createEntityManagerFactory(getPersistenceUnitName(),getJpaPropertyMap());
+    if (emf == null) {
+      throw new IllegalStateException("PersistenceProvider [" + provider + "] did not return an EntityManagerFactory for name '"+ getPersistenceUnitName()+ "'");
+    }
+    return emf;
+  }
+ else {
+    return Persistence.createEntityManagerFactory(getPersistenceUnitName(),getJpaPropertyMap());
+  }
+}

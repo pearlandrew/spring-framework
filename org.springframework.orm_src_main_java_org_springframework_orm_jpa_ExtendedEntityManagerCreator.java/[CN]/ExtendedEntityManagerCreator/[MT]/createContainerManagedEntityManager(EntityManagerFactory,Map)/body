@@ -1,0 +1,13 @@
+{
+  Assert.notNull(emf,"EntityManagerFactory must not be null");
+  if (emf instanceof EntityManagerFactoryInfo) {
+    EntityManagerFactoryInfo emfInfo=(EntityManagerFactoryInfo)emf;
+    EntityManagerFactory nativeEmf=emfInfo.getNativeEntityManagerFactory();
+    EntityManager rawEntityManager=(!CollectionUtils.isEmpty(properties) ? nativeEmf.createEntityManager(properties) : nativeEmf.createEntityManager());
+    return createProxy(rawEntityManager,emfInfo,true);
+  }
+ else {
+    EntityManager rawEntityManager=(!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
+    return createProxy(rawEntityManager,null,null,null,null,null,true);
+  }
+}

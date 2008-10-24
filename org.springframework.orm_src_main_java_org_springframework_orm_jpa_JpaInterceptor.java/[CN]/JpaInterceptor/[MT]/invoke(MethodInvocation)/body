@@ -1,0 +1,29 @@
+{
+  EntityManager em=getTransactionalEntityManager();
+  boolean isNewEm=false;
+  if (em == null) {
+    logger.debug("Creating new EntityManager for JpaInterceptor invocation");
+    em=createEntityManager();
+    isNewEm=true;
+    TransactionSynchronizationManager.bindResource(getEntityManagerFactory(),new EntityManagerHolder(em));
+  }
+  try {
+    Object retVal=methodInvocation.proceed();
+    flushIfNecessary(em,!isNewEm);
+    return retVal;
+  }
+ catch (  RuntimeException rawException) {
+    if (this.exceptionConversionEnabled) {
+      throw translateIfNecessary(rawException);
+    }
+ else {
+      throw rawException;
+    }
+  }
+ finally {
+    if (isNewEm) {
+      TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
+      EntityManagerFactoryUtils.closeEntityManager(em);
+    }
+  }
+}

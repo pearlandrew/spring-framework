@@ -1,0 +1,19 @@
+{
+  Properties jpaProperties=new Properties();
+  if (getDatabasePlatform() != null) {
+    jpaProperties.setProperty(Environment.DIALECT,getDatabasePlatform());
+  }
+ else   if (getDatabase() != null) {
+    Class databaseDialectClass=determineDatabaseDialectClass(getDatabase());
+    if (databaseDialectClass != null) {
+      jpaProperties.setProperty(Environment.DIALECT,databaseDialectClass.getName());
+    }
+  }
+  if (isGenerateDdl()) {
+    jpaProperties.setProperty(Environment.HBM2DDL_AUTO,"update");
+  }
+  if (isShowSql()) {
+    jpaProperties.setProperty(Environment.SHOW_SQL,"true");
+  }
+  return jpaProperties;
+}

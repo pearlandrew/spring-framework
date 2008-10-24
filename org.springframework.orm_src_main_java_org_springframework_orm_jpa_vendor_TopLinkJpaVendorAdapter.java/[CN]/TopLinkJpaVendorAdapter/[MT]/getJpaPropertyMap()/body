@@ -1,0 +1,20 @@
+{
+  Properties jpaProperties=new Properties();
+  if (getDatabasePlatform() != null) {
+    jpaProperties.setProperty(TopLinkProperties.TARGET_DATABASE,getDatabasePlatform());
+  }
+ else   if (getDatabase() != null) {
+    String targetDatabase=determineTargetDatabaseName(getDatabase());
+    if (targetDatabase != null) {
+      jpaProperties.setProperty(TopLinkProperties.TARGET_DATABASE,targetDatabase);
+    }
+  }
+  if (isGenerateDdl()) {
+    jpaProperties.setProperty(EntityManagerFactoryProvider.DDL_GENERATION,EntityManagerFactoryProvider.CREATE_ONLY);
+    jpaProperties.setProperty(EntityManagerFactoryProvider.DDL_GENERATION_MODE,EntityManagerFactoryProvider.DDL_DATABASE_GENERATION);
+  }
+  if (isShowSql()) {
+    jpaProperties.setProperty(TopLinkProperties.LOGGING_LEVEL,Level.FINE.toString());
+  }
+  return jpaProperties;
+}

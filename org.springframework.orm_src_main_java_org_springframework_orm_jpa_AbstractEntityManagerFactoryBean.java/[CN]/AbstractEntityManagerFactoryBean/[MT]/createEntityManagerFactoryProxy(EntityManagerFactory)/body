@@ -1,0 +1,16 @@
+{
+  Set<Class> ifcs=new LinkedHashSet<Class>();
+  if (this.entityManagerFactoryInterface != null) {
+    ifcs.add(this.entityManagerFactoryInterface);
+  }
+ else {
+    ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(emf.getClass(),this.beanClassLoader));
+  }
+  ifcs.add(EntityManagerFactoryInfo.class);
+  EntityManagerFactoryPlusOperations plusOperations=null;
+  if (getJpaDialect() != null && getJpaDialect().supportsEntityManagerFactoryPlusOperations()) {
+    plusOperations=getJpaDialect().getEntityManagerFactoryPlusOperations(emf);
+    ifcs.add(EntityManagerFactoryPlusOperations.class);
+  }
+  return (EntityManagerFactory)Proxy.newProxyInstance(this.beanClassLoader,ifcs.toArray(new Class[ifcs.size()]),new ManagedEntityManagerFactoryInvocationHandler(emf,this,plusOperations));
+}

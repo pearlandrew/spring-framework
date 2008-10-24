@@ -1,0 +1,14 @@
+{
+  Assert.notNull(beanFactory,"ListableBeanFactory must not be null");
+  Assert.hasLength(unitName,"Unit name must not be empty");
+  String[] candidateNames=BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory,EntityManagerFactory.class);
+  for (  String candidateName : candidateNames) {
+    EntityManagerFactory emf=(EntityManagerFactory)beanFactory.getBean(candidateName);
+    if (emf instanceof EntityManagerFactoryInfo) {
+      if (unitName.equals(((EntityManagerFactoryInfo)emf).getPersistenceUnitName())) {
+        return emf;
+      }
+    }
+  }
+  return (EntityManagerFactory)beanFactory.getBean(unitName,EntityManagerFactory.class);
+}

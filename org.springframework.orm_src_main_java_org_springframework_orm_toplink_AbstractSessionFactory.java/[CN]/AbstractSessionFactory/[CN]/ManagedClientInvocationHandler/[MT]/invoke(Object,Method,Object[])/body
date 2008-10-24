@@ -1,0 +1,24 @@
+{
+  if (method.getName().equals("equals")) {
+    return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+  }
+ else   if (method.getName().equals("hashCode")) {
+    return new Integer(System.identityHashCode(proxy));
+  }
+ else   if (method.getName().equals("getActiveSession")) {
+    return this.target;
+  }
+ else   if (method.getName().equals("getActiveUnitOfWork")) {
+    return this.uow;
+  }
+ else   if (method.getName().equals("release")) {
+    this.uow.release();
+    this.target.release();
+  }
+  try {
+    return method.invoke(this.target,args);
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+}

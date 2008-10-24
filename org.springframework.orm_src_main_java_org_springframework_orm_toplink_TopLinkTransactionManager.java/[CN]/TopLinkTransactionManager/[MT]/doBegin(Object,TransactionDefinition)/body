@@ -1,0 +1,51 @@
+{
+  Session session=null;
+  try {
+    if (!definition.isReadOnly()) {
+      logger.debug("Creating managed TopLink Session with active UnitOfWork for read-write transaction");
+      session=getSessionFactory().createManagedClientSession();
+    }
+ else {
+      logger.debug("Creating plain TopLink Session without active UnitOfWork for read-only transaction");
+      session=getSessionFactory().createSession();
+    }
+    if (logger.isDebugEnabled()) {
+      logger.debug("Opened new session [" + session + "] for TopLink transaction");
+    }
+    TopLinkTransactionObject txObject=(TopLinkTransactionObject)transaction;
+    txObject.setSessionHolder(new SessionHolder(session));
+    txObject.getSessionHolder().setSynchronizedWithTransaction(true);
+    int timeout=determineTimeout(definition);
+    if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+      txObject.getSessionHolder().setTimeoutInSeconds(timeout);
+    }
+    if (!definition.isReadOnly() && !isLazyDatabaseTransaction()) {
+      session.getActiveUnitOfWork().beginEarlyTransaction();
+    }
+    if (getDataSource() != null) {
+      Session mostSpecificSession=(!definition.isReadOnly() ? session.getActiveUnitOfWork() : session);
+      Connection con=getJdbcConnection(mostSpecificSession);
+      if (con != null) {
+        ConnectionHolder conHolder=new ConnectionHolder(con);
+        if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+          conHolder.setTimeoutInSeconds(timeout);
+        }
+        if (logger.isDebugEnabled()) {
+          logger.debug("Exposing TopLink transaction as JDBC transaction [" + con + "]");
+        }
+        TransactionSynchronizationManager.bindResource(getDataSource(),conHolder);
+        txObject.setConnectionHolder(conHolder);
+      }
+ else {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Not exposing TopLink transaction [" + session + "] as JDBC transaction because no JDBC Connection could be retrieved from it");
+        }
+      }
+    }
+    TransactionSynchronizationManager.bindResource(getSessionFactory(),txObject.getSessionHolder());
+  }
+ catch (  Exception ex) {
+    SessionFactoryUtils.releaseSession(session,getSessionFactory());
+    throw new CannotCreateTransactionException("Could not open TopLink Session for transaction",ex);
+  }
+}

@@ -1,0 +1,27 @@
+{
+  EntityManagerFactory emf=lookupEntityManagerFactory(request);
+  boolean participate=false;
+  if (TransactionSynchronizationManager.hasResource(emf)) {
+    participate=true;
+  }
+ else {
+    logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewFilter");
+    try {
+      EntityManager em=createEntityManager(emf);
+      TransactionSynchronizationManager.bindResource(emf,new EntityManagerHolder(em));
+    }
+ catch (    PersistenceException ex) {
+      throw new DataAccessResourceFailureException("Could not create JPA EntityManager",ex);
+    }
+  }
+  try {
+    filterChain.doFilter(request,response);
+  }
+  finally {
+    if (!participate) {
+      EntityManagerHolder emHolder=(EntityManagerHolder)TransactionSynchronizationManager.unbindResource(emf);
+      logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewFilter");
+      EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  super(member,pd);
+  AnnotatedElement ae=(AnnotatedElement)member;
+  PersistenceContext pc=ae.getAnnotation(PersistenceContext.class);
+  PersistenceUnit pu=ae.getAnnotation(PersistenceUnit.class);
+  Class resourceType=EntityManager.class;
+  if (pc != null) {
+    if (pu != null) {
+      throw new IllegalStateException("Member may only be annotated with either " + "@PersistenceContext or @PersistenceUnit, not both: " + member);
+    }
+    Properties properties=null;
+    PersistenceProperty[] pps=pc.properties();
+    if (!ObjectUtils.isEmpty(pps)) {
+      properties=new Properties();
+      for (int i=0; i < pps.length; i++) {
+        PersistenceProperty pp=pps[i];
+        properties.setProperty(pp.name(),pp.value());
+      }
+    }
+    this.unitName=pc.unitName();
+    this.type=pc.type();
+    this.properties=properties;
+  }
+ else {
+    resourceType=EntityManagerFactory.class;
+    this.unitName=pu.unitName();
+  }
+  checkResourceType(resourceType);
+}

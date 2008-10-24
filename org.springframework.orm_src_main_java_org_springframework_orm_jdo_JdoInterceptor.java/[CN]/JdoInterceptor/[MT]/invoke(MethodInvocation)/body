@@ -1,0 +1,34 @@
+{
+  boolean existingTransaction=false;
+  PersistenceManager pm=PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(),true);
+  if (TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory())) {
+    logger.debug("Found thread-bound PersistenceManager for JDO interceptor");
+    existingTransaction=true;
+  }
+ else {
+    logger.debug("Using new PersistenceManager for JDO interceptor");
+    TransactionSynchronizationManager.bindResource(getPersistenceManagerFactory(),new PersistenceManagerHolder(pm));
+  }
+  try {
+    Object retVal=methodInvocation.proceed();
+    flushIfNecessary(pm,existingTransaction);
+    return retVal;
+  }
+ catch (  JDOException ex) {
+    if (this.exceptionConversionEnabled) {
+      throw convertJdoAccessException(ex);
+    }
+ else {
+      throw ex;
+    }
+  }
+ finally {
+    if (existingTransaction) {
+      logger.debug("Not closing pre-bound JDO PersistenceManager after interceptor");
+    }
+ else {
+      TransactionSynchronizationManager.unbindResource(getPersistenceManagerFactory());
+      PersistenceManagerFactoryUtils.releasePersistenceManager(pm,getPersistenceManagerFactory());
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  if (ObjectUtils.isEmpty(configLocations)) {
+    throw new IllegalArgumentException("At least 1 'configLocation' entry is required");
+  }
+  SqlMapClient client=null;
+  SqlMapConfigParser configParser=new SqlMapConfigParser();
+  for (int i=0; i < configLocations.length; i++) {
+    InputStream is=configLocations[i].getInputStream();
+    try {
+      client=configParser.parse(is,properties);
+    }
+ catch (    RuntimeException ex) {
+      throw new NestedIOException("Failed to parse config resource: " + configLocations[i],ex.getCause());
+    }
+  }
+  if (mappingLocations != null) {
+    SqlMapParser mapParser=SqlMapParserFactory.createSqlMapParser(configParser);
+    for (int i=0; i < mappingLocations.length; i++) {
+      try {
+        mapParser.parse(mappingLocations[i].getInputStream());
+      }
+ catch (      NodeletException ex) {
+        throw new NestedIOException("Failed to parse mapping resource: " + mappingLocations[i],ex);
+      }
+    }
+  }
+  return client;
+}

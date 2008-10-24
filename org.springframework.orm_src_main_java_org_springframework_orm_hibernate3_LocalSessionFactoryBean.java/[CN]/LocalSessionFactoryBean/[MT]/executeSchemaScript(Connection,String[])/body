@@ -1,0 +1,24 @@
+{
+  if (sql != null && sql.length > 0) {
+    boolean oldAutoCommit=con.getAutoCommit();
+    if (!oldAutoCommit) {
+      con.setAutoCommit(true);
+    }
+    try {
+      Statement stmt=con.createStatement();
+      try {
+        for (int i=0; i < sql.length; i++) {
+          executeSchemaStatement(stmt,sql[i]);
+        }
+      }
+  finally {
+        JdbcUtils.closeStatement(stmt);
+      }
+    }
+  finally {
+      if (!oldAutoCommit) {
+        con.setAutoCommit(false);
+      }
+    }
+  }
+}

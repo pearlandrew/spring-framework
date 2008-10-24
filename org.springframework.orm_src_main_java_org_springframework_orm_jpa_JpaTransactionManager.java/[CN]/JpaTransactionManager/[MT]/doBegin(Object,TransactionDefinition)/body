@@ -1,0 +1,54 @@
+{
+  JpaTransactionObject txObject=(JpaTransactionObject)transaction;
+  if (txObject.hasConnectionHolder() && !txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
+    throw new IllegalTransactionStateException("Pre-bound JDBC Connection found! JpaTransactionManager does not support " + "running within DataSourceTransactionManager if told to manage the DataSource itself. " + "It is recommended to use a single JpaTransactionManager for all transactions "+ "on a single DataSource, no matter whether JPA or JDBC access.");
+  }
+  EntityManager em=null;
+  try {
+    if (txObject.getEntityManagerHolder() == null || txObject.getEntityManagerHolder().isSynchronizedWithTransaction()) {
+      EntityManager newEm=createEntityManagerForTransaction();
+      if (logger.isDebugEnabled()) {
+        logger.debug("Opened new EntityManager [" + newEm + "] for JPA transaction");
+      }
+      txObject.setEntityManagerHolder(new EntityManagerHolder(newEm),true);
+    }
+    em=txObject.getEntityManagerHolder().getEntityManager();
+    Object transactionData=getJpaDialect().beginTransaction(em,definition);
+    txObject.setTransactionData(transactionData);
+    int timeout=determineTimeout(definition);
+    if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+      txObject.getEntityManagerHolder().setTimeoutInSeconds(timeout);
+    }
+    if (getDataSource() != null) {
+      ConnectionHandle conHandle=getJpaDialect().getJdbcConnection(em,definition.isReadOnly());
+      if (conHandle != null) {
+        ConnectionHolder conHolder=new ConnectionHolder(conHandle);
+        if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+          conHolder.setTimeoutInSeconds(timeout);
+        }
+        if (logger.isDebugEnabled()) {
+          logger.debug("Exposing JPA transaction as JDBC transaction [" + conHolder.getConnectionHandle() + "]");
+        }
+        TransactionSynchronizationManager.bindResource(getDataSource(),conHolder);
+        txObject.setConnectionHolder(conHolder);
+      }
+ else {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Not exposing JPA transaction [" + em + "] as JDBC transaction because JpaDialect ["+ getJpaDialect()+ "] does not support JDBC Connection retrieval");
+        }
+      }
+    }
+    if (txObject.isNewEntityManagerHolder()) {
+      TransactionSynchronizationManager.bindResource(getEntityManagerFactory(),txObject.getEntityManagerHolder());
+    }
+    txObject.getEntityManagerHolder().setSynchronizedWithTransaction(true);
+  }
+ catch (  TransactionException ex) {
+    closeEntityManagerAfterFailedBegin(txObject);
+    throw ex;
+  }
+catch (  Exception ex) {
+    closeEntityManagerAfterFailedBegin(txObject);
+    throw new CannotCreateTransactionException("Could not open JPA EntityManager for transaction",ex);
+  }
+}

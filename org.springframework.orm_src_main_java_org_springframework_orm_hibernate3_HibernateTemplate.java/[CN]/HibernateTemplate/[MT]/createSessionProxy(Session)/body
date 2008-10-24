@@ -1,0 +1,14 @@
+{
+  Class[] sessionIfcs=null;
+  Class mainIfc=(session instanceof org.hibernate.classic.Session ? org.hibernate.classic.Session.class : Session.class);
+  if (session instanceof EventSource) {
+    sessionIfcs=new Class[]{mainIfc,EventSource.class};
+  }
+ else   if (session instanceof SessionImplementor) {
+    sessionIfcs=new Class[]{mainIfc,SessionImplementor.class};
+  }
+ else {
+    sessionIfcs=new Class[]{mainIfc};
+  }
+  return (Session)Proxy.newProxyInstance(session.getClass().getClassLoader(),sessionIfcs,new CloseSuppressingInvocationHandler(session));
+}

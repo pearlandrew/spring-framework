@@ -1,0 +1,20 @@
+{
+  if (method.getName().equals("equals")) {
+    return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+  }
+ else   if (method.getName().equals("hashCode")) {
+    return new Integer(System.identityHashCode(proxy));
+  }
+ else   if (method.getName().equals("getPersistenceManager")) {
+    PersistenceManagerFactory target=getTargetPersistenceManagerFactory();
+    PersistenceManager pm=PersistenceManagerFactoryUtils.doGetPersistenceManager(target,isAllowCreate());
+    Class[] ifcs=ClassUtils.getAllInterfacesForClass(pm.getClass(),getClass().getClassLoader());
+    return (PersistenceManager)Proxy.newProxyInstance(pm.getClass().getClassLoader(),ifcs,new TransactionAwareInvocationHandler(pm,target));
+  }
+  try {
+    return method.invoke(getTargetPersistenceManagerFactory(),args);
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+}
