@@ -1,0 +1,27 @@
+{
+  Thread currentThread=Thread.currentThread();
+  ClassLoader threadContextClassLoader=currentThread.getContextClassLoader();
+  boolean overrideClassLoader=(this.resourceLoader != null && !this.resourceLoader.getClassLoader().equals(threadContextClassLoader));
+  if (overrideClassLoader) {
+    currentThread.setContextClassLoader(this.resourceLoader.getClassLoader());
+  }
+  try {
+    SchedulerRepository repository=SchedulerRepository.getInstance();
+synchronized (repository) {
+      Scheduler existingScheduler=(schedulerName != null ? repository.lookup(schedulerName) : null);
+      Scheduler newScheduler=schedulerFactory.getScheduler();
+      if (newScheduler == existingScheduler) {
+        throw new IllegalStateException("Active Scheduler of name '" + schedulerName + "' already registered "+ "in Quartz SchedulerRepository. Cannot create a new Spring-managed Scheduler of the same name!");
+      }
+      if (!this.exposeSchedulerInRepository) {
+        SchedulerRepository.getInstance().remove(newScheduler.getSchedulerName());
+      }
+      return newScheduler;
+    }
+  }
+  finally {
+    if (overrideClassLoader) {
+      currentThread.setContextClassLoader(threadContextClassLoader);
+    }
+  }
+}

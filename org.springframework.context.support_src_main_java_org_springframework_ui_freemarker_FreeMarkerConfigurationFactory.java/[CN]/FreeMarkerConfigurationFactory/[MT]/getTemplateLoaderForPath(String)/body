@@ -1,0 +1,22 @@
+{
+  if (isPreferFileSystemAccess()) {
+    try {
+      Resource path=getResourceLoader().getResource(templateLoaderPath);
+      File file=path.getFile();
+      if (logger.isDebugEnabled()) {
+        logger.debug("Template loader path [" + path + "] resolved to file path ["+ file.getAbsolutePath()+ "]");
+      }
+      return new FileTemplateLoader(file);
+    }
+ catch (    IOException ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Cannot resolve template loader path [" + templateLoaderPath + "] to [java.io.File]: using SpringTemplateLoader as fallback",ex);
+      }
+      return new SpringTemplateLoader(getResourceLoader(),templateLoaderPath);
+    }
+  }
+ else {
+    logger.debug("File system access not preferred: using SpringTemplateLoader");
+    return new SpringTemplateLoader(getResourceLoader(),templateLoaderPath);
+  }
+}

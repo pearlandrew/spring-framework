@@ -1,0 +1,30 @@
+{
+  if (this.cacheManager == null) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Using default EHCache CacheManager for cache region '" + this.cacheName + "'");
+    }
+    this.cacheManager=CacheManager.getInstance();
+  }
+  if (this.cacheName == null) {
+    this.cacheName=this.beanName;
+  }
+  Ehcache rawCache=null;
+  if (this.cacheManager.cacheExists(this.cacheName)) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Using existing EHCache cache region '" + this.cacheName + "'");
+    }
+    rawCache=this.cacheManager.getEhcache(this.cacheName);
+  }
+ else {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Creating new EHCache cache region '" + this.cacheName + "'");
+    }
+    rawCache=createCache();
+    this.cacheManager.addCache(rawCache);
+  }
+  Ehcache decoratedCache=decorateCache(rawCache);
+  if (decoratedCache != rawCache) {
+    this.cacheManager.replaceCacheWithDecoratedCache(rawCache,decoratedCache);
+  }
+  this.cache=decoratedCache;
+}

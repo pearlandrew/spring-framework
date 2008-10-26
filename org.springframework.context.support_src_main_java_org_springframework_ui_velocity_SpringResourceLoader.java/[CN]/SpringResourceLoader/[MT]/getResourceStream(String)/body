@@ -1,0 +1,17 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Looking for Velocity resource with name [" + source + "]");
+  }
+  for (int i=0; i < this.resourceLoaderPaths.length; i++) {
+    org.springframework.core.io.Resource resource=this.resourceLoader.getResource(this.resourceLoaderPaths[i] + source);
+    try {
+      return resource.getInputStream();
+    }
+ catch (    IOException ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Could not find Velocity resource: " + resource);
+      }
+    }
+  }
+  throw new ResourceNotFoundException("Could not find resource [" + source + "] in Spring resource loader path");
+}

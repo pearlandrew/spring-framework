@@ -1,0 +1,31 @@
+{
+  boolean triggerExists=(getScheduler().getTrigger(trigger.getName(),trigger.getGroup()) != null);
+  if (!triggerExists || this.overwriteExistingJobs) {
+    if (trigger instanceof JobDetailAwareTrigger) {
+      JobDetail jobDetail=((JobDetailAwareTrigger)trigger).getJobDetail();
+      if (!this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
+        this.jobDetails.add(jobDetail);
+      }
+    }
+    if (!triggerExists) {
+      try {
+        getScheduler().scheduleJob(trigger);
+      }
+ catch (      ObjectAlreadyExistsException ex) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Unexpectedly found existing trigger, assumably due to cluster race condition: " + ex.getMessage() + " - can safely be ignored");
+        }
+        if (this.overwriteExistingJobs) {
+          getScheduler().rescheduleJob(trigger.getName(),trigger.getGroup(),trigger);
+        }
+      }
+    }
+ else {
+      getScheduler().rescheduleJob(trigger.getName(),trigger.getGroup(),trigger);
+    }
+    return true;
+  }
+ else {
+    return false;
+  }
+}

@@ -1,0 +1,59 @@
+{
+  TransactionStatus transactionStatus=null;
+  if (this.transactionManager != null) {
+    transactionStatus=this.transactionManager.getTransaction(new DefaultTransactionDefinition());
+  }
+  try {
+    if (this.jobSchedulingDataLocations != null) {
+      ClassLoadHelper clh=new ResourceLoaderClassLoadHelper(this.resourceLoader);
+      clh.initialize();
+      JobSchedulingDataProcessor dataProcessor=new JobSchedulingDataProcessor(clh,true,true);
+      for (int i=0; i < this.jobSchedulingDataLocations.length; i++) {
+        dataProcessor.processFileAndScheduleJobs(this.jobSchedulingDataLocations[i],getScheduler(),this.overwriteExistingJobs);
+      }
+    }
+    if (this.jobDetails != null) {
+      for (Iterator it=this.jobDetails.iterator(); it.hasNext(); ) {
+        JobDetail jobDetail=(JobDetail)it.next();
+        addJobToScheduler(jobDetail);
+      }
+    }
+ else {
+      this.jobDetails=new LinkedList();
+    }
+    if (this.calendars != null) {
+      for (Iterator it=this.calendars.keySet().iterator(); it.hasNext(); ) {
+        String calendarName=(String)it.next();
+        Calendar calendar=(Calendar)this.calendars.get(calendarName);
+        getScheduler().addCalendar(calendarName,calendar,true,true);
+      }
+    }
+    if (this.triggers != null) {
+      for (Iterator it=this.triggers.iterator(); it.hasNext(); ) {
+        Trigger trigger=(Trigger)it.next();
+        addTriggerToScheduler(trigger);
+      }
+    }
+  }
+ catch (  Throwable ex) {
+    if (transactionStatus != null) {
+      try {
+        this.transactionManager.rollback(transactionStatus);
+      }
+ catch (      TransactionException tex) {
+        logger.error("Job registration exception overridden by rollback exception",ex);
+        throw tex;
+      }
+    }
+    if (ex instanceof SchedulerException) {
+      throw (SchedulerException)ex;
+    }
+    if (ex instanceof Exception) {
+      throw new SchedulerException("Registration of jobs and triggers failed: " + ex.getMessage(),(Exception)ex);
+    }
+    throw new SchedulerException("Registration of jobs and triggers failed: " + ex.getMessage());
+  }
+  if (transactionStatus != null) {
+    this.transactionManager.commit(transactionStatus);
+  }
+}

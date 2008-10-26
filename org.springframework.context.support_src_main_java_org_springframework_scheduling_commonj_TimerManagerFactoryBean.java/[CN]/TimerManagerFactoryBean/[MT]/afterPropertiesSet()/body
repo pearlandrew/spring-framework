@@ -1,0 +1,26 @@
+{
+  if (this.timerManager == null) {
+    if (this.timerManagerName == null) {
+      throw new IllegalArgumentException("Either 'timerManager' or 'timerManagerName' must be specified");
+    }
+    this.timerManager=(TimerManager)lookup(this.timerManagerName,TimerManager.class);
+  }
+  if (this.scheduledTimerListeners != null) {
+    for (int i=0; i < this.scheduledTimerListeners.length; i++) {
+      ScheduledTimerListener scheduledTask=this.scheduledTimerListeners[i];
+      Timer timer=null;
+      if (scheduledTask.isOneTimeTask()) {
+        timer=this.timerManager.schedule(scheduledTask.getTimerListener(),scheduledTask.getDelay());
+      }
+ else {
+        if (scheduledTask.isFixedRate()) {
+          timer=this.timerManager.scheduleAtFixedRate(scheduledTask.getTimerListener(),scheduledTask.getDelay(),scheduledTask.getPeriod());
+        }
+ else {
+          timer=this.timerManager.schedule(scheduledTask.getTimerListener(),scheduledTask.getDelay(),scheduledTask.getPeriod());
+        }
+      }
+      this.timers.add(timer);
+    }
+  }
+}

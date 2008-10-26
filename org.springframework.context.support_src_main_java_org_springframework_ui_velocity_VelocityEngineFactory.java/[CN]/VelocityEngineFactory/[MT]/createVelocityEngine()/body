@@ -1,0 +1,44 @@
+{
+  VelocityEngine velocityEngine=newVelocityEngine();
+  Properties props=new Properties();
+  if (this.configLocation != null) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Loading Velocity config from [" + this.configLocation + "]");
+    }
+    PropertiesLoaderUtils.fillProperties(props,this.configLocation);
+  }
+  if (!this.velocityProperties.isEmpty()) {
+    props.putAll(this.velocityProperties);
+  }
+  if (this.resourceLoaderPath != null) {
+    initVelocityResourceLoader(velocityEngine,this.resourceLoaderPath);
+  }
+  if (this.overrideLogging) {
+    velocityEngine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM,new CommonsLoggingLogSystem());
+  }
+  for (Iterator it=props.entrySet().iterator(); it.hasNext(); ) {
+    Map.Entry entry=(Map.Entry)it.next();
+    if (!(entry.getKey() instanceof String)) {
+      throw new IllegalArgumentException("Illegal property key [" + entry.getKey() + "]: only Strings allowed");
+    }
+    velocityEngine.setProperty((String)entry.getKey(),entry.getValue());
+  }
+  postProcessVelocityEngine(velocityEngine);
+  try {
+    velocityEngine.init();
+  }
+ catch (  IOException ex) {
+    throw ex;
+  }
+catch (  VelocityException ex) {
+    throw ex;
+  }
+catch (  RuntimeException ex) {
+    throw ex;
+  }
+catch (  Exception ex) {
+    logger.error("Why does VelocityEngine throw a generic checked exception, after all?",ex);
+    throw new VelocityException(ex.toString());
+  }
+  return velocityEngine;
+}

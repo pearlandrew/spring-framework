@@ -1,0 +1,18 @@
+{
+  Assert.state(this.workManager != null,"No WorkManager specified");
+  Work work=new DelegatingWork(task);
+  try {
+    if (this.workListener != null) {
+      this.workManager.schedule(work,this.workListener);
+    }
+ else {
+      this.workManager.schedule(work);
+    }
+  }
+ catch (  WorkRejectedException ex) {
+    throw new TaskRejectedException("CommonJ WorkManager did not accept task: " + task,ex);
+  }
+catch (  WorkException ex) {
+    throw new SchedulingException("Could not schedule task on CommonJ WorkManager",ex);
+  }
+}

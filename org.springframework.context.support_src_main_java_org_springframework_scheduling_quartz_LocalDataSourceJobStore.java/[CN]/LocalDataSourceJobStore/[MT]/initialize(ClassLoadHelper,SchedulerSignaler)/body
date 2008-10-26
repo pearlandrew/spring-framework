@@ -1,0 +1,28 @@
+{
+  this.dataSource=SchedulerFactoryBean.getConfigTimeDataSource();
+  if (this.dataSource == null) {
+    throw new SchedulerConfigException("No local DataSource found for configuration - " + "'dataSource' property must be set on SchedulerFactoryBean");
+  }
+  setDataSource(TX_DATA_SOURCE_PREFIX + getInstanceName());
+  setDontSetAutoCommitFalse(true);
+  DBConnectionManager.getInstance().addConnectionProvider(TX_DATA_SOURCE_PREFIX + getInstanceName(),new ConnectionProvider(){
+    public Connection getConnection() throws SQLException {
+      return DataSourceUtils.doGetConnection(dataSource);
+    }
+    public void shutdown(){
+    }
+  }
+);
+  DataSource nonTxDataSource=SchedulerFactoryBean.getConfigTimeNonTransactionalDataSource();
+  final DataSource nonTxDataSourceToUse=(nonTxDataSource != null ? nonTxDataSource : this.dataSource);
+  setNonManagedTXDataSource(NON_TX_DATA_SOURCE_PREFIX + getInstanceName());
+  DBConnectionManager.getInstance().addConnectionProvider(NON_TX_DATA_SOURCE_PREFIX + getInstanceName(),new ConnectionProvider(){
+    public Connection getConnection() throws SQLException {
+      return nonTxDataSourceToUse.getConnection();
+    }
+    public void shutdown(){
+    }
+  }
+);
+  super.initialize(loadHelper,signaler);
+}

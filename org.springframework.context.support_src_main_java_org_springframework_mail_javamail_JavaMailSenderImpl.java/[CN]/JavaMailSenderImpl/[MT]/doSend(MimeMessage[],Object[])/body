@@ -1,0 +1,39 @@
+{
+  Map failedMessages=new LinkedHashMap();
+  try {
+    Transport transport=getTransport(getSession());
+    transport.connect(getHost(),getPort(),getUsername(),getPassword());
+    try {
+      for (int i=0; i < mimeMessages.length; i++) {
+        MimeMessage mimeMessage=mimeMessages[i];
+        try {
+          if (mimeMessage.getSentDate() == null) {
+            mimeMessage.setSentDate(new Date());
+          }
+          String messageId=mimeMessage.getMessageID();
+          mimeMessage.saveChanges();
+          if (messageId != null) {
+            mimeMessage.setHeader(HEADER_MESSAGE_ID,messageId);
+          }
+          transport.sendMessage(mimeMessage,mimeMessage.getAllRecipients());
+        }
+ catch (        MessagingException ex) {
+          Object original=(originalMessages != null ? originalMessages[i] : mimeMessage);
+          failedMessages.put(original,ex);
+        }
+      }
+    }
+  finally {
+      transport.close();
+    }
+  }
+ catch (  AuthenticationFailedException ex) {
+    throw new MailAuthenticationException(ex);
+  }
+catch (  MessagingException ex) {
+    throw new MailSendException("Mail server connection failed",ex);
+  }
+  if (!failedMessages.isEmpty()) {
+    throw new MailSendException(failedMessages);
+  }
+}

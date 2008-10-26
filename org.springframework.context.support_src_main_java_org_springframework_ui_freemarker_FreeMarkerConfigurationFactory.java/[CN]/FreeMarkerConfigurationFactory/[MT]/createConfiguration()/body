@@ -1,0 +1,40 @@
+{
+  Configuration config=newConfiguration();
+  Properties props=new Properties();
+  if (this.configLocation != null) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Loading FreeMarker configuration from " + this.configLocation);
+    }
+    PropertiesLoaderUtils.fillProperties(props,this.configLocation);
+  }
+  if (this.freemarkerSettings != null) {
+    props.putAll(this.freemarkerSettings);
+  }
+  if (!props.isEmpty()) {
+    config.setSettings(props);
+  }
+  if (!CollectionUtils.isEmpty(this.freemarkerVariables)) {
+    config.setAllSharedVariables(new SimpleHash(this.freemarkerVariables));
+  }
+  if (this.defaultEncoding != null) {
+    config.setDefaultEncoding(this.defaultEncoding);
+  }
+  if (this.preTemplateLoaders != null) {
+    this.templateLoaders.addAll(this.preTemplateLoaders);
+  }
+  if (this.templateLoaderPaths != null) {
+    for (int i=0; i < this.templateLoaderPaths.length; i++) {
+      this.templateLoaders.add(getTemplateLoaderForPath(this.templateLoaderPaths[i]));
+    }
+  }
+  postProcessTemplateLoaders(this.templateLoaders);
+  if (this.postTemplateLoaders != null) {
+    this.templateLoaders.addAll(this.postTemplateLoaders);
+  }
+  TemplateLoader loader=getAggregateTemplateLoader(this.templateLoaders);
+  if (loader != null) {
+    config.setTemplateLoader(loader);
+  }
+  postProcessConfiguration(config);
+  return config;
+}
