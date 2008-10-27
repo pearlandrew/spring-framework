@@ -1,0 +1,14 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Loading ApplicationContext for locations [" + StringUtils.arrayToCommaDelimitedString(locations) + "].");
+  }
+  GenericApplicationContext context=new GenericApplicationContext();
+  prepareContext(context);
+  customizeBeanFactory(context.getDefaultListableBeanFactory());
+  createBeanDefinitionReader(context).loadBeanDefinitions(locations);
+  AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+  customizeContext(context);
+  context.refresh();
+  context.registerShutdownHook();
+  return context;
+}

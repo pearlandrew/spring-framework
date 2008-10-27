@@ -1,0 +1,16 @@
+{
+  Assert.notNull(testInstance,"testInstance must not be null");
+  if (logger.isTraceEnabled()) {
+    logger.trace("prepareTestInstance(): instance [" + testInstance + "]");
+  }
+  getTestContext().updateState(testInstance,null,null);
+  for (  TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
+    try {
+      testExecutionListener.prepareTestInstance(getTestContext());
+    }
+ catch (    Exception ex) {
+      logger.error("Caught exception while allowing TestExecutionListener [" + testExecutionListener + "] to prepare test instance ["+ testInstance+ "]",ex);
+      throw ex;
+    }
+  }
+}

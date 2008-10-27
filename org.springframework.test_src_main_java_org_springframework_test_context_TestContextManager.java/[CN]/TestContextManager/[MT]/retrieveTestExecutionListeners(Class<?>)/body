@@ -1,0 +1,44 @@
+{
+  Assert.notNull(clazz,"Class must not be null");
+  Class<TestExecutionListeners> annotationType=TestExecutionListeners.class;
+  List<Class<? extends TestExecutionListener>> classesList=new ArrayList<Class<? extends TestExecutionListener>>();
+  Class<?> declaringClass=AnnotationUtils.findAnnotationDeclaringClass(annotationType,clazz);
+  boolean defaultListeners=false;
+  if (declaringClass == null) {
+    if (logger.isInfoEnabled()) {
+      logger.info("@TestExecutionListeners is not present for class [" + clazz + "]: using defaults.");
+    }
+    classesList.addAll(getDefaultTestExecutionListenerClasses());
+    defaultListeners=true;
+  }
+ else {
+    while (declaringClass != null) {
+      TestExecutionListeners testExecutionListeners=declaringClass.getAnnotation(annotationType);
+      if (logger.isTraceEnabled()) {
+        logger.trace("Retrieved @TestExecutionListeners [" + testExecutionListeners + "] for declaring class ["+ declaringClass+ "].");
+      }
+      Class<? extends TestExecutionListener>[] classes=testExecutionListeners.value();
+      if (classes != null) {
+        classesList.addAll(0,Arrays.<Class<? extends TestExecutionListener>>asList(classes));
+      }
+      declaringClass=(testExecutionListeners.inheritListeners() ? AnnotationUtils.findAnnotationDeclaringClass(annotationType,declaringClass.getSuperclass()) : null);
+    }
+  }
+  List<TestExecutionListener> listeners=new ArrayList<TestExecutionListener>(classesList.size());
+  for (  Class<? extends TestExecutionListener> listenerClass : classesList) {
+    try {
+      listeners.add((TestExecutionListener)BeanUtils.instantiateClass(listenerClass));
+    }
+ catch (    NoClassDefFoundError err) {
+      if (defaultListeners) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Could not instantiate default TestExecutionListener class [" + listenerClass.getName() + "]. Specify custom listener classes or make the default listener classes available.");
+        }
+      }
+ else {
+        throw err;
+      }
+    }
+  }
+  return listeners.toArray(new TestExecutionListener[listeners.size()]);
+}

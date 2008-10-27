@@ -1,0 +1,28 @@
+{
+  this.testException=null;
+  try {
+    this.testMethod.invoke(this.testInstance);
+    if (this.testMethod.expectsException()) {
+      addFailure(new AssertionError("Expected exception: " + this.testMethod.getExpectedException().getName()));
+    }
+  }
+ catch (  InvocationTargetException ex) {
+    this.testException=ex.getTargetException();
+    if (!(this.testException instanceof AssumptionViolatedException)) {
+      if (!this.testMethod.expectsException()) {
+        addFailure(this.testException);
+      }
+ else       if (this.testMethod.isUnexpected(this.testException)) {
+        addFailure(new Exception("Unexpected exception, expected <" + this.testMethod.getExpectedException().getName() + "> but was <"+ this.testException.getClass().getName()+ ">",this.testException));
+      }
+    }
+  }
+catch (  Throwable ex) {
+    addFailure(ex);
+  }
+ finally {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Test method [" + this.testMethod.getMethod() + "] threw exception: "+ this.testException);
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  ApplicationContext context=null;
+  ContextCache cache=getContextCache();
+synchronized (cache) {
+    context=cache.get(contextKeyString(getLocations()));
+    if (context == null) {
+      try {
+        context=loadApplicationContext();
+        cache.put(contextKeyString(getLocations()),context);
+      }
+ catch (      Exception ex) {
+        throw new IllegalStateException("Failed to load ApplicationContext",ex);
+      }
+    }
+  }
+  return context;
+}

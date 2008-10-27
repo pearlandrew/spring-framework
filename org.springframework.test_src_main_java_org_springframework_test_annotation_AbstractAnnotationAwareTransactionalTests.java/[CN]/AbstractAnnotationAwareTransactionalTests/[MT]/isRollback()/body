@@ -1,0 +1,17 @@
+{
+  boolean rollback=isDefaultRollback();
+  Rollback rollbackAnnotation=getTestMethod().getAnnotation(Rollback.class);
+  if (rollbackAnnotation != null) {
+    boolean rollbackOverride=rollbackAnnotation.value();
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug("Method-level @Rollback(" + rollbackOverride + ") overrides default rollback ["+ rollback+ "] for test ["+ getName()+ "].");
+    }
+    rollback=rollbackOverride;
+  }
+ else {
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug("No method-level @Rollback override: using default rollback [" + rollback + "] for test ["+ getName()+ "].");
+    }
+  }
+  return rollback;
+}

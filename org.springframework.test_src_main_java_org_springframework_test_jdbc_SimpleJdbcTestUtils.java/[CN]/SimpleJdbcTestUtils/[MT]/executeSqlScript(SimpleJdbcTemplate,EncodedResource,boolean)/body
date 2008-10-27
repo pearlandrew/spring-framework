@@ -1,0 +1,42 @@
+{
+  if (logger.isInfoEnabled()) {
+    logger.info("Executing SQL script from " + resource);
+  }
+  long startTime=System.currentTimeMillis();
+  List<String> statements=new LinkedList<String>();
+  try {
+    LineNumberReader lnr=new LineNumberReader(resource.getReader());
+    String script=JdbcTestUtils.readScript(lnr);
+    char delimiter=';';
+    if (!JdbcTestUtils.containsSqlScriptDelimiters(script,delimiter)) {
+      delimiter='\n';
+    }
+    JdbcTestUtils.splitSqlScript(script,delimiter,statements);
+    for (Iterator<String> itr=statements.iterator(); itr.hasNext(); ) {
+      String statement=itr.next();
+      try {
+        int rowsAffected=simpleJdbcTemplate.update(statement);
+        if (logger.isDebugEnabled()) {
+          logger.debug(rowsAffected + " rows affected by SQL: " + statement);
+        }
+      }
+ catch (      DataAccessException ex) {
+        if (continueOnError) {
+          if (logger.isWarnEnabled()) {
+            logger.warn("SQL: " + statement + " failed",ex);
+          }
+        }
+ else {
+          throw ex;
+        }
+      }
+    }
+    long elapsedTime=System.currentTimeMillis() - startTime;
+    if (logger.isInfoEnabled()) {
+      logger.info("Done executing SQL scriptBuilder from " + resource + " in "+ elapsedTime+ " ms.");
+    }
+  }
+ catch (  IOException ex) {
+    throw new DataAccessResourceFailureException("Failed to open SQL script from " + resource,ex);
+  }
+}

@@ -1,0 +1,28 @@
+{
+  ExpectedException expectedExceptionAnnotation=testMethod.getAnnotation(ExpectedException.class);
+  boolean exceptionIsExpected=(expectedExceptionAnnotation != null && expectedExceptionAnnotation.value() != null);
+  Class<? extends Throwable> expectedException=(exceptionIsExpected ? expectedExceptionAnnotation.value() : null);
+  Repeat repeat=testMethod.getAnnotation(Repeat.class);
+  int runs=((repeat != null) && (repeat.value() > 1)) ? repeat.value() : 1;
+  for (int i=0; i < runs; i++) {
+    try {
+      if (runs > 1 && this.logger != null && this.logger.isInfoEnabled()) {
+        this.logger.info("Repetition " + (i + 1) + " of test "+ testMethod.getName());
+      }
+      tec.run();
+      if (exceptionIsExpected) {
+        fail("Expected exception: " + expectedException.getName());
+      }
+    }
+ catch (    Throwable t) {
+      if (!exceptionIsExpected) {
+        throw t;
+      }
+      if (!expectedException.isAssignableFrom(t.getClass())) {
+        AssertionFailedError assertionError=new AssertionFailedError("Unexpected exception, expected<" + expectedException.getName() + "> but was<"+ t.getClass().getName()+ ">");
+        assertionError.initCause(t);
+        throw assertionError;
+      }
+    }
+  }
+}

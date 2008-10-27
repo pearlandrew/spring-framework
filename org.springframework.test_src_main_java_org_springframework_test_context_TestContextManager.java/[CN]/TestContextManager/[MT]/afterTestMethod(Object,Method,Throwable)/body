@@ -1,0 +1,24 @@
+{
+  Assert.notNull(testInstance,"testInstance must not be null");
+  if (logger.isTraceEnabled()) {
+    logger.trace("afterTestMethod(): instance [" + testInstance + "], method ["+ testMethod+ "], exception ["+ exception+ "]");
+  }
+  getTestContext().updateState(testInstance,testMethod,exception);
+  List<TestExecutionListener> listenersReversed=new ArrayList<TestExecutionListener>(getTestExecutionListeners());
+  Collections.reverse(listenersReversed);
+  Exception afterTestMethodException=null;
+  for (  TestExecutionListener testExecutionListener : listenersReversed) {
+    try {
+      testExecutionListener.afterTestMethod(getTestContext());
+    }
+ catch (    Exception ex) {
+      logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener + "] to process 'after' execution for test: method ["+ testMethod+ "], instance ["+ testInstance+ "], exception ["+ exception+ "]",ex);
+      if (afterTestMethodException == null) {
+        afterTestMethodException=ex;
+      }
+    }
+  }
+  if (afterTestMethodException != null) {
+    throw afterTestMethodException;
+  }
+}

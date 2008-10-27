@@ -1,0 +1,41 @@
+{
+  Throwable exception=null;
+  boolean reachedTest=false;
+  try {
+    this.testContextManager.beforeTestMethod(this,testMethod);
+    setUp();
+    reachedTest=true;
+    runTest();
+  }
+ catch (  Throwable ex) {
+    exception=ex;
+  }
+ finally {
+    try {
+      if (reachedTest) {
+        tearDown();
+      }
+    }
+ catch (    Throwable ex) {
+      if (exception == null) {
+        exception=ex;
+      }
+    }
+ finally {
+      try {
+        this.testContextManager.afterTestMethod(this,testMethod,exception);
+      }
+ catch (      Throwable ex) {
+        if (exception == null) {
+          exception=ex;
+        }
+      }
+    }
+  }
+  if (exception != null) {
+    if (exception.getCause() instanceof AssertionError) {
+      exception=exception.getCause();
+    }
+    throw exception;
+  }
+}

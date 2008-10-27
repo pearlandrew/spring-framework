@@ -1,0 +1,14 @@
+{
+  this.testContextManager.prepareTestInstance(this);
+  final Method testMethod=getTestMethod();
+  if (!ProfileValueUtils.isTestEnabledInThisEnvironment(this.profileValueSource,testMethod,getClass())) {
+    recordDisabled(testMethod);
+    return;
+  }
+  runTestTimed(new TestExecutionCallback(){
+    public void run() throws Throwable {
+      runManaged(testMethod);
+    }
+  }
+,testMethod);
+}

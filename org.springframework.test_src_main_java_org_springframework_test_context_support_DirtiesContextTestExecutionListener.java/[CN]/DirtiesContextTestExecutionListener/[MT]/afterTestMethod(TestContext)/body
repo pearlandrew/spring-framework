@@ -1,0 +1,12 @@
+{
+  Method testMethod=testContext.getTestMethod();
+  Assert.notNull(testMethod,"The test method of the supplied TestContext must not be null");
+  boolean dirtiesContext=testMethod.isAnnotationPresent(DirtiesContext.class);
+  if (logger.isDebugEnabled()) {
+    logger.debug("After test method: context [" + testContext + "], dirtiesContext ["+ dirtiesContext+ "].");
+  }
+  if (dirtiesContext) {
+    testContext.markApplicationContextDirty();
+    testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE,Boolean.TRUE);
+  }
+}

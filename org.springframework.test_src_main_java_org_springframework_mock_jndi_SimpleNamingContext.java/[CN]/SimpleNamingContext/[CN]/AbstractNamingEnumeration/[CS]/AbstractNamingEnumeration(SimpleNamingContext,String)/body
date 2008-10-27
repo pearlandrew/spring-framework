@@ -1,0 +1,27 @@
+{
+  if (!"".equals(proot) && !proot.endsWith("/")) {
+    proot=proot + "/";
+  }
+  String root=context.root + proot;
+  Map contents=new HashMap();
+  Iterator it=context.boundObjects.keySet().iterator();
+  while (it.hasNext()) {
+    String boundName=(String)it.next();
+    if (boundName.startsWith(root)) {
+      int startIndex=root.length();
+      int endIndex=boundName.indexOf('/',startIndex);
+      String strippedName=(endIndex != -1 ? boundName.substring(startIndex,endIndex) : boundName.substring(startIndex));
+      if (!contents.containsKey(strippedName)) {
+        try {
+          contents.put(strippedName,createObject(strippedName,context.lookup(proot + strippedName)));
+        }
+ catch (        NameNotFoundException ex) {
+        }
+      }
+    }
+  }
+  if (contents.size() == 0) {
+    throw new NamingException("Invalid root: [" + context.root + proot+ "]");
+  }
+  this.iterator=contents.values().iterator();
+}

@@ -1,0 +1,16 @@
+{
+  Assert.notNull(testInstance,"Test instance must not be null");
+  if (logger.isTraceEnabled()) {
+    logger.trace("beforeTestMethod(): instance [" + testInstance + "], method ["+ testMethod+ "]");
+  }
+  getTestContext().updateState(testInstance,testMethod,null);
+  for (  TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
+    try {
+      testExecutionListener.beforeTestMethod(getTestContext());
+    }
+ catch (    Exception ex) {
+      logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener + "] to process 'before' execution of test method ["+ testMethod+ "] for test instance ["+ testInstance+ "]",ex);
+      throw ex;
+    }
+  }
+}

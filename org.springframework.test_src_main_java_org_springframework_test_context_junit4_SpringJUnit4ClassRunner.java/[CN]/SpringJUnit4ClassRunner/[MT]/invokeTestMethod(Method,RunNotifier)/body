@@ -1,0 +1,20 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Invoking test method [" + method.toGenericString() + "]");
+  }
+  Description description=methodDescription(method);
+  Object testInstance;
+  try {
+    testInstance=createTest();
+  }
+ catch (  InvocationTargetException ex) {
+    notifier.testAborted(description,ex.getCause());
+    return;
+  }
+catch (  Exception ex) {
+    notifier.testAborted(description,ex);
+    return;
+  }
+  SpringTestMethod testMethod=new SpringTestMethod(method,getTestClass());
+  new SpringMethodRoadie(getTestContextManager(),testInstance,testMethod,notifier,description).run();
+}
