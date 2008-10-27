@@ -1,0 +1,21 @@
+{
+  Locale locale=this.localeResolver.resolveLocale(request);
+  response.setLocale(locale);
+  View view=null;
+  if (mv.isReference()) {
+    view=resolveViewName(mv.getViewName(),mv.getModelInternal(),locale,request);
+    if (view == null) {
+      throw new ServletException("Could not resolve view with name '" + mv.getViewName() + "' in servlet with name '"+ getServletName()+ "'");
+    }
+  }
+ else {
+    view=mv.getView();
+    if (view == null) {
+      throw new ServletException("ModelAndView [" + mv + "] neither contains a view name nor a "+ "View object in servlet with name '"+ getServletName()+ "'");
+    }
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Rendering view [" + view + "] in DispatcherServlet with name '"+ getServletName()+ "'");
+  }
+  view.render(mv.getModelInternal(),request,response);
+}

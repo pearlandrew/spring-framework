@@ -1,0 +1,18 @@
+{
+  try {
+    String handlerMethodName=this.methodNameResolver.getHandlerMethodName(request);
+    Method lastModifiedMethod=(Method)this.lastModifiedMethodMap.get(handlerMethodName);
+    if (lastModifiedMethod != null) {
+      try {
+        Long wrappedLong=(Long)lastModifiedMethod.invoke(this.delegate,new Object[]{request});
+        return (wrappedLong != null ? wrappedLong.longValue() : -1);
+      }
+ catch (      Exception ex) {
+        logger.error("Failed to invoke last-modified method",ex);
+      }
+    }
+  }
+ catch (  NoSuchRequestHandlingMethodException ex) {
+  }
+  return -1L;
+}

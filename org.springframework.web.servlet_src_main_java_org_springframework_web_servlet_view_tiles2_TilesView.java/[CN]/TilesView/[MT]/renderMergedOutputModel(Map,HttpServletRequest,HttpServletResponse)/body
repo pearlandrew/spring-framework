@@ -1,0 +1,16 @@
+{
+  ServletContext servletContext=getServletContext();
+  TilesContainer container=TilesAccess.getContainer(servletContext);
+  if (container == null) {
+    throw new ServletException("Tiles container is not initialized. " + "Have you added a TilesConfigurer to your web application context?");
+  }
+  exposeModelAsRequestAttributes(model,request);
+  JstlUtils.exposeLocalizationContext(new RequestContext(request,servletContext));
+  if (!response.isCommitted()) {
+    ServletContext sc=getServletContext();
+    if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+      WebUtils.exposeForwardRequestAttributes(request);
+    }
+  }
+  container.render(getUrl(),new Object[]{request,response});
+}

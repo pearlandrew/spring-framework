@@ -1,0 +1,26 @@
+{
+  try {
+    Transformer trans=buildTransformer(parameters);
+    if (this.uriResolver != null) {
+      trans.setURIResolver(this.uriResolver);
+    }
+    trans.setOutputProperty(OutputKeys.ENCODING,encoding);
+    if (this.indent) {
+      TransformerUtils.enableIndenting(trans);
+    }
+    if (this.outputProperties != null) {
+      Enumeration propsEnum=this.outputProperties.propertyNames();
+      while (propsEnum.hasMoreElements()) {
+        String propName=(String)propsEnum.nextElement();
+        trans.setOutputProperty(propName,this.outputProperties.getProperty(propName));
+      }
+    }
+    trans.transform(source,result);
+  }
+ catch (  TransformerConfigurationException ex) {
+    throw new NestedServletException("Couldn't create XSLT transformer in XSLT view with name [" + getBeanName() + "]",ex);
+  }
+catch (  TransformerException ex) {
+    throw new NestedServletException("Couldn't perform transform in XSLT view with name [" + getBeanName() + "]",ex);
+  }
+}

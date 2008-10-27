@@ -1,0 +1,32 @@
+{
+  Method method=(Method)this.handlerMethodMap.get(methodName);
+  if (method == null) {
+    throw new NoSuchRequestHandlingMethodException(methodName,getClass());
+  }
+  try {
+    Class[] paramTypes=method.getParameterTypes();
+    List params=new ArrayList(4);
+    params.add(request);
+    params.add(response);
+    if (paramTypes.length >= 3 && paramTypes[2].equals(HttpSession.class)) {
+      HttpSession session=request.getSession(false);
+      if (session == null) {
+        throw new HttpSessionRequiredException("Pre-existing session required for handler method '" + methodName + "'");
+      }
+      params.add(session);
+    }
+    if (paramTypes.length >= 3 && !paramTypes[paramTypes.length - 1].equals(HttpSession.class)) {
+      Object command=newCommandObject(paramTypes[paramTypes.length - 1]);
+      params.add(command);
+      bind(request,command);
+    }
+    Object returnValue=method.invoke(this.delegate,params.toArray(new Object[params.size()]));
+    return massageReturnValueIfNecessary(returnValue);
+  }
+ catch (  InvocationTargetException ex) {
+    return handleException(request,response,ex.getTargetException());
+  }
+catch (  Exception ex) {
+    return handleException(request,response,ex);
+  }
+}

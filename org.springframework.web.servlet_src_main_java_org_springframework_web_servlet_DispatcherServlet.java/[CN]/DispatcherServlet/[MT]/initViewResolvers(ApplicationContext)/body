@@ -1,0 +1,24 @@
+{
+  this.viewResolvers=null;
+  if (this.detectAllViewResolvers) {
+    Map matchingBeans=BeanFactoryUtils.beansOfTypeIncludingAncestors(context,ViewResolver.class,true,false);
+    if (!matchingBeans.isEmpty()) {
+      this.viewResolvers=new ArrayList(matchingBeans.values());
+      Collections.sort(this.viewResolvers,new OrderComparator());
+    }
+  }
+ else {
+    try {
+      Object vr=context.getBean(VIEW_RESOLVER_BEAN_NAME,ViewResolver.class);
+      this.viewResolvers=Collections.singletonList(vr);
+    }
+ catch (    NoSuchBeanDefinitionException ex) {
+    }
+  }
+  if (this.viewResolvers == null) {
+    this.viewResolvers=getDefaultStrategies(context,ViewResolver.class);
+    if (logger.isDebugEnabled()) {
+      logger.debug("No ViewResolvers found in servlet '" + getServletName() + "': using default");
+    }
+  }
+}

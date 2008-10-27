@@ -1,0 +1,24 @@
+{
+  HttpServletRequest requestToExpose=getRequestToExpose(request);
+  exposeModelAsRequestAttributes(model,requestToExpose);
+  exposeHelpers(requestToExpose);
+  String dispatcherPath=prepareForRendering(requestToExpose,response);
+  RequestDispatcher rd=requestToExpose.getRequestDispatcher(dispatcherPath);
+  if (rd == null) {
+    throw new ServletException("Could not get RequestDispatcher for [" + getUrl() + "]: check that this file exists within your WAR");
+  }
+  if (useInclude(requestToExpose,response)) {
+    response.setContentType(getContentType());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Including resource [" + getUrl() + "] in InternalResourceView '"+ getBeanName()+ "'");
+    }
+    rd.include(requestToExpose,response);
+  }
+ else {
+    exposeForwardRequestAttributes(requestToExpose);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Forwarding to resource [" + getUrl() + "] in InternalResourceView '"+ getBeanName()+ "'");
+    }
+    rd.forward(requestToExpose,response);
+  }
+}

@@ -1,0 +1,20 @@
+{
+  if (this.cachedFactory != null) {
+    return this.cachedFactory;
+  }
+  Resource actualLocation=this.location;
+  if (actualLocation == null) {
+    actualLocation=getApplicationContext().getResource(DEFAULT_LOCATION);
+  }
+  GenericWebApplicationContext factory=new GenericWebApplicationContext();
+  factory.setParent(getApplicationContext());
+  factory.setServletContext(getServletContext());
+  XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(factory);
+  reader.setEntityResolver(new ResourceEntityResolver(getApplicationContext()));
+  reader.loadBeanDefinitions(actualLocation);
+  factory.refresh();
+  if (isCache()) {
+    this.cachedFactory=factory;
+  }
+  return factory;
+}

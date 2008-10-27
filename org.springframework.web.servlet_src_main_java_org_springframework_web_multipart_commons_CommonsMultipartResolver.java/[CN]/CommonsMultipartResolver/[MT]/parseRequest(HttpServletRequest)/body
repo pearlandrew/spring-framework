@@ -1,0 +1,14 @@
+{
+  String encoding=determineEncoding(request);
+  FileUpload fileUpload=prepareFileUpload(encoding);
+  try {
+    List fileItems=((ServletFileUpload)fileUpload).parseRequest(request);
+    return parseFileItems(fileItems,encoding);
+  }
+ catch (  FileUploadBase.SizeLimitExceededException ex) {
+    throw new MaxUploadSizeExceededException(fileUpload.getSizeMax(),ex);
+  }
+catch (  FileUploadException ex) {
+    throw new MultipartException("Could not parse multipart servlet request",ex);
+  }
+}

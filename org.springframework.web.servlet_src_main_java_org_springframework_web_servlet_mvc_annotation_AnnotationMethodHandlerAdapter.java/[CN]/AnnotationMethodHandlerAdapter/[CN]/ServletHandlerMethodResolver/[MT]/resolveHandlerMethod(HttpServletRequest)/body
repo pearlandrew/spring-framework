@@ -1,0 +1,88 @@
+{
+  String lookupPath=urlPathHelper.getLookupPathForRequest(request);
+  Map<RequestMappingInfo,Method> targetHandlerMethods=new LinkedHashMap<RequestMappingInfo,Method>();
+  Map<RequestMappingInfo,String> targetPathMatches=new LinkedHashMap<RequestMappingInfo,String>();
+  String resolvedMethodName=null;
+  for (  Method handlerMethod : getHandlerMethods()) {
+    RequestMappingInfo mappingInfo=new RequestMappingInfo();
+    RequestMapping mapping=AnnotationUtils.findAnnotation(handlerMethod,RequestMapping.class);
+    mappingInfo.paths=mapping.value();
+    if (!hasTypeLevelMapping() || !Arrays.equals(mapping.method(),getTypeLevelMapping().method())) {
+      mappingInfo.methods=mapping.method();
+    }
+    if (!hasTypeLevelMapping() || !Arrays.equals(mapping.params(),getTypeLevelMapping().params())) {
+      mappingInfo.params=mapping.params();
+    }
+    boolean match=false;
+    if (mappingInfo.paths.length > 0) {
+      for (      String mappedPath : mappingInfo.paths) {
+        if (isPathMatch(mappedPath,lookupPath)) {
+          if (checkParameters(mappingInfo,request)) {
+            match=true;
+            targetPathMatches.put(mappingInfo,mappedPath);
+          }
+ else {
+            break;
+          }
+        }
+      }
+    }
+ else {
+      match=checkParameters(mappingInfo,request);
+      if (match && mappingInfo.methods.length == 0 && mappingInfo.params.length == 0 && resolvedMethodName != null && !resolvedMethodName.equals(handlerMethod.getName())) {
+        match=false;
+      }
+    }
+    if (match) {
+      Method oldMappedMethod=targetHandlerMethods.put(mappingInfo,handlerMethod);
+      if (oldMappedMethod != null && oldMappedMethod != handlerMethod) {
+        if (methodNameResolver != null && mappingInfo.paths.length == 0) {
+          if (!oldMappedMethod.getName().equals(handlerMethod.getName())) {
+            if (resolvedMethodName == null) {
+              resolvedMethodName=methodNameResolver.getHandlerMethodName(request);
+            }
+            if (!resolvedMethodName.equals(oldMappedMethod.getName())) {
+              oldMappedMethod=null;
+            }
+            if (!resolvedMethodName.equals(handlerMethod.getName())) {
+              if (oldMappedMethod != null) {
+                targetHandlerMethods.put(mappingInfo,oldMappedMethod);
+                oldMappedMethod=null;
+              }
+ else {
+                targetHandlerMethods.remove(mappingInfo);
+              }
+            }
+          }
+        }
+        if (oldMappedMethod != null) {
+          throw new IllegalStateException("Ambiguous handler methods mapped for HTTP path '" + lookupPath + "': {"+ oldMappedMethod+ ", "+ handlerMethod+ "}. If you intend to handle the same path in multiple methods, then factor "+ "them out into a dedicated handler class with that path mapped at the type level!");
+        }
+      }
+    }
+  }
+  if (targetHandlerMethods.size() == 1) {
+    return targetHandlerMethods.values().iterator().next();
+  }
+ else   if (!targetHandlerMethods.isEmpty()) {
+    RequestMappingInfo bestMappingMatch=null;
+    String bestPathMatch=null;
+    for (    RequestMappingInfo mapping : targetHandlerMethods.keySet()) {
+      String mappedPath=targetPathMatches.get(mapping);
+      if (bestMappingMatch == null) {
+        bestMappingMatch=mapping;
+        bestPathMatch=mappedPath;
+      }
+ else {
+        if (isBetterPathMatch(mappedPath,bestPathMatch,lookupPath) || (!isBetterPathMatch(bestPathMatch,mappedPath,lookupPath) && (isBetterMethodMatch(mapping,bestMappingMatch) || (!isBetterMethodMatch(bestMappingMatch,mapping) && isBetterParamMatch(mapping,bestMappingMatch))))) {
+          bestMappingMatch=mapping;
+          bestPathMatch=mappedPath;
+        }
+      }
+    }
+    return targetHandlerMethods.get(bestMappingMatch);
+  }
+ else {
+    throw new NoSuchRequestHandlingMethodException(lookupPath,request.getMethod(),request.getParameterMap());
+  }
+}

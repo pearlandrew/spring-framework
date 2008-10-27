@@ -1,0 +1,13 @@
+{
+  exposeModelAsRequestAttributes(model,request);
+  model.put(FreemarkerServlet.KEY_JSP_TAGLIBS,this.taglibFactory);
+  model.put(FreemarkerServlet.KEY_APPLICATION,this.servletContextHashModel);
+  model.put(FreemarkerServlet.KEY_SESSION,buildSessionModel(request,response));
+  model.put(FreemarkerServlet.KEY_REQUEST,new HttpRequestHashModel(request,response,getObjectWrapper()));
+  model.put(FreemarkerServlet.KEY_REQUEST_PARAMETERS,new HttpRequestParametersHashModel(request));
+  if (logger.isDebugEnabled()) {
+    logger.debug("Rendering FreeMarker template [" + getUrl() + "] in FreeMarkerView '"+ getBeanName()+ "'");
+  }
+  Locale locale=RequestContextUtils.getLocale(request);
+  processTemplate(getTemplate(locale),model,response);
+}

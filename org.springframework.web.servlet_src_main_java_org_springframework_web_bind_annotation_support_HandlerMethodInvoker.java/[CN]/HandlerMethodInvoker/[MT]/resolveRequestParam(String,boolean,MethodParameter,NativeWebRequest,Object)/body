@@ -1,0 +1,30 @@
+{
+  Class paramType=methodParam.getParameterType();
+  if ("".equals(paramName)) {
+    paramName=methodParam.getParameterName();
+    if (paramName == null) {
+      throw new IllegalStateException("No parameter specified for @RequestParam argument of type [" + paramType.getName() + "], and no parameter name information found in class file either.");
+    }
+  }
+  Object paramValue=null;
+  if (webRequest.getNativeRequest() instanceof MultipartRequest) {
+    paramValue=((MultipartRequest)webRequest.getNativeRequest()).getFile(paramName);
+  }
+  if (paramValue == null) {
+    String[] paramValues=webRequest.getParameterValues(paramName);
+    if (paramValues != null) {
+      paramValue=(paramValues.length == 1 ? paramValues[0] : paramValues);
+    }
+  }
+  if (paramValue == null) {
+    if (paramRequired) {
+      raiseMissingParameterException(paramName,paramType);
+    }
+    if (paramType.isPrimitive()) {
+      throw new IllegalStateException("Optional " + paramType + " parameter '"+ paramName+ "' is not present but cannot be translated into a null value due to being declared as a "+ "primitive type. Consider declaring it as object wrapper for the corresponding primitive type.");
+    }
+  }
+  WebDataBinder binder=createBinder(webRequest,null,paramName);
+  initBinder(handlerForInitBinderCall,paramName,binder,webRequest);
+  return binder.convertIfNecessary(paramValue,paramType,methodParam);
+}

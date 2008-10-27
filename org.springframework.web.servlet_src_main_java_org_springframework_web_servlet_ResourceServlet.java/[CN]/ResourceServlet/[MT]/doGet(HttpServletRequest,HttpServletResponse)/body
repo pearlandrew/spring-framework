@@ -1,0 +1,27 @@
+{
+  String resourceUrl=determineResourceUrl(request);
+  if (resourceUrl != null) {
+    try {
+      doInclude(request,response,resourceUrl);
+    }
+ catch (    ServletException ex) {
+      if (logger.isWarnEnabled()) {
+        logger.warn("Failed to include content of resource [" + resourceUrl + "]",ex);
+      }
+      if (!includeDefaultUrl(request,response)) {
+        throw ex;
+      }
+    }
+catch (    IOException ex) {
+      if (logger.isWarnEnabled()) {
+        logger.warn("Failed to include content of resource [" + resourceUrl + "]",ex);
+      }
+      if (!includeDefaultUrl(request,response)) {
+        throw ex;
+      }
+    }
+  }
+ else   if (!includeDefaultUrl(request,response)) {
+    throw new ServletException("No target resource URL found for request");
+  }
+}

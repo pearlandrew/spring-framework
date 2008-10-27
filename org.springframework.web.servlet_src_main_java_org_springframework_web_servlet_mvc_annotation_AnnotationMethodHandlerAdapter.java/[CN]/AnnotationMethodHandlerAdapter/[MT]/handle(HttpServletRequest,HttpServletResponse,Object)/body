@@ -1,0 +1,18 @@
+{
+  if (handler.getClass().getAnnotation(SessionAttributes.class) != null) {
+    checkAndPrepare(request,response,this.cacheSecondsForSessionAttributeHandlers,true);
+  }
+ else {
+    checkAndPrepare(request,response,true);
+  }
+  if (this.synchronizeOnSession) {
+    HttpSession session=request.getSession(false);
+    if (session != null) {
+      Object mutex=WebUtils.getSessionMutex(session);
+synchronized (mutex) {
+        return invokeHandlerMethod(request,response,handler);
+      }
+    }
+  }
+  return invokeHandlerMethod(request,response,handler);
+}

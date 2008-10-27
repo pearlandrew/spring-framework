@@ -1,0 +1,31 @@
+{
+  long startTime=System.currentTimeMillis();
+  Throwable failureCause=null;
+  try {
+    doService(request,response);
+  }
+ catch (  ServletException ex) {
+    failureCause=ex;
+    throw ex;
+  }
+catch (  IOException ex) {
+    failureCause=ex;
+    throw ex;
+  }
+catch (  Throwable ex) {
+    failureCause=ex;
+    throw new NestedServletException("Request processing failed",ex);
+  }
+ finally {
+    if (failureCause != null) {
+      this.logger.debug("Could not complete request",failureCause);
+    }
+ else {
+      this.logger.debug("Successfully completed request");
+    }
+    if (this.publishEvents) {
+      long processingTime=System.currentTimeMillis() - startTime;
+      this.webApplicationContext.publishEvent(new ServletRequestHandledEvent(this,request.getRequestURI(),request.getRemoteAddr(),request.getMethod(),getServletConfig().getServletName(),WebUtils.getSessionId(request),getUsernameForRequest(request),processingTime,failureCause));
+    }
+  }
+}

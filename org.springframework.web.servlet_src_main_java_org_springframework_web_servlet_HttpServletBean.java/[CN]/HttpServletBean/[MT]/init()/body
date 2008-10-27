@@ -1,0 +1,21 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Initializing servlet '" + getServletName() + "'");
+  }
+  try {
+    PropertyValues pvs=new ServletConfigPropertyValues(getServletConfig(),this.requiredProperties);
+    BeanWrapper bw=PropertyAccessorFactory.forBeanPropertyAccess(this);
+    ResourceLoader resourceLoader=new ServletContextResourceLoader(getServletContext());
+    bw.registerCustomEditor(Resource.class,new ResourceEditor(resourceLoader));
+    initBeanWrapper(bw);
+    bw.setPropertyValues(pvs,true);
+  }
+ catch (  BeansException ex) {
+    logger.error("Failed to set bean properties on servlet '" + getServletName() + "'",ex);
+    throw ex;
+  }
+  initServletBean();
+  if (logger.isDebugEnabled()) {
+    logger.debug("Servlet '" + getServletName() + "' configured successfully");
+  }
+}

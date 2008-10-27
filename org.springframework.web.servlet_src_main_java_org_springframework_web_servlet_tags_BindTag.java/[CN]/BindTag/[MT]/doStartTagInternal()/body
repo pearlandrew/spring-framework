@@ -1,0 +1,20 @@
+{
+  String resolvedPath=ExpressionEvaluationUtils.evaluateString("path",getPath(),pageContext);
+  if (!isIgnoreNestedPath()) {
+    String nestedPath=(String)pageContext.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME,PageContext.REQUEST_SCOPE);
+    if (nestedPath != null && !resolvedPath.startsWith(nestedPath) && !resolvedPath.equals(nestedPath.substring(0,nestedPath.length() - 1))) {
+      resolvedPath=nestedPath + resolvedPath;
+    }
+  }
+  try {
+    this.status=new BindStatus(getRequestContext(),resolvedPath,isHtmlEscape());
+  }
+ catch (  IllegalStateException ex) {
+    throw new JspTagException(ex.getMessage());
+  }
+  this.previousPageStatus=pageContext.getAttribute(STATUS_VARIABLE_NAME,PageContext.PAGE_SCOPE);
+  this.previousRequestStatus=pageContext.getAttribute(STATUS_VARIABLE_NAME,PageContext.REQUEST_SCOPE);
+  pageContext.removeAttribute(STATUS_VARIABLE_NAME,PageContext.PAGE_SCOPE);
+  pageContext.setAttribute(STATUS_VARIABLE_NAME,this.status,PageContext.REQUEST_SCOPE);
+  return EVAL_BODY_INCLUDE;
+}

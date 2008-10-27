@@ -1,0 +1,18 @@
+{
+  WebApplicationContext wac=findWebApplicationContext();
+  if (wac == null) {
+    WebApplicationContext parent=WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+    wac=createWebApplicationContext(parent);
+  }
+  if (!this.refreshEventReceived) {
+    onRefresh(wac);
+  }
+  if (this.publishContext) {
+    String attrName=getServletContextAttributeName();
+    getServletContext().setAttribute(attrName,wac);
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug("Published WebApplicationContext of servlet '" + getServletName() + "' as ServletContext attribute with name ["+ attrName+ "]");
+    }
+  }
+  return wac;
+}

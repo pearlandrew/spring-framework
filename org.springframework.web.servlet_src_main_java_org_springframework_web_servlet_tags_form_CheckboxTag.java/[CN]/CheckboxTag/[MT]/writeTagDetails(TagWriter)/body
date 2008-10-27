@@ -1,0 +1,20 @@
+{
+  tagWriter.writeAttribute("type","checkbox");
+  Object boundValue=getBoundValue();
+  Class valueType=getBindStatus().getValueType();
+  if (Boolean.class.equals(valueType) || boolean.class.equals(valueType)) {
+    if (boundValue instanceof String) {
+      boundValue=Boolean.valueOf((String)boundValue);
+    }
+    Boolean booleanValue=(boundValue != null ? (Boolean)boundValue : Boolean.FALSE);
+    renderFromBoolean(booleanValue,tagWriter);
+  }
+ else {
+    Object value=getValue();
+    if (value == null) {
+      throw new IllegalArgumentException("Attribute 'value' is required when binding to non-boolean values");
+    }
+    Object resolvedValue=(value instanceof String ? evaluate("value",(String)value) : value);
+    renderFromValue(resolvedValue,tagWriter);
+  }
+}

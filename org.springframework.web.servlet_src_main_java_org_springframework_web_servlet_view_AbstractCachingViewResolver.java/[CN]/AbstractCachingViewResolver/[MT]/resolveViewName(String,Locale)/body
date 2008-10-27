@@ -1,0 +1,20 @@
+{
+  if (!isCache()) {
+    logger.warn("View caching is SWITCHED OFF -- DEVELOPMENT SETTING ONLY: This can severely impair performance");
+    return createView(viewName,locale);
+  }
+ else {
+    Object cacheKey=getCacheKey(viewName,locale);
+synchronized (this.viewCache) {
+      View view=(View)this.viewCache.get(cacheKey);
+      if (view == null) {
+        view=createView(viewName,locale);
+        this.viewCache.put(cacheKey,view);
+        if (logger.isTraceEnabled()) {
+          logger.trace("Cached view [" + cacheKey + "]");
+        }
+      }
+      return view;
+    }
+  }
+}

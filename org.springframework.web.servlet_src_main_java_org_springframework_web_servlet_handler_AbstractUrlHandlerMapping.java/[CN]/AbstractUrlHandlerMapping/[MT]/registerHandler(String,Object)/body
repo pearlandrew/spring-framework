@@ -1,0 +1,37 @@
+{
+  Assert.notNull(urlPath,"URL path must not be null");
+  Assert.notNull(handler,"Handler object must not be null");
+  Object resolvedHandler=handler;
+  if (!this.lazyInitHandlers && handler instanceof String) {
+    String handlerName=(String)handler;
+    if (getApplicationContext().isSingleton(handlerName)) {
+      resolvedHandler=getApplicationContext().getBean(handlerName);
+    }
+  }
+  Object mappedHandler=this.handlerMap.get(urlPath);
+  if (mappedHandler != null) {
+    if (mappedHandler != resolvedHandler) {
+      throw new IllegalStateException("Cannot map handler [" + handler + "] to URL path ["+ urlPath+ "]: There is already handler ["+ resolvedHandler+ "] mapped.");
+    }
+  }
+ else {
+    if (urlPath.equals("/")) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Root mapping to handler [" + resolvedHandler + "]");
+      }
+      setRootHandler(resolvedHandler);
+    }
+ else     if (urlPath.equals("/*")) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Default mapping to handler [" + resolvedHandler + "]");
+      }
+      setDefaultHandler(resolvedHandler);
+    }
+ else {
+      this.handlerMap.put(urlPath,resolvedHandler);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Mapped URL path [" + urlPath + "] onto handler ["+ resolvedHandler+ "]");
+      }
+    }
+  }
+}

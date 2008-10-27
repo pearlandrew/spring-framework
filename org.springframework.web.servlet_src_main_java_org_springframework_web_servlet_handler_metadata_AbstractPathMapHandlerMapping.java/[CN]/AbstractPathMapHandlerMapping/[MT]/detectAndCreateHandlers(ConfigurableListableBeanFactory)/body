@@ -1,0 +1,21 @@
+{
+  try {
+    Class[] handlerClasses=getClassesWithPathMapAttributes();
+    if (logger.isDebugEnabled()) {
+      logger.debug("Found " + handlerClasses.length + " attribute-targeted handlers");
+    }
+    for (int i=0; i < handlerClasses.length; i++) {
+      Class handlerClass=handlerClasses[i];
+      Object handler=beanFactory.createBean(handlerClass,this.autowireMode,this.dependencyCheck);
+      beanFactory.registerSingleton(handlerClass.getName(),handler);
+      PathMap[] pathMaps=getPathMapAttributes(handlerClass);
+      registerHandler(pathMaps,handler);
+    }
+  }
+ catch (  BeansException ex) {
+    throw ex;
+  }
+catch (  Exception ex) {
+    throw new BeanInitializationException("Could not retrieve PathMap attributes",ex);
+  }
+}

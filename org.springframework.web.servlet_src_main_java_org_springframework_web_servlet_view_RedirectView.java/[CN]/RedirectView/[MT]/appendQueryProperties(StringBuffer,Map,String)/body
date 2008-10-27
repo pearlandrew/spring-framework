@@ -1,0 +1,41 @@
+{
+  String fragment=null;
+  int anchorIndex=targetUrl.indexOf("#");
+  if (anchorIndex > -1) {
+    fragment=targetUrl.substring(anchorIndex);
+    targetUrl.delete(anchorIndex,targetUrl.length());
+  }
+  boolean first=(getUrl().indexOf('?') < 0);
+  Iterator entries=queryProperties(model).entrySet().iterator();
+  while (entries.hasNext()) {
+    Map.Entry entry=(Map.Entry)entries.next();
+    String key=entry.getKey().toString();
+    Object rawValue=entry.getValue();
+    Iterator valueIter=null;
+    if (rawValue != null && rawValue.getClass().isArray()) {
+      valueIter=Arrays.asList(ObjectUtils.toObjectArray(rawValue)).iterator();
+    }
+ else     if (rawValue instanceof Collection) {
+      valueIter=((Collection)rawValue).iterator();
+    }
+ else {
+      valueIter=Collections.singleton(rawValue).iterator();
+    }
+    while (valueIter.hasNext()) {
+      Object value=valueIter.next();
+      if (first) {
+        targetUrl.append('?');
+        first=false;
+      }
+ else {
+        targetUrl.append('&');
+      }
+      String encodedKey=urlEncode(key,encodingScheme);
+      String encodedValue=(value != null ? urlEncode(value.toString(),encodingScheme) : "");
+      targetUrl.append(encodedKey).append('=').append(encodedValue);
+    }
+  }
+  if (fragment != null) {
+    targetUrl.append(fragment);
+  }
+}

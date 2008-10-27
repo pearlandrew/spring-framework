@@ -1,0 +1,46 @@
+{
+  Class[] initBinderParams=initBinderMethod.getParameterTypes();
+  Object[] initBinderArgs=new Object[initBinderParams.length];
+  for (int i=0; i < initBinderArgs.length; i++) {
+    MethodParameter methodParam=new MethodParameter(initBinderMethod,i);
+    methodParam.initParameterNameDiscovery(this.parameterNameDiscoverer);
+    GenericTypeResolver.resolveParameterType(methodParam,handler.getClass());
+    String paramName=null;
+    boolean paramRequired=false;
+    Object[] paramAnns=methodParam.getParameterAnnotations();
+    for (int j=0; j < paramAnns.length; j++) {
+      Object paramAnn=paramAnns[j];
+      if (RequestParam.class.isInstance(paramAnn)) {
+        RequestParam requestParam=(RequestParam)paramAnn;
+        paramName=requestParam.value();
+        paramRequired=requestParam.required();
+        break;
+      }
+ else       if (ModelAttribute.class.isInstance(paramAnn)) {
+        throw new IllegalStateException("@ModelAttribute is not supported on @InitBinder methods: " + initBinderMethod);
+      }
+    }
+    if (paramName == null) {
+      Object argValue=resolveCommonArgument(methodParam,webRequest);
+      if (argValue != WebArgumentResolver.UNRESOLVED) {
+        initBinderArgs[i]=argValue;
+      }
+ else {
+        Class paramType=initBinderParams[i];
+        if (paramType.isInstance(binder)) {
+          initBinderArgs[i]=binder;
+        }
+ else         if (BeanUtils.isSimpleProperty(paramType)) {
+          paramName="";
+        }
+ else {
+          throw new IllegalStateException("Unsupported argument [" + paramType.getName() + "] for @InitBinder method: "+ initBinderMethod);
+        }
+      }
+    }
+    if (paramName != null) {
+      initBinderArgs[i]=resolveRequestParam(paramName,paramRequired,methodParam,webRequest,null);
+    }
+  }
+  return initBinderArgs;
+}

@@ -1,0 +1,35 @@
+{
+  if (isCache()) {
+    BeanFactory cachedFactory=(BeanFactory)this.localeCache.get(locale);
+    if (cachedFactory != null) {
+      return cachedFactory;
+    }
+  }
+  List bundles=new LinkedList();
+  for (int i=0; i < this.basenames.length; i++) {
+    ResourceBundle bundle=getBundle(this.basenames[i],locale);
+    bundles.add(bundle);
+  }
+  if (isCache()) {
+    BeanFactory cachedFactory=(BeanFactory)this.bundleCache.get(bundles);
+    if (cachedFactory != null) {
+      this.localeCache.put(locale,cachedFactory);
+      return cachedFactory;
+    }
+  }
+  GenericWebApplicationContext factory=new GenericWebApplicationContext();
+  factory.setParent(getApplicationContext());
+  factory.setServletContext(getServletContext());
+  PropertiesBeanDefinitionReader reader=new PropertiesBeanDefinitionReader(factory);
+  reader.setDefaultParentBean(this.defaultParentView);
+  for (int i=0; i < bundles.size(); i++) {
+    ResourceBundle bundle=(ResourceBundle)bundles.get(i);
+    reader.registerBeanDefinitions(bundle);
+  }
+  factory.refresh();
+  if (isCache()) {
+    this.localeCache.put(locale,factory);
+    this.bundleCache.put(bundles,factory);
+  }
+  return factory;
+}

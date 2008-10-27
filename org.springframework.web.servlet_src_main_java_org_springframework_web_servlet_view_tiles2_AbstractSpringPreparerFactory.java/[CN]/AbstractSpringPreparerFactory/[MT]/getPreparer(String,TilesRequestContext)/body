@@ -1,0 +1,15 @@
+{
+  ServletRequest servletRequest=null;
+  if (context.getRequest() instanceof ServletRequest) {
+    servletRequest=(ServletRequest)context.getRequest();
+  }
+  ServletTilesApplicationContext tilesApplicationContext=null;
+  if (context instanceof ServletTilesApplicationContext) {
+    tilesApplicationContext=(ServletTilesApplicationContext)context;
+  }
+  if (servletRequest == null && tilesApplicationContext == null) {
+    throw new IllegalStateException("SpringBeanPreparerFactory requires either a " + "ServletRequest or a ServletTilesApplicationContext to operate on");
+  }
+  WebApplicationContext webApplicationContext=RequestContextUtils.getWebApplicationContext(servletRequest,tilesApplicationContext.getServletContext());
+  return getPreparer(name,webApplicationContext);
+}

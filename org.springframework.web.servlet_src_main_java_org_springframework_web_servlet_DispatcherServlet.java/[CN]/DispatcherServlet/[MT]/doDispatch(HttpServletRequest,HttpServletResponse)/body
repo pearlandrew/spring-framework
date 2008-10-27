@@ -1,0 +1,88 @@
+{
+  HttpServletRequest processedRequest=request;
+  HandlerExecutionChain mappedHandler=null;
+  int interceptorIndex=-1;
+  LocaleContext previousLocaleContext=LocaleContextHolder.getLocaleContext();
+  LocaleContextHolder.setLocaleContext(buildLocaleContext(request),this.threadContextInheritable);
+  RequestAttributes previousRequestAttributes=RequestContextHolder.getRequestAttributes();
+  ServletRequestAttributes requestAttributes=new ServletRequestAttributes(request);
+  RequestContextHolder.setRequestAttributes(requestAttributes,this.threadContextInheritable);
+  if (logger.isTraceEnabled()) {
+    logger.trace("Bound request context to thread: " + request);
+  }
+  try {
+    ModelAndView mv=null;
+    boolean errorView=false;
+    try {
+      processedRequest=checkMultipart(request);
+      mappedHandler=getHandler(processedRequest,false);
+      if (mappedHandler == null || mappedHandler.getHandler() == null) {
+        noHandlerFound(processedRequest,response);
+        return;
+      }
+      HandlerInterceptor[] interceptors=mappedHandler.getInterceptors();
+      if (interceptors != null) {
+        for (int i=0; i < interceptors.length; i++) {
+          HandlerInterceptor interceptor=interceptors[i];
+          if (!interceptor.preHandle(processedRequest,response,mappedHandler.getHandler())) {
+            triggerAfterCompletion(mappedHandler,interceptorIndex,processedRequest,response,null);
+            return;
+          }
+          interceptorIndex=i;
+        }
+      }
+      HandlerAdapter ha=getHandlerAdapter(mappedHandler.getHandler());
+      mv=ha.handle(processedRequest,response,mappedHandler.getHandler());
+      if (mv != null && !mv.hasView()) {
+        mv.setViewName(getDefaultViewName(request));
+      }
+      if (interceptors != null) {
+        for (int i=interceptors.length - 1; i >= 0; i--) {
+          HandlerInterceptor interceptor=interceptors[i];
+          interceptor.postHandle(processedRequest,response,mappedHandler.getHandler(),mv);
+        }
+      }
+    }
+ catch (    ModelAndViewDefiningException ex) {
+      logger.debug("ModelAndViewDefiningException encountered",ex);
+      mv=ex.getModelAndView();
+    }
+catch (    Exception ex) {
+      Object handler=(mappedHandler != null ? mappedHandler.getHandler() : null);
+      mv=processHandlerException(processedRequest,response,handler,ex);
+      errorView=(mv != null);
+    }
+    if (mv != null && !mv.wasCleared()) {
+      render(mv,processedRequest,response);
+      if (errorView) {
+        WebUtils.clearErrorRequestAttributes(request);
+      }
+    }
+ else {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Null ModelAndView returned to DispatcherServlet with name '" + getServletName() + "': assuming HandlerAdapter completed request handling");
+      }
+    }
+    triggerAfterCompletion(mappedHandler,interceptorIndex,processedRequest,response,null);
+  }
+ catch (  Exception ex) {
+    triggerAfterCompletion(mappedHandler,interceptorIndex,processedRequest,response,ex);
+    throw ex;
+  }
+catch (  Error err) {
+    ServletException ex=new NestedServletException("Handler processing failed",err);
+    triggerAfterCompletion(mappedHandler,interceptorIndex,processedRequest,response,ex);
+    throw ex;
+  }
+ finally {
+    if (processedRequest != request) {
+      cleanupMultipart(processedRequest);
+    }
+    RequestContextHolder.setRequestAttributes(previousRequestAttributes,this.threadContextInheritable);
+    LocaleContextHolder.setLocaleContext(previousLocaleContext,this.threadContextInheritable);
+    requestAttributes.requestCompleted();
+    if (logger.isTraceEnabled()) {
+      logger.trace("Cleared thread-bound request context: " + request);
+    }
+  }
+}

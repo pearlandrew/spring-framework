@@ -1,0 +1,16 @@
+{
+  final Set<String> urls=new LinkedHashSet<String>();
+  ReflectionUtils.doWithMethods(handlerType,new ReflectionUtils.MethodCallback(){
+    public void doWith(    Method method){
+      RequestMapping mapping=method.getAnnotation(RequestMapping.class);
+      if (mapping != null) {
+        String[] mappedPaths=mapping.value();
+        for (int i=0; i < mappedPaths.length; i++) {
+          addUrlsForPath(urls,mappedPaths[i]);
+        }
+      }
+    }
+  }
+);
+  return StringUtils.toStringArray(urls);
+}

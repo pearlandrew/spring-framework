@@ -1,0 +1,70 @@
+{
+  Class[] paramTypes=handlerMethod.getParameterTypes();
+  Object[] args=new Object[paramTypes.length];
+  for (int i=0; i < args.length; i++) {
+    MethodParameter methodParam=new MethodParameter(handlerMethod,i);
+    methodParam.initParameterNameDiscovery(this.parameterNameDiscoverer);
+    GenericTypeResolver.resolveParameterType(methodParam,handler.getClass());
+    String paramName=null;
+    boolean paramRequired=false;
+    String attrName=null;
+    Object[] paramAnns=methodParam.getParameterAnnotations();
+    for (int j=0; j < paramAnns.length; j++) {
+      Object paramAnn=paramAnns[j];
+      if (RequestParam.class.isInstance(paramAnn)) {
+        RequestParam requestParam=(RequestParam)paramAnn;
+        paramName=requestParam.value();
+        paramRequired=requestParam.required();
+        break;
+      }
+ else       if (ModelAttribute.class.isInstance(paramAnn)) {
+        ModelAttribute attr=(ModelAttribute)paramAnn;
+        attrName=attr.value();
+      }
+    }
+    if (paramName != null && attrName != null) {
+      throw new IllegalStateException("@RequestParam and @ModelAttribute are an exclusive choice -" + "do not specify both on the same parameter: " + handlerMethod);
+    }
+    Class paramType=methodParam.getParameterType();
+    if (paramName == null && attrName == null) {
+      Object argValue=resolveCommonArgument(methodParam,webRequest);
+      if (argValue != WebArgumentResolver.UNRESOLVED) {
+        args[i]=argValue;
+      }
+ else {
+        if (Model.class.isAssignableFrom(paramType) || Map.class.isAssignableFrom(paramType)) {
+          args[i]=implicitModel;
+        }
+ else         if (SessionStatus.class.isAssignableFrom(paramType)) {
+          args[i]=this.sessionStatus;
+        }
+ else         if (Errors.class.isAssignableFrom(paramType)) {
+          throw new IllegalStateException("Errors/BindingResult argument declared " + "without preceding model attribute. Check your handler method signature!");
+        }
+ else         if (BeanUtils.isSimpleProperty(paramType)) {
+          paramName="";
+        }
+ else {
+          attrName="";
+        }
+      }
+    }
+    if (paramName != null) {
+      args[i]=resolveRequestParam(paramName,paramRequired,methodParam,webRequest,handler);
+    }
+ else     if (attrName != null) {
+      WebDataBinder binder=resolveModelAttribute(attrName,methodParam,implicitModel,webRequest,handler);
+      boolean assignBindingResult=(args.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
+      if (binder.getTarget() != null) {
+        doBind(webRequest,binder,!assignBindingResult);
+      }
+      args[i]=binder.getTarget();
+      if (assignBindingResult) {
+        args[i + 1]=binder.getBindingResult();
+        i++;
+      }
+      implicitModel.putAll(binder.getBindingResult().getModel());
+    }
+  }
+  return args;
+}

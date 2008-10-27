@@ -1,0 +1,18 @@
+{
+  Locale locale=(Locale)request.getAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME);
+  if (locale != null) {
+    return locale;
+  }
+  Cookie cookie=WebUtils.getCookie(request,getCookieName());
+  if (cookie != null) {
+    locale=StringUtils.parseLocaleString(cookie.getValue());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Parsed cookie value [" + cookie.getValue() + "] into locale '"+ locale+ "'");
+    }
+    if (locale != null) {
+      request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME,locale);
+      return locale;
+    }
+  }
+  return determineDefaultLocale(request);
+}

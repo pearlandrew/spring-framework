@@ -1,0 +1,23 @@
+{
+  String action=getAction();
+  if (StringUtils.hasText(action)) {
+    return getDisplayString(evaluate(ACTION_ATTRIBUTE,action));
+  }
+ else {
+    String requestUri=getRequestContext().getRequestUri();
+    ServletResponse response=this.pageContext.getResponse();
+    if (response instanceof HttpServletResponse) {
+      requestUri=((HttpServletResponse)response).encodeURL(requestUri);
+      String queryString=getRequestContext().getQueryString();
+      if (StringUtils.hasText(queryString)) {
+        requestUri+="?" + HtmlUtils.htmlEscape(queryString);
+      }
+    }
+    if (StringUtils.hasText(requestUri)) {
+      return requestUri;
+    }
+ else {
+      throw new IllegalArgumentException("Attribute 'action' is required. " + "Attempted to resolve against current request URI but request URI was null.");
+    }
+  }
+}

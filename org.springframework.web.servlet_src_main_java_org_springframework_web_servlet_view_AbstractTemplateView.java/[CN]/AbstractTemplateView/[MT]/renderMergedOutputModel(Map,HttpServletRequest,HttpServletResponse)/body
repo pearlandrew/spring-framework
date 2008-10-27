@@ -1,0 +1,39 @@
+{
+  if (this.exposeRequestAttributes) {
+    for (Enumeration en=request.getAttributeNames(); en.hasMoreElements(); ) {
+      String attribute=(String)en.nextElement();
+      if (model.containsKey(attribute) && !this.allowRequestOverride) {
+        throw new ServletException("Cannot expose request attribute '" + attribute + "' because of an existing model object of the same name");
+      }
+      Object attributeValue=request.getAttribute(attribute);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Exposing request attribute '" + attribute + "' with value ["+ attributeValue+ "] to model");
+      }
+      model.put(attribute,attributeValue);
+    }
+  }
+  if (this.exposeSessionAttributes) {
+    HttpSession session=request.getSession(false);
+    if (session != null) {
+      for (Enumeration en=session.getAttributeNames(); en.hasMoreElements(); ) {
+        String attribute=(String)en.nextElement();
+        if (model.containsKey(attribute) && !this.allowSessionOverride) {
+          throw new ServletException("Cannot expose session attribute '" + attribute + "' because of an existing model object of the same name");
+        }
+        Object attributeValue=session.getAttribute(attribute);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Exposing session attribute '" + attribute + "' with value ["+ attributeValue+ "] to model");
+        }
+        model.put(attribute,attributeValue);
+      }
+    }
+  }
+  if (this.exposeSpringMacroHelpers) {
+    if (model.containsKey(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE)) {
+      throw new ServletException("Cannot expose bind macro helper '" + SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + "' because of an existing model object of the same name");
+    }
+    model.put(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE,new RequestContext(request,getServletContext(),model));
+  }
+  applyContentType(response);
+  renderMergedTemplateModel(model,request,response);
+}

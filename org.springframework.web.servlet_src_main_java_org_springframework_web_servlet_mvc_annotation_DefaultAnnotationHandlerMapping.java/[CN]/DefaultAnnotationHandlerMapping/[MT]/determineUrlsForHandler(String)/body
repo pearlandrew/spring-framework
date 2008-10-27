@@ -1,0 +1,27 @@
+{
+  ApplicationContext context=getApplicationContext();
+  Class<?> handlerType=context.getType(beanName);
+  ListableBeanFactory bf=(context instanceof ConfigurableApplicationContext ? ((ConfigurableApplicationContext)context).getBeanFactory() : context);
+  GenericBeanFactoryAccessor bfa=new GenericBeanFactoryAccessor(bf);
+  RequestMapping mapping=bfa.findAnnotationOnBean(beanName,RequestMapping.class);
+  if (mapping != null) {
+    this.cachedMappings.put(handlerType,mapping);
+    Set<String> urls=new LinkedHashSet<String>();
+    String[] paths=mapping.value();
+    if (paths.length > 0) {
+      for (      String path : paths) {
+        addUrlsForPath(urls,path);
+      }
+      return StringUtils.toStringArray(urls);
+    }
+ else {
+      return determineUrlsForHandlerMethods(handlerType);
+    }
+  }
+ else   if (AnnotationUtils.findAnnotation(handlerType,Controller.class) != null) {
+    return determineUrlsForHandlerMethods(handlerType);
+  }
+ else {
+    return null;
+  }
+}

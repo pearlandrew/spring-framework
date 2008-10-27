@@ -1,0 +1,21 @@
+{
+  Object handler=this.handlerMap.get(urlPath);
+  if (handler != null) {
+    validateHandler(handler,request);
+    return buildPathExposingHandler(handler,urlPath);
+  }
+  String bestPathMatch=null;
+  for (Iterator it=this.handlerMap.keySet().iterator(); it.hasNext(); ) {
+    String registeredPath=(String)it.next();
+    if (getPathMatcher().match(registeredPath,urlPath) && (bestPathMatch == null || bestPathMatch.length() < registeredPath.length())) {
+      bestPathMatch=registeredPath;
+    }
+  }
+  if (bestPathMatch != null) {
+    handler=this.handlerMap.get(bestPathMatch);
+    validateHandler(handler,request);
+    String pathWithinMapping=getPathMatcher().extractPathWithinPattern(bestPathMatch,urlPath);
+    return buildPathExposingHandler(handler,pathWithinMapping);
+  }
+  return null;
+}

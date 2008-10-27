@@ -1,0 +1,29 @@
+{
+  if (this.toolAttributes != null) {
+    for (Iterator it=this.toolAttributes.entrySet().iterator(); it.hasNext(); ) {
+      Map.Entry entry=(Map.Entry)it.next();
+      String attributeName=(String)entry.getKey();
+      Class toolClass=(Class)entry.getValue();
+      try {
+        Object tool=toolClass.newInstance();
+        initTool(tool,velocityContext);
+        velocityContext.put(attributeName,tool);
+      }
+ catch (      Exception ex) {
+        throw new NestedServletException("Could not instantiate Velocity tool '" + attributeName + "'",ex);
+      }
+    }
+  }
+  if (this.velocityFormatterAttribute != null) {
+    velocityContext.put(this.velocityFormatterAttribute,new VelocityFormatter(velocityContext));
+  }
+  if (this.dateToolAttribute != null || this.numberToolAttribute != null) {
+    Locale locale=RequestContextUtils.getLocale(request);
+    if (this.dateToolAttribute != null) {
+      velocityContext.put(this.dateToolAttribute,new LocaleAwareDateTool(locale));
+    }
+    if (this.numberToolAttribute != null) {
+      velocityContext.put(this.numberToolAttribute,new LocaleAwareNumberTool(locale));
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  Object items=getItems();
+  Object itemsObject=(items instanceof String ? evaluate("items",(String)items) : items);
+  String itemValue=getItemValue();
+  String itemLabel=getItemLabel();
+  String valueProperty=(itemValue != null ? ObjectUtils.getDisplayString(evaluate("itemValue",itemValue)) : null);
+  String labelProperty=(itemLabel != null ? ObjectUtils.getDisplayString(evaluate("itemLabel",itemLabel)) : null);
+  if (itemsObject == null) {
+    throw new IllegalArgumentException("Attribute 'items' is required and must be a Collection, an Array or a Map");
+  }
+  if (itemsObject.getClass().isArray()) {
+    Object[] itemsArray=(Object[])itemsObject;
+    for (int i=0; i < itemsArray.length; i++) {
+      Object item=itemsArray[i];
+      writeObjectEntry(tagWriter,valueProperty,labelProperty,item,i);
+    }
+  }
+ else   if (itemsObject instanceof Collection) {
+    final Collection optionCollection=(Collection)itemsObject;
+    int itemIndex=0;
+    for (Iterator it=optionCollection.iterator(); it.hasNext(); itemIndex++) {
+      Object item=it.next();
+      writeObjectEntry(tagWriter,valueProperty,labelProperty,item,itemIndex);
+    }
+  }
+ else   if (itemsObject instanceof Map) {
+    final Map optionMap=(Map)itemsObject;
+    int itemIndex=0;
+    for (Iterator it=optionMap.entrySet().iterator(); it.hasNext(); itemIndex++) {
+      Map.Entry entry=(Map.Entry)it.next();
+      writeMapEntry(tagWriter,valueProperty,labelProperty,entry,itemIndex);
+    }
+  }
+ else {
+    throw new IllegalArgumentException("Attribute 'items' must be a Collection, an Array or a Map");
+  }
+  return SKIP_BODY;
+}

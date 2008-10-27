@@ -1,0 +1,15 @@
+{
+  Class exceptionClass=exception.getClass();
+  if (logger.isDebugEnabled()) {
+    logger.debug("Trying to find handler for exception class [" + exceptionClass.getName() + "]");
+  }
+  Method handler=(Method)this.exceptionHandlerMap.get(exceptionClass);
+  while (handler == null && !exceptionClass.equals(Throwable.class)) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Trying to find handler for exception superclass [" + exceptionClass.getName() + "]");
+    }
+    exceptionClass=exceptionClass.getSuperclass();
+    handler=(Method)this.exceptionHandlerMap.get(exceptionClass);
+  }
+  return handler;
+}

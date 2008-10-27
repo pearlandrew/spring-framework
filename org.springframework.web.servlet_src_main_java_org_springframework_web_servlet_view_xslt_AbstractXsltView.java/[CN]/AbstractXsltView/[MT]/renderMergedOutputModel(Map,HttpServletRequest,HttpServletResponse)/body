@@ -1,0 +1,21 @@
+{
+  response.setContentType(getContentType());
+  Source source=null;
+  String docRoot=null;
+  Object singleModel=null;
+  if (this.useSingleModelNameAsRoot && model.size() == 1) {
+    docRoot=(String)model.keySet().iterator().next();
+    if (logger.isDebugEnabled()) {
+      logger.debug("Single model object received, key [" + docRoot + "] will be used as root tag");
+    }
+    singleModel=model.get(docRoot);
+  }
+  if (singleModel instanceof Node || singleModel instanceof Source) {
+    logger.debug("No need to domify: was passed an XML Node or Source");
+    source=(singleModel instanceof Node ? new DOMSource((Node)singleModel) : (Source)singleModel);
+  }
+ else {
+    source=createXsltSource(model,(docRoot != null ? docRoot : this.root),request,response);
+  }
+  doTransform(model,source,request,response);
+}

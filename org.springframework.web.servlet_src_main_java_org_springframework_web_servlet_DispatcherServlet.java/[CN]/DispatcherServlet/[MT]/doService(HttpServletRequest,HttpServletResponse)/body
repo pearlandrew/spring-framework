@@ -1,0 +1,30 @@
+{
+  if (logger.isDebugEnabled()) {
+    String requestUri=new UrlPathHelper().getRequestUri(request);
+    logger.debug("DispatcherServlet with name '" + getServletName() + "' processing request for ["+ requestUri+ "]");
+  }
+  Map attributesSnapshot=null;
+  if (WebUtils.isIncludeRequest(request)) {
+    logger.debug("Taking snapshot of request attributes before include");
+    attributesSnapshot=new HashMap();
+    Enumeration attrNames=request.getAttributeNames();
+    while (attrNames.hasMoreElements()) {
+      String attrName=(String)attrNames.nextElement();
+      if (this.cleanupAfterInclude || attrName.startsWith("org.springframework.web.servlet")) {
+        attributesSnapshot.put(attrName,request.getAttribute(attrName));
+      }
+    }
+  }
+  request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE,getWebApplicationContext());
+  request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE,this.localeResolver);
+  request.setAttribute(THEME_RESOLVER_ATTRIBUTE,this.themeResolver);
+  request.setAttribute(THEME_SOURCE_ATTRIBUTE,getThemeSource());
+  try {
+    doDispatch(request,response);
+  }
+  finally {
+    if (attributesSnapshot != null) {
+      restoreAttributesAfterInclude(request,attributesSnapshot);
+    }
+  }
+}

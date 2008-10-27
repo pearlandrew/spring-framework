@@ -1,0 +1,29 @@
+{
+  MessageSource messageSource=getMessageSource();
+  if (messageSource == null) {
+    throw new JspTagException("No corresponding MessageSource found");
+  }
+  MessageSourceResolvable resolvedMessage=null;
+  if (this.message instanceof MessageSourceResolvable) {
+    resolvedMessage=(MessageSourceResolvable)this.message;
+  }
+ else   if (this.message != null) {
+    String expr=this.message.toString();
+    resolvedMessage=(MessageSourceResolvable)ExpressionEvaluationUtils.evaluate("message",expr,MessageSourceResolvable.class,pageContext);
+  }
+  if (resolvedMessage != null) {
+    return messageSource.getMessage(resolvedMessage,getRequestContext().getLocale());
+  }
+  String resolvedCode=ExpressionEvaluationUtils.evaluateString("code",this.code,pageContext);
+  String resolvedText=ExpressionEvaluationUtils.evaluateString("text",this.text,pageContext);
+  if (resolvedCode != null || resolvedText != null) {
+    Object[] argumentsArray=resolveArguments(this.arguments);
+    if (resolvedText != null) {
+      return messageSource.getMessage(resolvedCode,argumentsArray,resolvedText,getRequestContext().getLocale());
+    }
+ else {
+      return messageSource.getMessage(resolvedCode,argumentsArray,getRequestContext().getLocale());
+    }
+  }
+  return resolvedText;
+}

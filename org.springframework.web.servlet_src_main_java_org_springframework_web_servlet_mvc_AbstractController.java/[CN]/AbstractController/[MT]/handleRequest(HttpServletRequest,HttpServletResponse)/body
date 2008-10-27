@@ -1,0 +1,13 @@
+{
+  checkAndPrepare(request,response,this instanceof LastModified);
+  if (this.synchronizeOnSession) {
+    HttpSession session=request.getSession(false);
+    if (session != null) {
+      Object mutex=WebUtils.getSessionMutex(session);
+synchronized (mutex) {
+        return handleRequestInternal(request,response);
+      }
+    }
+  }
+  return handleRequestInternal(request,response);
+}

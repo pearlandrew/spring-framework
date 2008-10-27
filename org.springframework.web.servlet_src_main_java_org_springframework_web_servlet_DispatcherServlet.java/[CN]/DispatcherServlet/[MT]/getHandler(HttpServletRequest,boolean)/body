@@ -1,0 +1,24 @@
+{
+  HandlerExecutionChain handler=(HandlerExecutionChain)request.getAttribute(HANDLER_EXECUTION_CHAIN_ATTRIBUTE);
+  if (handler != null) {
+    if (!cache) {
+      request.removeAttribute(HANDLER_EXECUTION_CHAIN_ATTRIBUTE);
+    }
+    return handler;
+  }
+  Iterator it=this.handlerMappings.iterator();
+  while (it.hasNext()) {
+    HandlerMapping hm=(HandlerMapping)it.next();
+    if (logger.isTraceEnabled()) {
+      logger.trace("Testing handler map [" + hm + "] in DispatcherServlet with name '"+ getServletName()+ "'");
+    }
+    handler=hm.getHandler(request);
+    if (handler != null) {
+      if (cache) {
+        request.setAttribute(HANDLER_EXECUTION_CHAIN_ATTRIBUTE,handler);
+      }
+      return handler;
+    }
+  }
+  return null;
+}

@@ -1,0 +1,24 @@
+{
+  this.handlerExceptionResolvers=null;
+  if (this.detectAllHandlerExceptionResolvers) {
+    Map matchingBeans=BeanFactoryUtils.beansOfTypeIncludingAncestors(context,HandlerExceptionResolver.class,true,false);
+    if (!matchingBeans.isEmpty()) {
+      this.handlerExceptionResolvers=new ArrayList(matchingBeans.values());
+      Collections.sort(this.handlerExceptionResolvers,new OrderComparator());
+    }
+  }
+ else {
+    try {
+      Object her=context.getBean(HANDLER_EXCEPTION_RESOLVER_BEAN_NAME,HandlerExceptionResolver.class);
+      this.handlerExceptionResolvers=Collections.singletonList(her);
+    }
+ catch (    NoSuchBeanDefinitionException ex) {
+    }
+  }
+  if (this.handlerExceptionResolvers == null) {
+    this.handlerExceptionResolvers=getDefaultStrategies(context,HandlerExceptionResolver.class);
+    if (logger.isDebugEnabled()) {
+      logger.debug("No HandlerExceptionResolvers found in servlet '" + getServletName() + "': using default");
+    }
+  }
+}

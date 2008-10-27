@@ -1,0 +1,14 @@
+{
+  RequestMethod[] mappedMethods=mapping.method();
+  if (!ServletAnnotationMappingUtils.checkRequestMethod(mappedMethods,request)) {
+    String[] supportedMethods=new String[mappedMethods.length];
+    for (int i=0; i < mappedMethods.length; i++) {
+      supportedMethods[i]=mappedMethods[i].name();
+    }
+    throw new HttpRequestMethodNotSupportedException(request.getMethod(),supportedMethods);
+  }
+  String[] mappedParams=mapping.params();
+  if (!ServletAnnotationMappingUtils.checkParameters(mappedParams,request)) {
+    throw new ServletException("Parameter conditions {" + StringUtils.arrayToDelimitedString(mappedParams,", ") + "} not met for request parameters: "+ request.getParameterMap());
+  }
+}
