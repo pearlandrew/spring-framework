@@ -1,0 +1,27 @@
+{
+  int currentPage=getCurrentPage(request);
+  String pageAttrName=getPageSessionAttributeName(request);
+  request.setAttribute(pageAttrName,new Integer(currentPage));
+  if (isCancelRequest(request)) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Cancelling wizard for form bean '" + getCommandName() + "'");
+    }
+    return renderCancel(request,response,command,errors);
+  }
+  if (isFinishRequest(request)) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Finishing wizard for form bean '" + getCommandName() + "'");
+    }
+    return renderValidatePagesAndFinish(request,response,command,errors,currentPage);
+  }
+  int targetPage=getTargetPage(request,command,errors,currentPage);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Target page " + targetPage + " requested");
+  }
+  if (targetPage != currentPage) {
+    if (!errors.hasErrors() || (this.allowDirtyBack && targetPage < currentPage) || (this.allowDirtyForward && targetPage > currentPage)) {
+      return showPage(request,errors,targetPage);
+    }
+  }
+  return showPage(request,errors,currentPage);
+}

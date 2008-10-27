@@ -1,0 +1,22 @@
+{
+  if (!isSessionForm()) {
+    return formBackingObject(request);
+  }
+  PortletSession session=request.getPortletSession(false);
+  if (session == null) {
+    throw new PortletSessionRequiredException("Must have session when trying to bind (in session-form mode)");
+  }
+  String formAttrName=getFormSessionAttributeName(request);
+  Object sessionFormObject=session.getAttribute(formAttrName);
+  if (sessionFormObject == null) {
+    throw new PortletSessionRequiredException("Form object not found in session (in session-form mode)");
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Removing form session attribute [" + formAttrName + "]");
+  }
+  session.removeAttribute(formAttrName);
+  if (!checkCommand(sessionFormObject)) {
+    throw new PortletSessionRequiredException("Object found in session does not match commandClass");
+  }
+  return sessionFormObject;
+}

@@ -1,0 +1,19 @@
+{
+  if (errors.hasErrors()) {
+    setPageRenderParameter(response,currentPage);
+    passRenderParameters(request,response);
+    return;
+  }
+  if (!suppressValidation(request)) {
+    for (int page=0; page < getPageCount(request,command); page++) {
+      validatePage(command,errors,page,true);
+      if (errors.hasErrors()) {
+        setPageRenderParameter(response,currentPage);
+        passRenderParameters(request,response);
+        return;
+      }
+    }
+  }
+  if (!isRedirectAction())   setPageRenderParameter(response,currentPage);
+  processFinish(request,response,command,errors);
+}

@@ -1,0 +1,25 @@
+{
+  beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST,new RequestScope());
+  beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION,new SessionScope(false));
+  beanFactory.registerScope(WebApplicationContext.SCOPE_GLOBAL_SESSION,new SessionScope(true));
+  beanFactory.registerResolvableDependency(PortletRequest.class,new ObjectFactory(){
+    public Object getObject(){
+      RequestAttributes requestAttr=RequestContextHolder.currentRequestAttributes();
+      if (!(requestAttr instanceof PortletRequestAttributes)) {
+        throw new IllegalStateException("Current request is not a portlet request");
+      }
+      return ((PortletRequestAttributes)requestAttr).getRequest();
+    }
+  }
+);
+  beanFactory.registerResolvableDependency(PortletSession.class,new ObjectFactory(){
+    public Object getObject(){
+      RequestAttributes requestAttr=RequestContextHolder.currentRequestAttributes();
+      if (!(requestAttr instanceof PortletRequestAttributes)) {
+        throw new IllegalStateException("Current request is not a portlet request");
+      }
+      return ((PortletRequestAttributes)requestAttr).getRequest().getPortletSession();
+    }
+  }
+);
+}

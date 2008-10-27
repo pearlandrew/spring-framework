@@ -1,0 +1,19 @@
+{
+  Object command=formBackingObject(request);
+  if (command == null) {
+    throw new PortletException("Form object returned by formBackingObject() must not be null");
+  }
+  if (!checkCommand(command)) {
+    throw new PortletException("Form object returned by formBackingObject() must match commandClass");
+  }
+  PortletRequestDataBinder binder=createBinder(request,command);
+  BindException errors=new BindException(binder.getBindingResult());
+  if (isBindOnNewForm()) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Binding to new form");
+    }
+    binder.bind(request);
+    onBindOnNewForm(request,command,errors);
+  }
+  return errors;
+}

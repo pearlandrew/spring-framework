@@ -1,0 +1,31 @@
+{
+  this.session=this.request.getPortletSession(false);
+synchronized (this.sessionAttributesToUpdate) {
+    if (this.session != null) {
+      for (Iterator it=this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext(); ) {
+        Map.Entry entry=(Map.Entry)it.next();
+        String name=(String)entry.getKey();
+        Object newValue=entry.getValue();
+        Object oldValue=this.session.getAttribute(name);
+        if (oldValue == newValue) {
+          this.session.setAttribute(name,newValue);
+        }
+      }
+    }
+    this.sessionAttributesToUpdate.clear();
+  }
+synchronized (this.globalSessionAttributesToUpdate) {
+    if (this.session != null) {
+      for (Iterator it=this.globalSessionAttributesToUpdate.entrySet().iterator(); it.hasNext(); ) {
+        Map.Entry entry=(Map.Entry)it.next();
+        String name=(String)entry.getKey();
+        Object newValue=entry.getValue();
+        Object oldValue=this.session.getAttribute(name,PortletSession.APPLICATION_SCOPE);
+        if (oldValue == newValue) {
+          this.session.setAttribute(name,newValue,PortletSession.APPLICATION_SCOPE);
+        }
+      }
+    }
+    this.globalSessionAttributesToUpdate.clear();
+  }
+}

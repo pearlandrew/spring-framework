@@ -1,0 +1,32 @@
+{
+  ExtendedModelMap implicitModel=null;
+  if (request instanceof RenderRequest && response instanceof RenderResponse) {
+    RenderRequest renderRequest=(RenderRequest)request;
+    RenderResponse renderResponse=(RenderResponse)response;
+    if (renderRequest.getParameter(IMPLICIT_MODEL_ATTRIBUTE) != null) {
+      PortletSession session=request.getPortletSession(false);
+      if (session != null) {
+        implicitModel=(ExtendedModelMap)session.getAttribute(IMPLICIT_MODEL_ATTRIBUTE);
+      }
+    }
+    if (handler.getClass().getAnnotation(SessionAttributes.class) != null) {
+      checkAndPrepare(renderRequest,renderResponse,this.cacheSecondsForSessionAttributeHandlers);
+    }
+ else {
+      checkAndPrepare(renderRequest,renderResponse);
+    }
+  }
+  if (implicitModel == null) {
+    implicitModel=new BindingAwareModelMap();
+  }
+  if (this.synchronizeOnSession) {
+    PortletSession session=request.getPortletSession(false);
+    if (session != null) {
+      Object mutex=PortletUtils.getSessionMutex(session);
+synchronized (mutex) {
+        return invokeHandlerMethod(request,response,handler,implicitModel);
+      }
+    }
+  }
+  return invokeHandlerMethod(request,response,handler,implicitModel);
+}

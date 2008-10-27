@@ -1,0 +1,16 @@
+{
+  Object command=null;
+  BindException errors=null;
+  if (isCommandInSession(request)) {
+    logger.debug("Render phase obtaining command and errors objects from session");
+    command=getRenderCommand(request);
+    errors=getRenderErrors(request);
+  }
+ else {
+    logger.debug("Render phase creating new command and errors objects");
+    command=getCommand(request);
+    PortletRequestDataBinder binder=bindAndValidate(request,command);
+    errors=new BindException(binder.getBindingResult());
+  }
+  return handleRender(request,response,command,errors);
+}

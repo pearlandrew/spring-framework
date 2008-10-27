@@ -1,0 +1,14 @@
+{
+  passRenderParameters(request,response);
+  Object command=formBackingObject(request);
+  if (command == null) {
+    throw new PortletException("Form object returned by formBackingObject() must not be null");
+  }
+  if (!checkCommand(command)) {
+    throw new PortletException("Form object returned by formBackingObject() must match commandClass");
+  }
+  PortletRequestDataBinder binder=bindAndValidate(request,command);
+  BindException errors=new BindException(binder.getBindingResult());
+  processFormSubmission(request,response,command,errors);
+  setRenderCommandAndErrors(request,command,errors);
+}

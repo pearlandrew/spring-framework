@@ -1,0 +1,92 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("DispatcherPortlet with name '" + getPortletName() + "' received render request");
+  }
+  LocaleContext previousLocaleContext=LocaleContextHolder.getLocaleContext();
+  LocaleContextHolder.setLocaleContext(buildLocaleContext(request),this.threadContextInheritable);
+  RequestAttributes previousRequestAttributes=RequestContextHolder.getRequestAttributes();
+  PortletRequestAttributes requestAttributes=new PortletRequestAttributes(request);
+  RequestContextHolder.setRequestAttributes(requestAttributes,this.threadContextInheritable);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Bound render request context to thread: " + request);
+  }
+  RenderRequest processedRequest=request;
+  HandlerExecutionChain mappedHandler=null;
+  int interceptorIndex=-1;
+  try {
+    ModelAndView mv=null;
+    try {
+      PortletSession session=request.getPortletSession(false);
+      if (session != null) {
+        if (request.getParameter(ACTION_EXCEPTION_RENDER_PARAMETER) != null) {
+          Exception ex=(Exception)session.getAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
+          if (ex != null) {
+            logger.debug("Render phase found exception caught during action phase - rethrowing it");
+            throw ex;
+          }
+        }
+ else {
+          session.removeAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
+        }
+      }
+      mappedHandler=getHandler(processedRequest,false);
+      if (mappedHandler == null || mappedHandler.getHandler() == null) {
+        noHandlerFound(processedRequest,response);
+        return;
+      }
+      HandlerInterceptor[] interceptors=mappedHandler.getInterceptors();
+      if (interceptors != null) {
+        for (int i=0; i < interceptors.length; i++) {
+          HandlerInterceptor interceptor=interceptors[i];
+          if (!interceptor.preHandleRender(processedRequest,response,mappedHandler.getHandler())) {
+            triggerAfterRenderCompletion(mappedHandler,interceptorIndex,processedRequest,response,null);
+            return;
+          }
+          interceptorIndex=i;
+        }
+      }
+      HandlerAdapter ha=getHandlerAdapter(mappedHandler.getHandler());
+      mv=ha.handleRender(processedRequest,response,mappedHandler.getHandler());
+      if (interceptors != null) {
+        for (int i=interceptors.length - 1; i >= 0; i--) {
+          HandlerInterceptor interceptor=interceptors[i];
+          interceptor.postHandleRender(processedRequest,response,mappedHandler.getHandler(),mv);
+        }
+      }
+    }
+ catch (    ModelAndViewDefiningException ex) {
+      logger.debug("ModelAndViewDefiningException encountered",ex);
+      mv=ex.getModelAndView();
+    }
+catch (    Exception ex) {
+      Object handler=(mappedHandler != null ? mappedHandler.getHandler() : null);
+      mv=processHandlerException(request,response,handler,ex);
+    }
+    if (mv != null && !mv.isEmpty()) {
+      render(mv,processedRequest,response);
+    }
+ else {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Null ModelAndView returned to DispatcherPortlet with name '" + getPortletName() + "': assuming HandlerAdapter completed request handling");
+      }
+    }
+    triggerAfterRenderCompletion(mappedHandler,interceptorIndex,processedRequest,response,null);
+  }
+ catch (  Exception ex) {
+    triggerAfterRenderCompletion(mappedHandler,interceptorIndex,processedRequest,response,ex);
+    throw ex;
+  }
+catch (  Error err) {
+    PortletException ex=new PortletException("Error occured during request processing: " + err.getMessage(),err);
+    triggerAfterRenderCompletion(mappedHandler,interceptorIndex,processedRequest,response,ex);
+    throw ex;
+  }
+ finally {
+    RequestContextHolder.setRequestAttributes(previousRequestAttributes,this.threadContextInheritable);
+    LocaleContextHolder.setLocaleContext(previousLocaleContext,this.threadContextInheritable);
+    requestAttributes.requestCompleted();
+    if (logger.isDebugEnabled()) {
+      logger.debug("Cleared thread-bound render request context: " + request);
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  Object lookupKey=getLookupKey(request);
+  Object handler=this.handlerMap.get(lookupKey);
+  if (handler != null && logger.isDebugEnabled()) {
+    logger.debug("Key [" + lookupKey + "] -> handler ["+ handler+ "]");
+  }
+  if (handler instanceof Map) {
+    Map predicateMap=(Map)handler;
+    List predicates=new LinkedList(predicateMap.keySet());
+    Collections.sort(predicates);
+    for (Iterator it=predicates.iterator(); it.hasNext(); ) {
+      PortletRequestMappingPredicate predicate=(PortletRequestMappingPredicate)it.next();
+      if (predicate.match(request)) {
+        return predicateMap.get(predicate);
+      }
+    }
+    return null;
+  }
+  return handler;
+}

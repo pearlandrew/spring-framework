@@ -1,0 +1,24 @@
+{
+  this.handlerMappings=null;
+  if (this.detectAllHandlerMappings) {
+    Map matchingBeans=BeanFactoryUtils.beansOfTypeIncludingAncestors(context,HandlerMapping.class,true,false);
+    if (!matchingBeans.isEmpty()) {
+      this.handlerMappings=new ArrayList(matchingBeans.values());
+      Collections.sort(this.handlerMappings,new OrderComparator());
+    }
+  }
+ else {
+    try {
+      Object hm=context.getBean(HANDLER_MAPPING_BEAN_NAME,HandlerMapping.class);
+      this.handlerMappings=Collections.singletonList(hm);
+    }
+ catch (    NoSuchBeanDefinitionException ex) {
+    }
+  }
+  if (this.handlerMappings == null) {
+    this.handlerMappings=getDefaultStrategies(context,HandlerMapping.class);
+    if (logger.isDebugEnabled()) {
+      logger.debug("No HandlerMappings found in portlet '" + getPortletName() + "': using default");
+    }
+  }
+}

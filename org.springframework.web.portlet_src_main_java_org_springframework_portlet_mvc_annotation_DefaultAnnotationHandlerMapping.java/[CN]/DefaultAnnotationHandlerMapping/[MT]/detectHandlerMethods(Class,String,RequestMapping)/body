@@ -1,0 +1,31 @@
+{
+  final Set<Boolean> handlersRegistered=new HashSet<Boolean>(1);
+  ReflectionUtils.doWithMethods(handlerType,new ReflectionUtils.MethodCallback(){
+    public void doWith(    Method method){
+      RequestMapping mapping=method.getAnnotation(RequestMapping.class);
+      if (mapping != null) {
+        String[] modeKeys=mapping.value();
+        if (modeKeys.length == 0) {
+          if (typeMapping != null) {
+            modeKeys=typeMapping.value();
+          }
+ else {
+            throw new IllegalStateException("No portlet mode mappings specified - neither at type nor method level");
+          }
+        }
+        String[] params=mapping.params();
+        if (typeMapping != null) {
+          PortletAnnotationMappingUtils.validateModeMapping(modeKeys,typeMapping.value());
+          params=StringUtils.mergeStringArrays(typeMapping.params(),params);
+        }
+        ParameterMappingPredicate predicate=new ParameterMappingPredicate(params);
+        for (        String modeKey : modeKeys) {
+          registerHandler(new PortletMode(modeKey),beanName,predicate);
+          handlersRegistered.add(Boolean.TRUE);
+        }
+      }
+    }
+  }
+);
+  return !handlersRegistered.isEmpty();
+}

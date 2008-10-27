@@ -1,0 +1,36 @@
+{
+  long startTime=System.currentTimeMillis();
+  Throwable failureCause=null;
+  try {
+    if (request instanceof ActionRequest) {
+      doActionService((ActionRequest)request,(ActionResponse)response);
+    }
+ else {
+      doRenderService((RenderRequest)request,(RenderResponse)response);
+    }
+  }
+ catch (  PortletException ex) {
+    failureCause=ex;
+    throw ex;
+  }
+catch (  IOException ex) {
+    failureCause=ex;
+    throw ex;
+  }
+catch (  Throwable ex) {
+    failureCause=ex;
+    throw new PortletException("Request processing failed",ex);
+  }
+ finally {
+    if (failureCause != null) {
+      logger.error("Could not complete request",failureCause);
+    }
+ else {
+      logger.debug("Successfully completed request");
+    }
+    if (isPublishEvents()) {
+      long processingTime=System.currentTimeMillis() - startTime;
+      this.portletApplicationContext.publishEvent(new PortletRequestHandledEvent(this,getPortletConfig().getPortletName(),request.getPortletMode().toString(),(request instanceof ActionRequest ? "action" : "render"),request.getRequestedSessionId(),getUsernameForRequest(request),processingTime,failureCause));
+    }
+  }
+}

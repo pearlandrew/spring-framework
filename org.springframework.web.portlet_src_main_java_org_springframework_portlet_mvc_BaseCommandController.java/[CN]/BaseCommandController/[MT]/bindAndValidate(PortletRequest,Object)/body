@@ -1,0 +1,15 @@
+{
+  PortletRequestDataBinder binder=createBinder(request,command);
+  if (!suppressBinding(request)) {
+    binder.bind(request);
+    BindException errors=new BindException(binder.getBindingResult());
+    onBind(request,command,errors);
+    if (this.validators != null && isValidateOnBinding() && !suppressValidation(request)) {
+      for (int i=0; i < this.validators.length; i++) {
+        ValidationUtils.invokeValidator(this.validators[i],command,errors);
+      }
+    }
+    onBindAndValidate(request,command,errors);
+  }
+  return binder;
+}

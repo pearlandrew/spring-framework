@@ -1,0 +1,27 @@
+{
+  ApplicationContext context=getApplicationContext();
+  String[] beanNames=context.getBeanNamesForType(Object.class);
+  for (  String beanName : beanNames) {
+    Class<?> handlerType=context.getType(beanName);
+    ListableBeanFactory bf=(context instanceof ConfigurableApplicationContext ? ((ConfigurableApplicationContext)context).getBeanFactory() : context);
+    GenericBeanFactoryAccessor bfa=new GenericBeanFactoryAccessor(bf);
+    RequestMapping mapping=bfa.findAnnotationOnBean(beanName,RequestMapping.class);
+    if (mapping != null) {
+      String[] modeKeys=mapping.value();
+      String[] params=mapping.params();
+      boolean registerHandlerType=true;
+      if (modeKeys.length == 0 || params.length == 0) {
+        registerHandlerType=!detectHandlerMethods(handlerType,beanName,mapping);
+      }
+      if (registerHandlerType) {
+        ParameterMappingPredicate predicate=new ParameterMappingPredicate(params);
+        for (        String modeKey : modeKeys) {
+          registerHandler(new PortletMode(modeKey),beanName,predicate);
+        }
+      }
+    }
+ else     if (AnnotationUtils.findAnnotation(handlerType,Controller.class) != null) {
+      detectHandlerMethods(handlerType,beanName,mapping);
+    }
+  }
+}

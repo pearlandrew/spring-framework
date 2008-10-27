@@ -1,0 +1,18 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Portlet with name '" + getPortletName() + "' will try to create custom ApplicationContext context of class '"+ getContextClass().getName()+ "'"+ ", using parent context ["+ parent+ "]");
+  }
+  if (!ConfigurablePortletApplicationContext.class.isAssignableFrom(getContextClass())) {
+    throw new ApplicationContextException("Fatal initialization error in portlet with name '" + getPortletName() + "': custom ApplicationContext class ["+ getContextClass().getName()+ "] is not of type ConfigurablePortletApplicationContext");
+  }
+  ConfigurablePortletApplicationContext pac=(ConfigurablePortletApplicationContext)BeanUtils.instantiateClass(getContextClass());
+  pac.setParent(parent);
+  pac.setPortletContext(getPortletContext());
+  pac.setPortletConfig(getPortletConfig());
+  pac.setNamespace(getNamespace());
+  pac.setConfigLocation(getContextConfigLocation());
+  pac.addApplicationListener(new SourceFilteringListener(pac,this));
+  postProcessPortletApplicationContext(pac);
+  pac.refresh();
+  return pac;
+}
