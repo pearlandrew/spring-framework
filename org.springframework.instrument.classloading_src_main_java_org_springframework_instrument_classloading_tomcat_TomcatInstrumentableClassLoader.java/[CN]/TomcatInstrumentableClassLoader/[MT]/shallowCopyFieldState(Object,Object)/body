@@ -1,0 +1,27 @@
+{
+  if (src == null) {
+    throw new IllegalArgumentException("Source for field copy cannot be null");
+  }
+  if (dest == null) {
+    throw new IllegalArgumentException("Destination for field copy cannot be null");
+  }
+  Class targetClass=findCommonAncestor(src.getClass(),dest.getClass());
+  do {
+    Field[] fields=targetClass.getDeclaredFields();
+    for (int i=0; i < fields.length; i++) {
+      Field field=fields[i];
+      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) || field.getName().equals("resourceEntries"))) {
+        try {
+          field.setAccessible(true);
+          Object srcValue=field.get(src);
+          field.set(dest,srcValue);
+        }
+ catch (        IllegalAccessException ex) {
+          throw new IllegalStateException("Shouldn't be illegal to access field '" + fields[i].getName() + "': "+ ex);
+        }
+      }
+    }
+    targetClass=targetClass.getSuperclass();
+  }
+ while (targetClass != null && targetClass != Object.class);
+}
