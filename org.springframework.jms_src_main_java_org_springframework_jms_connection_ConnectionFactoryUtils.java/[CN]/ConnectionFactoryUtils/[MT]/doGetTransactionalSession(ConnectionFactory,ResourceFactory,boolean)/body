@@ -1,0 +1,64 @@
+{
+  Assert.notNull(connectionFactory,"ConnectionFactory must not be null");
+  Assert.notNull(resourceFactory,"ResourceFactory must not be null");
+  JmsResourceHolder resourceHolder=(JmsResourceHolder)TransactionSynchronizationManager.getResource(connectionFactory);
+  if (resourceHolder != null) {
+    Session session=resourceFactory.getSession(resourceHolder);
+    if (session != null) {
+      if (startConnection) {
+        Connection con=resourceFactory.getConnection(resourceHolder);
+        if (con != null) {
+          con.start();
+        }
+      }
+      return session;
+    }
+    if (resourceHolder.isFrozen()) {
+      return null;
+    }
+  }
+  if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+    return null;
+  }
+  JmsResourceHolder resourceHolderToUse=resourceHolder;
+  if (resourceHolderToUse == null) {
+    resourceHolderToUse=new JmsResourceHolder(connectionFactory);
+  }
+  Connection con=resourceFactory.getConnection(resourceHolderToUse);
+  Session session=null;
+  try {
+    boolean isExistingCon=(con != null);
+    if (!isExistingCon) {
+      con=resourceFactory.createConnection();
+      resourceHolderToUse.addConnection(con);
+    }
+    session=resourceFactory.createSession(con);
+    resourceHolderToUse.addSession(session,con);
+    if (startConnection) {
+      con.start();
+    }
+  }
+ catch (  JMSException ex) {
+    if (session != null) {
+      try {
+        session.close();
+      }
+ catch (      Throwable ex2) {
+      }
+    }
+    if (con != null) {
+      try {
+        con.close();
+      }
+ catch (      Throwable ex2) {
+      }
+    }
+    throw ex;
+  }
+  if (resourceHolderToUse != resourceHolder) {
+    TransactionSynchronizationManager.registerSynchronization(new JmsResourceSynchronization(resourceHolderToUse,connectionFactory,resourceFactory.isSynchedLocalTransactionAllowed()));
+    resourceHolderToUse.setSynchronizedWithTransaction(true);
+    TransactionSynchronizationManager.bindResource(connectionFactory,resourceHolderToUse);
+  }
+  return session;
+}

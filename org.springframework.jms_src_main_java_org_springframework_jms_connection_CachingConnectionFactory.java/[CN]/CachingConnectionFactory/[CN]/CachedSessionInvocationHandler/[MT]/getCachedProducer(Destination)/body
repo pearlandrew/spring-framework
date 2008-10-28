@@ -1,0 +1,16 @@
+{
+  MessageProducer producer=(MessageProducer)this.cachedProducers.get(dest);
+  if (producer != null) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Found cached JMS MessageProducer for destination [" + dest + "]: "+ producer);
+    }
+  }
+ else {
+    producer=this.target.createProducer(dest);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Creating cached JMS MessageProducer for destination [" + dest + "]: "+ producer);
+    }
+    this.cachedProducers.put(dest,producer);
+  }
+  return new CachedMessageProducer(producer);
+}

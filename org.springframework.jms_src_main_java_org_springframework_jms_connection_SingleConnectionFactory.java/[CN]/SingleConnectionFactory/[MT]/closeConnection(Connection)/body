@@ -1,0 +1,22 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Closing shared JMS Connection: " + this.target);
+  }
+  try {
+    try {
+      if (this.started) {
+        this.started=false;
+        con.stop();
+      }
+    }
+  finally {
+      con.close();
+    }
+  }
+ catch (  javax.jms.IllegalStateException ex) {
+    logger.debug("Ignoring Connection state exception - assuming already closed: " + ex);
+  }
+catch (  Throwable ex) {
+    logger.debug("Could not close shared JMS Connection",ex);
+  }
+}

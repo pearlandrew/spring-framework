@@ -1,0 +1,33 @@
+{
+  try {
+    long timeout=getReceiveTimeout();
+    JmsResourceHolder resourceHolder=(JmsResourceHolder)TransactionSynchronizationManager.getResource(getConnectionFactory());
+    if (resourceHolder != null && resourceHolder.hasTimeout()) {
+      timeout=resourceHolder.getTimeToLiveInMillis();
+    }
+    Message message=null;
+    if (timeout == RECEIVE_TIMEOUT_NO_WAIT) {
+      message=consumer.receiveNoWait();
+    }
+ else     if (timeout > 0) {
+      message=consumer.receive(timeout);
+    }
+ else {
+      message=consumer.receive();
+    }
+    if (session.getTransacted()) {
+      if (isSessionLocallyTransacted(session)) {
+        JmsUtils.commitIfNecessary(session);
+      }
+    }
+ else     if (isClientAcknowledge(session)) {
+      if (message != null) {
+        message.acknowledge();
+      }
+    }
+    return message;
+  }
+  finally {
+    JmsUtils.closeMessageConsumer(consumer);
+  }
+}

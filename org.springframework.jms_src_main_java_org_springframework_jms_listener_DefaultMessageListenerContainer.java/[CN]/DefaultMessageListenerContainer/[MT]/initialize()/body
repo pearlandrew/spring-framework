@@ -1,0 +1,14 @@
+{
+  if (this.cacheLevel == CACHE_AUTO) {
+    this.cacheLevel=(getTransactionManager() != null ? CACHE_NONE : CACHE_CONSUMER);
+  }
+synchronized (this.lifecycleMonitor) {
+    if (this.taskExecutor == null) {
+      this.taskExecutor=createDefaultTaskExecutor();
+    }
+ else     if (this.taskExecutor instanceof SchedulingTaskExecutor && ((SchedulingTaskExecutor)this.taskExecutor).prefersShortLivedTasks() && this.maxMessagesPerTask == Integer.MIN_VALUE) {
+      this.maxMessagesPerTask=10;
+    }
+  }
+  super.initialize();
+}

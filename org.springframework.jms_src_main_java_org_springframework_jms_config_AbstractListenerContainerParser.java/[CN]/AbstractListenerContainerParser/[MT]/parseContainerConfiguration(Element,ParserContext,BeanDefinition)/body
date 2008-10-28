@@ -1,0 +1,26 @@
+{
+  String destinationType=ele.getAttribute(DESTINATION_TYPE_ATTRIBUTE);
+  boolean pubSubDomain=false;
+  boolean subscriptionDurable=false;
+  if (DESTINATION_TYPE_DURABLE_TOPIC.equals(destinationType)) {
+    pubSubDomain=true;
+    subscriptionDurable=true;
+  }
+ else   if (DESTINATION_TYPE_TOPIC.equals(destinationType)) {
+    pubSubDomain=true;
+  }
+ else   if ("".equals(destinationType) || DESTINATION_TYPE_QUEUE.equals(destinationType)) {
+  }
+ else {
+    parserContext.getReaderContext().error("Invalid listener container 'destination-type': " + "only \"queue\", \"topic\" and \"durableTopic\" supported.",ele);
+  }
+  configDef.getPropertyValues().addPropertyValue("pubSubDomain",Boolean.valueOf(pubSubDomain));
+  configDef.getPropertyValues().addPropertyValue("subscriptionDurable",Boolean.valueOf(subscriptionDurable));
+  if (ele.hasAttribute(CLIENT_ID_ATTRIBUTE)) {
+    String clientId=ele.getAttribute(CLIENT_ID_ATTRIBUTE);
+    if (!StringUtils.hasText(clientId)) {
+      parserContext.getReaderContext().error("Listener 'client-id' attribute contains empty value.",ele);
+    }
+    configDef.getPropertyValues().addPropertyValue("clientId",clientId);
+  }
+}

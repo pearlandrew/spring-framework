@@ -1,0 +1,16 @@
+{
+  Connection con=createConnection();
+  Session session=null;
+  try {
+    session=createSession(con);
+    Queue queueToUse=resolveQueue(session);
+    Message requestMessage=createRequestMessage(session,invocation);
+    con.start();
+    Message responseMessage=doExecuteRequest(session,queueToUse,requestMessage);
+    return extractInvocationResult(responseMessage);
+  }
+  finally {
+    JmsUtils.closeSession(session);
+    ConnectionFactoryUtils.releaseConnection(con,getConnectionFactory(),true);
+  }
+}

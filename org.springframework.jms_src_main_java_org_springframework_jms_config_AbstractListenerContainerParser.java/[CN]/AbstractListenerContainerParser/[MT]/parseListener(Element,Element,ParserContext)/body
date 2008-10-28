@@ -1,0 +1,38 @@
+{
+  RootBeanDefinition listenerDef=new RootBeanDefinition();
+  listenerDef.setSource(parserContext.extractSource(listenerEle));
+  String ref=listenerEle.getAttribute(REF_ATTRIBUTE);
+  if (!StringUtils.hasText(ref)) {
+    parserContext.getReaderContext().error("Listener 'ref' attribute contains empty value.",listenerEle);
+  }
+  listenerDef.getPropertyValues().addPropertyValue("delegate",new RuntimeBeanReference(ref));
+  String method=null;
+  if (listenerEle.hasAttribute(METHOD_ATTRIBUTE)) {
+    method=listenerEle.getAttribute(METHOD_ATTRIBUTE);
+    if (!StringUtils.hasText(method)) {
+      parserContext.getReaderContext().error("Listener 'method' attribute contains empty value.",listenerEle);
+    }
+  }
+  listenerDef.getPropertyValues().addPropertyValue("defaultListenerMethod",method);
+  if (containerEle.hasAttribute(MESSAGE_CONVERTER_ATTRIBUTE)) {
+    String messageConverter=containerEle.getAttribute(MESSAGE_CONVERTER_ATTRIBUTE);
+    listenerDef.getPropertyValues().addPropertyValue("messageConverter",new RuntimeBeanReference(messageConverter));
+  }
+  BeanDefinition containerDef=parseContainer(listenerEle,containerEle,parserContext);
+  if (listenerEle.hasAttribute(RESPONSE_DESTINATION_ATTRIBUTE)) {
+    String responseDestination=listenerEle.getAttribute(RESPONSE_DESTINATION_ATTRIBUTE);
+    boolean pubSubDomain=indicatesPubSub(containerDef);
+    listenerDef.getPropertyValues().addPropertyValue(pubSubDomain ? "defaultResponseTopicName" : "defaultResponseQueueName",responseDestination);
+    if (containerDef.getPropertyValues().contains("destinationResolver")) {
+      listenerDef.getPropertyValues().addPropertyValue("destinationResolver",containerDef.getPropertyValues().getPropertyValue("destinationResolver").getValue());
+    }
+  }
+  boolean jms102=indicatesJms102(containerDef);
+  listenerDef.setBeanClassName("org.springframework.jms.listener.adapter.MessageListenerAdapter" + (jms102 ? "102" : ""));
+  containerDef.getPropertyValues().addPropertyValue("messageListener",listenerDef);
+  String containerBeanName=listenerEle.getAttribute(ID_ATTRIBUTE);
+  if (!StringUtils.hasText(containerBeanName)) {
+    containerBeanName=parserContext.getReaderContext().generateBeanName(containerDef);
+  }
+  parserContext.registerBeanComponent(new BeanComponentDefinition(containerDef,containerBeanName));
+}

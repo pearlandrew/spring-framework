@@ -1,0 +1,18 @@
+{
+  MessageProducer producer=null;
+  try {
+    if (destination instanceof Topic) {
+      producer=((TopicSession)session).createPublisher((Topic)destination);
+      postProcessProducer(producer,response);
+      ((TopicPublisher)producer).publish(response);
+    }
+ else {
+      producer=((QueueSession)session).createSender((Queue)destination);
+      postProcessProducer(producer,response);
+      ((QueueSender)producer).send(response);
+    }
+  }
+  finally {
+    JmsUtils.closeMessageProducer(producer);
+  }
+}

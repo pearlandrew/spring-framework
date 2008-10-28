@@ -1,0 +1,29 @@
+{
+  Destination destination=getDestination();
+  if (destination == null) {
+    destination=resolveDestinationName(session,getDestinationName());
+  }
+  MessageConsumer consumer=createConsumer(session,destination);
+  if (this.taskExecutor != null) {
+    consumer.setMessageListener(new MessageListener(){
+      public void onMessage(      final Message message){
+        taskExecutor.execute(new Runnable(){
+          public void run(){
+            processMessage(message,session);
+          }
+        }
+);
+      }
+    }
+);
+  }
+ else {
+    consumer.setMessageListener(new MessageListener(){
+      public void onMessage(      Message message){
+        processMessage(message,session);
+      }
+    }
+);
+  }
+  return consumer;
+}

@@ -1,0 +1,48 @@
+{
+  String methodName=method.getName();
+  if (methodName.equals("equals")) {
+    return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+  }
+ else   if (methodName.equals("hashCode")) {
+    return new Integer(System.identityHashCode(proxy));
+  }
+ else   if (methodName.equals("toString")) {
+    return "Cached JMS Session: " + this.target;
+  }
+ else   if (methodName.equals("close")) {
+    if (active) {
+synchronized (this.sessionList) {
+        if (this.sessionList.size() < getSessionCacheSize()) {
+          logicalClose(proxy);
+          return null;
+        }
+      }
+    }
+    physicalClose();
+    return null;
+  }
+ else   if (methodName.equals("getTargetSession")) {
+    return this.target;
+  }
+ else   if (methodName.equals("commit") || methodName.equals("rollback")) {
+    this.transactionOpen=false;
+  }
+ else {
+    this.transactionOpen=true;
+    if ((methodName.equals("createProducer") || methodName.equals("createSender") || methodName.equals("createPublisher")) && isCacheProducers()) {
+      return getCachedProducer((Destination)args[0]);
+    }
+ else     if ((methodName.equals("createConsumer") || methodName.equals("createReceiver") || methodName.equals("createSubscriber")) && isCacheConsumers()) {
+      return getCachedConsumer((Destination)args[0],(args.length > 1 ? (String)args[1] : null),(args.length > 2 && ((Boolean)args[2]).booleanValue()),null);
+    }
+ else     if (methodName.equals("createDurableSubscriber") && isCacheConsumers()) {
+      return getCachedConsumer((Destination)args[0],(args.length > 2 ? (String)args[2] : null),(args.length > 3 && ((Boolean)args[3]).booleanValue()),(String)args[1]);
+    }
+  }
+  try {
+    return method.invoke(this.target,args);
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+}

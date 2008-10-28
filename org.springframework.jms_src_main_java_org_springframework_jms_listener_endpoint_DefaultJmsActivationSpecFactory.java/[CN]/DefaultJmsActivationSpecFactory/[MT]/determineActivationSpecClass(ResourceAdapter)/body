@@ -1,0 +1,39 @@
+{
+  String adapterClassName=adapter.getClass().getName();
+  if (adapterClassName.endsWith(RESOURCE_ADAPTER_SUFFIX)) {
+    String providerName=adapterClassName.substring(0,adapterClassName.length() - RESOURCE_ADAPTER_SUFFIX.length());
+    String specClassName=providerName + ACTIVATION_SPEC_SUFFIX;
+    try {
+      return adapter.getClass().getClassLoader().loadClass(specClassName);
+    }
+ catch (    ClassNotFoundException ex) {
+      logger.debug("No default <Provider>ActivationSpec class found: " + specClassName);
+    }
+  }
+ else   if (adapterClassName.endsWith(RESOURCE_ADAPTER_IMPL_SUFFIX)) {
+    String providerName=adapterClassName.substring(0,adapterClassName.length() - RESOURCE_ADAPTER_IMPL_SUFFIX.length());
+    String specClassName=providerName + ACTIVATION_SPEC_IMPL_SUFFIX;
+    try {
+      return adapter.getClass().getClassLoader().loadClass(specClassName);
+    }
+ catch (    ClassNotFoundException ex) {
+      logger.debug("No default <Provider>ActivationSpecImpl class found: " + specClassName);
+    }
+  }
+  String providerPackage=adapterClassName.substring(0,adapterClassName.lastIndexOf('.') + 1);
+  String specClassName=providerPackage + ACTIVATION_SPEC_IMPL_SUFFIX;
+  try {
+    return adapter.getClass().getClassLoader().loadClass(specClassName);
+  }
+ catch (  ClassNotFoundException ex) {
+    logger.debug("No default ActivationSpecImpl class found in provider package: " + specClassName);
+  }
+  specClassName=providerPackage + "inbound." + ACTIVATION_SPEC_IMPL_SUFFIX;
+  try {
+    return adapter.getClass().getClassLoader().loadClass(specClassName);
+  }
+ catch (  ClassNotFoundException ex) {
+    logger.debug("No default ActivationSpecImpl class found in inbound subpackage: " + specClassName);
+  }
+  throw new IllegalStateException("No ActivationSpec class defined - " + "specify the 'activationSpecClass' property or override the 'determineActivationSpecClass' method");
+}

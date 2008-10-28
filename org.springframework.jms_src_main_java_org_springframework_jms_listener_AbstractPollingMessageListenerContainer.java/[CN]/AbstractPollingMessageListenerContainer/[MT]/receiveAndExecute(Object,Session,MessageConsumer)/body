@@ -1,0 +1,26 @@
+{
+  if (this.transactionManager != null) {
+    TransactionStatus status=this.transactionManager.getTransaction(this.transactionDefinition);
+    boolean messageReceived=true;
+    try {
+      messageReceived=doReceiveAndExecute(invoker,session,consumer,status);
+    }
+ catch (    JMSException ex) {
+      rollbackOnException(status,ex);
+      throw ex;
+    }
+catch (    RuntimeException ex) {
+      rollbackOnException(status,ex);
+      throw ex;
+    }
+catch (    Error err) {
+      rollbackOnException(status,err);
+      throw err;
+    }
+    this.transactionManager.commit(status);
+    return messageReceived;
+  }
+ else {
+    return doReceiveAndExecute(invoker,session,consumer,null);
+  }
+}

@@ -1,0 +1,29 @@
+{
+  while (isRunning()) {
+    try {
+      if (sharedConnectionEnabled()) {
+        refreshSharedConnection();
+      }
+ else {
+        Connection con=createConnection();
+        JmsUtils.closeConnection(con);
+      }
+      logger.info("Successfully refreshed JMS Connection");
+      break;
+    }
+ catch (    Exception ex) {
+      StringBuffer msg=new StringBuffer();
+      msg.append("Could not refresh JMS Connection for destination '");
+      msg.append(getDestinationDescription()).append("' - retrying in ");
+      msg.append(this.recoveryInterval).append(" ms. Cause: ");
+      msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException)ex) : ex.getMessage());
+      if (logger.isDebugEnabled()) {
+        logger.info(msg,ex);
+      }
+ else       if (logger.isInfoEnabled()) {
+        logger.info(msg);
+      }
+    }
+    sleepInbetweenRecoveryAttempts();
+  }
+}

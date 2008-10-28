@@ -1,0 +1,14 @@
+{
+  boolean exposeResource=isExposeListenerSession();
+  if (exposeResource) {
+    TransactionSynchronizationManager.bindResource(getConnectionFactory(),new LocallyExposedJmsResourceHolder(session));
+  }
+  try {
+    executeListener(session,message);
+  }
+  finally {
+    if (exposeResource) {
+      TransactionSynchronizationManager.unbindResource(getConnectionFactory());
+    }
+  }
+}

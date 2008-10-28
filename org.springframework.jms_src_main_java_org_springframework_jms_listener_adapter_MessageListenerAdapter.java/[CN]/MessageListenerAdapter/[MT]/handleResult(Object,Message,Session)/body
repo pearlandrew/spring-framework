@@ -1,0 +1,16 @@
+{
+  if (session != null) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Listener method returned result [" + result + "] - generating response message for it");
+    }
+    Message response=buildMessage(session,result);
+    postProcessResponse(request,response);
+    Destination destination=getResponseDestination(request,response,session);
+    sendResponse(session,destination,response);
+  }
+ else {
+    if (logger.isWarnEnabled()) {
+      logger.warn("Listener method returned result [" + result + "]: not generating response message for it because of no JMS Session given");
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  Object cacheKey=new ConsumerCacheKey(dest,selector,noLocal,subscription);
+  MessageConsumer consumer=(MessageConsumer)this.cachedConsumers.get(cacheKey);
+  if (consumer != null) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Found cached JMS MessageConsumer for destination [" + dest + "]: "+ consumer);
+    }
+  }
+ else {
+    if (dest instanceof Topic) {
+      consumer=(subscription != null ? this.target.createDurableSubscriber((Topic)dest,subscription,selector,noLocal) : this.target.createConsumer(dest,selector,noLocal));
+    }
+ else {
+      consumer=this.target.createConsumer(dest,selector);
+    }
+    if (logger.isDebugEnabled()) {
+      logger.debug("Creating cached JMS MessageConsumer for destination [" + dest + "]: "+ consumer);
+    }
+    this.cachedConsumers.put(cacheKey,consumer);
+  }
+  return new CachedMessageConsumer(consumer);
+}

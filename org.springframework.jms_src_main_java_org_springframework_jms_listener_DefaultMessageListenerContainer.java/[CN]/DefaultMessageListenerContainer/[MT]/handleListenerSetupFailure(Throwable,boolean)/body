@@ -1,0 +1,27 @@
+{
+  if (ex instanceof JMSException) {
+    invokeExceptionListener((JMSException)ex);
+  }
+  if (ex instanceof SharedConnectionNotInitializedException) {
+    if (!alreadyRecovered) {
+      logger.debug("JMS message listener invoker needs to establish shared Connection");
+    }
+  }
+ else {
+    if (alreadyRecovered) {
+      logger.debug("Setup of JMS message listener invoker failed - already recovered by other invoker",ex);
+    }
+ else {
+      StringBuffer msg=new StringBuffer();
+      msg.append("Setup of JMS message listener invoker failed for destination '");
+      msg.append(getDestinationDescription()).append("' - trying to recover. Cause: ");
+      msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException)ex) : ex.getMessage());
+      if (logger.isDebugEnabled()) {
+        logger.info(msg,ex);
+      }
+ else {
+        logger.info(msg);
+      }
+    }
+  }
+}

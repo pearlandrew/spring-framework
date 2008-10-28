@@ -1,0 +1,18 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Closing cached Session: " + this.target);
+  }
+  try {
+    for (Iterator it=this.cachedProducers.values().iterator(); it.hasNext(); ) {
+      ((MessageProducer)it.next()).close();
+    }
+    for (Iterator it=this.cachedConsumers.values().iterator(); it.hasNext(); ) {
+      ((MessageConsumer)it.next()).close();
+    }
+  }
+  finally {
+    this.cachedProducers.clear();
+    this.cachedConsumers.clear();
+    this.target.close();
+  }
+}

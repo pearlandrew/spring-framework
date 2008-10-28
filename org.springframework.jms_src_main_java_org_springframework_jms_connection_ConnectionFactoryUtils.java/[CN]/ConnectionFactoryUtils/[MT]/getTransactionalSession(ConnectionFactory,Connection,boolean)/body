@@ -1,0 +1,20 @@
+{
+  return doGetTransactionalSession(cf,new ResourceFactory(){
+    public Session getSession(    JmsResourceHolder holder){
+      return holder.getSession(Session.class,existingCon);
+    }
+    public Connection getConnection(    JmsResourceHolder holder){
+      return (existingCon != null ? existingCon : holder.getConnection());
+    }
+    public Connection createConnection() throws JMSException {
+      return cf.createConnection();
+    }
+    public Session createSession(    Connection con) throws JMSException {
+      return con.createSession(synchedLocalTransactionAllowed,Session.AUTO_ACKNOWLEDGE);
+    }
+    public boolean isSynchedLocalTransactionAllowed(){
+      return synchedLocalTransactionAllowed;
+    }
+  }
+,true);
+}

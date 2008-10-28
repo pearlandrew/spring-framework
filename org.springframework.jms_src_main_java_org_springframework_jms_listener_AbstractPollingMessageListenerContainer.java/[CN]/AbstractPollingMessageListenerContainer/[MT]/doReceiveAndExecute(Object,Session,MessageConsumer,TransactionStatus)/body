@@ -1,0 +1,75 @@
+{
+  Connection conToClose=null;
+  Session sessionToClose=null;
+  MessageConsumer consumerToClose=null;
+  try {
+    Session sessionToUse=session;
+    boolean transactional=false;
+    if (sessionToUse == null) {
+      sessionToUse=ConnectionFactoryUtils.doGetTransactionalSession(getConnectionFactory(),this.transactionalResourceFactory,true);
+      transactional=(sessionToUse != null);
+    }
+    if (sessionToUse == null) {
+      Connection conToUse=null;
+      if (sharedConnectionEnabled()) {
+        conToUse=getSharedConnection();
+      }
+ else {
+        conToUse=createConnection();
+        conToClose=conToUse;
+        conToUse.start();
+      }
+      sessionToUse=createSession(conToUse);
+      sessionToClose=sessionToUse;
+    }
+    MessageConsumer consumerToUse=consumer;
+    if (consumerToUse == null) {
+      consumerToUse=createListenerConsumer(sessionToUse);
+      consumerToClose=consumerToUse;
+    }
+    Message message=receiveMessage(consumerToUse);
+    if (message != null) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Received message of type [" + message.getClass() + "] from consumer ["+ consumerToUse+ "] of "+ (transactional ? "transactional " : "")+ "session ["+ sessionToUse+ "]");
+      }
+      messageReceived(invoker,sessionToUse);
+      boolean exposeResource=(!transactional && isExposeListenerSession() && !TransactionSynchronizationManager.hasResource(getConnectionFactory()));
+      if (exposeResource) {
+        TransactionSynchronizationManager.bindResource(getConnectionFactory(),new LocallyExposedJmsResourceHolder(sessionToUse));
+      }
+      try {
+        doExecuteListener(sessionToUse,message);
+      }
+ catch (      Throwable ex) {
+        if (status != null) {
+          if (logger.isDebugEnabled()) {
+            logger.debug("Rolling back transaction because of listener exception thrown: " + ex);
+          }
+          status.setRollbackOnly();
+        }
+        handleListenerException(ex);
+        if (ex instanceof JMSException) {
+          throw (JMSException)ex;
+        }
+      }
+ finally {
+        if (exposeResource) {
+          TransactionSynchronizationManager.unbindResource(getConnectionFactory());
+        }
+      }
+      return true;
+    }
+ else {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Consumer [" + consumerToUse + "] of "+ (transactional ? "transactional " : "")+ "session ["+ sessionToUse+ "] did not receive a message");
+      }
+      noMessageReceived(invoker,sessionToUse);
+      return false;
+    }
+  }
+  finally {
+    JmsUtils.closeMessageConsumer(consumerToClose);
+    JmsUtils.closeSession(sessionToClose);
+    ConnectionFactoryUtils.releaseConnection(conToClose,getConnectionFactory(),true);
+  }
+}

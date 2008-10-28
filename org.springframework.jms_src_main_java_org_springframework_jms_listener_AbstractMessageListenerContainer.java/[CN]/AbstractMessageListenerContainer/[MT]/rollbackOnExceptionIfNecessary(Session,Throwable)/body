@@ -1,0 +1,25 @@
+{
+  try {
+    if (session.getTransacted() && isSessionLocallyTransacted(session)) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Initiating transaction rollback on application exception",ex);
+      }
+      JmsUtils.rollbackIfNecessary(session);
+    }
+  }
+ catch (  IllegalStateException ex2) {
+    logger.debug("Could not roll back because Session already closed",ex2);
+  }
+catch (  JMSException ex2) {
+    logger.error("Application exception overridden by rollback exception",ex);
+    throw ex2;
+  }
+catch (  RuntimeException ex2) {
+    logger.error("Application exception overridden by rollback exception",ex);
+    throw ex2;
+  }
+catch (  Error err) {
+    logger.error("Application exception overridden by rollback error",ex);
+    throw err;
+  }
+}

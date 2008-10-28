@@ -1,0 +1,16 @@
+{
+  establishSharedConnection();
+  Connection con=getSharedConnection();
+  Destination destination=getDestination();
+  if (destination == null) {
+    Session session=createSession(con);
+    try {
+      destination=resolveDestinationName(session,getDestinationName());
+    }
+  finally {
+      JmsUtils.closeSession(session);
+    }
+  }
+  ServerSessionPool pool=createServerSessionPool();
+  this.consumer=createConsumer(con,destination,pool);
+}

@@ -1,0 +1,75 @@
+{
+  if (method.getName().equals("equals")) {
+    return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+  }
+ else   if (method.getName().equals("hashCode")) {
+    return new Integer(System.identityHashCode(proxy));
+  }
+ else   if (method.getName().equals("toString")) {
+    return "Shared JMS Connection: " + this.target;
+  }
+ else   if (method.getName().equals("setClientID")) {
+    String currentClientId=this.target.getClientID();
+    if (currentClientId != null && currentClientId.equals(args[0])) {
+      return null;
+    }
+ else {
+      throw new javax.jms.IllegalStateException("setClientID call not supported on proxy for shared Connection. " + "Set the 'clientId' property on the SingleConnectionFactory instead.");
+    }
+  }
+ else   if (method.getName().equals("setExceptionListener")) {
+    ExceptionListener currentExceptionListener=this.target.getExceptionListener();
+    if (currentExceptionListener instanceof InternalChainedExceptionListener && args[0] != null) {
+      ((InternalChainedExceptionListener)currentExceptionListener).addDelegate((ExceptionListener)args[0]);
+      return null;
+    }
+ else {
+      throw new javax.jms.IllegalStateException("setExceptionListener call not supported on proxy for shared Connection. " + "Set the 'exceptionListener' property on the SingleConnectionFactory instead. " + "Alternatively, activate SingleConnectionFactory's 'reconnectOnException' feature, "+ "which will allow for registering further ExceptionListeners to the recovery chain.");
+    }
+  }
+ else   if (method.getName().equals("start")) {
+    this.target.start();
+synchronized (connectionMonitor) {
+      started=true;
+    }
+    return null;
+  }
+ else   if (method.getName().equals("stop")) {
+    return null;
+  }
+ else   if (method.getName().equals("close")) {
+    return null;
+  }
+ else   if (method.getName().equals("createSession") || method.getName().equals("createQueueSession") || method.getName().equals("createTopicSession")) {
+    boolean transacted=((Boolean)args[0]).booleanValue();
+    Integer ackMode=(Integer)args[1];
+    Integer mode=(transacted ? new Integer(Session.SESSION_TRANSACTED) : ackMode);
+    Session session=getSession(this.target,mode);
+    if (session != null) {
+      if (!method.getReturnType().isInstance(session)) {
+        String msg="JMS Session does not implement specific domain: " + session;
+        try {
+          session.close();
+        }
+ catch (        Throwable ex) {
+          logger.trace("Failed to close newly obtained JMS Session",ex);
+        }
+        throw new javax.jms.IllegalStateException(msg);
+      }
+      return session;
+    }
+  }
+  try {
+    Object retVal=method.invoke(this.target,args);
+    if (method.getName().equals("getExceptionListener") && retVal instanceof InternalChainedExceptionListener) {
+      InternalChainedExceptionListener listener=(InternalChainedExceptionListener)retVal;
+      return listener.getUserListener();
+    }
+ else {
+      return retVal;
+    }
+  }
+ catch (  InvocationTargetException ex) {
+    throw ex.getTargetException();
+  }
+}

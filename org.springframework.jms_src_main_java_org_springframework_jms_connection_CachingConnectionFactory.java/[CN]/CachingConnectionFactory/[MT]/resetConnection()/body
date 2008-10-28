@@ -1,0 +1,22 @@
+{
+  this.active=false;
+synchronized (this.cachedSessions) {
+    for (Iterator it=this.cachedSessions.values().iterator(); it.hasNext(); ) {
+      LinkedList sessionList=(LinkedList)it.next();
+synchronized (sessionList) {
+        for (Iterator it2=sessionList.iterator(); it2.hasNext(); ) {
+          Session session=(Session)it2.next();
+          try {
+            session.close();
+          }
+ catch (          Throwable ex) {
+            logger.trace("Could not close cached JMS Session",ex);
+          }
+        }
+      }
+    }
+    this.cachedSessions.clear();
+  }
+  this.active=true;
+  super.resetConnection();
+}

@@ -1,0 +1,19 @@
+{
+  try {
+synchronized (this.lifecycleMonitor) {
+      this.active=true;
+      this.lifecycleMonitor.notifyAll();
+    }
+    if (this.autoStartup) {
+      doStart();
+    }
+    doInitialize();
+  }
+ catch (  JMSException ex) {
+synchronized (this.sharedConnectionMonitor) {
+      ConnectionFactoryUtils.releaseConnection(this.sharedConnection,getConnectionFactory(),this.autoStartup);
+      this.sharedConnection=null;
+    }
+    throw convertJmsAccessException(ex);
+  }
+}

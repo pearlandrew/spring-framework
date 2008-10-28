@@ -1,0 +1,17 @@
+{
+  for (Iterator it=this.sessions.iterator(); it.hasNext(); ) {
+    try {
+      ((Session)it.next()).close();
+    }
+ catch (    Throwable ex) {
+      logger.debug("Could not close synchronized JMS Session after transaction",ex);
+    }
+  }
+  for (Iterator it=this.connections.iterator(); it.hasNext(); ) {
+    Connection con=(Connection)it.next();
+    ConnectionFactoryUtils.releaseConnection(con,this.connectionFactory,true);
+  }
+  this.connections.clear();
+  this.sessions.clear();
+  this.sessionsPerConnection.clear();
+}

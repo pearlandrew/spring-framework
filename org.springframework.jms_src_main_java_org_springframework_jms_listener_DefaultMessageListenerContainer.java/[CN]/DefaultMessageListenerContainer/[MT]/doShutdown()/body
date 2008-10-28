@@ -1,0 +1,16 @@
+{
+  logger.debug("Waiting for shutdown of message listener invokers");
+  try {
+synchronized (this.lifecycleMonitor) {
+      while (this.activeInvokerCount > 0) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Still waiting for shutdown of " + this.activeInvokerCount + " message listener invokers");
+        }
+        this.lifecycleMonitor.wait();
+      }
+    }
+  }
+ catch (  InterruptedException ex) {
+    Thread.currentThread().interrupt();
+  }
+}

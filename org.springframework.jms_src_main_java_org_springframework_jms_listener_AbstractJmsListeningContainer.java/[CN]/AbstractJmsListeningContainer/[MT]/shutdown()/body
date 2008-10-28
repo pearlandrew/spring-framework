@@ -1,0 +1,32 @@
+{
+  logger.debug("Shutting down JMS listener container");
+  boolean wasRunning=false;
+synchronized (this.lifecycleMonitor) {
+    wasRunning=this.running;
+    this.running=false;
+    this.active=false;
+    this.lifecycleMonitor.notifyAll();
+  }
+  if (wasRunning && sharedConnectionEnabled()) {
+    try {
+      stopSharedConnection();
+    }
+ catch (    Throwable ex) {
+      logger.debug("Could not stop JMS Connection on shutdown",ex);
+    }
+  }
+  try {
+    doShutdown();
+  }
+ catch (  JMSException ex) {
+    throw convertJmsAccessException(ex);
+  }
+ finally {
+    if (sharedConnectionEnabled()) {
+synchronized (this.sharedConnectionMonitor) {
+        ConnectionFactoryUtils.releaseConnection(this.sharedConnection,getConnectionFactory(),false);
+        this.sharedConnection=null;
+      }
+    }
+  }
+}

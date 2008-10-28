@@ -1,0 +1,22 @@
+{
+  Connection conToClose=null;
+  Session sessionToClose=null;
+  try {
+    Session sessionToUse=session;
+    if (!isExposeListenerSession()) {
+      conToClose=createConnection();
+      sessionToClose=createSession(conToClose);
+      sessionToUse=sessionToClose;
+    }
+    listener.onMessage(message,sessionToUse);
+    if (sessionToUse != session) {
+      if (sessionToUse.getTransacted() && isSessionLocallyTransacted(sessionToUse)) {
+        JmsUtils.commitIfNecessary(sessionToUse);
+      }
+    }
+  }
+  finally {
+    JmsUtils.closeSession(sessionToClose);
+    JmsUtils.closeConnection(conToClose);
+  }
+}

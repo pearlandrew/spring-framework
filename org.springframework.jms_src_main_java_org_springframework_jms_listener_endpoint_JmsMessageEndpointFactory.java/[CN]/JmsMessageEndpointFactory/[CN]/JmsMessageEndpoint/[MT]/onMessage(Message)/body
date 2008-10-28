@@ -1,0 +1,32 @@
+{
+  boolean applyDeliveryCalls=!hasBeforeDeliveryBeenCalled();
+  if (applyDeliveryCalls) {
+    try {
+      beforeDelivery(null);
+    }
+ catch (    ResourceException ex) {
+      throw new JmsResourceException(ex);
+    }
+  }
+  try {
+    messageListener.onMessage(message);
+  }
+ catch (  RuntimeException ex) {
+    onEndpointException(ex);
+    throw ex;
+  }
+catch (  Error err) {
+    onEndpointException(err);
+    throw err;
+  }
+ finally {
+    if (applyDeliveryCalls) {
+      try {
+        afterDelivery();
+      }
+ catch (      ResourceException ex) {
+        throw new JmsResourceException(ex);
+      }
+    }
+  }
+}
