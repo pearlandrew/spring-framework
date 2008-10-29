@@ -1,0 +1,15 @@
+{
+  DefaultListableBeanFactory lbf=new DefaultListableBeanFactory();
+  RootBeanDefinition bd=new RootBeanDefinition(TestBean.class,new MutablePropertyValues());
+  RootBeanDefinition bd2=new RootBeanDefinition(TestBean.class,new MutablePropertyValues());
+  lbf.registerBeanDefinition("test",bd);
+  lbf.registerBeanDefinition("test2",bd2);
+  try {
+    lbf.autowire(DependenciesBean.class,AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE,true);
+    fail("Should have thrown UnsatisfiedDependencyException");
+  }
+ catch (  UnsatisfiedDependencyException ex) {
+    assertTrue(ex.getMessage().indexOf("test") != -1);
+    assertTrue(ex.getMessage().indexOf("test2") != -1);
+  }
+}

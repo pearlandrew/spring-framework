@@ -1,0 +1,19 @@
+{
+  MockControl mock=MockControl.createControl(ScriptSource.class);
+  ScriptSource script=(ScriptSource)mock.getMock();
+  script.getScriptAsString();
+  final String badScript="class Foo { public Foo(String foo) {}}";
+  mock.setReturnValue(badScript);
+  script.suggestedClassName();
+  mock.setReturnValue("someName");
+  mock.replay();
+  GroovyScriptFactory factory=new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript);
+  try {
+    factory.getScriptedObject(script,new Class[]{});
+    fail("Must have thrown a ScriptCompilationException (no public no-arg ctor in scripted class).");
+  }
+ catch (  ScriptCompilationException expected) {
+    assertTrue(expected.contains(InstantiationException.class));
+  }
+  mock.verify();
+}

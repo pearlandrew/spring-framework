@@ -1,0 +1,16 @@
+{
+  sf.getCurrentSession();
+  sfControl.setReturnValue(session);
+  sfControl.replay();
+  HibernateTemplate ht=new HibernateTemplate(sf);
+  ht.setAllowCreate(false);
+  final List l=new ArrayList();
+  l.add("test");
+  List result=ht.executeFind(new HibernateCallback(){
+    public Object doInHibernate(    org.hibernate.Session session) throws HibernateException {
+      return l;
+    }
+  }
+);
+  assertTrue("Correct result list",result == l);
+}

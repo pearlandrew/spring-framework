@@ -1,0 +1,19 @@
+{
+  sf.getCurrentSession();
+  sfControl.setThrowable(new HibernateException(""));
+  sfControl.replay();
+  HibernateTemplate ht=new HibernateTemplate();
+  ht.setSessionFactory(sf);
+  ht.setAllowCreate(false);
+  try {
+    ht.execute(new HibernateCallback(){
+      public Object doInHibernate(      org.hibernate.Session session) throws HibernateException {
+        return null;
+      }
+    }
+);
+    fail("Should have thrown DataAccessException");
+  }
+ catch (  DataAccessResourceFailureException ex) {
+  }
+}

@@ -1,0 +1,15 @@
+{
+  MockServletContext sc=new MockServletContext("",new FileSystemResourceLoader());
+  sc.addInitParameter(Log4jWebConfigurer.CONFIG_LOCATION_PARAM,location);
+  if (refreshInterval) {
+    sc.addInitParameter(Log4jWebConfigurer.REFRESH_INTERVAL_PARAM,"10");
+  }
+  Log4jWebConfigurer.initLogging(sc);
+  try {
+    doTestLogOutput();
+  }
+  finally {
+    Log4jWebConfigurer.shutdownLogging(sc);
+  }
+  assertTrue(MockLog4jAppender.closeCalled);
+}

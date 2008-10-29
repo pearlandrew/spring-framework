@@ -1,0 +1,26 @@
+{
+  LocalSessionFactoryBean sfb=new LocalSessionFactoryBean(){
+    protected Configuration newConfiguration(){
+      return new Configuration(){
+        public Configuration setInterceptor(        Interceptor interceptor){
+          throw new IllegalArgumentException(interceptor.toString());
+        }
+      }
+;
+    }
+  }
+;
+  sfb.setMappingResources(new String[0]);
+  sfb.setDataSource(new DriverManagerDataSource());
+  MockControl interceptorControl=MockControl.createControl(Interceptor.class);
+  Interceptor entityInterceptor=(Interceptor)interceptorControl.getMock();
+  interceptorControl.replay();
+  sfb.setEntityInterceptor(entityInterceptor);
+  try {
+    sfb.afterPropertiesSet();
+    fail("Should have thrown IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException ex) {
+    assertTrue("Correct exception",ex.getMessage().equals(entityInterceptor.toString()));
+  }
+}

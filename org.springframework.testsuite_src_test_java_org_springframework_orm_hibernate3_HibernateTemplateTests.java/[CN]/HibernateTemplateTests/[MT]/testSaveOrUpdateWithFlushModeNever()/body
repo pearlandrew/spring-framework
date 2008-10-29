@@ -1,0 +1,20 @@
+{
+  TestBean tb=new TestBean();
+  sf.openSession();
+  sfControl.setReturnValue(session,1);
+  session.getSessionFactory();
+  sessionControl.setReturnValue(sf,1);
+  session.getFlushMode();
+  sessionControl.setReturnValue(FlushMode.NEVER);
+  session.close();
+  sessionControl.setReturnValue(null,1);
+  sfControl.replay();
+  sessionControl.replay();
+  HibernateTemplate ht=new HibernateTemplate(sf);
+  try {
+    ht.saveOrUpdate(tb);
+    fail("Should have thrown InvalidDataAccessApiUsageException");
+  }
+ catch (  InvalidDataAccessApiUsageException ex) {
+  }
+}

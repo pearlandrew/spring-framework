@@ -1,0 +1,10 @@
+{
+  final Object monitor=new Object();
+  RunAwareRunnable task=new RunAwareRunnable(monitor);
+  TimerTaskExecutor executor=new TimerTaskExecutor(new Timer());
+  executor.execute(task);
+synchronized (monitor) {
+    monitor.wait(5000);
+  }
+  assertTrue("Supplied task (a Runnable) is not being invoked.",task.isRunWasCalled());
+}

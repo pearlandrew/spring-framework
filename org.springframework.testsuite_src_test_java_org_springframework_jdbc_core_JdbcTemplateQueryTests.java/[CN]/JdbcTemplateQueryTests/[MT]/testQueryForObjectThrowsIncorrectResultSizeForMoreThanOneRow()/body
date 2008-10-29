@@ -1,0 +1,41 @@
+{
+  String sql="select pass from t_account where first_name='Alef'";
+  mockResultSetMetaData.getColumnCount();
+  ctrlResultSetMetaData.setReturnValue(1);
+  mockResultSet.getMetaData();
+  ctrlResultSet.setReturnValue(mockResultSetMetaData);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getString(1);
+  ctrlResultSet.setReturnValue("pass");
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getMetaData();
+  ctrlResultSet.setReturnValue(mockResultSetMetaData);
+  mockResultSetMetaData.getColumnCount();
+  ctrlResultSetMetaData.setReturnValue(1);
+  mockResultSet.getString(1);
+  ctrlResultSet.setReturnValue("pass");
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockStatement.executeQuery(sql);
+  ctrlStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockStatement.getWarnings();
+    ctrlStatement.setReturnValue(null);
+  }
+  mockStatement.close();
+  ctrlStatement.setVoidCallable();
+  mockConnection.createStatement();
+  ctrlConnection.setReturnValue(mockStatement);
+  replay();
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  try {
+    template.queryForObject(sql,String.class);
+    fail("Should have thrown IncorrectResultSizeDataAccessException");
+  }
+ catch (  IncorrectResultSizeDataAccessException ex) {
+  }
+}

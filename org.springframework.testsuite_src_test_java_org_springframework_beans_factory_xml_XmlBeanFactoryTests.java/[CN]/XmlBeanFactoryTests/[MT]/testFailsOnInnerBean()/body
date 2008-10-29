@@ -1,0 +1,22 @@
+{
+  DefaultListableBeanFactory xbf=new DefaultListableBeanFactory();
+  XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(xbf);
+  reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+  reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml",getClass()));
+  try {
+    xbf.getBean("failsOnInnerBean");
+  }
+ catch (  BeanCreationException ex) {
+    ex.printStackTrace();
+    assertTrue(ex.getMessage().indexOf("failsOnInnerBean") != -1);
+    assertTrue(ex.getMessage().indexOf("someMap") != -1);
+  }
+  try {
+    xbf.getBean("failsOnInnerBeanForConstructor");
+  }
+ catch (  BeanCreationException ex) {
+    ex.printStackTrace();
+    assertTrue(ex.getMessage().indexOf("failsOnInnerBeanForConstructor") != -1);
+    assertTrue(ex.getMessage().indexOf("constructor argument") != -1);
+  }
+}

@@ -1,0 +1,64 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  if (defaultUt) {
+    ut.getStatus();
+    utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
+    ut.getStatus();
+    utControl.setReturnValue(Status.STATUS_ACTIVE,2);
+    ut.begin();
+    utControl.setVoidCallable(1);
+    ut.commit();
+    utControl.setVoidCallable(1);
+  }
+  utControl.replay();
+  MockControl tmControl=MockControl.createControl(TransactionManager.class);
+  TransactionManager tm=(TransactionManager)tmControl.getMock();
+  if (!defaultUt) {
+    tm.getStatus();
+    tmControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
+    tm.getStatus();
+    tmControl.setReturnValue(Status.STATUS_ACTIVE,2);
+    tm.begin();
+    tmControl.setVoidCallable(1);
+    tm.commit();
+    tmControl.setVoidCallable(1);
+  }
+  tmControl.replay();
+  JtaTransactionManager ptm=new JtaTransactionManager();
+  ExpectedLookupTemplate jndiTemplate=new ExpectedLookupTemplate();
+  if (defaultUt) {
+    jndiTemplate.addObject("java:comp/UserTransaction",ut);
+  }
+  jndiTemplate.addObject(tmName,tm);
+  ptm.setJndiTemplate(jndiTemplate);
+  ptm.afterPropertiesSet();
+  if (tmFound) {
+    assertEquals(tm,ptm.getTransactionManager());
+  }
+ else {
+    assertNull(ptm.getTransactionManager());
+  }
+  if (defaultUt) {
+    assertEquals(ut,ptm.getUserTransaction());
+  }
+ else {
+    assertTrue(ptm.getUserTransaction() instanceof UserTransactionAdapter);
+    UserTransactionAdapter uta=(UserTransactionAdapter)ptm.getUserTransaction();
+    assertEquals(tm,uta.getTransactionManager());
+  }
+  TransactionTemplate tt=new TransactionTemplate(ptm);
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+  tt.execute(new TransactionCallbackWithoutResult(){
+    protected void doInTransactionWithoutResult(    TransactionStatus status){
+      assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+      assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+    }
+  }
+);
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+  utControl.verify();
+  tmControl.verify();
+}

@@ -1,0 +1,11 @@
+{
+  StaticApplicationContext context=new StaticApplicationContext();
+  context.registerBeanDefinition("broadcaster",new RootBeanDefinition(BeanThatBroadcasts.class));
+  RootBeanDefinition listenerDef=new RootBeanDefinition(BeanThatListens.class);
+  listenerDef.getConstructorArgumentValues().addGenericArgumentValue(new RuntimeBeanReference("broadcaster"));
+  context.registerBeanDefinition("listener",listenerDef);
+  context.refresh();
+  BeanThatBroadcasts broadcaster=(BeanThatBroadcasts)context.getBean("broadcaster");
+  context.publishEvent(new MyEvent(context));
+  assertEquals("The event was not received by the listener",2,broadcaster.receivedCount);
+}

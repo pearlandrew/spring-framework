@@ -1,0 +1,25 @@
+{
+  MockControl filterControl=MockControl.createControl(Filter.class);
+  Filter filter=(Filter)filterControl.getMock();
+  session.getSessionFactory();
+  sessionControl.setReturnValue(sf,1);
+  session.isOpen();
+  sessionControl.setReturnValue(true,1);
+  session.getEnabledFilter("myFilter");
+  sessionControl.setReturnValue(filter,1);
+  sfControl.replay();
+  sessionControl.replay();
+  HibernateTemplate ht=new HibernateTemplate(sf);
+  ht.setAllowCreate(false);
+  ht.setFilterName("myFilter");
+  TransactionSynchronizationManager.bindResource(sf,new SessionHolder(session));
+  try {
+    final List l=new ArrayList();
+    l.add("test");
+    Filter f=ht.enableFilter("myFilter");
+    assertTrue("Correct filter",f == filter);
+  }
+  finally {
+    TransactionSynchronizationManager.unbindResource(sf);
+  }
+}

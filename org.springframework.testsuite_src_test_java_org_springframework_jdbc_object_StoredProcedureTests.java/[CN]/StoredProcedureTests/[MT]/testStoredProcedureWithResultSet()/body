@@ -1,0 +1,36 @@
+{
+  MockControl ctrlResultSet=MockControl.createControl(ResultSet.class);
+  ResultSet mockResultSet=(ResultSet)ctrlResultSet.getMock();
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  if (debugEnabled) {
+    mockCallable.getWarnings();
+    ctrlCallable.setReturnValue(null);
+  }
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockCallable.execute();
+  ctrlCallable.setReturnValue(true);
+  mockCallable.getUpdateCount();
+  ctrlCallable.setReturnValue(-1);
+  mockCallable.getResultSet();
+  ctrlCallable.setReturnValue(mockResultSet);
+  mockCallable.getMoreResults();
+  ctrlCallable.setReturnValue(false);
+  mockCallable.getUpdateCount();
+  ctrlCallable.setReturnValue(-1);
+  mockCallable.close();
+  ctrlCallable.setVoidCallable();
+  mockConnection.prepareCall("{call " + StoredProcedureWithResultSet.SQL + "()}");
+  ctrlConnection.setReturnValue(mockCallable);
+  replay();
+  ctrlResultSet.replay();
+  StoredProcedureWithResultSet sproc=new StoredProcedureWithResultSet(mockDataSource);
+  sproc.execute();
+  ctrlResultSet.verify();
+  assertEquals(2,sproc.getCount());
+}

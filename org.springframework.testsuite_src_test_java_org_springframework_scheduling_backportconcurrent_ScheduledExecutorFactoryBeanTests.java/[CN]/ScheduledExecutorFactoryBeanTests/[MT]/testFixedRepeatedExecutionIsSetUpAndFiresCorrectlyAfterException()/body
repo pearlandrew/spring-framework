@@ -1,0 +1,19 @@
+{
+  MockControl mockRunnable=MockControl.createControl(Runnable.class);
+  Runnable runnable=(Runnable)mockRunnable.getMock();
+  runnable.run();
+  mockRunnable.setThrowable(new IllegalStateException());
+  runnable.run();
+  mockRunnable.setThrowable(new IllegalStateException());
+  mockRunnable.replay();
+  ScheduledExecutorTask task=new ScheduledExecutorTask(runnable);
+  task.setPeriod(500);
+  task.setFixedRate(true);
+  ScheduledExecutorFactoryBean factory=new ScheduledExecutorFactoryBean();
+  factory.setScheduledExecutorTasks(new ScheduledExecutorTask[]{task});
+  factory.setContinueScheduledExecutionAfterException(true);
+  factory.afterPropertiesSet();
+  pauseToLetTaskStart(2);
+  factory.destroy();
+  mockRunnable.verify();
+}

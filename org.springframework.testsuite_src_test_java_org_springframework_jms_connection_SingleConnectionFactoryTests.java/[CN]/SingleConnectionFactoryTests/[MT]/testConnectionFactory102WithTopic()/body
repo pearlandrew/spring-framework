@@ -1,0 +1,26 @@
+{
+  MockControl cfControl=MockControl.createControl(TopicConnectionFactory.class);
+  TopicConnectionFactory cf=(TopicConnectionFactory)cfControl.getMock();
+  MockControl conControl=MockControl.createControl(TopicConnection.class);
+  TopicConnection con=(TopicConnection)conControl.getMock();
+  cf.createTopicConnection();
+  cfControl.setReturnValue(con,1);
+  con.start();
+  conControl.setVoidCallable(2);
+  con.stop();
+  conControl.setVoidCallable(1);
+  con.close();
+  conControl.setVoidCallable(1);
+  cfControl.replay();
+  conControl.replay();
+  SingleConnectionFactory scf=new SingleConnectionFactory102(cf,true);
+  TopicConnection con1=scf.createTopicConnection();
+  con1.start();
+  con1.close();
+  TopicConnection con2=scf.createTopicConnection();
+  con2.start();
+  con2.close();
+  scf.destroy();
+  cfControl.verify();
+  conControl.verify();
+}

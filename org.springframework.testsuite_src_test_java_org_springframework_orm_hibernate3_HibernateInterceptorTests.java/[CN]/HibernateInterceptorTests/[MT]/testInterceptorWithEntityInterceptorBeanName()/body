@@ -1,0 +1,47 @@
+{
+  MockControl interceptorControl=MockControl.createControl(org.hibernate.Interceptor.class);
+  org.hibernate.Interceptor entityInterceptor=(org.hibernate.Interceptor)interceptorControl.getMock();
+  interceptorControl.replay();
+  MockControl interceptor2Control=MockControl.createControl(org.hibernate.Interceptor.class);
+  org.hibernate.Interceptor entityInterceptor2=(org.hibernate.Interceptor)interceptor2Control.getMock();
+  interceptor2Control.replay();
+  MockControl sfControl=MockControl.createControl(SessionFactory.class);
+  SessionFactory sf=(SessionFactory)sfControl.getMock();
+  MockControl sessionControl=MockControl.createControl(Session.class);
+  Session session=(Session)sessionControl.getMock();
+  sf.openSession(entityInterceptor);
+  sfControl.setReturnValue(session,1);
+  sf.openSession(entityInterceptor2);
+  sfControl.setReturnValue(session,1);
+  session.getSessionFactory();
+  sessionControl.setReturnValue(sf,2);
+  session.flush();
+  sessionControl.setVoidCallable(2);
+  session.close();
+  sessionControl.setReturnValue(null,2);
+  sfControl.replay();
+  sessionControl.replay();
+  MockControl beanFactoryControl=MockControl.createControl(BeanFactory.class);
+  BeanFactory beanFactory=(BeanFactory)beanFactoryControl.getMock();
+  beanFactory.getBean("entityInterceptor",org.hibernate.Interceptor.class);
+  beanFactoryControl.setReturnValue(entityInterceptor,1);
+  beanFactory.getBean("entityInterceptor",org.hibernate.Interceptor.class);
+  beanFactoryControl.setReturnValue(entityInterceptor2,1);
+  beanFactoryControl.replay();
+  HibernateInterceptor interceptor=new HibernateInterceptor();
+  interceptor.setSessionFactory(sf);
+  interceptor.setEntityInterceptorBeanName("entityInterceptor");
+  interceptor.setBeanFactory(beanFactory);
+  for (int i=0; i < 2; i++) {
+    try {
+      interceptor.invoke(new TestInvocation(sf));
+    }
+ catch (    Throwable t) {
+      fail("Should not have thrown Throwable: " + t.getMessage());
+    }
+  }
+  interceptorControl.verify();
+  interceptor2Control.verify();
+  sfControl.verify();
+  sessionControl.verify();
+}

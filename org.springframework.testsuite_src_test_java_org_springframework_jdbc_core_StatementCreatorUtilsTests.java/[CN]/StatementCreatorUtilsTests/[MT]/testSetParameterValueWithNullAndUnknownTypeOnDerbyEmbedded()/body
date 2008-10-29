@@ -1,0 +1,22 @@
+{
+  MockControl conControl=MockControl.createControl(Connection.class);
+  Connection con=(Connection)conControl.getMock();
+  MockControl metaDataControl=MockControl.createControl(DatabaseMetaData.class);
+  DatabaseMetaData metaData=(DatabaseMetaData)metaDataControl.getMock();
+  ps.getConnection();
+  psControl.setReturnValue(con,1);
+  con.getMetaData();
+  conControl.setReturnValue(metaData,1);
+  metaData.getDatabaseProductName();
+  metaDataControl.setReturnValue("Apache Derby");
+  metaData.getDriverName();
+  metaDataControl.setReturnValue("Apache Derby Embedded Driver");
+  ps.setNull(1,Types.VARCHAR);
+  psControl.setVoidCallable(1);
+  psControl.replay();
+  conControl.replay();
+  metaDataControl.replay();
+  StatementCreatorUtils.setParameterValue(ps,1,SqlTypeValue.TYPE_UNKNOWN,null,null);
+  conControl.verify();
+  metaDataControl.verify();
+}

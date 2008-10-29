@@ -1,0 +1,30 @@
+{
+  MockHttpServletRequest request=new MockHttpServletRequest();
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  AbstractXsltView view=new AbstractXsltView(){
+    protected Map getParameters(    HttpServletRequest request){
+      Map parameters=new HashMap();
+      parameters.put("sex","Male");
+      return parameters;
+    }
+  }
+;
+  Properties outputProperties=new Properties();
+  outputProperties.setProperty("indent","false");
+  view.setOutputProperties(outputProperties);
+  view.initApplicationContext();
+  Hero hero=new Hero("Jet",24,"BOOM");
+  Document document=DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+  Element node=document.createElement("hero");
+  node.setAttribute("name",hero.getName());
+  node.setAttribute("age",hero.getAge() + "");
+  node.setAttribute("catchphrase",hero.getCatchphrase());
+  view.render(new ModelAndView().addObject("hero",new DOMSource(node)).getModel(),request,response);
+  assertEquals("text/xml;charset=ISO-8859-1",response.getContentType());
+  String text=response.getContentAsString().trim();
+  assertTrue(text.startsWith("<?xml"));
+  assertTrue(text.indexOf("<hero") != -1);
+  assertTrue(text.indexOf("age=\"24\"") != -1);
+  assertTrue(text.indexOf("catchphrase=\"BOOM\"") != -1);
+  assertTrue(text.indexOf("name=\"Jet\"") != -1);
+}

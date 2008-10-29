@@ -1,0 +1,36 @@
+{
+  TestBean tb=new TestBean("tb",99);
+  StaticApplicationContext ac=new StaticApplicationContext();
+  MockControl schedulerControl=MockControl.createControl(Scheduler.class);
+  final Scheduler scheduler=(Scheduler)schedulerControl.getMock();
+  SchedulerContext schedulerContext=new SchedulerContext();
+  scheduler.getContext();
+  schedulerControl.setReturnValue(schedulerContext,4);
+  scheduler.start();
+  schedulerControl.setVoidCallable();
+  scheduler.shutdown(false);
+  schedulerControl.setVoidCallable();
+  schedulerControl.replay();
+  SchedulerFactoryBean schedulerFactoryBean=new SchedulerFactoryBean(){
+    protected Scheduler createScheduler(    SchedulerFactory schedulerFactory,    String schedulerName){
+      return scheduler;
+    }
+  }
+;
+  schedulerFactoryBean.setJobFactory(null);
+  Map schedulerContextMap=new HashMap();
+  schedulerContextMap.put("testBean",tb);
+  schedulerFactoryBean.setSchedulerContextAsMap(schedulerContextMap);
+  schedulerFactoryBean.setApplicationContext(ac);
+  schedulerFactoryBean.setApplicationContextSchedulerContextKey("appCtx");
+  try {
+    schedulerFactoryBean.afterPropertiesSet();
+    Scheduler returnedScheduler=(Scheduler)schedulerFactoryBean.getObject();
+    assertEquals(tb,returnedScheduler.getContext().get("testBean"));
+    assertEquals(ac,returnedScheduler.getContext().get("appCtx"));
+  }
+  finally {
+    schedulerFactoryBean.destroy();
+  }
+  schedulerControl.verify();
+}

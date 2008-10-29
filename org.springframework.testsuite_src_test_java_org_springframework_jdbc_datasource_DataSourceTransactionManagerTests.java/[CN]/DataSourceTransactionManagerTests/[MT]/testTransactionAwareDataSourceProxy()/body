@@ -1,0 +1,45 @@
+{
+  MockControl dsControl=MockControl.createControl(DataSource.class);
+  final DataSource ds=(DataSource)dsControl.getMock();
+  MockControl conControl=MockControl.createControl(Connection.class);
+  final Connection con=(Connection)conControl.getMock();
+  ds.getConnection();
+  dsControl.setReturnValue(con,1);
+  con.getMetaData();
+  conControl.setReturnValue(null,1);
+  con.getAutoCommit();
+  conControl.setReturnValue(true,1);
+  con.setAutoCommit(false);
+  conControl.setVoidCallable(1);
+  con.commit();
+  conControl.setVoidCallable(1);
+  con.setAutoCommit(true);
+  conControl.setVoidCallable(1);
+  con.isReadOnly();
+  conControl.setReturnValue(false,1);
+  con.close();
+  conControl.setVoidCallable(1);
+  conControl.replay();
+  dsControl.replay();
+  PlatformTransactionManager tm=new DataSourceTransactionManager(ds);
+  TransactionTemplate tt=new TransactionTemplate(tm);
+  assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
+  tt.execute(new TransactionCallbackWithoutResult(){
+    protected void doInTransactionWithoutResult(    TransactionStatus status){
+      assertEquals(con,DataSourceUtils.getConnection(ds));
+      TransactionAwareDataSourceProxy dsProxy=new TransactionAwareDataSourceProxy(ds);
+      try {
+        assertEquals(con,((ConnectionProxy)dsProxy.getConnection()).getTargetConnection());
+        assertEquals(con,new SimpleNativeJdbcExtractor().getNativeConnection(dsProxy.getConnection()));
+        dsProxy.getConnection().close();
+      }
+ catch (      SQLException ex) {
+        throw new UncategorizedSQLException("","",ex);
+      }
+    }
+  }
+);
+  assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
+  conControl.verify();
+  dsControl.verify();
+}

@@ -1,0 +1,24 @@
+{
+  MockControl ctrlResultSet=MockControl.createControl(ResultSet.class);
+  ResultSet mockResultSet=(ResultSet)ctrlResultSet.getMock();
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockCallable.setNull(1,Types.VARCHAR);
+  ctrlCallable.setVoidCallable();
+  mockCallable.execute();
+  ctrlCallable.setReturnValue(false);
+  mockCallable.getUpdateCount();
+  ctrlCallable.setReturnValue(-1);
+  if (debugEnabled) {
+    mockCallable.getWarnings();
+    ctrlCallable.setReturnValue(null);
+  }
+  mockCallable.close();
+  ctrlCallable.setVoidCallable();
+  mockConnection.prepareCall("{call " + NullArg.SQL + "(?)}");
+  ctrlConnection.setReturnValue(mockCallable);
+  replay();
+  ctrlResultSet.replay();
+  NullArg na=new NullArg(mockDataSource);
+  na.execute((String)null);
+}

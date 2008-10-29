@@ -1,0 +1,19 @@
+{
+  MockControl stmtControl=MockControl.createControl(Statement.class);
+  Statement stmt=(Statement)stmtControl.getMock();
+  con.createStatement();
+  conControl.setReturnValue(stmt,1);
+  stmt.executeQuery("some SQL");
+  stmtControl.setReturnValue(rs,1);
+  if (debugEnabled) {
+    stmt.getWarnings();
+    stmtControl.setReturnValue(null,1);
+  }
+  stmt.close();
+  stmtControl.setVoidCallable(1);
+  conControl.replay();
+  stmtControl.replay();
+  result=jdbcTemplate.query("some SQL",new TestRowMapper());
+  stmtControl.verify();
+  verify();
+}

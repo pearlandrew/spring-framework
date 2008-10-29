@@ -1,0 +1,21 @@
+{
+  final String helperTool="wrongType";
+  VelocityView vv=new VelocityView(){
+    protected void mergeTemplate(    Template template,    Context context,    HttpServletResponse response){
+      fail();
+    }
+  }
+;
+  vv.setUrl(TEMPLATE_FILE);
+  vv.setApplicationContext(wac);
+  vv.setExposeSpringMacroHelpers(true);
+  Map model=new HashMap();
+  model.put(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE,helperTool);
+  try {
+    vv.render(model,request,response);
+  }
+ catch (  Exception ex) {
+    assertTrue(ex instanceof ServletException);
+    assertTrue(ex.getMessage().indexOf(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) > -1);
+  }
+}

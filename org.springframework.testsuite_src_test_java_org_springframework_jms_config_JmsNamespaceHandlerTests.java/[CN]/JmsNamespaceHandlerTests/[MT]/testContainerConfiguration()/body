@@ -1,0 +1,19 @@
+{
+  Map containers=context.getBeansOfType(DefaultMessageListenerContainer.class);
+  ConnectionFactory defaultConnectionFactory=(ConnectionFactory)context.getBean(DEFAULT_CONNECTION_FACTORY);
+  ConnectionFactory explicitConnectionFactory=(ConnectionFactory)context.getBean(EXPLICIT_CONNECTION_FACTORY);
+  int defaultConnectionFactoryCount=0;
+  int explicitConnectionFactoryCount=0;
+  Iterator iter=containers.values().iterator();
+  while (iter.hasNext()) {
+    DefaultMessageListenerContainer container=(DefaultMessageListenerContainer)iter.next();
+    if (container.getConnectionFactory().equals(defaultConnectionFactory)) {
+      defaultConnectionFactoryCount++;
+    }
+ else     if (container.getConnectionFactory().equals(explicitConnectionFactory)) {
+      explicitConnectionFactoryCount++;
+    }
+  }
+  assertEquals("1 container should have the default connectionFactory",1,defaultConnectionFactoryCount);
+  assertEquals("2 containers should have the explicit connectionFactory",2,explicitConnectionFactoryCount);
+}

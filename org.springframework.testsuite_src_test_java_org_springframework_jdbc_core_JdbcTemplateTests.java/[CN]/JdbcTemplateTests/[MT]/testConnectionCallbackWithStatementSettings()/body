@@ -1,0 +1,24 @@
+{
+  MockControl ctrlStatement=MockControl.createControl(PreparedStatement.class);
+  PreparedStatement mockStatement=(PreparedStatement)ctrlStatement.getMock();
+  mockConnection.prepareStatement("some SQL");
+  ctrlConnection.setReturnValue(mockStatement,1);
+  mockStatement.setFetchSize(10);
+  ctrlStatement.setVoidCallable(1);
+  mockStatement.setMaxRows(20);
+  ctrlStatement.setVoidCallable(1);
+  mockStatement.close();
+  ctrlStatement.setVoidCallable(1);
+  replay();
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  Object result=template.execute(new ConnectionCallback(){
+    public Object doInConnection(    Connection con) throws SQLException {
+      PreparedStatement ps=con.prepareStatement("some SQL");
+      ps.close();
+      assertSame(mockConnection,new PlainNativeJdbcExtractor().getNativeConnection(con));
+      return "test";
+    }
+  }
+);
+  assertEquals("test",result);
+}

@@ -1,0 +1,16 @@
+{
+  mockPreparedStatement.executeUpdate();
+  ctrlPreparedStatement.setReturnValue(5);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(UPDATE);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  MaxRowsUpdater pc=new MaxRowsUpdater();
+  int rowsAffected=pc.run();
+  assertEquals(5,rowsAffected);
+}

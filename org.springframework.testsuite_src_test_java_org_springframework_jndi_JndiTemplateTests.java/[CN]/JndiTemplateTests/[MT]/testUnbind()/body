@@ -1,0 +1,18 @@
+{
+  String name="something";
+  MockControl mc=MockControl.createControl(Context.class);
+  final Context mock=(Context)mc.getMock();
+  mock.unbind(name);
+  mc.setVoidCallable(1);
+  mock.close();
+  mc.setVoidCallable(1);
+  mc.replay();
+  JndiTemplate jt=new JndiTemplate(){
+    protected Context createInitialContext(){
+      return mock;
+    }
+  }
+;
+  jt.unbind(name);
+  mc.verify();
+}

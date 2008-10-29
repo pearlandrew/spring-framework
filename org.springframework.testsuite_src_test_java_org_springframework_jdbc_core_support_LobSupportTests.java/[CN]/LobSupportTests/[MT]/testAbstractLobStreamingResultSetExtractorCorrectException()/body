@@ -1,0 +1,15 @@
+{
+  MockControl rsetControl=MockControl.createControl(ResultSet.class);
+  ResultSet rset=(ResultSet)rsetControl.getMock();
+  rset.next();
+  rsetControl.setReturnValue(true);
+  rsetControl.replay();
+  AbstractLobStreamingResultSetExtractor lobRse=getResultSetExtractor(true);
+  try {
+    lobRse.extractData(rset);
+    fail("LobRetrievalFailureException should have been thrown");
+  }
+ catch (  LobRetrievalFailureException e) {
+  }
+  rsetControl.verify();
+}

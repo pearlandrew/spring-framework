@@ -1,0 +1,37 @@
+{
+  String sql="SELECT AGE FROM CUSTMR WHERE ID < 3";
+  mockResultSetMetaData.getColumnCount();
+  ctrlResultSetMetaData.setReturnValue(1,2);
+  mockResultSetMetaData.getColumnLabel(1);
+  ctrlResultSetMetaData.setReturnValue("age",2);
+  mockResultSet.getMetaData();
+  ctrlResultSet.setReturnValue(mockResultSetMetaData,2);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getObject(1);
+  ctrlResultSet.setReturnValue(new Integer(11));
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getObject(1);
+  ctrlResultSet.setReturnValue(new Integer(12));
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockStatement.executeQuery(sql);
+  ctrlStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockStatement.getWarnings();
+    ctrlStatement.setReturnValue(null);
+  }
+  mockStatement.close();
+  ctrlStatement.setVoidCallable();
+  mockConnection.createStatement();
+  ctrlConnection.setReturnValue(mockStatement);
+  replay();
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  List li=template.queryForList(sql);
+  assertEquals("All rows returned",2,li.size());
+  assertEquals("First row is Integer",11,((Integer)((Map)li.get(0)).get("age")).intValue());
+  assertEquals("Second row is Integer",12,((Integer)((Map)li.get(1)).get("age")).intValue());
+}

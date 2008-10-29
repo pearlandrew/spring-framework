@@ -1,0 +1,58 @@
+{
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getInt("id");
+  ctrlResultSet.setReturnValue(1);
+  mockResultSet.getString("forename");
+  ctrlResultSet.setReturnValue("rod");
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockPreparedStatement.setObject(1,new Integer(1),Types.NUMERIC);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.setString(2,"UK");
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeQuery();
+  ctrlPreparedStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED,ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+class CustomerQuery extends MappingSqlQuery {
+    public CustomerQuery(    DataSource ds){
+      super(ds,SELECT_ID_FORENAME_NAMED_PARAMETERS);
+      setResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE);
+      if (namedDeclarations) {
+        declareParameter(new SqlParameter("country",Types.VARCHAR));
+        declareParameter(new SqlParameter("id",Types.NUMERIC));
+      }
+ else {
+        declareParameter(new SqlParameter(Types.NUMERIC));
+        declareParameter(new SqlParameter(Types.VARCHAR));
+      }
+      compile();
+    }
+    protected Object mapRow(    ResultSet rs,    int rownum) throws SQLException {
+      Customer cust=new Customer();
+      cust.setId(rs.getInt(COLUMN_NAMES[0]));
+      cust.setForename(rs.getString(COLUMN_NAMES[1]));
+      return cust;
+    }
+    public Customer findCustomer(    int id,    String country){
+      Map params=new HashMap();
+      params.put("id",new Integer(id));
+      params.put("country",country);
+      return (Customer)executeByNamedParam(params).get(0);
+    }
+  }
+  CustomerQuery query=new CustomerQuery(mockDataSource);
+  Customer cust=query.findCustomer(1,"UK");
+  assertTrue("Customer id was assigned correctly",cust.getId() == 1);
+  assertTrue("Customer forename was assigned correctly",cust.getForename().equals("rod"));
+}

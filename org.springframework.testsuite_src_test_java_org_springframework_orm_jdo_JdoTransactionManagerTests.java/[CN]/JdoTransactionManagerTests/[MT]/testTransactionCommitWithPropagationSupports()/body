@@ -1,0 +1,32 @@
+{
+  pmf.getConnectionFactory();
+  pmfControl.setReturnValue(null,2);
+  pmf.getPersistenceManager();
+  pmfControl.setReturnValue(pm,1);
+  pm.close();
+  pmControl.setVoidCallable(1);
+  pmfControl.replay();
+  pmControl.replay();
+  PlatformTransactionManager tm=new JdoTransactionManager(pmf);
+  TransactionTemplate tt=new TransactionTemplate(tm);
+  tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+  final List l=new ArrayList();
+  l.add("test");
+  assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+  Object result=tt.execute(new TransactionCallback(){
+    public Object doInTransaction(    TransactionStatus status){
+      assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+      assertTrue("Is not new transaction",!status.isNewTransaction());
+      JdoTemplate jt=new JdoTemplate(pmf);
+      return jt.execute(new JdoCallback(){
+        public Object doInJdo(        PersistenceManager pm){
+          return l;
+        }
+      }
+);
+    }
+  }
+);
+  assertTrue("Correct result list",result == l);
+  assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+}

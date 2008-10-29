@@ -1,0 +1,12 @@
+{
+  XmlBeanFactory parent=new XmlBeanFactory(new ClassPathResource("parent.xml",getClass()));
+  XmlBeanFactory child=new XmlBeanFactory(new ClassPathResource("child.xml",getClass()),parent);
+  try {
+    child.getBean("bogusParent",TestBean.class);
+    fail();
+  }
+ catch (  BeanDefinitionStoreException ex) {
+    assertTrue(ex.getMessage().indexOf("bogusParent") != -1);
+    assertTrue(ex.getCause() instanceof NoSuchBeanDefinitionException);
+  }
+}

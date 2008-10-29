@@ -1,0 +1,22 @@
+{
+  StaticApplicationContext ac=new StaticApplicationContext();
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  pvs.addPropertyValue("touchy","${test}");
+  ac.registerSingleton("tb",TestBean.class,pvs);
+  ac.registerAlias("tb","${myAlias}");
+  ac.registerAlias("${myTarget}","alias2");
+  pvs=new MutablePropertyValues();
+  Properties props=new Properties();
+  props.put("test","mytest");
+  props.put("myAlias","alias");
+  props.put("myTarget","tb");
+  pvs.addPropertyValue("properties",new Properties(props));
+  ac.registerSingleton("configurer",PropertyPlaceholderConfigurer.class,pvs);
+  ac.refresh();
+  TestBean tb=(TestBean)ac.getBean("tb");
+  assertEquals("mytest",tb.getTouchy());
+  tb=(TestBean)ac.getBean("alias");
+  assertEquals("mytest",tb.getTouchy());
+  tb=(TestBean)ac.getBean("alias2");
+  assertEquals("mytest",tb.getTouchy());
+}

@@ -1,0 +1,29 @@
+{
+  String sql="SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3";
+  MockControl ctrlResultSet=MockControl.createControl(ResultSet.class);
+  ResultSet mockResultSet=(ResultSet)ctrlResultSet.getMock();
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  MockControl ctrlStatement=MockControl.createControl(PreparedStatement.class);
+  PreparedStatement mockStatement=(PreparedStatement)ctrlStatement.getMock();
+  mockStatement.executeQuery(sql);
+  ctrlStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockStatement.getWarnings();
+    ctrlStatement.setReturnValue(null);
+  }
+  mockStatement.close();
+  ctrlStatement.setVoidCallable();
+  mockConnection.createStatement();
+  ctrlConnection.setReturnValue(mockStatement);
+  ctrlResultSet.replay();
+  ctrlStatement.replay();
+  replay();
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  RowCountCallbackHandler rcch=new RowCountCallbackHandler();
+  template.query(sql,rcch);
+  ctrlResultSet.verify();
+  ctrlStatement.verify();
+}

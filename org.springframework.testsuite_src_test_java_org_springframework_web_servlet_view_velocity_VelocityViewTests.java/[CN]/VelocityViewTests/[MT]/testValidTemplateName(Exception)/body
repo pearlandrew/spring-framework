@@ -1,0 +1,52 @@
+{
+  Map model=new HashMap();
+  model.put("foo","bar");
+  final String templateName="test.vm";
+  MockControl wmc=MockControl.createControl(WebApplicationContext.class);
+  WebApplicationContext wac=(WebApplicationContext)wmc.getMock();
+  MockServletContext sc=new MockServletContext();
+  sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,wac);
+  final Template expectedTemplate=new Template();
+  VelocityConfig vc=new VelocityConfig(){
+    public VelocityEngine getVelocityEngine(){
+      return new TestVelocityEngine(templateName,expectedTemplate);
+    }
+  }
+;
+  wac.getBeansOfType(VelocityConfig.class,true,false);
+  Map configurers=new HashMap();
+  configurers.put("velocityConfigurer",vc);
+  wmc.setReturnValue(configurers);
+  wac.getParentBeanFactory();
+  wmc.setReturnValue(null);
+  wac.getServletContext();
+  wmc.setReturnValue(sc,4);
+  wmc.replay();
+  HttpServletRequest request=new MockHttpServletRequest();
+  final HttpServletResponse expectedResponse=new MockHttpServletResponse();
+  VelocityView vv=new VelocityView(){
+    protected void mergeTemplate(    Template template,    Context context,    HttpServletResponse response) throws Exception {
+      assertTrue(template == expectedTemplate);
+      assertTrue(context.getKeys().length >= 1);
+      assertTrue(context.get("foo").equals("bar"));
+      assertTrue(response == expectedResponse);
+      if (mergeTemplateFailureException != null) {
+        throw mergeTemplateFailureException;
+      }
+    }
+  }
+;
+  vv.setUrl(templateName);
+  vv.setApplicationContext(wac);
+  try {
+    vv.render(model,request,expectedResponse);
+    if (mergeTemplateFailureException != null) {
+      fail();
+    }
+  }
+ catch (  Exception ex) {
+    assertNotNull(mergeTemplateFailureException);
+    assertEquals(ex,mergeTemplateFailureException);
+  }
+  wmc.verify();
+}

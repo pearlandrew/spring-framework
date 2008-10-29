@@ -1,0 +1,12 @@
+{
+  XmlBeanFactory bf=new XmlBeanFactory(new ClassPathResource("scopedList.xml",getClass()));
+  SimpleMapScope scope=new SimpleMapScope();
+  bf.registerScope("request",scope);
+  TestBean tb=(TestBean)bf.getBean("testBean");
+  assertTrue(AopUtils.isCglibProxy(tb.getFriends()));
+  assertTrue(tb.getFriends() instanceof ScopedObject);
+  ScopedObject scoped=(ScopedObject)tb.getFriends();
+  assertEquals(ArrayList.class,scoped.getTargetObject().getClass());
+  assertTrue(scope.getMap().containsKey("scopedTarget.scopedList"));
+  assertEquals(ArrayList.class,scope.getMap().get("scopedTarget.scopedList").getClass());
+}

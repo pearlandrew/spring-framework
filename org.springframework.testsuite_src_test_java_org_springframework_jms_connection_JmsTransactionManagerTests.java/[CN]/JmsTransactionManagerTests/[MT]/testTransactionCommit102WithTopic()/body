@@ -1,0 +1,35 @@
+{
+  MockControl cfControl=MockControl.createControl(TopicConnectionFactory.class);
+  TopicConnectionFactory cf=(TopicConnectionFactory)cfControl.getMock();
+  MockControl conControl=MockControl.createControl(TopicConnection.class);
+  TopicConnection con=(TopicConnection)conControl.getMock();
+  MockControl sessionControl=MockControl.createControl(TopicSession.class);
+  final TopicSession session=(TopicSession)sessionControl.getMock();
+  cf.createTopicConnection();
+  cfControl.setReturnValue(con,1);
+  con.createTopicSession(true,Session.AUTO_ACKNOWLEDGE);
+  conControl.setReturnValue(session,1);
+  session.commit();
+  sessionControl.setVoidCallable(1);
+  session.close();
+  sessionControl.setVoidCallable(1);
+  con.close();
+  conControl.setVoidCallable(1);
+  sessionControl.replay();
+  conControl.replay();
+  cfControl.replay();
+  JmsTransactionManager tm=new JmsTransactionManager102(cf,true);
+  TransactionStatus ts=tm.getTransaction(new DefaultTransactionDefinition());
+  JmsTemplate jt=new JmsTemplate102(cf,true);
+  jt.execute(new SessionCallback(){
+    public Object doInJms(    Session sess){
+      assertTrue(sess == session);
+      return null;
+    }
+  }
+);
+  tm.commit(ts);
+  sessionControl.verify();
+  conControl.verify();
+  cfControl.verify();
+}

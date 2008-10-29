@@ -1,0 +1,62 @@
+{
+  MockControl dsControl=MockControl.createControl(DataSource.class);
+  final DataSource ds=(DataSource)dsControl.getMock();
+  MockControl dialectControl=MockControl.createControl(JdoDialect.class);
+  JdoDialect dialect=(JdoDialect)dialectControl.getMock();
+  MockControl conControl=MockControl.createControl(Connection.class);
+  final Connection con=(Connection)conControl.getMock();
+  ConnectionHandle conHandle=new SimpleConnectionHandle(con);
+  pmf.getPersistenceManager();
+  pmfControl.setReturnValue(pm,1);
+  pm.currentTransaction();
+  pmControl.setReturnValue(tx,3);
+  pm.close();
+  pmControl.setVoidCallable(1);
+  TransactionTemplate tt=new TransactionTemplate();
+  dialect.beginTransaction(tx,tt);
+  dialectControl.setReturnValue(null,1);
+  dialect.getJdbcConnection(pm,false);
+  dialectControl.setReturnValue(conHandle,1);
+  dialect.releaseJdbcConnection(conHandle,pm);
+  dialectControl.setVoidCallable(1);
+  dialect.cleanupTransaction(null);
+  dialectControl.setVoidCallable(1);
+  tx.getRollbackOnly();
+  txControl.setReturnValue(false,1);
+  tx.commit();
+  txControl.setVoidCallable(1);
+  pmfControl.replay();
+  dsControl.replay();
+  dialectControl.replay();
+  pmControl.replay();
+  txControl.replay();
+  conControl.replay();
+  JdoTransactionManager tm=new JdoTransactionManager();
+  tm.setPersistenceManagerFactory(pmf);
+  tm.setDataSource(ds);
+  tm.setJdoDialect(dialect);
+  tt.setTransactionManager(tm);
+  final List l=new ArrayList();
+  l.add("test");
+  assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+  Object result=tt.execute(new TransactionCallback(){
+    public Object doInTransaction(    TransactionStatus status){
+      assertTrue("Has thread pm",TransactionSynchronizationManager.hasResource(pmf));
+      assertTrue("Has thread con",TransactionSynchronizationManager.hasResource(ds));
+      JdoTemplate jt=new JdoTemplate(pmf);
+      return jt.execute(new JdoCallback(){
+        public Object doInJdo(        PersistenceManager pm){
+          return l;
+        }
+      }
+);
+    }
+  }
+);
+  assertTrue("Correct result list",result == l);
+  assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+  assertTrue("Hasn't thread con",!TransactionSynchronizationManager.hasResource(ds));
+  dsControl.verify();
+  dialectControl.verify();
+  conControl.verify();
+}

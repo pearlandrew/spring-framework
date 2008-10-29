@@ -1,0 +1,16 @@
+{
+  MutablePropertyValues tsPvs=new MutablePropertyValues();
+  tsPvs.addPropertyValue("targetBeanName","person");
+  RootBeanDefinition tsBd=new RootBeanDefinition(TestTargetSource.class,tsPvs);
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  RootBeanDefinition bd=new RootBeanDefinition(SerializablePerson.class,pvs);
+  bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  bf.registerBeanDefinition("ts",tsBd);
+  bf.registerBeanDefinition("person",bd);
+  TestTargetSource cpts=(TestTargetSource)bf.getBean("ts");
+  TargetSource serialized=(TargetSource)SerializationTestUtils.serializeAndDeserialize(cpts);
+  assertTrue("Changed to SingletonTargetSource on deserialization",serialized instanceof SingletonTargetSource);
+  SingletonTargetSource sts=(SingletonTargetSource)serialized;
+  assertNotNull(sts.getTarget());
+}

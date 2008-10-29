@@ -1,0 +1,16 @@
+{
+  XmlBeanFactory parent=new XmlBeanFactory(new ClassPathResource("parent.xml",getClass()));
+  parent.preInstantiateSingletons();
+  assertTrue(parent.isSingleton("inheritedTestBeanWithoutClass"));
+  Map tbs=parent.getBeansOfType(TestBean.class);
+  assertEquals(2,tbs.size());
+  assertTrue(tbs.containsKey("inheritedTestBeanPrototype"));
+  assertTrue(tbs.containsKey("inheritedTestBeanSingleton"));
+  try {
+    parent.getBean("inheritedTestBeanWithoutClass");
+    fail("Should have thrown BeanIsAbstractException");
+  }
+ catch (  BeanIsAbstractException ex) {
+  }
+  assertTrue(parent.getBean("inheritedTestBeanPrototype") instanceof TestBean);
+}

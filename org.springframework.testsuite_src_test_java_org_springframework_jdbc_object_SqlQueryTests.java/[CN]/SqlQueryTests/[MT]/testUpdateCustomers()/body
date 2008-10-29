@@ -1,0 +1,51 @@
+{
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getInt("id");
+  ctrlResultSet.setReturnValue(1);
+  mockResultSet.updateString(2,"Rod");
+  ctrlResultSet.setVoidCallable();
+  mockResultSet.updateRow();
+  ctrlResultSet.setVoidCallable();
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getInt("id");
+  ctrlResultSet.setReturnValue(2);
+  mockResultSet.updateString(2,"Thomas");
+  ctrlResultSet.setVoidCallable();
+  mockResultSet.updateRow();
+  ctrlResultSet.setVoidCallable();
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockPreparedStatement.setObject(1,new Integer(2),Types.NUMERIC);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeQuery();
+  ctrlPreparedStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID,ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_UPDATABLE);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+class CustomerUpdateQuery extends UpdatableSqlQuery {
+    public CustomerUpdateQuery(    DataSource ds){
+      super(ds,SELECT_ID_FORENAME_WHERE_ID);
+      declareParameter(new SqlParameter(Types.NUMERIC));
+      compile();
+    }
+    protected Object updateRow(    ResultSet rs,    int rownum,    Map context) throws SQLException {
+      rs.updateString(2,"" + context.get(new Integer(rs.getInt(COLUMN_NAMES[0]))));
+      return null;
+    }
+  }
+  CustomerUpdateQuery query=new CustomerUpdateQuery(mockDataSource);
+  Map values=new HashMap(2);
+  values.put(new Integer(1),"Rod");
+  values.put(new Integer(2),"Thomas");
+  List customers=query.execute(2,values);
+}

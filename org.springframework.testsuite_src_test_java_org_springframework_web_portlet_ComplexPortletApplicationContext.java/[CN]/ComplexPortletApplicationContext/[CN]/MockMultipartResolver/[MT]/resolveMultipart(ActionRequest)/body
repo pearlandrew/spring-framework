@@ -1,0 +1,17 @@
+{
+  if (request.getAttribute("fail") != null) {
+    throw new MaxUploadSizeExceededException(1000);
+  }
+  if (request instanceof MultipartActionRequest) {
+    throw new IllegalStateException("Already a multipart request");
+  }
+  if (request.getAttribute("resolved") != null) {
+    throw new IllegalStateException("Already resolved");
+  }
+  request.setAttribute("resolved",Boolean.TRUE);
+  Map files=new HashMap();
+  files.put("someFile","someFile");
+  Map params=new HashMap();
+  params.put("someParam","someParam");
+  return new DefaultMultipartActionRequest(request,files,params);
+}

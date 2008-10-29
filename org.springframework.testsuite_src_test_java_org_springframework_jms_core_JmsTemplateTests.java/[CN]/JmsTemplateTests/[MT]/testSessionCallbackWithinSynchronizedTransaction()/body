@@ -1,0 +1,61 @@
+{
+  SingleConnectionFactory scf=new SingleConnectionFactory(mockConnectionFactory);
+  JmsTemplate template=createTemplate();
+  template.setConnectionFactory(scf);
+  mockConnection.start();
+  connectionControl.setVoidCallable(3);
+  mockSession.getTransacted();
+  sessionControl.setReturnValue(useTransactedSession(),2);
+  if (useTransactedTemplate()) {
+    mockSession.commit();
+    sessionControl.setVoidCallable(1);
+  }
+  mockSession.close();
+  sessionControl.setVoidCallable(1);
+  mockConnection.stop();
+  connectionControl.setVoidCallable(1);
+  mockConnection.close();
+  connectionControl.setVoidCallable(1);
+  sessionControl.replay();
+  connectionControl.replay();
+  TransactionSynchronizationManager.initSynchronization();
+  try {
+    template.execute(new SessionCallback(){
+      public Object doInJms(      Session session) throws JMSException {
+        boolean b=session.getTransacted();
+        return null;
+      }
+    }
+);
+    template.execute(new SessionCallback(){
+      public Object doInJms(      Session session) throws JMSException {
+        boolean b=session.getTransacted();
+        return null;
+      }
+    }
+);
+    assertSame(mockSession,ConnectionFactoryUtils.getTransactionalSession(scf,null,false));
+    assertSame(mockSession,ConnectionFactoryUtils.getTransactionalSession(scf,scf.createConnection(),false));
+    TransactionAwareConnectionFactoryProxy tacf=new TransactionAwareConnectionFactoryProxy(scf);
+    Connection tac=tacf.createConnection();
+    Session tas=tac.createSession(false,Session.AUTO_ACKNOWLEDGE);
+    boolean b=tas.getTransacted();
+    tas.close();
+    tac.close();
+    List synchs=TransactionSynchronizationManager.getSynchronizations();
+    assertEquals(1,synchs.size());
+    TransactionSynchronization synch=(TransactionSynchronization)synchs.get(0);
+    synch.beforeCommit(false);
+    synch.beforeCompletion();
+    synch.afterCommit();
+    synch.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
+  }
+  finally {
+    TransactionSynchronizationManager.clearSynchronization();
+    scf.destroy();
+  }
+  assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+  connectionFactoryControl.verify();
+  connectionControl.verify();
+  sessionControl.verify();
+}

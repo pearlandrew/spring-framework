@@ -1,0 +1,44 @@
+{
+  MockControl conControl=MockControl.createControl(Connection.class);
+  Connection con=(Connection)conControl.getMock();
+  con.getAutoCommit();
+  conControl.setReturnValue(false,1);
+  con.rollback();
+  conControl.setVoidCallable(1);
+  con.isReadOnly();
+  conControl.setReturnValue(false,1);
+  con.close();
+  conControl.setVoidCallable(1);
+  MockControl dsControl=MockControl.createControl(DataSource.class);
+  final DataSource ds=(DataSource)dsControl.getMock();
+  ds.getConnection();
+  dsControl.setReturnValue(con,1);
+  conControl.replay();
+  dsControl.replay();
+  PlatformTransactionManager tm=new DataSourceTransactionManager(ds);
+  final TransactionTemplate tt=new TransactionTemplate(tm);
+  tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+  assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
+  assertTrue("Synchronization not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  try {
+    tt.execute(new TransactionCallbackWithoutResult(){
+      protected void doInTransactionWithoutResult(      TransactionStatus status) throws RuntimeException {
+        assertTrue("Is new transaction",status.isNewTransaction());
+        tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NEVER);
+        tt.execute(new TransactionCallbackWithoutResult(){
+          protected void doInTransactionWithoutResult(          TransactionStatus status) throws RuntimeException {
+            fail("Should have thrown IllegalTransactionStateException");
+          }
+        }
+);
+        fail("Should have thrown IllegalTransactionStateException");
+      }
+    }
+);
+  }
+ catch (  IllegalTransactionStateException ex) {
+  }
+  assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
+  conControl.verify();
+  dsControl.verify();
+}

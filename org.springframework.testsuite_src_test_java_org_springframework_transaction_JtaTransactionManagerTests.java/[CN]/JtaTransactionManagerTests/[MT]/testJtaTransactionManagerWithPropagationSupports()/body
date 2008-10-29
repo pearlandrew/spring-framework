@@ -1,0 +1,29 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
+  utControl.replay();
+  MockControl synchControl=MockControl.createControl(TransactionSynchronization.class);
+  final TransactionSynchronization synch=(TransactionSynchronization)synchControl.getMock();
+  synch.beforeCompletion();
+  synchControl.setVoidCallable(1);
+  synch.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
+  synchControl.setVoidCallable(1);
+  synchControl.replay();
+  JtaTransactionManager ptm=newJtaTransactionManager(ut);
+  TransactionTemplate tt=new TransactionTemplate(ptm);
+  tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+  assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+  tt.execute(new TransactionCallbackWithoutResult(){
+    protected void doInTransactionWithoutResult(    TransactionStatus status){
+      assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+      TransactionSynchronizationManager.registerSynchronization(synch);
+      status.setRollbackOnly();
+    }
+  }
+);
+  assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+  utControl.verify();
+  synchControl.verify();
+}

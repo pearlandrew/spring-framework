@@ -1,0 +1,18 @@
+{
+  MockControl sfControl=MockControl.createControl(SessionFactory.class);
+  SessionFactory sf=(SessionFactory)sfControl.getMock();
+  sfControl.replay();
+  final List test=new ArrayList();
+  HibernateDaoSupport dao=new HibernateDaoSupport(){
+    protected void initDao(){
+      test.add("test");
+    }
+  }
+;
+  dao.setSessionFactory(sf);
+  dao.afterPropertiesSet();
+  assertEquals("Correct SessionFactory",sf,dao.getSessionFactory());
+  assertEquals("Correct HibernateTemplate",sf,dao.getHibernateTemplate().getSessionFactory());
+  assertEquals("initDao called",test.size(),1);
+  sfControl.verify();
+}

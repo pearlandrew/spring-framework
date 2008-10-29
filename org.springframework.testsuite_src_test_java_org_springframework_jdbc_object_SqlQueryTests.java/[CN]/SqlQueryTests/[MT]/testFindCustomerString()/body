@@ -1,0 +1,45 @@
+{
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getInt("id");
+  ctrlResultSet.setReturnValue(1);
+  mockResultSet.getString("forename");
+  ctrlResultSet.setReturnValue("rod");
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockPreparedStatement.setString(1,"rod");
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeQuery();
+  ctrlPreparedStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+class CustomerQuery extends MappingSqlQuery {
+    public CustomerQuery(    DataSource ds){
+      super(ds,SELECT_ID_FORENAME_WHERE);
+      declareParameter(new SqlParameter(Types.VARCHAR));
+      compile();
+    }
+    protected Object mapRow(    ResultSet rs,    int rownum) throws SQLException {
+      Customer cust=new Customer();
+      cust.setId(rs.getInt(COLUMN_NAMES[0]));
+      cust.setForename(rs.getString(COLUMN_NAMES[1]));
+      return cust;
+    }
+    public Customer findCustomer(    String id){
+      return (Customer)findObject(id);
+    }
+  }
+  CustomerQuery query=new CustomerQuery(mockDataSource);
+  Customer cust=query.findCustomer("rod");
+  assertTrue("Customer id was assigned correctly",cust.getId() == 1);
+  assertTrue("Customer forename was assigned correctly",cust.getForename().equals("rod"));
+}

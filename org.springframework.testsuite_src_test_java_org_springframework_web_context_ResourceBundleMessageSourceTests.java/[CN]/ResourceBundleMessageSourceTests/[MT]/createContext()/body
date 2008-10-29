@@ -1,0 +1,19 @@
+{
+  root=new XmlWebApplicationContext();
+  MockServletContext sc=new MockServletContext();
+  root.setServletContext(sc);
+  root.setConfigLocations(new String[]{"/org/springframework/web/context/WEB-INF/applicationContext.xml"});
+  root.refresh();
+  ConfigurableWebApplicationContext wac=new XmlWebApplicationContext();
+  wac.setParent(root);
+  wac.setServletContext(sc);
+  wac.setNamespace("test-servlet");
+  wac.setConfigLocations(new String[]{"/org/springframework/web/context/WEB-INF/test-servlet.xml"});
+  wac.refresh();
+  Theme theme=((ThemeSource)wac).getTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME);
+  assertNotNull(theme);
+  assertTrue("Theme name has to be the default theme name",AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(theme.getName()));
+  themeMsgSource=theme.getMessageSource();
+  assertNotNull(themeMsgSource);
+  return wac;
+}

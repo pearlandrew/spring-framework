@@ -1,0 +1,19 @@
+{
+  call1Control=MockControl.createControl(Call.class);
+  call1=(Call)call1Control.getMock();
+  service1.createCall(new QName("myNamespace","myPort"),"setName");
+  service1Control.setReturnValue(call1,count);
+  call1.invoke(new Object[]{"myName"});
+  call1Control.setMatcher(new ArgumentsMatcher(){
+    public boolean matches(    Object[] objects,    Object[] objects1){
+      return Arrays.equals((Object[])objects[0],(Object[])objects1[0]);
+    }
+    public String toString(    Object[] objects){
+      return ObjectUtils.nullSafeToString(objects[0]);
+    }
+  }
+);
+  call1Control.setReturnValue(null,count);
+  extendStandardCall();
+  call1Control.replay();
+}

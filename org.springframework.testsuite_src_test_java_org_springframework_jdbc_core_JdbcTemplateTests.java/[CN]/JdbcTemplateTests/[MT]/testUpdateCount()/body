@@ -1,0 +1,25 @@
+{
+  final String sql="UPDATE INVOICE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+  int idParam=11111;
+  MockControl ctrlPreparedStatement=MockControl.createControl(PreparedStatement.class);
+  PreparedStatement mockPreparedStatement=(PreparedStatement)ctrlPreparedStatement.getMock();
+  mockPreparedStatement.setInt(1,idParam);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeUpdate();
+  ctrlPreparedStatement.setReturnValue(1);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(sql);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  ctrlPreparedStatement.replay();
+  replay();
+  Dispatcher d=new Dispatcher(idParam,sql);
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  int rowsAffected=template.update(d);
+  assertTrue("1 update affected 1 row",rowsAffected == 1);
+  ctrlPreparedStatement.verify();
+}

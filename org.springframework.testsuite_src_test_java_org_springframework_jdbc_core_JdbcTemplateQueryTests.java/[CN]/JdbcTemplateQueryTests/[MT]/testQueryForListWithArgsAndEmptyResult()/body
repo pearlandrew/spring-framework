@@ -1,0 +1,25 @@
+{
+  String sql="SELECT AGE FROM CUSTMR WHERE ID < ?";
+  ctrlResultSet=MockControl.createControl(ResultSet.class);
+  mockResultSet=(ResultSet)ctrlResultSet.getMock();
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockPreparedStatement.setObject(1,new Integer(3));
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeQuery();
+  ctrlPreparedStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(sql);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  List li=template.queryForList(sql,new Object[]{new Integer(3)});
+  assertEquals("All rows returned",0,li.size());
+}

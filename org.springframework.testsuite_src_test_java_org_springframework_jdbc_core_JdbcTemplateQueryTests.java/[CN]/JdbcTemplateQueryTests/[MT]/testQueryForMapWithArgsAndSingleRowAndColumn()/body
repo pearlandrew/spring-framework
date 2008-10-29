@@ -1,0 +1,33 @@
+{
+  String sql="SELECT AGE FROM CUSTMR WHERE ID < ?";
+  mockResultSetMetaData.getColumnCount();
+  ctrlResultSetMetaData.setReturnValue(1);
+  mockResultSetMetaData.getColumnLabel(1);
+  ctrlResultSetMetaData.setReturnValue("age",1);
+  mockResultSet.getMetaData();
+  ctrlResultSet.setReturnValue(mockResultSetMetaData);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getObject(1);
+  ctrlResultSet.setReturnValue(new Integer(11));
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockPreparedStatement.setObject(1,new Integer(3));
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeQuery();
+  ctrlPreparedStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(sql);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  Map map=template.queryForMap(sql,new Object[]{new Integer(3)});
+  assertEquals("Row is Integer",11,((Integer)map.get("age")).intValue());
+}

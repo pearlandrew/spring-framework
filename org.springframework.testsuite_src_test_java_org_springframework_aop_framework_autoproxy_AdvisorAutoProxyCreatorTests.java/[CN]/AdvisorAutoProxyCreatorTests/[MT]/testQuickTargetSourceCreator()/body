@@ -1,0 +1,30 @@
+{
+  ClassPathXmlApplicationContext bf=new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/quickTargetSource.xml");
+  ITestBean test=(ITestBean)bf.getBean("test");
+  assertFalse(AopUtils.isAopProxy(test));
+  assertEquals("Rod",test.getName());
+  assertEquals("Kerry",test.getSpouse().getName());
+  test=(ITestBean)bf.getBean(":test");
+  assertTrue(AopUtils.isAopProxy(test));
+  Advised advised=(Advised)test;
+  assertTrue(advised.getTargetSource() instanceof CommonsPoolTargetSource);
+  assertEquals("Rod",test.getName());
+  assertEquals("Kerry",test.getSpouse().getName());
+  test=(ITestBean)bf.getBean("%test");
+  assertTrue(AopUtils.isAopProxy(test));
+  advised=(Advised)test;
+  assertTrue(advised.getTargetSource() instanceof ThreadLocalTargetSource);
+  assertEquals("Rod",test.getName());
+  assertEquals("Kerry",test.getSpouse().getName());
+  test=(ITestBean)bf.getBean("!test");
+  assertTrue(AopUtils.isAopProxy(test));
+  advised=(Advised)test;
+  assertTrue(advised.getTargetSource() instanceof PrototypeTargetSource);
+  assertEquals("Rod",test.getName());
+  assertEquals("Kerry",test.getSpouse().getName());
+  ITestBean test2=(ITestBean)bf.getBean("!test");
+  assertFalse("Prototypes cannot be the same object",test == test2);
+  assertEquals("Rod",test2.getName());
+  assertEquals("Kerry",test2.getSpouse().getName());
+  bf.close();
+}

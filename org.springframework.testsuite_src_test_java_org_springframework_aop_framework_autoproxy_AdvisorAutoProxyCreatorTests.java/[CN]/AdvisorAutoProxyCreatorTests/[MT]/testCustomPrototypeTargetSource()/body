@@ -1,0 +1,12 @@
+{
+  CountingTestBean.count=0;
+  BeanFactory bf=new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/customTargetSource.xml");
+  ITestBean test=(ITestBean)bf.getBean("prototypeTest");
+  assertTrue(AopUtils.isAopProxy(test));
+  Advised advised=(Advised)test;
+  assertTrue(advised.getTargetSource() instanceof PrototypeTargetSource);
+  assertEquals("Rod",test.getName());
+  assertEquals("Kerry",test.getSpouse().getName());
+  assertEquals("Only 2 CountingTestBeans instantiated",2,CountingTestBean.count);
+  CountingTestBean.count=0;
+}

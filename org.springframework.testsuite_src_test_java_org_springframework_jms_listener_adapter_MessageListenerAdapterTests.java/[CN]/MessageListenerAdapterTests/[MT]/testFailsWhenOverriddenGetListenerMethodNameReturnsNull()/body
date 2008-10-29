@@ -1,0 +1,19 @@
+{
+  MockControl mockMessage=MockControl.createControl(TextMessage.class);
+  final TextMessage message=(TextMessage)mockMessage.getMock();
+  message.getText();
+  mockMessage.setReturnValue(TEXT);
+  mockMessage.replay();
+  final MessageListenerAdapter adapter=new MessageListenerAdapter(){
+    protected void handleListenerException(    Throwable ex){
+      assertTrue(ex instanceof javax.jms.IllegalStateException);
+    }
+    protected String getListenerMethodName(    Message originalMessage,    Object extractedMessage){
+      return null;
+    }
+  }
+;
+  adapter.setDefaultListenerMethod(null);
+  adapter.onMessage(message);
+  mockMessage.verify();
+}

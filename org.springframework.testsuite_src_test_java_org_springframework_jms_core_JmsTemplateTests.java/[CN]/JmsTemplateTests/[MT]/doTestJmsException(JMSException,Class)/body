@@ -1,0 +1,38 @@
+{
+  JmsTemplate template=createTemplate();
+  template.setConnectionFactory(mockConnectionFactory);
+  template.setMessageConverter(new SimpleMessageConverter());
+  String s="Hello world";
+  MockControl messageProducerControl=MockControl.createControl(MessageProducer.class);
+  MessageProducer mockMessageProducer=(MessageProducer)messageProducerControl.getMock();
+  MockControl messageControl=MockControl.createControl(TextMessage.class);
+  TextMessage mockMessage=(TextMessage)messageControl.getMock();
+  sessionControl.reset();
+  mockSession.createProducer(mockQueue);
+  sessionControl.setReturnValue(mockMessageProducer);
+  mockSession.createTextMessage("Hello world");
+  sessionControl.setReturnValue(mockMessage);
+  mockMessageProducer.send(mockMessage);
+  messageProducerControl.setThrowable(original,1);
+  mockMessageProducer.close();
+  messageProducerControl.setVoidCallable(1);
+  mockSession.close();
+  sessionControl.setVoidCallable(1);
+  mockConnection.close();
+  connectionControl.setVoidCallable(1);
+  messageProducerControl.replay();
+  sessionControl.replay();
+  connectionControl.replay();
+  try {
+    template.convertAndSend(mockQueue,s);
+    fail("Should have thrown JmsException");
+  }
+ catch (  JmsException wrappedEx) {
+    assertEquals(thrownExceptionClass,wrappedEx.getClass());
+    assertEquals(original,wrappedEx.getCause());
+  }
+  messageProducerControl.verify();
+  sessionControl.verify();
+  connectionControl.verify();
+  connectionFactoryControl.verify();
+}

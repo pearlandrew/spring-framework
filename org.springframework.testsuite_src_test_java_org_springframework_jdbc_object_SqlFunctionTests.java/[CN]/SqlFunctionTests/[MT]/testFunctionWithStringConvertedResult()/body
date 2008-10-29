@@ -1,0 +1,37 @@
+{
+  ctrlResultSetMetaData=MockControl.createControl(ResultSetMetaData.class);
+  mockResultSetMetaData=(ResultSetMetaData)ctrlResultSetMetaData.getMock();
+  mockResultSetMetaData.getColumnCount();
+  ctrlResultSetMetaData.setReturnValue(1);
+  mockResultSet.getMetaData();
+  ctrlResultSet.setReturnValue(mockResultSetMetaData,1);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getString(1);
+  ctrlResultSet.setReturnValue("14");
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockPreparedStatement.setObject(1,new Integer(1),Types.INTEGER);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.setString(2,"rod");
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeQuery();
+  ctrlPreparedStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(FUNCTION_MIXED);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  SqlFunction function=new SqlFunction(mockDataSource,FUNCTION_MIXED);
+  function.setTypes(new int[]{Types.INTEGER,Types.VARCHAR});
+  function.setResultType(String.class);
+  function.compile();
+  String result=(String)function.runGeneric(new Object[]{new Integer(1),"rod"});
+  assertTrue("Function returned value 14","14".equals(result));
+}

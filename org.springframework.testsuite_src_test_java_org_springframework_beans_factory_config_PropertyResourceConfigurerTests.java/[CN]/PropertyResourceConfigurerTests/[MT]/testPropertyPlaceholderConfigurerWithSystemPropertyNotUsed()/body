@@ -1,0 +1,14 @@
+{
+  StaticApplicationContext ac=new StaticApplicationContext();
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  pvs.addPropertyValue("touchy","${os.name}");
+  ac.registerSingleton("tb",TestBean.class,pvs);
+  pvs=new MutablePropertyValues();
+  Properties props=new Properties();
+  props.put("os.name","myos");
+  pvs.addPropertyValue("properties",props);
+  ac.registerSingleton("configurer",PropertyPlaceholderConfigurer.class,pvs);
+  ac.refresh();
+  TestBean tb=(TestBean)ac.getBean("tb");
+  assertEquals("myos",tb.getTouchy());
+}

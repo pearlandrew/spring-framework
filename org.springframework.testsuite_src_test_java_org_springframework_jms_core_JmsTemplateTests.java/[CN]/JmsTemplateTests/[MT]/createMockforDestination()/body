@@ -1,0 +1,19 @@
+{
+  connectionFactoryControl=MockControl.createControl(ConnectionFactory.class);
+  mockConnectionFactory=(ConnectionFactory)connectionFactoryControl.getMock();
+  connectionControl=MockControl.createControl(Connection.class);
+  mockConnection=(Connection)connectionControl.getMock();
+  sessionControl=MockControl.createControl(Session.class);
+  mockSession=(Session)sessionControl.getMock();
+  queueControl=MockControl.createControl(Queue.class);
+  mockQueue=(Queue)queueControl.getMock();
+  mockConnectionFactory.createConnection();
+  connectionFactoryControl.setReturnValue(mockConnection);
+  connectionFactoryControl.replay();
+  mockConnection.createSession(useTransactedTemplate(),Session.AUTO_ACKNOWLEDGE);
+  connectionControl.setReturnValue(mockSession);
+  mockSession.getTransacted();
+  sessionControl.setReturnValue(useTransactedSession());
+  mockJndiContext.lookup("testDestination");
+  mockJndiControl.setReturnValue(mockQueue);
+}

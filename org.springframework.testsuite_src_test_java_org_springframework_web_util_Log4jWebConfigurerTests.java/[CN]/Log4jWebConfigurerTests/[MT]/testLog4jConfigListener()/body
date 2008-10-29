@@ -1,0 +1,13 @@
+{
+  Log4jConfigListener listener=new Log4jConfigListener();
+  MockServletContext sc=new MockServletContext("",new FileSystemResourceLoader());
+  sc.addInitParameter(Log4jWebConfigurer.CONFIG_LOCATION_PARAM,"test/org/springframework/util/testlog4j.properties");
+  listener.contextInitialized(new ServletContextEvent(sc));
+  try {
+    doTestLogOutput();
+  }
+  finally {
+    listener.contextDestroyed(new ServletContextEvent(sc));
+  }
+  assertTrue(MockLog4jAppender.closeCalled);
+}

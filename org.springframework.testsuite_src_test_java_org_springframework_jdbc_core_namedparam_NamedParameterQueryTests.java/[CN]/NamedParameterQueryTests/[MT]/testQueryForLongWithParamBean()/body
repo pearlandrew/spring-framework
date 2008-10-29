@@ -1,0 +1,33 @@
+{
+  String sql="SELECT AGE FROM CUSTMR WHERE ID = :id";
+  String sqlToUse="SELECT AGE FROM CUSTMR WHERE ID = ?";
+  mockResultSetMetaData.getColumnCount();
+  ctrlResultSetMetaData.setReturnValue(1);
+  mockResultSet.getMetaData();
+  ctrlResultSet.setReturnValue(mockResultSetMetaData);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getDouble(1);
+  ctrlResultSet.setReturnValue(87.0d);
+  mockResultSet.wasNull();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockPreparedStatement.setObject(1,new Integer(3),Types.INTEGER);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeQuery();
+  ctrlPreparedStatement.setReturnValue(mockResultSet);
+  mockPreparedStatement.getWarnings();
+  ctrlPreparedStatement.setReturnValue(null);
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(sqlToUse);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  NamedParameterJdbcTemplate template=new NamedParameterJdbcTemplate(mockDataSource);
+  BeanPropertySqlParameterSource parms=new BeanPropertySqlParameterSource(new ParameterBean(3));
+  long l=template.queryForLong(sql,parms);
+  assertEquals("Return of a long",87,l);
+}

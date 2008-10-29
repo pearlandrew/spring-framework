@@ -1,0 +1,47 @@
+{
+  TransactionAttribute txatt=new DefaultTransactionAttribute(){
+    public boolean rollbackOn(    Throwable t){
+      assertTrue(t == ex);
+      return shouldRollback;
+    }
+  }
+;
+  Method m=exceptionalMethod;
+  MapTransactionAttributeSource tas=new MapTransactionAttributeSource();
+  tas.register(m,txatt);
+  MockControl statusControl=MockControl.createControl(TransactionStatus.class);
+  TransactionStatus status=(TransactionStatus)statusControl.getMock();
+  MockControl ptmControl=MockControl.createControl(PlatformTransactionManager.class);
+  PlatformTransactionManager ptm=(PlatformTransactionManager)ptmControl.getMock();
+  ptm.getTransaction(txatt);
+  ptmControl.setReturnValue(status,1);
+  if (shouldRollback) {
+    ptm.rollback(status);
+  }
+ else {
+    ptm.commit(status);
+  }
+  TransactionSystemException tex=new TransactionSystemException("system exception");
+  if (rollbackException) {
+    ptmControl.setThrowable(tex,1);
+  }
+ else {
+    ptmControl.setVoidCallable(1);
+  }
+  ptmControl.replay();
+  TestBean tb=new TestBean();
+  ITestBean itb=(ITestBean)advised(tb,ptm,tas);
+  try {
+    itb.exceptional(ex);
+    fail("Should have thrown exception");
+  }
+ catch (  Throwable t) {
+    if (rollbackException) {
+      assertEquals("Caught wrong exception",tex,t);
+    }
+ else {
+      assertEquals("Caught wrong exception",ex,t);
+    }
+  }
+  ptmControl.verify();
+}

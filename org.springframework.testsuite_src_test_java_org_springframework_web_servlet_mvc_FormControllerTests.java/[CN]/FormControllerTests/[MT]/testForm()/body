@@ -1,0 +1,16 @@
+{
+  String formView="f";
+  String successView="s";
+  TestController mc=new TestController();
+  mc.setFormView(formView);
+  mc.setSuccessView(successView);
+  MockHttpServletRequest request=new MockHttpServletRequest("GET","/welcome.html");
+  request.addParameter("name","rod");
+  HttpServletResponse response=new MockHttpServletResponse();
+  ModelAndView mv=mc.handleRequest(request,response);
+  assertTrue("returned correct view name",mv.getViewName().equals(formView));
+  TestBean person=(TestBean)mv.getModel().get(TestController.BEAN_NAME);
+  assertTrue("model is non null",person != null);
+  assertTrue("bean age default ok",person.getAge() == TestController.DEFAULT_AGE);
+  assertTrue("name not set",person.getName() == null);
+}

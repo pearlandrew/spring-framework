@@ -1,0 +1,15 @@
+{
+  new AssertThrows(DataSourceLookupFailureException.class){
+    public void test() throws Exception {
+      JndiDataSourceLookup lookup=new JndiDataSourceLookup(){
+        protected Object lookup(        String jndiName,        Class requiredType) throws NamingException {
+          assertEquals(DATA_SOURCE_NAME,jndiName);
+          throw new NamingException();
+        }
+      }
+;
+      lookup.getDataSource(DATA_SOURCE_NAME);
+    }
+  }
+.runTest();
+}

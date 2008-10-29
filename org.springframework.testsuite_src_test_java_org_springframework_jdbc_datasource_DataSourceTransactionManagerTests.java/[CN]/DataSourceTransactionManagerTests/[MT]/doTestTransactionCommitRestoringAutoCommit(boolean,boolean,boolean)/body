@@ -1,0 +1,75 @@
+{
+  MockControl dsControl=MockControl.createControl(DataSource.class);
+  DataSource ds=(DataSource)dsControl.getMock();
+  MockControl conControl=MockControl.createControl(Connection.class);
+  final Connection con=(Connection)conControl.getMock();
+  if (lazyConnection) {
+    ds.getConnection();
+    dsControl.setReturnValue(con,1);
+    if (createStatement) {
+      con.getMetaData();
+      conControl.setReturnValue(null,1);
+    }
+    con.getAutoCommit();
+    conControl.setReturnValue(autoCommit,1);
+    con.getTransactionIsolation();
+    conControl.setReturnValue(Connection.TRANSACTION_READ_COMMITTED,1);
+    con.close();
+    conControl.setVoidCallable(1);
+  }
+  if (!lazyConnection || createStatement) {
+    ds.getConnection();
+    dsControl.setReturnValue(con,1);
+    con.getAutoCommit();
+    conControl.setReturnValue(autoCommit,1);
+    if (autoCommit) {
+      con.setAutoCommit(false);
+      conControl.setVoidCallable(1);
+    }
+    if (createStatement) {
+      con.createStatement();
+      conControl.setReturnValue(null,1);
+    }
+    con.commit();
+    conControl.setVoidCallable(1);
+    con.isReadOnly();
+    conControl.setReturnValue(false,1);
+    if (autoCommit) {
+      con.setAutoCommit(true);
+      conControl.setVoidCallable(1);
+    }
+    con.close();
+    conControl.setVoidCallable(1);
+  }
+  conControl.replay();
+  dsControl.replay();
+  final DataSource dsToUse=(lazyConnection ? new LazyConnectionDataSourceProxy(ds) : ds);
+  PlatformTransactionManager tm=new DataSourceTransactionManager(dsToUse);
+  TransactionTemplate tt=new TransactionTemplate(tm);
+  assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(dsToUse));
+  assertTrue("Synchronization not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  tt.execute(new TransactionCallbackWithoutResult(){
+    protected void doInTransactionWithoutResult(    TransactionStatus status) throws RuntimeException {
+      assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(dsToUse));
+      assertTrue("Synchronization active",TransactionSynchronizationManager.isSynchronizationActive());
+      assertTrue("Is new transaction",status.isNewTransaction());
+      assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+      assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
+      Connection tCon=DataSourceUtils.getConnection(dsToUse);
+      try {
+        if (createStatement) {
+          tCon.createStatement();
+          assertEquals(con,new SimpleNativeJdbcExtractor().getNativeConnection(tCon));
+        }
+      }
+ catch (      SQLException ex) {
+        throw new UncategorizedSQLException("","",ex);
+      }
+    }
+  }
+);
+  assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(dsToUse));
+  assertTrue("Synchronization not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  conControl.verify();
+  dsControl.verify();
+}

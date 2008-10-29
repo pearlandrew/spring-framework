@@ -1,0 +1,23 @@
+{
+  DummyJob.param=0;
+  DummyJob.count=0;
+  JobDetail jobDetail=new JobDetail();
+  jobDetail.setJobClass(DummyJobBean.class);
+  jobDetail.setName("myJob");
+  jobDetail.getJobDataMap().put("param","10");
+  SimpleTriggerBean trigger=new SimpleTriggerBean();
+  trigger.setName("myTrigger");
+  trigger.setJobDetail(jobDetail);
+  trigger.setStartDelay(1);
+  trigger.setRepeatInterval(500);
+  trigger.setRepeatCount(1);
+  trigger.afterPropertiesSet();
+  SchedulerFactoryBean bean=new SchedulerFactoryBean();
+  bean.setTriggers(new Trigger[]{trigger});
+  bean.setJobDetails(new JobDetail[]{jobDetail});
+  bean.afterPropertiesSet();
+  Thread.sleep(500);
+  assertEquals(10,DummyJobBean.param);
+  assertTrue(DummyJobBean.count > 0);
+  bean.destroy();
+}

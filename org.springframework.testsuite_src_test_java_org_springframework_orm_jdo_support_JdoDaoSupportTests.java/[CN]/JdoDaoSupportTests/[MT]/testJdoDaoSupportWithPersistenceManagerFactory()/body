@@ -1,0 +1,20 @@
+{
+  MockControl pmfControl=MockControl.createControl(PersistenceManagerFactory.class);
+  PersistenceManagerFactory pmf=(PersistenceManagerFactory)pmfControl.getMock();
+  pmf.getConnectionFactory();
+  pmfControl.setReturnValue(null,1);
+  pmfControl.replay();
+  final List test=new ArrayList();
+  JdoDaoSupport dao=new JdoDaoSupport(){
+    protected void initDao(){
+      test.add("test");
+    }
+  }
+;
+  dao.setPersistenceManagerFactory(pmf);
+  dao.afterPropertiesSet();
+  assertEquals("Correct PersistenceManagerFactory",pmf,dao.getPersistenceManagerFactory());
+  assertEquals("Correct JdoTemplate",pmf,dao.getJdoTemplate().getPersistenceManagerFactory());
+  assertEquals("initDao called",test.size(),1);
+  pmfControl.verify();
+}

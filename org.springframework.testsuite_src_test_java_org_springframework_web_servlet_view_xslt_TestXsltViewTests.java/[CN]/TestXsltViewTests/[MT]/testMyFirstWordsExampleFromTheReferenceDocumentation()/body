@@ -1,0 +1,34 @@
+{
+  if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
+    return;
+  }
+  MockHttpServletRequest request=new MockHttpServletRequest();
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  AbstractXsltView view=new AbstractXsltView(){
+    protected Source createXsltSource(    Map model,    String rootName,    HttpServletRequest request,    HttpServletResponse response) throws Exception {
+      Document document=DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+      Element root=document.createElement(rootName);
+      List words=(List)model.get("wordList");
+      for (Iterator it=words.iterator(); it.hasNext(); ) {
+        String nextWord=(String)it.next();
+        Element wordNode=document.createElement("word");
+        Text textNode=document.createTextNode(nextWord);
+        wordNode.appendChild(textNode);
+        root.appendChild(wordNode);
+      }
+      return new DOMSource(root);
+    }
+  }
+;
+  view.setStylesheetLocation(new ClassPathResource("org/springframework/web/servlet/view/xslt/firstWords.xsl"));
+  view.setIndent(true);
+  view.initApplicationContext();
+  Map map=new HashMap();
+  List wordList=new ArrayList();
+  wordList.add("hello");
+  wordList.add("world");
+  map.put("wordList",wordList);
+  view.render(new ModelAndView("home",map).getModel(),request,response);
+  String text=response.getContentAsString();
+  assertTrue(text.trim().startsWith("<html"));
+}

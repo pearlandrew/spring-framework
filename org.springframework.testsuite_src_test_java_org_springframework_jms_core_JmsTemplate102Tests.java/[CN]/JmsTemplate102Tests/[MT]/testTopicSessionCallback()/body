@@ -1,0 +1,22 @@
+{
+  JmsTemplate102 template=createTemplate();
+  template.setPubSubDomain(true);
+  template.setConnectionFactory(mockTopicConnectionFactory);
+  template.afterPropertiesSet();
+  mockTopicSession.close();
+  topicSessionControl.setVoidCallable(1);
+  mockTopicConnection.close();
+  topicConnectionControl.setVoidCallable(1);
+  topicSessionControl.replay();
+  topicConnectionControl.replay();
+  template.execute(new SessionCallback(){
+    public Object doInJms(    Session session) throws JMSException {
+      boolean b=session.getTransacted();
+      return null;
+    }
+  }
+);
+  topicConnectionFactoryControl.verify();
+  topicConnectionControl.verify();
+  topicSessionControl.verify();
+}

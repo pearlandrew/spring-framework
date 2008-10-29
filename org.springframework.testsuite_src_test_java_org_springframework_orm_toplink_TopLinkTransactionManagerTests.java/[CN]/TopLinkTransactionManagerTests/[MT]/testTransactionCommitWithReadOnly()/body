@@ -1,0 +1,36 @@
+{
+  MockControl sessionControl=MockControl.createControl(Session.class);
+  final Session session=(Session)sessionControl.getMock();
+  MockControl uowControl=MockControl.createControl(UnitOfWork.class);
+  UnitOfWork uow=(UnitOfWork)uowControl.getMock();
+  final SessionFactory sf=new MockSessionFactory(session);
+  session.release();
+  sessionControl.setVoidCallable();
+  sessionControl.replay();
+  uowControl.replay();
+  TopLinkTransactionManager tm=new TopLinkTransactionManager(sf);
+  TransactionTemplate tt=new TransactionTemplate(tm);
+  tt.setReadOnly(true);
+  final List l=new ArrayList();
+  l.add("test");
+  assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
+  assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  Object result=tt.execute(new TransactionCallback(){
+    public Object doInTransaction(    TransactionStatus status){
+      assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
+      TopLinkTemplate ht=new TopLinkTemplate(sf);
+      return ht.executeFind(new TopLinkCallback(){
+        public Object doInTopLink(        Session session){
+          return l;
+        }
+      }
+);
+    }
+  }
+);
+  assertTrue("Correct result list",result == l);
+  assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
+  assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  sessionControl.verify();
+  uowControl.verify();
+}

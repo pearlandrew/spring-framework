@@ -1,0 +1,18 @@
+{
+  StaticWebApplicationContext wac=new StaticWebApplicationContext(){
+    protected Resource getResourceByPath(    String path){
+      assertTrue("Correct default location",XmlViewResolver.DEFAULT_LOCATION.equals(path));
+      return super.getResourceByPath(path);
+    }
+  }
+;
+  wac.setServletContext(new MockServletContext());
+  wac.refresh();
+  XmlViewResolver vr=new XmlViewResolver();
+  try {
+    vr.setApplicationContext(wac);
+    fail("Should have thrown BeanDefinitionStoreException");
+  }
+ catch (  BeanDefinitionStoreException ex) {
+  }
+}

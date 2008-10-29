@@ -1,0 +1,32 @@
+{
+  MockHttpServletRequest request=new MockHttpServletRequest();
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  response.setOutputStreamAccessAllowed(false);
+  AbstractXsltView view=new AbstractXsltView(){
+    protected Source createXsltSource(    Map model,    String root,    HttpServletRequest request,    HttpServletResponse response) throws Exception {
+      Hero hero=(Hero)model.get("hero");
+      Document document=DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+      Element node=document.createElement(root);
+      node.setAttribute("name",hero.getName());
+      node.setAttribute("age",hero.getAge() + "");
+      node.setAttribute("catchphrase",hero.getCatchphrase());
+      return new DOMSource(node);
+    }
+    protected Map getParameters(    HttpServletRequest request){
+      Map parameters=new HashMap();
+      parameters.put("sex","Male");
+      return parameters;
+    }
+    protected boolean useWriter(){
+      return true;
+    }
+  }
+;
+  view.setStylesheetLocation(new ClassPathResource("org/springframework/web/servlet/view/xslt/sunnyDayExplicitRoot.xsl"));
+  view.setUseSingleModelNameAsRoot(false);
+  view.setRoot("baddie");
+  view.initApplicationContext();
+  view.render(new ModelAndView().addObject("hero",new Hero("Jet",24,"BOOM")).getModel(),request,response);
+  String text=response.getContentAsString();
+  assertTrue(text.trim().startsWith("<baddie "));
+}

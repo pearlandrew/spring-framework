@@ -1,0 +1,44 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
+  ut.setTransactionTimeout(10);
+  utControl.setVoidCallable(1);
+  ut.begin();
+  utControl.setVoidCallable(1);
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_ACTIVE,1);
+  ut.rollback();
+  utControl.setVoidCallable(1);
+  utControl.replay();
+  MockControl synchControl=MockControl.createControl(TransactionSynchronization.class);
+  final TransactionSynchronization synch=(TransactionSynchronization)synchControl.getMock();
+  synch.beforeCompletion();
+  synchControl.setVoidCallable(1);
+  synch.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
+  synchControl.setVoidCallable(1);
+  synchControl.replay();
+  JtaTransactionManager ptm=newJtaTransactionManager(ut);
+  TransactionTemplate tt=new TransactionTemplate(ptm);
+  tt.setTimeout(10);
+  tt.setName("txName");
+  assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+  assertNull(TransactionSynchronizationManager.getCurrentTransactionName());
+  assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+  tt.execute(new TransactionCallbackWithoutResult(){
+    protected void doInTransactionWithoutResult(    TransactionStatus status){
+      assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+      TransactionSynchronizationManager.registerSynchronization(synch);
+      assertEquals("txName",TransactionSynchronizationManager.getCurrentTransactionName());
+      assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+      status.setRollbackOnly();
+    }
+  }
+);
+  assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+  assertNull(TransactionSynchronizationManager.getCurrentTransactionName());
+  assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+  utControl.verify();
+  synchControl.verify();
+}

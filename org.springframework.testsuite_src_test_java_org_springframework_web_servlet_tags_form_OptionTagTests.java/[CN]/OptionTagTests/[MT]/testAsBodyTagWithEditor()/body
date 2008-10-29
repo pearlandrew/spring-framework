@@ -1,0 +1,18 @@
+{
+  BindStatus bindStatus=new BindStatus(getRequestContext(),"testBean.stringArray",false){
+    public PropertyEditor getEditor(){
+      return new RulesVariantEditor();
+    }
+  }
+;
+  getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE,bindStatus);
+  RulesVariant rulesVariant=new RulesVariant("someRules","someVariant");
+  getPageContext().getRequest().setAttribute("rule",rulesVariant);
+  this.tag.setValue("${rule}");
+  int result=this.tag.doStartTag();
+  assertEquals(BodyTag.EVAL_BODY_BUFFERED,result);
+  assertEquals(rulesVariant,getPageContext().getAttribute("value"));
+  assertEquals(rulesVariant.toId(),getPageContext().getAttribute("displayValue"));
+  result=this.tag.doEndTag();
+  assertEquals(Tag.EVAL_PAGE,result);
+}

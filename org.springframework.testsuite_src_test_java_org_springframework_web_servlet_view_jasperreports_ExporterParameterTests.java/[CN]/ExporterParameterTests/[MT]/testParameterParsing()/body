@@ -1,0 +1,39 @@
+{
+  Map params=new HashMap();
+  params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI","/foo/bar");
+  AbstractJasperReportsView view=new AbstractJasperReportsView(){
+    protected void renderReport(    JasperPrint filledReport,    Map model,    HttpServletResponse response) throws Exception {
+      assertEquals("Invalid number of exporter parameters",1,getConvertedExporterParameters().size());
+      JRExporterParameter key=JRHtmlExporterParameter.IMAGES_URI;
+      Object value=getConvertedExporterParameters().get(key);
+      assertNotNull("Value not mapped to correct key",value);
+      assertEquals("Incorrect value for parameter","/foo/bar",value);
+    }
+    /** 
+ * Merges the configured {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} with any specified
+ * in the supplied model data. {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} in the model
+ * override those specified in the configuration.
+ * @see #setExporterParameters(java.util.Map)
+ */
+    protected Map mergeExporterParameters(    Map model){
+      Map mergedParameters=new HashMap(getConvertedExporterParameters());
+      for (Iterator iterator=model.keySet().iterator(); iterator.hasNext(); ) {
+        Object key=iterator.next();
+        if (key instanceof JRExporterParameter) {
+          Object value=model.get(key);
+          if (value instanceof String) {
+            mergedParameters.put(key,value);
+          }
+ else {
+            logger.warn("Ignoring exporter parameter [" + key + "]. Value is not a String.");
+          }
+        }
+      }
+      return mergedParameters;
+    }
+  }
+;
+  view.setExporterParameters(params);
+  setViewProperties(view);
+  view.render(getModel(),request,response);
+}

@@ -1,0 +1,18 @@
+{
+  String path1="/Constructor.htm";
+  String path2="path2.cgi";
+  StaticWebApplicationContext wac=new StaticWebApplicationContext();
+  wac.registerSingleton("test",TestBean.class,new MutablePropertyValues());
+  HashUrlMapHandlerMapping hm=new HashUrlMapHandlerMapping();
+  hm.register(ConstructorController.class,new PathMap[]{new PathMap(path1),new PathMap(path2)});
+  hm.setApplicationContext(wac);
+  ConstructorController cc=(ConstructorController)wac.getBean(ConstructorController.class.getName());
+  assertSame(wac.getBean("test"),cc.testBean);
+  HandlerExecutionChain chain=hm.getHandler(new MockHttpServletRequest("GET",path1));
+  assertNotNull(chain);
+  assertEquals("Path is mapped correctly based on attribute 1",cc,chain.getHandler());
+  chain=hm.getHandler(new MockHttpServletRequest(null,"GET","/" + path2));
+  assertEquals("Path is mapped correctly based on attribute 2",cc,chain.getHandler());
+  chain=hm.getHandler(new MockHttpServletRequest(null,"GET","completeRubbish.html"));
+  assertNull("Don't know anything about this path",chain);
+}

@@ -1,0 +1,34 @@
+{
+  String sql="SELECT AGE FROM CUSTMR WHERE ID = :id";
+  String sqlToUse="SELECT AGE FROM CUSTMR WHERE ID = ?";
+  mockResultSetMetaData.getColumnCount();
+  ctrlResultSetMetaData.setReturnValue(1);
+  mockResultSet.getMetaData();
+  ctrlResultSet.setReturnValue(mockResultSetMetaData);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getInt(1);
+  ctrlResultSet.setReturnValue(22);
+  mockResultSet.wasNull();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockPreparedStatement.setObject(1,new Integer(3));
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeQuery();
+  ctrlPreparedStatement.setReturnValue(mockResultSet);
+  mockPreparedStatement.getWarnings();
+  ctrlPreparedStatement.setReturnValue(null);
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(sqlToUse);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  NamedParameterJdbcTemplate template=new NamedParameterJdbcTemplate(mockDataSource);
+  MapSqlParameterSource parms=new MapSqlParameterSource();
+  parms.addValue("id",new Integer(3));
+  Object o=template.queryForObject(sql,parms,Integer.class);
+  assertTrue("Correct result type",o instanceof Integer);
+}

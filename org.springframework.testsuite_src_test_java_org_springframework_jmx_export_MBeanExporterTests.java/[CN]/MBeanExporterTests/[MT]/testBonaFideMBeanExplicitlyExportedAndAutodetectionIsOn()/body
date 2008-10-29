@@ -1,0 +1,15 @@
+{
+  BeanDefinitionBuilder builder=BeanDefinitionBuilder.rootBeanDefinition(Person.class);
+  DefaultListableBeanFactory factory=new DefaultListableBeanFactory();
+  factory.registerBeanDefinition(OBJECT_NAME,builder.getBeanDefinition());
+  MBeanExporter exporter=new MBeanExporter();
+  exporter.setServer(getServer());
+  Map beansToExport=new HashMap();
+  beansToExport.put(OBJECT_NAME,OBJECT_NAME);
+  exporter.setBeans(beansToExport);
+  exporter.setAssembler(new NamedBeanAutodetectCapableMBeanInfoAssemblerStub(OBJECT_NAME));
+  exporter.setBeanFactory(factory);
+  exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ASSEMBLER);
+  exporter.afterPropertiesSet();
+  assertIsRegistered("Explicitly exported bona fide MBean obviously not exported.",ObjectNameManager.getInstance(OBJECT_NAME));
+}

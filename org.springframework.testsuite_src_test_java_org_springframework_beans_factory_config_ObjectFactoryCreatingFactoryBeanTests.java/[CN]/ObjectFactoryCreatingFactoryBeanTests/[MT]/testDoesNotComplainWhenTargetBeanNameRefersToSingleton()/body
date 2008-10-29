@@ -1,0 +1,17 @@
+{
+  final String targetBeanName="singleton";
+  final String expectedSingleton="Alicia Keys";
+  MockControl mock=MockControl.createControl(BeanFactory.class);
+  BeanFactory beanFactory=(BeanFactory)mock.getMock();
+  beanFactory.getBean(targetBeanName);
+  mock.setReturnValue(expectedSingleton);
+  mock.replay();
+  ObjectFactoryCreatingFactoryBean factory=new ObjectFactoryCreatingFactoryBean();
+  factory.setTargetBeanName(targetBeanName);
+  factory.setBeanFactory(beanFactory);
+  factory.afterPropertiesSet();
+  ObjectFactory objectFactory=(ObjectFactory)factory.getObject();
+  Object actualSingleton=objectFactory.getObject();
+  assertSame(expectedSingleton,actualSingleton);
+  mock.verify();
+}

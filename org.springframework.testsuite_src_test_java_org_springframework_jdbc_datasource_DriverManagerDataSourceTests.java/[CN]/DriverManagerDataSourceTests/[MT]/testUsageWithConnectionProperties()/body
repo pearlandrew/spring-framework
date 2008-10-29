@@ -1,0 +1,28 @@
+{
+  final String jdbcUrl="url";
+  final Properties connProps=new Properties();
+  connProps.setProperty("myProp","myValue");
+  connProps.setProperty("yourProp","yourValue");
+  connProps.setProperty("user","uname");
+  connProps.setProperty("password","pwd");
+  MockControl ctrlConnection=MockControl.createControl(Connection.class);
+  final Connection mockConnection=(Connection)ctrlConnection.getMock();
+  ctrlConnection.replay();
+class TestDriverManagerDataSource extends DriverManagerDataSource {
+    protected Connection getConnectionFromDriverManager(    String url,    Properties props){
+      assertEquals(jdbcUrl,url);
+      assertEquals("uname",props.getProperty("user"));
+      assertEquals("pwd",props.getProperty("password"));
+      assertEquals("myValue",props.getProperty("myProp"));
+      assertEquals("yourValue",props.getProperty("yourProp"));
+      return mockConnection;
+    }
+  }
+  DriverManagerDataSource ds=new TestDriverManagerDataSource();
+  ds.setUrl(jdbcUrl);
+  ds.setConnectionProperties(connProps);
+  Connection actualCon=ds.getConnection();
+  assertTrue(actualCon == mockConnection);
+  assertTrue(ds.getUrl().equals(jdbcUrl));
+  ctrlConnection.verify();
+}

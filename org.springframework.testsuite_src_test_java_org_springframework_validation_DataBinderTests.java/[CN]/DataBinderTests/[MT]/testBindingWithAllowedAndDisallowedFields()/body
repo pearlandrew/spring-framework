@@ -1,0 +1,16 @@
+{
+  TestBean rod=new TestBean();
+  DataBinder binder=new DataBinder(rod);
+  binder.setAllowedFields(new String[]{"name","myparam"});
+  binder.setDisallowedFields(new String[]{"age"});
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  pvs.addPropertyValue("name","Rod");
+  pvs.addPropertyValue("age","32x");
+  binder.bind(pvs);
+  binder.close();
+  assertTrue("changed name correctly",rod.getName().equals("Rod"));
+  assertTrue("did not change age",rod.getAge() == 0);
+  String[] disallowedFields=binder.getBindingResult().getSuppressedFields();
+  assertEquals(1,disallowedFields.length);
+  assertEquals("age",disallowedFields[0]);
+}

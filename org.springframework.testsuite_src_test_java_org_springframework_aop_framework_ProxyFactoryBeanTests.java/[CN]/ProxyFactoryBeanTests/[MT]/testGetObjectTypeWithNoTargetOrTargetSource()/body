@@ -1,0 +1,13 @@
+{
+  BeanFactory bf=new XmlBeanFactory(new ClassPathResource("proxyFactoryTargetSourceTests.xml",getClass()));
+  ITestBean tb=(ITestBean)bf.getBean("noTarget");
+  try {
+    tb.getName();
+    fail();
+  }
+ catch (  UnsupportedOperationException ex) {
+    assertEquals("getName",ex.getMessage());
+  }
+  FactoryBean pfb=(ProxyFactoryBean)bf.getBean("&noTarget");
+  assertTrue("Has correct object type",ITestBean.class.isAssignableFrom(pfb.getObjectType()));
+}

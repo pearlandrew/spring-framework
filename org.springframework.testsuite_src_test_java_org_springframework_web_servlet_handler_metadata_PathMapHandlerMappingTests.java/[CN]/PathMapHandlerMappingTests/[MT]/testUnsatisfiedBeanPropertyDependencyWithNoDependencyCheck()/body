@@ -1,0 +1,16 @@
+{
+  String path="/BeanProperty.htm";
+  StaticWebApplicationContext wac=new StaticWebApplicationContext();
+  HashUrlMapHandlerMapping hm=new HashUrlMapHandlerMapping();
+  hm.setAutowireModeName("AUTOWIRE_BY_NAME");
+  hm.setDependencyCheck(false);
+  hm.register(BeanPropertyController.class,new PathMap(path));
+  hm.setApplicationContext(wac);
+  BeanPropertyController bpc=(BeanPropertyController)wac.getBean(BeanPropertyController.class.getName());
+  assertNull("Not autowired but no dependency check",bpc.testBean);
+  HandlerExecutionChain chain=hm.getHandler(new MockHttpServletRequest("GET",path));
+  assertNotNull(chain);
+  assertEquals("Path is mapped correctly based on attribute",bpc,chain.getHandler());
+  chain=hm.getHandler(new MockHttpServletRequest("GET","completeRubbish.html"));
+  assertNull("Don't know anything about this path",chain);
+}

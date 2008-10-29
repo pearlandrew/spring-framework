@@ -1,0 +1,30 @@
+{
+  JmsTemplate template=createTemplate();
+  template.setConnectionFactory(mockConnectionFactory);
+  MockControl messageProducerControl=MockControl.createControl(MessageProducer.class);
+  MessageProducer mockMessageProducer=(MessageProducer)messageProducerControl.getMock();
+  mockSession.createProducer(null);
+  sessionControl.setReturnValue(mockMessageProducer);
+  mockMessageProducer.getPriority();
+  messageProducerControl.setReturnValue(4);
+  mockMessageProducer.close();
+  messageProducerControl.setVoidCallable(1);
+  mockSession.close();
+  sessionControl.setVoidCallable(1);
+  mockConnection.close();
+  connectionControl.setVoidCallable(1);
+  messageProducerControl.replay();
+  sessionControl.replay();
+  connectionControl.replay();
+  template.execute(new ProducerCallback(){
+    public Object doInJms(    Session session,    MessageProducer producer) throws JMSException {
+      boolean b=session.getTransacted();
+      int i=producer.getPriority();
+      return null;
+    }
+  }
+);
+  connectionFactoryControl.verify();
+  connectionControl.verify();
+  sessionControl.verify();
+}

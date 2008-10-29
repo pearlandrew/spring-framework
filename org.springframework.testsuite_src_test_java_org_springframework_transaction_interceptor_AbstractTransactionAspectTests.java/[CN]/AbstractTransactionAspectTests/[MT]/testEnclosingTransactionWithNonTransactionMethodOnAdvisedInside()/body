@@ -1,0 +1,37 @@
+{
+  TransactionAttribute txatt=new DefaultTransactionAttribute();
+  MapTransactionAttributeSource tas=new MapTransactionAttributeSource();
+  tas.register(exceptionalMethod,txatt);
+  TransactionStatus status=transactionStatusForNewTransaction();
+  MockControl ptmControl=MockControl.createControl(PlatformTransactionManager.class);
+  PlatformTransactionManager ptm=(PlatformTransactionManager)ptmControl.getMock();
+  ptm.getTransaction(txatt);
+  ptmControl.setReturnValue(status,1);
+  ptm.commit(status);
+  ptmControl.setVoidCallable(1);
+  ptmControl.replay();
+  final String spouseName="innerName";
+  TestBean outer=new TestBean(){
+    public void exceptional(    Throwable t) throws Throwable {
+      TransactionInfo ti=TransactionAspectSupport.currentTransactionInfo();
+      assertTrue(ti.hasTransaction());
+      assertEquals(spouseName,getSpouse().getName());
+    }
+  }
+;
+  TestBean inner=new TestBean(){
+    public String getName(){
+      TransactionInfo ti=TransactionAspectSupport.currentTransactionInfo();
+      assertFalse(ti.hasTransaction());
+      return spouseName;
+    }
+  }
+;
+  ITestBean outerProxy=(ITestBean)advised(outer,ptm,tas);
+  ITestBean innerProxy=(ITestBean)advised(inner,ptm,tas);
+  outer.setSpouse(innerProxy);
+  checkTransactionStatus(false);
+  outerProxy.exceptional(null);
+  checkTransactionStatus(false);
+  ptmControl.verify();
+}

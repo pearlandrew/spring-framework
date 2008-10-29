@@ -1,0 +1,44 @@
+{
+  final SQLException sex=new SQLException("I have a known problem","99999",1054);
+  final String sql="SELECT ID FROM CUSTOMER";
+  MockControl ctrlResultSet=MockControl.createControl(ResultSet.class);
+  ResultSet mockResultSet=(ResultSet)ctrlResultSet.getMock();
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  MockControl ctrlStatement=MockControl.createControl(PreparedStatement.class);
+  PreparedStatement mockStatement=(PreparedStatement)ctrlStatement.getMock();
+  mockStatement.executeQuery(sql);
+  ctrlStatement.setReturnValue(mockResultSet);
+  mockStatement.close();
+  ctrlStatement.setVoidCallable();
+  MockControl ctrlDatabaseMetaData=MockControl.createControl(DatabaseMetaData.class);
+  DatabaseMetaData mockDatabaseMetaData=(DatabaseMetaData)ctrlDatabaseMetaData.getMock();
+  mockDatabaseMetaData.getDatabaseProductName();
+  ctrlDatabaseMetaData.setReturnValue("MySQL");
+  mockConnection.createStatement();
+  ctrlConnection.setReturnValue(mockStatement);
+  mockConnection.getMetaData();
+  ctrlConnection.setReturnValue(mockDatabaseMetaData);
+  ctrlResultSet.replay();
+  ctrlStatement.replay();
+  ctrlDatabaseMetaData.replay();
+  replay();
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  try {
+    template.query(sql,new RowCallbackHandler(){
+      public void processRow(      ResultSet rs) throws SQLException {
+        throw sex;
+      }
+    }
+);
+    fail("Should have thrown BadSqlGrammarException");
+  }
+ catch (  BadSqlGrammarException ex) {
+    assertTrue("Wanted same exception back, not " + ex,sex == ex.getCause());
+  }
+  ctrlResultSet.verify();
+  ctrlStatement.verify();
+  ctrlDatabaseMetaData.verify();
+}

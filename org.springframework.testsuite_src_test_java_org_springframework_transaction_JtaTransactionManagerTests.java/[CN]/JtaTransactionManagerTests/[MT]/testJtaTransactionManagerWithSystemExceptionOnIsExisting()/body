@@ -1,0 +1,20 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  ut.getStatus();
+  utControl.setThrowable(new SystemException("system exception"));
+  utControl.replay();
+  try {
+    JtaTransactionManager ptm=newJtaTransactionManager(ut);
+    TransactionTemplate tt=new TransactionTemplate(ptm);
+    tt.execute(new TransactionCallbackWithoutResult(){
+      protected void doInTransactionWithoutResult(      TransactionStatus status){
+      }
+    }
+);
+    fail("Should have thrown TransactionSystemException");
+  }
+ catch (  TransactionSystemException ex) {
+  }
+  utControl.verify();
+}

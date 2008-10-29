@@ -1,0 +1,14 @@
+{
+  TestBean beanInstance=new TestBean();
+  MockControl mock=MockControl.createControl(BeanWiringInfoResolver.class);
+  BeanWiringInfoResolver resolver=(BeanWiringInfoResolver)mock.getMock();
+  resolver.resolveWiringInfo(beanInstance);
+  mock.setReturnValue(null);
+  mock.replay();
+  BeanConfigurerSupport configurer=new StubBeanConfigurerSupport();
+  configurer.setBeanWiringInfoResolver(resolver);
+  configurer.setBeanFactory(new DefaultListableBeanFactory());
+  configurer.configureBean(beanInstance);
+  mock.verify();
+  assertNull(beanInstance.getName());
+}

@@ -1,0 +1,25 @@
+{
+  MockControl mockRequest=MockControl.createControl(HttpServletRequest.class);
+  HttpServletRequest request=(HttpServletRequest)mockRequest.getMock();
+  request.getCharacterEncoding();
+  mockRequest.setReturnValue(null);
+  request.setCharacterEncoding(ENCODING);
+  mockRequest.setVoidCallable();
+  request.getAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
+  mockRequest.setReturnValue(null);
+  request.setAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX,Boolean.TRUE);
+  mockRequest.setVoidCallable();
+  request.removeAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
+  mockRequest.setVoidCallable();
+  mockRequest.replay();
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  MockControl mockFilter=MockControl.createControl(FilterChain.class);
+  FilterChain filterChain=(FilterChain)mockFilter.getMock();
+  filterChain.doFilter(request,response);
+  mockFilter.replay();
+  CharacterEncodingFilter filter=new CharacterEncodingFilter();
+  filter.setEncoding(ENCODING);
+  filter.doFilter(request,response,filterChain);
+  mockRequest.verify();
+  mockFilter.verify();
+}

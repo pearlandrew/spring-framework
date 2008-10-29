@@ -1,0 +1,23 @@
+{
+  mockPreparedStatement.setObject(1,new Integer(1),Types.DECIMAL);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.setObject(2,new Integer(1),Types.INTEGER);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeUpdate();
+  ctrlPreparedStatement.setReturnValue(1);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(UPDATE_NAMED_PARAMETERS_PARSED);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  NamedParameterJdbcTemplate jt=new NamedParameterJdbcTemplate(mockDataSource);
+  Map params=new HashMap();
+  params.put("perfId",new SqlParameterValue(Types.DECIMAL,new Integer(1)));
+  params.put("priceId",new SqlParameterValue(Types.INTEGER,new Integer(1)));
+  int rowsAffected=jt.update(UPDATE_NAMED_PARAMETERS,params);
+  assertEquals(1,rowsAffected);
+}

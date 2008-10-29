@@ -1,0 +1,28 @@
+{
+  final String s="foo";
+  MethodInterceptor mi=new MethodInterceptor(){
+    public Object invoke(    MethodInvocation invocation) throws Throwable {
+      if (!context) {
+        assertNoInvocationContext();
+      }
+ else {
+        assertTrue("have context",ExposeInvocationInterceptor.currentInvocation() != null);
+      }
+      return s;
+    }
+  }
+;
+  AdvisedSupport pc=new AdvisedSupport(new Class[]{ITestBean.class});
+  if (context) {
+    pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
+  }
+  pc.addAdvice(mi);
+  if (requiresTarget()) {
+    pc.setTarget(new TestBean());
+  }
+  AopProxy aop=createAopProxy(pc);
+  assertNoInvocationContext();
+  ITestBean tb=(ITestBean)aop.getProxy();
+  assertNoInvocationContext();
+  assertTrue("correct return value",tb.getName() == s);
+}

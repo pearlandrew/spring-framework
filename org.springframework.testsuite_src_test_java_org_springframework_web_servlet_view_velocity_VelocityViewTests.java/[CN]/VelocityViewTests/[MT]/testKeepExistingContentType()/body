@@ -1,0 +1,41 @@
+{
+  final String templateName="test.vm";
+  MockControl wmc=MockControl.createControl(WebApplicationContext.class);
+  WebApplicationContext wac=(WebApplicationContext)wmc.getMock();
+  MockServletContext sc=new MockServletContext();
+  sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,wac);
+  final Template expectedTemplate=new Template();
+  VelocityConfig vc=new VelocityConfig(){
+    public VelocityEngine getVelocityEngine(){
+      return new TestVelocityEngine(templateName,expectedTemplate);
+    }
+  }
+;
+  wac.getBeansOfType(VelocityConfig.class,true,false);
+  Map configurers=new HashMap();
+  configurers.put("velocityConfigurer",vc);
+  wmc.setReturnValue(configurers);
+  wac.getParentBeanFactory();
+  wmc.setReturnValue(null);
+  wac.getServletContext();
+  wmc.setReturnValue(sc,4);
+  wmc.replay();
+  HttpServletRequest request=new MockHttpServletRequest();
+  final HttpServletResponse expectedResponse=new MockHttpServletResponse();
+  expectedResponse.setContentType("myContentType");
+  VelocityView vv=new VelocityView(){
+    protected void mergeTemplate(    Template template,    Context context,    HttpServletResponse response){
+      assertTrue(template == expectedTemplate);
+      assertTrue(response == expectedResponse);
+    }
+    protected void exposeHelpers(    Map model,    HttpServletRequest request) throws Exception {
+      model.put("myHelper","myValue");
+    }
+  }
+;
+  vv.setUrl(templateName);
+  vv.setApplicationContext(wac);
+  vv.render(new HashMap(),request,expectedResponse);
+  wmc.verify();
+  assertEquals("myContentType",expectedResponse.getContentType());
+}

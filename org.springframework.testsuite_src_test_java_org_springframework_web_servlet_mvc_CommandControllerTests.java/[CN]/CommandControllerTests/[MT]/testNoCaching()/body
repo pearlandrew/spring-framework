@@ -1,0 +1,11 @@
+{
+  TestController mc=new TestController();
+  mc.setCacheSeconds(0);
+  HttpServletRequest request=new MockHttpServletRequest("GET","/ok.html");
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  mc.handleRequest(request,response);
+  assertTrue("Correct expires header",response.getHeader("Expires").equals(new Long(1)));
+  List cacheControl=response.getHeaders("Cache-Control");
+  assertTrue("Correct cache control",cacheControl.contains("no-cache"));
+  assertTrue("Correct cache control",cacheControl.contains("no-store"));
+}

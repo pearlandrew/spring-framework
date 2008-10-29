@@ -1,0 +1,23 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_ACTIVE,1);
+  utControl.replay();
+  JtaTransactionManager ptm=newJtaTransactionManager(ut);
+  TransactionTemplate tt=new TransactionTemplate(ptm);
+  tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+  assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+  try {
+    tt.execute(new TransactionCallbackWithoutResult(){
+      protected void doInTransactionWithoutResult(      TransactionStatus status){
+      }
+    }
+);
+    fail("Should have thrown TransactionSuspensionNotSupportedException");
+  }
+ catch (  TransactionSuspensionNotSupportedException ex) {
+  }
+  assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+  utControl.verify();
+}

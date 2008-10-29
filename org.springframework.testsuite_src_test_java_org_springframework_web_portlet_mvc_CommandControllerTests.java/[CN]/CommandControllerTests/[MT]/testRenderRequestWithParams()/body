@@ -1,0 +1,18 @@
+{
+  TestController tc=new TestController();
+  MockRenderRequest request=new MockRenderRequest();
+  MockRenderResponse response=new MockRenderResponse();
+  String name="test";
+  int age=30;
+  request.addParameter("name",name);
+  request.addParameter("age","" + age);
+  request.setContextPath("test");
+  ModelAndView mav=tc.handleRenderRequest(request,response);
+  assertEquals("test-view",mav.getViewName());
+  TestBean command=(TestBean)mav.getModel().get(tc.getCommandName());
+  assertEquals("Name should be bound",name,command.getName());
+  assertEquals("Age should be bound",age,command.getAge());
+  BindException errors=(BindException)mav.getModel().get(ERRORS_KEY);
+  assertNotNull(errors);
+  assertEquals("There should be no errors",0,errors.getErrorCount());
+}

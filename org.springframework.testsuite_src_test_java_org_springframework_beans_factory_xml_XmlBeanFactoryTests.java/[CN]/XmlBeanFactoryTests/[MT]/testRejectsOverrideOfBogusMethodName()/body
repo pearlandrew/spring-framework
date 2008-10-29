@@ -1,0 +1,12 @@
+{
+  DefaultListableBeanFactory xbf=new DefaultListableBeanFactory();
+  XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(xbf);
+  try {
+    reader.loadBeanDefinitions(new ClassPathResource("invalidOverridesNoSuchMethod.xml",getClass()));
+    xbf.getBean("constructorOverrides");
+    fail("Shouldn't allow override of bogus method");
+  }
+ catch (  BeanDefinitionStoreException ex) {
+    assertTrue("Bogus method name correctly reported",ex.getMessage().indexOf("bogusMethod") != -1);
+  }
+}

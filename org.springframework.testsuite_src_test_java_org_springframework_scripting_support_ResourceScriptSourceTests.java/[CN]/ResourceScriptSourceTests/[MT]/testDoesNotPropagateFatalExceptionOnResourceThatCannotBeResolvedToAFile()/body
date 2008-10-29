@@ -1,0 +1,11 @@
+{
+  MockControl mock=MockControl.createControl(Resource.class);
+  Resource resource=(Resource)mock.getMock();
+  resource.lastModified();
+  mock.setThrowable(new IOException());
+  mock.replay();
+  ResourceScriptSource scriptSource=new ResourceScriptSource(resource);
+  long lastModified=scriptSource.retrieveLastModifiedTime();
+  assertEquals(0,lastModified);
+  mock.verify();
+}

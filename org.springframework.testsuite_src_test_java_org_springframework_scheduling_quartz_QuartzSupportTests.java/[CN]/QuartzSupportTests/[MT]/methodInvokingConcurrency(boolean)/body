@@ -1,0 +1,50 @@
+{
+  TestMethodInvokingTask task1=new TestMethodInvokingTask();
+  MethodInvokingJobDetailFactoryBean mijdfb=new MethodInvokingJobDetailFactoryBean();
+  mijdfb.setConcurrent(concurrent);
+  mijdfb.setBeanName("myJob1");
+  mijdfb.setTargetObject(task1);
+  mijdfb.setTargetMethod("doWait");
+  mijdfb.afterPropertiesSet();
+  JobDetail jobDetail1=(JobDetail)mijdfb.getObject();
+  SimpleTriggerBean trigger0=new SimpleTriggerBean();
+  trigger0.setBeanName("myTrigger1");
+  trigger0.setJobDetail(jobDetail1);
+  trigger0.setStartDelay(0);
+  trigger0.setRepeatInterval(1);
+  trigger0.setRepeatCount(1);
+  trigger0.afterPropertiesSet();
+  SimpleTriggerBean trigger1=new SimpleTriggerBean();
+  trigger1.setBeanName("myTrigger1");
+  trigger1.setJobDetail(jobDetail1);
+  trigger1.setStartDelay(1000L);
+  trigger1.setRepeatInterval(1);
+  trigger1.setRepeatCount(1);
+  trigger1.afterPropertiesSet();
+  SchedulerFactoryBean schedulerFactoryBean=new SchedulerFactoryBean();
+  schedulerFactoryBean.setJobDetails(new JobDetail[]{jobDetail1});
+  schedulerFactoryBean.setTriggers(new Trigger[]{trigger1,trigger0});
+  schedulerFactoryBean.afterPropertiesSet();
+  try {
+    Thread.sleep(4000);
+  }
+ catch (  InterruptedException ex) {
+  }
+  if (concurrent) {
+    assertEquals(2,task1.counter);
+    task1.stop();
+    return;
+  }
+ else {
+    assertEquals(1,task1.counter);
+    task1.stop();
+  }
+  try {
+    Thread.sleep(4000);
+  }
+ catch (  InterruptedException ex) {
+  }
+  task1.stop();
+  assertEquals(2,task1.counter);
+  schedulerFactoryBean.destroy();
+}

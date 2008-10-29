@@ -1,0 +1,27 @@
+{
+  ExceptionCallMockServiceFactory serviceFactory=new ExceptionCallMockServiceFactory();
+  JaxRpcPortProxyFactoryBean factory=new JaxRpcPortProxyFactoryBean();
+  factory.setServiceFactory(serviceFactory);
+  factory.setNamespaceUri("myNamespace");
+  factory.setServiceName("myService1");
+  factory.setPortName("myPort");
+  factory.setServiceInterface(IRemoteBean.class);
+  factory.setRefreshServiceAfterConnectFailure(true);
+  factory.afterPropertiesSet();
+  assertTrue(factory.getObject() instanceof IRemoteBean);
+  IRemoteBean proxy=(IRemoteBean)factory.getObject();
+  try {
+    proxy.setName("exception");
+    fail("Should have thrown RemoteException");
+  }
+ catch (  RemoteException ex) {
+  }
+  proxy.setName("myName");
+  assertEquals("myName",RemoteBean.name);
+  proxy.setName("myName");
+  assertEquals("myName",RemoteBean.name);
+  assertEquals(2,serviceFactory.serviceCount);
+  MockServiceFactory.service1Control.verify();
+  CallMockServiceFactory.call1Control.verify();
+  ExceptionCallMockServiceFactory.call2Control.verify();
+}

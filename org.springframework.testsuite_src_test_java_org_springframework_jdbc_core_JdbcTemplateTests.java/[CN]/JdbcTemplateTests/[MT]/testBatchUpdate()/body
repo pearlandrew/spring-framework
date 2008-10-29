@@ -1,0 +1,37 @@
+{
+  final String[] sql={"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 1","UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 2"};
+  MockControl ctrlStatement=MockControl.createControl(Statement.class);
+  Statement mockStatement=(Statement)ctrlStatement.getMock();
+  mockStatement.getConnection();
+  ctrlStatement.setReturnValue(mockConnection);
+  mockStatement.addBatch(sql[0]);
+  ctrlStatement.setVoidCallable();
+  mockStatement.addBatch(sql[1]);
+  ctrlStatement.setVoidCallable();
+  mockStatement.executeBatch();
+  ctrlStatement.setReturnValue(new int[]{1,1});
+  if (debugEnabled) {
+    mockStatement.getWarnings();
+    ctrlStatement.setReturnValue(null);
+  }
+  mockStatement.close();
+  ctrlStatement.setVoidCallable();
+  MockControl ctrlDatabaseMetaData=MockControl.createControl(DatabaseMetaData.class);
+  DatabaseMetaData mockDatabaseMetaData=(DatabaseMetaData)ctrlDatabaseMetaData.getMock();
+  mockDatabaseMetaData.getDatabaseProductName();
+  ctrlDatabaseMetaData.setReturnValue("MySQL");
+  mockDatabaseMetaData.supportsBatchUpdates();
+  ctrlDatabaseMetaData.setReturnValue(true);
+  mockConnection.getMetaData();
+  ctrlConnection.setReturnValue(mockDatabaseMetaData,2);
+  mockConnection.createStatement();
+  ctrlConnection.setReturnValue(mockStatement);
+  ctrlStatement.replay();
+  ctrlDatabaseMetaData.replay();
+  replay();
+  JdbcTemplate template=new JdbcTemplate(mockDataSource,false);
+  int[] actualRowsAffected=template.batchUpdate(sql);
+  assertTrue("executed 2 updates",actualRowsAffected.length == 2);
+  ctrlStatement.verify();
+  ctrlDatabaseMetaData.verify();
+}

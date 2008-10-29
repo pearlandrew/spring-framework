@@ -1,0 +1,39 @@
+{
+class TestRedirectView extends RedirectView {
+    public boolean queryPropertiesCalled=false;
+    /** 
+ * Test whether this callback method is called with correct args
+ */
+    protected Map queryProperties(    Map model){
+      assertTrue("Map and model must be equal.",map.equals(model));
+      this.queryPropertiesCalled=true;
+      return super.queryProperties(model);
+    }
+  }
+  TestRedirectView rv=new TestRedirectView();
+  rv.setUrl(url);
+  rv.setContextRelative(contextRelative);
+  rv.setExposeModelAttributes(exposeModelAttributes);
+  MockControl requestControl=MockControl.createControl(HttpServletRequest.class);
+  HttpServletRequest request=(HttpServletRequest)requestControl.getMock();
+  request.getCharacterEncoding();
+  requestControl.setReturnValue(null,1);
+  if (contextRelative) {
+    expectedUrlForEncoding="/context" + expectedUrlForEncoding;
+    request.getContextPath();
+    requestControl.setReturnValue("/context");
+  }
+  requestControl.replay();
+  MockControl responseControl=MockControl.createControl(HttpServletResponse.class);
+  HttpServletResponse resp=(HttpServletResponse)responseControl.getMock();
+  resp.encodeRedirectURL(expectedUrlForEncoding);
+  responseControl.setReturnValue(expectedUrlForEncoding);
+  resp.sendRedirect(expectedUrlForEncoding);
+  responseControl.setVoidCallable(1);
+  responseControl.replay();
+  rv.render(map,request,resp);
+  if (exposeModelAttributes) {
+    assertTrue("queryProperties() should have been called.",rv.queryPropertiesCalled);
+  }
+  responseControl.verify();
+}

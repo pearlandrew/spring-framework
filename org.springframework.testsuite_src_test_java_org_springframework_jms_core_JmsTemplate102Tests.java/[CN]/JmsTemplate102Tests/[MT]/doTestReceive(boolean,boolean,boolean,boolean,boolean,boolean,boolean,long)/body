@@ -1,0 +1,166 @@
+{
+  JmsTemplate102 template=createTemplate();
+  template.setPubSubDomain(pubSub);
+  if (pubSub) {
+    template.setConnectionFactory(mockTopicConnectionFactory);
+  }
+ else {
+    template.setConnectionFactory(mockQueueConnectionFactory);
+  }
+  if (pubSub) {
+    topicConnectionControl.reset();
+    if (clientAcknowledge) {
+      template.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
+      mockTopicConnection.createTopicSession(useTransactedTemplate(),Session.CLIENT_ACKNOWLEDGE);
+    }
+ else {
+      template.setSessionAcknowledgeMode(Session.AUTO_ACKNOWLEDGE);
+      mockTopicConnection.createTopicSession(useTransactedTemplate(),Session.AUTO_ACKNOWLEDGE);
+    }
+    topicConnectionControl.setReturnValue(mockTopicSession);
+  }
+ else {
+    queueConnectionControl.reset();
+    if (clientAcknowledge) {
+      template.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
+      mockQueueConnection.createQueueSession(useTransactedTemplate(),Session.CLIENT_ACKNOWLEDGE);
+    }
+ else {
+      template.setSessionAcknowledgeMode(Session.AUTO_ACKNOWLEDGE);
+      mockQueueConnection.createQueueSession(useTransactedTemplate(),Session.AUTO_ACKNOWLEDGE);
+    }
+    queueConnectionControl.setReturnValue(mockQueueSession);
+  }
+  Destination dest=pubSub ? (Destination)mockTopic : (Destination)mockQueue;
+  if (useDefaultDestination) {
+    template.setDefaultDestination(dest);
+  }
+  if (noLocal) {
+    template.setPubSubNoLocal(true);
+  }
+  template.setReceiveTimeout(timeout);
+  if (pubSub) {
+    mockTopicConnection.start();
+    topicConnectionControl.setVoidCallable(1);
+    mockTopicConnection.close();
+    topicConnectionControl.setVoidCallable(1);
+  }
+ else {
+    mockQueueConnection.start();
+    queueConnectionControl.setVoidCallable(1);
+    mockQueueConnection.close();
+    queueConnectionControl.setVoidCallable(1);
+  }
+  String selectorString="selector";
+  MockControl messageConsumerControl=null;
+  MessageConsumer mockMessageConsumer=null;
+  if (pubSub) {
+    messageConsumerControl=MockControl.createControl(TopicSubscriber.class);
+    TopicSubscriber mockTopicSubscriber=(TopicSubscriber)messageConsumerControl.getMock();
+    mockMessageConsumer=mockTopicSubscriber;
+    mockTopicSession.createSubscriber(mockTopic,messageSelector ? selectorString : null,noLocal);
+    topicSessionControl.setReturnValue(mockTopicSubscriber);
+  }
+ else {
+    messageConsumerControl=MockControl.createControl(QueueReceiver.class);
+    QueueReceiver mockQueueReceiver=(QueueReceiver)messageConsumerControl.getMock();
+    mockMessageConsumer=mockQueueReceiver;
+    mockQueueSession.createReceiver(mockQueue,messageSelector ? selectorString : null);
+    queueSessionControl.setReturnValue(mockQueueReceiver);
+  }
+  if (useTransactedTemplate()) {
+    if (pubSub) {
+      mockTopicSession.commit();
+      topicSessionControl.setVoidCallable(1);
+    }
+ else {
+      mockQueueSession.commit();
+      queueSessionControl.setVoidCallable(1);
+    }
+  }
+  if (pubSub) {
+    mockTopicSession.close();
+    topicSessionControl.setVoidCallable(1);
+  }
+ else {
+    mockQueueSession.close();
+    queueSessionControl.setVoidCallable(1);
+  }
+  MockControl messageControl=MockControl.createControl(TextMessage.class);
+  TextMessage mockMessage=(TextMessage)messageControl.getMock();
+  if (testConverter) {
+    mockMessage.getText();
+    messageControl.setReturnValue("Hello World!");
+  }
+  if (!useTransactedSession() && clientAcknowledge) {
+    mockMessage.acknowledge();
+    messageControl.setVoidCallable(1);
+  }
+  if (pubSub) {
+    topicSessionControl.replay();
+    topicConnectionControl.replay();
+  }
+ else {
+    queueSessionControl.replay();
+    queueConnectionControl.replay();
+  }
+  messageControl.replay();
+  if (timeout == JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT) {
+    mockMessageConsumer.receiveNoWait();
+  }
+ else   if (timeout == JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT) {
+    mockMessageConsumer.receive();
+  }
+ else {
+    mockMessageConsumer.receive(timeout);
+  }
+  messageConsumerControl.setReturnValue(mockMessage);
+  mockMessageConsumer.close();
+  messageConsumerControl.setVoidCallable(1);
+  messageConsumerControl.replay();
+  Message message=null;
+  String textFromMessage=null;
+  if (useDefaultDestination) {
+    if (testConverter) {
+      textFromMessage=(String)(messageSelector ? template.receiveSelectedAndConvert(selectorString) : template.receiveAndConvert());
+    }
+ else {
+      message=(messageSelector ? template.receiveSelected(selectorString) : template.receive());
+    }
+  }
+ else   if (explicitDestination) {
+    if (testConverter) {
+      textFromMessage=(String)(messageSelector ? template.receiveSelectedAndConvert(dest,selectorString) : template.receiveAndConvert(dest));
+    }
+ else {
+      message=(messageSelector ? template.receiveSelected(dest,selectorString) : template.receive(dest));
+    }
+  }
+ else {
+    String destinationName=(pubSub ? "testTopic" : "testQueue");
+    if (testConverter) {
+      textFromMessage=(String)(messageSelector ? template.receiveSelectedAndConvert(destinationName,selectorString) : template.receiveAndConvert(destinationName));
+    }
+ else {
+      message=(messageSelector ? template.receiveSelected(destinationName,selectorString) : template.receive(destinationName));
+    }
+  }
+  if (pubSub) {
+    topicConnectionFactoryControl.verify();
+    topicConnectionControl.verify();
+    topicSessionControl.verify();
+  }
+ else {
+    queueConnectionFactoryControl.verify();
+    queueConnectionControl.verify();
+    queueSessionControl.verify();
+  }
+  messageConsumerControl.verify();
+  messageControl.verify();
+  if (testConverter) {
+    assertEquals("Message text should be equal","Hello World!",textFromMessage);
+  }
+ else {
+    assertEquals("Messages should refer to the same object",message,mockMessage);
+  }
+}

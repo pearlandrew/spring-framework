@@ -1,0 +1,30 @@
+{
+  MockControl connectionFactoryControl=MockControl.createControl(ConnectionFactory.class);
+  final ConnectionFactory connectionFactory=(ConnectionFactory)connectionFactoryControl.getMock();
+  MockControl connectionControl=MockControl.createControl(Connection.class);
+  Connection connection=(Connection)connectionControl.getMock();
+  MockControl interactionControl=MockControl.createControl(Interaction.class);
+  Interaction interaction=(Interaction)interactionControl.getMock();
+  MockControl inputOutputRecordControl=MockControl.createControl(Record.class);
+  Record inputOutputRecord=(Record)inputOutputRecordControl.getMock();
+  MockControl interactionSpecControl=MockControl.createControl(InteractionSpec.class);
+  InteractionSpec interactionSpec=(InteractionSpec)interactionSpecControl.getMock();
+  SimpleRecordOperation query=new SimpleRecordOperation(connectionFactory,interactionSpec);
+  connectionFactory.getConnection();
+  connectionFactoryControl.setReturnValue(connection);
+  connection.createInteraction();
+  connectionControl.setReturnValue(interaction);
+  interaction.execute(interactionSpec,inputOutputRecord,inputOutputRecord);
+  interactionControl.setReturnValue(true,1);
+  interaction.close();
+  interactionControl.setVoidCallable(1);
+  connection.close();
+  connectionControl.setVoidCallable(1);
+  connectionFactoryControl.replay();
+  connectionControl.replay();
+  interactionControl.replay();
+  query.execute(inputOutputRecord,inputOutputRecord);
+  connectionFactoryControl.verify();
+  connectionControl.verify();
+  interactionControl.verify();
+}

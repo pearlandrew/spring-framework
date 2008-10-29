@@ -1,0 +1,29 @@
+{
+  ThrowsAdviceInterceptorTests.MyThrowsHandler th=new ThrowsAdviceInterceptorTests.MyThrowsHandler();
+  ThrowsAdviceInterceptorTests.Echo target=new ThrowsAdviceInterceptorTests.Echo();
+  target.setA(16);
+  ProxyFactory pf=new ProxyFactory(target);
+  pf.addAdvice(new NopInterceptor());
+  pf.addAdvice(th);
+  ThrowsAdviceInterceptorTests.IEcho proxied=(ThrowsAdviceInterceptorTests.IEcho)createProxy(pf);
+  assertEquals(0,th.getCalls());
+  assertEquals(target.getA(),proxied.getA());
+  assertEquals(0,th.getCalls());
+  Exception ex=new Exception();
+  try {
+    proxied.echoException(1,ex);
+    fail();
+  }
+ catch (  Exception caught) {
+    assertEquals(ex,caught);
+  }
+  ex=new TransactionRequiredException();
+  try {
+    proxied.echoException(1,ex);
+    fail();
+  }
+ catch (  TransactionRequiredException caught) {
+    assertEquals(ex,caught);
+  }
+  assertEquals(1,th.getCalls("remoteException"));
+}

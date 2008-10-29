@@ -1,0 +1,17 @@
+{
+  SQLException sqlEx=new SQLException("argh","27");
+  final GenericJDBCException gjex=new GenericJDBCException("mymsg",sqlEx);
+  try {
+    createTemplate().execute(new HibernateCallback(){
+      public Object doInHibernate(      org.hibernate.Session session) throws HibernateException {
+        throw gjex;
+      }
+    }
+);
+    fail("Should have thrown DataIntegrityViolationException");
+  }
+ catch (  DataIntegrityViolationException ex) {
+    assertEquals(sqlEx,ex.getCause());
+    assertTrue(ex.getMessage().indexOf("mymsg") != -1);
+  }
+}

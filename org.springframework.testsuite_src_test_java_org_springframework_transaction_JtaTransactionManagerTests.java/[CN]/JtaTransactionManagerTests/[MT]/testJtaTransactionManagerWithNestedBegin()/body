@@ -1,0 +1,20 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_ACTIVE,3);
+  ut.begin();
+  utControl.setVoidCallable(1);
+  ut.commit();
+  utControl.setVoidCallable(1);
+  utControl.replay();
+  JtaTransactionManager ptm=newJtaTransactionManager(ut);
+  TransactionTemplate tt=new TransactionTemplate(ptm);
+  tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+  tt.execute(new TransactionCallbackWithoutResult(){
+    protected void doInTransactionWithoutResult(    TransactionStatus status){
+    }
+  }
+);
+  utControl.verify();
+}

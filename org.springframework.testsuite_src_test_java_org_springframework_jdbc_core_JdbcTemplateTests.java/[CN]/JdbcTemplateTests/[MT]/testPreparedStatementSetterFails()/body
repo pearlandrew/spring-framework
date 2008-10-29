@@ -1,0 +1,31 @@
+{
+  final String sql="UPDATE FOO SET NAME=? WHERE ID = 1";
+  final String name="Gary";
+  SQLException sex=new SQLException();
+  MockControl ctrlPreparedStatement=MockControl.createControl(PreparedStatement.class);
+  PreparedStatement mockPreparedStatement=(PreparedStatement)ctrlPreparedStatement.getMock();
+  mockPreparedStatement.setString(1,name);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeUpdate();
+  ctrlPreparedStatement.setThrowable(sex);
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(sql);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  ctrlPreparedStatement.replay();
+  replay();
+  PreparedStatementSetter pss=new PreparedStatementSetter(){
+    public void setValues(    PreparedStatement ps) throws SQLException {
+      ps.setString(1,name);
+    }
+  }
+;
+  try {
+    new JdbcTemplate(mockDataSource).update(sql,pss);
+    fail("Should have failed with SQLException");
+  }
+ catch (  DataAccessException ex) {
+    assertTrue("root cause was preserved",ex.getCause() == sex);
+  }
+  ctrlPreparedStatement.verify();
+}

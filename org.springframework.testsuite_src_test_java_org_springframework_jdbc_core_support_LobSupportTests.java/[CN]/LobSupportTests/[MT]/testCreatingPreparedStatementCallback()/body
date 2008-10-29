@@ -1,0 +1,31 @@
+{
+  MockControl lobHandlerControl=MockControl.createControl(LobHandler.class);
+  LobHandler handler=(LobHandler)lobHandlerControl.getMock();
+  MockControl lobCreatorControl=MockControl.createControl(LobCreator.class);
+  LobCreator creator=(LobCreator)lobCreatorControl.getMock();
+  MockControl psControl=MockControl.createControl(PreparedStatement.class);
+  PreparedStatement ps=(PreparedStatement)psControl.getMock();
+  handler.getLobCreator();
+  lobHandlerControl.setReturnValue(creator);
+  ps.executeUpdate();
+  psControl.setReturnValue(3);
+  creator.close();
+  lobHandlerControl.replay();
+  lobCreatorControl.replay();
+  psControl.replay();
+class SetValuesCalled {
+    boolean b=false;
+  }
+  final SetValuesCalled svc=new SetValuesCalled();
+  AbstractLobCreatingPreparedStatementCallback psc=new AbstractLobCreatingPreparedStatementCallback(handler){
+    protected void setValues(    PreparedStatement ps,    LobCreator lobCreator) throws SQLException, DataAccessException {
+      svc.b=true;
+    }
+  }
+;
+  assertEquals(new Integer(3),psc.doInPreparedStatement(ps));
+  lobHandlerControl.verify();
+  lobCreatorControl.verify();
+  psControl.verify();
+  assertTrue(svc.b);
+}

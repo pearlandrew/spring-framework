@@ -1,0 +1,47 @@
+{
+  MockControl ctrlResultSet;
+  ResultSet mockResultSet;
+  MockControl ctrlCallable;
+  CallableStatement mockCallable;
+  ctrlResultSet=MockControl.createControl(ResultSet.class);
+  mockResultSet=(ResultSet)ctrlResultSet.getMock();
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  ctrlCallable=MockControl.createControl(CallableStatement.class);
+  mockCallable=(CallableStatement)ctrlCallable.getMock();
+  mockCallable.execute();
+  ctrlCallable.setReturnValue(true);
+  mockCallable.getUpdateCount();
+  ctrlCallable.setReturnValue(-1);
+  mockCallable.getResultSet();
+  ctrlCallable.setReturnValue(mockResultSet);
+  mockCallable.close();
+  ctrlCallable.setVoidCallable();
+  mockConnection.prepareCall("my query");
+  ctrlConnection.setReturnValue(mockCallable);
+  ctrlResultSet.replay();
+  ctrlCallable.replay();
+  replay();
+  List params=new ArrayList();
+  params.add(new SqlReturnResultSet("",new RowCallbackHandler(){
+    public void processRow(    ResultSet rs){
+      throw new InvalidDataAccessApiUsageException("");
+    }
+  }
+));
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  try {
+    template.call(new CallableStatementCreator(){
+      public CallableStatement createCallableStatement(      Connection conn) throws SQLException {
+        return conn.prepareCall("my query");
+      }
+    }
+,params);
+  }
+ catch (  InvalidDataAccessApiUsageException idaauex) {
+  }
+  ctrlResultSet.verify();
+  ctrlCallable.verify();
+}

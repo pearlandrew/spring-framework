@@ -1,0 +1,61 @@
+{
+  final String templateName="test.vm";
+  MockControl wmc=MockControl.createControl(WebApplicationContext.class);
+  WebApplicationContext wac=(WebApplicationContext)wmc.getMock();
+  wac.getParentBeanFactory();
+  wmc.setReturnValue(null);
+  wac.getServletContext();
+  wmc.setReturnValue(new MockServletContext());
+  final Template expectedTemplate=new Template();
+  VelocityConfig vc=new VelocityConfig(){
+    public VelocityEngine getVelocityEngine(){
+      return new TestVelocityEngine(templateName,expectedTemplate);
+    }
+  }
+;
+  wac.getBeansOfType(VelocityConfig.class,true,false);
+  Map configurers=new HashMap();
+  configurers.put("velocityConfigurer",vc);
+  wmc.setReturnValue(configurers);
+  wmc.replay();
+  MockControl reqControl=MockControl.createControl(HttpServletRequest.class);
+  HttpServletRequest req=(HttpServletRequest)reqControl.getMock();
+  req.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
+  reqControl.setReturnValue(new AcceptHeaderLocaleResolver());
+  req.getLocale();
+  reqControl.setReturnValue(Locale.CANADA);
+  reqControl.replay();
+  final HttpServletResponse expectedResponse=new MockHttpServletResponse();
+  VelocityView vv=new VelocityView(){
+    protected void mergeTemplate(    Template template,    Context context,    HttpServletResponse response) throws Exception {
+      assertTrue(template == expectedTemplate);
+      assertTrue(response == expectedResponse);
+      assertEquals("myValue",context.get("myHelper"));
+      assertTrue(context.get("velocityFormatter") instanceof VelocityFormatter);
+      assertTrue(context.get("math") instanceof MathTool);
+      assertTrue(context.get("dateTool") instanceof DateTool);
+      DateTool dateTool=(DateTool)context.get("dateTool");
+      assertTrue(dateTool.getLocale().equals(Locale.CANADA));
+      assertTrue(context.get("numberTool") instanceof NumberTool);
+      NumberTool numberTool=(NumberTool)context.get("numberTool");
+      assertTrue(numberTool.getLocale().equals(Locale.CANADA));
+    }
+    protected void exposeHelpers(    Map model,    HttpServletRequest request) throws Exception {
+      model.put("myHelper","myValue");
+    }
+  }
+;
+  vv.setUrl(templateName);
+  vv.setApplicationContext(wac);
+  Properties toolAttributes=new Properties();
+  toolAttributes.setProperty("math",MathTool.class.getName());
+  vv.setToolAttributes(toolAttributes);
+  vv.setVelocityFormatterAttribute("velocityFormatter");
+  vv.setDateToolAttribute("dateTool");
+  vv.setNumberToolAttribute("numberTool");
+  vv.setExposeSpringMacroHelpers(false);
+  vv.render(new HashMap(),req,expectedResponse);
+  wmc.verify();
+  reqControl.verify();
+  assertEquals(AbstractView.DEFAULT_CONTENT_TYPE,expectedResponse.getContentType());
+}

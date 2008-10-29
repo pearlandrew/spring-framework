@@ -1,0 +1,19 @@
+{
+  MockControl queryControl=MockControl.createControl(Query.class);
+  Query query=(Query)queryControl.getMock();
+  pmf.getPersistenceManager();
+  pmfControl.setReturnValue(pm);
+  pm.newQuery("single string query");
+  pmControl.setReturnValue(query);
+  Collection coll=new HashSet();
+  query.execute();
+  queryControl.setReturnValue(coll);
+  pm.close();
+  pmControl.setVoidCallable(1);
+  pmfControl.replay();
+  pmControl.replay();
+  queryControl.replay();
+  JdoTemplate jt=new JdoTemplate(pmf);
+  assertEquals(coll,jt.find("single string query"));
+  queryControl.verify();
+}

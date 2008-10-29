@@ -1,0 +1,23 @@
+{
+  PageContext ctx=new MockPageContext();
+  ctx.setAttribute("bla","blie");
+  String expr="text${bla}text${bla}text";
+  String s=ExpressionEvaluationUtils.evaluateString("test",expr,ctx);
+  assertEquals("textblietextblietext",s);
+  expr="${bla}text${bla}text";
+  s=ExpressionEvaluationUtils.evaluateString("test",expr,ctx);
+  assertEquals("blietextblietext",s);
+  expr="${bla}text${bla}";
+  s=ExpressionEvaluationUtils.evaluateString("test",expr,ctx);
+  assertEquals("blietextblie",s);
+  expr="${bla}text${bla}";
+  s=ExpressionEvaluationUtils.evaluateString("test",expr,ctx);
+  assertEquals("blietextblie",s);
+  try {
+    expr="${bla}text${bla";
+    ExpressionEvaluationUtils.evaluateString("test",expr,ctx);
+    fail("Should have thrown JspException");
+  }
+ catch (  JspException ex) {
+  }
+}

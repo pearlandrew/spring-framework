@@ -1,0 +1,74 @@
+{
+  MockControl ctrlResultSet;
+  ResultSet mockResultSet;
+  MockControl ctrlStatement;
+  Statement mockStatement;
+  MockControl ctrlResultSet2;
+  ResultSet mockResultSet2;
+  MockControl ctrlPreparedStatement;
+  PreparedStatement mockPreparedStatement;
+  ctrlResultSet=MockControl.createControl(ResultSet.class);
+  mockResultSet=(ResultSet)ctrlResultSet.getMock();
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  ctrlStatement=MockControl.createControl(Statement.class);
+  mockStatement=(Statement)ctrlStatement.getMock();
+  mockStatement.executeQuery("my query");
+  ctrlStatement.setReturnValue(mockResultSet);
+  mockStatement.close();
+  ctrlStatement.setVoidCallable();
+  ctrlResultSet2=MockControl.createControl(ResultSet.class);
+  mockResultSet2=(ResultSet)ctrlResultSet2.getMock();
+  mockResultSet2.close();
+  ctrlResultSet2.setVoidCallable();
+  ctrlPreparedStatement=MockControl.createControl(PreparedStatement.class);
+  mockPreparedStatement=(PreparedStatement)ctrlPreparedStatement.getMock();
+  mockPreparedStatement.executeQuery();
+  ctrlPreparedStatement.setReturnValue(mockResultSet2);
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.createStatement();
+  ctrlConnection.setReturnValue(mockStatement);
+  mockConnection.prepareStatement("my query");
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  ctrlResultSet.replay();
+  ctrlStatement.replay();
+  ctrlResultSet2.replay();
+  ctrlPreparedStatement.replay();
+  replay();
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  try {
+    template.query("my query",new ResultSetExtractor(){
+      public Object extractData(      ResultSet rs){
+        throw new InvalidDataAccessApiUsageException("");
+      }
+    }
+);
+    fail("Should have thrown InvalidDataAccessApiUsageException");
+  }
+ catch (  InvalidDataAccessApiUsageException idaauex) {
+  }
+  try {
+    template.query(new PreparedStatementCreator(){
+      public PreparedStatement createPreparedStatement(      Connection con) throws SQLException {
+        return con.prepareStatement("my query");
+      }
+      public String getSql(){
+        return null;
+      }
+    }
+,new ResultSetExtractor(){
+      public Object extractData(      ResultSet rs2){
+        throw new InvalidDataAccessApiUsageException("");
+      }
+    }
+);
+    fail("Should have thrown InvalidDataAccessApiUsageException");
+  }
+ catch (  InvalidDataAccessApiUsageException idaauex) {
+  }
+  ctrlResultSet.verify();
+  ctrlStatement.verify();
+  ctrlResultSet2.verify();
+  ctrlPreparedStatement.verify();
+}

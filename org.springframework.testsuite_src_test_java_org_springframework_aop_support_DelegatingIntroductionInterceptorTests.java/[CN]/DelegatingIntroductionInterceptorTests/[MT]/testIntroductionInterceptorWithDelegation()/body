@@ -1,0 +1,15 @@
+{
+  TestBean raw=new TestBean();
+  assertTrue(!(raw instanceof TimeStamped));
+  ProxyFactory factory=new ProxyFactory(raw);
+  MockControl tsControl=MockControl.createControl(TimeStamped.class);
+  TimeStamped ts=(TimeStamped)tsControl.getMock();
+  ts.getTimeStamp();
+  long timestamp=111L;
+  tsControl.setReturnValue(timestamp,1);
+  tsControl.replay();
+  factory.addAdvisor(0,new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts)));
+  TimeStamped tsp=(TimeStamped)factory.getProxy();
+  assertTrue(tsp.getTimeStamp() == timestamp);
+  tsControl.verify();
+}

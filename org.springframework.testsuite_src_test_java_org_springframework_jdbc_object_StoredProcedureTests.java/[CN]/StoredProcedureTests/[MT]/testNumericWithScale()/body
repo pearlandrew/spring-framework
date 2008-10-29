@@ -1,0 +1,24 @@
+{
+  mockCallable.getConnection();
+  ctrlCallable.setDefaultReturnValue(mockConnection);
+  mockCallable.registerOutParameter(1,Types.DECIMAL,4);
+  ctrlCallable.setVoidCallable();
+  mockCallable.execute();
+  ctrlCallable.setReturnValue(false);
+  mockCallable.getUpdateCount();
+  ctrlCallable.setReturnValue(-1);
+  mockCallable.getObject(1);
+  ctrlCallable.setReturnValue(new BigDecimal("12345.6789"));
+  if (debugEnabled) {
+    mockCallable.getWarnings();
+    ctrlCallable.setReturnValue(null);
+  }
+  mockCallable.close();
+  ctrlCallable.setVoidCallable();
+  mockConnection.prepareCall("{call " + NumericWithScaleStoredProcedure.SQL + "(?)}");
+  ctrlConnection.setReturnValue(mockCallable);
+  replay();
+  NumericWithScaleStoredProcedure nwssp=new NumericWithScaleStoredProcedure(mockDataSource);
+  Map out=nwssp.executeTest();
+  assertEquals(new BigDecimal("12345.6789"),out.get("out"));
+}

@@ -1,0 +1,55 @@
+{
+  TestBean target=new TestBean("myname",99);
+  final JmsInvokerServiceExporter exporter=new JmsInvokerServiceExporter();
+  exporter.setServiceInterface(ITestBean.class);
+  exporter.setService(target);
+  exporter.setMessageConverter(new MockSimpleMessageConverter());
+  exporter.afterPropertiesSet();
+  JmsInvokerProxyFactoryBean pfb=new JmsInvokerProxyFactoryBean(){
+    protected Message doExecuteRequest(    Session session,    Queue queue,    Message requestMessage) throws JMSException {
+      MockControl exporterSessionControl=MockControl.createControl(Session.class);
+      Session mockExporterSession=(Session)exporterSessionControl.getMock();
+      ResponseStoringProducer mockProducer=new ResponseStoringProducer();
+      mockExporterSession.createProducer(requestMessage.getJMSReplyTo());
+      exporterSessionControl.setReturnValue(mockProducer);
+      exporterSessionControl.replay();
+      exporter.onMessage(requestMessage,mockExporterSession);
+      exporterSessionControl.verify();
+      assertTrue(mockProducer.closed);
+      return mockProducer.response;
+    }
+  }
+;
+  pfb.setServiceInterface(ITestBean.class);
+  pfb.setConnectionFactory(this.mockConnectionFactory);
+  if (dynamicQueue) {
+    pfb.setQueueName("myQueue");
+  }
+ else {
+    pfb.setQueue(this.mockQueue);
+  }
+  pfb.setMessageConverter(new MockSimpleMessageConverter());
+  pfb.afterPropertiesSet();
+  ITestBean proxy=(ITestBean)pfb.getObject();
+  assertEquals("myname",proxy.getName());
+  assertEquals(99,proxy.getAge());
+  proxy.setAge(50);
+  assertEquals(50,proxy.getAge());
+  proxy.setStringArray(new String[]{"str1","str2"});
+  assertTrue(Arrays.equals(new String[]{"str1","str2"},proxy.getStringArray()));
+  try {
+    proxy.exceptional(new IllegalStateException());
+    fail("Should have thrown IllegalStateException");
+  }
+ catch (  IllegalStateException ex) {
+  }
+  try {
+    proxy.exceptional(new IllegalAccessException());
+    fail("Should have thrown IllegalAccessException");
+  }
+ catch (  IllegalAccessException ex) {
+  }
+  connectionFactoryControl.verify();
+  connectionControl.verify();
+  sessionControl.verify();
+}

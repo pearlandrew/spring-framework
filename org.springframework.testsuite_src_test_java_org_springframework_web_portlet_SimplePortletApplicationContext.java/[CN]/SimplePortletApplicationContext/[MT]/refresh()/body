@@ -1,0 +1,29 @@
+{
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  registerSingleton("controller1",TestFormController.class,pvs);
+  pvs=new MutablePropertyValues();
+  pvs.addPropertyValue("bindOnNewForm","true");
+  registerSingleton("controller2",TestFormController.class,pvs);
+  pvs=new MutablePropertyValues();
+  pvs.addPropertyValue("requireSession","true");
+  pvs.addPropertyValue("sessionForm","true");
+  pvs.addPropertyValue("bindOnNewForm","true");
+  registerSingleton("controller3",TestFormController.class,pvs);
+  pvs=new MutablePropertyValues();
+  pvs.addPropertyValue("requireSession","true");
+  pvs.addPropertyValue("sessionForm","true");
+  pvs.addPropertyValue("bindOnNewForm","false");
+  registerSingleton("controller4",TestFormController.class,pvs);
+  pvs=new MutablePropertyValues();
+  Map parameterMap=new ManagedMap();
+  parameterMap.put("form",new RuntimeBeanReference("controller1"));
+  parameterMap.put("form-bind",new RuntimeBeanReference("controller2"));
+  parameterMap.put("form-session-bind",new RuntimeBeanReference("controller3"));
+  parameterMap.put("form-session-nobind",new RuntimeBeanReference("controller4"));
+  pvs.addPropertyValue(new PropertyValue("parameterMap",parameterMap));
+  registerSingleton("handlerMapping",ParameterHandlerMapping.class,pvs);
+  super.refresh();
+  TestFormController controller1=(TestFormController)getBean("controller1");
+  this.renderCommandSessionAttributeName=controller1.getRenderCommandName();
+  this.formSessionAttributeName=controller1.getFormSessionName();
+}

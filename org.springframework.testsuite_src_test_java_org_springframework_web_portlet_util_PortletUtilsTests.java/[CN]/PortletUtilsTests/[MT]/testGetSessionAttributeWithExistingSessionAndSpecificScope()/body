@@ -1,0 +1,17 @@
+{
+  MockControl mockSession=MockControl.createControl(PortletSession.class);
+  PortletSession session=(PortletSession)mockSession.getMock();
+  MockControl mockRequest=MockControl.createControl(PortletRequest.class);
+  PortletRequest request=(PortletRequest)mockRequest.getMock();
+  request.getPortletSession(false);
+  mockRequest.setReturnValue(session);
+  session.getAttribute("foo",PortletSession.APPLICATION_SCOPE);
+  mockSession.setReturnValue("foo");
+  mockRequest.replay();
+  mockSession.replay();
+  Object sessionAttribute=PortletUtils.getSessionAttribute(request,"foo",PortletSession.APPLICATION_SCOPE);
+  assertNotNull("Must not return null if session attribute exists (and Session exists)",sessionAttribute);
+  assertEquals("foo",sessionAttribute);
+  mockRequest.verify();
+  mockSession.verify();
+}

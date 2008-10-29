@@ -1,0 +1,129 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  MockControl tmControl=MockControl.createControl(TransactionManager.class);
+  TransactionManager tm=(TransactionManager)tmControl.getMock();
+  MockControl tx1Control=MockControl.createControl(javax.transaction.Transaction.class);
+  javax.transaction.Transaction tx1=(javax.transaction.Transaction)tx1Control.getMock();
+  MockControl sfControl=MockControl.createControl(SessionFactoryImplementor.class);
+  final SessionFactoryImplementor sf=(SessionFactoryImplementor)sfControl.getMock();
+  MockControl session1Control=MockControl.createControl(Session.class);
+  final Session session1=(Session)session1Control.getMock();
+  MockControl session2Control=MockControl.createControl(Session.class);
+  final Session session2=(Session)session2Control.getMock();
+  MockJtaTransaction transaction1=new MockJtaTransaction();
+  MockJtaTransaction transaction2=new MockJtaTransaction();
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_ACTIVE,3);
+  ut.begin();
+  utControl.setVoidCallable(2);
+  tm.getTransaction();
+  tmControl.setReturnValue(transaction1,1);
+  tm.suspend();
+  tmControl.setReturnValue(tx1,1);
+  tm.getTransaction();
+  tmControl.setReturnValue(transaction2,1);
+  tm.resume(tx1);
+  tmControl.setVoidCallable(1);
+  if (rollback) {
+    ut.rollback();
+  }
+ else {
+    ut.getStatus();
+    utControl.setReturnValue(Status.STATUS_ACTIVE,2);
+    ut.commit();
+  }
+  utControl.setVoidCallable(2);
+  sf.getTransactionManager();
+  sfControl.setReturnValue(tm,2);
+  sf.openSession();
+  sfControl.setReturnValue(session1,1);
+  sf.openSession();
+  sfControl.setReturnValue(session2,1);
+  session1.isOpen();
+  session1Control.setReturnValue(true,1);
+  session2.isOpen();
+  session2Control.setReturnValue(true,1);
+  session2.getFlushMode();
+  session2Control.setReturnValue(FlushMode.AUTO,1);
+  if (!rollback) {
+    session1.getFlushMode();
+    session1Control.setReturnValue(FlushMode.AUTO,1);
+    session2.getFlushMode();
+    session2Control.setReturnValue(FlushMode.AUTO,1);
+    session1.flush();
+    session1Control.setVoidCallable(1);
+    session2.flush();
+    session2Control.setVoidCallable(2);
+  }
+  session1.disconnect();
+  session1Control.setReturnValue(null,1);
+  session1.close();
+  session1Control.setReturnValue(null,1);
+  session2.close();
+  session2Control.setReturnValue(null,1);
+  utControl.replay();
+  tmControl.replay();
+  sfControl.replay();
+  session1Control.replay();
+  session2Control.replay();
+  JtaTransactionManager ptm=new JtaTransactionManager();
+  ptm.setUserTransaction(ut);
+  ptm.setTransactionManager(tm);
+  final TransactionTemplate tt=new TransactionTemplate(ptm);
+  tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+  assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
+  try {
+    tt.execute(new TransactionCallback(){
+      public Object doInTransaction(      TransactionStatus status){
+        org.hibernate.Session outerSession=SessionFactoryUtils.getSession(sf,false);
+        assertSame(session1,outerSession);
+        SessionHolder holder=(SessionHolder)TransactionSynchronizationManager.getResource(sf);
+        assertTrue("Has thread session",holder != null);
+        try {
+          tt.execute(new TransactionCallback(){
+            public Object doInTransaction(            TransactionStatus status){
+              org.hibernate.Session innerSession=SessionFactoryUtils.getSession(sf,false);
+              assertSame(session2,innerSession);
+              HibernateTemplate ht=new HibernateTemplate(sf);
+              ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
+              return ht.executeFind(new HibernateCallback(){
+                public Object doInHibernate(                org.hibernate.Session innerSession){
+                  if (rollback) {
+                    throw new HibernateException("");
+                  }
+                  return null;
+                }
+              }
+);
+            }
+          }
+);
+          return null;
+        }
+  finally {
+          assertTrue("Same thread session as before",outerSession == SessionFactoryUtils.getSession(sf,false));
+        }
+      }
+    }
+);
+    if (rollback) {
+      fail("Should have thrown DataAccessException");
+    }
+  }
+ catch (  DataAccessException ex) {
+    if (!rollback) {
+      throw ex;
+    }
+  }
+ finally {
+    assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
+  }
+  utControl.verify();
+  tmControl.verify();
+  sfControl.verify();
+  session1Control.verify();
+  session2Control.verify();
+}

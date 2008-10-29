@@ -1,0 +1,58 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
+  ut.begin();
+  utControl.setVoidCallable(1);
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_ACTIVE,2);
+  ut.commit();
+  utControl.setVoidCallable(1);
+  utControl.replay();
+  pmf.getPersistenceManager();
+  pmfControl.setReturnValue(pm,1);
+  pm.flush();
+  pmControl.setVoidCallable(2);
+  pm.close();
+  pmControl.setVoidCallable(1);
+  pmfControl.replay();
+  pmControl.replay();
+  JtaTransactionManager ptm=new JtaTransactionManager(ut);
+  TransactionTemplate tt=new TransactionTemplate(ptm);
+  final List l=new ArrayList();
+  l.add("test");
+  assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+  assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  Object result=tt.execute(new TransactionCallback(){
+    public Object doInTransaction(    TransactionStatus status){
+      assertTrue("JTA synchronizations active",TransactionSynchronizationManager.isSynchronizationActive());
+      assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+      JdoTemplate jt=new JdoTemplate(pmf);
+      jt.execute(new JdoCallback(){
+        public Object doInJdo(        PersistenceManager pm2){
+          assertTrue("Has thread pm",TransactionSynchronizationManager.hasResource(pmf));
+          pm2.flush();
+          return l;
+        }
+      }
+);
+      Object result=jt.execute(new JdoCallback(){
+        public Object doInJdo(        PersistenceManager pm2){
+          assertTrue("Has thread pm",TransactionSynchronizationManager.hasResource(pmf));
+          pm2.flush();
+          return l;
+        }
+      }
+);
+      assertTrue("Has thread pm",TransactionSynchronizationManager.hasResource(pmf));
+      return result;
+    }
+  }
+);
+  assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+  assertTrue("Correct result list",result == l);
+  assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+  assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  utControl.verify();
+}

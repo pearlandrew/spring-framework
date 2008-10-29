@@ -1,0 +1,27 @@
+{
+  final String errorCode="someCode";
+  final String defaultMessage="validation error!";
+  TestController tc=new TestController();
+  tc.setValidator(new Validator(){
+    public boolean supports(    Class c){
+      return TestBean.class.isAssignableFrom(c);
+    }
+    public void validate(    Object o,    Errors e){
+      ValidationUtils.rejectIfEmpty(e,"name",errorCode,defaultMessage);
+    }
+  }
+);
+  MockRenderRequest request=new MockRenderRequest();
+  int age=32;
+  request.setParameter("age","" + age);
+  MockRenderResponse response=new MockRenderResponse();
+  ModelAndView mav=tc.handleRenderRequest(request,response);
+  TestBean command=(TestBean)mav.getModel().get(tc.getCommandName());
+  assertNull("name should be null",command.getName());
+  assertEquals(age,command.getAge());
+  BindException errors=(BindException)mav.getModel().get(ERRORS_KEY);
+  assertEquals("There should be 1 error",1,errors.getErrorCount());
+  FieldError error=errors.getFieldError("name");
+  assertEquals(error.getCode(),errorCode);
+  assertEquals(error.getDefaultMessage(),defaultMessage);
+}

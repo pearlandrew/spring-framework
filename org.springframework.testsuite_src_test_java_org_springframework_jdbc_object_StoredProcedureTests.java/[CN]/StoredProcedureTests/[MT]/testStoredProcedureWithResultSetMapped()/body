@@ -1,0 +1,43 @@
+{
+  MockControl ctrlResultSet=MockControl.createControl(ResultSet.class);
+  ResultSet mockResultSet=(ResultSet)ctrlResultSet.getMock();
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getString(2);
+  ctrlResultSet.setReturnValue("Foo");
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getString(2);
+  ctrlResultSet.setReturnValue("Bar");
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockCallable.execute();
+  ctrlCallable.setReturnValue(true);
+  mockCallable.getUpdateCount();
+  ctrlCallable.setReturnValue(-1);
+  mockCallable.getResultSet();
+  ctrlCallable.setReturnValue(mockResultSet);
+  mockCallable.getMoreResults();
+  ctrlCallable.setReturnValue(false);
+  mockCallable.getUpdateCount();
+  ctrlCallable.setReturnValue(-1);
+  if (debugEnabled) {
+    mockCallable.getWarnings();
+    ctrlCallable.setReturnValue(null);
+  }
+  mockCallable.close();
+  ctrlCallable.setVoidCallable();
+  mockConnection.prepareCall("{call " + StoredProcedureWithResultSetMapped.SQL + "()}");
+  ctrlConnection.setReturnValue(mockCallable);
+  replay();
+  ctrlResultSet.replay();
+  StoredProcedureWithResultSetMapped sproc=new StoredProcedureWithResultSetMapped(mockDataSource);
+  Map res=sproc.execute();
+  ctrlResultSet.verify();
+  List rs=(List)res.get("rs");
+  assertEquals(2,rs.size());
+  assertEquals("Foo",rs.get(0));
+  assertEquals("Bar",rs.get(1));
+}

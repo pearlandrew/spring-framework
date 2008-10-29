@@ -1,0 +1,36 @@
+{
+  StaticApplicationContext ctx=new StaticApplicationContext();
+  ctx.registerSingleton("testService",TestService.class,new MutablePropertyValues());
+  ctx.registerSingleton("testServiceInstance2",TestService.class,new MutablePropertyValues());
+  MutablePropertyValues mpv=new MutablePropertyValues();
+  mpv.addPropertyValue(new PropertyValue("serviceLocatorInterface",TestServiceLocator.class));
+  ctx.registerSingleton("factory",ServiceLocatorFactoryBean.class,mpv);
+  mpv=new MutablePropertyValues();
+  mpv.addPropertyValue(new PropertyValue("serviceLocatorInterface",TestServiceLocator2.class));
+  ctx.registerSingleton("factory2",ServiceLocatorFactoryBean.class,mpv);
+  mpv=new MutablePropertyValues();
+  mpv.addPropertyValue(new PropertyValue("serviceLocatorInterface",TestService2Locator.class));
+  ctx.registerSingleton("factory3",ServiceLocatorFactoryBean.class,mpv);
+  ctx.refresh();
+  final TestServiceLocator factory=(TestServiceLocator)ctx.getBean("factory");
+  new AssertThrows(NoSuchBeanDefinitionException.class,"Must fail on more than one matching type"){
+    public void test() throws Exception {
+      factory.getTestService();
+    }
+  }
+.runTest();
+  final TestServiceLocator2 factory2=(TestServiceLocator2)ctx.getBean("factory2");
+  new AssertThrows(NoSuchBeanDefinitionException.class,"Must fail on more than one matching type"){
+    public void test() throws Exception {
+      factory2.getTestService(null);
+    }
+  }
+.runTest();
+  final TestService2Locator factory3=(TestService2Locator)ctx.getBean("factory3");
+  new AssertThrows(NoSuchBeanDefinitionException.class,"Must fail on no matching types"){
+    public void test() throws Exception {
+      factory3.getTestService();
+    }
+  }
+.runTest();
+}

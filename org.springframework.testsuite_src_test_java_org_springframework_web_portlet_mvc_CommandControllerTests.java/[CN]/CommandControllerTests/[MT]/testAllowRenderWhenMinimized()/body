@@ -1,0 +1,14 @@
+{
+  TestController tc=new TestController();
+  tc.setRenderWhenMinimized(true);
+  MockRenderRequest request=new MockRenderRequest();
+  request.setWindowState(WindowState.MINIMIZED);
+  request.setContextPath("test");
+  MockRenderResponse response=new MockRenderResponse();
+  ModelAndView mav=tc.handleRenderRequest(request,response);
+  assertNotNull("ModelAndView should not be null",mav);
+  assertEquals("test-view",mav.getViewName());
+  assertNotNull(mav.getModel().get(tc.getCommandName()));
+  BindException errors=(BindException)mav.getModel().get(ERRORS_KEY);
+  assertEquals("There should be no errors",0,errors.getErrorCount());
+}

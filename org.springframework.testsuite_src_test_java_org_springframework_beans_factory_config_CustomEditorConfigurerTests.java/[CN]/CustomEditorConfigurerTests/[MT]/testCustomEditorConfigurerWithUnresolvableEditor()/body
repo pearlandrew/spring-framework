@@ -1,0 +1,15 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  CustomEditorConfigurer cec=new CustomEditorConfigurer();
+  Map editors=new HashMap();
+  editors.put(Date.class,"MyNonExistingEditor");
+  editors.put("MyNonExistingType","MyNonExistingEditor");
+  cec.setCustomEditors(editors);
+  try {
+    cec.postProcessBeanFactory(bf);
+    fail("Should have thrown FatalBeanException");
+  }
+ catch (  FatalBeanException ex) {
+    assertTrue(ex.getCause() instanceof ClassNotFoundException);
+  }
+}

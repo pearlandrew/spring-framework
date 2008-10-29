@@ -1,0 +1,28 @@
+{
+  MockControl mockMessage=MockControl.createControl(TextMessage.class);
+  final TextMessage message=(TextMessage)mockMessage.getMock();
+  mockMessage.replay();
+  MockControl mockSession=MockControl.createControl(QueueSession.class);
+  final QueueSession session=(QueueSession)mockSession.getMock();
+  mockSession.replay();
+  MockControl mockDelegate=MockControl.createControl(ResponsiveMessageDelegate.class);
+  ResponsiveMessageDelegate delegate=(ResponsiveMessageDelegate)mockDelegate.getMock();
+  delegate.handleMessage(message);
+  mockDelegate.setThrowable(new IllegalArgumentException("Dow!"));
+  mockDelegate.replay();
+  final MessageListenerAdapter adapter=new MessageListenerAdapter(delegate){
+    protected Object extractMessage(    Message message){
+      return message;
+    }
+  }
+;
+  new AssertThrows(ListenerExecutionFailedException.class){
+    public void test() throws Exception {
+      adapter.onMessage(message,session);
+    }
+  }
+.runTest();
+  mockDelegate.verify();
+  mockMessage.verify();
+  mockSession.verify();
+}

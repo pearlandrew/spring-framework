@@ -1,0 +1,29 @@
+{
+  conControl=MockControl.createControl(Connection.class);
+  con=(Connection)conControl.getMock();
+  con.isClosed();
+  conControl.setDefaultReturnValue(false);
+  rsControl=MockControl.createControl(ResultSet.class);
+  rs=(ResultSet)rsControl.getMock();
+  rs.next();
+  rsControl.setReturnValue(true,1);
+  rs.getString(1);
+  rsControl.setReturnValue("tb1",1);
+  rs.getInt(2);
+  rsControl.setReturnValue(1,1);
+  rs.next();
+  rsControl.setReturnValue(true,1);
+  rs.getString(1);
+  rsControl.setReturnValue("tb2",1);
+  rs.getInt(2);
+  rsControl.setReturnValue(2,1);
+  rs.next();
+  rsControl.setReturnValue(false,1);
+  rs.close();
+  rsControl.setVoidCallable(1);
+  rsControl.replay();
+  jdbcTemplate=new JdbcTemplate();
+  jdbcTemplate.setDataSource(new SingleConnectionDataSource(con,false));
+  jdbcTemplate.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
+  jdbcTemplate.afterPropertiesSet();
+}

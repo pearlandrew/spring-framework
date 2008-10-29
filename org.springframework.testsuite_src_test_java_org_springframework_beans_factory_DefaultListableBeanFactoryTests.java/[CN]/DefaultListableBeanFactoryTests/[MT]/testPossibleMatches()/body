@@ -1,0 +1,17 @@
+{
+  try {
+    DefaultListableBeanFactory lbf=new DefaultListableBeanFactory();
+    MutablePropertyValues pvs=new MutablePropertyValues();
+    pvs.addPropertyValue("ag","foobar");
+    lbf.registerBeanDefinition("tb",new RootBeanDefinition(TestBean.class,pvs));
+    lbf.getBean("tb");
+    fail("Should throw exception on invalid property");
+  }
+ catch (  BeanCreationException ex) {
+    ex.printStackTrace();
+    assertTrue(ex.getCause() instanceof NotWritablePropertyException);
+    NotWritablePropertyException cause=(NotWritablePropertyException)ex.getCause();
+    assertEquals(1,cause.getPossibleMatches().length);
+    assertEquals("age",cause.getPossibleMatches()[0]);
+  }
+}

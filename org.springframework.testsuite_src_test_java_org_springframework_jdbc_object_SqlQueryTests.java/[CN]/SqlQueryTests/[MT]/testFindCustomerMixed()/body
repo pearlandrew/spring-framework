@@ -1,0 +1,78 @@
+{
+  MockControl ctrlResultSet2;
+  ResultSet mockResultSet2;
+  MockControl ctrlPreparedStatement2;
+  PreparedStatement mockPreparedStatement2;
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getInt("id");
+  ctrlResultSet.setReturnValue(1);
+  mockResultSet.getString("forename");
+  ctrlResultSet.setReturnValue("rod");
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockPreparedStatement.setObject(1,new Integer(1),Types.INTEGER);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.setString(2,"rod");
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeQuery();
+  ctrlPreparedStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  ctrlResultSet2=MockControl.createControl(ResultSet.class);
+  mockResultSet2=(ResultSet)ctrlResultSet2.getMock();
+  mockResultSet2.next();
+  ctrlResultSet2.setReturnValue(false);
+  mockResultSet2.close();
+  ctrlResultSet2.setVoidCallable();
+  ctrlPreparedStatement2=MockControl.createControl(PreparedStatement.class);
+  mockPreparedStatement2=(PreparedStatement)ctrlPreparedStatement2.getMock();
+  mockPreparedStatement2.setObject(1,new Integer(1),Types.INTEGER);
+  ctrlPreparedStatement2.setVoidCallable();
+  mockPreparedStatement2.setString(2,"Roger");
+  ctrlPreparedStatement2.setVoidCallable();
+  mockPreparedStatement2.executeQuery();
+  ctrlPreparedStatement2.setReturnValue(mockResultSet2);
+  if (debugEnabled) {
+    mockPreparedStatement2.getWarnings();
+    ctrlPreparedStatement2.setReturnValue(null);
+  }
+  mockPreparedStatement2.close();
+  ctrlPreparedStatement2.setVoidCallable();
+  mockConnection.prepareStatement(SELECT_ID_WHERE);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  mockConnection.prepareStatement(SELECT_ID_WHERE);
+  ctrlConnection.setReturnValue(mockPreparedStatement2);
+  ctrlResultSet2.replay();
+  ctrlPreparedStatement2.replay();
+  replay();
+class CustomerQuery extends MappingSqlQuery {
+    public CustomerQuery(    DataSource ds){
+      super(ds,SELECT_ID_WHERE);
+      declareParameter(new SqlParameter(COLUMN_NAMES[0],COLUMN_TYPES[0]));
+      declareParameter(new SqlParameter(COLUMN_NAMES[1],COLUMN_TYPES[1]));
+      compile();
+    }
+    protected Object mapRow(    ResultSet rs,    int rownum) throws SQLException {
+      Customer cust=new Customer();
+      cust.setId(rs.getInt(COLUMN_NAMES[0]));
+      cust.setForename(rs.getString(COLUMN_NAMES[1]));
+      return cust;
+    }
+    public Customer findCustomer(    int id,    String name){
+      return (Customer)findObject(new Object[]{new Integer(id),name});
+    }
+  }
+  CustomerQuery query=new CustomerQuery(mockDataSource);
+  Customer cust1=query.findCustomer(1,"rod");
+  assertTrue("Found customer",cust1 != null);
+  assertTrue("Customer id was assigned correctly",cust1.getId() == 1);
+  Customer cust2=query.findCustomer(1,"Roger");
+  assertTrue("No customer found",cust2 == null);
+}

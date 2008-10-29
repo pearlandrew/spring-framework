@@ -1,0 +1,21 @@
+{
+  mockPreparedStatement.setObject(1,new Integer(1),Types.NUMERIC);
+  mockPreparedStatement.setObject(2,new Integer(1),Types.NUMERIC);
+  mockPreparedStatement.setString(3,"rod");
+  mockPreparedStatement.setObject(4,Boolean.TRUE,Types.BOOLEAN);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeUpdate();
+  ctrlPreparedStatement.setReturnValue(1);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(UPDATE_OBJECTS);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  ConstructorUpdater pc=new ConstructorUpdater();
+  int rowsAffected=pc.run(1,1,"rod",true);
+  assertEquals(1,rowsAffected);
+}

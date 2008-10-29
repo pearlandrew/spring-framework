@@ -1,0 +1,24 @@
+{
+  MockHttpServletRequest request=new MockHttpServletRequest();
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  AbstractXsltView view=new AbstractXsltView(){
+    protected Source createXsltSource(    Map model,    String root,    HttpServletRequest request,    HttpServletResponse response) throws Exception {
+      Hero hero=(Hero)model.get("hero");
+      Document document=DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+      Element node=document.createElement(root);
+      node.setAttribute("name",hero.getName());
+      node.setAttribute("age",hero.getAge() + "");
+      node.setAttribute("catchphrase",hero.getCatchphrase());
+      return new DOMSource(node);
+    }
+  }
+;
+  view.setContentType("text/plain");
+  view.setStylesheetLocation(new ClassPathResource("org/springframework/web/servlet/view/xslt/sunnyDay.xsl"));
+  view.setIndent(true);
+  view.initApplicationContext();
+  view.render(new ModelAndView().addObject("hero",new Hero("Jet",24,"BOOM")).getModel(),request,response);
+  assertEquals("text/plain",response.getContentType());
+  String text=response.getContentAsString();
+  assertEquals("<hero name=\"Jet\" age=\"24\" catchphrase=\"BOOM\" sex=\"Female\"/>",text.trim());
+}

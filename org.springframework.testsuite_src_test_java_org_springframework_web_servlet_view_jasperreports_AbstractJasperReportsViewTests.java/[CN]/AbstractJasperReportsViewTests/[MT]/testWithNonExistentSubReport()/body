@@ -1,0 +1,19 @@
+{
+  if (!canCompileReport) {
+    return;
+  }
+  Map model=getModel();
+  model.put("SubReportData",getProductData());
+  Properties subReports=new Properties();
+  subReports.put("ProductsSubReport","org/springframework/ui/jasperreports/subReportChildFalse.jrxml");
+  AbstractJasperReportsView view=getView(SUB_REPORT_PARENT);
+  view.setReportDataKey("dataSource");
+  view.setSubReportUrls(subReports);
+  view.setSubReportDataKeys(new String[]{"SubReportData"});
+  try {
+    view.initApplicationContext();
+    fail("Invalid report URL should throw ApplicationContext Exception");
+  }
+ catch (  ApplicationContextException ex) {
+  }
+}

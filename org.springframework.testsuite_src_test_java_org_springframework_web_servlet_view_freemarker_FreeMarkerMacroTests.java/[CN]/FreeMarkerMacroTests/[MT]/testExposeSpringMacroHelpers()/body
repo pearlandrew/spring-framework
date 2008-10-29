@@ -1,0 +1,18 @@
+{
+  FreeMarkerView fv=new FreeMarkerView(){
+    protected void processTemplate(    Template template,    Map model,    HttpServletResponse response){
+      assertTrue(model.get(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) instanceof RequestContext);
+      RequestContext rc=(RequestContext)model.get(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
+      BindStatus status=rc.getBindStatus("tb.name");
+      assertEquals("name",status.getExpression());
+      assertEquals("juergen",status.getValue());
+    }
+  }
+;
+  fv.setUrl(TEMPLATE_FILE);
+  fv.setApplicationContext(wac);
+  fv.setExposeSpringMacroHelpers(true);
+  Map model=new HashMap();
+  model.put("tb",new TestBean("juergen",99));
+  fv.render(model,request,response);
+}

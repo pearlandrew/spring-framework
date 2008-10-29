@@ -1,0 +1,17 @@
+{
+  TestBean tb=new TestBean();
+  ProxyFactory pc=new ProxyFactory(new Class[]{ITestBean.class});
+  TestDynamicPointcutForSettersOnly dp=new TestDynamicPointcutForSettersOnly(new NopInterceptor(),"Age");
+  pc.addAdvisor(dp);
+  this.mockTargetSource.setTarget(tb);
+  pc.setTargetSource(mockTargetSource);
+  ITestBean it=(ITestBean)createProxy(pc);
+  assertEquals(dp.count,0);
+  int age=it.getAge();
+  assertEquals(0,dp.count);
+  it.setAge(11);
+  assertEquals(it.getAge(),11);
+  assertEquals(dp.count,1);
+  it.setName("joe");
+  assertEquals(dp.count,1);
+}

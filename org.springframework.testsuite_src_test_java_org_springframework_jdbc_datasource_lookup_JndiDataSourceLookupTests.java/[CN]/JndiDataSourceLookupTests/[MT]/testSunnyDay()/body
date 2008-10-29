@@ -1,0 +1,13 @@
+{
+  final DataSource expectedDataSource=new StubDataSource();
+  JndiDataSourceLookup lookup=new JndiDataSourceLookup(){
+    protected Object lookup(    String jndiName,    Class requiredType){
+      assertEquals(DATA_SOURCE_NAME,jndiName);
+      return expectedDataSource;
+    }
+  }
+;
+  DataSource dataSource=lookup.getDataSource(DATA_SOURCE_NAME);
+  assertNotNull("A DataSourceLookup implementation must *never* return null from getDataSource(): this one obviously (and incorrectly) is",dataSource);
+  assertSame(expectedDataSource,dataSource);
+}

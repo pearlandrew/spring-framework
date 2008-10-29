@@ -1,0 +1,59 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
+  ut.begin();
+  utControl.setVoidCallable(1);
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_ACTIVE,1);
+  ut.rollback();
+  utControl.setVoidCallable(1);
+  utControl.replay();
+  MockControl sfControl=MockControl.createControl(SessionFactory.class);
+  final SessionFactory sf=(SessionFactory)sfControl.getMock();
+  final MockControl sessionControl=MockControl.createControl(Session.class);
+  final Session session=(Session)sessionControl.getMock();
+  sf.openSession();
+  sfControl.setReturnValue(session,1);
+  session.getSessionFactory();
+  sessionControl.setReturnValue(sf,1);
+  sfControl.replay();
+  sessionControl.replay();
+  JtaTransactionManager ptm=new JtaTransactionManager(ut);
+  TransactionTemplate tt=new TransactionTemplate(ptm);
+  final List l=new ArrayList();
+  l.add("test");
+  assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  Object result=tt.execute(new TransactionCallback(){
+    public Object doInTransaction(    TransactionStatus status){
+      try {
+        assertTrue("JTA synchronizations active",TransactionSynchronizationManager.isSynchronizationActive());
+        HibernateTemplate ht=new HibernateTemplate(sf);
+        List htl=ht.executeFind(new HibernateCallback(){
+          public Object doInHibernate(          org.hibernate.Session session){
+            return l;
+          }
+        }
+);
+        status.setRollbackOnly();
+        sessionControl.verify();
+        sessionControl.reset();
+        session.close();
+        sessionControl.setReturnValue(null,1);
+        sessionControl.replay();
+        return htl;
+      }
+ catch (      Error err) {
+        err.printStackTrace();
+        throw err;
+      }
+    }
+  }
+);
+  assertTrue("Correct result list",result == l);
+  assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  utControl.verify();
+  sfControl.verify();
+  sessionControl.verify();
+}

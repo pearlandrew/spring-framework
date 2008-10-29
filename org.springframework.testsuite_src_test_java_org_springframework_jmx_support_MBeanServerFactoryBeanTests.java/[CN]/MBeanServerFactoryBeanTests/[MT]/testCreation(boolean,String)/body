@@ -1,0 +1,22 @@
+{
+  MBeanServerFactoryBean bean=new MBeanServerFactoryBean();
+  bean.setRegisterWithFactory(referenceShouldExist);
+  bean.afterPropertiesSet();
+  try {
+    MBeanServer server=(MBeanServer)bean.getObject();
+    List servers=MBeanServerFactory.findMBeanServer(null);
+    boolean found=false;
+    for (int x=0; x < servers.size(); x++) {
+      if (servers.get(x) == server) {
+        found=true;
+        break;
+      }
+    }
+    if (!(found == referenceShouldExist)) {
+      fail(failMsg);
+    }
+  }
+  finally {
+    bean.destroy();
+  }
+}

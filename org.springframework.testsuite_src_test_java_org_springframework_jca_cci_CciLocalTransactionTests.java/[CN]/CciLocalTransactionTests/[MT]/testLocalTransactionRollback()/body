@@ -1,0 +1,56 @@
+{
+  MockControl connectionFactoryControl=MockControl.createControl(ConnectionFactory.class);
+  final ConnectionFactory connectionFactory=(ConnectionFactory)connectionFactoryControl.getMock();
+  MockControl connectionControl=MockControl.createControl(Connection.class);
+  Connection connection=(Connection)connectionControl.getMock();
+  MockControl interactionControl=MockControl.createControl(Interaction.class);
+  Interaction interaction=(Interaction)interactionControl.getMock();
+  MockControl localTransactionControl=MockControl.createControl(LocalTransaction.class);
+  LocalTransaction localTransaction=(LocalTransaction)localTransactionControl.getMock();
+  MockControl recordControl=MockControl.createControl(Record.class);
+  final Record record=(Record)recordControl.getMock();
+  MockControl interactionSpecControl=MockControl.createControl(InteractionSpec.class);
+  final InteractionSpec interactionSpec=(InteractionSpec)interactionSpecControl.getMock();
+  connectionFactory.getConnection();
+  connectionFactoryControl.setReturnValue(connection);
+  connection.getLocalTransaction();
+  connectionControl.setReturnValue(localTransaction);
+  localTransaction.begin();
+  localTransactionControl.setVoidCallable(1);
+  connection.createInteraction();
+  connectionControl.setReturnValue(interaction);
+  interaction.execute(interactionSpec,record,record);
+  interactionControl.setReturnValue(true,1);
+  interaction.close();
+  interactionControl.setVoidCallable(1);
+  connection.getLocalTransaction();
+  connectionControl.setReturnValue(localTransaction);
+  localTransaction.rollback();
+  localTransactionControl.setVoidCallable(1);
+  connection.close();
+  connectionControl.setVoidCallable(1);
+  connectionFactoryControl.replay();
+  connectionControl.replay();
+  localTransactionControl.replay();
+  interactionControl.replay();
+  org.springframework.jca.cci.connection.CciLocalTransactionManager tm=new org.springframework.jca.cci.connection.CciLocalTransactionManager();
+  tm.setConnectionFactory(connectionFactory);
+  TransactionTemplate tt=new TransactionTemplate(tm);
+  try {
+    Object result=tt.execute(new TransactionCallback(){
+      public Object doInTransaction(      TransactionStatus status){
+        assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(connectionFactory));
+        CciTemplate ct=new CciTemplate(connectionFactory);
+        ct.execute(interactionSpec,record,record);
+        throw new DataRetrievalFailureException("error");
+      }
+    }
+);
+  }
+ catch (  Exception ex) {
+  }
+  connectionFactoryControl.verify();
+  connectionControl.verify();
+  interactionControl.verify();
+  localTransactionControl.verify();
+}

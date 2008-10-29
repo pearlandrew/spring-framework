@@ -1,0 +1,26 @@
+{
+  MockControl queryControl=MockControl.createControl(Query.class);
+  Query query=(Query)queryControl.getMock();
+  Iterator it=Collections.EMPTY_LIST.iterator();
+  sf.openSession();
+  sfControl.setReturnValue(session,1);
+  session.getSessionFactory();
+  sessionControl.setReturnValue(sf,1);
+  session.createQuery("some query string");
+  sessionControl.setReturnValue(query,1);
+  query.setParameter(0,"myvalue");
+  queryControl.setReturnValue(query,1);
+  query.iterate();
+  queryControl.setReturnValue(it,1);
+  session.flush();
+  sessionControl.setVoidCallable(1);
+  session.close();
+  sessionControl.setReturnValue(null,1);
+  sfControl.replay();
+  sessionControl.replay();
+  queryControl.replay();
+  HibernateTemplate ht=new HibernateTemplate(sf);
+  Iterator result=ht.iterate("some query string","myvalue");
+  assertTrue("Correct list",result == it);
+  queryControl.verify();
+}

@@ -1,0 +1,21 @@
+{
+  MockControl sessionControl=MockControl.createControl(Session.class);
+  Session session=(Session)sessionControl.getMock();
+  SessionFactory factory=new SingleSessionFactory(session);
+  sessionControl.replay();
+  SessionHolder sessionHolder=new SessionHolder(factory.createSession());
+  TransactionSynchronizationManager.bindResource(factory,sessionHolder);
+  TopLinkTemplate template=new TopLinkTemplate();
+  template.setAllowCreate(false);
+  template.setSessionFactory(factory);
+  template.execute(new TopLinkCallback(){
+    public Object doInTopLink(    Session session) throws TopLinkException {
+      assertTrue(session != null);
+      return null;
+    }
+  }
+);
+  assertTrue(TransactionSynchronizationManager.hasResource(factory));
+  sessionControl.verify();
+  TransactionSynchronizationManager.unbindResource(factory);
+}

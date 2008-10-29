@@ -1,0 +1,28 @@
+{
+  TestBean tb=new TestBean();
+  ProxyFactory pc=new ProxyFactory(tb);
+  pc.addInterface(ITestBean.class);
+  MethodInterceptor twoBirthdayInterceptor=new MethodInterceptor(){
+    public Object invoke(    MethodInvocation mi) throws Throwable {
+      MethodInvocation clone1=((ReflectiveMethodInvocation)mi).invocableClone();
+      MethodInvocation clone2=((ReflectiveMethodInvocation)mi).invocableClone();
+      clone1.proceed();
+      clone2.proceed();
+      return mi.proceed();
+    }
+  }
+;
+  StaticMethodMatcherPointcutAdvisor advisor=new StaticMethodMatcherPointcutAdvisor(twoBirthdayInterceptor){
+    public boolean matches(    Method m,    Class targetClass){
+      return "haveBirthday".equals(m.getName());
+    }
+  }
+;
+  pc.addAdvisor(advisor);
+  ITestBean it=(ITestBean)createProxy(pc);
+  final int age=20;
+  it.setAge(age);
+  assertEquals(age,it.getAge());
+  assertEquals(age + 2,it.haveBirthday());
+  assertEquals(age + 3,it.getAge());
+}

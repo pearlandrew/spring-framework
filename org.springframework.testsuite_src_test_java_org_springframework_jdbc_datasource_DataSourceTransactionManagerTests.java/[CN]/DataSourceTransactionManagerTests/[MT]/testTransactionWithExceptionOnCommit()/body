@@ -1,0 +1,32 @@
+{
+  MockControl conControl=MockControl.createControl(Connection.class);
+  final Connection con=(Connection)conControl.getMock();
+  MockControl dsControl=MockControl.createControl(DataSource.class);
+  DataSource ds=(DataSource)dsControl.getMock();
+  ds.getConnection();
+  dsControl.setReturnValue(con,1);
+  con.getAutoCommit();
+  conControl.setReturnValue(false,1);
+  con.commit();
+  conControl.setThrowable(new SQLException("Cannot commit"),1);
+  con.isReadOnly();
+  conControl.setReturnValue(false,1);
+  con.close();
+  conControl.setVoidCallable(1);
+  conControl.replay();
+  dsControl.replay();
+  PlatformTransactionManager tm=new DataSourceTransactionManager(ds);
+  TransactionTemplate tt=new TransactionTemplate(tm);
+  try {
+    tt.execute(new TransactionCallbackWithoutResult(){
+      protected void doInTransactionWithoutResult(      TransactionStatus status){
+      }
+    }
+);
+    fail("Should have thrown TransactionSystemException");
+  }
+ catch (  TransactionSystemException ex) {
+  }
+  assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
+  conControl.verify();
+}

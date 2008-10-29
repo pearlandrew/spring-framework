@@ -1,0 +1,31 @@
+{
+  MockHttpServletRequest request=new MockHttpServletRequest();
+  request.addParameter("param1","true");
+  request.addParameter("param2","e");
+  request.addParameter("param4","yes");
+  request.addParameter("param5","1");
+  request.addParameter("paramEmpty","");
+  assertTrue(RequestUtils.getBooleanParameter(request,"param1").equals(Boolean.TRUE));
+  assertTrue(RequestUtils.getBooleanParameter(request,"param1",false));
+  assertTrue(RequestUtils.getRequiredBooleanParameter(request,"param1"));
+  assertFalse(RequestUtils.getBooleanParameter(request,"param2",true));
+  assertFalse(RequestUtils.getRequiredBooleanParameter(request,"param2"));
+  assertTrue(RequestUtils.getBooleanParameter(request,"param3") == null);
+  assertTrue(RequestUtils.getBooleanParameter(request,"param3",true));
+  try {
+    RequestUtils.getRequiredBooleanParameter(request,"param3");
+    fail("Should have thrown ServletRequestBindingException");
+  }
+ catch (  ServletRequestBindingException ex) {
+  }
+  assertTrue(RequestUtils.getBooleanParameter(request,"param4",false));
+  assertTrue(RequestUtils.getRequiredBooleanParameter(request,"param4"));
+  assertTrue(RequestUtils.getBooleanParameter(request,"param5",false));
+  assertTrue(RequestUtils.getRequiredBooleanParameter(request,"param5"));
+  try {
+    RequestUtils.getRequiredBooleanParameter(request,"paramEmpty");
+    fail("Should have thrown ServletRequestBindingException");
+  }
+ catch (  ServletRequestBindingException ex) {
+  }
+}

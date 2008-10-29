@@ -1,0 +1,26 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
+  ut.begin();
+  utControl.setVoidCallable(1);
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_ACTIVE,1);
+  ut.rollback();
+  utControl.setVoidCallable(1);
+  utControl.replay();
+  JtaTransactionManager ptm=newJtaTransactionManager(ut);
+  assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+  TransactionStatus status=ptm.getTransaction(new DefaultTransactionDefinition());
+  assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+  ptm.rollback(status);
+  assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+  try {
+    ptm.rollback(status);
+    fail("Should have thrown IllegalTransactionStateException");
+  }
+ catch (  IllegalTransactionStateException ex) {
+  }
+  utControl.verify();
+}

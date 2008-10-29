@@ -1,0 +1,25 @@
+{
+  pmf.getConnectionFactory();
+  pmfControl.setReturnValue(null,1);
+  pmf.getPersistenceManager();
+  pmfControl.setReturnValue(pm,1);
+  pm.currentTransaction();
+  pmControl.setReturnValue(null,1);
+  pm.close();
+  pmControl.setVoidCallable(1);
+  pmfControl.replay();
+  pmControl.replay();
+  PlatformTransactionManager tm=new JdoTransactionManager(pmf);
+  TransactionTemplate tt=new TransactionTemplate(tm);
+  tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
+  try {
+    tt.execute(new TransactionCallbackWithoutResult(){
+      protected void doInTransactionWithoutResult(      TransactionStatus status){
+      }
+    }
+);
+    fail("Should have thrown InvalidIsolationLevelException");
+  }
+ catch (  InvalidIsolationLevelException ex) {
+  }
+}

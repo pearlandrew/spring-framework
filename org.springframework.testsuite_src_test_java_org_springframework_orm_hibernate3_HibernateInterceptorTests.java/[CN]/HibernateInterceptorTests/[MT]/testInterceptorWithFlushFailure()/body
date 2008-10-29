@@ -1,0 +1,29 @@
+{
+  MockControl sfControl=MockControl.createControl(SessionFactory.class);
+  SessionFactory sf=(SessionFactory)sfControl.getMock();
+  MockControl sessionControl=MockControl.createControl(Session.class);
+  Session session=(Session)sessionControl.getMock();
+  sf.openSession();
+  sfControl.setReturnValue(session,1);
+  session.getSessionFactory();
+  sessionControl.setReturnValue(sf,1);
+  SQLException sqlEx=new SQLException("argh","27");
+  session.flush();
+  ConstraintViolationException jdbcEx=new ConstraintViolationException("",sqlEx,null);
+  sessionControl.setThrowable(jdbcEx,1);
+  session.close();
+  sessionControl.setReturnValue(null,1);
+  sfControl.replay();
+  sessionControl.replay();
+  HibernateInterceptor interceptor=new HibernateInterceptor();
+  interceptor.setSessionFactory(sf);
+  try {
+    interceptor.invoke(new TestInvocation(sf));
+    fail("Should have thrown DataIntegrityViolationException");
+  }
+ catch (  DataIntegrityViolationException ex) {
+    assertEquals(jdbcEx,ex.getCause());
+  }
+  sfControl.verify();
+  sessionControl.verify();
+}

@@ -1,0 +1,16 @@
+{
+  MockControl dsControl=MockControl.createControl(DataSource.class);
+  DataSource ds=(DataSource)dsControl.getMock();
+  final List test=new ArrayList();
+  JdbcDaoSupport dao=new JdbcDaoSupport(){
+    protected void initDao(){
+      test.add("test");
+    }
+  }
+;
+  dao.setDataSource(ds);
+  dao.afterPropertiesSet();
+  assertEquals("Correct DataSource",ds,dao.getDataSource());
+  assertEquals("Correct JdbcTemplate",ds,dao.getJdbcTemplate().getDataSource());
+  assertEquals("initDao called",test.size(),1);
+}

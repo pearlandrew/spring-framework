@@ -1,0 +1,26 @@
+{
+  MockControl tmControl=MockControl.createControl(TransactionManager.class);
+  TransactionManager tm=(TransactionManager)tmControl.getMock();
+  MockJtaTransaction transaction=new MockJtaTransaction();
+  tm.getStatus();
+  tmControl.setReturnValue(Status.STATUS_ACTIVE,1);
+  tm.getTransaction();
+  tmControl.setReturnValue(transaction,1);
+  String content="content";
+  byte[] contentBytes=content.getBytes();
+  lobHandler.getBlobAsBytes(rs,"column");
+  lobHandlerControl.setReturnValue(contentBytes);
+  lobCreator.setBlobAsBytes(ps,1,contentBytes);
+  lobCreatorControl.setMatcher(new ArrayMatcher());
+  lobHandlerControl.replay();
+  lobCreatorControl.replay();
+  BlobStringType type=new BlobStringType(lobHandler,tm);
+  assertEquals(content,type.nullSafeGet(rs,new String[]{"column"},null));
+  tmControl.replay();
+  type.nullSafeSet(ps,content,1);
+  Synchronization synch=transaction.getSynchronization();
+  assertNotNull(synch);
+  synch.beforeCompletion();
+  synch.afterCompletion(Status.STATUS_COMMITTED);
+  tmControl.verify();
+}

@@ -1,0 +1,29 @@
+{
+  AbstractWizardFormController wizard=new TestWizardController(){
+    protected String getFormSessionAttributeName(){
+      return "myFormAttr";
+    }
+    protected String getPageSessionAttributeName(){
+      return "myPageAttr";
+    }
+  }
+;
+  wizard.setAllowDirtyBack(false);
+  wizard.setAllowDirtyForward(false);
+  wizard.setPageAttribute("currentPage");
+  HttpSession session=performRequest(wizard,null,null,0,null,0,"currentPage");
+  assertTrue(session.getAttribute("myFormAttr") instanceof TestBean);
+  assertEquals(new Integer(0),session.getAttribute("myPageAttr"));
+  Properties params=new Properties();
+  params.setProperty(AbstractWizardFormController.PARAM_TARGET + "1","value");
+  performRequest(wizard,session,null,0,null,0,"currentPage");
+  params.clear();
+  params.setProperty("name","myname");
+  params.setProperty(AbstractWizardFormController.PARAM_PAGE,"0");
+  params.setProperty(AbstractWizardFormController.PARAM_TARGET + "1","value");
+  performRequest(wizard,session,params,1,"myname",0,"currentPage");
+  params.clear();
+  params.setProperty("age","32");
+  params.setProperty(AbstractWizardFormController.PARAM_FINISH,"value");
+  performRequest(wizard,session,params,-1,"myname",32,"currentPage");
+}

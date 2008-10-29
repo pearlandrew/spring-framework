@@ -1,0 +1,17 @@
+{
+  MockActionRequest actionRequest=new MockActionRequest();
+  MockActionResponse actionResponse=new MockActionResponse();
+  actionRequest.setSession(new MockPortletSession());
+  actionRequest.setParameter("action","form-session-nobind");
+  actionRequest.setParameter("age","27");
+  simpleDispatcherPortlet.processAction(actionRequest,actionResponse);
+  Map renderParameters=actionResponse.getRenderParameterMap();
+  MockRenderRequest renderRequest=new MockRenderRequest();
+  MockRenderResponse renderResponse=new MockRenderResponse();
+  renderRequest.setParameters(renderParameters);
+  renderRequest.setParameter("action","form-session-nobind");
+  renderRequest.setParameter("age","30");
+  renderRequest.setSession(actionRequest.getPortletSession());
+  simpleDispatcherPortlet.doDispatch(renderRequest,renderResponse);
+  assertEquals("finished42",renderResponse.getContentAsString());
+}

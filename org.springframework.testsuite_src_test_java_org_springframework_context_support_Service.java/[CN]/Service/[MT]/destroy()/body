@@ -1,0 +1,22 @@
+{
+  this.properlyDestroyed=true;
+  Thread thread=new Thread(){
+    public void run(){
+      Assert.isTrue(applicationContext.getBean("messageSource") instanceof StaticMessageSource);
+      try {
+        applicationContext.getBean("service2");
+        properlyDestroyed=false;
+      }
+ catch (      BeanCreationNotAllowedException ex) {
+      }
+    }
+  }
+;
+  thread.start();
+  try {
+    thread.join();
+  }
+ catch (  InterruptedException ex) {
+    Thread.currentThread().interrupt();
+  }
+}

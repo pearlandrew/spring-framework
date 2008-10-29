@@ -1,0 +1,13 @@
+{
+  MockControl mock=MockControl.createControl(ScriptSource.class);
+  ScriptSource scriptSource=(ScriptSource)mock.getMock();
+  scriptSource.getScriptAsString();
+  mock.setReturnValue("class Bar {}");
+  scriptSource.suggestedClassName();
+  mock.setReturnValue("someName");
+  mock.replay();
+  GroovyScriptFactory factory=new GroovyScriptFactory("a script source locator (doesn't matter here)");
+  Object scriptedObject=factory.getScriptedObject(scriptSource,null);
+  assertNotNull(scriptedObject);
+  mock.verify();
+}

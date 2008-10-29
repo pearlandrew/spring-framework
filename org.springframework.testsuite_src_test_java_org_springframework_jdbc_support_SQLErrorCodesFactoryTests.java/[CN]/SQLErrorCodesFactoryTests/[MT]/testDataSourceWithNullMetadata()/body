@@ -1,0 +1,18 @@
+{
+  MockControl ctrlConnection=MockControl.createControl(Connection.class);
+  Connection mockConnection=(Connection)ctrlConnection.getMock();
+  mockConnection.getMetaData();
+  ctrlConnection.setReturnValue(null);
+  mockConnection.close();
+  ctrlConnection.setVoidCallable();
+  ctrlConnection.replay();
+  MockControl ctrlDataSource=MockControl.createControl(DataSource.class);
+  DataSource mockDataSource=(DataSource)ctrlDataSource.getMock();
+  mockDataSource.getConnection();
+  ctrlDataSource.setDefaultReturnValue(mockConnection);
+  ctrlDataSource.replay();
+  SQLErrorCodes sec=SQLErrorCodesFactory.getInstance().getErrorCodes(mockDataSource);
+  assertIsEmpty(sec);
+  ctrlConnection.verify();
+  ctrlDataSource.verify();
+}

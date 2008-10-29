@@ -1,0 +1,43 @@
+{
+  ctrlResultSetMetaData=MockControl.createControl(ResultSetMetaData.class);
+  mockResultSetMetaData=(ResultSetMetaData)ctrlResultSetMetaData.getMock();
+  mockResultSetMetaData.getColumnCount();
+  ctrlResultSetMetaData.setReturnValue(1);
+  mockResultSetMetaData.getColumnLabel(1);
+  ctrlResultSetMetaData.setReturnValue("1",2);
+  ctrlResultSet=MockControl.createControl(ResultSet.class);
+  mockResultSet=(ResultSet)ctrlResultSet.getMock();
+  mockResultSet.getMetaData();
+  ctrlResultSet.setReturnValue(mockResultSetMetaData);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getObject(1);
+  ctrlResultSet.setReturnValue(new Integer(11));
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockPreparedStatement.setString(1,"rod");
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeUpdate();
+  ctrlPreparedStatement.setReturnValue(1);
+  mockPreparedStatement.getGeneratedKeys();
+  ctrlPreparedStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(INSERT_GENERATE_KEYS,PreparedStatement.RETURN_GENERATED_KEYS);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  ctrlResultSet.replay();
+  ctrlResultSetMetaData.replay();
+  GeneratedKeysUpdater pc=new GeneratedKeysUpdater();
+  KeyHolder generatedKeyHolder=new GeneratedKeyHolder();
+  int rowsAffected=pc.run("rod",generatedKeyHolder);
+  assertEquals(1,rowsAffected);
+  assertEquals(1,generatedKeyHolder.getKeyList().size());
+  assertEquals(11,generatedKeyHolder.getKey().intValue());
+}

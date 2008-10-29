@@ -1,0 +1,58 @@
+{
+  JmsTemplate102 template=createTemplate();
+  template.setPubSubDomain(true);
+  template.setConnectionFactory(mockTopicConnectionFactory);
+  template.afterPropertiesSet();
+  MockControl topicPublisherControl=MockControl.createControl(TopicPublisher.class);
+  TopicPublisher mockTopicPublisher=(TopicPublisher)topicPublisherControl.getMock();
+  MockControl messageControl=MockControl.createControl(TextMessage.class);
+  TextMessage mockMessage=(TextMessage)messageControl.getMock();
+  mockTopicSession.createPublisher(this.mockTopic);
+  topicSessionControl.setReturnValue(mockTopicPublisher);
+  mockTopicSession.createTextMessage("just testing");
+  topicSessionControl.setReturnValue(mockMessage);
+  if (useTransactedTemplate()) {
+    mockTopicSession.commit();
+    topicSessionControl.setVoidCallable(1);
+  }
+  mockTopicPublisher.close();
+  topicPublisherControl.setVoidCallable(1);
+  mockTopicSession.close();
+  topicSessionControl.setVoidCallable(1);
+  mockTopicConnection.close();
+  topicConnectionControl.setVoidCallable(1);
+  topicSessionControl.replay();
+  topicConnectionControl.replay();
+  if (ignoreQOS) {
+    mockTopicPublisher.publish(mockMessage);
+  }
+ else {
+    template.setExplicitQosEnabled(true);
+    template.setDeliveryMode(deliveryMode);
+    template.setPriority(priority);
+    template.setTimeToLive(timeToLive);
+    mockTopicPublisher.publish(mockMessage,deliveryMode,priority,timeToLive);
+  }
+  topicPublisherControl.replay();
+  template.setPubSubDomain(true);
+  if (explicitTopic) {
+    template.send(mockTopic,new MessageCreator(){
+      public Message createMessage(      Session session) throws JMSException {
+        return session.createTextMessage("just testing");
+      }
+    }
+);
+  }
+ else {
+    template.send("testTopic",new MessageCreator(){
+      public Message createMessage(      Session session) throws JMSException {
+        return session.createTextMessage("just testing");
+      }
+    }
+);
+  }
+  topicConnectionFactoryControl.verify();
+  topicConnectionControl.verify();
+  topicSessionControl.verify();
+  topicPublisherControl.verify();
+}

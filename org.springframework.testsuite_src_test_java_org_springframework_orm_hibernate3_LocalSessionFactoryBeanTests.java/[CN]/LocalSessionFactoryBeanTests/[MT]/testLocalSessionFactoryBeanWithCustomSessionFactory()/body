@@ -1,0 +1,20 @@
+{
+  MockControl factoryControl=MockControl.createControl(SessionFactory.class);
+  final SessionFactory sessionFactory=(SessionFactory)factoryControl.getMock();
+  sessionFactory.close();
+  factoryControl.setVoidCallable(1);
+  factoryControl.replay();
+  LocalSessionFactoryBean sfb=new LocalSessionFactoryBean(){
+    protected SessionFactory newSessionFactory(    Configuration config){
+      return sessionFactory;
+    }
+  }
+;
+  sfb.setMappingResources(new String[0]);
+  sfb.setDataSource(new DriverManagerDataSource());
+  sfb.setExposeTransactionAwareSessionFactory(false);
+  sfb.afterPropertiesSet();
+  assertTrue(sessionFactory == sfb.getObject());
+  sfb.destroy();
+  factoryControl.verify();
+}

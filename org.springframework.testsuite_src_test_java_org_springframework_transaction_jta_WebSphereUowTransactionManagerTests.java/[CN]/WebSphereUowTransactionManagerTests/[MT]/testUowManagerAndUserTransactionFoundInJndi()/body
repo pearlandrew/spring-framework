@@ -1,0 +1,32 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_ACTIVE,2);
+  ut.begin();
+  utControl.setVoidCallable(1);
+  ut.commit();
+  utControl.setVoidCallable(1);
+  utControl.replay();
+  MockUOWManager manager=new MockUOWManager();
+  ExpectedLookupTemplate jndiTemplate=new ExpectedLookupTemplate();
+  jndiTemplate.addObject(WebSphereUowTransactionManager.DEFAULT_USER_TRANSACTION_NAME,ut);
+  jndiTemplate.addObject(WebSphereUowTransactionManager.DEFAULT_UOW_MANAGER_NAME,manager);
+  WebSphereUowTransactionManager ptm=new WebSphereUowTransactionManager();
+  ptm.setJndiTemplate(jndiTemplate);
+  ptm.afterPropertiesSet();
+  DefaultTransactionDefinition definition=new DefaultTransactionDefinition();
+  TransactionStatus ts=ptm.getTransaction(definition);
+  ptm.commit(ts);
+  assertEquals("result",ptm.execute(definition,new TransactionCallback(){
+    public Object doInTransaction(    TransactionStatus status){
+      return "result";
+    }
+  }
+));
+  assertEquals(UOWManager.UOW_TYPE_GLOBAL_TRANSACTION,manager.getUOWType());
+  assertFalse(manager.getJoined());
+  assertFalse(manager.getRollbackOnly());
+}

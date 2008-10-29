@@ -1,0 +1,19 @@
+{
+  topicConnectionFactoryControl=MockControl.createControl(TopicConnectionFactory.class);
+  mockTopicConnectionFactory=(TopicConnectionFactory)topicConnectionFactoryControl.getMock();
+  topicConnectionControl=MockControl.createControl(TopicConnection.class);
+  mockTopicConnection=(TopicConnection)topicConnectionControl.getMock();
+  topicControl=MockControl.createControl(Topic.class);
+  mockTopic=(Topic)topicControl.getMock();
+  topicSessionControl=MockControl.createControl(TopicSession.class);
+  mockTopicSession=(TopicSession)topicSessionControl.getMock();
+  mockTopicConnectionFactory.createTopicConnection();
+  topicConnectionFactoryControl.setReturnValue(mockTopicConnection);
+  topicConnectionFactoryControl.replay();
+  mockTopicConnection.createTopicSession(useTransactedTemplate(),Session.AUTO_ACKNOWLEDGE);
+  topicConnectionControl.setReturnValue(mockTopicSession);
+  mockTopicSession.getTransacted();
+  topicSessionControl.setReturnValue(useTransactedSession());
+  mockJndiContext.lookup("testTopic");
+  mockJndiControl.setReturnValue(mockTopic);
+}

@@ -1,0 +1,20 @@
+{
+  mockCallable.execute();
+  ctrlCallable.setReturnValue(true);
+  mockCallable.getUpdateCount();
+  ctrlCallable.setReturnValue(-1);
+  if (debugEnabled) {
+    mockCallable.getWarnings();
+    ctrlCallable.setReturnValue(null);
+  }
+  mockCallable.close();
+  ctrlCallable.setVoidCallable();
+  mockConnection.prepareCall("{call " + StoredProcedureWithResultSetMapped.SQL + "()}");
+  ctrlConnection.setReturnValue(mockCallable);
+  replay();
+  JdbcTemplate jdbcTemplate=new JdbcTemplate(mockDataSource);
+  jdbcTemplate.setSkipResultsProcessing(true);
+  StoredProcedureWithResultSetMapped sproc=new StoredProcedureWithResultSetMapped(jdbcTemplate);
+  Map res=sproc.execute();
+  assertEquals("incorrect number of returns",0,res.size());
+}

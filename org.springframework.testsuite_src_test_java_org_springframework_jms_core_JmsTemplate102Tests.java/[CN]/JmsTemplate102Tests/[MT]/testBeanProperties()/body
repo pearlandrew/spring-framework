@@ -1,0 +1,29 @@
+{
+  JmsTemplate102 template=createTemplate();
+  template.setConnectionFactory(mockQueueConnectionFactory);
+  assertTrue("connection factory ok",template.getConnectionFactory() == mockQueueConnectionFactory);
+  JmsTemplate102 s102=createTemplate();
+  try {
+    s102.afterPropertiesSet();
+    fail("IllegalArgumentException not thrown. ConnectionFactory should be set");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+  s102=createTemplate();
+  s102.setConnectionFactory(mockTopicConnectionFactory);
+  try {
+    s102.afterPropertiesSet();
+    fail("IllegalArgumentException not thrown. Mismatch of Destination and ConnectionFactory types.");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+  s102=createTemplate();
+  s102.setConnectionFactory(mockQueueConnectionFactory);
+  s102.setPubSubDomain(true);
+  try {
+    s102.afterPropertiesSet();
+    fail("IllegalArgumentException not thrown. Mismatch of Destination and ConnectionFactory types.");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+}

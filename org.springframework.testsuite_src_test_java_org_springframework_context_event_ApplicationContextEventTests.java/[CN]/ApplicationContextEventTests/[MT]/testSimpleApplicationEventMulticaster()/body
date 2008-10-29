@@ -1,0 +1,12 @@
+{
+  MockControl ctrl=MockControl.createControl(ApplicationListener.class);
+  ApplicationListener listener=(ApplicationListener)ctrl.getMock();
+  ApplicationEvent evt=new ContextClosedEvent(new StaticApplicationContext());
+  listener.onApplicationEvent(evt);
+  ctrl.setMatcher(new EqualsMatcher());
+  SimpleApplicationEventMulticaster smc=new SimpleApplicationEventMulticaster();
+  smc.addApplicationListener(listener);
+  ctrl.replay();
+  smc.multicastEvent(evt);
+  ctrl.verify();
+}

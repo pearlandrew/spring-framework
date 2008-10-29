@@ -1,0 +1,13 @@
+{
+  XmlBeanFactory bf=new XmlBeanFactory(new ClassPathResource("scopedTestBean.xml",getClass()));
+  SimpleMapScope scope=new SimpleMapScope();
+  bf.registerScope("request",scope);
+  ITestBean bean=(ITestBean)bf.getBean("testBean");
+  assertNotNull(bean);
+  assertTrue(AopUtils.isJdkDynamicProxy(bean));
+  assertTrue(bean instanceof ScopedObject);
+  ScopedObject scoped=(ScopedObject)bean;
+  assertEquals(TestBean.class,scoped.getTargetObject().getClass());
+  assertTrue(scope.getMap().containsKey("testBeanTarget"));
+  assertEquals(TestBean.class,scope.getMap().get("testBeanTarget").getClass());
+}

@@ -1,0 +1,21 @@
+{
+  final PropertyEditor floatEditor=new SimpleFloatEditor();
+  BindStatus bindStatus=new BindStatus(getRequestContext(),"testBean.someNumber",false){
+    public PropertyEditor getEditor(){
+      return floatEditor;
+    }
+  }
+;
+  getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE,bindStatus);
+  this.tag.setValue("${myOtherNumber}");
+  this.tag.setLabel("${myOtherNumber}");
+  int result=this.tag.doStartTag();
+  assertEquals(BodyTag.EVAL_BODY_BUFFERED,result);
+  result=this.tag.doEndTag();
+  assertEquals(Tag.EVAL_PAGE,result);
+  String output=getOutput();
+  assertOptionTagOpened(output);
+  assertOptionTagClosed(output);
+  assertAttributeNotPresent(output,"selected");
+  assertBlockTagContains(output,"12.35f");
+}

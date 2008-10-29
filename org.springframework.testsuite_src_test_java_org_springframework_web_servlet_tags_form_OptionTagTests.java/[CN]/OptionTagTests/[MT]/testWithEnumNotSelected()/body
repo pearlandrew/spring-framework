@@ -1,0 +1,17 @@
+{
+  getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE,new BindStatus(getRequestContext(),"testBean.favouriteColour",false));
+  String value=Colour.BLUE.getCode().toString();
+  String label=Colour.BLUE.getLabel();
+  this.tag.setValue(value);
+  this.tag.setLabel(label);
+  int result=this.tag.doStartTag();
+  assertEquals(BodyTag.EVAL_BODY_BUFFERED,result);
+  result=this.tag.doEndTag();
+  assertEquals(Tag.EVAL_PAGE,result);
+  String output=getOutput();
+  assertOptionTagOpened(output);
+  assertOptionTagClosed(output);
+  assertContainsAttribute(output,"value",value);
+  assertAttributeNotPresent(output,"selected");
+  assertBlockTagContains(output,label);
+}

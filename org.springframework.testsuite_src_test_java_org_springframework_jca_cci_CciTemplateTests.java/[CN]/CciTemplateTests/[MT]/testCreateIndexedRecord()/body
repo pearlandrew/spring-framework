@@ -1,0 +1,18 @@
+{
+  MockControl connectionFactoryControl=MockControl.createStrictControl(ConnectionFactory.class);
+  ConnectionFactory connectionFactory=(ConnectionFactory)connectionFactoryControl.getMock();
+  MockControl recordFactoryControl=MockControl.createStrictControl(RecordFactory.class);
+  RecordFactory recordFactory=(RecordFactory)recordFactoryControl.getMock();
+  MockControl indexedRecordControl=MockControl.createStrictControl(IndexedRecord.class);
+  IndexedRecord indexedRecord=(IndexedRecord)indexedRecordControl.getMock();
+  connectionFactory.getRecordFactory();
+  connectionFactoryControl.setReturnValue(recordFactory,1);
+  recordFactory.createIndexedRecord("name");
+  recordFactoryControl.setReturnValue(indexedRecord,1);
+  connectionFactoryControl.replay();
+  recordFactoryControl.replay();
+  CciTemplate ct=new CciTemplate(connectionFactory);
+  ct.createIndexedRecord("name");
+  connectionFactoryControl.verify();
+  recordFactoryControl.verify();
+}

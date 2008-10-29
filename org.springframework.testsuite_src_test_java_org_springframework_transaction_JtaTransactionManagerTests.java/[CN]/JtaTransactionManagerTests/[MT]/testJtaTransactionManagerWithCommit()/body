@@ -1,0 +1,45 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_ACTIVE,2);
+  ut.begin();
+  utControl.setVoidCallable(1);
+  ut.commit();
+  utControl.setVoidCallable(1);
+  utControl.replay();
+  MockControl synchControl=MockControl.createControl(TransactionSynchronization.class);
+  final TransactionSynchronization synch=(TransactionSynchronization)synchControl.getMock();
+  synch.beforeCommit(false);
+  synchControl.setVoidCallable(1);
+  synch.beforeCompletion();
+  synchControl.setVoidCallable(1);
+  synch.afterCommit();
+  synchControl.setVoidCallable(1);
+  synch.afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
+  synchControl.setVoidCallable(1);
+  synchControl.replay();
+  JtaTransactionManager ptm=newJtaTransactionManager(ut);
+  TransactionTemplate tt=new TransactionTemplate(ptm);
+  tt.setName("txName");
+  assertEquals(JtaTransactionManager.SYNCHRONIZATION_ALWAYS,ptm.getTransactionSynchronization());
+  assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+  assertNull(TransactionSynchronizationManager.getCurrentTransactionName());
+  assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+  tt.execute(new TransactionCallbackWithoutResult(){
+    protected void doInTransactionWithoutResult(    TransactionStatus status){
+      assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+      TransactionSynchronizationManager.registerSynchronization(synch);
+      assertEquals("txName",TransactionSynchronizationManager.getCurrentTransactionName());
+      assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+    }
+  }
+);
+  assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+  assertNull(TransactionSynchronizationManager.getCurrentTransactionName());
+  assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+  utControl.verify();
+  synchControl.verify();
+}

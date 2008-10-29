@@ -1,0 +1,39 @@
+{
+  String sql="SELECT forename from custmr";
+  SQLWarning warnings=new SQLWarning("My warning");
+  MockControl ctrlResultSet=MockControl.createControl(ResultSet.class);
+  ResultSet mockResultSet=(ResultSet)ctrlResultSet.getMock();
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  MockControl ctrlStatement=MockControl.createControl(PreparedStatement.class);
+  PreparedStatement mockStatement=(PreparedStatement)ctrlStatement.getMock();
+  mockStatement.executeQuery(sql);
+  ctrlStatement.setReturnValue(mockResultSet);
+  mockStatement.getWarnings();
+  ctrlStatement.setReturnValue(warnings);
+  mockStatement.close();
+  ctrlStatement.setVoidCallable();
+  mockConnection.createStatement();
+  ctrlConnection.setReturnValue(mockStatement);
+  ctrlResultSet.replay();
+  ctrlStatement.replay();
+  replay();
+  JdbcTemplate t=new JdbcTemplate(mockDataSource);
+  t.setIgnoreWarnings(false);
+  try {
+    t.query(sql,new RowCallbackHandler(){
+      public void processRow(      ResultSet rs) throws SQLException {
+        rs.getByte(1);
+      }
+    }
+);
+    fail("Should have thrown exception on warning");
+  }
+ catch (  SQLWarningException ex) {
+    assertTrue("Root cause of warning was correct",ex.getCause() == warnings);
+  }
+  ctrlResultSet.verify();
+  ctrlStatement.verify();
+}

@@ -1,0 +1,25 @@
+{
+  AbstractExcelView excelView=new AbstractExcelView(){
+    protected void buildExcelDocument(    Map model,    HSSFWorkbook wb,    HttpServletRequest request,    HttpServletResponse response) throws Exception {
+      HSSFSheet sheet=wb.createSheet();
+      wb.setSheetName(0,"Test Sheet");
+      HSSFCell cell=getCell(sheet,2,4);
+      cell.setCellValue("Test Value");
+      cell=getCell(sheet,2,3);
+      setText(cell,"Test Value");
+      cell=getCell(sheet,3,4);
+      setText(cell,"Test Value");
+      cell=getCell(sheet,2,4);
+      setText(cell,"Test Value");
+    }
+  }
+;
+  excelView.render(new HashMap(),request,response);
+  POIFSFileSystem poiFs=new POIFSFileSystem(new ByteArrayInputStream(response.getContentAsByteArray()));
+  HSSFWorkbook wb=new HSSFWorkbook(poiFs);
+  assertEquals("Test Sheet",wb.getSheetName(0));
+  HSSFSheet sheet=wb.getSheet("Test Sheet");
+  HSSFRow row=sheet.getRow(2);
+  HSSFCell cell=row.getCell((short)4);
+  assertEquals("Test Value",cell.getStringCellValue());
+}

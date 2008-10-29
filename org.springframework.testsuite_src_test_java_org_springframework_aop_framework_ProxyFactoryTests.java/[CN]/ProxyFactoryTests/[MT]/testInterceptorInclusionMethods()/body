@@ -1,0 +1,14 @@
+{
+  NopInterceptor di=new NopInterceptor();
+  NopInterceptor diUnused=new NopInterceptor();
+  ProxyFactory factory=new ProxyFactory(new TestBean());
+  factory.addAdvice(0,di);
+  ITestBean tb=(ITestBean)factory.getProxy();
+  assertTrue(factory.adviceIncluded(di));
+  assertTrue(!factory.adviceIncluded(diUnused));
+  assertTrue(factory.countAdvicesOfType(NopInterceptor.class) == 1);
+  assertTrue(factory.countAdvicesOfType(TransactionInterceptor.class) == 0);
+  factory.addAdvice(0,diUnused);
+  assertTrue(factory.adviceIncluded(diUnused));
+  assertTrue(factory.countAdvicesOfType(NopInterceptor.class) == 2);
+}

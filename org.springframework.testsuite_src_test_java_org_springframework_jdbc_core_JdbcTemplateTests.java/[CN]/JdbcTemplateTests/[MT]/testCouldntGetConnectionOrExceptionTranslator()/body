@@ -1,0 +1,18 @@
+{
+  SQLException sex=new SQLException("foo","07xxx");
+  ctrlDataSource=MockControl.createControl(DataSource.class);
+  mockDataSource=(DataSource)ctrlDataSource.getMock();
+  mockDataSource.getConnection();
+  ctrlDataSource.setThrowable(sex,2);
+  replay();
+  try {
+    JdbcTemplate template=new JdbcTemplate(mockDataSource,false);
+    RowCountCallbackHandler rcch=new RowCountCallbackHandler();
+    template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3",rcch);
+    fail("Shouldn't have executed query without a connection");
+  }
+ catch (  CannotGetJdbcConnectionException ex) {
+    assertTrue("Check root cause",ex.getCause() == sex);
+  }
+  ctrlDataSource.verify();
+}

@@ -1,0 +1,17 @@
+{
+  SQLException sex=new SQLException("Syntax error or access violation exception","42000");
+  mockCallable.execute();
+  ctrlCallable.setThrowable(sex);
+  mockCallable.close();
+  ctrlCallable.setVoidCallable();
+  mockConnection.prepareCall("{call " + StoredProcedureExceptionTranslator.SQL + "()}");
+  ctrlConnection.setReturnValue(mockCallable);
+  replay();
+  StoredProcedureExceptionTranslator sproc=new StoredProcedureExceptionTranslator(mockDataSource);
+  try {
+    sproc.execute();
+    fail("Custom exception should be thrown");
+  }
+ catch (  CustomDataException ex) {
+  }
+}

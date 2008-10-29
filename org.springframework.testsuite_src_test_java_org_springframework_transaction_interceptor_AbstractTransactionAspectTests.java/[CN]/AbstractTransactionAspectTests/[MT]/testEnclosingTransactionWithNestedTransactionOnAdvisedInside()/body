@@ -1,0 +1,48 @@
+{
+  final TransactionAttribute outerTxatt=new DefaultTransactionAttribute();
+  final TransactionAttribute innerTxatt=new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_NESTED);
+  Method outerMethod=exceptionalMethod;
+  Method innerMethod=getNameMethod;
+  MapTransactionAttributeSource tas=new MapTransactionAttributeSource();
+  tas.register(outerMethod,outerTxatt);
+  tas.register(innerMethod,innerTxatt);
+  TransactionStatus outerStatus=transactionStatusForNewTransaction();
+  TransactionStatus innerStatus=transactionStatusForNewTransaction();
+  MockControl ptmControl=MockControl.createControl(PlatformTransactionManager.class);
+  PlatformTransactionManager ptm=(PlatformTransactionManager)ptmControl.getMock();
+  ptm.getTransaction(outerTxatt);
+  ptmControl.setReturnValue(outerStatus,1);
+  ptm.getTransaction(innerTxatt);
+  ptmControl.setReturnValue(innerStatus,1);
+  ptm.commit(innerStatus);
+  ptmControl.setVoidCallable(1);
+  ptm.commit(outerStatus);
+  ptmControl.setVoidCallable(1);
+  ptmControl.replay();
+  final String spouseName="innerName";
+  TestBean outer=new TestBean(){
+    public void exceptional(    Throwable t) throws Throwable {
+      TransactionInfo ti=TransactionAspectSupport.currentTransactionInfo();
+      assertTrue(ti.hasTransaction());
+      assertEquals(outerTxatt,ti.getTransactionAttribute());
+      assertEquals(spouseName,getSpouse().getName());
+    }
+  }
+;
+  TestBean inner=new TestBean(){
+    public String getName(){
+      TransactionInfo ti=TransactionAspectSupport.currentTransactionInfo();
+      assertTrue(ti.hasTransaction());
+      assertEquals(innerTxatt,ti.getTransactionAttribute());
+      return spouseName;
+    }
+  }
+;
+  ITestBean outerProxy=(ITestBean)advised(outer,ptm,tas);
+  ITestBean innerProxy=(ITestBean)advised(inner,ptm,tas);
+  outer.setSpouse(innerProxy);
+  checkTransactionStatus(false);
+  outerProxy.exceptional(null);
+  checkTransactionStatus(false);
+  ptmControl.verify();
+}

@@ -1,0 +1,14 @@
+{
+  PlatformTransactionManager tm=new TestTransactionManager(false,true);
+  DefaultTransactionStatus status1=(DefaultTransactionStatus)tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
+  assertTrue("Must not have transaction",status1.getTransaction() == null);
+  DefaultTransactionStatus status2=(DefaultTransactionStatus)tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
+  assertTrue("Must have transaction",status2.getTransaction() != null);
+  assertTrue("Must be new transaction",status2.isNewTransaction());
+  try {
+    tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY));
+    fail("Should not have thrown NoTransactionException");
+  }
+ catch (  IllegalTransactionStateException ex) {
+  }
+}

@@ -1,0 +1,25 @@
+{
+  TestBean tb1=new TestBean();
+  TestBean tb2=new TestBean();
+  sf.openSession();
+  sfControl.setReturnValue(session,1);
+  session.getSessionFactory();
+  sessionControl.setReturnValue(sf,1);
+  session.getFlushMode();
+  sessionControl.setReturnValue(FlushMode.AUTO);
+  session.saveOrUpdate(tb1);
+  sessionControl.setVoidCallable(1);
+  session.saveOrUpdate(tb2);
+  sessionControl.setVoidCallable(1);
+  session.flush();
+  sessionControl.setVoidCallable(1);
+  session.close();
+  sessionControl.setReturnValue(null,1);
+  sfControl.replay();
+  sessionControl.replay();
+  HibernateTemplate ht=new HibernateTemplate(sf);
+  List tbs=new ArrayList();
+  tbs.add(tb1);
+  tbs.add(tb2);
+  ht.saveOrUpdateAll(tbs);
+}

@@ -1,0 +1,64 @@
+{
+  MockControl dsControl=MockControl.createControl(DataSource.class);
+  final DataSource ds=(DataSource)dsControl.getMock();
+  MockControl conControl=MockControl.createControl(Connection.class);
+  Connection con=(Connection)conControl.getMock();
+  MockControl mdControl=MockControl.createControl(DatabaseMetaData.class);
+  DatabaseMetaData md=(DatabaseMetaData)mdControl.getMock();
+  MockControl spControl=MockControl.createControl(Savepoint.class);
+  Savepoint sp=(Savepoint)spControl.getMock();
+  con.getAutoCommit();
+  conControl.setReturnValue(false,1);
+  md.supportsSavepoints();
+  mdControl.setReturnValue(true,1);
+  con.getMetaData();
+  conControl.setReturnValue(md,1);
+  for (int i=1; i <= count; i++) {
+    con.setSavepoint(ConnectionHolder.SAVEPOINT_NAME_PREFIX + i);
+    conControl.setReturnValue(sp,1);
+    con.releaseSavepoint(sp);
+    conControl.setVoidCallable(1);
+  }
+  con.commit();
+  conControl.setVoidCallable(1);
+  con.isReadOnly();
+  conControl.setReturnValue(false,1);
+  con.close();
+  conControl.setVoidCallable(1);
+  ds.getConnection();
+  dsControl.setReturnValue(con,1);
+  spControl.replay();
+  mdControl.replay();
+  conControl.replay();
+  dsControl.replay();
+  PlatformTransactionManager tm=new DataSourceTransactionManager(ds);
+  final TransactionTemplate tt=new TransactionTemplate(tm);
+  tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+  assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
+  assertTrue("Synchronization not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  tt.execute(new TransactionCallbackWithoutResult(){
+    protected void doInTransactionWithoutResult(    TransactionStatus status) throws RuntimeException {
+      assertTrue("Is new transaction",status.isNewTransaction());
+      assertTrue("Isn't nested transaction",!status.hasSavepoint());
+      for (int i=0; i < count; i++) {
+        tt.execute(new TransactionCallbackWithoutResult(){
+          protected void doInTransactionWithoutResult(          TransactionStatus status) throws RuntimeException {
+            assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(ds));
+            assertTrue("Synchronization active",TransactionSynchronizationManager.isSynchronizationActive());
+            assertTrue("Isn't new transaction",!status.isNewTransaction());
+            assertTrue("Is nested transaction",status.hasSavepoint());
+          }
+        }
+);
+      }
+      assertTrue("Is new transaction",status.isNewTransaction());
+      assertTrue("Isn't nested transaction",!status.hasSavepoint());
+    }
+  }
+);
+  assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
+  spControl.verify();
+  mdControl.verify();
+  conControl.verify();
+  dsControl.verify();
+}

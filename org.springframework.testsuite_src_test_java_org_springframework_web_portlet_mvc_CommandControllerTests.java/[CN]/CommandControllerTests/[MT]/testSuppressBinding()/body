@@ -1,0 +1,23 @@
+{
+  TestController tc=new TestController(){
+    protected boolean suppressBinding(    PortletRequest request){
+      return true;
+    }
+  }
+;
+  MockRenderRequest request=new MockRenderRequest();
+  MockRenderResponse response=new MockRenderResponse();
+  String name="test";
+  int age=30;
+  request.addParameter("name",name);
+  request.addParameter("age","" + age);
+  request.setContextPath("test");
+  ModelAndView mav=tc.handleRenderRequest(request,response);
+  assertEquals("test-view",mav.getViewName());
+  TestBean command=(TestBean)mav.getModel().get(tc.getCommandName());
+  assertNotNull(command);
+  assertTrue("Name should not have been bound",name != command.getName());
+  assertTrue("Age should not have been bound",age != command.getAge());
+  BindException errors=(BindException)mav.getModel().get(ERRORS_KEY);
+  assertEquals("There should be no errors",0,errors.getErrorCount());
+}

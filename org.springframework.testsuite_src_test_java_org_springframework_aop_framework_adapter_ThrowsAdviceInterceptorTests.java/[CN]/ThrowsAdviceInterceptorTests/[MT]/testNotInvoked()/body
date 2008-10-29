@@ -1,0 +1,13 @@
+{
+  MyThrowsHandler th=new MyThrowsHandler();
+  ThrowsAdviceInterceptor ti=new ThrowsAdviceInterceptor(th);
+  Object ret=new Object();
+  MockControl mc=MockControl.createControl(MethodInvocation.class);
+  MethodInvocation mi=(MethodInvocation)mc.getMock();
+  mi.proceed();
+  mc.setReturnValue(ret,1);
+  mc.replay();
+  assertEquals(ret,ti.invoke(mi));
+  assertEquals(0,th.getCalls());
+  mc.verify();
+}

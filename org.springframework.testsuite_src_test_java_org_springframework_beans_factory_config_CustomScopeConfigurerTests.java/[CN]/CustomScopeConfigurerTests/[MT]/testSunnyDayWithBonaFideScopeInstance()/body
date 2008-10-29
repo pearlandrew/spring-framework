@@ -1,0 +1,19 @@
+{
+  MockControl mockScope=MockControl.createControl(Scope.class);
+  final Scope scope=(Scope)mockScope.getMock();
+  mockScope.replay();
+  new ConfigurableListableBeanFactoryMockTemplate(){
+    public void setupExpectations(    MockControl mockControl,    ConfigurableListableBeanFactory factory){
+      factory.registerScope(FOO_SCOPE,scope);
+    }
+    protected void doTest(    ConfigurableListableBeanFactory factory){
+      Map scopes=new HashMap();
+      scopes.put(FOO_SCOPE,scope);
+      CustomScopeConfigurer figurer=new CustomScopeConfigurer();
+      figurer.setScopes(scopes);
+      figurer.postProcessBeanFactory(factory);
+    }
+  }
+.test();
+  mockScope.verify();
+}

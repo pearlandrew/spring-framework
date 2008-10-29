@@ -1,0 +1,69 @@
+{
+  final String sql="UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+  final int[] ids=new int[]{100,200};
+  final int[] rowsAffected=new int[]{1,2};
+  MockControl ctrlPreparedStatement=MockControl.createControl(PreparedStatement.class);
+  PreparedStatement mockPreparedStatement=(PreparedStatement)ctrlPreparedStatement.getMock();
+  mockPreparedStatement.getConnection();
+  ctrlPreparedStatement.setReturnValue(mockConnection);
+  mockPreparedStatement.setObject(1,new Integer(ids[0]),Types.INTEGER);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.addBatch();
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.setObject(1,new Integer(ids[1]),Types.INTEGER);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.addBatch();
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeBatch();
+  ctrlPreparedStatement.setReturnValue(rowsAffected);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  MockControl ctrlDatabaseMetaData=MockControl.createControl(DatabaseMetaData.class);
+  DatabaseMetaData mockDatabaseMetaData=(DatabaseMetaData)ctrlDatabaseMetaData.getMock();
+  mockDatabaseMetaData.supportsBatchUpdates();
+  ctrlDatabaseMetaData.setReturnValue(true);
+  mockConnection.prepareStatement(sql);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  mockConnection.getMetaData();
+  ctrlConnection.setReturnValue(mockDatabaseMetaData,1);
+  ctrlPreparedStatement.replay();
+  ctrlDatabaseMetaData.replay();
+  replay();
+  BatchSqlUpdate update=new BatchSqlUpdate(mockDataSource,sql);
+  update.declareParameter(new SqlParameter(Types.INTEGER));
+  if (flushThroughBatchSize) {
+    update.setBatchSize(2);
+  }
+  update.update(ids[0]);
+  update.update(ids[1]);
+  if (flushThroughBatchSize) {
+    assertEquals(0,update.getQueueCount());
+    assertEquals(2,update.getRowsAffected().length);
+  }
+ else {
+    assertEquals(2,update.getQueueCount());
+    assertEquals(0,update.getRowsAffected().length);
+  }
+  int[] actualRowsAffected=update.flush();
+  assertEquals(0,update.getQueueCount());
+  if (flushThroughBatchSize) {
+    assertTrue("flush did not execute updates",actualRowsAffected.length == 0);
+  }
+ else {
+    assertTrue("executed 2 updates",actualRowsAffected.length == 2);
+    assertEquals(rowsAffected[0],actualRowsAffected[0]);
+    assertEquals(rowsAffected[1],actualRowsAffected[1]);
+  }
+  actualRowsAffected=update.getRowsAffected();
+  assertTrue("executed 2 updates",actualRowsAffected.length == 2);
+  assertEquals(rowsAffected[0],actualRowsAffected[0]);
+  assertEquals(rowsAffected[1],actualRowsAffected[1]);
+  update.reset();
+  assertEquals(0,update.getRowsAffected().length);
+  ctrlPreparedStatement.verify();
+  ctrlDatabaseMetaData.verify();
+}

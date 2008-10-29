@@ -1,0 +1,21 @@
+{
+  final String helperTool="wrongType";
+  FreeMarkerView fv=new FreeMarkerView(){
+    protected void processTemplate(    Template template,    Map model,    HttpServletResponse response){
+      fail();
+    }
+  }
+;
+  fv.setUrl(TEMPLATE_FILE);
+  fv.setApplicationContext(wac);
+  fv.setExposeSpringMacroHelpers(true);
+  Map model=new HashMap();
+  model.put(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE,helperTool);
+  try {
+    fv.render(model,request,response);
+  }
+ catch (  Exception ex) {
+    assertTrue(ex instanceof ServletException);
+    assertTrue(ex.getMessage().indexOf(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) > -1);
+  }
+}

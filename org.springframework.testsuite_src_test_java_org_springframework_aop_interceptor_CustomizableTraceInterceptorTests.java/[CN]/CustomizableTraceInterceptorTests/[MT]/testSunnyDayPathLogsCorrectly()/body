@@ -1,0 +1,26 @@
+{
+  MockControl mockLog=MockControl.createControl(Log.class);
+  Log log=(Log)mockLog.getMock();
+  MockControl mockMethodInvocation=MockControl.createControl(MethodInvocation.class);
+  MethodInvocation methodInvocation=(MethodInvocation)mockMethodInvocation.getMock();
+  Method toString=String.class.getMethod("toString",new Class[]{});
+  log.isTraceEnabled();
+  mockLog.setReturnValue(true);
+  methodInvocation.getMethod();
+  mockMethodInvocation.setReturnValue(toString,4);
+  methodInvocation.getThis();
+  mockMethodInvocation.setReturnValue(this,2);
+  log.trace("Some tracing output");
+  mockLog.setMatcher(MockControl.ALWAYS_MATCHER);
+  methodInvocation.proceed();
+  mockMethodInvocation.setReturnValue(null);
+  log.trace("Some more tracing output");
+  mockLog.setMatcher(MockControl.ALWAYS_MATCHER);
+  mockLog.setVoidCallable();
+  mockMethodInvocation.replay();
+  mockLog.replay();
+  CustomizableTraceInterceptor interceptor=new StubCustomizableTraceInterceptor(log);
+  interceptor.invoke(methodInvocation);
+  mockLog.verify();
+  mockMethodInvocation.verify();
+}

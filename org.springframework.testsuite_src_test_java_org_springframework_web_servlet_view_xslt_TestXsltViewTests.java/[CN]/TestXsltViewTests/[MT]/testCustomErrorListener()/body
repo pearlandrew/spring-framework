@@ -1,0 +1,24 @@
+{
+  view.setErrorListener(new ErrorListener(){
+    public void warning(    TransformerException ex){
+      incWarnings();
+    }
+    public void error(    TransformerException ex){
+      incErrors();
+    }
+    public void fatalError(    TransformerException ex){
+      incFatals();
+    }
+  }
+);
+  view.setStylesheetLocation(new ClassPathResource("org/springframework/web/servlet/view/xslt/errors.xsl"));
+  try {
+    view.initApplicationContext();
+  }
+ catch (  ApplicationContextException ex) {
+    assertTrue(ex.getCause() instanceof TransformerException);
+  }
+  assertEquals(1,fatal);
+  assertEquals(1,errors);
+  assertEquals(0,warnings);
+}

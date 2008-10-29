@@ -1,0 +1,44 @@
+{
+  MockControl query1Control=MockControl.createControl(Query.class);
+  Query query1=(Query)query1Control.getMock();
+  MockControl query2Control=MockControl.createControl(Query.class);
+  Query query2=(Query)query2Control.getMock();
+  MockControl criteriaControl=MockControl.createControl(Criteria.class);
+  Criteria criteria=(Criteria)criteriaControl.getMock();
+  sf.openSession();
+  sfControl.setReturnValue(session,1);
+  session.getSessionFactory();
+  sessionControl.setReturnValue(sf,1);
+  session.createQuery("some query");
+  sessionControl.setReturnValue(query1);
+  session.getNamedQuery("some query name");
+  sessionControl.setReturnValue(query2);
+  session.createCriteria(TestBean.class);
+  sessionControl.setReturnValue(criteria,1);
+  session.flush();
+  sessionControl.setVoidCallable(1);
+  session.close();
+  sessionControl.setReturnValue(null,1);
+  sfControl.replay();
+  sessionControl.replay();
+  query1Control.replay();
+  query2Control.replay();
+  criteriaControl.replay();
+  HibernateTemplate ht=new HibernateTemplate(sf);
+  ht.setExposeNativeSession(true);
+  ht.setCacheQueries(true);
+  ht.setQueryCacheRegion("myRegion");
+  ht.execute(new HibernateCallback(){
+    public Object doInHibernate(    org.hibernate.Session sess) throws HibernateException {
+      assertSame(session,sess);
+      sess.createQuery("some query");
+      sess.getNamedQuery("some query name");
+      sess.createCriteria(TestBean.class);
+      return null;
+    }
+  }
+);
+  query1Control.verify();
+  query2Control.verify();
+  criteriaControl.verify();
+}

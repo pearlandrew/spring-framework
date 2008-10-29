@@ -1,0 +1,88 @@
+{
+  String sql="SELECT FORENAME FROM CUSTMR";
+  String[] results={"rod","gary"," portia"};
+class StringHandler implements RowCallbackHandler {
+    private List list=new LinkedList();
+    public void processRow(    ResultSet rs) throws SQLException {
+      list.add(rs.getString(1));
+    }
+    public String[] getStrings(){
+      return (String[])list.toArray(new String[list.size()]);
+    }
+  }
+  MockControl ctrlResultSet=MockControl.createControl(ResultSet.class);
+  ResultSet mockResultSet=(ResultSet)ctrlResultSet.getMock();
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getString(1);
+  ctrlResultSet.setReturnValue(results[0]);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getString(1);
+  ctrlResultSet.setReturnValue(results[1]);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getString(1);
+  ctrlResultSet.setReturnValue(results[2]);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  MockControl ctrlStatement=MockControl.createControl(PreparedStatement.class);
+  PreparedStatement mockStatement=(PreparedStatement)ctrlStatement.getMock();
+  if (fetchSize != null) {
+    mockStatement.setFetchSize(fetchSize.intValue());
+  }
+  if (maxRows != null) {
+    mockStatement.setMaxRows(maxRows.intValue());
+  }
+  if (queryTimeout != null) {
+    mockStatement.setQueryTimeout(queryTimeout.intValue());
+  }
+  if (argument != null) {
+    mockStatement.setObject(1,argument);
+  }
+  if (usePreparedStatement) {
+    mockStatement.executeQuery();
+  }
+ else {
+    mockStatement.executeQuery(sql);
+  }
+  ctrlStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockStatement.getWarnings();
+    ctrlStatement.setReturnValue(null);
+  }
+  mockStatement.close();
+  ctrlStatement.setVoidCallable();
+  if (usePreparedStatement) {
+    mockConnection.prepareStatement(sql);
+  }
+ else {
+    mockConnection.createStatement();
+  }
+  ctrlConnection.setReturnValue(mockStatement);
+  ctrlResultSet.replay();
+  ctrlStatement.replay();
+  replay();
+  StringHandler sh=new StringHandler();
+  JdbcTemplate template=new JdbcTemplate();
+  template.setDataSource(mockDataSource);
+  if (fetchSize != null) {
+    template.setFetchSize(fetchSize.intValue());
+  }
+  if (maxRows != null) {
+    template.setMaxRows(maxRows.intValue());
+  }
+  if (queryTimeout != null) {
+    template.setQueryTimeout(queryTimeout.intValue());
+  }
+  jdbcTemplateCallback.doInJdbcTemplate(template,sql,sh);
+  String[] forenames=sh.getStrings();
+  assertTrue("same length",forenames.length == results.length);
+  for (int i=0; i < forenames.length; i++) {
+    assertTrue("Row " + i + " matches",forenames[i].equals(results[i]));
+  }
+  ctrlResultSet.verify();
+  ctrlStatement.verify();
+}

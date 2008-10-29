@@ -1,0 +1,18 @@
+{
+  call2Control=MockControl.createControl(Call.class);
+  call2=(Call)call2Control.getMock();
+  service1.createCall(new QName("myNamespace","myPort"),"setName");
+  service1Control.setReturnValue(call2);
+  call2.invoke(new Object[]{"exception"});
+  call2Control.setMatcher(new ArgumentsMatcher(){
+    public boolean matches(    Object[] objects,    Object[] objects1){
+      return Arrays.equals((Object[])objects[0],(Object[])objects1[0]);
+    }
+    public String toString(    Object[] objects){
+      return ObjectUtils.nullSafeToString(objects[0]);
+    }
+  }
+);
+  call2Control.setThrowable(new RemoteException());
+  call2Control.replay();
+}

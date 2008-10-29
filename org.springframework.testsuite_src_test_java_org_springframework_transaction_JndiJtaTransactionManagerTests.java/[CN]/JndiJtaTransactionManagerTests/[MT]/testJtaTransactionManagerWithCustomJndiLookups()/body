@@ -1,0 +1,38 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_ACTIVE,2);
+  ut.begin();
+  utControl.setVoidCallable(1);
+  ut.commit();
+  utControl.setVoidCallable(1);
+  utControl.replay();
+  MockControl tmControl=MockControl.createControl(TransactionManager.class);
+  TransactionManager tm=(TransactionManager)tmControl.getMock();
+  JtaTransactionManager ptm=new JtaTransactionManager();
+  ptm.setUserTransactionName("jndi-ut");
+  ptm.setTransactionManagerName("jndi-tm");
+  ExpectedLookupTemplate jndiTemplate=new ExpectedLookupTemplate();
+  jndiTemplate.addObject("jndi-ut",ut);
+  jndiTemplate.addObject("jndi-tm",tm);
+  ptm.setJndiTemplate(jndiTemplate);
+  ptm.afterPropertiesSet();
+  assertEquals(ut,ptm.getUserTransaction());
+  assertEquals(tm,ptm.getTransactionManager());
+  TransactionTemplate tt=new TransactionTemplate(ptm);
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+  tt.execute(new TransactionCallbackWithoutResult(){
+    protected void doInTransactionWithoutResult(    TransactionStatus status){
+      assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+      assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+    }
+  }
+);
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+  utControl.verify();
+}

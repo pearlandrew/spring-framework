@@ -1,0 +1,23 @@
+{
+  MockControl mockSession=MockControl.createControl(Session.class);
+  Session session=(Session)mockSession.getMock();
+  mockSession.replay();
+  MockControl mockDestinationResolver=MockControl.createControl(DestinationResolver.class);
+  DestinationResolver dynamicResolver=(DestinationResolver)mockDestinationResolver.getMock();
+  dynamicResolver.resolveDestinationName(session,DESTINATION_NAME,true);
+  mockDestinationResolver.setReturnValue(DESTINATION);
+  mockDestinationResolver.replay();
+  JndiDestinationResolver resolver=new JndiDestinationResolver(){
+    protected Object lookup(    String jndiName,    Class requiredClass) throws NamingException {
+      throw new NamingException();
+    }
+  }
+;
+  resolver.setFallbackToDynamicDestination(true);
+  resolver.setDynamicDestinationResolver(dynamicResolver);
+  Destination destination=resolver.resolveDestinationName(session,DESTINATION_NAME,true);
+  assertNotNull(destination);
+  assertSame(DESTINATION,destination);
+  mockSession.verify();
+  mockDestinationResolver.verify();
+}

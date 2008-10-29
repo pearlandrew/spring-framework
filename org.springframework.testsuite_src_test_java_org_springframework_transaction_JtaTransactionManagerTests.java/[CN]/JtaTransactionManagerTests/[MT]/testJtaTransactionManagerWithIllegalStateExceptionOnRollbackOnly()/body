@@ -1,0 +1,23 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  ut.getStatus();
+  utControl.setReturnValue(Status.STATUS_ACTIVE,3);
+  ut.setRollbackOnly();
+  utControl.setThrowable(new IllegalStateException("no existing transaction"));
+  utControl.replay();
+  try {
+    JtaTransactionManager ptm=newJtaTransactionManager(ut);
+    TransactionTemplate tt=new TransactionTemplate(ptm);
+    tt.execute(new TransactionCallbackWithoutResult(){
+      protected void doInTransactionWithoutResult(      TransactionStatus status){
+        status.setRollbackOnly();
+      }
+    }
+);
+    fail("Should have thrown TransactionSystemException");
+  }
+ catch (  TransactionSystemException ex) {
+  }
+  utControl.verify();
+}

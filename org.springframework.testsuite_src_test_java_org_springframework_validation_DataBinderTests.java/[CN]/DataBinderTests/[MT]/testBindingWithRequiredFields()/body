@@ -1,0 +1,24 @@
+{
+  TestBean tb=new TestBean();
+  tb.setSpouse(new TestBean());
+  DataBinder binder=new DataBinder(tb,"person");
+  binder.setRequiredFields(new String[]{"touchy","name","age","date","spouse.name"});
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  pvs.addPropertyValue("touchy","");
+  pvs.addPropertyValue("name",null);
+  pvs.addPropertyValue("age",null);
+  pvs.addPropertyValue("spouse.name","     ");
+  binder.bind(pvs);
+  BindingResult br=binder.getBindingResult();
+  assertEquals("Wrong number of errors",5,br.getErrorCount());
+  assertEquals("required",br.getFieldError("touchy").getCode());
+  assertEquals("",br.getFieldValue("touchy"));
+  assertEquals("required",br.getFieldError("name").getCode());
+  assertEquals("",br.getFieldValue("name"));
+  assertEquals("required",br.getFieldError("age").getCode());
+  assertEquals("",br.getFieldValue("age"));
+  assertEquals("required",br.getFieldError("date").getCode());
+  assertEquals("",br.getFieldValue("date"));
+  assertEquals("required",br.getFieldError("spouse.name").getCode());
+  assertEquals("",br.getFieldValue("spouse.name"));
+}

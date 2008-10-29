@@ -1,0 +1,133 @@
+{
+  MockControl ctrlResultSet=MockControl.createControl(ResultSet.class);
+  final ResultSet mockResultSet=(ResultSet)ctrlResultSet.getMock();
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable(2);
+  MockControl ctrlStatement=MockControl.createControl(Statement.class);
+  final Statement mockStatement=(Statement)ctrlStatement.getMock();
+  if (debugEnabled) {
+    mockStatement.getWarnings();
+    ctrlStatement.setReturnValue(null);
+  }
+  mockStatement.close();
+  ctrlStatement.setVoidCallable();
+  MockControl ctrlStatement2=MockControl.createControl(Statement.class);
+  final Statement mockStatement2=(Statement)ctrlStatement2.getMock();
+  mockStatement2.executeQuery("my query");
+  ctrlStatement2.setReturnValue(mockResultSet,1);
+  MockControl ctrlPreparedStatement=MockControl.createControl(PreparedStatement.class);
+  final PreparedStatement mockPreparedStatement=(PreparedStatement)ctrlPreparedStatement.getMock();
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  MockControl ctrlPreparedStatement2=MockControl.createControl(PreparedStatement.class);
+  final PreparedStatement mockPreparedStatement2=(PreparedStatement)ctrlPreparedStatement2.getMock();
+  mockPreparedStatement2.executeQuery();
+  ctrlPreparedStatement2.setReturnValue(mockResultSet,1);
+  MockControl ctrlReturnResultSet=MockControl.createControl(ResultSet.class);
+  final ResultSet mockReturnResultSet=(ResultSet)ctrlReturnResultSet.getMock();
+  mockReturnResultSet.next();
+  ctrlReturnResultSet.setReturnValue(false);
+  mockReturnResultSet.close();
+  ctrlReturnResultSet.setVoidCallable(2);
+  MockControl ctrlCallableStatement=MockControl.createControl(CallableStatement.class);
+  final CallableStatement mockCallableStatement=(CallableStatement)ctrlCallableStatement.getMock();
+  if (debugEnabled) {
+    mockCallableStatement.getWarnings();
+    ctrlCallableStatement.setReturnValue(null);
+  }
+  mockCallableStatement.close();
+  ctrlCallableStatement.setVoidCallable();
+  MockControl ctrlCallableStatement2=MockControl.createControl(CallableStatement.class);
+  final CallableStatement mockCallableStatement2=(CallableStatement)ctrlCallableStatement2.getMock();
+  mockCallableStatement2.execute();
+  ctrlCallableStatement2.setReturnValue(true);
+  mockCallableStatement2.getUpdateCount();
+  ctrlCallableStatement2.setReturnValue(-1);
+  mockCallableStatement2.getResultSet();
+  ctrlCallableStatement2.setReturnValue(mockReturnResultSet);
+  mockCallableStatement2.getMoreResults();
+  ctrlCallableStatement2.setReturnValue(false);
+  mockCallableStatement2.getUpdateCount();
+  ctrlCallableStatement2.setReturnValue(-1);
+  ctrlResultSet.replay();
+  ctrlStatement.replay();
+  ctrlStatement2.replay();
+  ctrlPreparedStatement.replay();
+  ctrlPreparedStatement2.replay();
+  ctrlReturnResultSet.replay();
+  ;
+  ctrlCallableStatement.replay();
+  ctrlCallableStatement2.replay();
+  mockConnection.createStatement();
+  ctrlConnection.setReturnValue(mockStatement,1);
+  replay();
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  template.setNativeJdbcExtractor(new NativeJdbcExtractor(){
+    public boolean isNativeConnectionNecessaryForNativeStatements(){
+      return false;
+    }
+    public boolean isNativeConnectionNecessaryForNativePreparedStatements(){
+      return false;
+    }
+    public boolean isNativeConnectionNecessaryForNativeCallableStatements(){
+      return false;
+    }
+    public Connection getNativeConnection(    Connection con){
+      return con;
+    }
+    public Connection getNativeConnectionFromStatement(    Statement stmt) throws SQLException {
+      return stmt.getConnection();
+    }
+    public Statement getNativeStatement(    Statement stmt){
+      assertTrue(stmt == mockStatement);
+      return mockStatement2;
+    }
+    public PreparedStatement getNativePreparedStatement(    PreparedStatement ps){
+      assertTrue(ps == mockPreparedStatement);
+      return mockPreparedStatement2;
+    }
+    public CallableStatement getNativeCallableStatement(    CallableStatement cs){
+      assertTrue(cs == mockCallableStatement);
+      return mockCallableStatement2;
+    }
+    public ResultSet getNativeResultSet(    ResultSet rs){
+      return rs;
+    }
+  }
+);
+  template.query("my query",new ResultSetExtractor(){
+    public Object extractData(    ResultSet rs2){
+      assertEquals(mockResultSet,rs2);
+      return null;
+    }
+  }
+);
+  template.query(new PreparedStatementCreator(){
+    public PreparedStatement createPreparedStatement(    Connection conn){
+      return mockPreparedStatement;
+    }
+  }
+,new ResultSetExtractor(){
+    public Object extractData(    ResultSet rs2){
+      assertEquals(mockResultSet,rs2);
+      return null;
+    }
+  }
+);
+  template.call(new CallableStatementCreator(){
+    public CallableStatement createCallableStatement(    Connection con){
+      return mockCallableStatement;
+    }
+  }
+,new ArrayList());
+  ctrlStatement.verify();
+  ctrlStatement2.verify();
+  ctrlPreparedStatement.verify();
+  ctrlPreparedStatement2.verify();
+  ctrlCallableStatement.verify();
+  ctrlCallableStatement2.verify();
+}

@@ -1,0 +1,22 @@
+{
+  replay();
+  MappingSqlQuery query=new MappingSqlQuery(){
+    protected Object mapRow(    ResultSet rs,    int rownum) throws SQLException {
+      return new Integer(rs.getInt(1));
+    }
+  }
+;
+  query.setDataSource(mockDataSource);
+  query.setSql(SELECT_ID_WHERE);
+  query.declareParameter(new SqlParameter(COLUMN_NAMES[0],COLUMN_TYPES[0]));
+  query.declareParameter(new SqlParameter(COLUMN_NAMES[1],COLUMN_TYPES[1]));
+  query.compile();
+  try {
+    Map params=new HashMap();
+    params.put(COLUMN_NAMES[0],"Value");
+    List list=query.executeByNamedParam(params);
+    fail("Shouldn't succeed in running query with missing params");
+  }
+ catch (  InvalidDataAccessApiUsageException ex) {
+  }
+}

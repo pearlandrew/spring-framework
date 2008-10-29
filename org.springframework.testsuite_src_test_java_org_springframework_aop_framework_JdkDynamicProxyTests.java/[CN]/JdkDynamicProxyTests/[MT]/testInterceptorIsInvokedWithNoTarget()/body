@@ -1,0 +1,14 @@
+{
+  int age=25;
+  MockControl miControl=MockControl.createControl(MethodInterceptor.class);
+  MethodInterceptor mi=(MethodInterceptor)miControl.getMock();
+  AdvisedSupport pc=new AdvisedSupport(new Class[]{ITestBean.class});
+  pc.addAdvice(mi);
+  AopProxy aop=createAopProxy(pc);
+  mi.invoke(null);
+  miControl.setDefaultReturnValue(new Integer(age));
+  miControl.replay();
+  ITestBean tb=(ITestBean)aop.getProxy();
+  assertTrue("correct return value",tb.getAge() == age);
+  miControl.verify();
+}

@@ -1,0 +1,14 @@
+{
+  TestBean tb=new TestBean();
+  ProxyFactory pc=new ProxyFactory(new Class[]{ITestBean.class});
+  TestDynamicPointcutAdvice dp=new TestDynamicPointcutAdvice(new NopInterceptor(),"getAge");
+  pc.addAdvisor(dp);
+  pc.setTarget(tb);
+  ITestBean it=(ITestBean)createProxy(pc);
+  assertEquals(dp.count,0);
+  int age=it.getAge();
+  assertEquals(dp.count,1);
+  it.setAge(11);
+  assertEquals(it.getAge(),11);
+  assertEquals(dp.count,2);
+}

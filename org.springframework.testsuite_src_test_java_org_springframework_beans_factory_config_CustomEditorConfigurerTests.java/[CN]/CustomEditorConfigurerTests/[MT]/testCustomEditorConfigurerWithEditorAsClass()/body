@@ -1,0 +1,14 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  CustomEditorConfigurer cec=new CustomEditorConfigurer();
+  Map editors=new HashMap();
+  editors.put(Date.class,MyDateEditor.class);
+  cec.setCustomEditors(editors);
+  cec.postProcessBeanFactory(bf);
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  pvs.addPropertyValue("date","2.12.1975");
+  bf.registerBeanDefinition("tb",new RootBeanDefinition(TestBean.class,pvs));
+  TestBean tb=(TestBean)bf.getBean("tb");
+  DateFormat df=DateFormat.getDateInstance(DateFormat.SHORT,Locale.GERMAN);
+  assertEquals(df.parse("2.12.1975"),tb.getDate());
+}

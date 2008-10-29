@@ -1,0 +1,54 @@
+{
+  MockControl mockDestination=MockControl.createControl(Queue.class);
+  Queue destination=(Queue)mockDestination.getMock();
+  mockDestination.replay();
+  MockControl mockSentTextMessage=MockControl.createControl(TextMessage.class);
+  final TextMessage sentTextMessage=(TextMessage)mockSentTextMessage.getMock();
+  sentTextMessage.getJMSCorrelationID();
+  mockSentTextMessage.setReturnValue(CORRELATION_ID);
+  sentTextMessage.getJMSReplyTo();
+  mockSentTextMessage.setReturnValue(destination);
+  mockSentTextMessage.replay();
+  MockControl mockResponseTextMessage=MockControl.createControl(TextMessage.class);
+  TextMessage responseTextMessage=(TextMessage)mockResponseTextMessage.getMock();
+  responseTextMessage.setJMSCorrelationID(CORRELATION_ID);
+  mockResponseTextMessage.setVoidCallable();
+  mockResponseTextMessage.replay();
+  MockControl mockMessageProducer=MockControl.createControl(MessageProducer.class);
+  MessageProducer messageProducer=(MessageProducer)mockMessageProducer.getMock();
+  messageProducer.send(responseTextMessage);
+  mockMessageProducer.setThrowable(new JMSException("Dow!"));
+  messageProducer.close();
+  mockMessageProducer.setVoidCallable();
+  mockMessageProducer.replay();
+  MockControl mockSession=MockControl.createControl(QueueSession.class);
+  final QueueSession session=(QueueSession)mockSession.getMock();
+  session.createTextMessage(RESPONSE_TEXT);
+  mockSession.setReturnValue(responseTextMessage);
+  session.createProducer(destination);
+  mockSession.setReturnValue(messageProducer);
+  mockSession.replay();
+  MockControl mockDelegate=MockControl.createControl(ResponsiveMessageDelegate.class);
+  ResponsiveMessageDelegate delegate=(ResponsiveMessageDelegate)mockDelegate.getMock();
+  delegate.handleMessage(sentTextMessage);
+  mockDelegate.setReturnValue(RESPONSE_TEXT);
+  mockDelegate.replay();
+  final MessageListenerAdapter adapter=new MessageListenerAdapter(delegate){
+    protected Object extractMessage(    Message message){
+      return message;
+    }
+  }
+;
+  new AssertThrows(JMSException.class){
+    public void test() throws Exception {
+      adapter.onMessage(sentTextMessage,session);
+    }
+  }
+.runTest();
+  mockDelegate.verify();
+  mockSentTextMessage.verify();
+  mockResponseTextMessage.verify();
+  mockSession.verify();
+  mockDestination.verify();
+  mockMessageProducer.verify();
+}

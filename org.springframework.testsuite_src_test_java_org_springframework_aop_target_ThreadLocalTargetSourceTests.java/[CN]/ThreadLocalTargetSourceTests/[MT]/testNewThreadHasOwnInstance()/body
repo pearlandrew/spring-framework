@@ -1,0 +1,25 @@
+{
+  SideEffectBean apartment=(SideEffectBean)beanFactory.getBean("apartment");
+  assertEquals(INITIAL_COUNT,apartment.getCount());
+  apartment.doWork();
+  apartment.doWork();
+  apartment.doWork();
+  assertEquals(INITIAL_COUNT + 3,apartment.getCount());
+class Runner implements Runnable {
+    public SideEffectBean mine;
+    public void run(){
+      this.mine=(SideEffectBean)beanFactory.getBean("apartment");
+      assertEquals(INITIAL_COUNT,mine.getCount());
+      mine.doWork();
+      assertEquals(INITIAL_COUNT + 1,mine.getCount());
+    }
+  }
+  Runner r=new Runner();
+  Thread t=new Thread(r);
+  t.start();
+  t.join();
+  assertNotNull(r);
+  assertEquals(INITIAL_COUNT + 3,apartment.getCount());
+  assertEquals(INITIAL_COUNT + 3,r.mine.getCount());
+  assertEquals(2,((ThreadLocalTargetSourceStats)apartment).getObjectCount());
+}

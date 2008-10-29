@@ -1,0 +1,33 @@
+{
+  MockControl sessionControl=MockControl.createControl(Session.class);
+  Session session=(Session)sessionControl.getMock();
+  MockControl messageControl=MockControl.createControl(BytesMessage.class);
+  BytesMessage message=(BytesMessage)messageControl.getMock();
+  byte[] content="test".getBytes();
+  session.createBytesMessage();
+  sessionControl.setReturnValue(message,1);
+  message.writeBytes(content);
+  messageControl.setVoidCallable(1);
+  message.getBodyLength();
+  messageControl.setReturnValue(content.length,1);
+  message.readBytes(new byte[content.length]);
+  messageControl.setMatcher(new ArgumentsMatcher(){
+    public boolean matches(    Object[] arg0,    Object[] arg1){
+      byte[] one=(byte[])arg0[0];
+      byte[] two=(byte[])arg1[0];
+      return Arrays.equals(one,two);
+    }
+    public String toString(    Object[] arg0){
+      return "bla";
+    }
+  }
+);
+  messageControl.setReturnValue(content.length,1);
+  sessionControl.replay();
+  messageControl.replay();
+  SimpleMessageConverter converter=new SimpleMessageConverter();
+  Message msg=converter.toMessage(content,session);
+  assertEquals(content.length,((byte[])converter.fromMessage(msg)).length);
+  sessionControl.verify();
+  messageControl.verify();
+}

@@ -1,0 +1,18 @@
+{
+  pmf.getPersistenceManager();
+  pmfControl.setReturnValue(pm,1);
+  pm.close();
+  pmControl.setVoidCallable(1);
+  pmfControl.replay();
+  pmControl.replay();
+  JdoTemplate jt=new JdoTemplate(pmf);
+  final List l=new ArrayList();
+  l.add("test");
+  List result=(List)jt.execute(new JdoCallback(){
+    public Object doInJdo(    PersistenceManager pm){
+      return l;
+    }
+  }
+);
+  assertTrue("Correct result list",result == l);
+}

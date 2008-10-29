@@ -1,0 +1,19 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  CustomEditorConfigurer cec=new CustomEditorConfigurer();
+  Map editors=new HashMap();
+  editors.put("java.lang.String[]",new PropertyEditorSupport(){
+    public void setAsText(    String text){
+      setValue(new String[]{"test"});
+    }
+  }
+);
+  cec.setCustomEditors(editors);
+  cec.postProcessBeanFactory(bf);
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  pvs.addPropertyValue("stringArray","xxx");
+  bf.registerBeanDefinition("tb",new RootBeanDefinition(TestBean.class,pvs));
+  TestBean tb=(TestBean)bf.getBean("tb");
+  assertTrue(tb.getStringArray() != null && tb.getStringArray().length == 1);
+  assertEquals("test",tb.getStringArray()[0]);
+}

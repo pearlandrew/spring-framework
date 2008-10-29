@@ -1,0 +1,21 @@
+{
+  TestController mc=new TestController();
+  MockHttpServletRequest request=new MockHttpServletRequest("GET","/ok.html");
+  String name="Rod";
+  String age="32x";
+  request.addParameter("name",name);
+  request.addParameter("age",age);
+  HttpServletResponse response=new MockHttpServletResponse();
+  ModelAndView mv=mc.handleRequest(request,response);
+  assertTrue("returned correct view name",mv.getViewName().equals(request.getServletPath()));
+  TestBean person=(TestBean)mv.getModel().get("command");
+  Errors errors=(Errors)mv.getModel().get("errors");
+  assertTrue("command and errors non null",person != null && errors != null);
+  assertTrue("has 1 errors",errors.getErrorCount() == 1);
+  assertTrue("command name bound ok",person.getName().equals(name));
+  assertTrue("command age default",person.getAge() == new TestBean().getAge());
+  assertTrue("has error on field age",errors.hasFieldErrors("age"));
+  FieldError fe=errors.getFieldError("age");
+  assertTrue("Saved invalid value",fe.getRejectedValue().equals(age));
+  assertTrue("Correct field",fe.getField().equals("age"));
+}

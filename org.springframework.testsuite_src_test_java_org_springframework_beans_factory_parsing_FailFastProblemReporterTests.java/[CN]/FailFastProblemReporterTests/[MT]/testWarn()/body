@@ -1,0 +1,20 @@
+{
+  IllegalArgumentException rootCause=new IllegalArgumentException();
+  Problem problem=new Problem("VGER",new Location(new DescriptiveResource("here")),null,new IllegalArgumentException());
+  MockControl mockLog=MockControl.createControl(Log.class);
+  Log log=(Log)mockLog.getMock();
+  log.warn(null,rootCause);
+  mockLog.setMatcher(new AbstractMatcher(){
+    public boolean matches(    Object[] expected,    Object[] actual){
+      Assert.assertEquals(2,actual.length);
+      Assert.assertTrue(actual[1] instanceof IllegalArgumentException);
+      return true;
+    }
+  }
+);
+  mockLog.replay();
+  FailFastProblemReporter reporter=new FailFastProblemReporter();
+  reporter.setLogger(log);
+  reporter.warning(problem);
+  mockLog.verify();
+}

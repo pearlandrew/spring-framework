@@ -1,0 +1,29 @@
+{
+  session.getSessionFactory();
+  sessionControl.setReturnValue(sf,1);
+  session.isOpen();
+  sessionControl.setReturnValue(true,1);
+  session.enableFilter("myFilter");
+  sessionControl.setReturnValue(null,1);
+  session.disableFilter("myFilter");
+  sessionControl.setVoidCallable(1);
+  sfControl.replay();
+  sessionControl.replay();
+  HibernateTemplate ht=new HibernateTemplate(sf);
+  ht.setFilterName("myFilter");
+  TransactionSynchronizationManager.bindResource(sf,new SessionHolder(session));
+  try {
+    final List l=new ArrayList();
+    l.add("test");
+    List result=ht.executeFind(new HibernateCallback(){
+      public Object doInHibernate(      org.hibernate.Session session) throws HibernateException {
+        return l;
+      }
+    }
+);
+    assertTrue("Correct result list",result == l);
+  }
+  finally {
+    TransactionSynchronizationManager.unbindResource(sf);
+  }
+}

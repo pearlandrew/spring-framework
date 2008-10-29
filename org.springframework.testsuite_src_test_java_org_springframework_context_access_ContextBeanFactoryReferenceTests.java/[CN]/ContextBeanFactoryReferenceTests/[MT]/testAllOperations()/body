@@ -1,0 +1,15 @@
+{
+  MockControl control=MockControl.createControl(ConfigurableApplicationContext.class);
+  ConfigurableApplicationContext ctx=(ConfigurableApplicationContext)control.getMock();
+  ctx.close();
+  control.replay();
+  ContextBeanFactoryReference bfr=new ContextBeanFactoryReference(ctx);
+  assertNotNull(bfr.getFactory());
+  bfr.release();
+  try {
+    bfr.getFactory();
+  }
+ catch (  IllegalStateException e) {
+  }
+  control.verify();
+}

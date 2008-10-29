@@ -1,0 +1,69 @@
+{
+  MockControl utControl=MockControl.createControl(UserTransaction.class);
+  UserTransaction ut=(UserTransaction)utControl.getMock();
+  MockControl dsControl=MockControl.createControl(DataSource.class);
+  final DataSource ds=(DataSource)dsControl.getMock();
+  MockControl conControl=MockControl.createControl(Connection.class);
+  Connection con=(Connection)conControl.getMock();
+  JtaTransactionManager ptm=new JtaTransactionManager(ut){
+    protected void doRegisterAfterCompletionWithJtaTransaction(    JtaTransactionObject txObject,    final List synchronizations){
+      Thread async=new Thread(){
+        public void run(){
+          invokeAfterCompletion(synchronizations,TransactionSynchronization.STATUS_COMMITTED);
+        }
+      }
+;
+      async.start();
+      try {
+        async.join();
+      }
+ catch (      InterruptedException ex) {
+        ex.printStackTrace();
+      }
+    }
+  }
+;
+  TransactionTemplate tt=new TransactionTemplate(ptm);
+  assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
+  assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  for (int i=0; i < 3; i++) {
+    utControl.reset();
+    ut.getStatus();
+    utControl.setReturnValue(Status.STATUS_ACTIVE,1);
+    utControl.replay();
+    dsControl.reset();
+    conControl.reset();
+    ds.getConnection();
+    dsControl.setReturnValue(con,1);
+    con.close();
+    conControl.setVoidCallable(1);
+    dsControl.replay();
+    conControl.replay();
+    final boolean releaseCon=(i != 1);
+    tt.execute(new TransactionCallbackWithoutResult(){
+      protected void doInTransactionWithoutResult(      TransactionStatus status) throws RuntimeException {
+        assertTrue("JTA synchronizations active",TransactionSynchronizationManager.isSynchronizationActive());
+        assertTrue("Is existing transaction",!status.isNewTransaction());
+        Connection c=DataSourceUtils.getConnection(ds);
+        assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(ds));
+        DataSourceUtils.releaseConnection(c,ds);
+        c=DataSourceUtils.getConnection(ds);
+        assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(ds));
+        if (releaseCon) {
+          DataSourceUtils.releaseConnection(c,ds);
+        }
+      }
+    }
+);
+    if (!releaseCon) {
+      assertTrue("Still has connection holder",TransactionSynchronizationManager.hasResource(ds));
+    }
+ else {
+      assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
+    }
+    assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+    conControl.verify();
+    dsControl.verify();
+    utControl.verify();
+  }
+}

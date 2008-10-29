@@ -1,0 +1,25 @@
+{
+  MockControl interceptorControl=MockControl.createControl(org.hibernate.Interceptor.class);
+  Interceptor entityInterceptor=(Interceptor)interceptorControl.getMock();
+  sf.openSession(entityInterceptor);
+  sfControl.setReturnValue(session,1);
+  session.getSessionFactory();
+  sessionControl.setReturnValue(sf,1);
+  session.flush();
+  sessionControl.setVoidCallable(1);
+  session.close();
+  sessionControl.setReturnValue(null,1);
+  sfControl.replay();
+  sessionControl.replay();
+  HibernateTemplate ht=new HibernateTemplate(sf);
+  ht.setEntityInterceptor(entityInterceptor);
+  final List l=new ArrayList();
+  l.add("test");
+  List result=ht.executeFind(new HibernateCallback(){
+    public Object doInHibernate(    org.hibernate.Session session) throws HibernateException {
+      return l;
+    }
+  }
+);
+  assertTrue("Correct result list",result == l);
+}

@@ -1,0 +1,43 @@
+{
+  final SimpleMessageConsumer messageConsumer=new SimpleMessageConsumer();
+  MockControl mockSession=MockControl.createControl(Session.class);
+  Session session=(Session)mockSession.getMock();
+  session.createQueue(DESTINATION_NAME);
+  mockSession.setReturnValue(QUEUE_DESTINATION);
+  session.createConsumer(QUEUE_DESTINATION,null);
+  mockSession.setReturnValue(messageConsumer);
+  session.getTransacted();
+  mockSession.setReturnValue(false);
+  mockSession.replay();
+  MockControl mockConnection=MockControl.createControl(Connection.class);
+  Connection connection=(Connection)mockConnection.getMock();
+  connection.setExceptionListener(this.container);
+  mockConnection.setVoidCallable();
+  connection.createSession(this.container.isSessionTransacted(),this.container.getSessionAcknowledgeMode());
+  mockConnection.setReturnValue(session);
+  connection.start();
+  mockConnection.setVoidCallable();
+  mockConnection.replay();
+  MockControl mockConnectionFactory=MockControl.createControl(ConnectionFactory.class);
+  ConnectionFactory connectionFactory=(ConnectionFactory)mockConnectionFactory.getMock();
+  connectionFactory.createConnection();
+  mockConnectionFactory.setReturnValue(connection);
+  mockConnectionFactory.replay();
+  this.container.setConnectionFactory(connectionFactory);
+  this.container.setDestinationName(DESTINATION_NAME);
+  this.container.setMessageListener(new MessageListener(){
+    public void onMessage(    Message message){
+      throw new UnsupportedOperationException();
+    }
+  }
+);
+  this.container.afterPropertiesSet();
+  MockControl mockMessage=MockControl.createControl(Message.class);
+  final Message message=(Message)mockMessage.getMock();
+  mockMessage.replay();
+  messageConsumer.sendMessage(message);
+  mockMessage.verify();
+  mockSession.verify();
+  mockConnection.verify();
+  mockConnectionFactory.verify();
+}

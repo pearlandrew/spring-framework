@@ -1,0 +1,43 @@
+{
+  pmf.getConnectionFactory();
+  pmfControl.setReturnValue(null,2);
+  pmf.getPersistenceManager();
+  pmfControl.setReturnValue(pm,1);
+  pm.currentTransaction();
+  pmControl.setReturnValue(tx,2);
+  pm.close();
+  pmControl.setVoidCallable(1);
+  tx.begin();
+  txControl.setVoidCallable(1);
+  tx.isActive();
+  txControl.setReturnValue(true,1);
+  tx.rollback();
+  txControl.setVoidCallable(1);
+  pmfControl.replay();
+  pmControl.replay();
+  txControl.replay();
+  PlatformTransactionManager tm=new JdoTransactionManager(pmf);
+  TransactionTemplate tt=new TransactionTemplate(tm);
+  assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+  assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  try {
+    tt.execute(new TransactionCallback(){
+      public Object doInTransaction(      TransactionStatus status){
+        assertTrue("Has thread pm",TransactionSynchronizationManager.hasResource(pmf));
+        JdoTemplate jt=new JdoTemplate(pmf);
+        return jt.execute(new JdoCallback(){
+          public Object doInJdo(          PersistenceManager pm){
+            throw new RuntimeException("application exception");
+          }
+        }
+);
+      }
+    }
+);
+    fail("Should have thrown RuntimeException");
+  }
+ catch (  RuntimeException ex) {
+  }
+  assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+  assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+}

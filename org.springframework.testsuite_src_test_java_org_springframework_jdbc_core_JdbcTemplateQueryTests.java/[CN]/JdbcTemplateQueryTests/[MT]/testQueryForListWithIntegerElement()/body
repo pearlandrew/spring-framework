@@ -1,0 +1,32 @@
+{
+  String sql="SELECT AGE FROM CUSTMR WHERE ID < 3";
+  mockResultSetMetaData.getColumnCount();
+  ctrlResultSetMetaData.setReturnValue(1);
+  mockResultSet.getMetaData();
+  ctrlResultSet.setReturnValue(mockResultSetMetaData);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getInt(1);
+  ctrlResultSet.setReturnValue(11);
+  mockResultSet.wasNull();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockStatement.executeQuery(sql);
+  ctrlStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockStatement.getWarnings();
+    ctrlStatement.setReturnValue(null);
+  }
+  mockStatement.close();
+  ctrlStatement.setVoidCallable();
+  mockConnection.createStatement();
+  ctrlConnection.setReturnValue(mockStatement);
+  replay();
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  List li=template.queryForList(sql,Integer.class);
+  assertEquals("All rows returned",1,li.size());
+  assertEquals("Element is Integer",11,((Integer)li.get(0)).intValue());
+}

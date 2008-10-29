@@ -1,0 +1,9 @@
+{
+  BeanFactory bf=new XmlBeanFactory(new ClassPathResource("serializationTests.xml",getClass()));
+  Person p=(Person)bf.getBean("serializablePrototype");
+  assertNotSame("Should not be a Singleton",p,bf.getBean("serializablePrototype"));
+  Person p2=(Person)SerializationTestUtils.serializeAndDeserialize(p);
+  assertEquals(p,p2);
+  assertNotSame(p,p2);
+  assertEquals("serializablePrototype",p2.getName());
+}

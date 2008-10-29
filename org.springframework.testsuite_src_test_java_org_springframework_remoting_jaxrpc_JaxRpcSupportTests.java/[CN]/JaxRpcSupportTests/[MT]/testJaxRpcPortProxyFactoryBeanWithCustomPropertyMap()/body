@@ -1,0 +1,27 @@
+{
+  JaxRpcPortProxyFactoryBean factory=new JaxRpcPortProxyFactoryBean();
+  factory.setServiceFactoryClass(MockServiceFactory.class);
+  factory.setNamespaceUri("myNamespace");
+  factory.setServiceName("myService1");
+  factory.setPortName("myPort");
+  factory.setEndpointAddress("ea");
+  factory.setMaintainSession(true);
+  Map customProps=new HashMap();
+  customProps.put("myProp",new Integer(1));
+  factory.setCustomPropertyMap(customProps);
+  factory.addCustomProperty("myOtherProp","myOtherValue");
+  factory.setPortInterface(IRemoteBean.class);
+  factory.afterPropertiesSet();
+  assertTrue("Correct singleton value",factory.isSingleton());
+  assertTrue(factory.getPortStub() instanceof Stub);
+  Stub stub=(Stub)factory.getPortStub();
+  assertEquals("ea",stub._getProperty(Stub.ENDPOINT_ADDRESS_PROPERTY));
+  assertTrue(((Boolean)stub._getProperty(Stub.SESSION_MAINTAIN_PROPERTY)).booleanValue());
+  assertEquals(new Integer(1),stub._getProperty("myProp"));
+  assertEquals("myOtherValue",stub._getProperty("myOtherProp"));
+  assertTrue(factory.getObject() instanceof IRemoteBean);
+  IRemoteBean proxy=(IRemoteBean)factory.getObject();
+  proxy.setName("myName");
+  assertEquals("myName",RemoteBean.name);
+  MockServiceFactory.service1Control.verify();
+}

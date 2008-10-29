@@ -1,0 +1,22 @@
+{
+  StaticApplicationContext context=new StaticApplicationContext(){
+    public Resource getResource(    String location){
+      return super.getResource("classpath:org/springframework/context/support/context" + location);
+    }
+  }
+;
+  DefaultListableBeanFactory beanFactory=context.getDefaultListableBeanFactory();
+  Properties props=new Properties();
+  props.setProperty("test1","A.xml");
+  props.setProperty("test2","B.xml");
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  pvs.addPropertyValue("properties",props);
+  RootBeanDefinition bd=new RootBeanDefinition(ResourceMapFactoryBean.class,pvs);
+  beanFactory.registerBeanDefinition("resourceMap",bd);
+  context.refresh();
+  Map result=(Map)beanFactory.getBean("resourceMap");
+  assertEquals(2,result.size());
+  assertTrue(result.get("test1") instanceof ClassPathResource);
+  assertTrue(((Resource)result.get("test1")).getDescription().indexOf("contextA.xml") != -1);
+  assertTrue(((Resource)result.get("test2")).getDescription().indexOf("contextB.xml") != -1);
+}

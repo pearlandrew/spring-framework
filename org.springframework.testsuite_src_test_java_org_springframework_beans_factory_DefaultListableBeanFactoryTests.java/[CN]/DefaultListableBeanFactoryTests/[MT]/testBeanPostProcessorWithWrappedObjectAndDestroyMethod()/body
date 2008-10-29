@@ -1,0 +1,19 @@
+{
+  DefaultListableBeanFactory lbf=new DefaultListableBeanFactory();
+  RootBeanDefinition bd=new RootBeanDefinition(BeanWithDestroyMethod.class);
+  bd.setDestroyMethodName("close");
+  lbf.registerBeanDefinition("test",bd);
+  lbf.addBeanPostProcessor(new BeanPostProcessor(){
+    public Object postProcessBeforeInitialization(    Object bean,    String beanName){
+      return new TestBean();
+    }
+    public Object postProcessAfterInitialization(    Object bean,    String beanName){
+      return bean;
+    }
+  }
+);
+  BeanWithDestroyMethod.closed=false;
+  lbf.preInstantiateSingletons();
+  lbf.destroySingletons();
+  assertTrue("Destroy method invoked",BeanWithDestroyMethod.closed);
+}

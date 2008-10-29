@@ -1,0 +1,18 @@
+{
+  XmlBeanFactory bf=new XmlBeanFactory(new ClassPathResource("autodetectMBeans.xml",getClass()));
+  try {
+    bf.getBean("exporter");
+    MBeanServer server=(MBeanServer)bf.getBean("server");
+    ObjectInstance instance=server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=true"));
+    assertNotNull(instance);
+    try {
+      server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=false"));
+      fail("MBean with name spring:mbean=false should have been excluded");
+    }
+ catch (    InstanceNotFoundException expected) {
+    }
+  }
+  finally {
+    bf.destroySingletons();
+  }
+}

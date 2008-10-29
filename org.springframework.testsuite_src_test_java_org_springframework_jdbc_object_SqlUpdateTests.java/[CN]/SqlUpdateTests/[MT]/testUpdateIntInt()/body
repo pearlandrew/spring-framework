@@ -1,0 +1,19 @@
+{
+  mockPreparedStatement.setObject(1,new Integer(1),Types.NUMERIC);
+  mockPreparedStatement.setObject(2,new Integer(1),Types.NUMERIC);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeUpdate();
+  ctrlPreparedStatement.setReturnValue(1);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(UPDATE_INT_INT);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  IntIntUpdater pc=new IntIntUpdater();
+  int rowsAffected=pc.run(1,1);
+  assertEquals(1,rowsAffected);
+}

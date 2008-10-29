@@ -1,0 +1,13 @@
+{
+  DefaultListableBeanFactory lbf=new DefaultListableBeanFactory();
+  RootBeanDefinition bd=new RootBeanDefinition(TestBean.class,new MutablePropertyValues());
+  lbf.registerBeanDefinition("spouse",bd);
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  pvs.addPropertyValue("age","99");
+  lbf.registerBeanDefinition("test",new RootBeanDefinition(TestBean.class,RootBeanDefinition.AUTOWIRE_BY_NAME));
+  TestBean tb=new TestBean();
+  lbf.configureBean(tb,"test");
+  assertSame(lbf,tb.getBeanFactory());
+  TestBean spouse=(TestBean)lbf.getBean("spouse");
+  assertEquals(spouse,tb.getSpouse());
+}

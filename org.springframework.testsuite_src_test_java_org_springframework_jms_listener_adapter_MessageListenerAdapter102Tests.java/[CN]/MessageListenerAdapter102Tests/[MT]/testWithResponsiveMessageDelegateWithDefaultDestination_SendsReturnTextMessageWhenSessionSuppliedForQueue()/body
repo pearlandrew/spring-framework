@@ -1,0 +1,50 @@
+{
+  MockControl mockDestination=MockControl.createControl(Queue.class);
+  Queue destination=(Queue)mockDestination.getMock();
+  mockDestination.replay();
+  MockControl mockSentTextMessage=MockControl.createControl(TextMessage.class);
+  TextMessage sentTextMessage=(TextMessage)mockSentTextMessage.getMock();
+  sentTextMessage.getJMSCorrelationID();
+  mockSentTextMessage.setReturnValue(CORRELATION_ID);
+  sentTextMessage.getJMSReplyTo();
+  mockSentTextMessage.setReturnValue(null);
+  mockSentTextMessage.replay();
+  MockControl mockResponseTextMessage=MockControl.createControl(TextMessage.class);
+  TextMessage responseTextMessage=(TextMessage)mockResponseTextMessage.getMock();
+  responseTextMessage.setJMSCorrelationID(CORRELATION_ID);
+  mockResponseTextMessage.setVoidCallable();
+  mockResponseTextMessage.replay();
+  MockControl mockQueueSender=MockControl.createControl(QueueSender.class);
+  QueueSender queueSender=(QueueSender)mockQueueSender.getMock();
+  queueSender.send(responseTextMessage);
+  mockQueueSender.setVoidCallable();
+  queueSender.close();
+  mockQueueSender.setVoidCallable();
+  mockQueueSender.replay();
+  MockControl mockSession=MockControl.createControl(QueueSession.class);
+  QueueSession session=(QueueSession)mockSession.getMock();
+  session.createTextMessage(RESPONSE_TEXT);
+  mockSession.setReturnValue(responseTextMessage);
+  session.createSender(destination);
+  mockSession.setReturnValue(queueSender);
+  mockSession.replay();
+  MockControl mockDelegate=MockControl.createControl(ResponsiveMessageDelegate.class);
+  ResponsiveMessageDelegate delegate=(ResponsiveMessageDelegate)mockDelegate.getMock();
+  delegate.handleMessage(sentTextMessage);
+  mockDelegate.setReturnValue(RESPONSE_TEXT);
+  mockDelegate.replay();
+  MessageListenerAdapter102 adapter=new MessageListenerAdapter102(delegate){
+    protected Object extractMessage(    Message message){
+      return message;
+    }
+  }
+;
+  adapter.setDefaultResponseDestination(destination);
+  adapter.onMessage(sentTextMessage,session);
+  mockDelegate.verify();
+  mockSentTextMessage.verify();
+  mockResponseTextMessage.verify();
+  mockSession.verify();
+  mockDestination.verify();
+  mockQueueSender.verify();
+}

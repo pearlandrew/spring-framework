@@ -1,0 +1,45 @@
+{
+  final Person person=new Person();
+  ReflectionTestUtils.setField(person,"id",new Long(99),long.class);
+  ReflectionTestUtils.setField(person,"name","Tom");
+  ReflectionTestUtils.setField(person,"age",new Integer(42));
+  ReflectionTestUtils.setField(person,"eyeColor","blue",String.class);
+  ReflectionTestUtils.setField(person,"likesPets",Boolean.TRUE);
+  ReflectionTestUtils.setField(person,"favoriteNumber",PI,Number.class);
+  assertEquals("Verifying that the person's ID (private field in a superclass) was set.",99,person.getId());
+  assertEquals("Verifying that the person's name (protected field) was set.","Tom",person.getName());
+  assertEquals("Verifying that the person's age (private field) was set.",42,person.getAge());
+  assertEquals("Verifying that the person's eye color (package private field) was set.","blue",person.getEyeColor());
+  assertEquals("Verifying that the person's 'likes pets' flag (package private boolean field) was set.",true,person.likesPets());
+  assertEquals("Verifying that the person's 'favorite number' (package field) was set.",PI,person.getFavoriteNumber());
+  assertEquals(new Long(99),ReflectionTestUtils.getField(person,"id"));
+  assertEquals("Tom",ReflectionTestUtils.getField(person,"name"));
+  assertEquals(new Integer(42),ReflectionTestUtils.getField(person,"age"));
+  assertEquals("blue",ReflectionTestUtils.getField(person,"eyeColor"));
+  assertEquals(Boolean.TRUE,ReflectionTestUtils.getField(person,"likesPets"));
+  assertEquals(PI,ReflectionTestUtils.getField(person,"favoriteNumber"));
+  ReflectionTestUtils.setField(person,"name",null,String.class);
+  ReflectionTestUtils.setField(person,"eyeColor",null,String.class);
+  ReflectionTestUtils.setField(person,"favoriteNumber",null,Number.class);
+  assertNull("Verifying that the person's name (protected field) was set.",person.getName());
+  assertNull("Verifying that the person's eye color (package private field) was set.",person.getEyeColor());
+  assertNull("Verifying that the person's 'favorite number' (package field) was set.",person.getFavoriteNumber());
+  new AssertThrows(IllegalArgumentException.class,"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException."){
+    public void test() throws Exception {
+      ReflectionTestUtils.setField(person,"id",null,long.class);
+    }
+  }
+.runTest();
+  new AssertThrows(IllegalArgumentException.class,"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException."){
+    public void test() throws Exception {
+      ReflectionTestUtils.setField(person,"age",null,int.class);
+    }
+  }
+.runTest();
+  new AssertThrows(IllegalArgumentException.class,"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException."){
+    public void test() throws Exception {
+      ReflectionTestUtils.setField(person,"likesPets",null,boolean.class);
+    }
+  }
+.runTest();
+}

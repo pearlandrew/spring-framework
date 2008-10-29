@@ -1,0 +1,12 @@
+{
+  DefaultListableBeanFactory xbf=new DefaultListableBeanFactory();
+  XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(xbf);
+  reader.loadBeanDefinitions(new ClassPathResource("delegationOverrides.xml",getClass()));
+  SerializableMethodReplacerCandidate s=(SerializableMethodReplacerCandidate)xbf.getBean("serializableReplacer");
+  String forwards="this is forwards";
+  String backwards=new StringBuffer(forwards).reverse().toString();
+  assertEquals(backwards,s.replaceMe(forwards));
+  assertTrue(SerializationTestUtils.isSerializable(s));
+  s=(SerializableMethodReplacerCandidate)SerializationTestUtils.serializeAndDeserialize(s);
+  assertEquals("Method replace still works after serialization and deserialization",backwards,s.replaceMe(forwards));
+}

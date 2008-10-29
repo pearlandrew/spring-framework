@@ -1,0 +1,20 @@
+{
+  MyThrowsHandler th=new MyThrowsHandler();
+  ThrowsAdviceInterceptor ti=new ThrowsAdviceInterceptor(th);
+  TransactionRolledbackException ex=new TransactionRolledbackException();
+  MockControl mc=MockControl.createControl(MethodInvocation.class);
+  MethodInvocation mi=(MethodInvocation)mc.getMock();
+  mi.proceed();
+  mc.setThrowable(ex);
+  mc.replay();
+  try {
+    ti.invoke(mi);
+    fail();
+  }
+ catch (  Exception caught) {
+    assertEquals(ex,caught);
+  }
+  assertEquals(1,th.getCalls());
+  assertEquals(1,th.getCalls("remoteException"));
+  mc.verify();
+}

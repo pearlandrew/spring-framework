@@ -1,0 +1,12 @@
+{
+  final CancelAwareTimer timer=new CancelAwareTimer();
+  TimerTaskExecutor executor=new TimerTaskExecutor(){
+    protected Timer createTimer(){
+      return timer;
+    }
+  }
+;
+  executor.afterPropertiesSet();
+  executor.destroy();
+  assertTrue("When the Timer used is created by the TimerTaskExecutor because " + "no Timer was set explicitly, then the destroy() callback must cancel() said Timer (it obviously isn't doing this).",timer.isCancelWasCalled());
+}

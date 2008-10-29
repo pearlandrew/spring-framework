@@ -1,0 +1,15 @@
+{
+  ClassPathXmlApplicationContext context=new ClassPathXmlApplicationContext(new String[]{"/org/springframework/context/support/invalidValueType.xml"},false);
+  try {
+    context.refresh();
+    fail("Should have thrown BeanCreationException");
+  }
+ catch (  BeanCreationException ex) {
+    assertTrue(ex.contains(TypeMismatchException.class));
+    assertTrue(ex.toString().indexOf("someMessageSource") != -1);
+    assertTrue(ex.toString().indexOf("useCodeAsDefaultMessage") != -1);
+    checkExceptionFromInvalidValueType(ex);
+    checkExceptionFromInvalidValueType(new ExceptionInInitializerError(ex));
+    assertFalse(context.isActive());
+  }
+}

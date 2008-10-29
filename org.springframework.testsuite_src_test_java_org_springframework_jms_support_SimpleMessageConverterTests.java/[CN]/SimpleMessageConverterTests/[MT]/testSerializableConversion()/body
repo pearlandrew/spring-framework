@@ -1,0 +1,18 @@
+{
+  MockControl sessionControl=MockControl.createControl(Session.class);
+  Session session=(Session)sessionControl.getMock();
+  MockControl messageControl=MockControl.createControl(ObjectMessage.class);
+  ObjectMessage message=(ObjectMessage)messageControl.getMock();
+  Integer content=new Integer(5);
+  session.createObjectMessage(content);
+  sessionControl.setReturnValue(message,1);
+  message.getObject();
+  messageControl.setReturnValue(content,1);
+  sessionControl.replay();
+  messageControl.replay();
+  SimpleMessageConverter converter=new SimpleMessageConverter();
+  Message msg=converter.toMessage(content,session);
+  assertEquals(content,converter.fromMessage(msg));
+  sessionControl.verify();
+  messageControl.verify();
+}

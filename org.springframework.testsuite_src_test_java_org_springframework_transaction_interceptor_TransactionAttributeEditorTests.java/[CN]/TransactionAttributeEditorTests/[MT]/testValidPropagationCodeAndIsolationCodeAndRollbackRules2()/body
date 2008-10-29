@@ -1,0 +1,14 @@
+{
+  TransactionAttributeEditor pe=new TransactionAttributeEditor();
+  pe.setAsText("+ServletException,readOnly,ISOLATION_READ_COMMITTED,-MailSendException,PROPAGATION_SUPPORTS");
+  TransactionAttribute ta=(TransactionAttribute)pe.getValue();
+  assertNotNull(ta);
+  assertEquals(ta.getPropagationBehavior(),TransactionDefinition.PROPAGATION_SUPPORTS);
+  assertEquals(ta.getIsolationLevel(),TransactionDefinition.ISOLATION_READ_COMMITTED);
+  assertEquals(ta.getTimeout(),TransactionDefinition.TIMEOUT_DEFAULT);
+  assertTrue(ta.isReadOnly());
+  assertTrue(ta.rollbackOn(new RuntimeException()));
+  assertFalse(ta.rollbackOn(new Exception()));
+  assertFalse(ta.rollbackOn(new ServletException()));
+  assertTrue(ta.rollbackOn(new MailSendException("")));
+}

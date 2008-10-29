@@ -1,0 +1,34 @@
+{
+  CommonsDbcpNativeJdbcExtractor extractor=new CommonsDbcpNativeJdbcExtractor();
+  assertFalse(extractor.isNativeConnectionNecessaryForNativeStatements());
+  MockControl conControl=MockControl.createControl(Connection.class);
+  Connection con=(Connection)conControl.getMock();
+  MockControl stmtControl=MockControl.createControl(Statement.class);
+  Statement stmt=(Statement)stmtControl.getMock();
+  con.getMetaData();
+  conControl.setReturnValue(null,2);
+  stmt.getConnection();
+  stmtControl.setReturnValue(con,1);
+  conControl.replay();
+  stmtControl.replay();
+  Connection nativeConnection=extractor.getNativeConnection(con);
+  assertEquals(con,nativeConnection);
+  nativeConnection=extractor.getNativeConnectionFromStatement(stmt);
+  assertEquals(con,nativeConnection);
+  assertEquals(stmt,extractor.getNativeStatement(stmt));
+  MockControl psControl=MockControl.createControl(PreparedStatement.class);
+  PreparedStatement ps=(PreparedStatement)psControl.getMock();
+  psControl.replay();
+  assertEquals(ps,extractor.getNativePreparedStatement(ps));
+  MockControl csControl=MockControl.createControl(CallableStatement.class);
+  CallableStatement cs=(CallableStatement)csControl.getMock();
+  csControl.replay();
+  assertEquals(cs,extractor.getNativePreparedStatement(cs));
+  MockControl rsControl=MockControl.createControl(ResultSet.class);
+  ResultSet rs=(ResultSet)rsControl.getMock();
+  rsControl.replay();
+  assertEquals(rs,extractor.getNativeResultSet(rs));
+  conControl.verify();
+  stmtControl.verify();
+  psControl.verify();
+}

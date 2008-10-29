@@ -1,0 +1,67 @@
+{
+  MockControl queryControl=MockControl.createControl(Query.class);
+  Query query=(Query)queryControl.getMock();
+  MockControl dialectControl=MockControl.createControl(JdoDialect.class);
+  final JdoDialect dialect=(JdoDialect)dialectControl.getMock();
+  TransactionTemplate tt=new TransactionTemplate();
+  pmf.getConnectionFactory();
+  pmfControl.setReturnValue(null,2);
+  pmf.getPersistenceManager();
+  pmfControl.setReturnValue(pm,1);
+  pm.currentTransaction();
+  pmControl.setReturnValue(tx,3);
+  dialect.beginTransaction(tx,tt);
+  dialectControl.setReturnValue(null,1);
+  if (!exposeNativePm) {
+    dialect.applyQueryTimeout(query,10);
+  }
+  dialect.cleanupTransaction(null);
+  dialectControl.setVoidCallable(1);
+  pm.newQuery(TestBean.class);
+  pmControl.setReturnValue(query,1);
+  pm.close();
+  pmControl.setVoidCallable(1);
+  tx.getRollbackOnly();
+  txControl.setReturnValue(false,1);
+  tx.commit();
+  txControl.setVoidCallable(1);
+  pmfControl.replay();
+  pmControl.replay();
+  txControl.replay();
+  queryControl.replay();
+  dialectControl.replay();
+  JdoTransactionManager tm=new JdoTransactionManager(pmf);
+  tm.setJdoDialect(dialect);
+  tt.setTransactionManager(tm);
+  tt.setTimeout(10);
+  assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+  assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  tt.execute(new TransactionCallback(){
+    public Object doInTransaction(    TransactionStatus status){
+      assertTrue("Has thread pm",TransactionSynchronizationManager.hasResource(pmf));
+      JdoTemplate jt=new JdoTemplate(pmf);
+      jt.setJdoDialect(dialect);
+      if (exposeNativePm) {
+        jt.setExposeNativePersistenceManager(true);
+      }
+      return jt.execute(new JdoCallback(){
+        public Object doInJdo(        PersistenceManager pm2){
+          if (exposeNativePm) {
+            assertSame(pm,pm2);
+          }
+ else {
+            assertTrue(Proxy.isProxyClass(pm2.getClass()));
+          }
+          pm2.newQuery(TestBean.class);
+          return null;
+        }
+      }
+);
+    }
+  }
+);
+  assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+  assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  dialectControl.verify();
+  queryControl.verify();
+}

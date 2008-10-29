@@ -1,0 +1,46 @@
+{
+  JobFactory jobFactory=new AdaptableJobFactory();
+  MockControl schedulerControl=MockControl.createControl(Scheduler.class);
+  final Scheduler scheduler=(Scheduler)schedulerControl.getMock();
+  SchedulerListener schedulerListener=new TestSchedulerListener();
+  JobListener globalJobListener=new TestJobListener();
+  JobListener jobListener=new TestJobListener();
+  TriggerListener globalTriggerListener=new TestTriggerListener();
+  TriggerListener triggerListener=new TestTriggerListener();
+  scheduler.setJobFactory(jobFactory);
+  schedulerControl.setVoidCallable();
+  scheduler.addSchedulerListener(schedulerListener);
+  schedulerControl.setVoidCallable();
+  scheduler.addGlobalJobListener(globalJobListener);
+  schedulerControl.setVoidCallable();
+  scheduler.addJobListener(jobListener);
+  schedulerControl.setVoidCallable();
+  scheduler.addGlobalTriggerListener(globalTriggerListener);
+  schedulerControl.setVoidCallable();
+  scheduler.addTriggerListener(triggerListener);
+  schedulerControl.setVoidCallable();
+  scheduler.start();
+  schedulerControl.setVoidCallable();
+  scheduler.shutdown(false);
+  schedulerControl.setVoidCallable();
+  schedulerControl.replay();
+  SchedulerFactoryBean schedulerFactoryBean=new SchedulerFactoryBean(){
+    protected Scheduler createScheduler(    SchedulerFactory schedulerFactory,    String schedulerName){
+      return scheduler;
+    }
+  }
+;
+  schedulerFactoryBean.setJobFactory(jobFactory);
+  schedulerFactoryBean.setSchedulerListeners(new SchedulerListener[]{schedulerListener});
+  schedulerFactoryBean.setGlobalJobListeners(new JobListener[]{globalJobListener});
+  schedulerFactoryBean.setJobListeners(new JobListener[]{jobListener});
+  schedulerFactoryBean.setGlobalTriggerListeners(new TriggerListener[]{globalTriggerListener});
+  schedulerFactoryBean.setTriggerListeners(new TriggerListener[]{triggerListener});
+  try {
+    schedulerFactoryBean.afterPropertiesSet();
+  }
+  finally {
+    schedulerFactoryBean.destroy();
+  }
+  schedulerControl.verify();
+}

@@ -1,0 +1,16 @@
+{
+  MockControl mockObjectMessage=MockControl.createControl(ObjectMessage.class);
+  ObjectMessage objectMessage=(ObjectMessage)mockObjectMessage.getMock();
+  objectMessage.getObject();
+  mockObjectMessage.setReturnValue(NUMBER);
+  mockObjectMessage.replay();
+  MockControl mockDelegate=MockControl.createControl(MessageContentsDelegate.class);
+  MessageContentsDelegate delegate=(MessageContentsDelegate)mockDelegate.getMock();
+  delegate.handleMessage(NUMBER);
+  mockDelegate.setVoidCallable();
+  mockDelegate.replay();
+  MessageListenerAdapter adapter=new MessageListenerAdapter(delegate);
+  adapter.onMessage(objectMessage);
+  mockDelegate.verify();
+  mockObjectMessage.verify();
+}

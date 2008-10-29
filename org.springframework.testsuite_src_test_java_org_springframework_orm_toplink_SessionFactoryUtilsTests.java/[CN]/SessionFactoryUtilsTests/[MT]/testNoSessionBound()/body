@@ -1,0 +1,19 @@
+{
+  MockControl sessionControl=MockControl.createControl(Session.class);
+  Session session=(Session)sessionControl.getMock();
+  SessionFactory factory=new SingleSessionFactory(session);
+  session.hasExternalTransactionController();
+  sessionControl.setReturnValue(false,1);
+  sessionControl.replay();
+  try {
+    Session boundSession=SessionFactoryUtils.getSession(factory,false);
+    fail();
+  }
+ catch (  Throwable t) {
+    assertTrue(t.getClass().equals(IllegalStateException.class));
+  }
+  Session boundSession=SessionFactoryUtils.getSession(factory,true);
+  assertTrue(session == boundSession);
+  assertFalse(TransactionSynchronizationManager.hasResource(factory));
+  assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+}

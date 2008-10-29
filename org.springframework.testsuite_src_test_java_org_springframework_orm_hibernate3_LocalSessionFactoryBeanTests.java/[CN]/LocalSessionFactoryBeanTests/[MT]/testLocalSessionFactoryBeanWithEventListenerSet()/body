@@ -1,0 +1,28 @@
+{
+  final Map registeredListeners=new HashMap();
+  LocalSessionFactoryBean sfb=new LocalSessionFactoryBean(){
+    protected Configuration newConfiguration(){
+      return new Configuration(){
+        public void setListeners(        String type,        Object[] listeners){
+          assertTrue(listeners instanceof MergeEventListener[]);
+          registeredListeners.put(type,new HashSet(Arrays.asList(listeners)));
+        }
+      }
+;
+    }
+    protected SessionFactory newSessionFactory(    Configuration config){
+      return null;
+    }
+  }
+;
+  sfb.setMappingResources(new String[0]);
+  sfb.setDataSource(new DriverManagerDataSource());
+  Map listeners=new HashMap();
+  Set mergeSet=new HashSet();
+  mergeSet.add(new DummyMergeEventListener());
+  mergeSet.add(new DummyMergeEventListener());
+  listeners.put("merge",mergeSet);
+  sfb.setEventListeners(listeners);
+  sfb.afterPropertiesSet();
+  assertEquals(listeners,registeredListeners);
+}

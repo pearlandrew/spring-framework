@@ -1,0 +1,24 @@
+{
+  MockControl mc=MockControl.createControl(WebApplicationContext.class);
+  WebApplicationContext wac=(WebApplicationContext)mc.getMock();
+  wac.getServletContext();
+  mc.setReturnValue(new MockServletContext());
+  mc.replay();
+  HttpServletRequest request=new MockHttpServletRequest();
+  HttpServletResponse response=new MockHttpServletResponse();
+  TestView tv=new TestView(request,response,wac);
+  tv.setApplicationContext(wac);
+  Properties p=new Properties();
+  p.setProperty("one","bar");
+  p.setProperty("something","else");
+  tv.setAttributes(p);
+  Map model=new HashMap();
+  model.put("one",new HashMap());
+  model.put("two",new Object());
+  tv.render(model,request,response);
+  checkContainsAll(model,tv.model);
+  assertTrue(tv.model.size() == 3);
+  assertTrue(tv.model.get("something").equals("else"));
+  assertTrue(tv.inited);
+  mc.verify();
+}

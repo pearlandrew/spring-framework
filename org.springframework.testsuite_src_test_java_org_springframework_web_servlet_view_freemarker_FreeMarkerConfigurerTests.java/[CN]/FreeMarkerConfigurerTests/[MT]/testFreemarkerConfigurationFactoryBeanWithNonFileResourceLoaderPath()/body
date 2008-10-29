@@ -1,0 +1,24 @@
+{
+  FreeMarkerConfigurationFactoryBean fcfb=new FreeMarkerConfigurationFactoryBean();
+  fcfb.setTemplateLoaderPath("file:/mydir");
+  Properties settings=new Properties();
+  settings.setProperty("localized_lookup","false");
+  fcfb.setFreemarkerSettings(settings);
+  fcfb.setResourceLoader(new ResourceLoader(){
+    public Resource getResource(    String location){
+      if (!("file:/mydir".equals(location) || "file:/mydir/test".equals(location))) {
+        throw new IllegalArgumentException(location);
+      }
+      return new ByteArrayResource("test".getBytes(),"test");
+    }
+    public ClassLoader getClassLoader(){
+      return getClass().getClassLoader();
+    }
+  }
+);
+  fcfb.afterPropertiesSet();
+  assertTrue(fcfb.getObject() instanceof Configuration);
+  Configuration fc=(Configuration)fcfb.getObject();
+  Template ft=fc.getTemplate("test");
+  assertEquals("test",FreeMarkerTemplateUtils.processTemplateIntoString(ft,new HashMap()));
+}

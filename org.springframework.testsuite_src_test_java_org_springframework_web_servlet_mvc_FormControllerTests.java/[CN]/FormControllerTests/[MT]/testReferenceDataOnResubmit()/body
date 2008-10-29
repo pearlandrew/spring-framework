@@ -1,0 +1,20 @@
+{
+  String formView="f";
+  String successView="s";
+  RefController mc=new RefController();
+  mc.setFormView(formView);
+  mc.setCommandName("tb");
+  mc.setSuccessView(successView);
+  mc.refDataCount=0;
+  MockHttpServletRequest request=new MockHttpServletRequest("POST","/welcome.html");
+  request.addParameter("age","23x");
+  HttpServletResponse response=new MockHttpServletResponse();
+  ModelAndView mv=mc.handleRequest(request,response);
+  assertTrue("returned correct view name",mv.getViewName().equals(formView));
+  assertTrue("has errors",mv.getModel().get(BindException.MODEL_KEY_PREFIX + mc.getCommandName()) != null);
+  assertTrue("refDataCount == 1",mc.refDataCount == 1);
+  TestBean person=(TestBean)mv.getModel().get(mc.getCommandName());
+  int[] numbers=(int[])mv.getModel().get(mc.NUMBERS_ATT);
+  assertTrue("model is non null",person != null);
+  assertTrue("numbers is non null",numbers != null);
+}

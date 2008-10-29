@@ -1,0 +1,36 @@
+{
+  ThrowsAdviceInterceptorTests.MyThrowsHandler th=new ThrowsAdviceInterceptorTests.MyThrowsHandler();
+  Advisor matchesEchoInvocations=new StaticMethodMatcherPointcutAdvisor(th){
+    public boolean matches(    Method m,    Class targetClass){
+      return m.getName().startsWith("echo");
+    }
+  }
+;
+  ThrowsAdviceInterceptorTests.Echo target=new ThrowsAdviceInterceptorTests.Echo();
+  target.setA(16);
+  ProxyFactory pf=new ProxyFactory(target);
+  pf.addAdvice(new NopInterceptor());
+  pf.addAdvisor(matchesEchoInvocations);
+  assertEquals("Advisor was added",matchesEchoInvocations,pf.getAdvisors()[1]);
+  ThrowsAdviceInterceptorTests.IEcho proxied=(ThrowsAdviceInterceptorTests.IEcho)createProxy(pf);
+  assertEquals(0,th.getCalls());
+  assertEquals(target.getA(),proxied.getA());
+  assertEquals(0,th.getCalls());
+  Exception ex=new Exception();
+  try {
+    proxied.echoException(1,ex);
+    fail();
+  }
+ catch (  Exception caught) {
+    assertEquals(ex,caught);
+  }
+  ex=new ServletException();
+  try {
+    proxied.echoException(1,ex);
+    fail();
+  }
+ catch (  ServletException caught) {
+    assertEquals(ex,caught);
+  }
+  assertEquals(1,th.getCalls("servletException"));
+}

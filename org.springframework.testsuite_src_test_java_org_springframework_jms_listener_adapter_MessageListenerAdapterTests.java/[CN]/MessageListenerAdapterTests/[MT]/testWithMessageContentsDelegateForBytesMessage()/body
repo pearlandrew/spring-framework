@@ -1,0 +1,20 @@
+{
+  MockControl mockBytesMessage=MockControl.createControl(BytesMessage.class);
+  BytesMessage bytesMessage=(BytesMessage)mockBytesMessage.getMock();
+  bytesMessage.getBodyLength();
+  mockBytesMessage.setReturnValue(TEXT.getBytes().length);
+  bytesMessage.readBytes(null);
+  mockBytesMessage.setMatcher(MockControl.ALWAYS_MATCHER);
+  mockBytesMessage.setReturnValue(TEXT.getBytes().length);
+  mockBytesMessage.replay();
+  MockControl mockDelegate=MockControl.createControl(MessageContentsDelegate.class);
+  MessageContentsDelegate delegate=(MessageContentsDelegate)mockDelegate.getMock();
+  delegate.handleMessage(TEXT.getBytes());
+  mockDelegate.setMatcher(MockControl.ALWAYS_MATCHER);
+  mockDelegate.setVoidCallable();
+  mockDelegate.replay();
+  MessageListenerAdapter adapter=new MessageListenerAdapter(delegate);
+  adapter.onMessage(bytesMessage);
+  mockDelegate.verify();
+  mockBytesMessage.verify();
+}

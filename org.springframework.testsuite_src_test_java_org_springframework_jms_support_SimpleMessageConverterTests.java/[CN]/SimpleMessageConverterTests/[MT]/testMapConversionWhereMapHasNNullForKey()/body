@@ -1,0 +1,20 @@
+{
+  MockControl messageControl=MockControl.createControl(MapMessage.class);
+  MapMessage message=(MapMessage)messageControl.getMock();
+  messageControl.replay();
+  MockControl sessionControl=MockControl.createControl(Session.class);
+  final Session session=(Session)sessionControl.getMock();
+  session.createMapMessage();
+  sessionControl.setReturnValue(message);
+  sessionControl.replay();
+  final Map content=new HashMap();
+  content.put(null,"value1");
+  final SimpleMessageConverter converter=new SimpleMessageConverter();
+  new AssertThrows(MessageConversionException.class){
+    public void test() throws Exception {
+      converter.toMessage(content,session);
+    }
+  }
+.runTest();
+  sessionControl.verify();
+}

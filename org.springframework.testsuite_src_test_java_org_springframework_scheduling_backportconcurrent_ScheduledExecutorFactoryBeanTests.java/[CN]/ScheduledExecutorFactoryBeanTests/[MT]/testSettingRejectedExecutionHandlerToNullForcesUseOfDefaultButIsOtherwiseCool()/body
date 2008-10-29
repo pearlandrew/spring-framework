@@ -1,0 +1,13 @@
+{
+  ScheduledExecutorFactoryBean factory=new ScheduledExecutorFactoryBean(){
+    protected ScheduledExecutorService createExecutor(    int poolSize,    ThreadFactory threadFactory,    RejectedExecutionHandler rejectedExecutionHandler){
+      assertNotNull("Bah; the setRejectedExecutionHandler(..) method must use a default RejectedExecutionHandler if a null arg is passed in.");
+      return super.createExecutor(poolSize,threadFactory,rejectedExecutionHandler);
+    }
+  }
+;
+  factory.setScheduledExecutorTasks(new ScheduledExecutorTask[]{new NoOpScheduledExecutorTask()});
+  factory.setRejectedExecutionHandler(null);
+  factory.afterPropertiesSet();
+  factory.destroy();
+}

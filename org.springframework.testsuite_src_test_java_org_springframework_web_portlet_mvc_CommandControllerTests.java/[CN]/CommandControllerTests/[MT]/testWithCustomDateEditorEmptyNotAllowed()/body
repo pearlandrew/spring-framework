@@ -1,0 +1,26 @@
+{
+  final DateFormat dateFormat=new SimpleDateFormat("dd-MM-yyyy");
+  TestController tc=new TestController(){
+    protected void initBinder(    PortletRequest request,    PortletRequestDataBinder binder){
+      binder.registerCustomEditor(Date.class,new CustomDateEditor(dateFormat,false));
+    }
+  }
+;
+  MockRenderRequest request=new MockRenderRequest();
+  MockRenderResponse response=new MockRenderResponse();
+  String name="test";
+  int age=30;
+  request.addParameter("name",name);
+  request.addParameter("age","" + age);
+  String emptyString="";
+  request.addParameter("date",emptyString);
+  ModelAndView mav=tc.handleRenderRequest(request,response);
+  TestBean command=(TestBean)mav.getModel().get(tc.getCommandName());
+  assertEquals(name,command.getName());
+  assertEquals(age,command.getAge());
+  BindException errors=(BindException)mav.getModel().get(ERRORS_KEY);
+  assertEquals("There should be 1 error",1,errors.getErrorCount());
+  assertNotNull(errors.getFieldError("date"));
+  assertEquals("typeMismatch",errors.getFieldError("date").getCode());
+  assertEquals(emptyString,errors.getFieldError("date").getRejectedValue());
+}

@@ -1,0 +1,15 @@
+{
+  String withinBeansPackage="within(org.springframework.beans.";
+  if (matchSubpackages) {
+    withinBeansPackage+=".";
+  }
+  withinBeansPackage=withinBeansPackage + "*)";
+  AspectJExpressionPointcut withinBeansPc=new AspectJExpressionPointcut();
+  withinBeansPc.setExpression(withinBeansPackage);
+  assertTrue(withinBeansPc.matches(TestBean.class));
+  assertTrue(withinBeansPc.matches(getAge,TestBean.class));
+  assertEquals(matchSubpackages,withinBeansPc.matches(BeanFactory.class));
+  assertEquals(matchSubpackages,withinBeansPc.matches(DefaultListableBeanFactory.class.getMethod("getBeanDefinitionCount",null),DefaultListableBeanFactory.class));
+  assertFalse(withinBeansPc.matches(String.class));
+  assertFalse(withinBeansPc.matches(OtherIOther.class.getMethod("absquatulate",null),OtherIOther.class));
+}

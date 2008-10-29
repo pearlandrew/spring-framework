@@ -1,0 +1,21 @@
+{
+  int newAge=65;
+  ITestBean itb=(ITestBean)createProxy(pc);
+  itb.setAge(newAge);
+  assertTrue(itb.getAge() == newAge);
+  Lockable lockable=(Lockable)itb;
+  assertFalse(lockable.locked());
+  lockable.lock();
+  assertTrue(itb.getAge() == newAge);
+  try {
+    itb.setAge(1);
+    fail("Setters should fail when locked");
+  }
+ catch (  LockedException ex) {
+  }
+  assertTrue(itb.getAge() == newAge);
+  assertTrue(lockable.locked());
+  lockable.unlock();
+  itb.setAge(1);
+  assertTrue(itb.getAge() == 1);
+}

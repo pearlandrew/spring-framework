@@ -1,0 +1,44 @@
+{
+  TestBean target=new TestBean("myname",99);
+  final HttpInvokerServiceExporter exporter=new HttpInvokerServiceExporter();
+  exporter.setServiceInterface(ITestBean.class);
+  exporter.setService(target);
+  exporter.afterPropertiesSet();
+  HttpInvokerProxyFactoryBean pfb=new HttpInvokerProxyFactoryBean();
+  pfb.setServiceInterface(ITestBean.class);
+  pfb.setServiceUrl("http://myurl");
+  pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor(){
+    protected RemoteInvocationResult doExecuteRequest(    HttpInvokerClientConfiguration config,    ByteArrayOutputStream baos) throws Exception {
+      assertEquals("http://myurl",config.getServiceUrl());
+      MockHttpServletRequest request=new MockHttpServletRequest();
+      MockHttpServletResponse response=new MockHttpServletResponse();
+      request.setContent(baos.toByteArray());
+      exporter.handleRequest(request,response);
+      return readRemoteInvocationResult(new ByteArrayInputStream(response.getContentAsByteArray()),config.getCodebaseUrl());
+    }
+  }
+);
+  if (explicitClassLoader) {
+    ((BeanClassLoaderAware)pfb.getHttpInvokerRequestExecutor()).setBeanClassLoader(getClass().getClassLoader());
+  }
+  pfb.afterPropertiesSet();
+  ITestBean proxy=(ITestBean)pfb.getObject();
+  assertEquals("myname",proxy.getName());
+  assertEquals(99,proxy.getAge());
+  proxy.setAge(50);
+  assertEquals(50,proxy.getAge());
+  proxy.setStringArray(new String[]{"str1","str2"});
+  assertTrue(Arrays.equals(new String[]{"str1","str2"},proxy.getStringArray()));
+  try {
+    proxy.exceptional(new IllegalStateException());
+    fail("Should have thrown IllegalStateException");
+  }
+ catch (  IllegalStateException ex) {
+  }
+  try {
+    proxy.exceptional(new IllegalAccessException());
+    fail("Should have thrown IllegalAccessException");
+  }
+ catch (  IllegalAccessException ex) {
+  }
+}

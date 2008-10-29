@@ -1,0 +1,41 @@
+{
+  StaticApplicationContext ctx=new StaticApplicationContext();
+  ctx.registerSingleton("testService",TestService.class,new MutablePropertyValues());
+  ctx.registerSingleton("testServiceInstance2",TestService.class,new MutablePropertyValues());
+  MutablePropertyValues mpv=new MutablePropertyValues();
+  mpv.addPropertyValue(new PropertyValue("serviceLocatorInterface",TestServiceLocator.class));
+  mpv.addPropertyValue(new PropertyValue("serviceLocatorExceptionClass",CustomServiceLocatorException1.class));
+  ctx.registerSingleton("factory",ServiceLocatorFactoryBean.class,mpv);
+  mpv=new MutablePropertyValues();
+  mpv.addPropertyValue(new PropertyValue("serviceLocatorInterface",TestServiceLocator2.class));
+  mpv.addPropertyValue(new PropertyValue("serviceLocatorExceptionClass",CustomServiceLocatorException2.class));
+  ctx.registerSingleton("factory2",ServiceLocatorFactoryBean.class,mpv);
+  mpv=new MutablePropertyValues();
+  mpv.addPropertyValue(new PropertyValue("serviceLocatorInterface",TestService2Locator.class));
+  mpv.addPropertyValue(new PropertyValue("serviceLocatorExceptionClass",CustomServiceLocatorException3.class));
+  ctx.registerSingleton("factory3",ServiceLocatorFactoryBean.class,mpv);
+  ctx.refresh();
+  TestServiceLocator factory=(TestServiceLocator)ctx.getBean("factory");
+  try {
+    factory.getTestService();
+    fail("Must fail on more than one matching type");
+  }
+ catch (  CustomServiceLocatorException1 expected) {
+    assertTrue(expected.getCause() instanceof NoSuchBeanDefinitionException);
+  }
+  TestServiceLocator2 factory2=(TestServiceLocator2)ctx.getBean("factory2");
+  try {
+    factory2.getTestService(null);
+    fail("Must fail on more than one matching type");
+  }
+ catch (  CustomServiceLocatorException2 expected) {
+    assertTrue(expected.getCause() instanceof NoSuchBeanDefinitionException);
+  }
+  final TestService2Locator factory3=(TestService2Locator)ctx.getBean("factory3");
+  new AssertThrows(CustomServiceLocatorException3.class,"Must fail on no matching types"){
+    public void test() throws Exception {
+      factory3.getTestService();
+    }
+  }
+.runTest();
+}

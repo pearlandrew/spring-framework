@@ -1,0 +1,16 @@
+{
+  JaxRpcPortProxyFactoryBean factory=new JaxRpcPortProxyFactoryBean();
+  factory.setServiceFactoryClass(MockServiceFactory.class);
+  factory.setNamespaceUri("myNamespace");
+  factory.setServiceName("myService1");
+  factory.setPortName("myPort");
+  factory.setPortInterface(IRemoteBean.class);
+  factory.setServiceInterface(IBusinessBean.class);
+  factory.afterPropertiesSet();
+  assertTrue(factory.getObject() instanceof IBusinessBean);
+  assertFalse(factory.getObject() instanceof IRemoteBean);
+  IBusinessBean proxy=(IBusinessBean)factory.getObject();
+  proxy.setName("myName");
+  assertEquals("myName",RemoteBean.name);
+  MockServiceFactory.service1Control.verify();
+}

@@ -1,0 +1,19 @@
+{
+  JaxRpcPortProxyFactoryBean factory=new JaxRpcPortProxyFactoryBean();
+  factory.setServiceFactoryClass(CallMockServiceFactory.class);
+  factory.setNamespaceUri("myNamespace");
+  factory.setServiceName("myServiceX");
+  factory.setPortName("myPort");
+  factory.setServiceInterface(IRemoteBean.class);
+  factory.setLookupServiceOnStartup(false);
+  factory.afterPropertiesSet();
+  assertTrue(factory.getObject() instanceof IRemoteBean);
+  IRemoteBean proxy=(IRemoteBean)factory.getObject();
+  try {
+    proxy.setName("exception");
+    fail("Should have thrown RemoteException");
+  }
+ catch (  RemoteLookupFailureException ex) {
+    assertTrue(ex.getCause() instanceof ServiceException);
+  }
+}

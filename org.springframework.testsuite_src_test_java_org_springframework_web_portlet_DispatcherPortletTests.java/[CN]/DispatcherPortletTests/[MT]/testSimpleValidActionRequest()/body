@@ -1,0 +1,13 @@
+{
+  MockActionRequest request=new MockActionRequest();
+  MockActionResponse response=new MockActionResponse();
+  request.setParameter("action","form");
+  request.setParameter("age","29");
+  simpleDispatcherPortlet.processAction(request,response);
+  String exceptionParam=response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
+  assertNull(exceptionParam);
+  SimplePortletApplicationContext ac=(SimplePortletApplicationContext)simpleDispatcherPortlet.getPortletApplicationContext();
+  String commandAttribute=ac.getRenderCommandSessionAttributeName();
+  TestBean testBean=(TestBean)request.getPortletSession().getAttribute(commandAttribute);
+  assertEquals(39,testBean.getAge());
+}

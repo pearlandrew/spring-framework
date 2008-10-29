@@ -1,0 +1,23 @@
+{
+  sf.openSession();
+  sfControl.setReturnValue(session,1);
+  session.getSessionFactory();
+  sessionControl.setReturnValue(sf,1);
+  session.setFlushMode(FlushMode.NEVER);
+  sessionControl.setVoidCallable(1);
+  session.close();
+  sessionControl.setReturnValue(null,1);
+  sfControl.replay();
+  sessionControl.replay();
+  HibernateTemplate ht=new HibernateTemplate(sf);
+  ht.setFlushMode(HibernateTemplate.FLUSH_NEVER);
+  final List l=new ArrayList();
+  l.add("test");
+  List result=ht.executeFind(new HibernateCallback(){
+    public Object doInHibernate(    org.hibernate.Session session) throws HibernateException {
+      return l;
+    }
+  }
+);
+  assertTrue("Correct result list",result == l);
+}

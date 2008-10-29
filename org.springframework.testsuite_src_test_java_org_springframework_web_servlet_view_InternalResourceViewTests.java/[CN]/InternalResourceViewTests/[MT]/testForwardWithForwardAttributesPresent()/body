@@ -1,0 +1,38 @@
+{
+  HashMap model=new HashMap();
+  Object obj=new Integer(1);
+  model.put("foo","bar");
+  model.put("I",obj);
+  String url="forward-to";
+  MockHttpServletRequest request=new MockHttpServletRequest("GET","/myservlet/handler.do");
+  request.setContextPath("/mycontext");
+  request.setServletPath("/myservlet");
+  request.setPathInfo(";mypathinfo");
+  request.setQueryString("?param1=value1");
+  request.setAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE,"/MYservlet/handler.do");
+  request.setAttribute(WebUtils.FORWARD_CONTEXT_PATH_ATTRIBUTE,"/MYcontext");
+  request.setAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE,"/MYservlet");
+  request.setAttribute(WebUtils.FORWARD_PATH_INFO_ATTRIBUTE,";MYpathinfo");
+  request.setAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE,"?Param1=value1");
+  InternalResourceView view=new InternalResourceView();
+  view.setUrl(url);
+  view.setServletContext(new MockServletContext(){
+    public int getMinorVersion(){
+      return 4;
+    }
+  }
+);
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  view.render(model,request,response);
+  assertEquals(url,response.getForwardedUrl());
+  Set keys=model.keySet();
+  for (Iterator it=keys.iterator(); it.hasNext(); ) {
+    String key=(String)it.next();
+    assertEquals(model.get(key),request.getAttribute(key));
+  }
+  assertEquals("/MYservlet/handler.do",request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE));
+  assertEquals("/MYcontext",request.getAttribute(WebUtils.FORWARD_CONTEXT_PATH_ATTRIBUTE));
+  assertEquals("/MYservlet",request.getAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE));
+  assertEquals(";MYpathinfo",request.getAttribute(WebUtils.FORWARD_PATH_INFO_ATTRIBUTE));
+  assertEquals("?Param1=value1",request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE));
+}

@@ -1,0 +1,17 @@
+{
+  MockServletContext context=new MockServletContext();
+  MockHttpServletRequest request=new MockHttpServletRequest(context);
+  request.addPreferredLocale(Locale.UK);
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  Locale locale=localeResolver.resolveLocale(request);
+  assertEquals(locale,Locale.UK);
+  try {
+    localeResolver.setLocale(request,response,Locale.GERMANY);
+    if (!shouldSet)     fail("should not be able to set Locale");
+    locale=localeResolver.resolveLocale(request);
+    assertEquals(locale,Locale.GERMANY);
+  }
+ catch (  UnsupportedOperationException ex) {
+    if (shouldSet)     fail("should be able to set Locale");
+  }
+}

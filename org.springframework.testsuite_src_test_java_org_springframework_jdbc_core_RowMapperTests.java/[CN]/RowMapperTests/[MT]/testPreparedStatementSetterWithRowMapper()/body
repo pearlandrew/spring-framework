@@ -1,0 +1,26 @@
+{
+  MockControl psControl=MockControl.createControl(PreparedStatement.class);
+  final PreparedStatement ps=(PreparedStatement)psControl.getMock();
+  con.prepareStatement("some SQL");
+  conControl.setReturnValue(ps,1);
+  ps.setString(1,"test");
+  psControl.setVoidCallable(1);
+  ps.executeQuery();
+  psControl.setReturnValue(rs,1);
+  if (debugEnabled) {
+    ps.getWarnings();
+    psControl.setReturnValue(null,1);
+  }
+  ps.close();
+  psControl.setVoidCallable(1);
+  conControl.replay();
+  psControl.replay();
+  result=jdbcTemplate.query("some SQL",new PreparedStatementSetter(){
+    public void setValues(    PreparedStatement ps) throws SQLException {
+      ps.setString(1,"test");
+    }
+  }
+,new TestRowMapper());
+  psControl.verify();
+  verify();
+}

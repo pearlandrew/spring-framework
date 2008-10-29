@@ -1,0 +1,31 @@
+{
+  TestBean testBean1=(TestBean)context.getBean("testBean1");
+  TestBean testBean2=(TestBean)context.getBean("testBean2");
+  TestMessageListener testBean3=(TestMessageListener)context.getBean("testBean3");
+  assertNull(testBean1.getName());
+  assertNull(testBean2.getName());
+  assertNull(testBean3.message);
+  MockControl control1=MockControl.createControl(TextMessage.class);
+  TextMessage message1=(TextMessage)control1.getMock();
+  control1.expectAndReturn(message1.getText(),"Test1");
+  control1.replay();
+  MessageListener listener1=getListener("listener1");
+  listener1.onMessage(message1);
+  assertEquals("Test1",testBean1.getName());
+  control1.verify();
+  MockControl control2=MockControl.createControl(TextMessage.class);
+  TextMessage message2=(TextMessage)control2.getMock();
+  control2.expectAndReturn(message2.getText(),"Test2");
+  control2.replay();
+  MessageListener listener2=getListener("listener2");
+  listener2.onMessage(message2);
+  assertEquals("Test2",testBean2.getName());
+  control2.verify();
+  MockControl control3=MockControl.createControl(TextMessage.class);
+  TextMessage message3=(TextMessage)control3.getMock();
+  control3.replay();
+  MessageListener listener3=getListener(DefaultMessageListenerContainer.class.getName() + "#0");
+  listener3.onMessage(message3);
+  assertSame(message3,testBean3.message);
+  control3.verify();
+}

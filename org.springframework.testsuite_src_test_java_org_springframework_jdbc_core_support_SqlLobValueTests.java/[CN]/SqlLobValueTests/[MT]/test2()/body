@@ -1,0 +1,20 @@
+{
+  String testString="Bla";
+  creator.setBlobAsBytes(ps,1,testString.getBytes());
+  lobCreatorControl.setMatcher(new ArgumentsMatcher(){
+    public boolean matches(    Object[] arg0,    Object[] arg1){
+      byte[] one=(byte[])arg0[2];
+      byte[] two=(byte[])arg1[2];
+      return Arrays.equals(one,two);
+    }
+    public String toString(    Object[] arg0){
+      return "bla";
+    }
+  }
+);
+  replay();
+  SqlLobValue lob=new SqlLobValue(testString,handler);
+  lob.setTypeValue(ps,1,Types.BLOB,"test");
+  lobHandlerControl.verify();
+  lobCreatorControl.verify();
+}

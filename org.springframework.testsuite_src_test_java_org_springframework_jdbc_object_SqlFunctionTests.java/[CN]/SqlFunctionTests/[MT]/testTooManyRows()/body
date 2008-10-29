@@ -1,0 +1,39 @@
+{
+  ctrlResultSetMetaData=MockControl.createControl(ResultSetMetaData.class);
+  mockResultSetMetaData=(ResultSetMetaData)ctrlResultSetMetaData.getMock();
+  mockResultSetMetaData.getColumnCount();
+  ctrlResultSetMetaData.setReturnValue(1,2);
+  mockResultSet.getMetaData();
+  ctrlResultSet.setReturnValue(mockResultSetMetaData,2);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getObject(1);
+  ctrlResultSet.setReturnValue(new Integer(14),1);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getObject(1);
+  ctrlResultSet.setReturnValue(new Integer(15),1);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockPreparedStatement.executeQuery();
+  ctrlPreparedStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(FUNCTION);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  SqlFunction function=new SqlFunction(mockDataSource,FUNCTION);
+  function.compile();
+  try {
+    int count=function.run();
+    fail("Shouldn't continue when too many rows returned");
+  }
+ catch (  IncorrectResultSizeDataAccessException idaauex) {
+  }
+}

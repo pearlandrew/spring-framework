@@ -1,0 +1,19 @@
+{
+  byte[] testContent="Bla".getBytes();
+  ByteArrayInputStream bais=new ByteArrayInputStream(testContent);
+  creator.setClobAsAsciiStream(ps,1,bais,3);
+  lobCreatorControl.setMatcher(new ArgumentsMatcher(){
+    public boolean matches(    Object[] arg0,    Object[] arg1){
+      return true;
+    }
+    public String toString(    Object[] arg0){
+      return null;
+    }
+  }
+);
+  replay();
+  SqlLobValue lob=new SqlLobValue(new ByteArrayInputStream(testContent),3,handler);
+  lob.setTypeValue(ps,1,Types.CLOB,"test");
+  lobHandlerControl.verify();
+  lobCreatorControl.verify();
+}

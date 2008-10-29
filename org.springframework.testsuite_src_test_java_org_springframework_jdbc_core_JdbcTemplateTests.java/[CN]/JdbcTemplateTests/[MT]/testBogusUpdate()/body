@@ -1,0 +1,28 @@
+{
+  final String sql="UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+  final int idParam=6666;
+  SQLException sex=new SQLException("bad update");
+  MockControl ctrlPreparedStatement=MockControl.createControl(PreparedStatement.class);
+  PreparedStatement mockPreparedStatement=(PreparedStatement)ctrlPreparedStatement.getMock();
+  mockPreparedStatement.setInt(1,idParam);
+  ctrlPreparedStatement.setVoidCallable();
+  mockPreparedStatement.executeUpdate();
+  ctrlPreparedStatement.setThrowable(sex);
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(sql);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  ctrlPreparedStatement.replay();
+  replay();
+  Dispatcher d=new Dispatcher(idParam,sql);
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  try {
+    template.update(d);
+    fail("Bogus update should throw exception");
+  }
+ catch (  UncategorizedDataAccessException ex) {
+    assertTrue("Correct exception",ex instanceof UncategorizedSQLException);
+    assertTrue("Root cause is correct",ex.getCause() == sex);
+  }
+  ctrlPreparedStatement.verify();
+}

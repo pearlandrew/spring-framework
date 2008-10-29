@@ -1,0 +1,38 @@
+{
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getInt(1);
+  ctrlResultSet.setReturnValue(1);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockPreparedStatement.executeQuery();
+  ctrlPreparedStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(SELECT_ID);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  SqlQuery query=new MappingSqlQueryWithParameters(){
+    protected Object mapRow(    ResultSet rs,    int rownum,    Object[] params,    Map context) throws SQLException {
+      assertTrue("params were null",params == null);
+      assertTrue("context was null",context == null);
+      return new Integer(rs.getInt(1));
+    }
+  }
+;
+  query.setDataSource(mockDataSource);
+  query.setSql(SELECT_ID);
+  query.compile();
+  List list=query.execute();
+  assertTrue("Found customers",list.size() != 0);
+  for (Iterator itr=list.iterator(); itr.hasNext(); ) {
+    Integer id=(Integer)itr.next();
+    assertTrue("Customer id was assigned correctly",id.intValue() == 1);
+  }
+}

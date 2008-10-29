@@ -1,0 +1,20 @@
+{
+  mockPreparedStatement.executeUpdate();
+  ctrlPreparedStatement.setReturnValue(2);
+  if (debugEnabled) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockConnection.prepareStatement(UPDATE);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  RequiredRowsUpdater pc=new RequiredRowsUpdater();
+  try {
+    int rowsAffected=pc.run();
+    fail("Shouldn't continue when too many rows affected");
+  }
+ catch (  JdbcUpdateAffectedIncorrectNumberOfRowsException juaicrex) {
+  }
+}

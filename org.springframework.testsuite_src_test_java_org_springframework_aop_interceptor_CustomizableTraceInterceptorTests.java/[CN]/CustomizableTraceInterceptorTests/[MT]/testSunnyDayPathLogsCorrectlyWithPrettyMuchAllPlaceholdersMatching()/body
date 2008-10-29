@@ -1,0 +1,31 @@
+{
+  MockControl mockLog=MockControl.createControl(Log.class);
+  Log log=(Log)mockLog.getMock();
+  MockControl mockMethodInvocation=MockControl.createControl(MethodInvocation.class);
+  MethodInvocation methodInvocation=(MethodInvocation)mockMethodInvocation.getMock();
+  Method toString=String.class.getMethod("toString",new Class[0]);
+  Object[] arguments=new Object[]{"$ One \\$",new Long(2)};
+  log.isTraceEnabled();
+  mockLog.setReturnValue(true);
+  methodInvocation.getMethod();
+  mockMethodInvocation.setReturnValue(toString,7);
+  methodInvocation.getThis();
+  mockMethodInvocation.setReturnValue(this,2);
+  methodInvocation.getArguments();
+  mockMethodInvocation.setReturnValue(arguments,2);
+  log.trace("Some tracing output");
+  mockLog.setMatcher(MockControl.ALWAYS_MATCHER);
+  methodInvocation.proceed();
+  mockMethodInvocation.setReturnValue("Hello!");
+  log.trace("Some more tracing output");
+  mockLog.setMatcher(MockControl.ALWAYS_MATCHER);
+  mockLog.setVoidCallable();
+  mockMethodInvocation.replay();
+  mockLog.replay();
+  CustomizableTraceInterceptor interceptor=new StubCustomizableTraceInterceptor(log);
+  interceptor.setEnterMessage(new StringBuffer().append("Entering the '").append(CustomizableTraceInterceptor.PLACEHOLDER_METHOD_NAME).append("' method of the [").append(CustomizableTraceInterceptor.PLACEHOLDER_TARGET_CLASS_NAME).append("] class with the following args (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENTS).append(") and arg types (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENT_TYPES).append(").").toString());
+  interceptor.setExitMessage(new StringBuffer().append("Exiting the '").append(CustomizableTraceInterceptor.PLACEHOLDER_METHOD_NAME).append("' method of the [").append(CustomizableTraceInterceptor.PLACEHOLDER_TARGET_CLASS_SHORT_NAME).append("] class with the following args (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENTS).append(") and arg types (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENT_TYPES).append("), returning '").append(CustomizableTraceInterceptor.PLACEHOLDER_RETURN_VALUE).append("' and taking '").append(CustomizableTraceInterceptor.PLACEHOLDER_INVOCATION_TIME).append("' this long.").toString());
+  interceptor.invoke(methodInvocation);
+  mockLog.verify();
+  mockMethodInvocation.verify();
+}

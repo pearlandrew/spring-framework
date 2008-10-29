@@ -1,0 +1,35 @@
+{
+  MockControl sessionControl=MockControl.createControl(Session.class);
+  final Session session=(Session)sessionControl.getMock();
+  final SessionFactory sf=new MockSessionFactory(session);
+  session.release();
+  sessionControl.setVoidCallable();
+  sessionControl.replay();
+  TopLinkTransactionManager tm=new TopLinkTransactionManager(sf);
+  tm.setLazyDatabaseTransaction(true);
+  final TransactionTemplate tt=new TransactionTemplate(tm);
+  try {
+    tt.execute(new TransactionCallback(){
+      public Object doInTransaction(      TransactionStatus status){
+        return tt.execute(new TransactionCallback(){
+          public Object doInTransaction(          TransactionStatus status){
+            TopLinkTemplate ht=new TopLinkTemplate(sf);
+            return ht.executeFind(new TopLinkCallback(){
+              public Object doInTopLink(              Session session){
+                throw new RuntimeException("application exception");
+              }
+            }
+);
+          }
+        }
+);
+      }
+    }
+);
+    fail("Should not thrown RuntimeException");
+  }
+ catch (  RuntimeException ex) {
+    assertTrue(ex.getMessage().equals("application exception"));
+  }
+  sessionControl.verify();
+}

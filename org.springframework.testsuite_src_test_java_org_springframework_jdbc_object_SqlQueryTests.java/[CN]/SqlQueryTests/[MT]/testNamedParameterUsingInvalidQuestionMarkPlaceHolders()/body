@@ -1,0 +1,31 @@
+{
+  mockConnection.prepareStatement(SELECT_ID_FORENAME_WHERE_ID_REUSED_1,ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+class CustomerQuery extends MappingSqlQuery {
+    public CustomerQuery(    DataSource ds){
+      super(ds,SELECT_ID_FORENAME_WHERE_ID_REUSED_1);
+      setResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE);
+      declareParameter(new SqlParameter("id1",Types.NUMERIC));
+      compile();
+    }
+    protected Object mapRow(    ResultSet rs,    int rownum) throws SQLException {
+      Customer cust=new Customer();
+      cust.setId(rs.getInt(COLUMN_NAMES[0]));
+      cust.setForename(rs.getString(COLUMN_NAMES[1]));
+      return cust;
+    }
+    public List findCustomers(    Integer id1){
+      Map params=new HashMap();
+      params.put("id1",id1);
+      return (List)executeByNamedParam(params);
+    }
+  }
+  CustomerQuery query=new CustomerQuery(mockDataSource);
+  try {
+    List cust=query.findCustomers(new Integer(1));
+    fail("Should have caused an InvalidDataAccessApiUsageException");
+  }
+ catch (  InvalidDataAccessApiUsageException e) {
+  }
+}

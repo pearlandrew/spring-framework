@@ -1,0 +1,25 @@
+{
+  mockCallable.setObject(1,new Integer(1106),Types.INTEGER);
+  ctrlCallable.setVoidCallable();
+  mockCallable.registerOutParameter(2,Types.INTEGER);
+  ctrlCallable.setVoidCallable();
+  mockCallable.execute();
+  ctrlCallable.setReturnValue(false);
+  mockCallable.getUpdateCount();
+  ctrlCallable.setReturnValue(-1);
+  mockCallable.getObject(2);
+  ctrlCallable.setReturnValue(new Integer(4));
+  if (debugEnabled) {
+    mockCallable.getWarnings();
+    ctrlCallable.setReturnValue(null);
+  }
+  mockCallable.close();
+  ctrlCallable.setVoidCallable();
+  mockConnection.prepareCall("{call " + StoredProcedureConfiguredViaJdbcTemplate.SQL + "(?, ?)}");
+  ctrlConnection.setReturnValue(mockCallable);
+  replay();
+  JdbcTemplate t=new JdbcTemplate();
+  t.setDataSource(mockDataSource);
+  StoredProcedureConfiguredViaJdbcTemplate sp=new StoredProcedureConfiguredViaJdbcTemplate(t);
+  assertEquals(sp.execute(1106),4);
+}

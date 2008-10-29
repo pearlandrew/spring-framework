@@ -1,0 +1,15 @@
+{
+  BeanFactory bf=new XmlBeanFactory(new ClassPathResource("serializationTests.xml",getClass()));
+  Person p=(Person)bf.getBean("serializableSingleton");
+  assertSame("Should be a Singleton",p,bf.getBean("serializableSingleton"));
+  Person p2=(Person)SerializationTestUtils.serializeAndDeserialize(p);
+  assertEquals(p,p2);
+  assertNotSame(p,p2);
+  assertEquals("serializableSingleton",p2.getName());
+  Advice nop=new NopInterceptor();
+  ((Advised)p).addAdvice(nop);
+  assertEquals(p2.getName(),p2.getName());
+  assertFalse("Not serializable because an interceptor isn't serializable",SerializationTestUtils.isSerializable(p));
+  assertTrue(((Advised)p).removeAdvice(nop));
+  assertTrue("Serializable again because offending interceptor was removed",SerializationTestUtils.isSerializable(p));
+}

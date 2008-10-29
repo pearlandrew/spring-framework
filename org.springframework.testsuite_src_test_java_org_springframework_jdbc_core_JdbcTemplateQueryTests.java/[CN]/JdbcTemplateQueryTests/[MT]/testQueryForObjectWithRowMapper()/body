@@ -1,0 +1,30 @@
+{
+  String sql="SELECT AGE FROM CUSTMR WHERE ID = 3";
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(true);
+  mockResultSet.getInt(1);
+  ctrlResultSet.setReturnValue(22);
+  mockResultSet.next();
+  ctrlResultSet.setReturnValue(false);
+  mockResultSet.close();
+  ctrlResultSet.setVoidCallable();
+  mockStatement.executeQuery(sql);
+  ctrlStatement.setReturnValue(mockResultSet);
+  if (debugEnabled) {
+    mockStatement.getWarnings();
+    ctrlStatement.setReturnValue(null);
+  }
+  mockStatement.close();
+  ctrlStatement.setVoidCallable();
+  mockConnection.createStatement();
+  ctrlConnection.setReturnValue(mockStatement);
+  replay();
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  Object o=template.queryForObject(sql,new RowMapper(){
+    public Object mapRow(    ResultSet rs,    int rowNum) throws SQLException {
+      return new Integer(rs.getInt(1));
+    }
+  }
+);
+  assertTrue("Correct result type",o instanceof Integer);
+}

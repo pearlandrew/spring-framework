@@ -1,0 +1,22 @@
+{
+  final String sql="UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
+  int rowsAffected=33;
+  MockControl ctrlStatement=MockControl.createControl(Statement.class);
+  Statement mockStatement=(Statement)ctrlStatement.getMock();
+  mockStatement.executeUpdate(sql);
+  ctrlStatement.setReturnValue(rowsAffected);
+  if (debugEnabled) {
+    mockStatement.getWarnings();
+    ctrlStatement.setReturnValue(null);
+  }
+  mockStatement.close();
+  ctrlStatement.setVoidCallable();
+  mockConnection.createStatement();
+  ctrlConnection.setReturnValue(mockStatement);
+  ctrlStatement.replay();
+  replay();
+  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  int actualRowsAffected=template.update(sql);
+  assertTrue("Actual rows affected is correct",actualRowsAffected == rowsAffected);
+  ctrlStatement.verify();
+}

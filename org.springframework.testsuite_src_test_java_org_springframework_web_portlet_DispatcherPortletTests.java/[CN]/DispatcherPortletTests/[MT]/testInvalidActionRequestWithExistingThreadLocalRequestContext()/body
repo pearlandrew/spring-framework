@@ -1,0 +1,23 @@
+{
+  MockServletContext servletContext=new MockServletContext();
+  MockHttpServletRequest httpRequest=new MockHttpServletRequest(servletContext);
+  httpRequest.addPreferredLocale(Locale.GERMAN);
+  try {
+    LocaleContextHolder.setLocale(httpRequest.getLocale());
+    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
+    LocaleContext servletLocaleContext=LocaleContextHolder.getLocaleContext();
+    RequestAttributes servletRequestAttrs=RequestContextHolder.getRequestAttributes();
+    MockActionRequest request=new MockActionRequest();
+    MockActionResponse response=new MockActionResponse();
+    request.setParameter("action","invalid");
+    simpleDispatcherPortlet.processAction(request,response);
+    String exceptionParam=response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
+    assertNotNull(exceptionParam);
+    assertSame(servletLocaleContext,LocaleContextHolder.getLocaleContext());
+    assertSame(servletRequestAttrs,RequestContextHolder.getRequestAttributes());
+  }
+  finally {
+    RequestContextHolder.resetRequestAttributes();
+    LocaleContextHolder.resetLocaleContext();
+  }
+}

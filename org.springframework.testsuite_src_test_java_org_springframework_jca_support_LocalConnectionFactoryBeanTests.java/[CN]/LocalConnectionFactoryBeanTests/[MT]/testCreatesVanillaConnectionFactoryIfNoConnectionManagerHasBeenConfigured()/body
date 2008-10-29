@@ -1,0 +1,13 @@
+{
+  final Object CONNECTION_FACTORY=new Object();
+  MockControl mockManagedConnectionFactory=MockControl.createControl(ManagedConnectionFactory.class);
+  ManagedConnectionFactory managedConnectionFactory=(ManagedConnectionFactory)mockManagedConnectionFactory.getMock();
+  managedConnectionFactory.createConnectionFactory();
+  mockManagedConnectionFactory.setReturnValue(CONNECTION_FACTORY);
+  mockManagedConnectionFactory.replay();
+  LocalConnectionFactoryBean factory=new LocalConnectionFactoryBean();
+  factory.setManagedConnectionFactory(managedConnectionFactory);
+  factory.afterPropertiesSet();
+  assertEquals(CONNECTION_FACTORY,factory.getObject());
+  mockManagedConnectionFactory.verify();
+}

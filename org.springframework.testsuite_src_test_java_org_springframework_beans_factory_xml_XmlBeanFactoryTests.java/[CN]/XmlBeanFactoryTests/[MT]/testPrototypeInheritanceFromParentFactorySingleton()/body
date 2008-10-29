@@ -1,0 +1,12 @@
+{
+  XmlBeanFactory parent=new XmlBeanFactory(new ClassPathResource("parent.xml",getClass()));
+  XmlBeanFactory child=new XmlBeanFactory(new ClassPathResource("child.xml",getClass()),parent);
+  TestBean inherits=(TestBean)child.getBean("protoypeInheritsFromParentFactorySingleton");
+  assertTrue(inherits.getName().equals("prototypeOverridesInheritedSingleton"));
+  assertTrue(inherits.getAge() == 1);
+  TestBean inherits2=(TestBean)child.getBean("protoypeInheritsFromParentFactorySingleton");
+  assertFalse(inherits2 == inherits);
+  inherits2.setAge(13);
+  assertTrue(inherits2.getAge() == 13);
+  assertTrue(inherits.getAge() == 1);
+}

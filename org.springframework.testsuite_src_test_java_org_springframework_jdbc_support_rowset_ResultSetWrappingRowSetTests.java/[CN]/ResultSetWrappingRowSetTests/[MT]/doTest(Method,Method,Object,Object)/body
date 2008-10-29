@@ -1,0 +1,39 @@
+{
+  rsetMethod.invoke(rset,new Object[]{arg});
+  if (ret instanceof Double) {
+    rsetControl.setReturnValue(((Double)ret).doubleValue());
+  }
+ else   if (ret instanceof Float) {
+    rsetControl.setReturnValue(((Float)ret).floatValue());
+  }
+ else   if (ret instanceof Integer) {
+    rsetControl.setReturnValue(((Integer)ret).intValue());
+  }
+ else   if (ret instanceof Short) {
+    rsetControl.setReturnValue(((Short)ret).shortValue());
+  }
+ else   if (ret instanceof Long) {
+    rsetControl.setReturnValue(((Long)ret).longValue());
+  }
+ else   if (ret instanceof Boolean) {
+    rsetControl.setReturnValue(((Boolean)ret).booleanValue());
+  }
+ else   if (ret instanceof Byte) {
+    rsetControl.setReturnValue(((Byte)ret).byteValue());
+  }
+ else {
+    rsetControl.setReturnValue(ret);
+  }
+  rsetMethod.invoke(rset,new Object[]{arg});
+  rsetControl.setThrowable(new SQLException("test"));
+  rsetControl.replay();
+  rowset=new ResultSetWrappingSqlRowSet(rset);
+  rowsetMethod.invoke(rowset,new Object[]{arg});
+  try {
+    rowsetMethod.invoke(rowset,new Object[]{arg});
+    fail("InvalidResultSetAccessException should have been thrown");
+  }
+ catch (  InvocationTargetException ex) {
+    assertEquals(InvalidResultSetAccessException.class,ex.getTargetException().getClass());
+  }
+}

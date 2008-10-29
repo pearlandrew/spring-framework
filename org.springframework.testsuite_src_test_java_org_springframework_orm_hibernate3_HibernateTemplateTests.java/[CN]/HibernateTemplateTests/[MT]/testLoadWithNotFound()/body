@@ -1,0 +1,23 @@
+{
+  sf.openSession();
+  sfControl.setReturnValue(session,1);
+  session.getSessionFactory();
+  sessionControl.setReturnValue(sf,1);
+  session.load(TestBean.class,"id");
+  ObjectNotFoundException onfex=new ObjectNotFoundException("id",TestBean.class.getName());
+  sessionControl.setThrowable(onfex);
+  session.close();
+  sessionControl.setReturnValue(null,1);
+  sfControl.replay();
+  sessionControl.replay();
+  HibernateTemplate ht=new HibernateTemplate(sf);
+  try {
+    ht.load(TestBean.class,"id");
+    fail("Should have thrown HibernateObjectRetrievalFailureException");
+  }
+ catch (  HibernateObjectRetrievalFailureException ex) {
+    assertEquals(TestBean.class.getName(),ex.getPersistentClassName());
+    assertEquals("id",ex.getIdentifier());
+    assertEquals(onfex,ex.getCause());
+  }
+}

@@ -1,0 +1,47 @@
+{
+  mockCallable.setObject(1,new Integer(11),Types.INTEGER);
+  ctrlCallable.setVoidCallable(1);
+  mockCallable.registerOutParameter(2,Types.INTEGER);
+  ctrlCallable.setVoidCallable(1);
+  mockCallable.execute();
+  ctrlCallable.setReturnValue(false,1);
+  mockCallable.getUpdateCount();
+  ctrlCallable.setReturnValue(-1);
+  mockCallable.getObject(2);
+  ctrlCallable.setReturnValue(new Integer(5),1);
+  if (debugEnabled) {
+    mockCallable.getWarnings();
+    ctrlCallable.setReturnValue(null);
+  }
+  mockCallable.close();
+  ctrlCallable.setVoidCallable(1);
+  ctrlCallable.replay();
+  ctrlConnection=MockControl.createControl(Connection.class);
+  mockConnection=(Connection)ctrlConnection.getMock();
+  mockConnection.prepareCall("{call " + StoredProcedureConfiguredViaJdbcTemplate.SQL + "(?, ?)}");
+  ctrlConnection.setReturnValue(mockCallable,1);
+  mockConnection.close();
+  ctrlConnection.setVoidCallable(1);
+  ctrlConnection.replay();
+  MockControl dsControl=MockControl.createControl(DataSource.class);
+  DataSource localDs=(DataSource)dsControl.getMock();
+  localDs.getConnection();
+  dsControl.setReturnValue(mockConnection,1);
+  dsControl.replay();
+class TestJdbcTemplate extends JdbcTemplate {
+    int calls;
+    public Map call(    CallableStatementCreator csc,    List declaredParameters) throws DataAccessException {
+      calls++;
+      return super.call(csc,declaredParameters);
+    }
+  }
+  TestJdbcTemplate t=new TestJdbcTemplate();
+  t.setDataSource(localDs);
+  t.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
+  StoredProcedureConfiguredViaJdbcTemplate sp=new StoredProcedureConfiguredViaJdbcTemplate(t);
+  assertEquals(sp.execute(11),5);
+  assertEquals(1,t.calls);
+  dsControl.verify();
+  ctrlCallable.verify();
+  ctrlConnection.verify();
+}

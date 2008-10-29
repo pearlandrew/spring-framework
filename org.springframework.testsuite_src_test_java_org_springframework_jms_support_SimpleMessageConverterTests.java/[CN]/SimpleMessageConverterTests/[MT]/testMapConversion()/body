@@ -1,0 +1,28 @@
+{
+  MockControl sessionControl=MockControl.createControl(Session.class);
+  Session session=(Session)sessionControl.getMock();
+  MockControl messageControl=MockControl.createControl(MapMessage.class);
+  MapMessage message=(MapMessage)messageControl.getMock();
+  Map content=new HashMap();
+  content.put("key1","value1");
+  content.put("key2","value2");
+  session.createMapMessage();
+  sessionControl.setReturnValue(message,1);
+  message.setObject("key1","value1");
+  messageControl.setVoidCallable(1);
+  message.setObject("key2","value2");
+  messageControl.setVoidCallable(1);
+  message.getMapNames();
+  messageControl.setReturnValue(Collections.enumeration(content.keySet()));
+  message.getObject("key1");
+  messageControl.setReturnValue("value1",1);
+  message.getObject("key2");
+  messageControl.setReturnValue("value2",1);
+  sessionControl.replay();
+  messageControl.replay();
+  SimpleMessageConverter converter=new SimpleMessageConverter();
+  Message msg=converter.toMessage(content,session);
+  assertEquals(content,converter.fromMessage(msg));
+  sessionControl.verify();
+  messageControl.verify();
+}

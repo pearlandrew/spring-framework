@@ -1,0 +1,31 @@
+{
+  MockControl connectionFactoryControl=MockControl.createStrictControl(ConnectionFactory.class);
+  ConnectionFactory connectionFactory=(ConnectionFactory)connectionFactoryControl.getMock();
+  MockControl connectionControl=MockControl.createStrictControl(Connection.class);
+  Connection connection=(Connection)connectionControl.getMock();
+  MockControl interactionControl=MockControl.createStrictControl(Interaction.class);
+  Interaction interaction=(Interaction)interactionControl.getMock();
+  MockControl interactionCallbackControl=MockControl.createStrictControl(InteractionCallback.class);
+  InteractionCallback interactionCallback=(InteractionCallback)interactionCallbackControl.getMock();
+  Object obj=new Object();
+  connectionFactory.getConnection();
+  connectionFactoryControl.setReturnValue(connection);
+  connection.createInteraction();
+  connectionControl.setReturnValue(interaction);
+  interactionCallback.doInInteraction(interaction,connectionFactory);
+  interactionCallbackControl.setReturnValue(obj);
+  interaction.close();
+  interactionControl.setVoidCallable(1);
+  connection.close();
+  connectionControl.setVoidCallable(1);
+  connectionFactoryControl.replay();
+  connectionControl.replay();
+  interactionControl.replay();
+  interactionCallbackControl.replay();
+  CciTemplate ct=new CciTemplate(connectionFactory);
+  ct.execute(interactionCallback);
+  connectionFactoryControl.verify();
+  connectionControl.verify();
+  interactionControl.verify();
+  interactionCallbackControl.verify();
+}

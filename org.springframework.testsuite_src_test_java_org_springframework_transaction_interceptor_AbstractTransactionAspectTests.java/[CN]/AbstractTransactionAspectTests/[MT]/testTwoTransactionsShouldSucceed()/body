@@ -1,0 +1,23 @@
+{
+  TransactionAttribute txatt=new DefaultTransactionAttribute();
+  MapTransactionAttributeSource tas1=new MapTransactionAttributeSource();
+  tas1.register(getNameMethod,txatt);
+  MapTransactionAttributeSource tas2=new MapTransactionAttributeSource();
+  tas2.register(setNameMethod,txatt);
+  TransactionStatus status=transactionStatusForNewTransaction();
+  MockControl ptmControl=MockControl.createControl(PlatformTransactionManager.class);
+  PlatformTransactionManager ptm=(PlatformTransactionManager)ptmControl.getMock();
+  ptm.getTransaction(txatt);
+  ptmControl.setReturnValue(status,2);
+  ptm.commit(status);
+  ptmControl.setVoidCallable(2);
+  ptmControl.replay();
+  TestBean tb=new TestBean();
+  ITestBean itb=(ITestBean)advised(tb,ptm,new TransactionAttributeSource[]{tas1,tas2});
+  checkTransactionStatus(false);
+  itb.getName();
+  checkTransactionStatus(false);
+  itb.setName("myName");
+  checkTransactionStatus(false);
+  ptmControl.verify();
+}

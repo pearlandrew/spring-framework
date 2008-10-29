@@ -1,0 +1,10 @@
+{
+  List list=new LinkedList();
+  list.add(new NoRollbackRuleAttribute("org.springframework.mail.MailSendException"));
+  list.add(new RollbackRuleAttribute("javax.servlet.ServletException"));
+  RuleBasedTransactionAttribute rta=new RuleBasedTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRED,list);
+  assertTrue(rta.rollbackOn(new RuntimeException()));
+  assertFalse(rta.rollbackOn(new MailSendException("")));
+  assertFalse(rta.rollbackOn(new Exception()));
+  assertTrue(rta.rollbackOn(new ServletException()));
+}

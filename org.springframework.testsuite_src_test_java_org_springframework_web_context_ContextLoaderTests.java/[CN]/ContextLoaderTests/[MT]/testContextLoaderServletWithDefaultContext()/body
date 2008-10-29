@@ -1,0 +1,15 @@
+{
+  MockServletContext sc=new MockServletContext("");
+  sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,"/org/springframework/web/context/WEB-INF/applicationContext.xml");
+  HttpServlet servlet=new ContextLoaderServlet();
+  ServletConfig config=new MockServletConfig(sc,"test");
+  servlet.init(config);
+  WebApplicationContext context=(WebApplicationContext)sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+  assertTrue("Correct WebApplicationContext exposed in ServletContext",context instanceof XmlWebApplicationContext);
+  LifecycleBean lb=(LifecycleBean)context.getBean("lifecycle");
+  assertTrue("Not destroyed",!lb.isDestroyed());
+  assertFalse(context.containsBean("beans1.bean1"));
+  assertFalse(context.containsBean("beans1.bean2"));
+  servlet.destroy();
+  assertTrue("Destroyed",lb.isDestroyed());
+}

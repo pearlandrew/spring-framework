@@ -1,0 +1,116 @@
+{
+  MockControl dsControl=MockControl.createControl(DataSource.class);
+  final DataSource ds=(DataSource)dsControl.getMock();
+  MockControl conControl=MockControl.createControl(Connection.class);
+  Connection con=(Connection)conControl.getMock();
+  MockControl sfControl=MockControl.createControl(SessionFactory.class);
+  final SessionFactory sf=(SessionFactory)sfControl.getMock();
+  MockControl sessionControl=MockControl.createControl(Session.class);
+  final Session session=(Session)sessionControl.getMock();
+  MockControl tx1Control=MockControl.createControl(Transaction.class);
+  final Transaction tx1=(Transaction)tx1Control.getMock();
+  MockControl tx2Control=MockControl.createControl(Transaction.class);
+  final Transaction tx2=(Transaction)tx2Control.getMock();
+  session.beginTransaction();
+  sessionControl.setReturnValue(tx1,1);
+  tx1.rollback();
+  tx1Control.setVoidCallable(1);
+  session.clear();
+  sessionControl.setVoidCallable(1);
+  session.beginTransaction();
+  sessionControl.setReturnValue(tx2,1);
+  tx2.commit();
+  tx2Control.setVoidCallable(1);
+  session.isOpen();
+  sessionControl.setReturnValue(true,2);
+  session.getFlushMode();
+  sessionControl.setReturnValue(FlushMode.NEVER,2);
+  session.setFlushMode(FlushMode.AUTO);
+  sessionControl.setVoidCallable(2);
+  session.setFlushMode(FlushMode.NEVER);
+  sessionControl.setVoidCallable(2);
+  session.isConnected();
+  sessionControl.setReturnValue(true,2);
+  session.connection();
+  sessionControl.setReturnValue(con,6);
+  con.isReadOnly();
+  conControl.setReturnValue(false,2);
+  session.disconnect();
+  sessionControl.setReturnValue(null,2);
+  dsControl.replay();
+  conControl.replay();
+  sfControl.replay();
+  sessionControl.replay();
+  tx1Control.replay();
+  tx2Control.replay();
+  HibernateTransactionManager tm=new HibernateTransactionManager();
+  tm.setSessionFactory(sf);
+  tm.setDataSource(ds);
+  final TransactionTemplate tt=new TransactionTemplate(tm);
+  assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
+  assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  TransactionSynchronizationManager.bindResource(sf,new SessionHolder(session));
+  assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
+  try {
+    tt.execute(new TransactionCallbackWithoutResult(){
+      public void doInTransactionWithoutResult(      TransactionStatus status){
+        assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
+        assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(ds));
+        SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.getResource(sf);
+        assertEquals(tx1,sessionHolder.getTransaction());
+        tt.execute(new TransactionCallbackWithoutResult(){
+          public void doInTransactionWithoutResult(          TransactionStatus status){
+            status.setRollbackOnly();
+            HibernateTemplate ht=new HibernateTemplate(sf);
+            ht.setExposeNativeSession(true);
+            ht.execute(new HibernateCallback(){
+              public Object doInHibernate(              org.hibernate.Session sess) throws HibernateException {
+                assertEquals(session,sess);
+                return null;
+              }
+            }
+);
+          }
+        }
+);
+      }
+    }
+);
+    fail("Should have thrown UnexpectedRollbackException");
+  }
+ catch (  UnexpectedRollbackException ex) {
+  }
+  assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
+  SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.getResource(sf);
+  assertTrue("Hasn't thread transaction",sessionHolder.getTransaction() == null);
+  assertTrue("Not marked rollback-only",!sessionHolder.isRollbackOnly());
+  tt.execute(new TransactionCallbackWithoutResult(){
+    public void doInTransactionWithoutResult(    TransactionStatus status){
+      assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
+      assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(ds));
+      SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.getResource(sf);
+      assertEquals(tx2,sessionHolder.getTransaction());
+      HibernateTemplate ht=new HibernateTemplate(sf);
+      ht.setExposeNativeSession(true);
+      ht.execute(new HibernateCallback(){
+        public Object doInHibernate(        org.hibernate.Session sess) throws HibernateException {
+          assertEquals(session,sess);
+          return null;
+        }
+      }
+);
+    }
+  }
+);
+  assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
+  assertTrue("Hasn't thread transaction",sessionHolder.getTransaction() == null);
+  TransactionSynchronizationManager.unbindResource(sf);
+  assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
+  assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  dsControl.verify();
+  conControl.verify();
+  sfControl.verify();
+  sessionControl.verify();
+  tx1Control.verify();
+  tx2Control.verify();
+}

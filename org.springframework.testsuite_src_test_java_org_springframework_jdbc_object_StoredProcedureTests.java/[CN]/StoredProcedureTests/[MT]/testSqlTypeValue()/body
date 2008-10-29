@@ -1,0 +1,27 @@
+{
+  int[] testVal=new int[]{1,2};
+  mockCallable.getConnection();
+  ctrlCallable.setDefaultReturnValue(mockConnection);
+  mockCallable.setObject(1,testVal,Types.ARRAY);
+  ctrlCallable.setVoidCallable();
+  mockCallable.registerOutParameter(2,Types.VARCHAR);
+  ctrlCallable.setVoidCallable();
+  mockCallable.execute();
+  ctrlCallable.setReturnValue(false);
+  mockCallable.getUpdateCount();
+  ctrlCallable.setReturnValue(-1);
+  mockCallable.getObject(2);
+  ctrlCallable.setReturnValue("OK");
+  if (debugEnabled) {
+    mockCallable.getWarnings();
+    ctrlCallable.setReturnValue(null);
+  }
+  mockCallable.close();
+  ctrlCallable.setVoidCallable();
+  mockConnection.prepareCall("{call " + SqlTypeValueStoredProcedure.SQL + "(?, ?)}");
+  ctrlConnection.setReturnValue(mockCallable);
+  replay();
+  SqlTypeValueStoredProcedure stvsp=new SqlTypeValueStoredProcedure(mockDataSource);
+  Map out=stvsp.executeTest(testVal);
+  assertEquals("OK",out.get("out"));
+}

@@ -1,0 +1,32 @@
+{
+  MockControl criteriaControl=MockControl.createControl(Criteria.class);
+  Criteria criteria=(Criteria)criteriaControl.getMock();
+  List list=new ArrayList();
+  sf.openSession();
+  sfControl.setReturnValue(session,1);
+  session.getSessionFactory();
+  sessionControl.setReturnValue(sf,1);
+  session.createCriteria(TestBean.class);
+  sessionControl.setReturnValue(criteria,1);
+  criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+  criteriaControl.setReturnValue(criteria);
+  criteria.setCacheable(true);
+  criteriaControl.setReturnValue(criteria,1);
+  criteria.setCacheRegion("myCacheRegion");
+  criteriaControl.setReturnValue(criteria,1);
+  criteria.list();
+  criteriaControl.setReturnValue(list,1);
+  session.flush();
+  sessionControl.setVoidCallable(1);
+  session.close();
+  sessionControl.setReturnValue(null,1);
+  sfControl.replay();
+  sessionControl.replay();
+  criteriaControl.replay();
+  HibernateTemplate ht=new HibernateTemplate(sf);
+  ht.setCacheQueries(true);
+  ht.setQueryCacheRegion("myCacheRegion");
+  List result=ht.loadAll(TestBean.class);
+  assertTrue("Correct result",result == list);
+  criteriaControl.verify();
+}

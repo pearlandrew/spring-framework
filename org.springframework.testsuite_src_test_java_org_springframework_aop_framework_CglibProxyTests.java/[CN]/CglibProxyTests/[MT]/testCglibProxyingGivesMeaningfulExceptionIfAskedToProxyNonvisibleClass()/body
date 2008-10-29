@@ -1,0 +1,17 @@
+{
+class YouCantSeeThis {
+    void hidden(){
+    }
+  }
+  YouCantSeeThis mine=new YouCantSeeThis();
+  try {
+    ProxyFactory pf=new ProxyFactory(mine);
+    pf.getProxy();
+    fail("Shouldn't be able to proxy non-visible class with CGLIB");
+  }
+ catch (  AopConfigException ex) {
+    assertTrue(ex.getCause() instanceof CodeGenerationException || ex.getCause() instanceof IllegalArgumentException);
+    assertTrue(ex.getMessage().indexOf("final") != -1);
+    assertTrue(ex.getMessage().indexOf("visible") != -1);
+  }
+}

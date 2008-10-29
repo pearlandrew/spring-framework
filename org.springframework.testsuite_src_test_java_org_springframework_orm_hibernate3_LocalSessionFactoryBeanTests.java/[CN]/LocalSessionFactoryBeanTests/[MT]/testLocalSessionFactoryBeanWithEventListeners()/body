@@ -1,0 +1,25 @@
+{
+  final Map registeredListeners=new HashMap();
+  LocalSessionFactoryBean sfb=new LocalSessionFactoryBean(){
+    protected Configuration newConfiguration(){
+      return new Configuration(){
+        public void setListener(        String type,        Object listener){
+          registeredListeners.put(type,listener);
+        }
+      }
+;
+    }
+    protected SessionFactory newSessionFactory(    Configuration config){
+      return null;
+    }
+  }
+;
+  sfb.setMappingResources(new String[0]);
+  sfb.setDataSource(new DriverManagerDataSource());
+  Map listeners=new HashMap();
+  listeners.put("flush","myListener");
+  listeners.put("create","yourListener");
+  sfb.setEventListeners(listeners);
+  sfb.afterPropertiesSet();
+  assertEquals(listeners,registeredListeners);
+}

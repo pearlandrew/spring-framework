@@ -1,0 +1,41 @@
+{
+  pmf.getConnectionFactory();
+  pmfControl.setReturnValue(null,2);
+  pmf.getPersistenceManager();
+  pmfControl.setReturnValue(pm,1);
+  pm.currentTransaction();
+  pmControl.setReturnValue(tx,2);
+  pm.flush();
+  pmControl.setVoidCallable(1);
+  pm.close();
+  pmControl.setVoidCallable(1);
+  tx.begin();
+  txControl.setVoidCallable(1);
+  tx.isActive();
+  txControl.setReturnValue(true,1);
+  tx.rollback();
+  txControl.setVoidCallable(1);
+  pmfControl.replay();
+  pmControl.replay();
+  txControl.replay();
+  PlatformTransactionManager tm=new JdoTransactionManager(pmf);
+  TransactionTemplate tt=new TransactionTemplate(tm);
+  assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+  tt.execute(new TransactionCallback(){
+    public Object doInTransaction(    TransactionStatus status){
+      assertTrue("Has thread pm",TransactionSynchronizationManager.hasResource(pmf));
+      JdoTemplate jt=new JdoTemplate(pmf);
+      jt.execute(new JdoCallback(){
+        public Object doInJdo(        PersistenceManager pm2){
+          pm2.flush();
+          return null;
+        }
+      }
+);
+      status.setRollbackOnly();
+      return null;
+    }
+  }
+);
+  assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
+}

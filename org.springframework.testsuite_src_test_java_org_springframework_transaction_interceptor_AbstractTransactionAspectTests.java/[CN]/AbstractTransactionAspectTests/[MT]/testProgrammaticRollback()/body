@@ -1,0 +1,26 @@
+{
+  TransactionAttribute txatt=new DefaultTransactionAttribute();
+  Method m=getNameMethod;
+  MapTransactionAttributeSource tas=new MapTransactionAttributeSource();
+  tas.register(m,txatt);
+  TransactionStatus status=transactionStatusForNewTransaction();
+  MockControl ptmControl=MockControl.createControl(PlatformTransactionManager.class);
+  PlatformTransactionManager ptm=(PlatformTransactionManager)ptmControl.getMock();
+  ptm.getTransaction(txatt);
+  ptmControl.setReturnValue(status,1);
+  ptm.commit(status);
+  ptmControl.setVoidCallable(1);
+  ptmControl.replay();
+  final String name="jenny";
+  TestBean tb=new TestBean(){
+    public String getName(){
+      TransactionStatus txStatus=TransactionInterceptor.currentTransactionStatus();
+      txStatus.setRollbackOnly();
+      return name;
+    }
+  }
+;
+  ITestBean itb=(ITestBean)advised(tb,ptm,tas);
+  assertTrue(name.equals(itb.getName()));
+  ptmControl.verify();
+}

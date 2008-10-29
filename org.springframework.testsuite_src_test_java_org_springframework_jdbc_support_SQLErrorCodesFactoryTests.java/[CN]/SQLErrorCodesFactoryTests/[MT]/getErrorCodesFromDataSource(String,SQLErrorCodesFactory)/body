@@ -1,0 +1,33 @@
+{
+  MockControl mdControl=MockControl.createControl(DatabaseMetaData.class);
+  DatabaseMetaData md=(DatabaseMetaData)mdControl.getMock();
+  md.getDatabaseProductName();
+  mdControl.setReturnValue(productName);
+  mdControl.replay();
+  MockControl ctrlConnection=MockControl.createControl(Connection.class);
+  Connection mockConnection=(Connection)ctrlConnection.getMock();
+  mockConnection.getMetaData();
+  ctrlConnection.setReturnValue(md);
+  mockConnection.close();
+  ctrlConnection.setVoidCallable();
+  ctrlConnection.replay();
+  MockControl ctrlDataSource=MockControl.createControl(DataSource.class);
+  DataSource mockDataSource=(DataSource)ctrlDataSource.getMock();
+  mockDataSource.getConnection();
+  ctrlDataSource.setDefaultReturnValue(mockConnection);
+  ctrlDataSource.replay();
+  SQLErrorCodesFactory secf=null;
+  if (factory != null) {
+    secf=factory;
+  }
+ else {
+    secf=SQLErrorCodesFactory.getInstance();
+  }
+  SQLErrorCodes sec=secf.getErrorCodes(mockDataSource);
+  mdControl.verify();
+  ctrlConnection.verify();
+  ctrlDataSource.verify();
+  SQLErrorCodes sec2=secf.getErrorCodes(mockDataSource);
+  assertSame("Cached per DataSource",sec2,sec);
+  return sec;
+}

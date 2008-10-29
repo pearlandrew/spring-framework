@@ -1,0 +1,21 @@
+{
+  VelocityConfigurer vc=new VelocityConfigurer();
+  vc.setResourceLoaderPath("file:/mydir,file:/yourdir");
+  vc.setResourceLoader(new ResourceLoader(){
+    public Resource getResource(    String location){
+      if ("file:/yourdir/test".equals(location)) {
+        return new DescriptiveResource("");
+      }
+      return new ByteArrayResource("test".getBytes(),"test");
+    }
+    public ClassLoader getClassLoader(){
+      return getClass().getClassLoader();
+    }
+  }
+);
+  vc.setPreferFileSystemAccess(false);
+  vc.afterPropertiesSet();
+  assertTrue(vc.createVelocityEngine() instanceof VelocityEngine);
+  VelocityEngine ve=vc.createVelocityEngine();
+  assertEquals("test",VelocityEngineUtils.mergeTemplateIntoString(ve,"test",new HashMap()));
+}
