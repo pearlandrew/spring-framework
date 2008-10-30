@@ -1,0 +1,21 @@
+{
+  ShallowEtagResponseWrapper wrapper=new ShallowEtagResponseWrapper(response);
+  filterChain.doFilter(request,wrapper);
+  byte[] body=wrapper.toByteArray();
+  String responseETag=generateETagHeaderValue(body);
+  response.setHeader(HEADER_ETAG,responseETag);
+  String requestETag=request.getHeader(HEADER_IF_NONE_MATCH);
+  if (responseETag.equals(requestETag)) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("ETag [" + responseETag + "] equal to If-None-Match, sending 304");
+    }
+    response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+  }
+ else {
+    if (logger.isTraceEnabled()) {
+      logger.trace("ETag [" + responseETag + "] not equal to If-None-Match ["+ requestETag+ "], sending normal response");
+    }
+    response.setContentLength(body.length);
+    FileCopyUtils.copy(body,response.getOutputStream());
+  }
+}
