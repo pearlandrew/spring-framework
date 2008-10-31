@@ -1,21 +1,14 @@
 {
-  MockControl invCtrl=MockControl.createControl(MethodInvocation.class);
-  MethodInvocation invocation=(MethodInvocation)invCtrl.getMock();
-  MockControl ctxCtrl=MockControl.createControl(ApplicationContext.class);
-  ApplicationContext ctx=(ApplicationContext)ctxCtrl.getMock();
+  MethodInvocation invocation=EasyMock.createMock(MethodInvocation.class);
+  ApplicationContext ctx=EasyMock.createMock(ApplicationContext.class);
   EventPublicationInterceptor interceptor=new EventPublicationInterceptor();
   interceptor.setApplicationEventClass(MyEvent.class);
   interceptor.setApplicationEventPublisher(ctx);
   interceptor.afterPropertiesSet();
-  invocation.proceed();
-  invCtrl.setReturnValue(new Object());
-  invocation.getThis();
-  invCtrl.setReturnValue(new Object());
-  ctx.publishEvent(new MyEvent(new Object()));
-  ctxCtrl.setDefaultMatcher(new AlwaysMatcher());
-  ctxCtrl.replay();
-  invCtrl.replay();
+  expect(invocation.proceed()).andReturn(new Object());
+  expect(invocation.getThis()).andReturn(new Object());
+  ctx.publishEvent(isA(MyEvent.class));
+  replay(invocation,ctx);
   interceptor.invoke(invocation);
-  ctxCtrl.verify();
-  invCtrl.verify();
+  verify(invocation,ctx);
 }
