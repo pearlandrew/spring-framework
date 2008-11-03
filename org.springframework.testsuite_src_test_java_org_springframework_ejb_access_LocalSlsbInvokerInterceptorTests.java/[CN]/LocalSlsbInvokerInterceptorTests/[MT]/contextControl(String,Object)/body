@@ -1,0 +1,15 @@
+{
+  MockControl homeControl=MockControl.createControl(SlsbHome.class);
+  final SlsbHome mockHome=(SlsbHome)homeControl.getMock();
+  mockHome.create();
+  homeControl.setReturnValue(ejbInstance,1);
+  homeControl.replay();
+  MockControl ctxControl=MockControl.createControl(Context.class);
+  final Context mockCtx=(Context)ctxControl.getMock();
+  mockCtx.lookup("java:comp/env/" + jndiName);
+  ctxControl.setReturnValue(mockHome);
+  mockCtx.close();
+  ctxControl.setVoidCallable();
+  ctxControl.replay();
+  return ctxControl;
+}

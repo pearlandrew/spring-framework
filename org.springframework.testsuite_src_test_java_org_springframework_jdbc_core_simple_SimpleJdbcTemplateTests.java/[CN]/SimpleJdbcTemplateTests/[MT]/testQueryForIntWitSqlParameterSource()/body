@@ -1,0 +1,17 @@
+{
+  String sql="SELECT COUNT(0) FROM BAR WHERE ID=:id AND XY=:xy";
+  int expectedResult=666;
+  int arg1=24;
+  String arg2="foo";
+  MockControl mc=MockControl.createControl(NamedParameterJdbcOperations.class);
+  NamedParameterJdbcOperations npjo=(NamedParameterJdbcOperations)mc.getMock();
+  SqlParameterSource args=new MapSqlParameterSource().addValue("id",arg1).addValue("xy",arg2);
+  npjo.queryForInt(sql,args);
+  mc.setDefaultMatcher(new ArrayMatcher());
+  mc.setReturnValue(expectedResult);
+  mc.replay();
+  SimpleJdbcTemplate jth=new SimpleJdbcTemplate(npjo);
+  int result=jth.queryForInt(sql,args);
+  assertEquals(expectedResult,result);
+  mc.verify();
+}

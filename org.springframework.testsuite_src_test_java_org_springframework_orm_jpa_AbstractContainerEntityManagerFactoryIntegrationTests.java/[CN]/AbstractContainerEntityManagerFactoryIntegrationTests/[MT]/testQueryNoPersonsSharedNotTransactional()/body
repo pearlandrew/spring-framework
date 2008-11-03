@@ -1,0 +1,22 @@
+{
+  EntityManager em=SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
+  Query q=em.createQuery("select p from Person as p");
+  q.setFlushMode(FlushModeType.AUTO);
+  List<Person> people=q.getResultList();
+  assertEquals(0,people.size());
+  try {
+    assertNull(q.getSingleResult());
+    fail("Should have thrown IllegalStateException");
+  }
+ catch (  Exception ex) {
+    assertTrue(ex.getMessage().indexOf("closed") != -1);
+  }
+  q=em.createQuery("select p from Person as p");
+  q.setFlushMode(FlushModeType.AUTO);
+  try {
+    assertNull(q.getSingleResult());
+    fail("Should have thrown NoResultException");
+  }
+ catch (  NoResultException ex) {
+  }
+}

@@ -1,0 +1,62 @@
+{
+  tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+  MockControl managerControl2=MockControl.createControl(EntityManager.class);
+  EntityManager manager2=(EntityManager)managerControl2.getMock();
+  MockControl txControl2=MockControl.createControl(EntityTransaction.class);
+  EntityTransaction tx2=(EntityTransaction)txControl2.getMock();
+  managerControl.expectAndReturn(manager.getTransaction(),tx,2);
+  factoryControl.expectAndReturn(factory.createEntityManager(),manager2);
+  managerControl2.expectAndReturn(manager2.getTransaction(),tx2,3);
+  txControl.expectAndReturn(tx.getRollbackOnly(),false);
+  txControl2.expectAndReturn(tx2.getRollbackOnly(),false);
+  manager.flush();
+  tx.commit();
+  tx2.begin();
+  tx2.commit();
+  manager2.flush();
+  manager2.close();
+  factoryControl.replay();
+  managerControl.replay();
+  txControl.replay();
+  managerControl2.replay();
+  txControl2.replay();
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  tt.execute(new TransactionCallback(){
+    public Object doInTransaction(    TransactionStatus status){
+      template.execute(new JpaCallback(){
+        public Object doInJpa(        EntityManager em2){
+          em2.flush();
+          return null;
+        }
+      }
+);
+      TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter(){
+        public void afterCompletion(        int status){
+          tt.execute(new TransactionCallback(){
+            public Object doInTransaction(            TransactionStatus status){
+              return template.execute(new JpaCallback(){
+                public Object doInJpa(                EntityManager em2){
+                  em2.flush();
+                  return null;
+                }
+              }
+);
+            }
+          }
+);
+        }
+      }
+);
+      return null;
+    }
+  }
+);
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  factoryControl.verify();
+  managerControl.verify();
+  txControl.verify();
+  managerControl2.verify();
+  txControl2.verify();
+}

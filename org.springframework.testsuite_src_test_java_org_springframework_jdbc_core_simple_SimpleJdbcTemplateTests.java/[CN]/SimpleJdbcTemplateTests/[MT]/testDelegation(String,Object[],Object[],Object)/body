@@ -1,0 +1,91 @@
+{
+  Class[] unifiedTypes;
+  Object[] unifiedArgs;
+  Class[] unifiedTypes2;
+  Object[] unifiedArgs2;
+  boolean namedParameters=false;
+  if (varargs != null && varargs.length > 0) {
+    if (varargs[0].getClass().equals(HashMap.class)) {
+      unifiedTypes=new Class[typedArgs.length + 1];
+      unifiedArgs=new Object[typedArgs.length + 1];
+      for (int i=0; i < typedArgs.length; i++) {
+        unifiedTypes[i]=typedArgs[i].getClass();
+        unifiedArgs[i]=typedArgs[i];
+      }
+      unifiedTypes[unifiedTypes.length - 1]=Map.class;
+      unifiedArgs[unifiedArgs.length - 1]=varargs[0];
+      unifiedTypes2=unifiedTypes;
+      unifiedArgs2=unifiedArgs;
+      namedParameters=true;
+    }
+ else     if (varargs[0].getClass().equals(MapSqlParameterSource.class)) {
+      unifiedTypes=new Class[typedArgs.length + 1];
+      unifiedArgs=new Object[typedArgs.length + 1];
+      for (int i=0; i < typedArgs.length; i++) {
+        unifiedTypes[i]=typedArgs[i].getClass();
+        unifiedArgs[i]=typedArgs[i];
+      }
+      unifiedTypes[unifiedTypes.length - 1]=SqlParameterSource.class;
+      unifiedArgs[unifiedArgs.length - 1]=varargs[0];
+      unifiedTypes2=unifiedTypes;
+      unifiedArgs2=unifiedArgs;
+      namedParameters=true;
+    }
+ else {
+      unifiedTypes=new Class[typedArgs.length + 1];
+      unifiedArgs=new Object[typedArgs.length + 1];
+      for (int i=0; i < unifiedTypes.length - 1; i++) {
+        unifiedTypes[i]=typedArgs[i].getClass();
+        unifiedArgs[i]=typedArgs[i];
+      }
+      unifiedTypes[unifiedTypes.length - 1]=Object[].class;
+      unifiedArgs[unifiedTypes.length - 1]=varargs;
+    }
+    unifiedTypes2=unifiedTypes;
+    unifiedArgs2=unifiedArgs;
+  }
+ else {
+    unifiedTypes=new Class[typedArgs.length];
+    unifiedTypes2=new Class[typedArgs.length + 1];
+    unifiedArgs=new Object[typedArgs.length];
+    unifiedArgs2=new Object[typedArgs.length + 1];
+    for (int i=0; i < typedArgs.length; i++) {
+      unifiedTypes[i]=unifiedTypes2[i]=typedArgs[i].getClass();
+      unifiedArgs[i]=unifiedArgs2[i]=typedArgs[i];
+    }
+    unifiedTypes2[unifiedTypes2.length - 1]=Object[].class;
+    unifiedArgs2[unifiedArgs2.length - 1]=new Object[]{};
+  }
+  MockControl mc;
+  JdbcOperations jo=null;
+  NamedParameterJdbcOperations npjo=null;
+  Method joMethod=null;
+  SimpleJdbcTemplate jth=null;
+  if (namedParameters) {
+    mc=MockControl.createControl(NamedParameterJdbcOperations.class);
+    npjo=(NamedParameterJdbcOperations)mc.getMock();
+    joMethod=NamedParameterJdbcOperations.class.getMethod(methodName,unifiedTypes);
+    joMethod.invoke(npjo,unifiedArgs);
+    jth=new SimpleJdbcTemplate(npjo);
+  }
+ else {
+    mc=MockControl.createControl(JdbcOperations.class);
+    jo=(JdbcOperations)mc.getMock();
+    joMethod=JdbcOperations.class.getMethod(methodName,unifiedTypes);
+    joMethod.invoke(jo,unifiedArgs);
+    jth=new SimpleJdbcTemplate(jo);
+  }
+  mc.setDefaultMatcher(new ArrayMatcher());
+  if (joMethod.getReturnType().isPrimitive()) {
+    mc.setReturnValue(((Integer)expectedResult).intValue());
+  }
+ else {
+    mc.setReturnValue(expectedResult);
+  }
+  mc.replay();
+  Method jthMethod=SimpleJdbcTemplate.class.getMethod(methodName,unifiedTypes2);
+  Object result=jthMethod.invoke(jth,unifiedArgs2);
+  assertEquals(expectedResult,result);
+  mc.verify();
+  return result;
+}

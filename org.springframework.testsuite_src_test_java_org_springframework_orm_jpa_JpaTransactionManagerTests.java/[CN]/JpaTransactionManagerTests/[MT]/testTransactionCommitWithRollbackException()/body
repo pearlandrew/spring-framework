@@ -1,0 +1,39 @@
+{
+  managerControl.expectAndReturn(manager.getTransaction(),tx);
+  txControl.expectAndReturn(tx.getRollbackOnly(),true);
+  managerControl.expectAndReturn(manager.getTransaction(),tx);
+  tx.commit();
+  txControl.setThrowable(new RollbackException());
+  manager.flush();
+  factoryControl.replay();
+  managerControl.replay();
+  txControl.replay();
+  final List<String> l=new ArrayList<String>();
+  l.add("test");
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  try {
+    Object result=tt.execute(new TransactionCallback(){
+      public Object doInTransaction(      TransactionStatus status){
+        assertTrue(TransactionSynchronizationManager.hasResource(factory));
+        return template.execute(new JpaCallback(){
+          public Object doInJpa(          EntityManager em){
+            em.flush();
+            return l;
+          }
+        }
+);
+      }
+    }
+);
+    assertSame(l,result);
+  }
+ catch (  TransactionSystemException tse) {
+    assertTrue(tse.getCause() instanceof RollbackException);
+  }
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  factoryControl.verify();
+  managerControl.verify();
+  txControl.verify();
+}

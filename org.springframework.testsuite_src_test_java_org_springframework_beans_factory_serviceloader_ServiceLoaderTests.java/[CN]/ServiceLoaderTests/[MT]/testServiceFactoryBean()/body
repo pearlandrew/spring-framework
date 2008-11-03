@@ -1,0 +1,10 @@
+{
+  if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16 || !ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()) {
+    return;
+  }
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  RootBeanDefinition bd=new RootBeanDefinition(ServiceFactoryBean.class);
+  bd.getPropertyValues().addPropertyValue("serviceType",DocumentBuilderFactory.class.getName());
+  bf.registerBeanDefinition("service",bd);
+  assertTrue(bf.getBean("service") instanceof DocumentBuilderFactory);
+}

@@ -1,0 +1,35 @@
+{
+  managerControl.expectAndReturn(manager.getTransaction(),tx);
+  txControl.expectAndReturn(tx.isActive(),true);
+  tx.rollback();
+  factoryControl.replay();
+  managerControl.replay();
+  txControl.replay();
+  final List<String> l=new ArrayList<String>();
+  l.add("test");
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  try {
+    tt.execute(new TransactionCallback(){
+      public Object doInTransaction(      TransactionStatus status){
+        assertTrue(TransactionSynchronizationManager.hasResource(factory));
+        return template.execute(new JpaCallback(){
+          public Object doInJpa(          EntityManager em){
+            throw new RuntimeException("some exception");
+          }
+        }
+);
+      }
+    }
+);
+    fail("Should have propagated RuntimeException");
+  }
+ catch (  RuntimeException ex) {
+    assertEquals("some exception",ex.getMessage());
+  }
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  factoryControl.verify();
+  managerControl.verify();
+  txControl.verify();
+}

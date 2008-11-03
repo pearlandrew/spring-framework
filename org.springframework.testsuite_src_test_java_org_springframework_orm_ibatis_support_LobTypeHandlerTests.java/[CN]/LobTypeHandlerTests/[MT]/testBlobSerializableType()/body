@@ -1,0 +1,37 @@
+{
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  ObjectOutputStream oos=new ObjectOutputStream(baos);
+  oos.writeObject("content");
+  oos.close();
+  lobHandler.getBlobAsBinaryStream(rs,1);
+  lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()),1);
+  lobHandler.getBlobAsBinaryStream(rs,1);
+  lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()),1);
+  lobCreator.setBlobAsBytes(ps,1,baos.toByteArray());
+  lobCreatorControl.setMatcher(new ArgumentsMatcher(){
+    public boolean matches(    Object[] o1,    Object[] o2){
+      return Arrays.equals((byte[])o1[2],(byte[])o2[2]);
+    }
+    public String toString(    Object[] objects){
+      return null;
+    }
+  }
+);
+  lobHandlerControl.replay();
+  lobCreatorControl.replay();
+  BlobSerializableTypeHandler type=new BlobSerializableTypeHandler(lobHandler);
+  assertEquals("content",type.valueOf("content"));
+  assertEquals("content",type.getResult(rs,"column"));
+  assertEquals("content",type.getResult(rs,1));
+  TransactionSynchronizationManager.initSynchronization();
+  try {
+    type.setParameter(ps,1,"content",null);
+    List synchs=TransactionSynchronizationManager.getSynchronizations();
+    assertEquals(1,synchs.size());
+    ((TransactionSynchronization)synchs.get(0)).beforeCompletion();
+    ((TransactionSynchronization)synchs.get(0)).afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
+  }
+  finally {
+    TransactionSynchronizationManager.clearSynchronization();
+  }
+}

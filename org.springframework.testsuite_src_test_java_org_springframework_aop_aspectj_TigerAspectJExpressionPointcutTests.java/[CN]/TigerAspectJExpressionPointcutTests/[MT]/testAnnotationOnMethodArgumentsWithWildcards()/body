@@ -1,0 +1,13 @@
+{
+  String expression="execution(* *(*, @(org.springframework..*) *))";
+  AspectJExpressionPointcut takesSpringAnnotatedArgument2=new AspectJExpressionPointcut();
+  takesSpringAnnotatedArgument2.setExpression(expression);
+  assertFalse(takesSpringAnnotatedArgument2.matches(getAge,TestBean.class));
+  assertFalse(takesSpringAnnotatedArgument2.matches(HasTransactionalAnnotation.class.getMethod("foo",(Class[])null),HasTransactionalAnnotation.class));
+  assertFalse(takesSpringAnnotatedArgument2.matches(HasTransactionalAnnotation.class.getMethod("bar",String.class),HasTransactionalAnnotation.class));
+  assertFalse(takesSpringAnnotatedArgument2.matches(AnnotationTransactionAttributeSourceTests.TestBean3.class.getMethod("setName",String.class),TestBean3.class));
+  assertFalse(takesSpringAnnotatedArgument2.matches(AnnotationTransactionAttributeSourceTests.TestBean3.class.getMethod("getAge",(Class[])null),TestBean3.class));
+  assertFalse(takesSpringAnnotatedArgument2.matches(AnnotationTransactionAttributeSourceTests.TestBean3.class.getMethod("setName",String.class),TestBean3.class));
+  assertTrue(takesSpringAnnotatedArgument2.matches(ProcessesSpringAnnotatedParameters.class.getMethod("takesAnnotatedParameters",TestBean.class,SpringAnnotated.class),ProcessesSpringAnnotatedParameters.class));
+  assertFalse(takesSpringAnnotatedArgument2.matches(ProcessesSpringAnnotatedParameters.class.getMethod("takesNoAnnotatedParameters",TestBean.class,TestBean3.class),ProcessesSpringAnnotatedParameters.class));
+}

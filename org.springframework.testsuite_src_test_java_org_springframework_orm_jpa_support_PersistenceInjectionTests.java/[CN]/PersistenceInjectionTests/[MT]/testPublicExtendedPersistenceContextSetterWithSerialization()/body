@@ -1,0 +1,24 @@
+{
+  DummyInvocationHandler ih=new DummyInvocationHandler();
+  Object mockEm=(EntityManager)Proxy.newProxyInstance(getClass().getClassLoader(),new Class[]{EntityManager.class},ih);
+  mockEmf.createEntityManager();
+  emfMc.setReturnValue(mockEm,1);
+  emfMc.replay();
+  GenericApplicationContext gac=new GenericApplicationContext();
+  SimpleMapScope myScope=new SimpleMapScope();
+  gac.getDefaultListableBeanFactory().registerScope("myScope",myScope);
+  gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory",mockEmf);
+  gac.registerBeanDefinition("annotationProcessor",new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
+  RootBeanDefinition bd=new RootBeanDefinition(DefaultPublicPersistenceContextSetter.class);
+  bd.setScope("myScope");
+  gac.registerBeanDefinition(DefaultPublicPersistenceContextSetter.class.getName(),bd);
+  gac.refresh();
+  DefaultPublicPersistenceContextSetter bean=(DefaultPublicPersistenceContextSetter)gac.getBean(DefaultPublicPersistenceContextSetter.class.getName());
+  assertNotNull(bean.em);
+  assertNotNull(SerializationTestUtils.serializeAndDeserialize(bean.em));
+  SimpleMapScope serialized=(SimpleMapScope)SerializationTestUtils.serializeAndDeserialize(myScope);
+  serialized.close();
+  assertTrue(DummyInvocationHandler.closed);
+  DummyInvocationHandler.closed=false;
+  emfMc.verify();
+}

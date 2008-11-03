@@ -1,0 +1,12 @@
+{
+  Properties props=new Properties();
+  props.put("foo","bar");
+  mockEmf.createEntityManager(props);
+  emfMc.setReturnValue(MockControl.createControl(EntityManager.class).getMock(),1);
+  emfMc.replay();
+  PersistenceAnnotationBeanPostProcessor babpp=new MockPersistenceAnnotationBeanPostProcessor();
+  DefaultPrivatePersistenceContextFieldExtendedWithProps dppcf=new DefaultPrivatePersistenceContextFieldExtendedWithProps();
+  babpp.postProcessAfterInstantiation(dppcf,"bean name does not matter");
+  assertNotNull(dppcf.em);
+  emfMc.verify();
+}

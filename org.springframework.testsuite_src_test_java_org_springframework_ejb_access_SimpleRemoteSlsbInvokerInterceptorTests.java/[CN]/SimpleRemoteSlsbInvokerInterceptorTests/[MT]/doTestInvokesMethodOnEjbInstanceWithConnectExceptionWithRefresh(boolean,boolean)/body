@@ -1,0 +1,31 @@
+{
+  MockControl ejbControl=MockControl.createControl(RemoteInterface.class);
+  final RemoteInterface ejb=(RemoteInterface)ejbControl.getMock();
+  ejb.targetMethod();
+  ejbControl.setThrowable(new ConnectException(""),2);
+  ejb.remove();
+  ejbControl.setVoidCallable(2);
+  ejbControl.replay();
+  int lookupCount=2;
+  if (!cacheHome) {
+    lookupCount++;
+    if (lookupHomeOnStartup) {
+      lookupCount++;
+    }
+  }
+  final String jndiName="foobar";
+  MockControl contextControl=contextControl(jndiName,ejb,2,lookupCount,lookupCount);
+  SimpleRemoteSlsbInvokerInterceptor si=configuredInterceptor(contextControl,jndiName);
+  si.setRefreshHomeOnConnectFailure(true);
+  si.setLookupHomeOnStartup(lookupHomeOnStartup);
+  si.setCacheHome(cacheHome);
+  RemoteInterface target=(RemoteInterface)configuredProxy(si,RemoteInterface.class);
+  try {
+    target.targetMethod();
+    fail("Should have thrown RemoteException");
+  }
+ catch (  ConnectException ex) {
+  }
+  contextControl.verify();
+  ejbControl.verify();
+}

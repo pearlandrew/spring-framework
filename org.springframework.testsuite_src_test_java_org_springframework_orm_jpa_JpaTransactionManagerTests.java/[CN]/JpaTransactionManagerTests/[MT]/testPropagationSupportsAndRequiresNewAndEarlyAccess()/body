@@ -1,0 +1,49 @@
+{
+  tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+  factoryControl.expectAndReturn(factory.createEntityManager(),manager);
+  managerControl.expectAndReturn(manager.getTransaction(),tx,2);
+  manager.flush();
+  manager.close();
+  txControl.expectAndReturn(tx.getRollbackOnly(),false);
+  tx.commit();
+  factoryControl.replay();
+  managerControl.replay();
+  txControl.replay();
+  final List<String> l=new ArrayList<String>();
+  l.add("test");
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  Object result=tt.execute(new TransactionCallback(){
+    public Object doInTransaction(    TransactionStatus status){
+      JpaTemplate template2=new JpaTemplate(factory);
+      template2.execute(new JpaCallback(){
+        public Object doInJpa(        EntityManager em) throws PersistenceException {
+          return null;
+        }
+      }
+);
+      assertTrue(TransactionSynchronizationManager.hasResource(factory));
+      TransactionTemplate tt2=new TransactionTemplate(transactionManager);
+      tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+      return tt2.execute(new TransactionCallback(){
+        public Object doInTransaction(        TransactionStatus status){
+          return template.execute(new JpaCallback(){
+            public Object doInJpa(            EntityManager em2){
+              em2.flush();
+              return l;
+            }
+          }
+);
+        }
+      }
+);
+    }
+  }
+);
+  assertSame(l,result);
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  factoryControl.verify();
+  managerControl.verify();
+  txControl.verify();
+}

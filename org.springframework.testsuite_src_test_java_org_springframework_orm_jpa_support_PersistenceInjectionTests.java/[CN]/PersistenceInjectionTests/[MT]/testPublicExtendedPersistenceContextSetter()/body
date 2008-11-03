@@ -1,0 +1,14 @@
+{
+  Object mockEm=(EntityManager)MockControl.createControl(EntityManager.class).getMock();
+  mockEmf.createEntityManager();
+  emfMc.setReturnValue(mockEm,1);
+  emfMc.replay();
+  GenericApplicationContext gac=new GenericApplicationContext();
+  gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory",mockEmf);
+  gac.registerBeanDefinition("annotationProcessor",new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
+  gac.registerBeanDefinition(DefaultPublicPersistenceContextSetter.class.getName(),new RootBeanDefinition(DefaultPublicPersistenceContextSetter.class));
+  gac.refresh();
+  DefaultPublicPersistenceContextSetter bean=(DefaultPublicPersistenceContextSetter)gac.getBean(DefaultPublicPersistenceContextSetter.class.getName());
+  assertNotNull(bean.em);
+  emfMc.verify();
+}

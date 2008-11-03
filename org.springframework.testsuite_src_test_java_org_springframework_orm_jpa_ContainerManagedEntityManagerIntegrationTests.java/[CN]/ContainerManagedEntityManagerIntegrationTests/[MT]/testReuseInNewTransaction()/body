@@ -1,0 +1,12 @@
+{
+  EntityManager em=createContainerManagedEntityManager();
+  doInstantiateAndSave(em);
+  endTransaction();
+  startNewTransaction();
+  assertFalse(em.contains(new Person()));
+  doInstantiateAndSave(em);
+  setComplete();
+  endTransaction();
+  assertEquals("Tx must have committed back",1,countRowsInTable("person"));
+  deleteFromTables(new String[]{"person"});
+}

@@ -1,0 +1,19 @@
+{
+  String sql="SELECT SYSDATE FROM DUAL";
+  Date expectedResult=new Date();
+  ParameterizedRowMapper<Date> rm=new ParameterizedRowMapper<Date>(){
+    public Date mapRow(    ResultSet rs,    int rowNum){
+      return new Date();
+    }
+  }
+;
+  MockControl mc=MockControl.createControl(JdbcOperations.class);
+  JdbcOperations jo=(JdbcOperations)mc.getMock();
+  jo.queryForObject(sql,rm);
+  mc.setReturnValue(expectedResult);
+  mc.replay();
+  SimpleJdbcTemplate jth=new SimpleJdbcTemplate(jo);
+  Date result=jth.queryForObject(sql,rm);
+  assertEquals(expectedResult,result);
+  mc.verify();
+}

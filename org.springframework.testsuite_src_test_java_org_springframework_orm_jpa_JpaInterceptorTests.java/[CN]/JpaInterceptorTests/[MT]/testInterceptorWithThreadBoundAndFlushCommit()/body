@@ -1,0 +1,19 @@
+{
+  factoryControl.replay();
+  managerControl.replay();
+  TransactionSynchronizationManager.bindResource(factory,new EntityManagerHolder(entityManager));
+  JpaInterceptor interceptor=new JpaInterceptor();
+  interceptor.setFlushEager(false);
+  interceptor.setEntityManagerFactory(factory);
+  try {
+    interceptor.invoke(new TestInvocation(factory));
+  }
+ catch (  Throwable t) {
+    fail("Should not have thrown Throwable: " + t.getMessage());
+  }
+ finally {
+    TransactionSynchronizationManager.unbindResource(factory);
+  }
+  factoryControl.verify();
+  managerControl.verify();
+}

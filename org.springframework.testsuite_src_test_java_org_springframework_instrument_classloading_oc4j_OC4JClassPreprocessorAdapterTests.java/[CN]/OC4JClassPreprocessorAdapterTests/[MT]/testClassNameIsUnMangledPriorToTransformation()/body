@@ -1,0 +1,19 @@
+{
+  final byte[] classBytes="CAFEBABE".getBytes();
+  final ClassLoader classLoader=getClass().getClassLoader();
+  MockControl mockTransformer=MockControl.createControl(ClassFileTransformer.class);
+  ClassFileTransformer transformer=(ClassFileTransformer)mockTransformer.getMock();
+  transformer.transform(classLoader,"com/foo/Bar",null,null,classBytes);
+  mockTransformer.setMatcher(new AbstractMatcher(){
+    public boolean matches(    Object[] expected,    Object[] actual){
+      return expected[1].equals(actual[1]);
+    }
+  }
+);
+  mockTransformer.setReturnValue(classBytes);
+  mockTransformer.replay();
+  OC4JClassPreprocessorAdapter processor=new OC4JClassPreprocessorAdapter(transformer);
+  byte[] bytes=processor.processClass("com.foo.Bar",classBytes,0,0,null,classLoader);
+  assertNotNull(bytes);
+  mockTransformer.verify();
+}

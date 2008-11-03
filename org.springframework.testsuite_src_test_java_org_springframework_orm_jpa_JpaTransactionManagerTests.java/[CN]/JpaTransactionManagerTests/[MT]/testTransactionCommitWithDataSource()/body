@@ -1,0 +1,39 @@
+{
+  MockControl dsControl=MockControl.createControl(DataSource.class);
+  DataSource ds=(DataSource)dsControl.getMock();
+  transactionManager.setDataSource(ds);
+  managerControl.expectAndReturn(manager.getTransaction(),tx);
+  managerControl.expectAndReturn(manager.getTransaction(),tx);
+  txControl.expectAndReturn(tx.getRollbackOnly(),false);
+  tx.commit();
+  manager.flush();
+  factoryControl.replay();
+  managerControl.replay();
+  txControl.replay();
+  dsControl.replay();
+  final List<String> l=new ArrayList<String>();
+  l.add("test");
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  Object result=tt.execute(new TransactionCallback(){
+    public Object doInTransaction(    TransactionStatus status){
+      assertTrue(TransactionSynchronizationManager.hasResource(factory));
+      assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+      return template.execute(new JpaCallback(){
+        public Object doInJpa(        EntityManager em){
+          em.flush();
+          return l;
+        }
+      }
+);
+    }
+  }
+);
+  assertTrue(result == l);
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  factoryControl.verify();
+  managerControl.verify();
+  txControl.verify();
+  dsControl.verify();
+}

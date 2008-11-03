@@ -1,0 +1,23 @@
+{
+  String sql="SELECT SOMEDATE FROM BAR WHERE ID=? AND XY=?";
+  Date expectedResult=new Date();
+  double arg1=24.7;
+  String arg2="foo";
+  Object arg3=new Object();
+  ParameterizedRowMapper<Date> rm=new ParameterizedRowMapper<Date>(){
+    public Date mapRow(    ResultSet rs,    int rowNum){
+      return new Date();
+    }
+  }
+;
+  MockControl mc=MockControl.createControl(JdbcOperations.class);
+  JdbcOperations jo=(JdbcOperations)mc.getMock();
+  jo.queryForObject(sql,new Object[]{arg1,arg2,arg3},rm);
+  mc.setDefaultMatcher(new ArrayMatcher());
+  mc.setReturnValue(expectedResult);
+  mc.replay();
+  SimpleJdbcTemplate jth=new SimpleJdbcTemplate(jo);
+  Date result=jth.queryForObject(sql,rm,arg1,arg2,arg3);
+  assertEquals(expectedResult,result);
+  mc.verify();
+}

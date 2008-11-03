@@ -1,0 +1,34 @@
+{
+  managerControl.reset();
+  txControl.reset();
+  manager.flush();
+  manager.close();
+  factoryControl.replay();
+  managerControl.replay();
+  txControl.replay();
+  tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  tt.execute(new TransactionCallback(){
+    public Object doInTransaction(    TransactionStatus status){
+      assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+      assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+      assertTrue(!status.isNewTransaction());
+      template.execute(new JpaCallback(){
+        public Object doInJpa(        EntityManager em){
+          em.flush();
+          return null;
+        }
+      }
+);
+      status.setRollbackOnly();
+      return null;
+    }
+  }
+);
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  factoryControl.verify();
+  managerControl.verify();
+  txControl.verify();
+}

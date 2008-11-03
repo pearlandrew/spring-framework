@@ -1,0 +1,17 @@
+{
+  if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
+    return;
+  }
+  ClassPathXmlApplicationContext ac=new ClassPathXmlApplicationContext("/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
+  StopWatch sw=new StopWatch();
+  sw.start("prototype");
+  for (int i=0; i < 10000; i++) {
+    ITestBean shouldBeWeaved=(ITestBean)ac.getBean("adrian2");
+    if (i < 10) {
+      testAspectsAndAdvisorAreApplied(ac,shouldBeWeaved);
+    }
+  }
+  sw.stop();
+  System.out.println(sw.getTotalTimeMillis());
+  assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(),sw.getTotalTimeMillis() < 4000);
+}

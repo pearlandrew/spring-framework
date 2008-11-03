@@ -1,0 +1,19 @@
+{
+  TestBean1 tb=new TestBean1();
+  CallCountingTransactionManager ptm=new CallCountingTransactionManager();
+  AnnotationTransactionAttributeSource tas=new AnnotationTransactionAttributeSource();
+  TransactionInterceptor ti=new TransactionInterceptor(ptm,tas);
+  ProxyFactory proxyFactory=new ProxyFactory();
+  proxyFactory.setInterfaces(new Class[]{ITestBean.class});
+  proxyFactory.addAdvice(ti);
+  proxyFactory.setTarget(tb);
+  ITestBean proxy=(ITestBean)proxyFactory.getProxy();
+  proxy.getAge();
+  assertEquals(1,ptm.commits);
+  ITestBean serializedProxy=(ITestBean)SerializationTestUtils.serializeAndDeserialize(proxy);
+  serializedProxy.getAge();
+  Advised advised=(Advised)serializedProxy;
+  TransactionInterceptor serializedTi=(TransactionInterceptor)advised.getAdvisors()[0].getAdvice();
+  CallCountingTransactionManager serializedPtm=(CallCountingTransactionManager)serializedTi.getTransactionManager();
+  assertEquals(2,serializedPtm.commits);
+}

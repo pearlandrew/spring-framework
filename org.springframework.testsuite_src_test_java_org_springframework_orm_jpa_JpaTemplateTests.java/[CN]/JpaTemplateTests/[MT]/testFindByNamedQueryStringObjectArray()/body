@@ -1,0 +1,20 @@
+{
+  String queryName="some query name";
+  MockControl queryControl=MockControl.createControl(Query.class);
+  Query query=(Query)queryControl.getMock();
+  List result=new ArrayList();
+  Object param1=new Object();
+  Object param2=new Object();
+  Object[] params=new Object[]{param1,param2};
+  managerControl.expectAndReturn(manager.createNamedQuery(queryName),query);
+  queryControl.expectAndReturn(query.setParameter(1,param1),null);
+  queryControl.expectAndReturn(query.setParameter(2,param2),null);
+  queryControl.expectAndReturn(query.getResultList(),result);
+  managerControl.replay();
+  factoryControl.replay();
+  queryControl.replay();
+  assertSame(result,template.findByNamedQuery(queryName,params));
+  managerControl.verify();
+  factoryControl.verify();
+  queryControl.verify();
+}

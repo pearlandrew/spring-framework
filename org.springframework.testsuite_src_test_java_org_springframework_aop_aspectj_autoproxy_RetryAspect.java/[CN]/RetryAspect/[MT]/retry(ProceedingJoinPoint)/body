@@ -1,0 +1,22 @@
+{
+  boolean retry=true;
+  Object o=null;
+  while (retry) {
+    try {
+      retry=false;
+      this.beginCalls++;
+      try {
+        o=jp.proceed();
+        this.commitCalls++;
+      }
+ catch (      RetryableException e) {
+        this.rollbackCalls++;
+        throw e;
+      }
+    }
+ catch (    RetryableException re) {
+      retry=true;
+    }
+  }
+  return o;
+}

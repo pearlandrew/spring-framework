@@ -1,0 +1,22 @@
+{
+  MockControl ejbControl=MockControl.createControl(LocalInterfaceWithBusinessMethods.class);
+  final LocalInterfaceWithBusinessMethods ejb=(LocalInterfaceWithBusinessMethods)ejbControl.getMock();
+  ejb.targetMethod();
+  ejbControl.setThrowable(expected);
+  ejbControl.replay();
+  final String jndiName="foobar";
+  MockControl contextControl=contextControl(jndiName,ejb);
+  LocalSlsbInvokerInterceptor si=configuredInterceptor(contextControl,jndiName);
+  ProxyFactory pf=new ProxyFactory(new Class[]{LocalInterfaceWithBusinessMethods.class});
+  pf.addAdvice(si);
+  LocalInterfaceWithBusinessMethods target=(LocalInterfaceWithBusinessMethods)pf.getProxy();
+  try {
+    target.targetMethod();
+    fail("Should have thrown exception");
+  }
+ catch (  Exception thrown) {
+    assertTrue(thrown == expected);
+  }
+  contextControl.verify();
+  ejbControl.verify();
+}

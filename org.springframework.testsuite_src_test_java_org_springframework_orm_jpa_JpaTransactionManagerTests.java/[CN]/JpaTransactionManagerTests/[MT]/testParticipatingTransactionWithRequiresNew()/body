@@ -1,0 +1,46 @@
+{
+  tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+  factoryControl.expectAndReturn(factory.createEntityManager(),manager);
+  managerControl.expectAndReturn(manager.getTransaction(),tx,5);
+  manager.flush();
+  manager.close();
+  factoryControl.replay();
+  managerControl.replay();
+  txControl.replay();
+  final List<String> l=new ArrayList<String>();
+  l.add("test");
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  Object result=tt.execute(new TransactionCallback(){
+    public Object doInTransaction(    TransactionStatus status){
+      txControl.verify();
+      txControl.reset();
+      tx.begin();
+      txControl.expectAndReturn(tx.getRollbackOnly(),false);
+      tx.commit();
+      txControl.expectAndReturn(tx.getRollbackOnly(),false);
+      tx.commit();
+      txControl.replay();
+      assertTrue(TransactionSynchronizationManager.hasResource(factory));
+      return tt.execute(new TransactionCallback(){
+        public Object doInTransaction(        TransactionStatus status){
+          return template.execute(new JpaCallback(){
+            public Object doInJpa(            EntityManager em2){
+              em2.flush();
+              return l;
+            }
+          }
+);
+        }
+      }
+);
+    }
+  }
+);
+  assertSame(l,result);
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  factoryControl.verify();
+  managerControl.verify();
+  txControl.verify();
+}

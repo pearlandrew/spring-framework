@@ -1,0 +1,15 @@
+{
+  TestSqlMapClientTemplate template=new TestSqlMapClientTemplate();
+  template.executor.update("myStatement","myParameter");
+  template.executorControl.setReturnValue(20,1);
+  template.executorControl.replay();
+  try {
+    template.update("myStatement","myParameter",10);
+    fail("Should have thrown JdbcUpdateAffectedIncorrectNumberOfRowsException");
+  }
+ catch (  JdbcUpdateAffectedIncorrectNumberOfRowsException ex) {
+    assertEquals(10,ex.getExpectedRowsAffected());
+    assertEquals(20,ex.getActualRowsAffected());
+  }
+  template.executorControl.verify();
+}

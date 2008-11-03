@@ -1,0 +1,20 @@
+{
+  ClassPathXmlApplicationContext bf=new ClassPathXmlApplicationContext(file);
+  StopWatch sw=new StopWatch();
+  sw.start(howmany + " repeated mixed invocations with " + technology);
+  ITestBean adrian=(ITestBean)bf.getBean("adrian");
+  assertTrue(AopUtils.isAopProxy(adrian));
+  Advised a=(Advised)adrian;
+  assertTrue(a.getAdvisors().length >= 3);
+  for (int i=0; i < howmany; i++) {
+    adrian.getAge();
+    adrian.getName();
+    adrian.setAge(i);
+    adrian.getDoctor();
+    adrian.getLawyer();
+    adrian.getSpouse();
+  }
+  sw.stop();
+  System.out.println(sw.prettyPrint());
+  return sw.getLastTaskTimeMillis();
+}

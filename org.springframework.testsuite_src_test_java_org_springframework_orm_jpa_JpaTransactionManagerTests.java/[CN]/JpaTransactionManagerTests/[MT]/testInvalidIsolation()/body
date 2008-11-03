@@ -1,0 +1,22 @@
+{
+  tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
+  txControl.reset();
+  managerControl.reset();
+  manager.close();
+  factoryControl.replay();
+  managerControl.replay();
+  txControl.replay();
+  try {
+    tt.execute(new TransactionCallbackWithoutResult(){
+      protected void doInTransactionWithoutResult(      TransactionStatus status){
+      }
+    }
+);
+    fail("Should have thrown InvalidIsolationLevelException");
+  }
+ catch (  InvalidIsolationLevelException ex) {
+  }
+  factoryControl.verify();
+  managerControl.verify();
+  txControl.verify();
+}

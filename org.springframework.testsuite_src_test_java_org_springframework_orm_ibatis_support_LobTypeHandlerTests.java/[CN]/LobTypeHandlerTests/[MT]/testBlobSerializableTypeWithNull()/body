@@ -1,0 +1,21 @@
+{
+  lobHandler.getBlobAsBinaryStream(rs,1);
+  lobHandlerControl.setReturnValue(null,2);
+  lobCreator.setBlobAsBytes(ps,1,null);
+  lobHandlerControl.replay();
+  lobCreatorControl.replay();
+  BlobSerializableTypeHandler type=new BlobSerializableTypeHandler(lobHandler);
+  assertEquals(null,type.valueOf(null));
+  assertEquals(null,type.getResult(rs,"column"));
+  assertEquals(null,type.getResult(rs,1));
+  TransactionSynchronizationManager.initSynchronization();
+  try {
+    type.setParameter(ps,1,null,null);
+    List synchs=TransactionSynchronizationManager.getSynchronizations();
+    assertEquals(1,synchs.size());
+    ((TransactionSynchronization)synchs.get(0)).beforeCompletion();
+  }
+  finally {
+    TransactionSynchronizationManager.clearSynchronization();
+  }
+}

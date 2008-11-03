@@ -1,0 +1,21 @@
+{
+  factoryControl.expectAndReturn(factory.createEntityManager(),entityManager);
+  entityManager.flush();
+  PersistenceException exception=new PersistenceException();
+  managerControl.setThrowable(exception,1);
+  entityManager.close();
+  factoryControl.replay();
+  managerControl.replay();
+  JpaInterceptor interceptor=new JpaInterceptor();
+  interceptor.setFlushEager(true);
+  interceptor.setExceptionConversionEnabled(false);
+  interceptor.setEntityManagerFactory(factory);
+  try {
+    interceptor.invoke(new TestInvocation(factory));
+  }
+ catch (  PersistenceException ex) {
+    assertEquals(exception,ex);
+  }
+  factoryControl.verify();
+  managerControl.verify();
+}

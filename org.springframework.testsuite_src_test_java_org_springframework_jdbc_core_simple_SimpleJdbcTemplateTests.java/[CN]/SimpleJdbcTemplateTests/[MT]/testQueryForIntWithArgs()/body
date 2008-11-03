@@ -1,0 +1,16 @@
+{
+  String sql="SELECT COUNT(0) FROM BAR WHERE ID=? AND XY=?";
+  int expectedResult=666;
+  int arg1=24;
+  String arg2="foo";
+  MockControl mc=MockControl.createControl(JdbcOperations.class);
+  JdbcOperations jo=(JdbcOperations)mc.getMock();
+  jo.queryForInt(sql,new Object[]{arg1,arg2});
+  mc.setDefaultMatcher(new ArrayMatcher());
+  mc.setReturnValue(expectedResult);
+  mc.replay();
+  SimpleJdbcTemplate jth=new SimpleJdbcTemplate(jo);
+  int result=jth.queryForInt(sql,arg1,arg2);
+  assertEquals(expectedResult,result);
+  mc.verify();
+}

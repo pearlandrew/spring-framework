@@ -1,0 +1,41 @@
+{
+  factoryControl.reset();
+  managerControl.reset();
+  txControl.reset();
+  managerControl.expectAndReturn(manager.getTransaction(),tx,2);
+  tx.begin();
+  txControl.expectAndReturn(tx.isActive(),true);
+  tx.rollback();
+  manager.clear();
+  factoryControl.replay();
+  managerControl.replay();
+  txControl.replay();
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  TransactionSynchronizationManager.bindResource(factory,new EntityManagerHolder(manager));
+  try {
+    tt.execute(new TransactionCallback(){
+      public Object doInTransaction(      TransactionStatus status){
+        assertTrue(TransactionSynchronizationManager.hasResource(factory));
+        assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+        template.execute(new JpaCallback(){
+          public Object doInJpa(          EntityManager em){
+            return null;
+          }
+        }
+);
+        status.setRollbackOnly();
+        return null;
+      }
+    }
+);
+    assertTrue(TransactionSynchronizationManager.hasResource(factory));
+    assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  }
+  finally {
+    TransactionSynchronizationManager.unbindResource(factory);
+  }
+  factoryControl.verify();
+  managerControl.verify();
+  txControl.verify();
+}

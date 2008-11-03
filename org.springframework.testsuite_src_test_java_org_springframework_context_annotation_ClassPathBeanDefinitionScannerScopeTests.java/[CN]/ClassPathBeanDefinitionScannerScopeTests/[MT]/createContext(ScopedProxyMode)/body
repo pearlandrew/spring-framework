@@ -1,0 +1,20 @@
+{
+  GenericWebApplicationContext context=new GenericWebApplicationContext();
+  ClassPathBeanDefinitionScanner scanner=new ClassPathBeanDefinitionScanner(context,false);
+  scanner.setIncludeAnnotationConfig(false);
+  scanner.addIncludeFilter(new AnnotationTypeFilter(ScopeTestComponent.class));
+  scanner.setBeanNameGenerator(new BeanNameGenerator(){
+    public String generateBeanName(    BeanDefinition definition,    BeanDefinitionRegistry registry){
+      String beanClassName=ClassUtils.getShortName(definition.getBeanClassName());
+      int begin=beanClassName.lastIndexOf('.') + 1;
+      int end=beanClassName.lastIndexOf("ScopedTestBean");
+      return beanClassName.substring(begin,end).toLowerCase();
+    }
+  }
+);
+  scanner.setScopedProxyMode(scopedProxyMode);
+  scanner.scan(getClass().getPackage().getName());
+  scanner.scan(getClass().getPackage().getName());
+  context.refresh();
+  return context;
+}

@@ -1,0 +1,18 @@
+{
+  MockControl mockControl=MockControl.createControl(EntityManagerFactory.class);
+  EntityManagerFactory entityManagerFactory=(EntityManagerFactory)mockControl.getMock();
+  mockControl.replay();
+  final List test=new ArrayList();
+  JpaDaoSupport dao=new JpaDaoSupport(){
+    protected void initDao(){
+      test.add("test");
+    }
+  }
+;
+  dao.setEntityManagerFactory(entityManagerFactory);
+  dao.afterPropertiesSet();
+  assertNotNull("jpa template not created",dao.getJpaTemplate());
+  assertEquals("incorrect entity manager factory",entityManagerFactory,dao.getJpaTemplate().getEntityManagerFactory());
+  assertEquals("initDao not called",test.size(),1);
+  mockControl.verify();
+}

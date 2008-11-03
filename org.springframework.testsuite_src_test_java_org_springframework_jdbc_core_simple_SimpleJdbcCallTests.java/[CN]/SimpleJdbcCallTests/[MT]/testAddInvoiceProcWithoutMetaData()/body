@@ -1,0 +1,41 @@
+{
+  final int amount=1103;
+  final int custid=3;
+  mockDatabaseMetaData.getDatabaseProductName();
+  ctrlDatabaseMetaData.setReturnValue("MyDB");
+  mockDatabaseMetaData.getUserName();
+  ctrlDatabaseMetaData.setReturnValue("me");
+  mockDatabaseMetaData.supportsCatalogsInProcedureCalls();
+  ctrlDatabaseMetaData.setReturnValue(false);
+  mockDatabaseMetaData.supportsSchemasInProcedureCalls();
+  ctrlDatabaseMetaData.setReturnValue(false);
+  mockDatabaseMetaData.storesUpperCaseIdentifiers();
+  ctrlDatabaseMetaData.setReturnValue(false);
+  mockDatabaseMetaData.storesLowerCaseIdentifiers();
+  ctrlDatabaseMetaData.setReturnValue(true);
+  mockCallable.setObject(1,1103,4);
+  ctrlCallable.setVoidCallable();
+  mockCallable.setObject(2,3,4);
+  ctrlCallable.setVoidCallable();
+  mockCallable.registerOutParameter(3,4);
+  ctrlCallable.setVoidCallable();
+  mockCallable.execute();
+  ctrlCallable.setReturnValue(false);
+  mockCallable.getUpdateCount();
+  ctrlCallable.setReturnValue(-1);
+  mockCallable.getObject(3);
+  ctrlCallable.setReturnValue(new Long(4));
+  if (debugEnabled) {
+    mockCallable.getWarnings();
+    ctrlCallable.setReturnValue(null);
+  }
+  mockCallable.close();
+  ctrlCallable.setVoidCallable();
+  mockConnection.prepareCall("{call add_invoice(?, ?, ?)}");
+  ctrlConnection.setReturnValue(mockCallable);
+  replay();
+  SimpleJdbcCall adder=new SimpleJdbcCall(mockDataSource).withProcedureName("add_invoice");
+  adder.declareParameters(new SqlParameter("amount",Types.INTEGER),new SqlParameter("custid",Types.INTEGER),new SqlOutParameter("newid",Types.INTEGER));
+  Number newId=adder.executeObject(Number.class,new MapSqlParameterSource().addValue("amount",amount).addValue("custid",custid));
+  assertEquals(4,newId.intValue());
+}

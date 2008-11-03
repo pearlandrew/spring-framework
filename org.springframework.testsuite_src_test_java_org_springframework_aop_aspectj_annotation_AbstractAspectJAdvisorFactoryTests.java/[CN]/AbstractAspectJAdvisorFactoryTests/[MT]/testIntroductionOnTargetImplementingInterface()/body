@@ -1,0 +1,15 @@
+{
+  CannotBeUnlocked target=new CannotBeUnlocked();
+  Lockable proxy=(Lockable)createProxy(target,AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(),"someBean")),CannotBeUnlocked.class),CannotBeUnlocked.class);
+  assertTrue(proxy instanceof Lockable);
+  Lockable lockable=(Lockable)proxy;
+  assertTrue("Already locked",lockable.locked());
+  lockable.lock();
+  assertTrue("Real target ignores locking",lockable.locked());
+  try {
+    lockable.unlock();
+    fail();
+  }
+ catch (  UnsupportedOperationException ex) {
+  }
+}

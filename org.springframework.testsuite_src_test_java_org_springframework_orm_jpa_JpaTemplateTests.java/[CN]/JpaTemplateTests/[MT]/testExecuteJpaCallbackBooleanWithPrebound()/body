@@ -1,0 +1,22 @@
+{
+  template.setExposeNativeEntityManager(false);
+  template.setEntityManagerFactory(factory);
+  template.afterPropertiesSet();
+  TransactionSynchronizationManager.bindResource(factory,new EntityManagerHolder(manager));
+  managerControl.replay();
+  factoryControl.replay();
+  try {
+    template.execute(new JpaCallback(){
+      public Object doInJpa(      EntityManager em) throws PersistenceException {
+        assertSame(em,manager);
+        return null;
+      }
+    }
+,true);
+    managerControl.verify();
+    factoryControl.verify();
+  }
+  finally {
+    TransactionSynchronizationManager.unbindResource(factory);
+  }
+}

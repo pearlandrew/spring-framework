@@ -1,0 +1,16 @@
+{
+  factoryControl=MockControl.createControl(EntityManagerFactory.class);
+  factory=(EntityManagerFactory)factoryControl.getMock();
+  managerControl=MockControl.createControl(EntityManager.class);
+  manager=(EntityManager)managerControl.getMock();
+  txControl=MockControl.createControl(EntityTransaction.class);
+  tx=(EntityTransaction)txControl.getMock();
+  transactionManager=new JpaTransactionManager(factory);
+  template=new JpaTemplate(factory);
+  template.afterPropertiesSet();
+  tt=new TransactionTemplate(transactionManager);
+  factoryControl.expectAndReturn(factory.createEntityManager(),manager);
+  managerControl.expectAndReturn(manager.getTransaction(),tx);
+  tx.begin();
+  manager.close();
+}

@@ -1,0 +1,17 @@
+{
+  GenericApplicationContext context=new GenericApplicationContext();
+  ClassPathBeanDefinitionScanner scanner=new ClassPathBeanDefinitionScanner(context);
+  scanner.setIncludeAnnotationConfig(false);
+  scanner.setBeanNameGenerator(new TestBeanNameGenerator());
+  int beanCount=scanner.scan(BASE_PACKAGE);
+  assertEquals(9,beanCount);
+  context.refresh();
+  FooService fooService=(FooService)context.getBean("fooService");
+  assertFalse(fooService.isInitCalled());
+  try {
+    fooService.foo(123);
+    fail("NullPointerException expected; fooDao must not have been set");
+  }
+ catch (  NullPointerException expected) {
+  }
+}

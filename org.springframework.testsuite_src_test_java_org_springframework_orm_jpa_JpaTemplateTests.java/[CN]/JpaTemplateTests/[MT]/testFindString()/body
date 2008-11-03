@@ -1,0 +1,15 @@
+{
+  String queryString="some query";
+  MockControl queryControl=MockControl.createControl(Query.class);
+  Query query=(Query)queryControl.getMock();
+  List result=new ArrayList();
+  managerControl.expectAndReturn(manager.createQuery(queryString),query);
+  queryControl.expectAndReturn(query.getResultList(),result);
+  managerControl.replay();
+  factoryControl.replay();
+  queryControl.replay();
+  assertSame(result,template.find(queryString));
+  managerControl.verify();
+  factoryControl.verify();
+  queryControl.verify();
+}

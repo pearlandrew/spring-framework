@@ -1,0 +1,20 @@
+{
+  try {
+    ltw=new GlassFishLoadTimeWeaver(null);
+    fail("expected exception");
+  }
+ catch (  RuntimeException e) {
+  }
+  ClassLoader cl1=new URLClassLoader(new URL[0]);
+  ClassLoader cl2=new URLClassLoader(new URL[0],cl1);
+  ClassLoader cl3=new DummyInstrumentableClassLoader(cl2);
+  ClassLoader cl4=new URLClassLoader(new URL[0],cl3);
+  ltw=new GlassFishLoadTimeWeaver(cl4);
+  assertSame(cl3,ltw.getInstrumentableClassLoader());
+  cl1=new URLClassLoader(new URL[0]);
+  cl2=new URLClassLoader(new URL[0],cl1);
+  cl3=new DummyInstrumentableClassLoader(cl2);
+  cl4=new DummyInstrumentableClassLoader(cl3);
+  ltw=new GlassFishLoadTimeWeaver(cl4);
+  assertSame(cl4,ltw.getInstrumentableClassLoader());
+}

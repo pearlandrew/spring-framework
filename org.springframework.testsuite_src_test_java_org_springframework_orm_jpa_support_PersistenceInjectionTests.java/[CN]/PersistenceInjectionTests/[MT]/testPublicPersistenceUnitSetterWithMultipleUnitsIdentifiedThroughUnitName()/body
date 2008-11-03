@@ -1,0 +1,21 @@
+{
+  MockControl emf2Mc=MockControl.createControl(EntityManagerFactoryWithInfo.class);
+  EntityManagerFactoryWithInfo mockEmf2=(EntityManagerFactoryWithInfo)emf2Mc.getMock();
+  mockEmf2.getPersistenceUnitName();
+  emf2Mc.setReturnValue("Person",2);
+  emf2Mc.replay();
+  GenericApplicationContext gac=new GenericApplicationContext();
+  gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory",mockEmf);
+  gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory2",mockEmf2);
+  RootBeanDefinition processorDef=new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class);
+  processorDef.getPropertyValues().addPropertyValue("defaultPersistenceUnitName","entityManagerFactory");
+  gac.registerBeanDefinition("annotationProcessor",processorDef);
+  gac.registerBeanDefinition(DefaultPublicPersistenceUnitSetter.class.getName(),new RootBeanDefinition(DefaultPublicPersistenceUnitSetter.class));
+  gac.registerBeanDefinition(DefaultPublicPersistenceUnitSetterNamedPerson.class.getName(),new RootBeanDefinition(DefaultPublicPersistenceUnitSetterNamedPerson.class));
+  gac.refresh();
+  DefaultPublicPersistenceUnitSetter bean=(DefaultPublicPersistenceUnitSetter)gac.getBean(DefaultPublicPersistenceUnitSetter.class.getName());
+  DefaultPublicPersistenceUnitSetterNamedPerson bean2=(DefaultPublicPersistenceUnitSetterNamedPerson)gac.getBean(DefaultPublicPersistenceUnitSetterNamedPerson.class.getName());
+  assertSame(mockEmf,bean.emf);
+  assertSame(mockEmf2,bean2.emf);
+  emf2Mc.verify();
+}

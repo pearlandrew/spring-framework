@@ -1,0 +1,24 @@
+{
+  lobHandler.getClobAsString(rs,1);
+  lobHandlerControl.setReturnValue("content",2);
+  lobCreator.setClobAsString(ps,1,"content");
+  lobCreatorControl.setVoidCallable(1);
+  lobHandlerControl.replay();
+  lobCreatorControl.replay();
+  ClobStringTypeHandler type=new ClobStringTypeHandler(lobHandler);
+  assertEquals("content",type.valueOf("content"));
+  assertEquals("content",type.getResult(rs,"column"));
+  assertEquals("content",type.getResult(rs,1));
+  TransactionSynchronizationManager.initSynchronization();
+  try {
+    type.setParameter(ps,1,"content",null);
+    List synchs=TransactionSynchronizationManager.getSynchronizations();
+    assertEquals(1,synchs.size());
+    assertTrue(synchs.get(0).getClass().getName().endsWith("LobCreatorSynchronization"));
+    ((TransactionSynchronization)synchs.get(0)).beforeCompletion();
+    ((TransactionSynchronization)synchs.get(0)).afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
+  }
+  finally {
+    TransactionSynchronizationManager.clearSynchronization();
+  }
+}

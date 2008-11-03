@@ -1,0 +1,26 @@
+{
+  final String jndiName="foo";
+  MockControl mc=MockControl.createControl(MyHome.class);
+  final MyHome home=(MyHome)mc.getMock();
+  mc.replay();
+  JndiTemplate jt=new JndiTemplate(){
+    public Object lookup(    String name) throws NamingException {
+      assertTrue(name.equals("java:comp/env/" + jndiName));
+      return home;
+    }
+  }
+;
+  LocalStatelessSessionProxyFactoryBean fb=new LocalStatelessSessionProxyFactoryBean();
+  fb.setJndiName(jndiName);
+  fb.setResourceRef(true);
+  fb.setJndiTemplate(jt);
+  assertTrue(fb.isSingleton());
+  try {
+    fb.afterPropertiesSet();
+    fail("Should have failed to create EJB");
+  }
+ catch (  IllegalArgumentException ex) {
+    assertTrue(ex.getMessage().indexOf("businessInterface") != 1);
+  }
+  mc.verify();
+}

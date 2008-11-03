@@ -1,0 +1,21 @@
+{
+  MockControl ejbControl=MockControl.createControl(RemoteInterface.class);
+  final RemoteInterface ejb=(RemoteInterface)ejbControl.getMock();
+  ejb.targetMethod();
+  ejbControl.setThrowable(new RemoteException(),1);
+  ejb.remove();
+  ejbControl.setVoidCallable(1);
+  ejbControl.replay();
+  final String jndiName="foobar";
+  MockControl contextControl=contextControl(jndiName,ejb,1,1,1);
+  SimpleRemoteSlsbInvokerInterceptor si=configuredInterceptor(contextControl,jndiName);
+  RemoteInterface target=(RemoteInterface)configuredProxy(si,RemoteInterface.class);
+  try {
+    target.targetMethod();
+    fail("Should have thrown RemoteException");
+  }
+ catch (  RemoteException ex) {
+  }
+  contextControl.verify();
+  ejbControl.verify();
+}

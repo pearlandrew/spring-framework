@@ -1,0 +1,32 @@
+{
+  final String NO_SUCH_PROC="x";
+  mockDatabaseMetaData.getDatabaseProductName();
+  ctrlDatabaseMetaData.setReturnValue("MyDB");
+  mockDatabaseMetaData.getDatabaseProductName();
+  ctrlDatabaseMetaData.setReturnValue("MyDB");
+  mockDatabaseMetaData.getUserName();
+  ctrlDatabaseMetaData.setReturnValue("me");
+  mockDatabaseMetaData.supportsCatalogsInProcedureCalls();
+  ctrlDatabaseMetaData.setReturnValue(false);
+  mockDatabaseMetaData.supportsSchemasInProcedureCalls();
+  ctrlDatabaseMetaData.setReturnValue(false);
+  mockDatabaseMetaData.storesUpperCaseIdentifiers();
+  ctrlDatabaseMetaData.setReturnValue(false);
+  mockDatabaseMetaData.storesLowerCaseIdentifiers();
+  ctrlDatabaseMetaData.setReturnValue(true);
+  SQLException sex=new SQLException("Syntax error or access violation exception","42000");
+  mockCallable.execute();
+  ctrlCallable.setThrowable(sex);
+  mockCallable.close();
+  ctrlCallable.setVoidCallable();
+  mockConnection.prepareCall("{call " + NO_SUCH_PROC + "()}");
+  ctrlConnection.setReturnValue(mockCallable);
+  replay();
+  SimpleJdbcCall sproc=new SimpleJdbcCall(mockDataSource).withProcedureName(NO_SUCH_PROC);
+  try {
+    sproc.execute();
+    fail("Shouldn't succeed in running stored procedure which doesn't exist");
+  }
+ catch (  BadSqlGrammarException ex) {
+  }
+}

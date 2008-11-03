@@ -1,0 +1,20 @@
+{
+  MockControl dsControl=MockControl.createControl(DataSource.class);
+  DataSource ds=(DataSource)dsControl.getMock();
+  SqlMapClientDaoSupport testDao=new SqlMapClientDaoSupport(){
+  }
+;
+  testDao.setDataSource(ds);
+  assertEquals(ds,testDao.getDataSource());
+  MockControl clientControl=MockControl.createControl(SqlMapClient.class);
+  SqlMapClient client=(SqlMapClient)clientControl.getMock();
+  clientControl.replay();
+  testDao.setSqlMapClient(client);
+  assertEquals(client,testDao.getSqlMapClient());
+  SqlMapClientTemplate template=new SqlMapClientTemplate();
+  template.setDataSource(ds);
+  template.setSqlMapClient(client);
+  testDao.setSqlMapClientTemplate(template);
+  assertEquals(template,testDao.getSqlMapClientTemplate());
+  testDao.afterPropertiesSet();
+}

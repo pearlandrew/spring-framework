@@ -1,0 +1,24 @@
+{
+  template.setExposeNativeEntityManager(true);
+  template.setEntityManager(manager);
+  template.afterPropertiesSet();
+  managerControl.replay();
+  factoryControl.replay();
+  template.execute(new JpaCallback(){
+    public Object doInJpa(    EntityManager em) throws PersistenceException {
+      assertSame(em,manager);
+      return null;
+    }
+  }
+);
+  template.setExposeNativeEntityManager(false);
+  template.execute(new JpaCallback(){
+    public Object doInJpa(    EntityManager em) throws PersistenceException {
+      assertNotSame(em,manager);
+      return null;
+    }
+  }
+);
+  managerControl.verify();
+  factoryControl.verify();
+}

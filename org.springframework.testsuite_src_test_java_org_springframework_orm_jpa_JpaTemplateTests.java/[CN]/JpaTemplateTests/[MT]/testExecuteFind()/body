@@ -1,0 +1,21 @@
+{
+  template.setEntityManager(manager);
+  template.setExposeNativeEntityManager(true);
+  template.afterPropertiesSet();
+  managerControl.replay();
+  factoryControl.replay();
+  try {
+    template.executeFind(new JpaCallback(){
+      public Object doInJpa(      EntityManager em) throws PersistenceException {
+        assertSame(em,manager);
+        return new Object();
+      }
+    }
+);
+    fail("should have thrown exception");
+  }
+ catch (  DataAccessException e) {
+  }
+  managerControl.verify();
+  factoryControl.verify();
+}

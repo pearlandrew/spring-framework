@@ -1,0 +1,21 @@
+{
+  if (mixin.isModified()) {
+    return;
+  }
+  Method correspondingGetter=getGetterFromSetter(((MethodSignature)jp.getSignature()).getMethod());
+  boolean modified=true;
+  if (correspondingGetter != null) {
+    try {
+      Object oldValue=correspondingGetter.invoke(jp.getTarget());
+      modified=!ObjectUtils.nullSafeEquals(oldValue,newValue);
+    }
+ catch (    Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+ else {
+  }
+  if (modified) {
+    mixin.markDirty();
+  }
+}

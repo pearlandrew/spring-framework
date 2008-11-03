@@ -1,0 +1,18 @@
+{
+  Properties props=new Properties();
+  props.put("foo","bar");
+  MockControl emC=MockControl.createControl(EntityManager.class);
+  EntityManager em=(EntityManager)emC.getMock();
+  emfMc.expectAndReturn(mockEmf.createEntityManager(props),em);
+  emC.expectAndReturn(em.getDelegate(),new Object());
+  em.close();
+  emfMc.replay();
+  emC.replay();
+  PersistenceAnnotationBeanPostProcessor babpp=new MockPersistenceAnnotationBeanPostProcessor();
+  DefaultPrivatePersistenceContextFieldWithProperties transactionalField=new DefaultPrivatePersistenceContextFieldWithProperties();
+  babpp.postProcessAfterInstantiation(transactionalField,"bean name does not matter");
+  assertNotNull(transactionalField.em);
+  assertNotNull(transactionalField.em.getDelegate());
+  emfMc.verify();
+  emC.verify();
+}
