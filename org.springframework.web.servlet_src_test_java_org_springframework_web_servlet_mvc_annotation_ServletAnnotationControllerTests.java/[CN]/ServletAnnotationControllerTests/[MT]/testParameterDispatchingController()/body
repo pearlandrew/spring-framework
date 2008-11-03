@@ -1,0 +1,53 @@
+{
+  final MockServletContext servletContext=new MockServletContext();
+  final MockServletConfig servletConfig=new MockServletConfig(servletContext);
+  @SuppressWarnings("serial") DispatcherServlet servlet=new DispatcherServlet(){
+    protected WebApplicationContext createWebApplicationContext(    WebApplicationContext parent){
+      GenericWebApplicationContext wac=new GenericWebApplicationContext();
+      wac.setServletContext(servletContext);
+      RootBeanDefinition bd=new RootBeanDefinition(MyParameterDispatchingController.class);
+      bd.setScope(WebApplicationContext.SCOPE_REQUEST);
+      wac.registerBeanDefinition("controller",bd);
+      AnnotationConfigUtils.registerAnnotationConfigProcessors(wac);
+      wac.getBeanFactory().registerResolvableDependency(ServletConfig.class,servletConfig);
+      wac.refresh();
+      return wac;
+    }
+  }
+;
+  servlet.init(servletConfig);
+  MockHttpServletRequest request=new MockHttpServletRequest(servletContext,"GET","/myPath.do");
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  HttpSession session=request.getSession();
+  servlet.service(request,response);
+  assertEquals("myView",response.getContentAsString());
+  assertSame(servletContext,request.getAttribute("servletContext"));
+  assertSame(servletConfig,request.getAttribute("servletConfig"));
+  assertSame(session,request.getAttribute("session"));
+  assertSame(request,request.getAttribute("request"));
+  request=new MockHttpServletRequest(servletContext,"GET","/myPath.do");
+  response=new MockHttpServletResponse();
+  session=request.getSession();
+  servlet.service(request,response);
+  assertEquals("myView",response.getContentAsString());
+  assertSame(servletContext,request.getAttribute("servletContext"));
+  assertSame(servletConfig,request.getAttribute("servletConfig"));
+  assertSame(session,request.getAttribute("session"));
+  assertSame(request,request.getAttribute("request"));
+  request=new MockHttpServletRequest(servletContext,"GET","/myPath.do");
+  request.addParameter("view","other");
+  response=new MockHttpServletResponse();
+  servlet.service(request,response);
+  assertEquals("myOtherView",response.getContentAsString());
+  request=new MockHttpServletRequest(servletContext,"GET","/myPath.do");
+  request.addParameter("view","my");
+  request.addParameter("lang","de");
+  response=new MockHttpServletResponse();
+  servlet.service(request,response);
+  assertEquals("myLangView",response.getContentAsString());
+  request=new MockHttpServletRequest(servletContext,"GET","/myPath.do");
+  request.addParameter("surprise","!");
+  response=new MockHttpServletResponse();
+  servlet.service(request,response);
+  assertEquals("mySurpriseView",response.getContentAsString());
+}

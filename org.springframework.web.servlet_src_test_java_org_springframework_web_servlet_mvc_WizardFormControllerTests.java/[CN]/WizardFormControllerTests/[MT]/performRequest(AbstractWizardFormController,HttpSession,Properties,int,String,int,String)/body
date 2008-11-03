@@ -1,0 +1,49 @@
+{
+  MockHttpServletRequest request=new MockHttpServletRequest((params != null ? "POST" : "GET"),"/wizard");
+  request.addParameter("formAttr","1");
+  request.addParameter("pageAttr","2");
+  if (params != null) {
+    for (Iterator it=params.keySet().iterator(); it.hasNext(); ) {
+      String param=(String)it.next();
+      request.addParameter(param,params.getProperty(param));
+    }
+  }
+  request.setSession(session);
+  request.setAttribute("target",new Integer(target));
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  ModelAndView mv=wizard.handleRequest(request,response);
+  if (target >= 0) {
+    assertTrue("Page " + target + " returned",("page" + target).equals(mv.getViewName()));
+    if (pageAttr != null) {
+      assertTrue("Page attribute set",(new Integer(target)).equals(mv.getModel().get(pageAttr)));
+      assertTrue("Correct model size",mv.getModel().size() == 3);
+    }
+ else {
+      assertTrue("Correct model size",mv.getModel().size() == 2);
+    }
+    assertTrue(request.getSession().getAttribute(wizard.getFormSessionAttributeName(request)) instanceof TestBean);
+    assertEquals(new Integer(target),request.getSession().getAttribute(wizard.getPageSessionAttributeName(request)));
+  }
+ else   if (target == -1) {
+    assertTrue("Success target returned","success".equals(mv.getViewName()));
+    assertTrue("Correct model size",mv.getModel().size() == 1);
+    assertTrue(request.getSession().getAttribute(wizard.getFormSessionAttributeName(request)) == null);
+    assertTrue(request.getSession().getAttribute(wizard.getPageSessionAttributeName(request)) == null);
+  }
+ else   if (target == -2) {
+    assertTrue("Cancel view returned","cancel".equals(mv.getViewName()));
+    assertTrue("Correct model size",mv.getModel().size() == 1);
+    assertTrue(request.getSession().getAttribute(wizard.getFormSessionAttributeName(request)) == null);
+    assertTrue(request.getSession().getAttribute(wizard.getPageSessionAttributeName(request)) == null);
+  }
+  TestBean tb=(TestBean)mv.getModel().get("tb");
+  assertTrue("Has model",tb != null);
+  assertTrue("Name is " + name,ObjectUtils.nullSafeEquals(name,tb.getName()));
+  assertTrue("Age is " + age,tb.getAge() == age);
+  Errors errors=(Errors)mv.getModel().get(BindException.MODEL_KEY_PREFIX + "tb");
+  if (params != null && params.containsKey("formChange")) {
+    assertNotNull(errors);
+    assertFalse(errors.hasErrors());
+  }
+  return request.getSession(false);
+}

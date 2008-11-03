@@ -1,0 +1,36 @@
+{
+  WebApplicationContext wac=RequestContextUtils.getWebApplicationContext(request);
+  if (!(wac instanceof ComplexWebApplicationContext)) {
+    throw new ServletException("Incorrect WebApplicationContext");
+  }
+  if (!(request instanceof MultipartHttpServletRequest)) {
+    throw new ServletException("Not in a MultipartHttpServletRequest");
+  }
+  if (!(RequestContextUtils.getLocaleResolver(request) instanceof SessionLocaleResolver)) {
+    throw new ServletException("Incorrect LocaleResolver");
+  }
+  if (!Locale.CANADA.equals(RequestContextUtils.getLocale(request))) {
+    throw new ServletException("Incorrect Locale");
+  }
+  if (!Locale.CANADA.equals(LocaleContextHolder.getLocale())) {
+    throw new ServletException("Incorrect Locale");
+  }
+  if (!(RequestContextUtils.getThemeResolver(request) instanceof SessionThemeResolver)) {
+    throw new ServletException("Incorrect ThemeResolver");
+  }
+  if (!"theme".equals(RequestContextUtils.getThemeResolver(request).resolveThemeName(request))) {
+    throw new ServletException("Incorrect theme name");
+  }
+  if (request.getParameter("fail") != null) {
+    throw new ModelAndViewDefiningException(new ModelAndView("failed1"));
+  }
+  if (request.getParameter("access") != null) {
+    throw new IllegalAccessException("illegal access");
+  }
+  if (request.getParameter("servlet") != null) {
+    throw new ServletRequestBindingException("servlet");
+  }
+  if (request.getParameter("exception") != null) {
+    throw new RuntimeException("servlet");
+  }
+}

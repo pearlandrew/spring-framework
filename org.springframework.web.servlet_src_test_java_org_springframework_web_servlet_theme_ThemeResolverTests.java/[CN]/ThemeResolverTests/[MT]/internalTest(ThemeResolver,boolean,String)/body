@@ -1,0 +1,19 @@
+{
+  MockServletContext context=new MockServletContext();
+  MockHttpServletRequest request=new MockHttpServletRequest(context);
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  String themeName=themeResolver.resolveThemeName(request);
+  assertEquals(themeName,defaultName);
+  try {
+    themeResolver.setThemeName(request,response,TEST_THEME_NAME);
+    if (!shouldSet)     fail("should not be able to set Theme name");
+    themeName=themeResolver.resolveThemeName(request);
+    assertEquals(TEST_THEME_NAME,themeName);
+    themeResolver.setThemeName(request,response,null);
+    themeName=themeResolver.resolveThemeName(request);
+    assertEquals(themeName,defaultName);
+  }
+ catch (  UnsupportedOperationException ex) {
+    if (shouldSet)     fail("should be able to set Theme name");
+  }
+}

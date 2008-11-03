@@ -1,0 +1,22 @@
+{
+  String formView="f";
+  String successView="s";
+  TestController mc=new TestController();
+  mc.setFormView(formView);
+  mc.setSuccessView(successView);
+  mc.setSessionForm(true);
+  HttpServletRequest request1=new MockHttpServletRequest("GET","/welcome.html");
+  HttpServletResponse response1=new MockHttpServletResponse();
+  ModelAndView mv1=mc.handleRequest(request1,response1);
+  assertTrue("returned correct view name",mv1.getViewName().equals(formView));
+  TestBean person=(TestBean)mv1.getModel().get(TestController.BEAN_NAME);
+  assertTrue("model is non null",person != null);
+  assertTrue("Bean age default ok",person.getAge() == TestController.DEFAULT_AGE);
+  MockHttpServletRequest request2=new MockHttpServletRequest("POST","/welcome.html");
+  request2.setSession(request1.getSession(false));
+  HttpServletResponse response2=new MockHttpServletResponse();
+  ModelAndView mv2=mc.handleRequest(request2,response2);
+  assertTrue("returned correct view name",mv2.getViewName().equals(successView));
+  TestBean person2=(TestBean)mv2.getModel().get(TestController.BEAN_NAME);
+  assertTrue("model is same object",person == person2);
+}

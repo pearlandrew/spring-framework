@@ -1,0 +1,16 @@
+{
+  String successView="successView";
+  TestController ctl=new TestController();
+  ctl.setSuccessView(successView);
+  MockHttpServletRequest request=new MockHttpServletRequest();
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  String name="Rob Harrop";
+  int age=23;
+  request.setMethod("POST");
+  request.addParameter("name",name);
+  request.addParameter("age","" + age);
+  ModelAndView mv=ctl.handleRequest(request,response);
+  assertEquals("Incorrect view name",successView,mv.getViewName());
+  TestBean command=(TestBean)mv.getModel().get(ctl.getCommandName());
+  testCommandIsBound(command,name,age);
+}

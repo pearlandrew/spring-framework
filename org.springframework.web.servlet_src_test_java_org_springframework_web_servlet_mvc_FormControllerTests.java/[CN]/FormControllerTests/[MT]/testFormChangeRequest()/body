@@ -1,0 +1,33 @@
+{
+  String formView="fred";
+  String successView="tony";
+  final Float myFloat=new Float("123.45");
+  TestController mc=new TestController(){
+    protected boolean isFormChangeRequest(    HttpServletRequest request){
+      return (request.getParameter("formChange") != null);
+    }
+    protected void onFormChange(    HttpServletRequest request,    HttpServletResponse response,    Object command){
+      assertNotNull("Command should not be null",command);
+      assertEquals("Incorrect command class",TestBean.class,command.getClass());
+      ((TestBean)command).setMyFloat(myFloat);
+    }
+  }
+;
+  mc.setFormView(formView);
+  mc.setSuccessView(successView);
+  MockHttpServletRequest request=new MockHttpServletRequest("POST","/foo.html");
+  request.addParameter("name","Rod");
+  request.addParameter("age","99");
+  request.addParameter("formChange","true");
+  HttpServletResponse response=new MockHttpServletResponse();
+  ModelAndView mv=mc.handleRequest(request,response);
+  assertTrue("returned correct view name: expected '" + formView + "', not '"+ mv.getViewName()+ "'",mv.getViewName().equals(formView));
+  TestBean person=(TestBean)mv.getModel().get(mc.getCommandName());
+  assertTrue("model is non null",person != null);
+  assertTrue("bean name bound ok",person.getName().equals("Rod"));
+  assertTrue("bean age is 99",person.getAge() == 99);
+  assertEquals("Command property myFloat not updated in onFormChange",myFloat,person.getMyFloat());
+  Errors errors=(Errors)mv.getModel().get(BindException.MODEL_KEY_PREFIX + mc.getCommandName());
+  assertTrue("errors returned in model",errors != null);
+  assertTrue("No errors",errors.getErrorCount() == 0);
+}
