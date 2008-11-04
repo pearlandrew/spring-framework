@@ -7,6 +7,7 @@
     GenericTypeResolver.resolveParameterType(methodParam,handler.getClass());
     String paramName=null;
     boolean paramRequired=false;
+    String paramDefaultValue=null;
     Object[] paramAnns=methodParam.getParameterAnnotations();
     for (int j=0; j < paramAnns.length; j++) {
       Object paramAnn=paramAnns[j];
@@ -14,6 +15,7 @@
         RequestParam requestParam=(RequestParam)paramAnn;
         paramName=requestParam.value();
         paramRequired=requestParam.required();
+        paramDefaultValue=requestParam.defaultValue();
         break;
       }
  else       if (ModelAttribute.class.isInstance(paramAnn)) {
@@ -39,7 +41,7 @@
       }
     }
     if (paramName != null) {
-      initBinderArgs[i]=resolveRequestParam(paramName,paramRequired,methodParam,webRequest,null);
+      initBinderArgs[i]=resolveRequestParam(paramName,paramRequired,paramDefaultValue,methodParam,webRequest,null);
     }
   }
   return initBinderArgs;
