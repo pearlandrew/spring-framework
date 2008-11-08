@@ -2,6 +2,7 @@
   String lookupPath=urlPathHelper.getLookupPathForRequest(request);
   Map<RequestMappingInfo,Method> targetHandlerMethods=new LinkedHashMap<RequestMappingInfo,Method>();
   Map<RequestMappingInfo,String> targetPathMatches=new LinkedHashMap<RequestMappingInfo,String>();
+  Set<String> allowedMethods=new LinkedHashSet<String>(7);
   String resolvedMethodName=null;
   for (  Method handlerMethod : getHandlerMethods()) {
     RequestMappingInfo mappingInfo=new RequestMappingInfo();
@@ -22,6 +23,9 @@
             targetPathMatches.put(mappingInfo,mappedPath);
           }
  else {
+            for (            RequestMethod requestMethod : mappingInfo.methods) {
+              allowedMethods.add(requestMethod.toString());
+            }
             break;
           }
         }
@@ -83,6 +87,11 @@
     return targetHandlerMethods.get(bestMappingMatch);
   }
  else {
-    throw new NoSuchRequestHandlingMethodException(lookupPath,request.getMethod(),request.getParameterMap());
+    if (!allowedMethods.isEmpty()) {
+      throw new HttpRequestMethodNotSupportedException(request.getMethod(),StringUtils.toStringArray(allowedMethods));
+    }
+ else {
+      throw new NoSuchRequestHandlingMethodException(lookupPath,request.getMethod(),request.getParameterMap());
+    }
   }
 }

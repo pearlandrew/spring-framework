@@ -2,16 +2,16 @@
   @SuppressWarnings("serial") DispatcherServlet servlet=new DispatcherServlet(){
     @Override protected WebApplicationContext createWebApplicationContext(    WebApplicationContext parent){
       GenericWebApplicationContext wac=new GenericWebApplicationContext();
-      wac.registerBeanDefinition("controller",new RootBeanDefinition(MyNullCommandController.class));
+      wac.registerBeanDefinition("controller",new RootBeanDefinition(MethodNotAllowedController.class));
       wac.refresh();
       return wac;
     }
   }
 ;
   servlet.init(new MockServletConfig());
-  MockHttpServletRequest request=new MockHttpServletRequest("GET","/myPath");
-  request.setUserPrincipal(new OtherPrincipal());
+  MockHttpServletRequest request=new MockHttpServletRequest("GET","/myPath.do");
   MockHttpServletResponse response=new MockHttpServletResponse();
   servlet.service(request,response);
-  assertEquals("myView",response.getContentAsString());
+  assertEquals("Invalid response status",HttpServletResponse.SC_METHOD_NOT_ALLOWED,response.getStatus());
+  assertEquals("Invalid Allow Header","PUT, DELETE, HEAD, TRACE, OPTIONS, POST",response.getHeader("Allow"));
 }
