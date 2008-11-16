@@ -1,0 +1,29 @@
+{
+  HttpServletRequest request=(HttpServletRequest)pageContext.getRequest();
+  HttpServletResponse response=(HttpServletResponse)pageContext.getResponse();
+  StringBuilder url=new StringBuilder();
+  if (type == UrlType.CONTEXT_RELATIVE) {
+    if (context == null) {
+      url.append(request.getContextPath());
+    }
+ else {
+      url.append(context);
+    }
+  }
+  if (type != UrlType.RELATIVE && type != UrlType.ABSOLUTE && !value.startsWith("/")) {
+    url.append("/");
+  }
+  url.append(replaceUriTemplateParams(value,params,templateParams));
+  url.append(createQueryString(params,templateParams,(url.indexOf("?") == -1)));
+  String urlStr;
+  if (type != UrlType.ABSOLUTE) {
+    urlStr=response.encodeURL(url.toString());
+  }
+ else {
+    urlStr=url.toString();
+  }
+  if (escapeXml) {
+    urlStr=escapeXml(urlStr);
+  }
+  return urlStr;
+}
