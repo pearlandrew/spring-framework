@@ -1,0 +1,16 @@
+{
+  DispatcherServlet servlet=new DispatcherServlet(){
+    @Override protected WebApplicationContext createWebApplicationContext(    WebApplicationContext parent) throws BeansException {
+      GenericWebApplicationContext wac=new GenericWebApplicationContext();
+      wac.registerBeanDefinition("controller",new RootBeanDefinition(UriTemplateController.class));
+      wac.refresh();
+      return wac;
+    }
+  }
+;
+  servlet.init(new MockServletConfig());
+  MockHttpServletRequest request=new MockHttpServletRequest("GET","/hotels/42/bookings/21");
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  servlet.service(request,response);
+  assertEquals("test-42-21",response.getContentAsString());
+}

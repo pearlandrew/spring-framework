@@ -2,11 +2,10 @@
   Object handler=this.handlerMap.get(urlPath);
   if (handler != null) {
     validateHandler(handler,request);
-    return buildPathExposingHandler(handler,urlPath);
+    return buildPathExposingHandler(handler,urlPath,null);
   }
   String bestPathMatch=null;
-  for (Iterator it=this.handlerMap.keySet().iterator(); it.hasNext(); ) {
-    String registeredPath=(String)it.next();
+  for (  String registeredPath : this.handlerMap.keySet()) {
     if (getPathMatcher().match(registeredPath,urlPath) && (bestPathMatch == null || bestPathMatch.length() < registeredPath.length())) {
       bestPathMatch=registeredPath;
     }
@@ -15,7 +14,8 @@
     handler=this.handlerMap.get(bestPathMatch);
     validateHandler(handler,request);
     String pathWithinMapping=getPathMatcher().extractPathWithinPattern(bestPathMatch,urlPath);
-    return buildPathExposingHandler(handler,pathWithinMapping);
+    Map<String,String> uriTemplateVariables=getPathMatcher().extractUriTemplateVariables(bestPathMatch,urlPath);
+    return buildPathExposingHandler(handler,pathWithinMapping,uriTemplateVariables);
   }
   return null;
 }
