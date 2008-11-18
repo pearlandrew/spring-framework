@@ -1,5 +1,4 @@
 {
-  pattern=uriTemplateToAntPattern(pattern);
   if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
     return false;
   }
@@ -14,7 +13,7 @@
     if ("**".equals(patDir)) {
       break;
     }
-    if (!matchStrings(patDir,pathDirs[pathIdxStart])) {
+    if (!matchStrings(patDir,pathDirs[pathIdxStart],uriTemplateVariables)) {
       return false;
     }
     pattIdxStart++;
@@ -48,7 +47,7 @@
     if (patDir.equals("**")) {
       break;
     }
-    if (!matchStrings(patDir,pathDirs[pathIdxEnd])) {
+    if (!matchStrings(patDir,pathDirs[pathIdxEnd],uriTemplateVariables)) {
       return false;
     }
     pattIdxEnd--;
@@ -79,9 +78,9 @@
     int foundIdx=-1;
     strLoop:     for (int i=0; i <= strLength - patLength; i++) {
       for (int j=0; j < patLength; j++) {
-        String subPat=(String)pattDirs[pattIdxStart + j + 1];
-        String subStr=(String)pathDirs[pathIdxStart + i + j];
-        if (!matchStrings(subPat,subStr)) {
+        String subPat=pattDirs[pattIdxStart + j + 1];
+        String subStr=pathDirs[pathIdxStart + i + j];
+        if (!matchStrings(subPat,subStr,uriTemplateVariables)) {
           continue strLoop;
         }
       }

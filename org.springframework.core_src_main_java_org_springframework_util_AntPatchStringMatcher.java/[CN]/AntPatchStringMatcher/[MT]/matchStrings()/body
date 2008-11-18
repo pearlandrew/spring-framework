@@ -1,0 +1,52 @@
+{
+  if (shortcutPossible()) {
+    return doShortcut();
+  }
+  if (patternContainsOnlyStar()) {
+    return true;
+  }
+  if (patternContainsOneTemplateVariable()) {
+    addTemplateVariable(0,patIdxEnd,0,strIdxEnd);
+    return true;
+  }
+  if (!matchBeforeFirstStarOrCurly()) {
+    return false;
+  }
+  if (allCharsUsed()) {
+    return onlyStarsLeft();
+  }
+  if (!matchAfterLastStarOrCurly()) {
+    return false;
+  }
+  if (allCharsUsed()) {
+    return onlyStarsLeft();
+  }
+  while (patIdxStart != patIdxEnd && strIdxStart <= strIdxEnd) {
+    int patIdxTmp=findNextStar();
+    if (patIdxTmp == patIdxStart + 1 && patArr[patIdxTmp] == '*') {
+      patIdxStart++;
+      continue;
+    }
+    int patLength=(patIdxTmp - patIdxStart - 1);
+    int strLength=(strIdxEnd - strIdxStart + 1);
+    int foundIdx=-1;
+    strLoop:     for (int i=0; i <= strLength - patLength; i++) {
+      for (int j=0; j < patLength; j++) {
+        ch=patArr[patIdxStart + j + 1];
+        if (ch != '?') {
+          if (ch != strArr[strIdxStart + i + j]) {
+            continue strLoop;
+          }
+        }
+      }
+      foundIdx=strIdxStart + i;
+      break;
+    }
+    if (foundIdx == -1) {
+      return false;
+    }
+    patIdxStart=patIdxTmp;
+    strIdxStart=foundIdx + patLength;
+  }
+  return onlyStarsLeft();
+}
