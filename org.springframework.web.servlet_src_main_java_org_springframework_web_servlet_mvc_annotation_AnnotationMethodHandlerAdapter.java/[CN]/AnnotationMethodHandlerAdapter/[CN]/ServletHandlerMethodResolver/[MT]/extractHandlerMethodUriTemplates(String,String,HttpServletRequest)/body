@@ -1,0 +1,29 @@
+{
+  Map<String,String> variables=null;
+  boolean hasSuffix=(mappedPath.indexOf('.') != -1);
+  if (!hasSuffix && pathMatcher.match(mappedPath + ".*",lookupPath)) {
+    String realPath=mappedPath + ".*";
+    if (pathMatcher.match(realPath,lookupPath)) {
+      variables=pathMatcher.extractUriTemplateVariables(realPath,lookupPath);
+    }
+  }
+  if (variables == null && !mappedPath.startsWith("/")) {
+    String realPath="/**/" + mappedPath;
+    if (pathMatcher.match(realPath,lookupPath)) {
+      variables=pathMatcher.extractUriTemplateVariables(realPath,lookupPath);
+    }
+ else {
+      realPath=realPath + ".*";
+      if (pathMatcher.match(realPath,lookupPath)) {
+        variables=pathMatcher.extractUriTemplateVariables(realPath,lookupPath);
+      }
+    }
+  }
+  if (!CollectionUtils.isEmpty(variables)) {
+    Map<String,String> typeVariables=(Map<String,String>)request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+    if (typeVariables != null) {
+      variables.putAll(typeVariables);
+    }
+    request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE,variables);
+  }
+}
