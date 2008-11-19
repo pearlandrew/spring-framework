@@ -22,9 +22,16 @@
     return onlyStarsLeft();
   }
   while (patIdxStart != patIdxEnd && strIdxStart <= strIdxEnd) {
-    int patIdxTmp=findNextStar();
-    if (patIdxTmp == patIdxStart + 1 && patArr[patIdxTmp] == '*') {
-      patIdxStart++;
+    int patIdxTmp;
+    if (patArr[patIdxStart] == '{') {
+      patIdxTmp=findClosingCurly();
+      addTemplateVariable(patIdxStart,patIdxTmp,strIdxStart,strIdxEnd);
+      patIdxStart=patIdxTmp + 1;
+      strIdxStart=strIdxEnd + 1;
+      continue;
+    }
+    patIdxTmp=findNextStarOrCurly();
+    if (consecutiveStars(patIdxTmp)) {
       continue;
     }
     int patLength=(patIdxTmp - patIdxStart - 1);
