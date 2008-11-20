@@ -1,0 +1,8 @@
+{
+  final List<JdbcPet> pets=this.simpleJdbcTemplate.query("SELECT id, name, birth_date, type_id, owner_id FROM pets WHERE owner_id=?",new JdbcPetRowMapper(),owner.getId().intValue());
+  for (  JdbcPet pet : pets) {
+    owner.addPet(pet);
+    pet.setType(EntityUtils.getById(getPetTypes(),PetType.class,pet.getTypeId()));
+    loadVisits(pet);
+  }
+}
