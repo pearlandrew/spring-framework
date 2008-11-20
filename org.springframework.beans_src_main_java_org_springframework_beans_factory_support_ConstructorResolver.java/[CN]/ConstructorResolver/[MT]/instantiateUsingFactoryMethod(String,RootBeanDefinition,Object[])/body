@@ -63,7 +63,7 @@
       resolvedValues=new ConstructorArgumentValues();
       minNrOfArgs=resolveConstructorArguments(beanName,mbd,bw,cargs,resolvedValues);
     }
-    List causes=null;
+    List<Exception> causes=null;
     for (int i=0; i < candidates.length; i++) {
       Method candidate=candidates[i];
       Class[] paramTypes=candidate.getParameterTypes();
@@ -79,15 +79,15 @@
             }
             if (i == candidates.length - 1 && factoryMethodToUse == null) {
               if (causes != null) {
-                for (Iterator it=causes.iterator(); it.hasNext(); ) {
-                  this.beanFactory.onSuppressedException((Exception)it.next());
+                for (                Exception cause : causes) {
+                  this.beanFactory.onSuppressedException(cause);
                 }
               }
               throw ex;
             }
  else {
               if (causes == null) {
-                causes=new LinkedList();
+                causes=new LinkedList<Exception>();
               }
               causes.add(ex);
               continue;

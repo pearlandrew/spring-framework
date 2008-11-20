@@ -2,8 +2,8 @@
   String methodType=(methodOrCtor instanceof Constructor ? "constructor" : "factory method");
   TypeConverter converter=(this.typeConverter != null ? this.typeConverter : bw);
   ArgumentsHolder args=new ArgumentsHolder(paramTypes.length);
-  Set usedValueHolders=new HashSet(paramTypes.length);
-  Set autowiredBeanNames=new LinkedHashSet(4);
+  Set<ConstructorArgumentValues.ValueHolder> usedValueHolders=new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
+  Set<String> autowiredBeanNames=new LinkedHashSet<String>(4);
   boolean resolveNecessary=false;
   for (int paramIndex=0; paramIndex < paramTypes.length; paramIndex++) {
     Class paramType=paramTypes[paramIndex];
@@ -57,8 +57,7 @@
       }
     }
   }
-  for (Iterator it=autowiredBeanNames.iterator(); it.hasNext(); ) {
-    String autowiredBeanName=(String)it.next();
+  for (  String autowiredBeanName : autowiredBeanNames) {
     this.beanFactory.registerDependentBean(autowiredBeanName,beanName);
     if (this.beanFactory.logger.isDebugEnabled()) {
       this.beanFactory.logger.debug("Autowiring by type from bean name '" + beanName + "' via "+ methodType+ " to bean named '"+ autowiredBeanName+ "'");

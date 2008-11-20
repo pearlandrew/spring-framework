@@ -2,16 +2,15 @@
   TypeConverter converterToUse=(this.typeConverter != null ? this.typeConverter : bw);
   BeanDefinitionValueResolver valueResolver=new BeanDefinitionValueResolver(this.beanFactory,beanName,mbd,converterToUse);
   int minNrOfArgs=cargs.getArgumentCount();
-  for (Iterator it=cargs.getIndexedArgumentValues().entrySet().iterator(); it.hasNext(); ) {
-    Map.Entry entry=(Map.Entry)it.next();
-    int index=((Integer)entry.getKey()).intValue();
+  for (  Map.Entry<Integer,ConstructorArgumentValues.ValueHolder> entry : cargs.getIndexedArgumentValues().entrySet()) {
+    int index=entry.getKey();
     if (index < 0) {
       throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Invalid constructor argument index: " + index);
     }
     if (index > minNrOfArgs) {
       minNrOfArgs=index + 1;
     }
-    ConstructorArgumentValues.ValueHolder valueHolder=(ConstructorArgumentValues.ValueHolder)entry.getValue();
+    ConstructorArgumentValues.ValueHolder valueHolder=entry.getValue();
     if (valueHolder.isConverted()) {
       resolvedValues.addIndexedArgumentValue(index,valueHolder);
     }
@@ -22,8 +21,7 @@
       resolvedValues.addIndexedArgumentValue(index,resolvedValueHolder);
     }
   }
-  for (Iterator it=cargs.getGenericArgumentValues().iterator(); it.hasNext(); ) {
-    ConstructorArgumentValues.ValueHolder valueHolder=(ConstructorArgumentValues.ValueHolder)it.next();
+  for (  ConstructorArgumentValues.ValueHolder valueHolder : cargs.getGenericArgumentValues()) {
     if (valueHolder.isConverted()) {
       resolvedValues.addGenericArgumentValue(valueHolder);
     }

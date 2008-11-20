@@ -56,7 +56,7 @@
         throw new BeanCreationException(mbd.getResourceDescription(),beanName,minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" + beanName+ "' "+ "(hint: specify index and/or type arguments for simple parameters to avoid type ambiguities)");
       }
       ArgumentsHolder args=null;
-      List causes=null;
+      List<Exception> causes=null;
       if (resolvedValues != null) {
         try {
           args=createArgumentArray(beanName,mbd,resolvedValues,bw,paramTypes,candidate,autowiring);
@@ -67,15 +67,15 @@
           }
           if (i == candidates.length - 1 && constructorToUse == null) {
             if (causes != null) {
-              for (Iterator it=causes.iterator(); it.hasNext(); ) {
-                this.beanFactory.onSuppressedException((Exception)it.next());
+              for (              Exception cause : causes) {
+                this.beanFactory.onSuppressedException(cause);
               }
             }
             throw ex;
           }
  else {
             if (causes == null) {
-              causes=new LinkedList();
+              causes=new LinkedList<Exception>();
             }
             causes.add(ex);
             continue;
