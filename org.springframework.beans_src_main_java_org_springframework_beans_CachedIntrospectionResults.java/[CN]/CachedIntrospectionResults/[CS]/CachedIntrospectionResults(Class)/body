@@ -13,16 +13,13 @@
     if (logger.isTraceEnabled()) {
       logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
     }
-    this.propertyDescriptorCache=new HashMap();
+    this.propertyDescriptorCache=new HashMap<String,PropertyDescriptor>();
     PropertyDescriptor[] pds=this.beanInfo.getPropertyDescriptors();
-    for (int i=0; i < pds.length; i++) {
-      PropertyDescriptor pd=pds[i];
+    for (    PropertyDescriptor pd : pds) {
       if (logger.isTraceEnabled()) {
         logger.trace("Found bean property '" + pd.getName() + "'"+ (pd.getPropertyType() != null ? " of type [" + pd.getPropertyType().getName() + "]" : "")+ (pd.getPropertyEditorClass() != null ? "; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
       }
-      if (JdkVersion.isAtLeastJava15()) {
-        pd=new GenericTypeAwarePropertyDescriptor(beanClass,pd.getName(),pd.getReadMethod(),pd.getWriteMethod(),pd.getPropertyEditorClass());
-      }
+      pd=new GenericTypeAwarePropertyDescriptor(beanClass,pd.getName(),pd.getReadMethod(),pd.getWriteMethod(),pd.getPropertyEditorClass());
       this.propertyDescriptorCache.put(pd.getName(),pd);
     }
   }

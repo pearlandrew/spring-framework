@@ -1,12 +1,11 @@
 {
-  ConfigurableBeanFactory cbf=(this.beanFactory instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory)this.beanFactory : null);
-  List advisors=new ArrayList();
-  for (int i=0; i < this.interceptorNames.length; i++) {
-    String beanName=this.interceptorNames[i];
+  ConfigurableBeanFactory cbf=(this.beanFactory instanceof ConfigurableBeanFactory) ? (ConfigurableBeanFactory)this.beanFactory : null;
+  List<Advisor> advisors=new ArrayList<Advisor>();
+  for (  String beanName : this.interceptorNames) {
     if (cbf == null || !cbf.isCurrentlyInCreation(beanName)) {
       Object next=this.beanFactory.getBean(beanName);
       advisors.add(this.advisorAdapterRegistry.wrap(next));
     }
   }
-  return (Advisor[])advisors.toArray(new Advisor[advisors.size()]);
+  return advisors.toArray(new Advisor[advisors.size()]);
 }

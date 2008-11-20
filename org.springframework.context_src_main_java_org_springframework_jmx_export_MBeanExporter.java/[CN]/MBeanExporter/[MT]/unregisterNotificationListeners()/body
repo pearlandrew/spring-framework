@@ -1,11 +1,10 @@
 {
-  for (Iterator it=this.registeredNotificationListeners.entrySet().iterator(); it.hasNext(); ) {
-    Map.Entry entry=(Map.Entry)it.next();
-    NotificationListenerBean bean=(NotificationListenerBean)entry.getKey();
-    ObjectName[] mappedObjectNames=(ObjectName[])entry.getValue();
-    for (int j=0; j < mappedObjectNames.length; j++) {
+  for (  Map.Entry<NotificationListenerBean,ObjectName[]> entry : this.registeredNotificationListeners.entrySet()) {
+    NotificationListenerBean bean=entry.getKey();
+    ObjectName[] mappedObjectNames=entry.getValue();
+    for (    ObjectName mappedObjectName : mappedObjectNames) {
       try {
-        this.server.removeNotificationListener(mappedObjectNames[j],bean.getNotificationListener(),bean.getNotificationFilter(),bean.getHandback());
+        this.server.removeNotificationListener(mappedObjectName,bean.getNotificationListener(),bean.getNotificationFilter(),bean.getHandback());
       }
  catch (      Exception ex) {
         if (logger.isDebugEnabled()) {

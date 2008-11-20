@@ -1,0 +1,76 @@
+{
+  String className=null;
+  String parent=null;
+  String scope=GenericBeanDefinition.SCOPE_SINGLETON;
+  boolean isAbstract=false;
+  boolean lazyInit=false;
+  ConstructorArgumentValues cas=new ConstructorArgumentValues();
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  for (  Map.Entry entry : map.entrySet()) {
+    String key=StringUtils.trimWhitespace((String)entry.getKey());
+    if (key.startsWith(prefix + SEPARATOR)) {
+      String property=key.substring(prefix.length() + SEPARATOR.length());
+      if (CLASS_KEY.equals(property)) {
+        className=StringUtils.trimWhitespace((String)entry.getValue());
+      }
+ else       if (PARENT_KEY.equals(property)) {
+        parent=StringUtils.trimWhitespace((String)entry.getValue());
+      }
+ else       if (ABSTRACT_KEY.equals(property)) {
+        String val=StringUtils.trimWhitespace((String)entry.getValue());
+        isAbstract=TRUE_VALUE.equals(val);
+      }
+ else       if (SCOPE_KEY.equals(property)) {
+        scope=StringUtils.trimWhitespace((String)entry.getValue());
+      }
+ else       if (SINGLETON_KEY.equals(property)) {
+        String val=StringUtils.trimWhitespace((String)entry.getValue());
+        scope=((val == null || TRUE_VALUE.equals(val) ? GenericBeanDefinition.SCOPE_SINGLETON : GenericBeanDefinition.SCOPE_PROTOTYPE));
+      }
+ else       if (LAZY_INIT_KEY.equals(property)) {
+        String val=StringUtils.trimWhitespace((String)entry.getValue());
+        lazyInit=TRUE_VALUE.equals(val);
+      }
+ else       if (property.startsWith(CONSTRUCTOR_ARG_PREFIX)) {
+        if (property.endsWith(REF_SUFFIX)) {
+          int index=Integer.parseInt(property.substring(1,property.length() - REF_SUFFIX.length()));
+          cas.addIndexedArgumentValue(index,new RuntimeBeanReference(entry.getValue().toString()));
+        }
+ else {
+          int index=Integer.parseInt(property.substring(1));
+          cas.addIndexedArgumentValue(index,readValue(entry));
+        }
+      }
+ else       if (property.endsWith(REF_SUFFIX)) {
+        property=property.substring(0,property.length() - REF_SUFFIX.length());
+        String ref=StringUtils.trimWhitespace((String)entry.getValue());
+        Object val=new RuntimeBeanReference(ref);
+        pvs.addPropertyValue(property,val);
+      }
+ else {
+        pvs.addPropertyValue(property,readValue(entry));
+      }
+    }
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Registering bean definition for bean name '" + beanName + "' with "+ pvs);
+  }
+  if (parent == null && className == null && !beanName.equals(this.defaultParentBean)) {
+    parent=this.defaultParentBean;
+  }
+  try {
+    AbstractBeanDefinition bd=BeanDefinitionReaderUtils.createBeanDefinition(parent,className,getBeanClassLoader());
+    bd.setScope(scope);
+    bd.setAbstract(isAbstract);
+    bd.setLazyInit(lazyInit);
+    bd.setConstructorArgumentValues(cas);
+    bd.setPropertyValues(pvs);
+    getRegistry().registerBeanDefinition(beanName,bd);
+  }
+ catch (  ClassNotFoundException ex) {
+    throw new CannotLoadBeanClassException(resourceDescription,beanName,className,ex);
+  }
+catch (  LinkageError err) {
+    throw new CannotLoadBeanClassException(resourceDescription,beanName,className,err);
+  }
+}

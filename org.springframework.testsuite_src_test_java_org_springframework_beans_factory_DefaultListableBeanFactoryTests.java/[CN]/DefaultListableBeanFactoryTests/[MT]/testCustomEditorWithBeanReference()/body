@@ -1,7 +1,12 @@
 {
   DefaultListableBeanFactory lbf=new DefaultListableBeanFactory();
-  NumberFormat nf=NumberFormat.getInstance(Locale.GERMAN);
-  lbf.registerCustomEditor(Float.class,new CustomNumberEditor(Float.class,nf,true));
+  lbf.addPropertyEditorRegistrar(new PropertyEditorRegistrar(){
+    public void registerCustomEditors(    PropertyEditorRegistry registry){
+      NumberFormat nf=NumberFormat.getInstance(Locale.GERMAN);
+      registry.registerCustomEditor(Float.class,new CustomNumberEditor(Float.class,nf,true));
+    }
+  }
+);
   MutablePropertyValues pvs=new MutablePropertyValues();
   pvs.addPropertyValue("myFloat",new RuntimeBeanReference("myFloat"));
   lbf.registerBeanDefinition("testBean",new RootBeanDefinition(TestBean.class,pvs));

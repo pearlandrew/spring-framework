@@ -1,0 +1,18 @@
+{
+  Assert.notNull(lbf,"ListableBeanFactory must not be null");
+  Map<String,T> result=new LinkedHashMap<String,T>(4);
+  result.putAll(lbf.getBeansOfType(type));
+  if (lbf instanceof HierarchicalBeanFactory) {
+    HierarchicalBeanFactory hbf=(HierarchicalBeanFactory)lbf;
+    if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
+      Map<String,T> parentResult=beansOfTypeIncludingAncestors((ListableBeanFactory)hbf.getParentBeanFactory(),type);
+      for (      Map.Entry<String,T> entry : parentResult.entrySet()) {
+        String beanName=entry.getKey();
+        if (!result.containsKey(beanName) && !hbf.containsLocalBean(beanName)) {
+          result.put(beanName,entry.getValue());
+        }
+      }
+    }
+  }
+  return result;
+}

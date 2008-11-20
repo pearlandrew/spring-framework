@@ -1,5 +1,5 @@
 {
-  if (this.earlyFlushBeforeCommit) {
+  if (this.earlyFlushBeforeCommit && status.isNewTransaction()) {
     HibernateTransactionObject txObject=(HibernateTransactionObject)status.getTransaction();
     Session session=txObject.getSessionHolder().getSession();
     if (!session.getFlushMode().lessThan(FlushMode.COMMIT)) {
@@ -11,7 +11,7 @@
         throw convertHibernateAccessException(ex);
       }
  finally {
-        session.setFlushMode(FlushMode.NEVER);
+        session.setFlushMode(FlushMode.MANUAL);
       }
     }
   }

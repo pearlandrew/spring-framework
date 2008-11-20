@@ -2,45 +2,50 @@
   Assert.notNull(attrValue,"Attribute value must not be null");
   Assert.notNull(resultClass,"Result class must not be null");
   Assert.notNull(pageContext,"PageContext must not be null");
-  if (resultClass.isAssignableFrom(String.class)) {
-    StringBuffer resultValue=null;
-    int exprPrefixIndex=-1;
-    int exprSuffixIndex=0;
-    do {
-      exprPrefixIndex=attrValue.indexOf(EXPRESSION_PREFIX,exprSuffixIndex);
-      if (exprPrefixIndex != -1) {
-        int prevExprSuffixIndex=exprSuffixIndex;
-        exprSuffixIndex=attrValue.indexOf(EXPRESSION_SUFFIX,exprPrefixIndex + EXPRESSION_PREFIX.length());
-        String expr=null;
-        if (exprSuffixIndex != -1) {
-          exprSuffixIndex+=EXPRESSION_SUFFIX.length();
-          expr=attrValue.substring(exprPrefixIndex,exprSuffixIndex);
-        }
+  try {
+    if (resultClass.isAssignableFrom(String.class)) {
+      StringBuilder resultValue=null;
+      int exprPrefixIndex=-1;
+      int exprSuffixIndex=0;
+      do {
+        exprPrefixIndex=attrValue.indexOf(EXPRESSION_PREFIX,exprSuffixIndex);
+        if (exprPrefixIndex != -1) {
+          int prevExprSuffixIndex=exprSuffixIndex;
+          exprSuffixIndex=attrValue.indexOf(EXPRESSION_SUFFIX,exprPrefixIndex + EXPRESSION_PREFIX.length());
+          String expr=null;
+          if (exprSuffixIndex != -1) {
+            exprSuffixIndex+=EXPRESSION_SUFFIX.length();
+            expr=attrValue.substring(exprPrefixIndex,exprSuffixIndex);
+          }
  else {
-          expr=attrValue.substring(exprPrefixIndex);
-        }
-        if (expr.length() == attrValue.length()) {
-          return helper.evaluate(attrName,attrValue,resultClass,pageContext);
+            expr=attrValue.substring(exprPrefixIndex);
+          }
+          if (expr.length() == attrValue.length()) {
+            return evaluateExpression(attrValue,resultClass,pageContext);
+          }
+ else {
+            if (resultValue == null) {
+              resultValue=new StringBuilder();
+            }
+            resultValue.append(attrValue.substring(prevExprSuffixIndex,exprPrefixIndex));
+            resultValue.append(evaluateExpression(expr,String.class,pageContext));
+          }
         }
  else {
           if (resultValue == null) {
-            resultValue=new StringBuffer();
+            resultValue=new StringBuilder();
           }
-          resultValue.append(attrValue.substring(prevExprSuffixIndex,exprPrefixIndex));
-          resultValue.append(helper.evaluate(attrName,expr,String.class,pageContext));
+          resultValue.append(attrValue.substring(exprSuffixIndex));
         }
       }
- else {
-        if (resultValue == null) {
-          resultValue=new StringBuffer();
-        }
-        resultValue.append(attrValue.substring(exprSuffixIndex));
-      }
-    }
  while (exprPrefixIndex != -1 && exprSuffixIndex != -1);
-    return resultValue.toString();
-  }
+      return resultValue.toString();
+    }
  else {
-    return helper.evaluate(attrName,attrValue,resultClass,pageContext);
+      return evaluateExpression(attrValue,resultClass,pageContext);
+    }
+  }
+ catch (  ELException ex) {
+    throw new JspException("Parsing of JSP EL expression failed for attribute '" + attrName + "'",ex);
   }
 }

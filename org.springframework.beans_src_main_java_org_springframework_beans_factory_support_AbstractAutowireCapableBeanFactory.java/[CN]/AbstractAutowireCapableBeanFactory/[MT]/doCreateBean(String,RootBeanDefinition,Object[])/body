@@ -1,7 +1,7 @@
 {
   BeanWrapper instanceWrapper=null;
   if (mbd.isSingleton()) {
-    instanceWrapper=(BeanWrapper)this.factoryBeanInstanceCache.remove(beanName);
+    instanceWrapper=this.factoryBeanInstanceCache.remove(beanName);
   }
   if (instanceWrapper == null) {
     instanceWrapper=createBeanInstance(beanName,mbd,args);
@@ -47,9 +47,8 @@ synchronized (mbd.postProcessingLock) {
       }
  else       if (!this.allowRawInjectionDespiteWrapping && hasDependentBean(beanName)) {
         String[] dependentBeans=getDependentBeans(beanName);
-        Set actualDependentBeans=new LinkedHashSet(dependentBeans.length);
-        for (int i=0; i < dependentBeans.length; i++) {
-          String dependentBean=dependentBeans[i];
+        Set<String> actualDependentBeans=new LinkedHashSet<String>(dependentBeans.length);
+        for (        String dependentBean : dependentBeans) {
           if (!removeSingletonIfCreatedForTypeCheckOnly(dependentBean)) {
             actualDependentBeans.add(dependentBean);
           }

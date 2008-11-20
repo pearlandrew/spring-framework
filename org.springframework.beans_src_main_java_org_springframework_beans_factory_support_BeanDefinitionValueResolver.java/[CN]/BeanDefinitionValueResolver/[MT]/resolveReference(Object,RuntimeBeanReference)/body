@@ -1,14 +1,16 @@
 {
   try {
+    String refName=ref.getBeanName();
+    refName=String.valueOf(evaluate(refName));
     if (ref.isToParent()) {
       if (this.beanFactory.getParentBeanFactory() == null) {
-        throw new BeanCreationException(this.beanDefinition.getResourceDescription(),this.beanName,"Can't resolve reference to bean '" + ref.getBeanName() + "' in parent factory: no parent factory available");
+        throw new BeanCreationException(this.beanDefinition.getResourceDescription(),this.beanName,"Can't resolve reference to bean '" + refName + "' in parent factory: no parent factory available");
       }
-      return this.beanFactory.getParentBeanFactory().getBean(ref.getBeanName());
+      return this.beanFactory.getParentBeanFactory().getBean(refName);
     }
  else {
-      Object bean=this.beanFactory.getBean(ref.getBeanName());
-      this.beanFactory.registerDependentBean(ref.getBeanName(),this.beanName);
+      Object bean=this.beanFactory.getBean(refName);
+      this.beanFactory.registerDependentBean(refName,this.beanName);
       return bean;
     }
   }

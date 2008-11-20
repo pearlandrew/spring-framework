@@ -1,3 +1,14 @@
 {
-  return ((HibernateEntityManager)em).getSession();
+  if (em instanceof HibernateEntityManager) {
+    return ((HibernateEntityManager)em).getSession();
+  }
+ else {
+    Object delegate=em.getDelegate();
+    if (delegate instanceof Session) {
+      return (Session)delegate;
+    }
+ else {
+      throw new IllegalStateException("Cannot obtain native Hibernate Session from given JPA EntityManager: " + em.getClass());
+    }
+  }
 }

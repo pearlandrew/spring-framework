@@ -1,14 +1,13 @@
 {
   Assert.notNull(valueResolver,"StringValueResolver must not be null");
 synchronized (this.aliasMap) {
-    Map aliasCopy=new HashMap(this.aliasMap);
-    for (Iterator it=aliasCopy.keySet().iterator(); it.hasNext(); ) {
-      String alias=(String)it.next();
-      String registeredName=(String)aliasCopy.get(alias);
+    Map<String,String> aliasCopy=new HashMap<String,String>(this.aliasMap);
+    for (    String alias : aliasCopy.keySet()) {
+      String registeredName=aliasCopy.get(alias);
       String resolvedAlias=valueResolver.resolveStringValue(alias);
       String resolvedName=valueResolver.resolveStringValue(registeredName);
       if (!resolvedAlias.equals(alias)) {
-        String existingName=(String)this.aliasMap.get(resolvedAlias);
+        String existingName=this.aliasMap.get(resolvedAlias);
         if (existingName != null && !existingName.equals(resolvedName)) {
           throw new IllegalStateException("Cannot register resolved alias '" + resolvedAlias + "' (original: '"+ alias+ "') for name '"+ resolvedName+ "': It is already registered for name '"+ registeredName+ "'.");
         }

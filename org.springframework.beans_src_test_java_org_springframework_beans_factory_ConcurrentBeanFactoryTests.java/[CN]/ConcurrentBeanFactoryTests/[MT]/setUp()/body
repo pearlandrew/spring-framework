@@ -1,6 +1,10 @@
 {
   XmlBeanFactory factory=new XmlBeanFactory(new ClassPathResource("concurrent.xml",getClass()));
-  CustomDateEditor editor=new CustomDateEditor(df,false);
-  factory.registerCustomEditor(Date.class,editor);
+  factory.addPropertyEditorRegistrar(new PropertyEditorRegistrar(){
+    public void registerCustomEditors(    PropertyEditorRegistry registry){
+      registry.registerCustomEditor(Date.class,new CustomDateEditor((DateFormat)df.clone(),false));
+    }
+  }
+);
   this.factory=factory;
 }

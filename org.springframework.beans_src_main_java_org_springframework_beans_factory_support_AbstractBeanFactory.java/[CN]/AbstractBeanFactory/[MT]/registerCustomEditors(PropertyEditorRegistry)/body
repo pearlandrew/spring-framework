@@ -4,8 +4,7 @@
     registrySupport.useConfigValueEditors();
   }
   if (!this.propertyEditorRegistrars.isEmpty()) {
-    for (Iterator it=this.propertyEditorRegistrars.iterator(); it.hasNext(); ) {
-      PropertyEditorRegistrar registrar=(PropertyEditorRegistrar)it.next();
+    for (    PropertyEditorRegistrar registrar : this.propertyEditorRegistrars) {
       try {
         registrar.registerCustomEditors(registry);
       }
@@ -26,26 +25,10 @@
     }
   }
   if (!this.customEditors.isEmpty()) {
-    for (Iterator it=this.customEditors.entrySet().iterator(); it.hasNext(); ) {
-      Map.Entry entry=(Map.Entry)it.next();
-      Class requiredType=(Class)entry.getKey();
-      Object value=entry.getValue();
-      if (value instanceof PropertyEditor) {
-        PropertyEditor editor=(PropertyEditor)value;
-        if (registrySupport != null) {
-          registrySupport.registerSharedEditor(requiredType,editor);
-        }
- else {
-          registry.registerCustomEditor(requiredType,editor);
-        }
-      }
- else       if (value instanceof Class) {
-        Class editorClass=(Class)value;
-        registry.registerCustomEditor(requiredType,(PropertyEditor)BeanUtils.instantiateClass(editorClass));
-      }
- else {
-        throw new IllegalStateException("Illegal custom editor value type: " + value.getClass().getName());
-      }
+    for (    Map.Entry<Class,Class<PropertyEditor>> entry : this.customEditors.entrySet()) {
+      Class requiredType=entry.getKey();
+      Class editorClass=entry.getValue();
+      registry.registerCustomEditor(requiredType,(PropertyEditor)BeanUtils.instantiateClass(editorClass));
     }
   }
 }

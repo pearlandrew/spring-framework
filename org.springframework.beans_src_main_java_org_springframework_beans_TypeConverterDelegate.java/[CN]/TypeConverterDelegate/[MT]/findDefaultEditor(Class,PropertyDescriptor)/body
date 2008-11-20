@@ -1,29 +1,12 @@
 {
   PropertyEditor editor=null;
   if (descriptor != null) {
-    if (JdkVersion.isAtLeastJava15()) {
-      editor=descriptor.createPropertyEditor(this.targetObject);
-    }
- else {
-      Class editorClass=descriptor.getPropertyEditorClass();
-      if (editorClass != null) {
-        editor=(PropertyEditor)BeanUtils.instantiateClass(editorClass);
-      }
-    }
+    editor=descriptor.createPropertyEditor(this.targetObject);
   }
   if (editor == null && requiredType != null) {
     editor=(PropertyEditor)this.propertyEditorRegistry.getDefaultEditor(requiredType);
     if (editor == null && !String.class.equals(requiredType)) {
       editor=BeanUtils.findEditorByConvention(requiredType);
-      if (editor == null && !unknownEditorTypes.containsKey(requiredType)) {
-        editor=PropertyEditorManager.findEditor(requiredType);
-        if (editor == null) {
-          unknownEditorTypes.put(requiredType,Boolean.TRUE);
-        }
- else {
-          logger.warn("PropertyEditor [" + editor.getClass().getName() + "] found through deprecated global PropertyEditorManager fallback - "+ "consider using a more isolated form of registration, e.g. on the BeanWrapper/BeanFactory!");
-        }
-      }
     }
   }
   return editor;

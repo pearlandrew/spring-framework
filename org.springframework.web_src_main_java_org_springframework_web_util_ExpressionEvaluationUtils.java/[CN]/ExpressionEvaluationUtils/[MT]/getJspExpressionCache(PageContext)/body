@@ -1,14 +1,14 @@
 {
   ServletContext servletContext=pageContext.getServletContext();
-  Map cacheMap=(Map)servletContext.getAttribute(EXPRESSION_CACHE_MAP_CONTEXT_ATTR);
+  Map<ExpressionCacheKey,Expression> cacheMap=(Map<ExpressionCacheKey,Expression>)servletContext.getAttribute(EXPRESSION_CACHE_MAP_CONTEXT_ATTR);
   if (cacheMap == null) {
     Boolean cacheFlag=(Boolean)servletContext.getAttribute(EXPRESSION_CACHE_FLAG_CONTEXT_ATTR);
     if (cacheFlag == null) {
       cacheFlag=Boolean.valueOf(servletContext.getInitParameter(EXPRESSION_CACHE_CONTEXT_PARAM));
       servletContext.setAttribute(EXPRESSION_CACHE_FLAG_CONTEXT_ATTR,cacheFlag);
     }
-    if (cacheFlag.booleanValue()) {
-      cacheMap=Collections.synchronizedMap(new HashMap());
+    if (cacheFlag) {
+      cacheMap=Collections.synchronizedMap(new HashMap<ExpressionCacheKey,Expression>());
       servletContext.setAttribute(EXPRESSION_CACHE_MAP_CONTEXT_ATTR,cacheMap);
     }
   }

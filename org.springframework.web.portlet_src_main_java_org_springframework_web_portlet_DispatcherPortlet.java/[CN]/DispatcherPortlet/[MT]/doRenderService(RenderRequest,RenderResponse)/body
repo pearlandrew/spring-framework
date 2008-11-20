@@ -10,7 +10,6 @@
   if (logger.isDebugEnabled()) {
     logger.debug("Bound render request context to thread: " + request);
   }
-  RenderRequest processedRequest=request;
   HandlerExecutionChain mappedHandler=null;
   int interceptorIndex=-1;
   try {
@@ -29,28 +28,28 @@
           session.removeAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE);
         }
       }
-      mappedHandler=getHandler(processedRequest,false);
+      mappedHandler=getHandler(request,false);
       if (mappedHandler == null || mappedHandler.getHandler() == null) {
-        noHandlerFound(processedRequest,response);
+        noHandlerFound(request,response);
         return;
       }
       HandlerInterceptor[] interceptors=mappedHandler.getInterceptors();
       if (interceptors != null) {
         for (int i=0; i < interceptors.length; i++) {
           HandlerInterceptor interceptor=interceptors[i];
-          if (!interceptor.preHandleRender(processedRequest,response,mappedHandler.getHandler())) {
-            triggerAfterRenderCompletion(mappedHandler,interceptorIndex,processedRequest,response,null);
+          if (!interceptor.preHandleRender(request,response,mappedHandler.getHandler())) {
+            triggerAfterRenderCompletion(mappedHandler,interceptorIndex,request,response,null);
             return;
           }
           interceptorIndex=i;
         }
       }
       HandlerAdapter ha=getHandlerAdapter(mappedHandler.getHandler());
-      mv=ha.handleRender(processedRequest,response,mappedHandler.getHandler());
+      mv=ha.handleRender(request,response,mappedHandler.getHandler());
       if (interceptors != null) {
         for (int i=interceptors.length - 1; i >= 0; i--) {
           HandlerInterceptor interceptor=interceptors[i];
-          interceptor.postHandleRender(processedRequest,response,mappedHandler.getHandler(),mv);
+          interceptor.postHandleRender(request,response,mappedHandler.getHandler(),mv);
         }
       }
     }
@@ -63,22 +62,22 @@ catch (    Exception ex) {
       mv=processHandlerException(request,response,handler,ex);
     }
     if (mv != null && !mv.isEmpty()) {
-      render(mv,processedRequest,response);
+      render(mv,request,response);
     }
  else {
       if (logger.isDebugEnabled()) {
         logger.debug("Null ModelAndView returned to DispatcherPortlet with name '" + getPortletName() + "': assuming HandlerAdapter completed request handling");
       }
     }
-    triggerAfterRenderCompletion(mappedHandler,interceptorIndex,processedRequest,response,null);
+    triggerAfterRenderCompletion(mappedHandler,interceptorIndex,request,response,null);
   }
  catch (  Exception ex) {
-    triggerAfterRenderCompletion(mappedHandler,interceptorIndex,processedRequest,response,ex);
+    triggerAfterRenderCompletion(mappedHandler,interceptorIndex,request,response,ex);
     throw ex;
   }
 catch (  Error err) {
     PortletException ex=new PortletException("Error occured during request processing: " + err.getMessage(),err);
-    triggerAfterRenderCompletion(mappedHandler,interceptorIndex,processedRequest,response,ex);
+    triggerAfterRenderCompletion(mappedHandler,interceptorIndex,request,response,ex);
     throw ex;
   }
  finally {

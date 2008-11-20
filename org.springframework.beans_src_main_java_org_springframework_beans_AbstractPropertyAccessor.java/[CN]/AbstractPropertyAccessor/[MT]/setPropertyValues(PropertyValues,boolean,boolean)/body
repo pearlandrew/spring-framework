@@ -1,8 +1,7 @@
 {
-  List propertyAccessExceptions=null;
-  List propertyValues=(pvs instanceof MutablePropertyValues ? ((MutablePropertyValues)pvs).getPropertyValueList() : Arrays.asList(pvs.getPropertyValues()));
-  for (Iterator it=propertyValues.iterator(); it.hasNext(); ) {
-    PropertyValue pv=(PropertyValue)it.next();
+  List<PropertyAccessException> propertyAccessExceptions=null;
+  List<PropertyValue> propertyValues=(pvs instanceof MutablePropertyValues ? ((MutablePropertyValues)pvs).getPropertyValueList() : Arrays.asList(pvs.getPropertyValues()));
+  for (  PropertyValue pv : propertyValues) {
     try {
       setPropertyValue(pv);
     }
@@ -18,13 +17,13 @@ catch (    NullValueInNestedPathException ex) {
     }
 catch (    PropertyAccessException ex) {
       if (propertyAccessExceptions == null) {
-        propertyAccessExceptions=new LinkedList();
+        propertyAccessExceptions=new LinkedList<PropertyAccessException>();
       }
       propertyAccessExceptions.add(ex);
     }
   }
   if (propertyAccessExceptions != null) {
-    PropertyAccessException[] paeArray=(PropertyAccessException[])propertyAccessExceptions.toArray(new PropertyAccessException[propertyAccessExceptions.size()]);
+    PropertyAccessException[] paeArray=propertyAccessExceptions.toArray(new PropertyAccessException[propertyAccessExceptions.size()]);
     throw new PropertyBatchUpdateException(paeArray);
   }
 }
