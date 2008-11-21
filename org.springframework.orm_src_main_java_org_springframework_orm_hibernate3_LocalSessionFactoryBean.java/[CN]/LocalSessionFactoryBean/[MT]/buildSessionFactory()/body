@@ -38,19 +38,18 @@
     }
     if (this.typeDefinitions != null) {
       Mappings mappings=config.createMappings();
-      for (int i=0; i < this.typeDefinitions.length; i++) {
-        TypeDefinitionBean typeDef=this.typeDefinitions[i];
+      for (      TypeDefinitionBean typeDef : this.typeDefinitions) {
         mappings.addTypeDef(typeDef.getTypeName(),typeDef.getTypeClass(),typeDef.getParameters());
       }
     }
     if (this.filterDefinitions != null) {
-      for (int i=0; i < this.filterDefinitions.length; i++) {
-        config.addFilterDefinition(this.filterDefinitions[i]);
+      for (      FilterDefinition filterDef : this.filterDefinitions) {
+        config.addFilterDefinition(filterDef);
       }
     }
     if (this.configLocations != null) {
-      for (int i=0; i < this.configLocations.length; i++) {
-        config.configure(this.configLocations[i].getURL());
+      for (      Resource resource : this.configLocations) {
+        config.configure(resource.getURL());
       }
     }
     if (this.hibernateProperties != null) {
@@ -70,32 +69,31 @@
       config.setProperty(Environment.CACHE_PROVIDER,LocalCacheProviderProxy.class.getName());
     }
     if (this.mappingResources != null) {
-      for (int i=0; i < this.mappingResources.length; i++) {
-        Resource resource=new ClassPathResource(this.mappingResources[i].trim(),this.beanClassLoader);
+      for (      String mapping : this.mappingResources) {
+        Resource resource=new ClassPathResource(mapping.trim(),this.beanClassLoader);
         config.addInputStream(resource.getInputStream());
       }
     }
     if (this.mappingLocations != null) {
-      for (int i=0; i < this.mappingLocations.length; i++) {
-        config.addInputStream(this.mappingLocations[i].getInputStream());
+      for (      Resource resource : this.mappingLocations) {
+        config.addInputStream(resource.getInputStream());
       }
     }
     if (this.cacheableMappingLocations != null) {
-      for (int i=0; i < this.cacheableMappingLocations.length; i++) {
-        config.addCacheableFile(this.cacheableMappingLocations[i].getFile());
+      for (      Resource resource : this.cacheableMappingLocations) {
+        config.addCacheableFile(resource.getFile());
       }
     }
     if (this.mappingJarLocations != null) {
-      for (int i=0; i < this.mappingJarLocations.length; i++) {
-        Resource resource=this.mappingJarLocations[i];
+      for (      Resource resource : this.mappingJarLocations) {
         config.addJar(resource.getFile());
       }
     }
     if (this.mappingDirectoryLocations != null) {
-      for (int i=0; i < this.mappingDirectoryLocations.length; i++) {
-        File file=this.mappingDirectoryLocations[i].getFile();
+      for (      Resource resource : this.mappingDirectoryLocations) {
+        File file=resource.getFile();
         if (!file.isDirectory()) {
-          throw new IllegalArgumentException("Mapping directory location [" + this.mappingDirectoryLocations[i] + "] does not denote a directory");
+          throw new IllegalArgumentException("Mapping directory location [" + resource + "] does not denote a directory");
         }
         config.addDirectory(file);
       }
@@ -127,13 +125,11 @@
       }
     }
     if (this.eventListeners != null) {
-      for (Iterator it=this.eventListeners.entrySet().iterator(); it.hasNext(); ) {
-        Map.Entry entry=(Map.Entry)it.next();
-        Assert.isTrue(entry.getKey() instanceof String,"Event listener key needs to be of type String");
-        String listenerType=(String)entry.getKey();
+      for (      Map.Entry<String,Object> entry : this.eventListeners.entrySet()) {
+        String listenerType=entry.getKey();
         Object listenerObject=entry.getValue();
         if (listenerObject instanceof Collection) {
-          Collection listeners=(Collection)listenerObject;
+          Collection<Object> listeners=(Collection<Object>)listenerObject;
           EventListeners listenerRegistry=config.getEventListeners();
           Object[] listenerArray=(Object[])Array.newInstance(listenerRegistry.getListenerClassFor(listenerType),listeners.size());
           listenerArray=listeners.toArray(listenerArray);

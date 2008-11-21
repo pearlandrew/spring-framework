@@ -1,8 +1,9 @@
 {
-  DataAccessException translatedDex=null;
-  for (Iterator it=this.delegates.iterator(); translatedDex == null && it.hasNext(); ) {
-    PersistenceExceptionTranslator pet=(PersistenceExceptionTranslator)it.next();
-    translatedDex=pet.translateExceptionIfPossible(ex);
+  for (  PersistenceExceptionTranslator pet : this.delegates) {
+    DataAccessException translatedDex=pet.translateExceptionIfPossible(ex);
+    if (translatedDex != null) {
+      return translatedDex;
+    }
   }
-  return translatedDex;
+  return null;
 }

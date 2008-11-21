@@ -3,18 +3,17 @@
   Assert.notNull(mappedName,"Mapped name must not be null");
   String name=clazz.getName() + '.' + mappedName;
   Method[] methods=clazz.getDeclaredMethods();
-  List matchingMethods=new ArrayList();
-  for (int i=0; i < methods.length; i++) {
-    if (isMatch(methods[i].getName(),mappedName)) {
-      matchingMethods.add(methods[i]);
+  List<Method> matchingMethods=new ArrayList<Method>();
+  for (  Method method : methods) {
+    if (isMatch(method.getName(),mappedName)) {
+      matchingMethods.add(method);
     }
   }
   if (matchingMethods.isEmpty()) {
     throw new IllegalArgumentException("Couldn't find method '" + mappedName + "' on class ["+ clazz.getName()+ "]");
   }
-  for (Iterator it=matchingMethods.iterator(); it.hasNext(); ) {
-    Method method=(Method)it.next();
-    String regMethodName=(String)this.methodNameMap.get(method);
+  for (  Method method : matchingMethods) {
+    String regMethodName=this.methodNameMap.get(method);
     if (regMethodName == null || (!regMethodName.equals(name) && regMethodName.length() <= name.length())) {
       if (logger.isDebugEnabled() && regMethodName != null) {
         logger.debug("Replacing attribute for transactional method [" + method + "]: current name '"+ name+ "' is more specific than '"+ regMethodName+ "'");
@@ -23,7 +22,7 @@
       addTransactionalMethod(method,attr);
     }
  else {
-      if (logger.isDebugEnabled() && regMethodName != null) {
+      if (logger.isDebugEnabled()) {
         logger.debug("Keeping attribute for transactional method [" + method + "]: current name '"+ name+ "' is not more specific than '"+ regMethodName+ "'");
       }
     }

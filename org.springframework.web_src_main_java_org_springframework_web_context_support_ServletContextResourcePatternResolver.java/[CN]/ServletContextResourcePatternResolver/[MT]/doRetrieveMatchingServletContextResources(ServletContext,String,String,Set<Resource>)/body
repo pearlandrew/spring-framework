@@ -1,0 +1,21 @@
+{
+  Set candidates=servletContext.getResourcePaths(dir);
+  if (candidates != null) {
+    boolean dirDepthNotFixed=fullPattern.contains("**");
+    for (Iterator it=candidates.iterator(); it.hasNext(); ) {
+      String currPath=(String)it.next();
+      if (!currPath.startsWith(dir)) {
+        int dirIndex=currPath.indexOf(dir);
+        if (dirIndex != -1) {
+          currPath=currPath.substring(dirIndex);
+        }
+      }
+      if (currPath.endsWith("/") && (dirDepthNotFixed || StringUtils.countOccurrencesOf(currPath,"/") <= StringUtils.countOccurrencesOf(fullPattern,"/"))) {
+        doRetrieveMatchingServletContextResources(servletContext,fullPattern,currPath,result);
+      }
+      if (getPathMatcher().match(fullPattern,currPath)) {
+        result.add(new ServletContextResource(servletContext,currPath));
+      }
+    }
+  }
+}
