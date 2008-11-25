@@ -2,14 +2,16 @@
   if (requiredType == null && propertyPath == null) {
     throw new IllegalArgumentException("Either requiredType or propertyPath is required");
   }
-  if (this.customEditors == null) {
-    this.customEditors=new LinkedHashMap(16);
-  }
   if (propertyPath != null) {
-    this.customEditors.put(propertyPath,new CustomEditorHolder(propertyEditor,requiredType));
-    this.propertySpecificEditorsRegistered=true;
+    if (this.customEditorsForPath == null) {
+      this.customEditorsForPath=new LinkedHashMap<String,CustomEditorHolder>(16);
+    }
+    this.customEditorsForPath.put(propertyPath,new CustomEditorHolder(propertyEditor,requiredType));
   }
  else {
+    if (this.customEditors == null) {
+      this.customEditors=new LinkedHashMap<Class,PropertyEditor>(16);
+    }
     this.customEditors.put(requiredType,propertyEditor);
     this.customEditorCache=null;
   }

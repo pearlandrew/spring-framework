@@ -8,29 +8,26 @@
       ClassLoadHelper clh=new ResourceLoaderClassLoadHelper(this.resourceLoader);
       clh.initialize();
       JobSchedulingDataProcessor dataProcessor=new JobSchedulingDataProcessor(clh,true,true);
-      for (int i=0; i < this.jobSchedulingDataLocations.length; i++) {
-        dataProcessor.processFileAndScheduleJobs(this.jobSchedulingDataLocations[i],getScheduler(),this.overwriteExistingJobs);
+      for (      String location : this.jobSchedulingDataLocations) {
+        dataProcessor.processFileAndScheduleJobs(location,getScheduler(),this.overwriteExistingJobs);
       }
     }
     if (this.jobDetails != null) {
-      for (Iterator it=this.jobDetails.iterator(); it.hasNext(); ) {
-        JobDetail jobDetail=(JobDetail)it.next();
+      for (      JobDetail jobDetail : this.jobDetails) {
         addJobToScheduler(jobDetail);
       }
     }
  else {
-      this.jobDetails=new LinkedList();
+      this.jobDetails=new LinkedList<JobDetail>();
     }
     if (this.calendars != null) {
-      for (Iterator it=this.calendars.keySet().iterator(); it.hasNext(); ) {
-        String calendarName=(String)it.next();
-        Calendar calendar=(Calendar)this.calendars.get(calendarName);
+      for (      String calendarName : this.calendars.keySet()) {
+        Calendar calendar=this.calendars.get(calendarName);
         getScheduler().addCalendar(calendarName,calendar,true,true);
       }
     }
     if (this.triggers != null) {
-      for (Iterator it=this.triggers.iterator(); it.hasNext(); ) {
-        Trigger trigger=(Trigger)it.next();
+      for (      Trigger trigger : this.triggers) {
         addTriggerToScheduler(trigger);
       }
     }
@@ -49,7 +46,7 @@
       throw (SchedulerException)ex;
     }
     if (ex instanceof Exception) {
-      throw new SchedulerException("Registration of jobs and triggers failed: " + ex.getMessage(),(Exception)ex);
+      throw new SchedulerException("Registration of jobs and triggers failed: " + ex.getMessage(),ex);
     }
     throw new SchedulerException("Registration of jobs and triggers failed: " + ex.getMessage());
   }

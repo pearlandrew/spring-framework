@@ -1,0 +1,19 @@
+{
+  if (this.transactionOpen && this.target.getTransacted()) {
+    this.transactionOpen=false;
+    this.target.rollback();
+  }
+  for (Iterator<Map.Entry<ConsumerCacheKey,MessageConsumer>> it=this.cachedConsumers.entrySet().iterator(); it.hasNext(); ) {
+    Map.Entry<ConsumerCacheKey,MessageConsumer> entry=it.next();
+    if (entry.getKey().subscription != null) {
+      entry.getValue().close();
+      it.remove();
+    }
+  }
+  if (!this.sessionList.contains(proxy)) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Returning cached Session: " + this.target);
+    }
+    this.sessionList.addLast(proxy);
+  }
+}

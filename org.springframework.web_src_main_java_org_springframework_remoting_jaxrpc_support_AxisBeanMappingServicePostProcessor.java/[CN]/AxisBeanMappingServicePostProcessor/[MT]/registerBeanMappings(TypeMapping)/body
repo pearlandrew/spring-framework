@@ -1,17 +1,8 @@
 {
   if (this.beanMappings != null) {
-    for (Iterator it=this.beanMappings.entrySet().iterator(); it.hasNext(); ) {
-      Map.Entry entry=(Map.Entry)it.next();
-      Object key=entry.getKey();
-      Class javaType=null;
-      if (key instanceof Class) {
-        javaType=(Class)key;
-      }
- else {
-        javaType=ClassUtils.resolveClassName((String)key,this.beanClassLoader);
-      }
-      String wsdlTypeName=(String)entry.getValue();
-      registerBeanMapping(mapping,javaType,wsdlTypeName);
+    for (    Map.Entry<Object,String> entry : this.beanMappings.entrySet()) {
+      Class javaType=(entry.getKey() instanceof Class ? (Class)entry.getKey() : ClassUtils.resolveClassName(entry.getKey().toString(),this.beanClassLoader));
+      registerBeanMapping(mapping,javaType,entry.getValue());
     }
   }
 }

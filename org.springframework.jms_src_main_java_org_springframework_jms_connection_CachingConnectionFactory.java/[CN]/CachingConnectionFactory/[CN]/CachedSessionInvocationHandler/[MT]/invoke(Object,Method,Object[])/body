@@ -4,7 +4,7 @@
     return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
   }
  else   if (methodName.equals("hashCode")) {
-    return new Integer(System.identityHashCode(proxy));
+    return System.identityHashCode(proxy);
   }
  else   if (methodName.equals("toString")) {
     return "Cached JMS Session: " + this.target;
@@ -13,7 +13,7 @@
     if (active) {
 synchronized (this.sessionList) {
         if (this.sessionList.size() < getSessionCacheSize()) {
-          logicalClose(proxy);
+          logicalClose((Session)proxy);
           return null;
         }
       }
@@ -33,10 +33,10 @@ synchronized (this.sessionList) {
       return getCachedProducer((Destination)args[0]);
     }
  else     if ((methodName.equals("createConsumer") || methodName.equals("createReceiver") || methodName.equals("createSubscriber")) && isCacheConsumers()) {
-      return getCachedConsumer((Destination)args[0],(args.length > 1 ? (String)args[1] : null),(args.length > 2 && ((Boolean)args[2]).booleanValue()),null);
+      return getCachedConsumer((Destination)args[0],(args.length > 1 ? (String)args[1] : null),(args.length > 2 && (Boolean)args[2]),null);
     }
  else     if (methodName.equals("createDurableSubscriber") && isCacheConsumers()) {
-      return getCachedConsumer((Destination)args[0],(args.length > 2 ? (String)args[2] : null),(args.length > 3 && ((Boolean)args[3]).booleanValue()),(String)args[1]);
+      return getCachedConsumer((Destination)args[0],(args.length > 2 ? (String)args[2] : null),(args.length > 3 && (Boolean)args[3]),(String)args[1]);
     }
   }
   try {

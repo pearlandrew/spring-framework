@@ -1,21 +1,18 @@
 {
   boolean isFactoryType=(type != null && FactoryBean.class.isAssignableFrom(type));
-  List matches=new ArrayList();
-  Set keys=this.beans.keySet();
-  Iterator it=keys.iterator();
-  while (it.hasNext()) {
-    String name=(String)it.next();
+  List<String> matches=new ArrayList<String>();
+  for (  String name : this.beans.keySet()) {
     Object beanInstance=this.beans.get(name);
     if (beanInstance instanceof FactoryBean && !isFactoryType) {
       if (includeFactoryBeans) {
         Class objectType=((FactoryBean)beanInstance).getObjectType();
-        if (objectType != null && type.isAssignableFrom(objectType)) {
+        if (objectType != null && (type == null || type.isAssignableFrom(objectType))) {
           matches.add(name);
         }
       }
     }
  else {
-      if (type.isInstance(beanInstance)) {
+      if (type == null || type.isInstance(beanInstance)) {
         matches.add(name);
       }
     }
