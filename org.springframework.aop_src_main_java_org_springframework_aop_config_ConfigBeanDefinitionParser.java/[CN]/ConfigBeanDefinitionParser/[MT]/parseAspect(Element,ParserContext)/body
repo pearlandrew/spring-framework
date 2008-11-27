@@ -3,11 +3,11 @@
   String aspectName=aspectElement.getAttribute(REF);
   try {
     this.parseState.push(new AspectEntry(aspectId,aspectName));
-    List beanDefinitions=new ArrayList();
-    List beanReferences=new ArrayList();
-    List declareParents=DomUtils.getChildElementsByTagName(aspectElement,DECLARE_PARENTS);
+    List<BeanDefinition> beanDefinitions=new ArrayList<BeanDefinition>();
+    List<BeanReference> beanReferences=new ArrayList<BeanReference>();
+    List<Element> declareParents=DomUtils.getChildElementsByTagName(aspectElement,DECLARE_PARENTS);
     for (int i=METHOD_INDEX; i < declareParents.size(); i++) {
-      Element declareParentsElement=(Element)declareParents.get(i);
+      Element declareParentsElement=declareParents.get(i);
       beanDefinitions.add(parseDeclareParents(declareParentsElement,parserContext));
     }
     NodeList nodeList=aspectElement.getChildNodes();
@@ -29,9 +29,8 @@
     }
     AspectComponentDefinition aspectComponentDefinition=createAspectComponentDefinition(aspectElement,aspectId,beanDefinitions,beanReferences,parserContext);
     parserContext.pushContainingComponent(aspectComponentDefinition);
-    List pointcuts=DomUtils.getChildElementsByTagName(aspectElement,POINTCUT);
-    for (int i=0; i < pointcuts.size(); i++) {
-      Element pointcutElement=(Element)pointcuts.get(i);
+    List<Element> pointcuts=DomUtils.getChildElementsByTagName(aspectElement,POINTCUT);
+    for (    Element pointcutElement : pointcuts) {
       parsePointcut(pointcutElement,parserContext);
     }
     parserContext.popAndRegisterContainingComponent();

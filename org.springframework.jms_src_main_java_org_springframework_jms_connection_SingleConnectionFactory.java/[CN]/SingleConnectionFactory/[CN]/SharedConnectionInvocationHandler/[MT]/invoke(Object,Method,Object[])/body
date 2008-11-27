@@ -3,7 +3,7 @@
     return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
   }
  else   if (method.getName().equals("hashCode")) {
-    return new Integer(System.identityHashCode(proxy));
+    return System.identityHashCode(proxy);
   }
  else   if (method.getName().equals("toString")) {
     return "Shared JMS Connection: " + this.target;
@@ -41,9 +41,9 @@ synchronized (connectionMonitor) {
     return null;
   }
  else   if (method.getName().equals("createSession") || method.getName().equals("createQueueSession") || method.getName().equals("createTopicSession")) {
-    boolean transacted=((Boolean)args[0]).booleanValue();
+    boolean transacted=(Boolean)args[0];
     Integer ackMode=(Integer)args[1];
-    Integer mode=(transacted ? new Integer(Session.SESSION_TRANSACTED) : ackMode);
+    Integer mode=(transacted ? Session.SESSION_TRANSACTED : ackMode);
     Session session=getSession(this.target,mode);
     if (session != null) {
       if (!method.getReturnType().isInstance(session)) {

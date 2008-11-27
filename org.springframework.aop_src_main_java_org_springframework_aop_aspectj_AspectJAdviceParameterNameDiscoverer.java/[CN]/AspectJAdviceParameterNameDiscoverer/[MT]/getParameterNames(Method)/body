@@ -2,7 +2,6 @@
   this.argumentTypes=method.getParameterTypes();
   this.numberOfRemainingUnboundArguments=this.argumentTypes.length;
   this.parameterNameBindings=new String[this.numberOfRemainingUnboundArguments];
-  this.algorithmicStep=STEP_JOIN_POINT_BINDING;
   int minimumNumberUnboundArgs=0;
   if (this.returningName != null) {
     minimumNumberUnboundArgs++;
@@ -14,8 +13,9 @@
     throw new IllegalStateException("Not enough arguments in method to satisfy binding of returning and throwing variables");
   }
   try {
-    while ((this.numberOfRemainingUnboundArguments > 0) && (this.algorithmicStep < STEP_FINISHED)) {
-switch (this.algorithmicStep++) {
+    int algorithmicStep=STEP_JOIN_POINT_BINDING;
+    while ((this.numberOfRemainingUnboundArguments > 0) && algorithmicStep < STEP_FINISHED) {
+switch (algorithmicStep++) {
 case STEP_JOIN_POINT_BINDING:
         if (!maybeBindThisJoinPoint()) {
           maybeBindThisJoinPointStaticPart();
@@ -40,7 +40,7 @@ case STEP_REFERENCE_PCUT_BINDING:
 maybeBindReferencePointcutParameter();
 break;
 default :
-throw new IllegalStateException("Unknown algorithmic step: " + (this.algorithmicStep - 1));
+throw new IllegalStateException("Unknown algorithmic step: " + (algorithmicStep - 1));
 }
 }
 }

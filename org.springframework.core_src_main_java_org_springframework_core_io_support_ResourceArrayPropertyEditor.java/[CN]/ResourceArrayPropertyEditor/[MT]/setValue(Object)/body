@@ -1,15 +1,13 @@
 {
   if (value instanceof Collection || (value instanceof Object[] && !(value instanceof Resource[]))) {
     Collection input=(value instanceof Collection ? (Collection)value : Arrays.asList((Object[])value));
-    List merged=new ArrayList();
-    for (Iterator it=input.iterator(); it.hasNext(); ) {
-      Object element=it.next();
+    List<Resource> merged=new ArrayList<Resource>();
+    for (    Object element : input) {
       if (element instanceof String) {
         String pattern=resolvePath((String)element).trim();
         try {
           Resource[] resources=this.resourcePatternResolver.getResources(pattern);
-          for (int i=0; i < resources.length; i++) {
-            Resource resource=resources[i];
+          for (          Resource resource : resources) {
             if (!merged.contains(resource)) {
               merged.add(resource);
             }
@@ -20,8 +18,9 @@
         }
       }
  else       if (element instanceof Resource) {
-        if (!merged.contains(element)) {
-          merged.add(element);
+        Resource resource=(Resource)element;
+        if (!merged.contains(resource)) {
+          merged.add(resource);
         }
       }
  else {

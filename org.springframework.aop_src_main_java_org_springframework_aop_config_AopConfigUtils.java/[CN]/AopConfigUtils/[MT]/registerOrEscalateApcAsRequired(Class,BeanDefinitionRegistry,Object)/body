@@ -4,7 +4,7 @@
     BeanDefinition apcDefinition=registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
     if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
       int currentPriority=findPriorityForClass(apcDefinition.getBeanClassName());
-      int requiredPriority=findPriorityForClass(cls.getName());
+      int requiredPriority=findPriorityForClass(cls);
       if (currentPriority < requiredPriority) {
         apcDefinition.setBeanClassName(cls.getName());
       }
@@ -13,7 +13,7 @@
   }
   RootBeanDefinition beanDefinition=new RootBeanDefinition(cls);
   beanDefinition.setSource(source);
-  beanDefinition.getPropertyValues().addPropertyValue("order",new Integer(Ordered.HIGHEST_PRECEDENCE));
+  beanDefinition.getPropertyValues().addPropertyValue("order",Ordered.HIGHEST_PRECEDENCE);
   beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
   registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME,beanDefinition);
   return beanDefinition;

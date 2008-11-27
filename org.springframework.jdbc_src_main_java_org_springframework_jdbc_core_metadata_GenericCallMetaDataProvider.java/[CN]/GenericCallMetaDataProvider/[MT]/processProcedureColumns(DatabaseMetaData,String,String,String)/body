@@ -8,7 +8,7 @@
   }
   try {
     procs=databaseMetaData.getProcedures(metaDataCatalogName,metaDataSchemaName,metaDataProcedureName);
-    List found=new ArrayList();
+    List<String> found=new ArrayList<String>();
     while (procs.next()) {
       found.add(procs.getString("PROCEDURE_CAT") + "." + procs.getString("PROCEDURE_SCHEM")+ "."+ procs.getString("PROCEDURE_NAME"));
     }
@@ -40,15 +40,17 @@
       }
     }
   }
- catch (  SQLException se) {
-    logger.warn("Error while retreiving metadata for procedure columns: " + se.getMessage());
+ catch (  SQLException ex) {
+    logger.warn("Error while retrieving metadata for procedure columns: " + ex);
   }
  finally {
     try {
-      if (procs != null)       procs.close();
+      if (procs != null) {
+        procs.close();
+      }
     }
- catch (    SQLException se) {
-      logger.warn("Problem closing resultset for procedure column metadata " + se.getMessage());
+ catch (    SQLException ex) {
+      logger.warn("Problem closing ResultSet for procedure column metadata: " + ex);
     }
   }
 }
