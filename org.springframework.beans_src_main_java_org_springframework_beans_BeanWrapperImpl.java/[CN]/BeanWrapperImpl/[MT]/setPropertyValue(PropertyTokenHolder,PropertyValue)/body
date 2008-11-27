@@ -124,7 +124,7 @@ catch (      IndexOutOfBoundsException ex) {
               readMethod.setAccessible(true);
             }
             try {
-              oldValue=readMethod.invoke(this.object,new Object[0]);
+              oldValue=readMethod.invoke(this.object);
             }
  catch (            Exception ex) {
               if (logger.isDebugEnabled()) {
@@ -134,13 +134,13 @@ catch (      IndexOutOfBoundsException ex) {
           }
           valueToApply=this.typeConverterDelegate.convertIfNecessary(oldValue,originalValue,pd);
         }
-        pv.getOriginalPropertyValue().conversionNecessary=Boolean.valueOf(valueToApply != originalValue);
+        pv.getOriginalPropertyValue().conversionNecessary=(valueToApply != originalValue);
       }
       Method writeMethod=pd.getWriteMethod();
       if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
         writeMethod.setAccessible(true);
       }
-      writeMethod.invoke(this.object,new Object[]{valueToApply});
+      writeMethod.invoke(this.object,valueToApply);
     }
  catch (    InvocationTargetException ex) {
       PropertyChangeEvent propertyChangeEvent=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());

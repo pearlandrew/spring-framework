@@ -1,17 +1,16 @@
 {
   Assert.notNull(generatedKeyHolder,"KeyHolder must not be null");
   logger.debug("Executing SQL update and returning generated keys");
-  Integer result=(Integer)execute(psc,new PreparedStatementCallback(){
-    public Object doInPreparedStatement(    PreparedStatement ps) throws SQLException {
+  return execute(psc,new PreparedStatementCallback<Integer>(){
+    public Integer doInPreparedStatement(    PreparedStatement ps) throws SQLException {
       int rows=ps.executeUpdate();
-      List generatedKeys=generatedKeyHolder.getKeyList();
+      List<Map<String,Object>> generatedKeys=generatedKeyHolder.getKeyList();
       generatedKeys.clear();
       ResultSet keys=ps.getGeneratedKeys();
       if (keys != null) {
         try {
-          RowMapper rowMapper=getColumnMapRowMapper();
-          RowMapperResultSetExtractor rse=new RowMapperResultSetExtractor(rowMapper,1);
-          generatedKeys.addAll((List)rse.extractData(keys));
+          RowMapperResultSetExtractor<Map<String,Object>> rse=new RowMapperResultSetExtractor<Map<String,Object>>(getColumnMapRowMapper(),1);
+          generatedKeys.addAll(rse.extractData(keys));
         }
   finally {
           JdbcUtils.closeResultSet(keys);
@@ -20,9 +19,8 @@
       if (logger.isDebugEnabled()) {
         logger.debug("SQL update affected " + rows + " rows and returned "+ generatedKeys.size()+ " keys");
       }
-      return new Integer(rows);
+      return rows;
     }
   }
 );
-  return result.intValue();
 }

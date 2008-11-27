@@ -1,0 +1,21 @@
+{
+  assertCondition(mav != null,"ModelAndView is null");
+  assertCondition(mav.getModel() != null,"Model is null");
+  if (!mav.getModel().keySet().equals(expectedModel.keySet())) {
+    StringBuilder sb=new StringBuilder("Keyset of expected model does not match.\n");
+    appendNonMatchingSetsErrorMessage(expectedModel.keySet(),mav.getModel().keySet(),sb);
+    fail(sb.toString());
+  }
+  StringBuilder sb=new StringBuilder();
+  for (  String modelName : mav.getModel().keySet()) {
+    Object assertionValue=expectedModel.get(modelName);
+    Object mavValue=mav.getModel().get(modelName);
+    if (!assertionValue.equals(mavValue)) {
+      sb.append("Value under name '").append(modelName).append("' differs, should have been '").append(assertionValue).append("' but was '").append(mavValue).append("'\n");
+    }
+  }
+  if (sb.length() != 0) {
+    sb.insert(0,"Values of expected model do not match.\n");
+    fail(sb.toString());
+  }
+}

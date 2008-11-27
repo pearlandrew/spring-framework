@@ -1,14 +1,14 @@
 {
   Assert.state(this.mappedClass != null,"Mapped class was not specified");
-  Object mappedObject=BeanUtils.instantiateClass(this.mappedClass);
+  T mappedObject=BeanUtils.instantiate(this.mappedClass);
   BeanWrapper bw=PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
   initBeanWrapper(bw);
   ResultSetMetaData rsmd=rs.getMetaData();
   int columnCount=rsmd.getColumnCount();
-  Set populatedProperties=(isCheckFullyPopulated() ? new HashSet() : null);
+  Set<String> populatedProperties=(isCheckFullyPopulated() ? new HashSet<String>() : null);
   for (int index=1; index <= columnCount; index++) {
     String column=JdbcUtils.lookupColumnName(rsmd,index).toLowerCase();
-    PropertyDescriptor pd=(PropertyDescriptor)this.mappedFields.get(column);
+    PropertyDescriptor pd=this.mappedFields.get(column);
     if (pd != null) {
       try {
         Object value=getColumnValue(rs,index,pd);

@@ -1,7 +1,7 @@
 {
   logger.debug("Executing prepared SQL update");
-  Integer result=(Integer)execute(psc,new PreparedStatementCallback(){
-    public Object doInPreparedStatement(    PreparedStatement ps) throws SQLException {
+  return execute(psc,new PreparedStatementCallback<Integer>(){
+    public Integer doInPreparedStatement(    PreparedStatement ps) throws SQLException {
       try {
         if (pss != null) {
           pss.setValues(ps);
@@ -10,7 +10,7 @@
         if (logger.isDebugEnabled()) {
           logger.debug("SQL update affected " + rows + " rows");
         }
-        return new Integer(rows);
+        return rows;
       }
   finally {
         if (pss instanceof ParameterDisposer) {
@@ -20,5 +20,4 @@
     }
   }
 );
-  return result.intValue();
 }

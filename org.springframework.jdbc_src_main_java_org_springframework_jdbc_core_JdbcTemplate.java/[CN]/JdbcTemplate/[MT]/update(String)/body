@@ -3,17 +3,17 @@
   if (logger.isDebugEnabled()) {
     logger.debug("Executing SQL update [" + sql + "]");
   }
-class UpdateStatementCallback implements StatementCallback, SqlProvider {
-    public Object doInStatement(    Statement stmt) throws SQLException {
+class UpdateStatementCallback implements StatementCallback<Integer>, SqlProvider {
+    public Integer doInStatement(    Statement stmt) throws SQLException {
       int rows=stmt.executeUpdate(sql);
       if (logger.isDebugEnabled()) {
         logger.debug("SQL update affected " + rows + " rows");
       }
-      return new Integer(rows);
+      return rows;
     }
     public String getSql(){
       return sql;
     }
   }
-  return ((Integer)execute(new UpdateStatementCallback())).intValue();
+  return execute(new UpdateStatementCallback());
 }

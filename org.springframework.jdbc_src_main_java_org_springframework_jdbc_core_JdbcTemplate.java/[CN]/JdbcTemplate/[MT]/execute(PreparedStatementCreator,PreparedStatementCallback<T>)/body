@@ -1,0 +1,44 @@
+{
+  Assert.notNull(psc,"PreparedStatementCreator must not be null");
+  Assert.notNull(action,"Callback object must not be null");
+  if (logger.isDebugEnabled()) {
+    String sql=getSql(psc);
+    logger.debug("Executing prepared SQL statement" + (sql != null ? " [" + sql + "]" : ""));
+  }
+  Connection con=DataSourceUtils.getConnection(getDataSource());
+  PreparedStatement ps=null;
+  try {
+    Connection conToUse=con;
+    if (this.nativeJdbcExtractor != null && this.nativeJdbcExtractor.isNativeConnectionNecessaryForNativePreparedStatements()) {
+      conToUse=this.nativeJdbcExtractor.getNativeConnection(con);
+    }
+    ps=psc.createPreparedStatement(conToUse);
+    applyStatementSettings(ps);
+    PreparedStatement psToUse=ps;
+    if (this.nativeJdbcExtractor != null) {
+      psToUse=this.nativeJdbcExtractor.getNativePreparedStatement(ps);
+    }
+    T result=action.doInPreparedStatement(psToUse);
+    handleWarnings(ps);
+    return result;
+  }
+ catch (  SQLException ex) {
+    if (psc instanceof ParameterDisposer) {
+      ((ParameterDisposer)psc).cleanupParameters();
+    }
+    String sql=getSql(psc);
+    psc=null;
+    JdbcUtils.closeStatement(ps);
+    ps=null;
+    DataSourceUtils.releaseConnection(con,getDataSource());
+    con=null;
+    throw getExceptionTranslator().translate("PreparedStatementCallback",sql,ex);
+  }
+ finally {
+    if (psc instanceof ParameterDisposer) {
+      ((ParameterDisposer)psc).cleanupParameters();
+    }
+    JdbcUtils.closeStatement(ps);
+    DataSourceUtils.releaseConnection(con,getDataSource());
+  }
+}

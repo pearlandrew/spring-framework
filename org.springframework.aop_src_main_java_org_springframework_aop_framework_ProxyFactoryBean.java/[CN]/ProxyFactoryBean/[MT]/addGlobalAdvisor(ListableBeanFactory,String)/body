@@ -1,24 +1,21 @@
 {
   String[] globalAdvisorNames=BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory,Advisor.class);
   String[] globalInterceptorNames=BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory,Interceptor.class);
-  List beans=new ArrayList(globalAdvisorNames.length + globalInterceptorNames.length);
-  Map names=new HashMap();
-  for (int i=0; i < globalAdvisorNames.length; i++) {
-    String name=globalAdvisorNames[i];
+  List<Object> beans=new ArrayList<Object>(globalAdvisorNames.length + globalInterceptorNames.length);
+  Map<Object,String> names=new HashMap<Object,String>(beans.size());
+  for (  String name : globalAdvisorNames) {
     Object bean=beanFactory.getBean(name);
     beans.add(bean);
     names.put(bean,name);
   }
-  for (int i=0; i < globalInterceptorNames.length; i++) {
-    String name=globalInterceptorNames[i];
+  for (  String name : globalInterceptorNames) {
     Object bean=beanFactory.getBean(name);
     beans.add(bean);
     names.put(bean,name);
   }
   Collections.sort(beans,new OrderComparator());
-  for (Iterator it=beans.iterator(); it.hasNext(); ) {
-    Object bean=it.next();
-    String name=(String)names.get(bean);
+  for (  Object bean : beans) {
+    String name=names.get(bean);
     if (name.startsWith(prefix)) {
       addAdvisorOnChainCreation(bean,name);
     }

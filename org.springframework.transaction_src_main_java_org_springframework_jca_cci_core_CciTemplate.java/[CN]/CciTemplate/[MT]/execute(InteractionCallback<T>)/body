@@ -1,0 +1,15 @@
+{
+  Assert.notNull(action,"Callback object must not be null");
+  return execute(new ConnectionCallback<T>(){
+    public T doInConnection(    Connection connection,    ConnectionFactory connectionFactory) throws ResourceException, SQLException, DataAccessException {
+      Interaction interaction=connection.createInteraction();
+      try {
+        return action.doInInteraction(interaction,connectionFactory);
+      }
+  finally {
+        closeInteraction(interaction);
+      }
+    }
+  }
+);
+}

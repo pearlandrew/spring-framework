@@ -1,0 +1,21 @@
+{
+  String format=(String)model.get(this.formatKey);
+  if (format == null) {
+    throw new IllegalArgumentException("No format format found in model");
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Rendering report using format mapping key [" + format + "]");
+  }
+  Class viewClass=this.formatMappings.get(format);
+  if (viewClass == null) {
+    throw new IllegalArgumentException("Format discriminator [" + format + "] is not a configured mapping");
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Rendering report using view class [" + viewClass.getName() + "]");
+  }
+  AbstractJasperReportsView view=(AbstractJasperReportsView)BeanUtils.instantiateClass(viewClass);
+  view.setExporterParameters(getExporterParameters());
+  view.convertExporterParameters();
+  populateContentDispositionIfNecessary(response,format);
+  view.renderReport(populatedReport,model,response);
+}

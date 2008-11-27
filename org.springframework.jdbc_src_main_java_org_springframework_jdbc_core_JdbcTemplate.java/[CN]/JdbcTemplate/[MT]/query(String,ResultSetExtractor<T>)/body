@@ -1,0 +1,27 @@
+{
+  Assert.notNull(sql,"SQL must not be null");
+  Assert.notNull(rse,"ResultSetExtractor must not be null");
+  if (logger.isDebugEnabled()) {
+    logger.debug("Executing SQL query [" + sql + "]");
+  }
+class QueryStatementCallback implements StatementCallback<T>, SqlProvider {
+    public T doInStatement(    Statement stmt) throws SQLException {
+      ResultSet rs=null;
+      try {
+        rs=stmt.executeQuery(sql);
+        ResultSet rsToUse=rs;
+        if (nativeJdbcExtractor != null) {
+          rsToUse=nativeJdbcExtractor.getNativeResultSet(rs);
+        }
+        return rse.extractData(rsToUse);
+      }
+  finally {
+        JdbcUtils.closeResultSet(rs);
+      }
+    }
+    public String getSql(){
+      return sql;
+    }
+  }
+  return execute(new QueryStatementCallback());
+}

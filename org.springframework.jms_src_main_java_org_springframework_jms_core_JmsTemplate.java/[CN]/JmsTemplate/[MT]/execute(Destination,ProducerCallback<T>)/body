@@ -1,0 +1,15 @@
+{
+  Assert.notNull(action,"Callback object must not be null");
+  return execute(new SessionCallback<T>(){
+    public T doInJms(    Session session) throws JMSException {
+      MessageProducer producer=createProducer(session,destination);
+      try {
+        return action.doInJms(session,producer);
+      }
+  finally {
+        JmsUtils.closeMessageProducer(producer);
+      }
+    }
+  }
+,false);
+}

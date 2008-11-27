@@ -1,18 +1,17 @@
 {
   Object other=args[0];
   if (proxy == other) {
-    return Boolean.TRUE;
+    return true;
   }
-  AdvisedSupport otherAdvised=null;
   if (other instanceof Factory) {
     Callback callback=((Factory)other).getCallback(INVOKE_EQUALS);
     if (!(callback instanceof EqualsInterceptor)) {
-      return Boolean.FALSE;
+      return false;
     }
-    otherAdvised=((EqualsInterceptor)callback).advised;
+    AdvisedSupport otherAdvised=((EqualsInterceptor)callback).advised;
+    return AopProxyUtils.equalsInProxy(this.advised,otherAdvised);
   }
  else {
-    return Boolean.FALSE;
+    return false;
   }
-  return (AopProxyUtils.equalsInProxy(this.advised,otherAdvised) ? Boolean.TRUE : Boolean.FALSE);
 }

@@ -1,11 +1,9 @@
 {
-  MethodInvocation invocation=null;
   Object oldProxy=null;
   boolean setProxyContext=false;
   Class targetClass=null;
   Object target=null;
   try {
-    Object retVal=null;
     if (this.advised.exposeProxy) {
       oldProxy=AopContext.setCurrentProxy(proxy);
       setProxyContext=true;
@@ -14,13 +12,13 @@
     if (target != null) {
       targetClass=target.getClass();
     }
-    List chain=this.advised.getInterceptorsAndDynamicInterceptionAdvice(method,targetClass);
+    List<Object> chain=this.advised.getInterceptorsAndDynamicInterceptionAdvice(method,targetClass);
+    Object retVal=null;
     if (chain.isEmpty() && Modifier.isPublic(method.getModifiers())) {
       retVal=methodProxy.invoke(target,args);
     }
  else {
-      invocation=new CglibMethodInvocation(proxy,target,method,args,targetClass,chain,methodProxy);
-      retVal=invocation.proceed();
+      retVal=new CglibMethodInvocation(proxy,target,method,args,targetClass,chain,methodProxy).proceed();
     }
     retVal=massageReturnTypeIfNecessary(proxy,target,method,retVal);
     return retVal;

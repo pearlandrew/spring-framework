@@ -1,11 +1,11 @@
 {
 synchronized (this.cachedBundleMessageFormats) {
-    Map codeMap=(Map)this.cachedBundleMessageFormats.get(bundle);
-    Map localeMap=null;
+    Map<String,Map<Locale,MessageFormat>> codeMap=this.cachedBundleMessageFormats.get(bundle);
+    Map<Locale,MessageFormat> localeMap=null;
     if (codeMap != null) {
-      localeMap=(Map)codeMap.get(code);
+      localeMap=codeMap.get(code);
       if (localeMap != null) {
-        MessageFormat result=(MessageFormat)localeMap.get(locale);
+        MessageFormat result=localeMap.get(locale);
         if (result != null) {
           return result;
         }
@@ -14,11 +14,11 @@ synchronized (this.cachedBundleMessageFormats) {
     String msg=getStringOrNull(bundle,code);
     if (msg != null) {
       if (codeMap == null) {
-        codeMap=new HashMap();
+        codeMap=new HashMap<String,Map<Locale,MessageFormat>>();
         this.cachedBundleMessageFormats.put(bundle,codeMap);
       }
       if (localeMap == null) {
-        localeMap=new HashMap();
+        localeMap=new HashMap<Locale,MessageFormat>();
         codeMap.put(code,localeMap);
       }
       MessageFormat result=createMessageFormat(msg,locale);

@@ -3,14 +3,14 @@
   if (logger.isDebugEnabled()) {
     logger.debug("Executing SQL batch update of " + sql.length + " statements");
   }
-class BatchUpdateStatementCallback implements StatementCallback, SqlProvider {
+class BatchUpdateStatementCallback implements StatementCallback<int[]>, SqlProvider {
     private String currSql;
-    public Object doInStatement(    Statement stmt) throws SQLException, DataAccessException {
+    public int[] doInStatement(    Statement stmt) throws SQLException, DataAccessException {
       int[] rowsAffected=new int[sql.length];
       if (JdbcUtils.supportsBatchUpdates(stmt.getConnection())) {
-        for (int i=0; i < sql.length; i++) {
-          this.currSql=sql[i];
-          stmt.addBatch(sql[i]);
+        for (        String sqlStmt : sql) {
+          this.currSql=sqlStmt;
+          stmt.addBatch(sqlStmt);
         }
         rowsAffected=stmt.executeBatch();
       }
@@ -28,8 +28,8 @@ class BatchUpdateStatementCallback implements StatementCallback, SqlProvider {
       return rowsAffected;
     }
     public String getSql(){
-      return currSql;
+      return this.currSql;
     }
   }
-  return (int[])execute(new BatchUpdateStatementCallback());
+  return execute(new BatchUpdateStatementCallback());
 }

@@ -1,9 +1,8 @@
 {
   if (this.toolAttributes != null) {
-    for (Iterator it=this.toolAttributes.entrySet().iterator(); it.hasNext(); ) {
-      Map.Entry entry=(Map.Entry)it.next();
-      String attributeName=(String)entry.getKey();
-      Class toolClass=(Class)entry.getValue();
+    for (    Map.Entry<String,Class> entry : this.toolAttributes.entrySet()) {
+      String attributeName=entry.getKey();
+      Class toolClass=entry.getValue();
       try {
         Object tool=toolClass.newInstance();
         initTool(tool,velocityContext);
@@ -13,9 +12,6 @@
         throw new NestedServletException("Could not instantiate Velocity tool '" + attributeName + "'",ex);
       }
     }
-  }
-  if (this.velocityFormatterAttribute != null) {
-    velocityContext.put(this.velocityFormatterAttribute,new VelocityFormatter(velocityContext));
   }
   if (this.dateToolAttribute != null || this.numberToolAttribute != null) {
     Locale locale=RequestContextUtils.getLocale(request);

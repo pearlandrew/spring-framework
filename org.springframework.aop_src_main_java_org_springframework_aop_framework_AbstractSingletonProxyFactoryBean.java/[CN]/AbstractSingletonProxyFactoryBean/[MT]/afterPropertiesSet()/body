@@ -10,14 +10,14 @@
   }
   ProxyFactory proxyFactory=new ProxyFactory();
   if (this.preInterceptors != null) {
-    for (int i=0; i < this.preInterceptors.length; i++) {
-      proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(this.preInterceptors[i]));
+    for (    Object interceptor : this.preInterceptors) {
+      proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(interceptor));
     }
   }
   proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(createMainInterceptor()));
   if (this.postInterceptors != null) {
-    for (int i=0; i < this.postInterceptors.length; i++) {
-      proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(this.postInterceptors[i]));
+    for (    Object interceptor : this.postInterceptors) {
+      proxyFactory.addAdvisor(this.advisorAdapterRegistry.wrap(interceptor));
     }
   }
   proxyFactory.copyFrom(this);
@@ -29,5 +29,5 @@
  else   if (!isProxyTargetClass()) {
     proxyFactory.setInterfaces(ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass(),this.proxyClassLoader));
   }
-  this.proxy=getProxy(proxyFactory);
+  this.proxy=proxyFactory.getProxy(this.proxyClassLoader);
 }

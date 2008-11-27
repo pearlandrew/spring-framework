@@ -1,17 +1,14 @@
 {
-  StringBuffer query=new StringBuffer();
-  query.append(encodeParameter("urlType",this.urlType));
+  StringBuilder sb=new StringBuilder();
+  sb.append(encodeParameter("urlType",this.urlType));
   if (this.windowState != null) {
-    query.append(";" + encodeParameter("windowState",this.windowState.toString()));
+    sb.append(";").append(encodeParameter("windowState",this.windowState.toString()));
   }
   if (this.portletMode != null) {
-    query.append(";" + encodeParameter("portletMode",this.portletMode.toString()));
+    sb.append(";").append(encodeParameter("portletMode",this.portletMode.toString()));
   }
-  for (Iterator it=this.parameters.entrySet().iterator(); it.hasNext(); ) {
-    Map.Entry entry=(Map.Entry)it.next();
-    String name=(String)entry.getKey();
-    String[] values=(String[])entry.getValue();
-    query.append(";" + encodeParameter("param_" + name,values));
+  for (  Map.Entry<String,String[]> entry : this.parameters.entrySet()) {
+    sb.append(";").append(encodeParameter("param_" + entry.getKey(),entry.getValue()));
   }
-  return (this.secure ? "https:" : "http:") + "//localhost/mockportlet?" + query.toString();
+  return (this.secure ? "https:" : "http:") + "//localhost/mockportlet?" + sb.toString();
 }

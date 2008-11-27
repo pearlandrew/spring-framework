@@ -1,11 +1,11 @@
 {
   VelocityEngine velocityEngine=newVelocityEngine();
-  Properties props=new Properties();
+  Map<String,Object> props=new HashMap<String,Object>();
   if (this.configLocation != null) {
     if (logger.isInfoEnabled()) {
       logger.info("Loading Velocity config from [" + this.configLocation + "]");
     }
-    PropertiesLoaderUtils.fillProperties(props,this.configLocation);
+    CollectionUtils.mergePropertiesIntoMap(PropertiesLoaderUtils.loadProperties(this.configLocation),props);
   }
   if (!this.velocityProperties.isEmpty()) {
     props.putAll(this.velocityProperties);
@@ -16,12 +16,8 @@
   if (this.overrideLogging) {
     velocityEngine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM,new CommonsLoggingLogSystem());
   }
-  for (Iterator it=props.entrySet().iterator(); it.hasNext(); ) {
-    Map.Entry entry=(Map.Entry)it.next();
-    if (!(entry.getKey() instanceof String)) {
-      throw new IllegalArgumentException("Illegal property key [" + entry.getKey() + "]: only Strings allowed");
-    }
-    velocityEngine.setProperty((String)entry.getKey(),entry.getValue());
+  for (  Map.Entry<String,Object> entry : props.entrySet()) {
+    velocityEngine.setProperty(entry.getKey(),entry.getValue());
   }
   postProcessVelocityEngine(velocityEngine);
   try {

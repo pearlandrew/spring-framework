@@ -5,22 +5,22 @@
   Callback aopInterceptor=new DynamicAdvisedInterceptor(this.advised);
   Callback targetInterceptor=null;
   if (exposeProxy) {
-    targetInterceptor=isStatic ? (Callback)new StaticUnadvisedExposedInterceptor(this.advised.getTargetSource().getTarget()) : (Callback)new DynamicUnadvisedExposedInterceptor(this.advised.getTargetSource());
+    targetInterceptor=isStatic ? new StaticUnadvisedExposedInterceptor(this.advised.getTargetSource().getTarget()) : new DynamicUnadvisedExposedInterceptor(this.advised.getTargetSource());
   }
  else {
-    targetInterceptor=isStatic ? (Callback)new StaticUnadvisedInterceptor(this.advised.getTargetSource().getTarget()) : (Callback)new DynamicUnadvisedInterceptor(this.advised.getTargetSource());
+    targetInterceptor=isStatic ? new StaticUnadvisedInterceptor(this.advised.getTargetSource().getTarget()) : new DynamicUnadvisedInterceptor(this.advised.getTargetSource());
   }
-  Callback targetDispatcher=isStatic ? (Callback)new StaticDispatcher(this.advised.getTargetSource().getTarget()) : new SerializableNoOp();
+  Callback targetDispatcher=isStatic ? new StaticDispatcher(this.advised.getTargetSource().getTarget()) : new SerializableNoOp();
   Callback[] mainCallbacks=new Callback[]{aopInterceptor,targetInterceptor,new SerializableNoOp(),targetDispatcher,this.advisedDispatcher,new EqualsInterceptor(this.advised),new HashCodeInterceptor(this.advised)};
   Callback[] callbacks;
   if (isStatic && isFrozen) {
     Method[] methods=rootClass.getMethods();
     Callback[] fixedCallbacks=new Callback[methods.length];
-    this.fixedInterceptorMap=new HashMap(methods.length);
+    this.fixedInterceptorMap=new HashMap<String,Integer>(methods.length);
     for (int x=0; x < methods.length; x++) {
-      List chain=this.advised.getInterceptorsAndDynamicInterceptionAdvice(methods[x],rootClass);
+      List<Object> chain=this.advised.getInterceptorsAndDynamicInterceptionAdvice(methods[x],rootClass);
       fixedCallbacks[x]=new FixedChainStaticTargetInterceptor(chain,this.advised.getTargetSource().getTarget(),this.advised.getTargetClass());
-      this.fixedInterceptorMap.put(methods[x].toString(),new Integer(x));
+      this.fixedInterceptorMap.put(methods[x].toString(),x);
     }
     callbacks=new Callback[mainCallbacks.length + fixedCallbacks.length];
     for (int x=0; x < mainCallbacks.length; x++) {

@@ -1,0 +1,15 @@
+{
+  Assert.notNull(action,"Callback object must not be null");
+  return execute(new SessionCallback<T>(){
+    public T doInJms(    Session session) throws JMSException {
+      QueueBrowser browser=createBrowser(session,queue,messageSelector);
+      try {
+        return action.doInJms(session,browser);
+      }
+  finally {
+        JmsUtils.closeQueueBrowser(browser);
+      }
+    }
+  }
+,true);
+}

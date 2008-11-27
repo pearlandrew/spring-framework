@@ -1,0 +1,35 @@
+{
+  final List<SqlParameter> updateCountParameters=new ArrayList<SqlParameter>();
+  final List<SqlParameter> resultSetParameters=new ArrayList<SqlParameter>();
+  final List<SqlParameter> callParameters=new ArrayList<SqlParameter>();
+  for (  SqlParameter parameter : declaredParameters) {
+    if (parameter.isResultsParameter()) {
+      if (parameter instanceof SqlReturnResultSet) {
+        resultSetParameters.add(parameter);
+      }
+ else {
+        updateCountParameters.add(parameter);
+      }
+    }
+ else {
+      callParameters.add(parameter);
+    }
+  }
+  return execute(csc,new CallableStatementCallback<Map<String,Object>>(){
+    public Map<String,Object> doInCallableStatement(    CallableStatement cs) throws SQLException {
+      boolean retVal=cs.execute();
+      int updateCount=cs.getUpdateCount();
+      if (logger.isDebugEnabled()) {
+        logger.debug("CallableStatement.execute() returned '" + retVal + "'");
+        logger.debug("CallableStatement.getUpdateCount() returned " + updateCount);
+      }
+      Map<String,Object> returnedResults=createResultsMap();
+      if (retVal || updateCount != -1) {
+        returnedResults.putAll(extractReturnedResults(cs,updateCountParameters,resultSetParameters,updateCount));
+      }
+      returnedResults.putAll(extractOutputParameters(cs,callParameters));
+      return returnedResults;
+    }
+  }
+);
+}

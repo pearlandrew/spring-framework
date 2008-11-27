@@ -1,0 +1,26 @@
+{
+  return execute(new InteractionCallback<T>(){
+    public T doInInteraction(    Interaction interaction,    ConnectionFactory connectionFactory) throws ResourceException, SQLException, DataAccessException {
+      Record outputRecordToUse=outputRecord;
+      try {
+        if (outputRecord != null || getOutputRecordCreator() != null) {
+          if (outputRecord == null) {
+            RecordFactory recordFactory=getRecordFactory(connectionFactory);
+            outputRecordToUse=getOutputRecordCreator().createRecord(recordFactory);
+          }
+          interaction.execute(spec,inputRecord,outputRecordToUse);
+        }
+ else {
+          outputRecordToUse=interaction.execute(spec,inputRecord);
+        }
+        return (outputExtractor != null ? outputExtractor.extractData(outputRecordToUse) : null);
+      }
+  finally {
+        if (outputRecordToUse instanceof ResultSet) {
+          closeResultSet((ResultSet)outputRecordToUse);
+        }
+      }
+    }
+  }
+);
+}

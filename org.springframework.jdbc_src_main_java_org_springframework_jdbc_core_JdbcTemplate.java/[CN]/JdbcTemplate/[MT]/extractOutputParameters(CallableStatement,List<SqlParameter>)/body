@@ -1,0 +1,34 @@
+{
+  Map<String,Object> returnedResults=new HashMap<String,Object>();
+  int sqlColIndex=1;
+  for (  SqlParameter param : parameters) {
+    if (param instanceof SqlOutParameter) {
+      SqlOutParameter outParam=(SqlOutParameter)param;
+      if (outParam.isReturnTypeSupported()) {
+        Object out=outParam.getSqlReturnType().getTypeValue(cs,sqlColIndex,outParam.getSqlType(),outParam.getTypeName());
+        returnedResults.put(outParam.getName(),out);
+      }
+ else {
+        Object out=cs.getObject(sqlColIndex);
+        if (out instanceof ResultSet) {
+          if (outParam.isResultSetSupported()) {
+            returnedResults.putAll(processResultSet((ResultSet)out,outParam));
+          }
+ else {
+            String rsName=outParam.getName();
+            SqlReturnResultSet rsParam=new SqlReturnResultSet(rsName,new ColumnMapRowMapper());
+            returnedResults.putAll(processResultSet(cs.getResultSet(),rsParam));
+            logger.info("Added default SqlReturnResultSet parameter named " + rsName);
+          }
+        }
+ else {
+          returnedResults.put(outParam.getName(),out);
+        }
+      }
+    }
+    if (!(param.isResultsParameter())) {
+      sqlColIndex++;
+    }
+  }
+  return returnedResults;
+}
