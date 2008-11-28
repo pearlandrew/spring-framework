@@ -3,7 +3,7 @@
   applyTimeout(txObject,timeout);
   if (this.beginWithNameMethod != null && definition.getName() != null) {
     try {
-      this.beginWithNameMethod.invoke(txObject.getUserTransaction(),new Object[]{definition.getName()});
+      this.beginWithNameMethod.invoke(txObject.getUserTransaction(),definition.getName());
     }
  catch (    InvocationTargetException ex) {
       throw new TransactionSystemException("OC4J's UserTransaction.begin(String) method failed",ex.getTargetException());
@@ -19,8 +19,7 @@ catch (    Exception ex) {
     if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
       try {
         Transaction tx=getTransactionManager().getTransaction();
-        Integer isolationLevel=new Integer(definition.getIsolationLevel());
-        this.setTransactionIsolationMethod.invoke(tx,new Object[]{isolationLevel});
+        this.setTransactionIsolationMethod.invoke(tx,definition.getIsolationLevel());
       }
  catch (      InvocationTargetException ex) {
         throw new TransactionSystemException("OC4J's Transaction.setTransactionIsolation(int) method failed",ex.getTargetException());
