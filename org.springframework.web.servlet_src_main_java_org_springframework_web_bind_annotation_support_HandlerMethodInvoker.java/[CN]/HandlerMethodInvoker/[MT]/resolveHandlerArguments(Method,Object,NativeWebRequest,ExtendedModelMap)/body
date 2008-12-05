@@ -6,32 +6,43 @@
     methodParam.initParameterNameDiscovery(this.parameterNameDiscoverer);
     GenericTypeResolver.resolveParameterType(methodParam,handler.getClass());
     String paramName=null;
-    boolean paramRequired=false;
-    String paramDefaultValue=null;
+    String headerName=null;
+    boolean required=false;
+    String defaultValue=null;
     String pathVarName=null;
     String attrName=null;
+    int found=0;
     Annotation[] paramAnns=methodParam.getParameterAnnotations();
     for (    Annotation paramAnn : paramAnns) {
       if (RequestParam.class.isInstance(paramAnn)) {
         RequestParam requestParam=(RequestParam)paramAnn;
         paramName=requestParam.value();
-        paramRequired=requestParam.required();
-        paramDefaultValue=requestParam.defaultValue();
-        break;
+        required=requestParam.required();
+        defaultValue=requestParam.defaultValue();
+        found++;
+      }
+ else       if (RequestHeader.class.isInstance(paramAnn)) {
+        RequestHeader requestHeader=(RequestHeader)paramAnn;
+        headerName=requestHeader.value();
+        required=requestHeader.required();
+        defaultValue=requestHeader.defaultValue();
+        found++;
       }
  else       if (ModelAttribute.class.isInstance(paramAnn)) {
         ModelAttribute attr=(ModelAttribute)paramAnn;
         attrName=attr.value();
+        found++;
       }
  else       if (PathVariable.class.isInstance(paramAnn)) {
         PathVariable pathVar=(PathVariable)paramAnn;
         pathVarName=pathVar.value();
+        found++;
       }
     }
-    if ((paramName != null && attrName != null) || (paramName != null && pathVarName != null) || (pathVarName != null && attrName != null)) {
-      throw new IllegalStateException("@RequestParam, @PathVariable and @ModelAttribute are exclusive " + "choices - do not specify both on the same parameter: " + handlerMethod);
+    if (found > 1) {
+      throw new IllegalStateException("Handler parameter annotations are exclusive choices - " + "do not specify more than one such annotation on the same parameter: " + handlerMethod);
     }
-    if (paramName == null && attrName == null && pathVarName == null) {
+    if (found == 0) {
       Object argValue=resolveCommonArgument(methodParam,webRequest);
       if (argValue != WebArgumentResolver.UNRESOLVED) {
         args[i]=argValue;
@@ -56,7 +67,10 @@
       }
     }
     if (paramName != null) {
-      args[i]=resolveRequestParam(paramName,paramRequired,paramDefaultValue,methodParam,webRequest,handler);
+      args[i]=resolveRequestParam(paramName,required,defaultValue,methodParam,webRequest,handler);
+    }
+ else     if (headerName != null) {
+      args[i]=resolveRequestHeader(headerName,required,defaultValue,methodParam,webRequest,handler);
     }
  else     if (attrName != null) {
       WebDataBinder binder=resolveModelAttribute(attrName,methodParam,implicitModel,webRequest,handler);
