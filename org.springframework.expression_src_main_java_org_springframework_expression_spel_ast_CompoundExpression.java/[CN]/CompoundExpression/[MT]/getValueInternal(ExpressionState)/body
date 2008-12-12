@@ -1,0 +1,23 @@
+{
+  Object result=null;
+  SpelNodeImpl nextNode=null;
+  try {
+    nextNode=getChild(0);
+    result=nextNode.getValueInternal(state);
+    for (int i=1; i < getChildCount(); i++) {
+      try {
+        state.pushActiveContextObject(result);
+        nextNode=getChild(i);
+        result=nextNode.getValueInternal(state);
+      }
+  finally {
+        state.popActiveContextObject();
+      }
+    }
+  }
+ catch (  SpelException ee) {
+    ee.setPosition(nextNode.getCharPositionInLine());
+    throw ee;
+  }
+  return result;
+}

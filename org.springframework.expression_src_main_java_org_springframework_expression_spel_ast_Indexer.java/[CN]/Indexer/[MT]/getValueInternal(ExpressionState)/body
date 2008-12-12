@@ -1,0 +1,32 @@
+{
+  Object ctx=state.getActiveContextObject();
+  Object index=getChild(0).getValueInternal(state);
+  if (ctx instanceof Map) {
+    return ((Map<?,?>)ctx).get(index);
+  }
+  int idx=state.toInteger(index);
+  if (ctx.getClass().isArray()) {
+    return accessArrayElement(ctx,idx);
+  }
+ else   if (ctx instanceof Collection) {
+    Collection<?> c=(Collection<?>)ctx;
+    if (idx >= c.size()) {
+      throw new SpelException(SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS,c.size(),idx);
+    }
+    int pos=0;
+    for (    Object o : c) {
+      if (pos == idx) {
+        return o;
+      }
+      pos++;
+    }
+  }
+ else   if (ctx instanceof String) {
+    String ctxString=(String)ctx;
+    if (idx >= ctxString.length()) {
+      throw new SpelException(SpelMessages.STRING_INDEX_OUT_OF_BOUNDS,ctxString.length(),idx);
+    }
+    return String.valueOf(ctxString.charAt(idx));
+  }
+  throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE,ctx.getClass().getName());
+}

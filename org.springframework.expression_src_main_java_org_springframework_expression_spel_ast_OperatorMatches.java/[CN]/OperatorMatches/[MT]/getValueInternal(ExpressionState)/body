@@ -1,0 +1,20 @@
+{
+  SpelNodeImpl leftOp=getLeftOperand();
+  SpelNodeImpl rightOp=getRightOperand();
+  Object left=leftOp.getValue(state,String.class);
+  Object right=getRightOperand().getValueInternal(state);
+  try {
+    if (!(left instanceof String)) {
+      throw new SpelException(leftOp.getCharPositionInLine(),SpelMessages.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR,left);
+    }
+    if (!(right instanceof String)) {
+      throw new SpelException(rightOp.getCharPositionInLine(),SpelMessages.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR,right);
+    }
+    Pattern pattern=Pattern.compile((String)right);
+    Matcher matcher=pattern.matcher((String)left);
+    return matcher.matches();
+  }
+ catch (  PatternSyntaxException pse) {
+    throw new SpelException(rightOp.getCharPositionInLine(),pse,SpelMessages.INVALID_PATTERN,right);
+  }
+}
