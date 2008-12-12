@@ -1,14 +1,14 @@
 {
 class MapAwareMethodInterceptor implements MethodInterceptor {
-    private final Map expectedValues;
-    private final Map valuesToAdd;
-    public MapAwareMethodInterceptor(    Map expectedValues,    Map valuesToAdd){
+    private final Map<String,String> expectedValues;
+    private final Map<String,String> valuesToAdd;
+    public MapAwareMethodInterceptor(    Map<String,String> expectedValues,    Map<String,String> valuesToAdd){
       this.expectedValues=expectedValues;
       this.valuesToAdd=valuesToAdd;
     }
     public Object invoke(    MethodInvocation invocation) throws Throwable {
       ReflectiveMethodInvocation rmi=(ReflectiveMethodInvocation)invocation;
-      for (Iterator it=rmi.getUserAttributes().keySet().iterator(); it.hasNext(); ) {
+      for (Iterator<String> it=rmi.getUserAttributes().keySet().iterator(); it.hasNext(); ) {
         Object key=it.next();
         assertEquals(expectedValues.get(key),rmi.getUserAttributes().get(key));
       }
@@ -18,17 +18,17 @@ class MapAwareMethodInterceptor implements MethodInterceptor {
   }
   ;
   AdvisedSupport pc=new AdvisedSupport(new Class[]{ITestBean.class});
-  MapAwareMethodInterceptor mami1=new MapAwareMethodInterceptor(new HashMap(),new HashMap());
-  Map firstValuesToAdd=new HashMap();
+  MapAwareMethodInterceptor mami1=new MapAwareMethodInterceptor(new HashMap<String,String>(),new HashMap<String,String>());
+  Map<String,String> firstValuesToAdd=new HashMap<String,String>();
   firstValuesToAdd.put("test","");
-  MapAwareMethodInterceptor mami2=new MapAwareMethodInterceptor(new HashMap(),firstValuesToAdd);
-  MapAwareMethodInterceptor mami3=new MapAwareMethodInterceptor(firstValuesToAdd,new HashMap());
-  MapAwareMethodInterceptor mami4=new MapAwareMethodInterceptor(firstValuesToAdd,new HashMap());
-  Map secondValuesToAdd=new HashMap();
+  MapAwareMethodInterceptor mami2=new MapAwareMethodInterceptor(new HashMap<String,String>(),firstValuesToAdd);
+  MapAwareMethodInterceptor mami3=new MapAwareMethodInterceptor(firstValuesToAdd,new HashMap<String,String>());
+  MapAwareMethodInterceptor mami4=new MapAwareMethodInterceptor(firstValuesToAdd,new HashMap<String,String>());
+  Map<String,String> secondValuesToAdd=new HashMap<String,String>();
   secondValuesToAdd.put("foo","bar");
   secondValuesToAdd.put("cat","dog");
   MapAwareMethodInterceptor mami5=new MapAwareMethodInterceptor(firstValuesToAdd,secondValuesToAdd);
-  Map finalExpected=new HashMap(firstValuesToAdd);
+  Map<String,String> finalExpected=new HashMap<String,String>(firstValuesToAdd);
   finalExpected.putAll(secondValuesToAdd);
   MapAwareMethodInterceptor mami6=new MapAwareMethodInterceptor(finalExpected,secondValuesToAdd);
   pc.addAdvice(mami1);
