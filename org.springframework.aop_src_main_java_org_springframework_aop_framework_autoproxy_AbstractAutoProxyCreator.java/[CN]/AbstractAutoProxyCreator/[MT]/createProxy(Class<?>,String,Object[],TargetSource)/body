@@ -1,0 +1,21 @@
+{
+  ProxyFactory proxyFactory=new ProxyFactory();
+  proxyFactory.copyFrom(this);
+  if (!shouldProxyTargetClass(beanClass,beanName)) {
+    Class<?>[] targetInterfaces=ClassUtils.getAllInterfacesForClass(beanClass,this.proxyClassLoader);
+    for (    Class<?> targetInterface : targetInterfaces) {
+      proxyFactory.addInterface(targetInterface);
+    }
+  }
+  Advisor[] advisors=buildAdvisors(beanName,specificInterceptors);
+  for (  Advisor advisor : advisors) {
+    proxyFactory.addAdvisor(advisor);
+  }
+  proxyFactory.setTargetSource(targetSource);
+  customizeProxyFactory(proxyFactory);
+  proxyFactory.setFrozen(this.freezeProxy);
+  if (advisorsPreFiltered()) {
+    proxyFactory.setPreFiltered(true);
+  }
+  return proxyFactory.getProxy(this.proxyClassLoader);
+}
