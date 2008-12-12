@@ -1,10 +1,5 @@
 {
-  try {
-    TimeStamped ts=(TimeStamped)factory.getBean("test2");
-    fail("Shouldn't implement TimeStamped before manipulation");
-  }
- catch (  ClassCastException ex) {
-  }
+  assertThat("Shouldn't implement TimeStamped before manipulation",factory.getBean("test2"),not(instanceOf(TimeStamped.class)));
   ProxyFactoryBean config=(ProxyFactoryBean)factory.getBean("&test2");
   long time=666L;
   TimestampIntroductionInterceptor ti=new TimestampIntroductionInterceptor();
@@ -17,12 +12,7 @@
   config.removeAdvice(ti);
   assertTrue(config.getAdvisors().length == oldCount);
   assertTrue(ts.getTimeStamp() == time);
-  try {
-    ts=(TimeStamped)factory.getBean("test2");
-    fail("Should no longer implement TimeStamped");
-  }
- catch (  ClassCastException ex) {
-  }
+  assertThat("Should no longer implement TimeStamped",factory.getBean("test2"),not(instanceOf(TimeStamped.class)));
   config.removeAdvice(new DebugInterceptor());
   assertTrue(config.getAdvisors().length == oldCount);
   ITestBean it=(ITestBean)ts;
