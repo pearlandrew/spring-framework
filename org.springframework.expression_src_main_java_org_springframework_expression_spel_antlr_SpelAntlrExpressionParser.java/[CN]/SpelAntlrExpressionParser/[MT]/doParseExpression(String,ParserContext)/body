@@ -1,0 +1,18 @@
+{
+  try {
+    lexer.setCharStream(new ANTLRStringStream(expressionString));
+    CommonTokenStream tokens=new CommonTokenStream(lexer);
+    parser.setTokenStream(tokens);
+    expr_return exprReturn=parser.expr();
+    SpelExpression newExpression=new SpelExpression(expressionString,(SpelNode)exprReturn.getTree());
+    return newExpression;
+  }
+ catch (  RecognitionException re) {
+    ParseException exception=new ParseException(expressionString,"Recognition error at position: " + re.charPositionInLine + ": "+ re.getMessage(),re);
+    throw exception;
+  }
+catch (  WrappedELException e) {
+    SpelException wrappedException=e.getCause();
+    throw new ParseException(expressionString,"Parsing problem: " + wrappedException.getMessage(),wrappedException);
+  }
+}
