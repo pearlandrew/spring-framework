@@ -1,0 +1,13 @@
+{
+  TestBean raw=new TestBean();
+  assertTrue(!(raw instanceof SubTimeStamped));
+  ProxyFactory factory=new ProxyFactory(raw);
+  TimeStamped ts=createMock(SubTimeStamped.class);
+  long timestamp=111L;
+  expect(ts.getTimeStamp()).andReturn(timestamp);
+  replay(ts);
+  factory.addAdvisor(0,new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts),SubTimeStamped.class));
+  SubTimeStamped tsp=(SubTimeStamped)factory.getProxy();
+  assertTrue(tsp.getTimeStamp() == timestamp);
+  verify(ts);
+}
