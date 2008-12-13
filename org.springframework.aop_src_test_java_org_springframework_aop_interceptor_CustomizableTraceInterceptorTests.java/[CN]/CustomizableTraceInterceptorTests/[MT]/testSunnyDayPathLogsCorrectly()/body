@@ -1,0 +1,17 @@
+{
+  Log log=createMock(Log.class);
+  MethodInvocation methodInvocation=createMock(MethodInvocation.class);
+  Method toString=String.class.getMethod("toString",new Class[]{});
+  expect(log.isTraceEnabled()).andReturn(true);
+  expect(methodInvocation.getMethod()).andReturn(toString).times(4);
+  expect(methodInvocation.getThis()).andReturn(this).times(2);
+  log.trace(isA(String.class));
+  expect(methodInvocation.proceed()).andReturn(null);
+  log.trace(isA(String.class));
+  replay(methodInvocation);
+  replay(log);
+  CustomizableTraceInterceptor interceptor=new StubCustomizableTraceInterceptor(log);
+  interceptor.invoke(methodInvocation);
+  verify(log);
+  verify(methodInvocation);
+}

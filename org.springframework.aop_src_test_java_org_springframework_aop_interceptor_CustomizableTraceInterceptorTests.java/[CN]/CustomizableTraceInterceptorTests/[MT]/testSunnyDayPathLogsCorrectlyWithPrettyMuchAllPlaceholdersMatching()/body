@@ -1,0 +1,21 @@
+{
+  Log log=createMock(Log.class);
+  MethodInvocation methodInvocation=createMock(MethodInvocation.class);
+  Method toString=String.class.getMethod("toString",new Class[0]);
+  Object[] arguments=new Object[]{"$ One \\$",new Long(2)};
+  expect(log.isTraceEnabled()).andReturn(true);
+  expect(methodInvocation.getMethod()).andReturn(toString).times(7);
+  expect(methodInvocation.getThis()).andReturn(this).times(2);
+  expect(methodInvocation.getArguments()).andReturn(arguments).times(2);
+  log.trace(isA(String.class));
+  expect(methodInvocation.proceed()).andReturn("Hello!");
+  log.trace(isA(String.class));
+  replay(methodInvocation);
+  replay(log);
+  CustomizableTraceInterceptor interceptor=new StubCustomizableTraceInterceptor(log);
+  interceptor.setEnterMessage(new StringBuffer().append("Entering the '").append(CustomizableTraceInterceptor.PLACEHOLDER_METHOD_NAME).append("' method of the [").append(CustomizableTraceInterceptor.PLACEHOLDER_TARGET_CLASS_NAME).append("] class with the following args (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENTS).append(") and arg types (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENT_TYPES).append(").").toString());
+  interceptor.setExitMessage(new StringBuffer().append("Exiting the '").append(CustomizableTraceInterceptor.PLACEHOLDER_METHOD_NAME).append("' method of the [").append(CustomizableTraceInterceptor.PLACEHOLDER_TARGET_CLASS_SHORT_NAME).append("] class with the following args (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENTS).append(") and arg types (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENT_TYPES).append("), returning '").append(CustomizableTraceInterceptor.PLACEHOLDER_RETURN_VALUE).append("' and taking '").append(CustomizableTraceInterceptor.PLACEHOLDER_INVOCATION_TIME).append("' this long.").toString());
+  interceptor.invoke(methodInvocation);
+  verify(log);
+  verify(methodInvocation);
+}

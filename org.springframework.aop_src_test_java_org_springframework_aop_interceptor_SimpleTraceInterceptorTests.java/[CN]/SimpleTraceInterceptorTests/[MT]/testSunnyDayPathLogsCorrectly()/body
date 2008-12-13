@@ -1,0 +1,16 @@
+{
+  Log log=createMock(Log.class);
+  MethodInvocation mi=createMock(MethodInvocation.class);
+  Method toString=String.class.getMethod("toString",new Class[]{});
+  expect(mi.getMethod()).andReturn(toString);
+  expect(mi.getThis()).andReturn(this);
+  log.trace(isA(String.class));
+  expect(mi.proceed()).andReturn(null);
+  log.trace(isA(String.class));
+  replay(log);
+  replay(mi);
+  SimpleTraceInterceptor interceptor=new SimpleTraceInterceptor(true);
+  interceptor.invokeUnderTrace(mi,log);
+  verify(log);
+  verify(mi);
+}

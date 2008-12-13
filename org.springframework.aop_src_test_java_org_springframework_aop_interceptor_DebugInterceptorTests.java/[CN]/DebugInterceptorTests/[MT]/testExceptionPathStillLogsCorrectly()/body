@@ -1,0 +1,21 @@
+{
+  Log log=createMock(Log.class);
+  MethodInvocation methodInvocation=createMock(MethodInvocation.class);
+  expect(log.isTraceEnabled()).andReturn(true);
+  log.trace(isA(String.class));
+  IllegalArgumentException exception=new IllegalArgumentException();
+  expect(methodInvocation.proceed()).andThrow(exception);
+  log.trace(isA(String.class),eq(exception));
+  replay(methodInvocation);
+  replay(log);
+  DebugInterceptor interceptor=new StubDebugInterceptor(log);
+  try {
+    interceptor.invoke(methodInvocation);
+    fail("Must have propagated the IllegalArgumentException.");
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  checkCallCountTotal(interceptor);
+  verify(methodInvocation);
+  verify(log);
+}

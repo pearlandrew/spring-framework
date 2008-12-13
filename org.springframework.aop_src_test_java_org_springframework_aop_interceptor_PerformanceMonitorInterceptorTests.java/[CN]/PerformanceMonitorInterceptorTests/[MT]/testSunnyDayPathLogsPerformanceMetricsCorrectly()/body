@@ -1,0 +1,14 @@
+{
+  Log log=createMock(Log.class);
+  MethodInvocation mi=createMock(MethodInvocation.class);
+  Method toString=String.class.getMethod("toString",new Class[0]);
+  expect(mi.getMethod()).andReturn(toString);
+  expect(mi.proceed()).andReturn(null);
+  log.trace(isA(String.class));
+  replay(mi);
+  replay(log);
+  PerformanceMonitorInterceptor interceptor=new PerformanceMonitorInterceptor(true);
+  interceptor.invokeUnderTrace(mi,log);
+  verify(log);
+  verify(mi);
+}

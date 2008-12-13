@@ -1,0 +1,19 @@
+{
+  Log log=createMock(Log.class);
+  MethodInvocation mi=createMock(MethodInvocation.class);
+  Method toString=String.class.getMethod("toString",new Class[0]);
+  expect(mi.getMethod()).andReturn(toString);
+  expect(mi.proceed()).andThrow(new IllegalArgumentException());
+  log.trace(isA(String.class));
+  replay(mi);
+  replay(log);
+  PerformanceMonitorInterceptor interceptor=new PerformanceMonitorInterceptor(true);
+  try {
+    interceptor.invokeUnderTrace(mi,log);
+    fail("Must have propagated the IllegalArgumentException.");
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  verify(log);
+  verify(mi);
+}
