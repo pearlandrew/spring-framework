@@ -1,0 +1,66 @@
+{
+  String expectedNameFromProperties="tony";
+  String expectedNameFromArgs="gordon";
+  DefaultListableBeanFactory lbf=new DefaultListableBeanFactory();
+  RootBeanDefinition instanceFactoryDefinition=new RootBeanDefinition(BeanWithFactoryMethod.class);
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  pvs.addPropertyValue("name",expectedNameFromProperties);
+  instanceFactoryDefinition.setPropertyValues(pvs);
+  lbf.registerBeanDefinition("factoryBeanInstance",instanceFactoryDefinition);
+  RootBeanDefinition factoryMethodDefinitionWithProperties=new RootBeanDefinition();
+  factoryMethodDefinitionWithProperties.setFactoryBeanName("factoryBeanInstance");
+  factoryMethodDefinitionWithProperties.setFactoryMethodName("create");
+  if (!singleton) {
+    factoryMethodDefinitionWithProperties.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+  }
+  lbf.registerBeanDefinition("fmWithProperties",factoryMethodDefinitionWithProperties);
+  RootBeanDefinition factoryMethodDefinitionGeneric=new RootBeanDefinition();
+  factoryMethodDefinitionGeneric.setFactoryBeanName("factoryBeanInstance");
+  factoryMethodDefinitionGeneric.setFactoryMethodName("createGeneric");
+  if (!singleton) {
+    factoryMethodDefinitionGeneric.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+  }
+  lbf.registerBeanDefinition("fmGeneric",factoryMethodDefinitionGeneric);
+  RootBeanDefinition factoryMethodDefinitionWithArgs=new RootBeanDefinition();
+  factoryMethodDefinitionWithArgs.setFactoryBeanName("factoryBeanInstance");
+  factoryMethodDefinitionWithArgs.setFactoryMethodName("createWithArgs");
+  ConstructorArgumentValues cvals=new ConstructorArgumentValues();
+  cvals.addGenericArgumentValue(expectedNameFromArgs);
+  factoryMethodDefinitionWithArgs.setConstructorArgumentValues(cvals);
+  if (!singleton) {
+    factoryMethodDefinitionWithArgs.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+  }
+  lbf.registerBeanDefinition("fmWithArgs",factoryMethodDefinitionWithArgs);
+  assertEquals(4,lbf.getBeanDefinitionCount());
+  List<String> tbNames=Arrays.asList(lbf.getBeanNamesForType(TestBean.class));
+  assertTrue(tbNames.contains("fmWithProperties"));
+  assertTrue(tbNames.contains("fmWithArgs"));
+  assertEquals(2,tbNames.size());
+  TestBean tb=(TestBean)lbf.getBean("fmWithProperties");
+  TestBean second=(TestBean)lbf.getBean("fmWithProperties");
+  if (singleton) {
+    assertSame(tb,second);
+  }
+ else {
+    assertNotSame(tb,second);
+  }
+  assertEquals(expectedNameFromProperties,tb.getName());
+  tb=(TestBean)lbf.getBean("fmGeneric");
+  second=(TestBean)lbf.getBean("fmGeneric");
+  if (singleton) {
+    assertSame(tb,second);
+  }
+ else {
+    assertNotSame(tb,second);
+  }
+  assertEquals(expectedNameFromProperties,tb.getName());
+  TestBean tb2=(TestBean)lbf.getBean("fmWithArgs");
+  second=(TestBean)lbf.getBean("fmWithArgs");
+  if (singleton) {
+    assertSame(tb2,second);
+  }
+ else {
+    assertNotSame(tb2,second);
+  }
+  assertEquals(expectedNameFromArgs,tb2.getName());
+}

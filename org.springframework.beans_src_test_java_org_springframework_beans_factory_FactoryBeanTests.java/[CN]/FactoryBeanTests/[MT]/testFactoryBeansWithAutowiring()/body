@@ -1,0 +1,13 @@
+{
+  XmlBeanFactory factory=new XmlBeanFactory(new ClassPathResource("factoryBeansWithAutowiring.xml",getClass()));
+  BeanFactoryPostProcessor ppc=(BeanFactoryPostProcessor)factory.getBean("propertyPlaceholderConfigurer");
+  ppc.postProcessBeanFactory(factory);
+  Alpha alpha=(Alpha)factory.getBean("alpha");
+  Beta beta=(Beta)factory.getBean("beta");
+  Gamma gamma=(Gamma)factory.getBean("gamma");
+  Gamma gamma2=(Gamma)factory.getBean("gammaFactory");
+  assertSame(beta,alpha.getBeta());
+  assertSame(gamma,beta.getGamma());
+  assertSame(gamma2,beta.getGamma());
+  assertEquals("yourName",beta.getName());
+}
