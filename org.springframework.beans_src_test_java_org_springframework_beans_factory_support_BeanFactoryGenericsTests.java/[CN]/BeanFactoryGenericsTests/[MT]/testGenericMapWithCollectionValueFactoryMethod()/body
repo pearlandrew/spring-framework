@@ -1,0 +1,24 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  bf.addPropertyEditorRegistrar(new PropertyEditorRegistrar(){
+    public void registerCustomEditors(    PropertyEditorRegistry registry){
+      registry.registerCustomEditor(Number.class,new CustomNumberEditor(Integer.class,false));
+    }
+  }
+);
+  RootBeanDefinition rbd=new RootBeanDefinition(GenericBean.class);
+  rbd.setFactoryMethodName("createInstance");
+  Map<String,AbstractCollection<?>> input=new HashMap<String,AbstractCollection<?>>();
+  HashSet<Integer> value1=new HashSet<Integer>();
+  value1.add(new Integer(1));
+  input.put("1",value1);
+  ArrayList<Boolean> value2=new ArrayList<Boolean>();
+  value2.add(Boolean.TRUE);
+  input.put("2",value2);
+  rbd.getConstructorArgumentValues().addGenericArgumentValue(Boolean.TRUE);
+  rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
+  bf.registerBeanDefinition("genericBean",rbd);
+  GenericBean<?> gb=(GenericBean<?>)bf.getBean("genericBean");
+  assertTrue(gb.getCollectionMap().get(new Integer(1)) instanceof HashSet);
+  assertTrue(gb.getCollectionMap().get(new Integer(2)) instanceof ArrayList);
+}
