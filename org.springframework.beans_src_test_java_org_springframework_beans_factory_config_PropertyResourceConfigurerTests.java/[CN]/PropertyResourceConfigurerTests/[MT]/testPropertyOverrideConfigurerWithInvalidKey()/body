@@ -1,0 +1,28 @@
+{
+  factory.registerBeanDefinition("tb1",genericBeanDefinition(TestBean.class).getBeanDefinition());
+  factory.registerBeanDefinition("tb2",genericBeanDefinition(TestBean.class).getBeanDefinition());
+{
+    PropertyOverrideConfigurer poc=new PropertyOverrideConfigurer();
+    poc.setIgnoreInvalidKeys(true);
+    Properties props=new Properties();
+    props.setProperty("argh","hgra");
+    props.setProperty("tb2.name","test");
+    poc.setProperties(props);
+    poc.postProcessBeanFactory(factory);
+  }
+{
+    PropertyOverrideConfigurer poc=new PropertyOverrideConfigurer();
+    Properties props=new Properties();
+    props.setProperty("argh","hgra");
+    props.setProperty("tb2.age","99");
+    props.setProperty("tb2.name","test2");
+    poc.setProperties(props);
+    poc.setOrder(0);
+    try {
+      poc.postProcessBeanFactory(factory);
+    }
+ catch (    BeanInitializationException ex) {
+      assertTrue(ex.getMessage().toLowerCase().indexOf("argh") != -1);
+    }
+  }
+}
