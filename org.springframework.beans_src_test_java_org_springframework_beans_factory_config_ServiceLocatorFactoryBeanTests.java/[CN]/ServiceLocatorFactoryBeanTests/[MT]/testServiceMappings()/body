@@ -1,13 +1,8 @@
 {
-  StaticApplicationContext ctx=new StaticApplicationContext();
-  ctx.registerPrototype("testService1",TestService.class,new MutablePropertyValues());
-  ctx.registerPrototype("testService2",ExtendedTestService.class,new MutablePropertyValues());
-  MutablePropertyValues mpv=new MutablePropertyValues();
-  mpv.addPropertyValue("serviceLocatorInterface",TestServiceLocator3.class);
-  mpv.addPropertyValue("serviceMappings","=testService1\n1=testService1\n2=testService2");
-  ctx.registerSingleton("factory",ServiceLocatorFactoryBean.class,mpv);
-  ctx.refresh();
-  TestServiceLocator3 factory=(TestServiceLocator3)ctx.getBean("factory");
+  bf.registerBeanDefinition("testService1",genericBeanDefinition(TestService.class).getBeanDefinition());
+  bf.registerBeanDefinition("testService2",genericBeanDefinition(ExtendedTestService.class).getBeanDefinition());
+  bf.registerBeanDefinition("factory",genericBeanDefinition(ServiceLocatorFactoryBean.class).addPropertyValue("serviceLocatorInterface",TestServiceLocator3.class).addPropertyValue("serviceMappings","=testService1\n1=testService1\n2=testService2").getBeanDefinition());
+  TestServiceLocator3 factory=(TestServiceLocator3)bf.getBean("factory");
   TestService testBean1=factory.getTestService();
   TestService testBean2=factory.getTestService("testService1");
   TestService testBean3=factory.getTestService(1);
