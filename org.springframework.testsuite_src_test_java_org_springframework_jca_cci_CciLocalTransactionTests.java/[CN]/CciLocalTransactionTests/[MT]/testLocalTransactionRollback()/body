@@ -1,43 +1,25 @@
 {
-  MockControl connectionFactoryControl=MockControl.createControl(ConnectionFactory.class);
-  final ConnectionFactory connectionFactory=(ConnectionFactory)connectionFactoryControl.getMock();
-  MockControl connectionControl=MockControl.createControl(Connection.class);
-  Connection connection=(Connection)connectionControl.getMock();
-  MockControl interactionControl=MockControl.createControl(Interaction.class);
-  Interaction interaction=(Interaction)interactionControl.getMock();
-  MockControl localTransactionControl=MockControl.createControl(LocalTransaction.class);
-  LocalTransaction localTransaction=(LocalTransaction)localTransactionControl.getMock();
-  MockControl recordControl=MockControl.createControl(Record.class);
-  final Record record=(Record)recordControl.getMock();
-  MockControl interactionSpecControl=MockControl.createControl(InteractionSpec.class);
-  final InteractionSpec interactionSpec=(InteractionSpec)interactionSpecControl.getMock();
-  connectionFactory.getConnection();
-  connectionFactoryControl.setReturnValue(connection);
-  connection.getLocalTransaction();
-  connectionControl.setReturnValue(localTransaction);
+  final ConnectionFactory connectionFactory=createMock(ConnectionFactory.class);
+  Connection connection=createMock(Connection.class);
+  Interaction interaction=createMock(Interaction.class);
+  LocalTransaction localTransaction=createMock(LocalTransaction.class);
+  final Record record=createMock(Record.class);
+  final InteractionSpec interactionSpec=createMock(InteractionSpec.class);
+  expect(connectionFactory.getConnection()).andReturn(connection);
+  expect(connection.getLocalTransaction()).andReturn(localTransaction);
   localTransaction.begin();
-  localTransactionControl.setVoidCallable(1);
-  connection.createInteraction();
-  connectionControl.setReturnValue(interaction);
-  interaction.execute(interactionSpec,record,record);
-  interactionControl.setReturnValue(true,1);
+  expect(connection.createInteraction()).andReturn(interaction);
+  expect(interaction.execute(interactionSpec,record,record)).andReturn(true);
   interaction.close();
-  interactionControl.setVoidCallable(1);
-  connection.getLocalTransaction();
-  connectionControl.setReturnValue(localTransaction);
+  expect(connection.getLocalTransaction()).andReturn(localTransaction);
   localTransaction.rollback();
-  localTransactionControl.setVoidCallable(1);
   connection.close();
-  connectionControl.setVoidCallable(1);
-  connectionFactoryControl.replay();
-  connectionControl.replay();
-  localTransactionControl.replay();
-  interactionControl.replay();
+  replay(connectionFactory,connection,localTransaction,interaction,record);
   org.springframework.jca.cci.connection.CciLocalTransactionManager tm=new org.springframework.jca.cci.connection.CciLocalTransactionManager();
   tm.setConnectionFactory(connectionFactory);
   TransactionTemplate tt=new TransactionTemplate(tm);
   try {
-    Object result=tt.execute(new TransactionCallback(){
+    tt.execute(new TransactionCallback(){
       public Object doInTransaction(      TransactionStatus status){
         assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(connectionFactory));
         CciTemplate ct=new CciTemplate(connectionFactory);
@@ -49,8 +31,5 @@
   }
  catch (  Exception ex) {
   }
-  connectionFactoryControl.verify();
-  connectionControl.verify();
-  interactionControl.verify();
-  localTransactionControl.verify();
+  verify(connectionFactory,connection,localTransaction,interaction,record);
 }

@@ -3,19 +3,20 @@
   RecordFactory recordFactory=createMock(RecordFactory.class);
   Connection connection=createMock(Connection.class);
   Interaction interaction=createMock(Interaction.class);
-  RecordCreator generator=createMock(RecordCreator.class);
+  RecordCreator creator=createMock(RecordCreator.class);
   Record inputRecord=createMock(Record.class);
-  Record outputRecord=createMock(Record.class);
+  final Record outputRecord=createMock(Record.class);
   InteractionSpec interactionSpec=createMock(InteractionSpec.class);
-  expect(connectionFactory.getRecordFactory()).andReturn(recordFactory);
   expect(connectionFactory.getConnection()).andReturn(connection);
+  expect(connectionFactory.getRecordFactory()).andReturn(recordFactory);
   expect(connection.createInteraction()).andReturn(interaction);
-  expect(generator.createRecord(recordFactory)).andReturn(inputRecord);
-  expect(interaction.execute(interactionSpec,inputRecord)).andReturn(outputRecord);
+  expect(creator.createRecord(recordFactory)).andReturn(outputRecord);
+  expect(interaction.execute(interactionSpec,inputRecord,outputRecord)).andReturn(true);
   interaction.close();
   connection.close();
-  replay(connectionFactory,connection,interaction,generator);
+  replay(connectionFactory,connection,interaction,creator);
   CciTemplate ct=new CciTemplate(connectionFactory);
-  ct.execute(interactionSpec,generator);
-  verify(connectionFactory,connection,interaction,generator);
+  ct.setOutputRecordCreator(creator);
+  ct.execute(interactionSpec,inputRecord);
+  verify(connectionFactory,connection,interaction,creator);
 }
