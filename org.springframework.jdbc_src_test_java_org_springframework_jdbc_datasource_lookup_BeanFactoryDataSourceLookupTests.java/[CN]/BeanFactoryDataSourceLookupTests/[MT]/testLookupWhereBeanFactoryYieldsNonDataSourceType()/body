@@ -1,0 +1,13 @@
+{
+  final BeanFactory beanFactory=createMock(BeanFactory.class);
+  expect(beanFactory.getBean(DATASOURCE_BEAN_NAME,DataSource.class)).andThrow(new BeanNotOfRequiredTypeException(DATASOURCE_BEAN_NAME,DataSource.class,String.class));
+  replay(beanFactory);
+  try {
+    BeanFactoryDataSourceLookup lookup=new BeanFactoryDataSourceLookup(beanFactory);
+    lookup.getDataSource(DATASOURCE_BEAN_NAME);
+    fail("should have thrown DataSourceLookupFailureException");
+  }
+ catch (  DataSourceLookupFailureException ex) {
+  }
+  verify(beanFactory);
+}
