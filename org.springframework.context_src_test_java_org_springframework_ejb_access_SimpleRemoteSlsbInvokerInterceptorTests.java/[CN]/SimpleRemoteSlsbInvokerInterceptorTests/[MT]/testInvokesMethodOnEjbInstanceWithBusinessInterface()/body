@@ -1,0 +1,13 @@
+{
+  Object retVal=new Object();
+  final RemoteInterface ejb=createMock(RemoteInterface.class);
+  expect(ejb.targetMethod()).andReturn(retVal);
+  ejb.remove();
+  replay(ejb);
+  final String jndiName="foobar";
+  Context mockContext=mockContext(jndiName,ejb,1,1,1);
+  SimpleRemoteSlsbInvokerInterceptor si=configuredInterceptor(mockContext,jndiName);
+  BusinessInterface target=(BusinessInterface)configuredProxy(si,BusinessInterface.class);
+  assertTrue(target.targetMethod() == retVal);
+  verify(mockContext,ejb);
+}

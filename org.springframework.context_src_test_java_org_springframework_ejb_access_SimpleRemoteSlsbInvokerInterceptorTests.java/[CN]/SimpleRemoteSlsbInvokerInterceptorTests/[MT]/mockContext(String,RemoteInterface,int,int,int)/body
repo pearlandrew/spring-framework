@@ -1,0 +1,11 @@
+{
+  final SlsbHome mockHome=createMock(SlsbHome.class);
+  expect(mockHome.create()).andReturn(ejbInstance).times(createCount);
+  replay(mockHome);
+  final Context mockCtx=createMock(Context.class);
+  expect(mockCtx.lookup("java:comp/env/" + jndiName)).andReturn(mockHome).times(lookupCount);
+  mockCtx.close();
+  expectLastCall().times(closeCount);
+  replay(mockCtx);
+  return mockCtx;
+}

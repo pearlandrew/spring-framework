@@ -1,0 +1,23 @@
+{
+  Object retVal=new Object();
+  final RemoteInterface ejb=createMock(RemoteInterface.class);
+  expect(ejb.targetMethod()).andReturn(retVal).times(2);
+  ejb.remove();
+  replay(ejb);
+  int lookupCount=1;
+  if (!cacheHome) {
+    lookupCount++;
+    if (lookupHomeOnStartup) {
+      lookupCount++;
+    }
+  }
+  final String jndiName="foobar";
+  Context mockContext=mockContext(jndiName,ejb,2,lookupCount,lookupCount);
+  SimpleRemoteSlsbInvokerInterceptor si=configuredInterceptor(mockContext,jndiName);
+  si.setLookupHomeOnStartup(lookupHomeOnStartup);
+  si.setCacheHome(cacheHome);
+  RemoteInterface target=(RemoteInterface)configuredProxy(si,RemoteInterface.class);
+  assertTrue(target.targetMethod() == retVal);
+  assertTrue(target.targetMethod() == retVal);
+  verify(mockContext,ejb);
+}

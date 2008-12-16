@@ -1,0 +1,16 @@
+{
+  Object retVal=new Object();
+  LocalInterfaceWithBusinessMethods ejb=createMock(LocalInterfaceWithBusinessMethods.class);
+  expect(ejb.targetMethod()).andReturn(retVal);
+  ejb.remove();
+  replay(ejb);
+  String jndiName="foobar";
+  Context mockContext=mockContext(jndiName,ejb);
+  LocalSlsbInvokerInterceptor si=configuredInterceptor(mockContext,jndiName);
+  ProxyFactory pf=new ProxyFactory(new Class[]{BusinessMethods.class});
+  pf.addAdvice(si);
+  BusinessMethods target=(BusinessMethods)pf.getProxy();
+  assertTrue(target.targetMethod() == retVal);
+  verify(mockContext);
+  verify(ejb);
+}
