@@ -1,0 +1,40 @@
+{
+  SessionContext sc=createMock(SessionContext.class);
+  replay(sc);
+  final BeanFactory bf=new StaticListableBeanFactory();
+  BeanFactoryLocator bfl=new BeanFactoryLocator(){
+    public BeanFactoryReference useBeanFactory(    String factoryKey) throws FatalBeanException {
+      return new BeanFactoryReference(){
+        public BeanFactory getFactory(){
+          return bf;
+        }
+        public void release() throws FatalBeanException {
+        }
+      }
+;
+    }
+  }
+;
+  @SuppressWarnings("serial") AbstractStatelessSessionBean slsb=new AbstractStatelessSessionBean(){
+    protected void onEjbCreate() throws CreateException {
+      assertTrue(getBeanFactory() == bf);
+    }
+  }
+;
+  slsb.setBeanFactoryLocator(bfl);
+  slsb.setSessionContext(sc);
+  assertTrue(sc == slsb.getSessionContext());
+  slsb.ejbCreate();
+  try {
+    slsb.ejbActivate();
+    fail("Shouldn't allow activation of SLSB");
+  }
+ catch (  IllegalStateException ex) {
+  }
+  try {
+    slsb.ejbPassivate();
+    fail("Shouldn't allow passivation of SLSB");
+  }
+ catch (  IllegalStateException ex) {
+  }
+}

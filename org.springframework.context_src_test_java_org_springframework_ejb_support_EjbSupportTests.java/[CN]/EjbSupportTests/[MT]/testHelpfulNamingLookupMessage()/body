@@ -1,0 +1,19 @@
+{
+  SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+  SessionContext sc=createMock(SessionContext.class);
+  replay(sc);
+  @SuppressWarnings("serial") AbstractStatelessSessionBean slsb=new AbstractStatelessSessionBean(){
+    public void onEjbCreate(){
+    }
+  }
+;
+  slsb.setSessionContext(sc);
+  try {
+    slsb.ejbCreate();
+    fail();
+  }
+ catch (  BeansException ex) {
+    assertTrue(ex.getMessage().indexOf("environment") != -1);
+    assertTrue(ex.getMessage().indexOf("ejb/BeanFactoryPath") != -1);
+  }
+}
