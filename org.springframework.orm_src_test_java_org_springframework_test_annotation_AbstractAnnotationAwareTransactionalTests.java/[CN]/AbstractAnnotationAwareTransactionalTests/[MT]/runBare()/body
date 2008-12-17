@@ -1,0 +1,33 @@
+{
+  if (isDisabledInThisEnvironment(getName())) {
+    super.runBare();
+    return;
+  }
+  final Method testMethod=getTestMethod();
+  if (isDisabledInThisEnvironment(testMethod)) {
+    recordDisabled();
+    this.logger.info("**** " + getClass().getName() + "."+ getName()+ " disabled in this environment: "+ "Total disabled tests="+ getDisabledTestCount());
+    return;
+  }
+  TransactionDefinition explicitTransactionDefinition=this.transactionAttributeSource.getTransactionAttribute(testMethod,getClass());
+  if (explicitTransactionDefinition != null) {
+    this.logger.info("Custom transaction definition [" + explicitTransactionDefinition + "] for test method ["+ getName()+ "].");
+    setTransactionDefinition(explicitTransactionDefinition);
+  }
+ else   if (testMethod.isAnnotationPresent(NotTransactional.class)) {
+    preventTransaction();
+  }
+  runTestTimed(new TestExecutionCallback(){
+    public void run() throws Throwable {
+      try {
+        AbstractAnnotationAwareTransactionalTests.super.runBare();
+      }
+  finally {
+        if (testMethod.isAnnotationPresent(DirtiesContext.class)) {
+          AbstractAnnotationAwareTransactionalTests.this.setDirty();
+        }
+      }
+    }
+  }
+,testMethod);
+}
