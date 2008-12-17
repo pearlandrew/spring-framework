@@ -1,19 +1,16 @@
 {
   Object o=new Object();
   String name="foo";
-  MockControl mc=MockControl.createControl(Context.class);
-  final Context mock=(Context)mc.getMock();
-  mock.bind(name,o);
-  mc.setVoidCallable(1);
-  mock.close();
-  mc.setVoidCallable(1);
-  mc.replay();
+  final Context context=createMock(Context.class);
+  context.bind(name,o);
+  context.close();
+  replay(context);
   JndiTemplate jt=new JndiTemplate(){
     protected Context createInitialContext(){
-      return mock;
+      return context;
     }
   }
 ;
   jt.bind(name,o);
-  mc.verify();
+  verify(context);
 }

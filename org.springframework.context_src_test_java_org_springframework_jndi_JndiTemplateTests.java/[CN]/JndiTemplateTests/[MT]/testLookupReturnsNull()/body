@@ -1,15 +1,12 @@
 {
   String name="foo";
-  MockControl mc=MockControl.createControl(Context.class);
-  final Context mock=(Context)mc.getMock();
-  mock.lookup(name);
-  mc.setReturnValue(null);
-  mock.close();
-  mc.setVoidCallable(1);
-  mc.replay();
+  final Context context=createMock(Context.class);
+  expect(context.lookup(name)).andReturn(null);
+  context.close();
+  replay(context);
   JndiTemplate jt=new JndiTemplate(){
     protected Context createInitialContext(){
-      return mock;
+      return context;
     }
   }
 ;
@@ -19,5 +16,5 @@
   }
  catch (  NameNotFoundException ex) {
   }
-  mc.verify();
+  verify(context);
 }
