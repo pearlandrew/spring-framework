@@ -1,16 +1,14 @@
 {
-  MockServletContext servletContext=new MockServletContext();
-  MockHttpServletRequest httpRequest=new MockHttpServletRequest(servletContext);
-  httpRequest.addPreferredLocale(Locale.GERMAN);
+  MockActionRequest request=new MockActionRequest();
+  MockActionResponse response=new MockActionResponse();
+  request.addPreferredLocale(Locale.GERMAN);
+  request.setParameter("action","form");
+  request.setParameter("age","29");
   try {
-    LocaleContextHolder.setLocale(httpRequest.getLocale());
-    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
+    LocaleContextHolder.setLocale(request.getLocale());
+    RequestContextHolder.setRequestAttributes(new PortletRequestAttributes(request));
     LocaleContext servletLocaleContext=LocaleContextHolder.getLocaleContext();
     RequestAttributes servletRequestAttrs=RequestContextHolder.getRequestAttributes();
-    MockActionRequest request=new MockActionRequest();
-    MockActionResponse response=new MockActionResponse();
-    request.setParameter("action","form");
-    request.setParameter("age","29");
     simpleDispatcherPortlet.processAction(request,response);
     assertSame(servletLocaleContext,LocaleContextHolder.getLocaleContext());
     assertSame(servletRequestAttrs,RequestContextHolder.getRequestAttributes());

@@ -1,14 +1,12 @@
 {
-  MockServletContext servletContext=new MockServletContext();
-  MockHttpServletRequest httpRequest=new MockHttpServletRequest(servletContext);
-  httpRequest.addPreferredLocale(Locale.GERMAN);
+  MockRenderRequest request=new MockRenderRequest();
+  MockRenderResponse response=new MockRenderResponse();
+  request.addPreferredLocale(Locale.GERMAN);
   try {
-    LocaleContextHolder.setLocale(httpRequest.getLocale());
-    RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
+    LocaleContextHolder.setLocale(request.getLocale());
+    RequestContextHolder.setRequestAttributes(new PortletRequestAttributes(request));
     LocaleContext servletLocaleContext=LocaleContextHolder.getLocaleContext();
     RequestAttributes servletRequestAttrs=RequestContextHolder.getRequestAttributes();
-    MockRenderRequest request=new MockRenderRequest();
-    MockRenderResponse response=new MockRenderResponse();
     try {
       simpleDispatcherPortlet.doDispatch(request,response);
       fail("should have failed to find a handler and raised an UnavailableException");
