@@ -1,0 +1,21 @@
+{
+  BeanFactoryReference bfr=facLoc.useBeanFactory("a.qualified.name.of.some.sort");
+  BeanFactory fac=bfr.getFactory();
+  BeanFactoryReference bfr2=facLoc.useBeanFactory("another.qualified.name");
+  fac=bfr2.getFactory();
+  TestBean tb=(TestBean)fac.getBean("beans1.bean1");
+  assertTrue(tb.getName().equals("beans1.bean1"));
+  tb.setName("was beans1.bean1");
+  BeanFactoryReference bfr3=facLoc.useBeanFactory("another.qualified.name");
+  fac=bfr3.getFactory();
+  tb=(TestBean)fac.getBean("beans1.bean1");
+  assertTrue(tb.getName().equals("was beans1.bean1"));
+  BeanFactoryReference bfr4=facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
+  fac=bfr4.getFactory();
+  tb=(TestBean)fac.getBean("beans1.bean1");
+  assertTrue(tb.getName().equals("was beans1.bean1"));
+  bfr2.release();
+  bfr3.release();
+  bfr.release();
+  bfr4.release();
+}

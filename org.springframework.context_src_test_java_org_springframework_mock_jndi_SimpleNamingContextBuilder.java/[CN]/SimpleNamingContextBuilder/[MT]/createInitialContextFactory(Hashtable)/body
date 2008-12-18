@@ -1,0 +1,34 @@
+{
+  if (activated == null && environment != null) {
+    Object icf=environment.get(Context.INITIAL_CONTEXT_FACTORY);
+    if (icf != null) {
+      Class icfClass=null;
+      if (icf instanceof Class) {
+        icfClass=(Class)icf;
+      }
+ else       if (icf instanceof String) {
+        icfClass=ClassUtils.resolveClassName((String)icf,getClass().getClassLoader());
+      }
+ else {
+        throw new IllegalArgumentException("Invalid value type for environment key [" + Context.INITIAL_CONTEXT_FACTORY + "]: "+ icf.getClass().getName());
+      }
+      if (!InitialContextFactory.class.isAssignableFrom(icfClass)) {
+        throw new IllegalArgumentException("Specified class does not implement [" + InitialContextFactory.class.getName() + "]: "+ icf);
+      }
+      try {
+        return (InitialContextFactory)icfClass.newInstance();
+      }
+ catch (      Throwable ex) {
+        IllegalStateException ise=new IllegalStateException("Cannot instantiate specified InitialContextFactory: " + icf);
+        ise.initCause(ex);
+        throw ise;
+      }
+    }
+  }
+  return new InitialContextFactory(){
+    public Context getInitialContext(    Hashtable environment){
+      return new SimpleNamingContext("",boundObjects,environment);
+    }
+  }
+;
+}
