@@ -1,17 +1,10 @@
 {
   Throwable t=new Throwable();
-  mockControl=MockControl.createControl(AfterThrowingAdviceBindingCollaborator.class);
-  mockCollaborator=(AfterThrowingAdviceBindingCollaborator)mockControl.getMock();
+  mockCollaborator=createMock(AfterThrowingAdviceBindingCollaborator.class);
   afterThrowingAdviceAspect.setCollaborator(mockCollaborator);
   mockCollaborator.noArgs();
   mockCollaborator.oneThrowable(t);
   mockCollaborator.noArgsOnThrowableMatch();
-  mockControl.replay();
-  try {
-    this.testBean.exceptional(t);
-    fail("should throw exception");
-  }
- catch (  Throwable x) {
-  }
-  mockControl.verify();
+  replay(mockCollaborator);
+  this.testBean.exceptional(t);
 }

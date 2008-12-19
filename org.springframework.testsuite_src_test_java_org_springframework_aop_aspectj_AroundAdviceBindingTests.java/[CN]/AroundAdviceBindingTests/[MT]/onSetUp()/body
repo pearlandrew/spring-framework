@@ -1,6 +1,10 @@
 {
-  super.onSetUp();
-  mockControl=MockControl.createNiceControl(AroundAdviceBindingCollaborator.class);
-  mockCollaborator=(AroundAdviceBindingCollaborator)mockControl.getMock();
+  ctx=new ClassPathXmlApplicationContext(getConfigPath(),getClass());
+  AroundAdviceBindingTestAspect aroundAdviceAspect=((AroundAdviceBindingTestAspect)ctx.getBean("testAspect"));
+  ITestBean injectedTestBean=(ITestBean)ctx.getBean("testBean");
+  assertTrue(AopUtils.isAopProxy(injectedTestBean));
+  this.testBeanProxy=injectedTestBean;
+  this.testBeanTarget=(TestBean)((Advised)testBeanProxy).getTargetSource().getTarget();
+  mockCollaborator=createNiceMock(AroundAdviceBindingCollaborator.class);
   aroundAdviceAspect.setCollaborator(mockCollaborator);
 }
