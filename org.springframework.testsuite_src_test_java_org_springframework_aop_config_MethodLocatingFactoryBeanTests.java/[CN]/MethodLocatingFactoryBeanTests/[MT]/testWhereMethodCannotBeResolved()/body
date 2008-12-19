@@ -1,20 +1,7 @@
 {
-  new BeanFactoryScalarMockTemplate(){
-    protected void setupBeanFactoryExpectations(    MockControl mockControl,    BeanFactory beanFactory) throws Exception {
-      beanFactory.getType(BEAN_NAME);
-      mockControl.setReturnValue(String.class);
-    }
-    protected void doTestInternal(    final BeanFactory beanFactory) throws Exception {
-      new AssertThrows(IllegalArgumentException.class){
-        public void test() throws Exception {
-          MethodLocatingFactoryBean factory=new MethodLocatingFactoryBean();
-          factory.setTargetBeanName(BEAN_NAME);
-          factory.setMethodName("loadOfOld()");
-          factory.setBeanFactory(beanFactory);
-        }
-      }
-.runTest();
-    }
-  }
-.test();
+  expect(beanFactory.getType(BEAN_NAME)).andReturn(String.class);
+  replay(beanFactory);
+  factory.setTargetBeanName(BEAN_NAME);
+  factory.setMethodName("loadOfOld()");
+  factory.setBeanFactory(beanFactory);
 }

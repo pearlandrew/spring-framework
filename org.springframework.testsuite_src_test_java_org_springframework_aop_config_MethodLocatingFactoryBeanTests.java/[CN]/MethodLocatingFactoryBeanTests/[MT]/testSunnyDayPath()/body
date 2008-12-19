@@ -1,20 +1,12 @@
 {
-  new BeanFactoryScalarMockTemplate(){
-    protected void setupBeanFactoryExpectations(    MockControl mockControl,    BeanFactory beanFactory) throws Exception {
-      beanFactory.getType(BEAN_NAME);
-      mockControl.setReturnValue(String.class);
-    }
-    protected void doTestInternal(    final BeanFactory beanFactory) throws Exception {
-      MethodLocatingFactoryBean factory=new MethodLocatingFactoryBean();
-      factory.setTargetBeanName(BEAN_NAME);
-      factory.setMethodName("toString()");
-      factory.setBeanFactory(beanFactory);
-      Object result=factory.getObject();
-      assertNotNull(result);
-      assertTrue(result instanceof Method);
-      Method method=(Method)result;
-      assertEquals("Bingo",method.invoke("Bingo",new Object[]{}));
-    }
-  }
-.test();
+  expect(beanFactory.getType(BEAN_NAME)).andReturn(String.class);
+  replay(beanFactory);
+  factory.setTargetBeanName(BEAN_NAME);
+  factory.setMethodName("toString()");
+  factory.setBeanFactory(beanFactory);
+  Object result=factory.getObject();
+  assertNotNull(result);
+  assertTrue(result instanceof Method);
+  Method method=(Method)result;
+  assertEquals("Bingo",method.invoke("Bingo",new Object[]{}));
 }
