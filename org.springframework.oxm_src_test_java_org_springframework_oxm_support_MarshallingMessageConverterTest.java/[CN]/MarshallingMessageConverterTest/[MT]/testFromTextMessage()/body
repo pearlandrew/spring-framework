@@ -1,0 +1,19 @@
+{
+  MockControl textMessageControl=MockControl.createControl(TextMessage.class);
+  TextMessage textMessageMock=(TextMessage)textMessageControl.getMock();
+  Object unmarshalled=new Object();
+  unmarshallerMock.unmarshal(new StringSource(""));
+  unmarshallerControl.setMatcher(MockControl.ALWAYS_MATCHER);
+  unmarshallerControl.setReturnValue(unmarshalled);
+  textMessageControl.expectAndReturn(textMessageMock.getText(),"");
+  marshallerControl.replay();
+  unmarshallerControl.replay();
+  sessionControl.replay();
+  textMessageControl.replay();
+  Object result=converter.fromMessage(textMessageMock);
+  assertEquals("Invalid result",result,unmarshalled);
+  marshallerControl.verify();
+  unmarshallerControl.verify();
+  sessionControl.verify();
+  textMessageControl.verify();
+}

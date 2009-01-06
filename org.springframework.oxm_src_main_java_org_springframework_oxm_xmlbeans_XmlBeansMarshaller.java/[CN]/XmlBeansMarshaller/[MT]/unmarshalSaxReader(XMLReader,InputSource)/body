@@ -1,0 +1,23 @@
+{
+  XmlSaxHandler saxHandler=XmlObject.Factory.newXmlSaxHandler(getXmlOptions());
+  xmlReader.setContentHandler(saxHandler.getContentHandler());
+  try {
+    xmlReader.setProperty("http://xml.org/sax/properties/lexical-handler",saxHandler.getLexicalHandler());
+  }
+ catch (  SAXNotRecognizedException e) {
+  }
+catch (  SAXNotSupportedException e) {
+  }
+  try {
+    xmlReader.parse(inputSource);
+    XmlObject object=saxHandler.getObject();
+    validate(object);
+    return object;
+  }
+ catch (  SAXException ex) {
+    throw convertXmlBeansException(ex,false);
+  }
+catch (  XmlException ex) {
+    throw convertXmlBeansException(ex,false);
+  }
+}

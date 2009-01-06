@@ -1,0 +1,18 @@
+{
+  if (isValidating() && object != null) {
+    XmlOptions validateOptions=getXmlOptions() != null ? getXmlOptions() : new XmlOptions();
+    List errorsList=new ArrayList();
+    validateOptions.setErrorListener(errorsList);
+    if (!object.validate(validateOptions)) {
+      StringBuffer buffer=new StringBuffer("Could not validate XmlObject :");
+      for (Iterator iterator=errorsList.iterator(); iterator.hasNext(); ) {
+        XmlError xmlError=(XmlError)iterator.next();
+        if (xmlError instanceof XmlValidationError) {
+          buffer.append(xmlError.toString());
+        }
+      }
+      XmlException ex=new XmlException(buffer.toString(),null,errorsList);
+      throw new XmlBeansValidationFailureException(ex);
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  MockControl handlerControl=MockControl.createStrictControl(ContentHandler.class);
+  handlerControl.setDefaultMatcher(MockControl.ALWAYS_MATCHER);
+  ContentHandler handlerMock=(ContentHandler)handlerControl.getMock();
+  handlerMock.startDocument();
+  handlerMock.startElement("","flight","flight",null);
+  handlerMock.startElement("","number","number",null);
+  handlerMock.characters(new char[]{'4','2'},0,2);
+  handlerMock.endElement("","number","number");
+  handlerMock.endElement("","flight","flight");
+  handlerMock.endDocument();
+  handlerControl.replay();
+  SAXResult result=new SAXResult(handlerMock);
+  marshaller.marshal(flight,result);
+  handlerControl.verify();
+}

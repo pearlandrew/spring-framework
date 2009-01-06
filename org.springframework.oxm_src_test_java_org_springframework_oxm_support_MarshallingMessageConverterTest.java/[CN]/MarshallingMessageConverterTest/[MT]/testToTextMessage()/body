@@ -1,0 +1,18 @@
+{
+  converter.setMarshalTo(MarshallingMessageConverter.MARSHAL_TO_TEXT_MESSAGE);
+  MockControl textMessageControl=MockControl.createControl(TextMessage.class);
+  TextMessage textMessageMock=(TextMessage)textMessageControl.getMock();
+  Object toBeMarshalled=new Object();
+  sessionControl.expectAndReturn(sessionMock.createTextMessage(""),textMessageMock);
+  marshallerMock.marshal(toBeMarshalled,new StringResult());
+  marshallerControl.setMatcher(MockControl.ALWAYS_MATCHER);
+  marshallerControl.replay();
+  unmarshallerControl.replay();
+  sessionControl.replay();
+  textMessageControl.replay();
+  converter.toMessage(toBeMarshalled,sessionMock);
+  marshallerControl.verify();
+  unmarshallerControl.verify();
+  sessionControl.verify();
+  textMessageControl.verify();
+}

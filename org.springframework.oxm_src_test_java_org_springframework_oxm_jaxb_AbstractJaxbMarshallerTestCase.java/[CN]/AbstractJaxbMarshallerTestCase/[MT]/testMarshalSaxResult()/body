@@ -1,0 +1,25 @@
+{
+  MockControl handlerControl=MockControl.createStrictControl(ContentHandler.class);
+  ContentHandler handlerMock=(ContentHandler)handlerControl.getMock();
+  handlerMock.setDocumentLocator(null);
+  handlerControl.setMatcher(MockControl.ALWAYS_MATCHER);
+  handlerMock.startDocument();
+  handlerMock.startPrefixMapping("","http://samples.springframework.org/flight");
+  handlerMock.startElement("http://samples.springframework.org/flight","flights","flights",null);
+  handlerControl.setMatcher(MockControl.ALWAYS_MATCHER);
+  handlerMock.startElement("http://samples.springframework.org/flight","flight","flight",null);
+  handlerControl.setMatcher(MockControl.ALWAYS_MATCHER);
+  handlerMock.startElement("http://samples.springframework.org/flight","number","number",null);
+  handlerControl.setMatcher(MockControl.ALWAYS_MATCHER);
+  handlerMock.characters(new char[]{'4','2'},0,2);
+  handlerControl.setMatcher(MockControl.ALWAYS_MATCHER);
+  handlerMock.endElement("http://samples.springframework.org/flight","number","number");
+  handlerMock.endElement("http://samples.springframework.org/flight","flight","flight");
+  handlerMock.endElement("http://samples.springframework.org/flight","flights","flights");
+  handlerMock.endPrefixMapping("");
+  handlerMock.endDocument();
+  handlerControl.replay();
+  SAXResult result=new SAXResult(handlerMock);
+  marshaller.marshal(flights,result);
+  handlerControl.verify();
+}

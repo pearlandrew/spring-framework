@@ -1,0 +1,19 @@
+{
+  ContentHandler handlerMock=createStrictMock(ContentHandler.class);
+  handlerMock.setDocumentLocator(isA(Locator.class));
+  handlerMock.startDocument();
+  handlerMock.startPrefixMapping("","http://samples.springframework.org/flight");
+  handlerMock.startElement(eq("http://samples.springframework.org/flight"),eq("flights"),eq("flights"),isA(Attributes.class));
+  handlerMock.startElement(eq("http://samples.springframework.org/flight"),eq("flight"),eq("flight"),isA(Attributes.class));
+  handlerMock.startElement(eq("http://samples.springframework.org/flight"),eq("number"),eq("number"),isA(Attributes.class));
+  handlerMock.characters(isA(char[].class),eq(0),eq(2));
+  handlerMock.endElement("http://samples.springframework.org/flight","number","number");
+  handlerMock.endElement("http://samples.springframework.org/flight","flight","flight");
+  handlerMock.endElement("http://samples.springframework.org/flight","flights","flights");
+  handlerMock.endPrefixMapping("");
+  handlerMock.endDocument();
+  replay(handlerMock);
+  SAXResult result=new SAXResult(handlerMock);
+  marshaller.marshal(flights,result);
+  verify(handlerMock);
+}

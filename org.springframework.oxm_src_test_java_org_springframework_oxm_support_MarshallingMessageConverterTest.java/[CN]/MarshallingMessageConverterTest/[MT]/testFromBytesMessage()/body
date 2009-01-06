@@ -1,0 +1,22 @@
+{
+  MockControl bytesMessageControl=MockControl.createControl(BytesMessage.class);
+  BytesMessage bytesMessageMock=(BytesMessage)bytesMessageControl.getMock();
+  Object unmarshalled=new Object();
+  bytesMessageControl.expectAndReturn(bytesMessageMock.getBodyLength(),10);
+  bytesMessageMock.readBytes(new byte[0]);
+  bytesMessageControl.setMatcher(MockControl.ALWAYS_MATCHER);
+  bytesMessageControl.setReturnValue(0);
+  unmarshallerMock.unmarshal(new StringSource(""));
+  unmarshallerControl.setMatcher(MockControl.ALWAYS_MATCHER);
+  unmarshallerControl.setReturnValue(unmarshalled);
+  marshallerControl.replay();
+  unmarshallerControl.replay();
+  sessionControl.replay();
+  bytesMessageControl.replay();
+  Object result=converter.fromMessage(bytesMessageMock);
+  assertEquals("Invalid result",result,unmarshalled);
+  marshallerControl.verify();
+  unmarshallerControl.verify();
+  sessionControl.verify();
+  bytesMessageControl.verify();
+}

@@ -1,0 +1,23 @@
+{
+  if (TraxUtils.isStaxSource(source)) {
+    XMLStreamReader streamReader=TraxUtils.getXMLStreamReader(source);
+    if (streamReader != null) {
+      source=new StaxSource(streamReader);
+    }
+ else {
+      XMLEventReader eventReader=TraxUtils.getXMLEventReader(source);
+      if (eventReader != null) {
+        source=new StaxSource(eventReader);
+      }
+ else {
+        throw new IllegalArgumentException("StAXSource contains neither XMLStreamReader nor XMLEventReader");
+      }
+    }
+  }
+  try {
+    return createUnmarshaller().unmarshal(source);
+  }
+ catch (  JAXBException ex) {
+    throw convertJaxbException(ex);
+  }
+}
