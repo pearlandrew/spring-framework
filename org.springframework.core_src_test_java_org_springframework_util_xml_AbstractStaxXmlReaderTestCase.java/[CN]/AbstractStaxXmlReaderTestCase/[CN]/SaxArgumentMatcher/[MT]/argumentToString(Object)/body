@@ -1,0 +1,43 @@
+{
+  if (argument instanceof char[]) {
+    char[] array=(char[])argument;
+    StringBuilder buffer=new StringBuilder();
+    for (    char anArray : array) {
+      buffer.append(anArray);
+    }
+    return buffer.toString();
+  }
+ else   if (argument instanceof Attributes) {
+    Attributes attributes=(Attributes)argument;
+    StringBuilder buffer=new StringBuilder("[");
+    for (int i=0; i < attributes.getLength(); i++) {
+      if (attributes.getURI(i).length() != 0) {
+        buffer.append('{');
+        buffer.append(attributes.getURI(i));
+        buffer.append('}');
+      }
+      if (attributes.getQName(i).length() != 0) {
+        buffer.append(attributes.getQName(i));
+      }
+      buffer.append('=');
+      buffer.append(attributes.getValue(i));
+      if (i < attributes.getLength() - 1) {
+        buffer.append(", ");
+      }
+    }
+    buffer.append(']');
+    return buffer.toString();
+  }
+ else   if (argument instanceof Locator) {
+    Locator locator=(Locator)argument;
+    StringBuilder buffer=new StringBuilder("[");
+    buffer.append(locator.getLineNumber());
+    buffer.append(',');
+    buffer.append(locator.getColumnNumber());
+    buffer.append(']');
+    return buffer.toString();
+  }
+ else {
+    return super.argumentToString(argument);
+  }
+}

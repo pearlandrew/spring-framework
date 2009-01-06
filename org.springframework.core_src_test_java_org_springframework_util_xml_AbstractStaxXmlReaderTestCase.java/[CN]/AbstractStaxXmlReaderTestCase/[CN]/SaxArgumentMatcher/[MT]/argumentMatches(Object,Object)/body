@@ -1,0 +1,28 @@
+{
+  if (expected instanceof char[]) {
+    return Arrays.equals((char[])expected,(char[])actual);
+  }
+ else   if (expected instanceof Attributes) {
+    Attributes expectedAttributes=(Attributes)expected;
+    Attributes actualAttributes=(Attributes)actual;
+    if (expectedAttributes.getLength() != actualAttributes.getLength()) {
+      return false;
+    }
+    for (int i=0; i < expectedAttributes.getLength(); i++) {
+      boolean found=false;
+      for (int j=0; j < actualAttributes.getLength(); j++) {
+        if (expectedAttributes.getURI(i).equals(actualAttributes.getURI(j)) && expectedAttributes.getQName(i).equals(actualAttributes.getQName(j)) && expectedAttributes.getType(i).equals(actualAttributes.getType(j))&& expectedAttributes.getValue(i).equals(actualAttributes.getValue(j))) {
+          found=true;
+          break;
+        }
+      }
+      if (!found) {
+        return false;
+      }
+    }
+    return true;
+  }
+ else {
+    return super.argumentMatches(expected,actual);
+  }
+}
