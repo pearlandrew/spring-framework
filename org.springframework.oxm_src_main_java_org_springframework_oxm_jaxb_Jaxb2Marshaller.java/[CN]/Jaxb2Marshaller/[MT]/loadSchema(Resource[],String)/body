@@ -1,0 +1,15 @@
+{
+  Assert.notEmpty(resources,"No resources given");
+  Assert.hasLength(schemaLanguage,"No schema language provided");
+  Source[] schemaSources=new Source[resources.length];
+  XMLReader xmlReader=XMLReaderFactory.createXMLReader();
+  xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes",true);
+  for (int i=0; i < resources.length; i++) {
+    Assert.notNull(resources[i],"Resource is null");
+    Assert.isTrue(resources[i].exists(),"Resource " + resources[i] + " does not exist");
+    InputSource inputSource=SaxUtils.createInputSource(resources[i]);
+    schemaSources[i]=new SAXSource(xmlReader,inputSource);
+  }
+  SchemaFactory schemaFactory=SchemaFactory.newInstance(schemaLanguage);
+  return schemaFactory.newSchema(schemaSources);
+}

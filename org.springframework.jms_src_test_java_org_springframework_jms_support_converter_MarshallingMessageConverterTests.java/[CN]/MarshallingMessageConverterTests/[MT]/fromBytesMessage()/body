@@ -1,0 +1,11 @@
+{
+  BytesMessage bytesMessageMock=createMock(BytesMessage.class);
+  Object unmarshalled=new Object();
+  expect(bytesMessageMock.getBodyLength()).andReturn(10L);
+  expect(bytesMessageMock.readBytes(isA(byte[].class))).andReturn(0);
+  expect(unmarshallerMock.unmarshal(isA(Source.class))).andReturn(unmarshalled);
+  replay(marshallerMock,unmarshallerMock,sessionMock,bytesMessageMock);
+  Object result=converter.fromMessage(bytesMessageMock);
+  assertEquals("Invalid result",result,unmarshalled);
+  verify(marshallerMock,unmarshallerMock,sessionMock,bytesMessageMock);
+}

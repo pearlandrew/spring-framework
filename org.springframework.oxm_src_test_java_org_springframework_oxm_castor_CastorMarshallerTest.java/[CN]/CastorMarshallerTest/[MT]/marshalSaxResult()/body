@@ -1,0 +1,18 @@
+{
+  ContentHandler handlerMock=createMock(ContentHandler.class);
+  handlerMock.startDocument();
+  handlerMock.startPrefixMapping("tns","http://samples.springframework.org/flight");
+  handlerMock.startElement(eq("http://samples.springframework.org/flight"),eq("flights"),eq("tns:flights"),isA(Attributes.class));
+  handlerMock.startElement(eq("http://samples.springframework.org/flight"),eq("flight"),eq("tns:flight"),isA(Attributes.class));
+  handlerMock.startElement(eq("http://samples.springframework.org/flight"),eq("number"),eq("tns:number"),isA(Attributes.class));
+  handlerMock.characters(aryEq(new char[]{'4','2'}),eq(0),eq(2));
+  handlerMock.endElement("http://samples.springframework.org/flight","number","tns:number");
+  handlerMock.endElement("http://samples.springframework.org/flight","flight","tns:flight");
+  handlerMock.endElement("http://samples.springframework.org/flight","flights","tns:flights");
+  handlerMock.endPrefixMapping("tns");
+  handlerMock.endDocument();
+  replay(handlerMock);
+  SAXResult result=new SAXResult(handlerMock);
+  marshaller.marshal(flights,result);
+  verify(handlerMock);
+}

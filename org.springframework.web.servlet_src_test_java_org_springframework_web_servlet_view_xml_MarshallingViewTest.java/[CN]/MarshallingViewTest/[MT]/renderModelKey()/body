@@ -1,0 +1,16 @@
+{
+  Object toBeMarshalled=new Object();
+  String modelKey="key";
+  view.setModelKey(modelKey);
+  Map model=new HashMap();
+  model.put(modelKey,toBeMarshalled);
+  MockHttpServletRequest request=new MockHttpServletRequest();
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  expect(marshallerMock.supports(Object.class)).andReturn(true);
+  marshallerMock.marshal(eq(toBeMarshalled),isA(StreamResult.class));
+  replay(marshallerMock);
+  view.render(model,request,response);
+  assertEquals("Invalid content type","application/xml",response.getContentType());
+  assertEquals("Invalid content length",0,response.getContentLength());
+  verify(marshallerMock);
+}
