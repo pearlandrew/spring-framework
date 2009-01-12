@@ -1,0 +1,22 @@
+{
+  if (JAXBElement.class.isAssignableFrom(clazz)) {
+    return true;
+  }
+ else   if (clazz.getAnnotation(XmlRootElement.class) != null) {
+    return true;
+  }
+  if (StringUtils.hasLength(contextPath)) {
+    String packageName=ClassUtils.getPackageName(clazz);
+    String[] contextPaths=StringUtils.tokenizeToStringArray(contextPath,":");
+    for (    String contextPath : contextPaths) {
+      if (contextPath.equals(packageName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+ else   if (!ObjectUtils.isEmpty(classesToBeBound)) {
+    return Arrays.asList(classesToBeBound).contains(clazz);
+  }
+  return false;
+}
