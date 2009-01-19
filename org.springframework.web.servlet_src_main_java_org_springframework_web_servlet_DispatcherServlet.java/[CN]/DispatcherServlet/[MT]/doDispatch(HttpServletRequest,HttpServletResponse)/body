@@ -2,14 +2,6 @@
   HttpServletRequest processedRequest=request;
   HandlerExecutionChain mappedHandler=null;
   int interceptorIndex=-1;
-  LocaleContext previousLocaleContext=LocaleContextHolder.getLocaleContext();
-  LocaleContextHolder.setLocaleContext(buildLocaleContext(request),this.threadContextInheritable);
-  RequestAttributes previousRequestAttributes=RequestContextHolder.getRequestAttributes();
-  ServletRequestAttributes requestAttributes=new ServletRequestAttributes(request);
-  RequestContextHolder.setRequestAttributes(requestAttributes,this.threadContextInheritable);
-  if (logger.isTraceEnabled()) {
-    logger.trace("Bound request context to thread: " + request);
-  }
   try {
     ModelAndView mv=null;
     boolean errorView=false;
@@ -77,12 +69,6 @@ catch (  Error err) {
  finally {
     if (processedRequest != request) {
       cleanupMultipart(processedRequest);
-    }
-    RequestContextHolder.setRequestAttributes(previousRequestAttributes,this.threadContextInheritable);
-    LocaleContextHolder.setLocaleContext(previousLocaleContext,this.threadContextInheritable);
-    requestAttributes.requestCompleted();
-    if (logger.isTraceEnabled()) {
-      logger.trace("Cleared thread-bound request context: " + request);
     }
   }
 }

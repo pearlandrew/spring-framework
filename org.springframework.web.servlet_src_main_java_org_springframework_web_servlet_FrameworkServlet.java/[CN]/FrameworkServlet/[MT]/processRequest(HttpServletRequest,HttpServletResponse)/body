@@ -1,6 +1,14 @@
 {
   long startTime=System.currentTimeMillis();
   Throwable failureCause=null;
+  LocaleContext previousLocaleContext=LocaleContextHolder.getLocaleContext();
+  LocaleContextHolder.setLocaleContext(buildLocaleContext(request),this.threadContextInheritable);
+  RequestAttributes previousRequestAttributes=RequestContextHolder.getRequestAttributes();
+  ServletRequestAttributes requestAttributes=new ServletRequestAttributes(request);
+  RequestContextHolder.setRequestAttributes(requestAttributes,this.threadContextInheritable);
+  if (logger.isTraceEnabled()) {
+    logger.trace("Bound request context to thread: " + request);
+  }
   try {
     doService(request,response);
   }
@@ -17,6 +25,12 @@ catch (  Throwable ex) {
     throw new NestedServletException("Request processing failed",ex);
   }
  finally {
+    RequestContextHolder.setRequestAttributes(previousRequestAttributes,this.threadContextInheritable);
+    LocaleContextHolder.setLocaleContext(previousLocaleContext,this.threadContextInheritable);
+    requestAttributes.requestCompleted();
+    if (logger.isTraceEnabled()) {
+      logger.trace("Cleared thread-bound request context: " + request);
+    }
     if (failureCause != null) {
       this.logger.debug("Could not complete request",failureCause);
     }
