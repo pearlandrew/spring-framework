@@ -2,9 +2,20 @@
   final Set<Boolean> handlersRegistered=new HashSet<Boolean>(1);
   ReflectionUtils.doWithMethods(handlerType,new ReflectionUtils.MethodCallback(){
     public void doWith(    Method method){
-      RequestMapping mapping=method.getAnnotation(RequestMapping.class);
-      if (mapping != null) {
-        String[] modeKeys=mapping.value();
+      boolean mappingFound=false;
+      String[] modeKeys=new String[0];
+      String[] params=new String[0];
+      for (      Annotation ann : method.getAnnotations()) {
+        if (AnnotationUtils.findAnnotation(ann.getClass(),Mapping.class) != null) {
+          mappingFound=true;
+          if (ann instanceof RequestMapping) {
+            modeKeys=(String[])AnnotationUtils.getValue(ann);
+          }
+          String[] specificParams=(String[])AnnotationUtils.getValue(ann,"params");
+          params=StringUtils.mergeStringArrays(params,specificParams);
+        }
+      }
+      if (mappingFound) {
         if (modeKeys.length == 0) {
           if (typeMapping != null) {
             modeKeys=typeMapping.value();
@@ -13,7 +24,6 @@
             throw new IllegalStateException("No portlet mode mappings specified - neither at type nor method level");
           }
         }
-        String[] params=mapping.params();
         if (typeMapping != null) {
           PortletAnnotationMappingUtils.validateModeMapping(modeKeys,typeMapping.value());
           params=StringUtils.mergeStringArrays(typeMapping.params(),params);

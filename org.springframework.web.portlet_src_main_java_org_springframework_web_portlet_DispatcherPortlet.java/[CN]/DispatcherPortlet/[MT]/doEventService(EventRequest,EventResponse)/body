@@ -1,0 +1,44 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("DispatcherPortlet with name '" + getPortletName() + "' received action request");
+  }
+  HandlerExecutionChain mappedHandler=null;
+  int interceptorIndex=-1;
+  try {
+    mappedHandler=getHandler(request,false);
+    if (mappedHandler == null || mappedHandler.getHandler() == null) {
+      noHandlerFound(request,response);
+      return;
+    }
+    HandlerInterceptor[] interceptors=mappedHandler.getInterceptors();
+    if (interceptors != null) {
+      for (int i=0; i < interceptors.length; i++) {
+        HandlerInterceptor interceptor=interceptors[i];
+        if (!interceptor.preHandleEvent(request,response,mappedHandler.getHandler())) {
+          triggerAfterEventCompletion(mappedHandler,interceptorIndex,request,response,null);
+          return;
+        }
+        interceptorIndex=i;
+      }
+    }
+    HandlerAdapter ha=getHandlerAdapter(mappedHandler.getHandler());
+    ha.handleEvent(request,response,mappedHandler.getHandler());
+    triggerAfterEventCompletion(mappedHandler,interceptorIndex,request,response,null);
+  }
+ catch (  Exception ex) {
+    triggerAfterEventCompletion(mappedHandler,interceptorIndex,request,response,ex);
+    try {
+      response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER,ex.toString());
+      request.getPortletSession().setAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE,ex);
+      logger.debug("Caught exception during action phase - forwarding to render phase",ex);
+    }
+ catch (    IllegalStateException ex2) {
+      throw ex;
+    }
+  }
+catch (  Error err) {
+    PortletException ex=new PortletException("Error occured during request processing: " + err.getMessage(),err);
+    triggerAfterEventCompletion(mappedHandler,interceptorIndex,request,response,ex);
+    throw ex;
+  }
+}

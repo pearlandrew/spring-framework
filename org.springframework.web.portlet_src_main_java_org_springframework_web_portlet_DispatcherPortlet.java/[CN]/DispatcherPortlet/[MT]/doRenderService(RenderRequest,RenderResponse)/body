@@ -2,14 +2,6 @@
   if (logger.isDebugEnabled()) {
     logger.debug("DispatcherPortlet with name '" + getPortletName() + "' received render request");
   }
-  LocaleContext previousLocaleContext=LocaleContextHolder.getLocaleContext();
-  LocaleContextHolder.setLocaleContext(buildLocaleContext(request),this.threadContextInheritable);
-  RequestAttributes previousRequestAttributes=RequestContextHolder.getRequestAttributes();
-  PortletRequestAttributes requestAttributes=new PortletRequestAttributes(request);
-  RequestContextHolder.setRequestAttributes(requestAttributes,this.threadContextInheritable);
-  if (logger.isDebugEnabled()) {
-    logger.debug("Bound render request context to thread: " + request);
-  }
   HandlerExecutionChain mappedHandler=null;
   int interceptorIndex=-1;
   try {
@@ -79,13 +71,5 @@ catch (  Error err) {
     PortletException ex=new PortletException("Error occured during request processing: " + err.getMessage(),err);
     triggerAfterRenderCompletion(mappedHandler,interceptorIndex,request,response,ex);
     throw ex;
-  }
- finally {
-    RequestContextHolder.setRequestAttributes(previousRequestAttributes,this.threadContextInheritable);
-    LocaleContextHolder.setLocaleContext(previousLocaleContext,this.threadContextInheritable);
-    requestAttributes.requestCompleted();
-    if (logger.isDebugEnabled()) {
-      logger.debug("Cleared thread-bound render request context: " + request);
-    }
   }
 }

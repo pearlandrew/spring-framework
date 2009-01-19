@@ -1,0 +1,16 @@
+{
+  DispatcherPortlet portlet=new DispatcherPortlet(){
+    protected ApplicationContext createPortletApplicationContext(    ApplicationContext parent) throws BeansException {
+      GenericWebApplicationContext wac=new GenericWebApplicationContext();
+      wac.registerBeanDefinition("controller",new RootBeanDefinition(MyController.class));
+      wac.refresh();
+      return wac;
+    }
+  }
+;
+  portlet.init(new MockPortletConfig());
+  MockRenderRequest request=new MockRenderRequest(PortletMode.VIEW);
+  MockRenderResponse response=new MockRenderResponse();
+  portlet.render(request,response);
+  assertEquals("test",response.getContentAsString());
+}

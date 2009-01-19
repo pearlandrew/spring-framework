@@ -1,0 +1,28 @@
+{
+  RequestMappingInfo mappingInfo=new RequestMappingInfo();
+  RequestMapping requestMapping=AnnotationUtils.findAnnotation(method,RequestMapping.class);
+  ActionMapping actionMapping=AnnotationUtils.findAnnotation(method,ActionMapping.class);
+  RenderMapping renderMapping=AnnotationUtils.findAnnotation(method,RenderMapping.class);
+  ResourceMapping resourceMapping=AnnotationUtils.findAnnotation(method,ResourceMapping.class);
+  EventMapping eventMapping=AnnotationUtils.findAnnotation(method,EventMapping.class);
+  if (actionMapping != null) {
+    mappingInfo.initPhaseMapping(PortletRequest.ACTION_PHASE,actionMapping.value(),actionMapping.params());
+  }
+  if (renderMapping != null) {
+    mappingInfo.initPhaseMapping(PortletRequest.RENDER_PHASE,renderMapping.value(),renderMapping.params());
+  }
+  if (resourceMapping != null) {
+    mappingInfo.initPhaseMapping(PortletRequest.RESOURCE_PHASE,resourceMapping.value(),resourceMapping.params());
+  }
+  if (eventMapping != null) {
+    mappingInfo.initPhaseMapping(PortletRequest.EVENT_PHASE,eventMapping.value(),eventMapping.params());
+  }
+  if (requestMapping != null) {
+    mappingInfo.initStandardMapping(requestMapping.value(),requestMapping.method(),requestMapping.params());
+    if (mappingInfo.phase == null) {
+      mappingInfo.phase=determineDefaultPhase(method);
+    }
+  }
+  this.mappings.put(method,mappingInfo);
+  return (mappingInfo.phase != null);
+}
