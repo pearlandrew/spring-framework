@@ -1,3 +1,10 @@
 {
-  throw new UnsupportedOperationException("@PathVariable not supported");
+  Class paramType=methodParam.getParameterType();
+  if (pathVarName.length() == 0) {
+    pathVarName=getRequiredParameterName(methodParam);
+  }
+  String pathVarValue=resolvePathVariable(pathVarName,paramType,webRequest);
+  WebDataBinder binder=createBinder(webRequest,null,pathVarName);
+  initBinder(handlerForInitBinderCall,pathVarName,binder,webRequest);
+  return binder.convertIfNecessary(pathVarValue,paramType,methodParam);
 }

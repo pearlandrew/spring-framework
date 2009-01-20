@@ -7,10 +7,11 @@
     GenericTypeResolver.resolveParameterType(methodParam,handler.getClass());
     String paramName=null;
     String headerName=null;
-    boolean required=false;
-    String defaultValue=null;
+    String cookieName=null;
     String pathVarName=null;
     String attrName=null;
+    boolean required=false;
+    String defaultValue=null;
     int found=0;
     Annotation[] paramAnns=methodParam.getParameterAnnotations();
     for (    Annotation paramAnn : paramAnns) {
@@ -28,14 +29,21 @@
         defaultValue=requestHeader.defaultValue();
         found++;
       }
- else       if (ModelAttribute.class.isInstance(paramAnn)) {
-        ModelAttribute attr=(ModelAttribute)paramAnn;
-        attrName=attr.value();
+ else       if (CookieValue.class.isInstance(paramAnn)) {
+        CookieValue cookieValue=(CookieValue)paramAnn;
+        cookieName=cookieValue.value();
+        required=cookieValue.required();
+        defaultValue=cookieValue.defaultValue();
         found++;
       }
  else       if (PathVariable.class.isInstance(paramAnn)) {
         PathVariable pathVar=(PathVariable)paramAnn;
         pathVarName=pathVar.value();
+        found++;
+      }
+ else       if (ModelAttribute.class.isInstance(paramAnn)) {
+        ModelAttribute attr=(ModelAttribute)paramAnn;
+        attrName=attr.value();
         found++;
       }
     }
@@ -72,6 +80,12 @@
  else     if (headerName != null) {
       args[i]=resolveRequestHeader(headerName,required,defaultValue,methodParam,webRequest,handler);
     }
+ else     if (cookieName != null) {
+      args[i]=resolveCookieValue(cookieName,required,defaultValue,methodParam,webRequest,handler);
+    }
+ else     if (pathVarName != null) {
+      args[i]=resolvePathVariable(pathVarName,methodParam,webRequest,handler);
+    }
  else     if (attrName != null) {
       WebDataBinder binder=resolveModelAttribute(attrName,methodParam,implicitModel,webRequest,handler);
       boolean assignBindingResult=(args.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
@@ -84,9 +98,6 @@
         i++;
       }
       implicitModel.putAll(binder.getBindingResult().getModel());
-    }
- else     if (pathVarName != null) {
-      args[i]=resolvePathVariable(pathVarName,methodParam,webRequest,handler);
     }
   }
   return args;
