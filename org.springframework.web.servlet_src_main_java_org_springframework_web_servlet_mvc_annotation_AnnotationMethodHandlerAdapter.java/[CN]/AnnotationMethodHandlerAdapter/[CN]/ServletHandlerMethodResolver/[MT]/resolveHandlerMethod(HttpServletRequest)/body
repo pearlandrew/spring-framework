@@ -1,7 +1,7 @@
 {
   String lookupPath=urlPathHelper.getLookupPathForRequest(request);
+  Comparator<String> pathComparator=pathMatcher.getPatternComparator(lookupPath);
   Map<RequestMappingInfo,Method> targetHandlerMethods=new LinkedHashMap<RequestMappingInfo,Method>();
-  Map<RequestMappingInfo,String> targetPathMatches=new LinkedHashMap<RequestMappingInfo,String>();
   Set<String> allowedMethods=new LinkedHashSet<String>(7);
   String resolvedMethodName=null;
   for (  Method handlerMethod : getHandlerMethods()) {
@@ -16,11 +16,12 @@
     }
     boolean match=false;
     if (mappingInfo.paths.length > 0) {
+      List<String> matchedPaths=new ArrayList<String>(mappingInfo.paths.length);
       for (      String mappedPath : mappingInfo.paths) {
         if (isPathMatch(mappedPath,lookupPath)) {
           if (checkParameters(mappingInfo,request)) {
             match=true;
-            targetPathMatches.put(mappingInfo,mappedPath);
+            matchedPaths.add(mappedPath);
           }
  else {
             for (            RequestMethod requestMethod : mappingInfo.methods) {
@@ -30,6 +31,8 @@
           }
         }
       }
+      Collections.sort(matchedPaths,pathComparator);
+      mappingInfo.matchedPaths=matchedPaths.toArray(new String[matchedPaths.size()]);
     }
  else {
       match=checkParameters(mappingInfo,request);
@@ -65,30 +68,13 @@
       }
     }
   }
-  if (targetHandlerMethods.size() == 1) {
-    if (targetPathMatches.size() == 1) {
-      extractHandlerMethodUriTemplates(targetPathMatches.values().iterator().next(),lookupPath,request);
-    }
-    return targetHandlerMethods.values().iterator().next();
-  }
- else   if (!targetHandlerMethods.isEmpty()) {
-    RequestMappingInfo bestMappingMatch=null;
-    String bestPathMatch=null;
-    for (    RequestMappingInfo mapping : targetHandlerMethods.keySet()) {
-      String mappedPath=targetPathMatches.get(mapping);
-      if (bestMappingMatch == null) {
-        bestMappingMatch=mapping;
-        bestPathMatch=mappedPath;
-      }
- else {
-        if (isBetterPathMatch(mappedPath,bestPathMatch,lookupPath) || (!isBetterPathMatch(bestPathMatch,mappedPath,lookupPath) && (isBetterMethodMatch(mapping,bestMappingMatch) || (!isBetterMethodMatch(bestMappingMatch,mapping) && isBetterParamMatch(mapping,bestMappingMatch))))) {
-          bestMappingMatch=mapping;
-          bestPathMatch=mappedPath;
-        }
-      }
-    }
-    if (bestPathMatch != null) {
-      extractHandlerMethodUriTemplates(bestPathMatch,lookupPath,request);
+  if (!targetHandlerMethods.isEmpty()) {
+    List<RequestMappingInfo> matches=new ArrayList<RequestMappingInfo>(targetHandlerMethods.keySet());
+    RequestMappingInfoComparator requestMappingInfoComparator=new RequestMappingInfoComparator(pathComparator);
+    Collections.sort(matches,requestMappingInfoComparator);
+    RequestMappingInfo bestMappingMatch=matches.get(0);
+    if (bestMappingMatch.matchedPaths.length > 0) {
+      extractHandlerMethodUriTemplates(bestMappingMatch.matchedPaths[0],lookupPath,request);
     }
     return targetHandlerMethods.get(bestMappingMatch);
   }
