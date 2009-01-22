@@ -2,7 +2,16 @@
   for (Iterator it=optionCollection.iterator(); it.hasNext(); ) {
     Object item=it.next();
     BeanWrapper wrapper=PropertyAccessorFactory.forBeanPropertyAccess(item);
-    Object value=(this.valueProperty != null ? wrapper.getPropertyValue(this.valueProperty) : item);
+    Object value;
+    if (this.valueProperty != null) {
+      value=wrapper.getPropertyValue(this.valueProperty);
+    }
+ else     if (item instanceof Enum) {
+      value=((Enum<?>)item).name();
+    }
+ else {
+      value=item;
+    }
     Object label=(this.labelProperty != null ? wrapper.getPropertyValue(this.labelProperty) : item);
     renderOption(tagWriter,item,value,label);
   }

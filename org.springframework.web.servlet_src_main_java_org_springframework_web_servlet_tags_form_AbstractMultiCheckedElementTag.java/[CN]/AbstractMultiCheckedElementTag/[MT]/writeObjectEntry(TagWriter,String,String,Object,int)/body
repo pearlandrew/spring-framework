@@ -1,6 +1,15 @@
 {
   BeanWrapper wrapper=PropertyAccessorFactory.forBeanPropertyAccess(item);
-  Object renderValue=(valueProperty != null ? wrapper.getPropertyValue(valueProperty) : item);
+  Object renderValue;
+  if (valueProperty != null) {
+    renderValue=wrapper.getPropertyValue(valueProperty);
+  }
+ else   if (item instanceof Enum) {
+    renderValue=((Enum<?>)item).name();
+  }
+ else {
+    renderValue=item;
+  }
   Object renderLabel=(labelProperty != null ? wrapper.getPropertyValue(labelProperty) : item);
   writeElementTag(tagWriter,item,renderValue,renderLabel,itemIndex);
 }
