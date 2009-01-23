@@ -1,0 +1,28 @@
+{
+  Connection connection=null;
+  try {
+    connection=dataSource.getConnection();
+    try {
+      String sql=parseSqlIn(sqlFile);
+      executeSql(sql,connection);
+    }
+ catch (    IOException e) {
+      throw new RuntimeException("I/O exception occurred accessing the database schema file",e);
+    }
+catch (    SQLException e) {
+      throw new RuntimeException("SQL exception occurred exporting database schema",e);
+    }
+  }
+ catch (  SQLException e) {
+    throw new RuntimeException("SQL exception occurred acquiring connection",e);
+  }
+ finally {
+    if (connection != null) {
+      try {
+        connection.close();
+      }
+ catch (      SQLException e) {
+      }
+    }
+  }
+}
