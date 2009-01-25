@@ -8,6 +8,23 @@
  else   if (method.getName().equals("toString")) {
     return "Shared EntityManager proxy for target factory [" + this.targetFactory + "]";
   }
+ else   if (method.getName().equals("getEntityManagerFactory")) {
+    return this.targetFactory;
+  }
+ else   if (method.getName().equals("getQueryBuilder")) {
+    try {
+      return EntityManagerFactory.class.getMethod("getQueryBuilder").invoke(this.targetFactory);
+    }
+ catch (    InvocationTargetException ex) {
+      throw ex.getTargetException();
+    }
+  }
+ else   if (method.getName().equals("unwrap")) {
+    Class targetClass=(Class)args[0];
+    if (targetClass == null || targetClass.isInstance(proxy)) {
+      return proxy;
+    }
+  }
  else   if (method.getName().equals("isOpen")) {
     return true;
   }
@@ -27,6 +44,15 @@
     }
     return target;
   }
+ else   if (method.getName().equals("unwrap")) {
+    Class targetClass=(Class)args[0];
+    if (targetClass == null || targetClass.isInstance(proxy)) {
+      return proxy;
+    }
+    if (target == null) {
+      throw new IllegalStateException("No transactional EntityManager available");
+    }
+  }
   boolean isNewEm=false;
   if (target == null) {
     logger.debug("Creating new EntityManager for shared EntityManager invocation");
@@ -35,9 +61,15 @@
   }
   try {
     Object result=method.invoke(target,args);
-    if (isNewEm && result instanceof Query) {
-      result=Proxy.newProxyInstance(Query.class.getClassLoader(),new Class[]{Query.class},new DeferredQueryInvocationHandler((Query)result,target));
-      isNewEm=false;
+    if (result instanceof Query) {
+      Query query=(Query)result;
+      if (isNewEm) {
+        result=Proxy.newProxyInstance(Query.class.getClassLoader(),new Class[]{Query.class},new DeferredQueryInvocationHandler(query,target));
+        isNewEm=false;
+      }
+ else {
+        EntityManagerFactoryUtils.applyTransactionTimeout(query,this.targetFactory);
+      }
     }
     return result;
   }

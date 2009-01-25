@@ -1,12 +1,14 @@
 {
   pmf.getConnectionFactory();
-  pmfControl.setReturnValue(null,2);
+  pmfControl.setReturnValue(null,3);
   pmf.getPersistenceManager();
+  pmfControl.setReturnValue(pm,1);
+  pmf.getPersistenceManagerProxy();
   pmfControl.setReturnValue(pm,1);
   pm.currentTransaction();
   pmControl.setReturnValue(tx,3);
   pm.flush();
-  pmControl.setVoidCallable(2);
+  pmControl.setVoidCallable(4);
   pm.close();
   pmControl.setVoidCallable(1);
   tx.begin();
@@ -29,10 +31,21 @@
       assertTrue("Has thread pm",TransactionSynchronizationManager.hasResource(pmf));
       TransactionAwarePersistenceManagerFactoryProxy proxyFactory=new TransactionAwarePersistenceManagerFactoryProxy();
       proxyFactory.setTargetPersistenceManagerFactory(pmf);
-      PersistenceManagerFactory proxy=(PersistenceManagerFactory)proxyFactory.getObject();
-      assertEquals(pm.toString(),proxy.getPersistenceManager().toString());
-      proxy.getPersistenceManager().flush();
-      proxy.getPersistenceManager().close();
+      PersistenceManagerFactory pmfProxy=proxyFactory.getObject();
+      assertEquals(pm.toString(),pmfProxy.getPersistenceManager().toString());
+      pmfProxy.getPersistenceManager().flush();
+      pmfProxy.getPersistenceManager().close();
+      SpringPersistenceManagerProxyBean proxyBean=new SpringPersistenceManagerProxyBean();
+      proxyBean.setPersistenceManagerFactory(pmf);
+      proxyBean.afterPropertiesSet();
+      PersistenceManager pmProxy=proxyBean.getObject();
+      assertSame(pmf,pmProxy.getPersistenceManagerFactory());
+      pmProxy.flush();
+      pmProxy.close();
+      StandardPersistenceManagerProxyBean stdProxyBean=new StandardPersistenceManagerProxyBean();
+      stdProxyBean.setPersistenceManagerFactory(pmf);
+      PersistenceManager stdPmProxy=stdProxyBean.getObject();
+      stdPmProxy.flush();
       JdoTemplate jt=new JdoTemplate(pmf);
       return jt.execute(new JdoCallback(){
         public Object doInJdo(        PersistenceManager pm2){

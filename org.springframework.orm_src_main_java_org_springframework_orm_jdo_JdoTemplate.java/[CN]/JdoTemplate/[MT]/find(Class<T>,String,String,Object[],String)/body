@@ -1,0 +1,14 @@
+{
+  return execute(new JdoCallback<Collection<T>>(){
+    @SuppressWarnings("unchecked") public Collection<T> doInJdo(    PersistenceManager pm) throws JDOException {
+      Query query=pm.newQuery(entityClass,filter);
+      prepareQuery(query);
+      query.declareParameters(parameters);
+      if (ordering != null) {
+        query.setOrdering(ordering);
+      }
+      return (Collection<T>)query.executeWithArray(values);
+    }
+  }
+,true);
+}
