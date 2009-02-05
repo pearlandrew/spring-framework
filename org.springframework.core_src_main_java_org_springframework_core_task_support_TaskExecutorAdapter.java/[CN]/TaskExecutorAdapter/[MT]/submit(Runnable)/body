@@ -1,0 +1,15 @@
+{
+  try {
+    if (this.concurrentExecutor instanceof ExecutorService) {
+      return ((ExecutorService)this.concurrentExecutor).submit(task);
+    }
+ else {
+      FutureTask<Object> future=new FutureTask<Object>(task,null);
+      this.concurrentExecutor.execute(future);
+      return future;
+    }
+  }
+ catch (  RejectedExecutionException ex) {
+    throw new TaskRejectedException("Executor [" + this.concurrentExecutor + "] did not accept task: "+ task,ex);
+  }
+}
