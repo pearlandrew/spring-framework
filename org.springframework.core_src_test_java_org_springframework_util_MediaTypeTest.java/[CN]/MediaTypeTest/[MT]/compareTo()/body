@@ -1,0 +1,33 @@
+{
+  MediaType audioBasic=new MediaType("audio","basic");
+  MediaType audio=new MediaType("audio");
+  MediaType audio03=new MediaType("audio","*",Collections.singletonMap("q","0.3"));
+  MediaType audio07=new MediaType("audio","*",Collections.singletonMap("q","0.7"));
+  MediaType all=MediaType.ALL;
+  assertEquals("Invalid comparison result",0,audioBasic.compareTo(audioBasic));
+  assertEquals("Invalid comparison result",0,audio.compareTo(audio));
+  assertEquals("Invalid comparison result",0,audio07.compareTo(audio07));
+  assertTrue("Invalid comparison result",audioBasic.compareTo(audio) < 0);
+  assertTrue("Invalid comparison result",audioBasic.compareTo(all) < 0);
+  assertTrue("Invalid comparison result",audio.compareTo(all) < 0);
+  assertTrue("Invalid comparison result",audio.compareTo(audioBasic) > 0);
+  assertTrue("Invalid comparison result",all.compareTo(audioBasic) > 0);
+  assertTrue("Invalid comparison result",all.compareTo(audio) > 0);
+  assertTrue("Invalid comparison result",audio.compareTo(audio07) < 0);
+  assertTrue("Invalid comparison result",audio07.compareTo(audio03) < 0);
+  assertTrue("Invalid comparison result",audio03.compareTo(all) > 0);
+  List<MediaType> expected=new ArrayList<MediaType>();
+  expected.add(audioBasic);
+  expected.add(audio);
+  expected.add(all);
+  expected.add(audio07);
+  expected.add(audio03);
+  List<MediaType> result=new ArrayList<MediaType>(expected);
+  for (int i=0; i < 10; i++) {
+    Collections.shuffle(result);
+    Collections.sort(result);
+    for (int j=0; j < result.size(); j++) {
+      assertEquals("Invalid media type at " + j,expected.get(j),result.get(j));
+    }
+  }
+}

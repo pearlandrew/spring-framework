@@ -1,0 +1,26 @@
+{
+  Assert.hasLength(mediaType,"'mediaType' must not be empty");
+  mediaType=mediaType.trim();
+  int subTypeIdx=mediaType.indexOf('/');
+  if (subTypeIdx == -1) {
+    throw new IllegalArgumentException("mediaType " + mediaType + " contains no /");
+  }
+  String type=mediaType.substring(0,subTypeIdx);
+  String subtype;
+  Map<String,String> parameters;
+  int paramIdx=mediaType.indexOf(';',subTypeIdx + 1);
+  if (paramIdx == -1) {
+    subtype=mediaType.substring(subTypeIdx + 1).trim();
+    parameters=null;
+  }
+ else {
+    subtype=mediaType.substring(subTypeIdx + 1,paramIdx).trim();
+    String[] tokens=StringUtils.tokenizeToStringArray(mediaType.substring(paramIdx),"; ");
+    parameters=new LinkedHashMap<String,String>(tokens.length);
+    for (    String token : tokens) {
+      int eqPos=token.indexOf('=');
+      parameters.put(token.substring(0,eqPos),token.substring(eqPos + 1));
+    }
+  }
+  return new MediaType(type,subtype,parameters);
+}
