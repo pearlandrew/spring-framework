@@ -1,7 +1,12 @@
 {
   LoadTimeWeaver weaverToUse=this.loadTimeWeaver;
-  if (weaverToUse == null && InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
-    weaverToUse=new InstrumentationLoadTimeWeaver(this.beanClassLoader);
+  if (weaverToUse == null) {
+    if (InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
+      weaverToUse=new InstrumentationLoadTimeWeaver(this.beanClassLoader);
+    }
+ else {
+      throw new IllegalStateException("No LoadTimeWeaver available");
+    }
   }
   weaverToUse.addTransformer(new AspectJClassBypassingClassFileTransformer(new ClassPreProcessorAgentAdapter()));
 }
