@@ -1,0 +1,33 @@
+{
+  RequestAttributes attrs=RequestContextHolder.getRequestAttributes();
+  Assert.isInstanceOf(ServletRequestAttributes.class,attrs);
+  ServletRequestAttributes servletAttrs=(ServletRequestAttributes)attrs;
+  List<MediaType> requestedMediaTypes=getMediaTypes(servletAttrs.getRequest());
+  Collections.sort(requestedMediaTypes);
+  SortedMap<MediaType,View> views=new TreeMap<MediaType,View>();
+  for (  ViewResolver viewResolver : viewResolvers) {
+    View view=viewResolver.resolveViewName(viewName,locale);
+    if (view != null) {
+      MediaType viewMediaType=MediaType.parseMediaType(view.getContentType());
+      for (      MediaType requestedMediaType : requestedMediaTypes) {
+        if (requestedMediaType.includes(viewMediaType)) {
+          if (!views.containsKey(requestedMediaType)) {
+            views.put(requestedMediaType,view);
+            break;
+          }
+        }
+      }
+    }
+  }
+  if (!views.isEmpty()) {
+    MediaType mediaType=views.firstKey();
+    View view=views.get(mediaType);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Returning [" + view + "] based on requested media type '"+ mediaType+ "'");
+    }
+    return view;
+  }
+ else {
+    return null;
+  }
+}

@@ -1,0 +1,26 @@
+{
+  if (favorPathExtension) {
+    String requestUri=urlPathHelper.getRequestUri(request);
+    String filename=WebUtils.extractFullFilenameFromUrlPath(requestUri);
+    MediaType mediaType=getMediaTypeFromFilename(filename);
+    if (mediaType != null) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Requested media type is '" + mediaType + "' (based on filename '"+ filename+ "')");
+      }
+      List<MediaType> mediaTypes=new ArrayList<MediaType>();
+      mediaTypes.add(mediaType);
+      return mediaTypes;
+    }
+  }
+  String acceptHeader=request.getHeader(ACCEPT_HEADER);
+  if (StringUtils.hasText(acceptHeader)) {
+    List<MediaType> mediaTypes=MediaType.parseMediaTypes(acceptHeader);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Requested media types are " + mediaTypes + " (based on Accept header)");
+    }
+    return mediaTypes;
+  }
+ else {
+    return Collections.emptyList();
+  }
+}
