@@ -1,3 +1,13 @@
 {
-  return this.applicationListeners;
+  LinkedList<ApplicationListener> allListeners=new LinkedList<ApplicationListener>(this.applicationListeners);
+  if (!this.applicationListenerBeans.isEmpty()) {
+    if (this.beanFactory == null) {
+      throw new IllegalStateException("ApplicationEventMulticaster cannot retrieve listener beans " + "because it is not associated with a BeanFactory: " + this.applicationListenerBeans);
+    }
+    for (    String listenerBeanName : applicationListenerBeans) {
+      allListeners.add(this.beanFactory.getBean(listenerBeanName,ApplicationListener.class));
+    }
+  }
+  Collections.sort(allListeners,new OrderComparator());
+  return allListeners;
 }
