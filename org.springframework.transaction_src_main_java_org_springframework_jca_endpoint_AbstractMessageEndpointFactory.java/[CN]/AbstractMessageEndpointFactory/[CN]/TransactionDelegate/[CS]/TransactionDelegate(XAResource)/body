@@ -1,6 +1,8 @@
 {
-  if (transactionFactory != null && xaResource == null) {
-    throw new IllegalStateException("ResourceAdapter-provided XAResource is required for " + "transaction management. Check your ResourceAdapter's configuration.");
+  if (xaResource == null) {
+    if (transactionFactory != null && !transactionFactory.supportsResourceAdapterManagedTransactions()) {
+      throw new IllegalStateException("ResourceAdapter-provided XAResource is required for " + "transaction management. Check your ResourceAdapter's configuration.");
+    }
   }
   this.xaResource=xaResource;
 }
