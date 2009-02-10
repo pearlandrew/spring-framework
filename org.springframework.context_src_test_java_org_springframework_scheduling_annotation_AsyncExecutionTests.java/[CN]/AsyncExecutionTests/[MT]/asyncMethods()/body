@@ -1,0 +1,13 @@
+{
+  originalThreadName=Thread.currentThread().getName();
+  GenericApplicationContext context=new GenericApplicationContext();
+  context.registerBeanDefinition("asyncTest",new RootBeanDefinition(AsyncMethodBean.class));
+  context.registerBeanDefinition("autoProxyCreator",new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
+  context.registerBeanDefinition("asyncAdvisor",new RootBeanDefinition(AsyncAnnotationAdvisor.class));
+  context.refresh();
+  AsyncMethodBean asyncTest=context.getBean("asyncTest",AsyncMethodBean.class);
+  asyncTest.doNothing(5);
+  asyncTest.doSomething(10);
+  Future<String> future=asyncTest.returnSomething(20);
+  assertEquals("20",future.get());
+}

@@ -1,0 +1,23 @@
+{
+  Future result=this.asyncExecutor.submit(new Callable<Object>(){
+    public Object call() throws Exception {
+      try {
+        Object result=invocation.proceed();
+        if (result instanceof Future) {
+          return ((Future)result).get();
+        }
+      }
+ catch (      Throwable ex) {
+        ReflectionUtils.rethrowException(ex);
+      }
+      return null;
+    }
+  }
+);
+  if (Future.class.isAssignableFrom(invocation.getMethod().getReturnType())) {
+    return result;
+  }
+ else {
+    return null;
+  }
+}
