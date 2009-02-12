@@ -1,7 +1,7 @@
 {
   Object intendedArrayType=getChild(0).getValueInternal(state);
   if (!(intendedArrayType instanceof String)) {
-    throw new SpelException(getChild(0).getCharPositionInLine(),SpelMessages.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION,Utils.formatClassnameForMessage(intendedArrayType.getClass()));
+    throw new SpelException(getChild(0).getCharPositionInLine(),SpelMessages.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION,FormatHelper.formatClassNameForMessage(intendedArrayType.getClass()));
   }
   String type=(String)intendedArrayType;
   Class<?> componentType=null;
@@ -24,7 +24,7 @@
     int dimensions=getChild(1).getChildCount();
     if (dimensions == 1) {
       Object o=getChild(1).getValueInternal(state);
-      int arraySize=state.toInteger(o);
+      int arraySize=state.convertValue(o,Integer.class);
       if (getChildCount() == 3) {
         int initializerLength=getChild(2).getChildCount();
         if (initializerLength != arraySize) {
@@ -36,7 +36,7 @@
  else {
       int[] dims=new int[dimensions];
       for (int d=0; d < dimensions; d++) {
-        dims[d]=state.toInteger(getChild(1).getChild(d).getValueInternal(state));
+        dims[d]=state.convertValue(getChild(1).getChild(d).getValueInternal(state),Integer.class);
       }
       newArray=Array.newInstance(componentType,dims);
     }
@@ -57,49 +57,49 @@
  else     if (arrayTypeCode == TypeCode.INT) {
       int[] newIntArray=(int[])newArray;
       for (int i=0; i < newIntArray.length; i++) {
-        newIntArray[i]=state.toInteger(initializer.getChild(i).getValueInternal(state));
+        newIntArray[i]=state.convertValue(initializer.getChild(i).getValueInternal(state),Integer.class);
       }
     }
  else     if (arrayTypeCode == TypeCode.BOOLEAN) {
       boolean[] newBooleanArray=(boolean[])newArray;
       for (int i=0; i < newBooleanArray.length; i++) {
-        newBooleanArray[i]=state.toBoolean(initializer.getChild(i).getValueInternal(state));
+        newBooleanArray[i]=state.convertValue(initializer.getChild(i).getValueInternal(state),Boolean.class);
       }
     }
  else     if (arrayTypeCode == TypeCode.CHAR) {
       char[] newCharArray=(char[])newArray;
       for (int i=0; i < newCharArray.length; i++) {
-        newCharArray[i]=state.toCharacter(initializer.getChild(i).getValueInternal(state));
+        newCharArray[i]=state.convertValue(initializer.getChild(i).getValueInternal(state),Character.class);
       }
     }
  else     if (arrayTypeCode == TypeCode.SHORT) {
       short[] newShortArray=(short[])newArray;
       for (int i=0; i < newShortArray.length; i++) {
-        newShortArray[i]=state.toShort(initializer.getChild(i).getValueInternal(state));
+        newShortArray[i]=state.convertValue(initializer.getChild(i).getValueInternal(state),Short.class);
       }
     }
  else     if (arrayTypeCode == TypeCode.LONG) {
       long[] newLongArray=(long[])newArray;
       for (int i=0; i < newLongArray.length; i++) {
-        newLongArray[i]=state.toLong(initializer.getChild(i).getValueInternal(state));
+        newLongArray[i]=state.convertValue(initializer.getChild(i).getValueInternal(state),Long.class);
       }
     }
  else     if (arrayTypeCode == TypeCode.FLOAT) {
       float[] newFloatArray=(float[])newArray;
       for (int i=0; i < newFloatArray.length; i++) {
-        newFloatArray[i]=state.toFloat(initializer.getChild(i).getValueInternal(state));
+        newFloatArray[i]=state.convertValue(initializer.getChild(i).getValueInternal(state),Float.class);
       }
     }
  else     if (arrayTypeCode == TypeCode.DOUBLE) {
       double[] newDoubleArray=(double[])newArray;
       for (int i=0; i < newDoubleArray.length; i++) {
-        newDoubleArray[i]=state.toDouble(initializer.getChild(i).getValueInternal(state));
+        newDoubleArray[i]=state.convertValue(initializer.getChild(i).getValueInternal(state),Double.class);
       }
     }
  else     if (arrayTypeCode == TypeCode.BYTE) {
       byte[] newByteArray=(byte[])newArray;
       for (int i=0; i < newByteArray.length; i++) {
-        newByteArray[i]=state.toByte(initializer.getChild(i).getValueInternal(state));
+        newByteArray[i]=state.convertValue(initializer.getChild(i).getValueInternal(state),Byte.class);
       }
     }
   }

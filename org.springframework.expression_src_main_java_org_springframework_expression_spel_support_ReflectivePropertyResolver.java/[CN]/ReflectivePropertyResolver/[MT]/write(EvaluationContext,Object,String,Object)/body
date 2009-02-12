@@ -1,0 +1,49 @@
+{
+  if (target == null) {
+    throw new AccessException("Cannot write property on null target");
+  }
+  Class<?> type=(target instanceof Class ? (Class<?>)target : target.getClass());
+  CacheKey cacheKey=new CacheKey(type,name);
+  Member cachedMember=this.writerCache.get(cacheKey);
+  if (cachedMember == null || cachedMember instanceof Method) {
+    Method method=(Method)cachedMember;
+    if (method == null) {
+      method=findSetterForProperty(name,type,target instanceof Class);
+      if (method != null) {
+        cachedMember=method;
+        this.writerCache.put(cacheKey,cachedMember);
+      }
+    }
+    if (method != null) {
+      try {
+        ReflectionUtils.makeAccessible(method);
+        method.invoke(target,newValue);
+        return;
+      }
+ catch (      Exception ex) {
+        throw new AccessException("Unable to access property '" + name + "' through setter",ex);
+      }
+    }
+  }
+  if (cachedMember == null || cachedMember instanceof Field) {
+    Field field=(Field)cachedMember;
+    if (field == null) {
+      field=findField(name,type,target instanceof Class);
+      if (field != null) {
+        cachedMember=field;
+        this.readerCache.put(cacheKey,cachedMember);
+      }
+    }
+    if (field != null) {
+      try {
+        ReflectionUtils.makeAccessible(field);
+        field.set(target,newValue);
+        return;
+      }
+ catch (      Exception ex) {
+        throw new AccessException("Unable to access field: " + name,ex);
+      }
+    }
+  }
+  throw new AccessException("Neither setter nor field found for property '" + name + "'");
+}

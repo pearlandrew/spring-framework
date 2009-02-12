@@ -1,0 +1,23 @@
+{
+  if (target == null) {
+    return false;
+  }
+  Class<?> type=(target instanceof Class ? (Class<?>)target : target.getClass());
+  CacheKey cacheKey=new CacheKey(type,name);
+  if (this.writerCache.containsKey(cacheKey)) {
+    return true;
+  }
+  Method method=findSetterForProperty(name,type,target instanceof Class);
+  if (method != null) {
+    this.writerCache.put(cacheKey,method);
+    return true;
+  }
+ else {
+    Field field=findField(name,type,target instanceof Class);
+    if (field != null) {
+      this.writerCache.put(cacheKey,field);
+      return true;
+    }
+  }
+  return false;
+}

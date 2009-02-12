@@ -1,0 +1,26 @@
+{
+  if (target == null) {
+    return false;
+  }
+  Class<?> type=(target instanceof Class ? (Class<?>)target : target.getClass());
+  if ((type.isArray() && name.equals("length"))) {
+    return true;
+  }
+  CacheKey cacheKey=new CacheKey(type,name);
+  if (this.readerCache.containsKey(cacheKey)) {
+    return true;
+  }
+  Method method=findGetterForProperty(name,type,target instanceof Class);
+  if (method != null) {
+    this.readerCache.put(cacheKey,method);
+    return true;
+  }
+ else {
+    Field field=findField(name,type,target instanceof Class);
+    if (field != null) {
+      this.readerCache.put(cacheKey,field);
+      return true;
+    }
+  }
+  return false;
+}

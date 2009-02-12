@@ -1,19 +1,9 @@
 {
-  OperatorOverloader overloader=relatedContext.getTypeUtils().getOperatorOverloader();
-  try {
-    if (overloader != null && overloader.overridesOperation(op,left,right)) {
-      return overloader.operate(op,left,right);
-    }
- else {
-      throw new SpelException(SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES,op,left,right);
-    }
+  OperatorOverloader overloader=this.relatedContext.getOperatorOverloader();
+  if (overloader.overridesOperation(op,left,right)) {
+    return overloader.operate(op,left,right);
   }
- catch (  EvaluationException e) {
-    if (e instanceof SpelException) {
-      throw (SpelException)e;
-    }
  else {
-      throw new SpelException(e,SpelMessages.UNEXPECTED_PROBLEM_INVOKING_OPERATOR,op,left,right,e.getMessage());
-    }
+    throw new SpelException(SpelMessages.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES,op,left,right);
   }
 }

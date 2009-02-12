@@ -1,0 +1,21 @@
+{
+  int nParams=paramTypes.length;
+  int nArgs=args.length;
+  if (nParams != args.length || paramTypes[nParams - 1] != (args[nArgs - 1] == null ? null : args[nArgs - 1].getClass())) {
+    int arraySize=0;
+    if (nArgs >= nParams) {
+      arraySize=nArgs - (nParams - 1);
+    }
+    Object[] repackagedArguments=(Object[])Array.newInstance(paramTypes[nParams - 1].getComponentType(),arraySize);
+    for (int i=0; i < arraySize; i++) {
+      repackagedArguments[i]=args[nParams + i - 1];
+    }
+    Object[] newArgs=new Object[nParams];
+    for (int i=0; i < newArgs.length - 1; i++) {
+      newArgs[i]=args[i];
+    }
+    newArgs[newArgs.length - 1]=repackagedArguments;
+    return newArgs;
+  }
+  return args;
+}

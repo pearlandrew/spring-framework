@@ -1,18 +1,16 @@
 {
   try {
-    lexer.setCharStream(new ANTLRStringStream(expressionString));
-    CommonTokenStream tokens=new CommonTokenStream(lexer);
-    parser.setTokenStream(tokens);
-    expr_return exprReturn=parser.expr();
-    SpelExpression newExpression=new SpelExpression(expressionString,(SpelNode)exprReturn.getTree());
-    return newExpression;
+    this.lexer.setCharStream(new ANTLRStringStream(expressionString));
+    CommonTokenStream tokens=new CommonTokenStream(this.lexer);
+    this.parser.setTokenStream(tokens);
+    expr_return exprReturn=this.parser.expr();
+    return new SpelExpression(expressionString,(SpelNode)exprReturn.getTree());
   }
  catch (  RecognitionException re) {
-    ParseException exception=new ParseException(expressionString,"Recognition error at position: " + re.charPositionInLine + ": "+ re.getMessage(),re);
-    throw exception;
+    throw new ParseException(expressionString,"Recognition error at position: " + re.charPositionInLine + ": "+ re.getMessage(),re);
   }
-catch (  WrappedELException e) {
-    SpelException wrappedException=e.getCause();
+catch (  WrappedSpelException ex) {
+    SpelException wrappedException=ex.getCause();
     throw new ParseException(expressionString,"Parsing problem: " + wrappedException.getMessage(),wrappedException);
   }
 }

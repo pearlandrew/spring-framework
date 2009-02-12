@@ -1,0 +1,31 @@
+{
+  Object contextObject=state.getActiveContextObject();
+  EvaluationContext eContext=state.getEvaluationContext();
+  PropertyAccessor accessorToUse=this.cachedWriteAccessor;
+  if (accessorToUse != null) {
+    try {
+      accessorToUse.write(state.getEvaluationContext(),contextObject,name,newValue);
+      return;
+    }
+ catch (    AccessException ae) {
+      this.cachedWriteAccessor=null;
+    }
+  }
+  Class<?> contextObjectClass=getObjectClass(contextObject);
+  List<PropertyAccessor> accessorsToTry=getPropertyAccessorsToTry(contextObjectClass,state);
+  if (accessorsToTry != null) {
+    try {
+      for (      PropertyAccessor accessor : accessorsToTry) {
+        if (accessor.canWrite(eContext,contextObject,name)) {
+          this.cachedWriteAccessor=accessor;
+          accessor.write(eContext,contextObject,name,newValue);
+          return;
+        }
+      }
+    }
+ catch (    AccessException ae) {
+      throw new SpelException(getCharPositionInLine(),ae,SpelMessages.EXCEPTION_DURING_PROPERTY_WRITE,name,ae.getMessage());
+    }
+  }
+  throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_SETTER_NOT_FOUND,name,FormatHelper.formatClassNameForMessage(contextObjectClass));
+}

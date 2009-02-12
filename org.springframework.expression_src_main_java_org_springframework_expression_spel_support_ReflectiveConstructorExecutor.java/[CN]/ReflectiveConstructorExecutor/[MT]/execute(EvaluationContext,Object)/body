@@ -1,0 +1,17 @@
+{
+  try {
+    if (argsRequiringConversion != null && arguments != null) {
+      ReflectionHelper.convertArguments(c.getParameterTypes(),c.isVarArgs(),context.getTypeConverter(),argsRequiringConversion,arguments);
+    }
+    if (c.isVarArgs()) {
+      arguments=ReflectionHelper.setupArgumentsForVarargsInvocation(c.getParameterTypes(),arguments);
+    }
+    if (!c.isAccessible()) {
+      c.setAccessible(true);
+    }
+    return c.newInstance(arguments);
+  }
+ catch (  Exception ex) {
+    throw new AccessException("Problem invoking constructor: " + c,ex);
+  }
+}

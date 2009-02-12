@@ -1,0 +1,23 @@
+{
+  try {
+    Expression expr=this.expressionCache.get(value);
+    if (expr == null) {
+      expr=this.expressionParser.parseExpression(value,this.beanExpressionParserContext);
+      this.expressionCache.put(value,expr);
+    }
+    StandardEvaluationContext sec=this.evaluationCache.get(evalContext);
+    if (sec == null) {
+      sec=new StandardEvaluationContext();
+      sec.setRootObject(evalContext);
+      sec.addPropertyAccessor(new BeanExpressionContextAccessor());
+      sec.addPropertyAccessor(new BeanFactoryAccessor());
+      sec.addPropertyAccessor(new MapAccessor());
+      customizeEvaluationContext(sec);
+      this.evaluationCache.put(evalContext,sec);
+    }
+    return expr.getValue(sec);
+  }
+ catch (  Exception ex) {
+    throw new BeanExpressionException("Expression parsing failed",ex);
+  }
+}

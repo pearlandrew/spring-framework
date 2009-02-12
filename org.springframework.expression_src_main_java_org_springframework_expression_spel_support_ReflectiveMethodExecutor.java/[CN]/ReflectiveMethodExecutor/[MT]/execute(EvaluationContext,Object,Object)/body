@@ -1,0 +1,15 @@
+{
+  try {
+    if (this.argsRequiringConversion != null && arguments != null) {
+      ReflectionHelper.convertArguments(this.method.getParameterTypes(),this.method.isVarArgs(),context.getTypeConverter(),this.argsRequiringConversion,arguments);
+    }
+    if (this.method.isVarArgs()) {
+      arguments=ReflectionHelper.setupArgumentsForVarargsInvocation(this.method.getParameterTypes(),arguments);
+    }
+    ReflectionUtils.makeAccessible(this.method);
+    return this.method.invoke(target,arguments);
+  }
+ catch (  Exception ex) {
+    throw new AccessException("Problem invoking method: " + this.method,ex);
+  }
+}

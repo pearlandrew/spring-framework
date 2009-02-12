@@ -1,11 +1,16 @@
 {
   try {
-    Method m=HasRoleExecutor.class.getMethod("hasRole",new String[]{}.getClass());
-    Object[] args=ReflectionUtils.prepareArguments(tc,m,methodArguments);
+    Method m=HasRoleExecutor.class.getMethod("hasRole",String[].class);
+    Object[] args=arguments;
+    if (args != null) {
+      ReflectionHelper.convertArguments(m.getParameterTypes(),m.isVarArgs(),tc,args);
+    }
+    if (m.isVarArgs()) {
+      args=ReflectionHelper.setupArgumentsForVarargsInvocation(m.getParameterTypes(),args);
+    }
     return m.invoke(null,args);
   }
- catch (  Exception e) {
-    e.printStackTrace();
-    throw new AccessException("Problem invoking hasRole");
+ catch (  Exception ex) {
+    throw new AccessException("Problem invoking hasRole",ex);
   }
 }

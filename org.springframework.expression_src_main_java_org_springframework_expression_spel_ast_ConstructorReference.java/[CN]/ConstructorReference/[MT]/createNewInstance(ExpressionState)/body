@@ -6,24 +6,21 @@
     arguments[i]=childValue;
     argumentTypes[i]=childValue.getClass();
   }
-  if (cachedExecutor != null) {
+  ConstructorExecutor executorToUse=this.cachedExecutor;
+  if (executorToUse != null) {
     try {
-      return cachedExecutor.execute(state.getEvaluationContext(),arguments);
+      return executorToUse.execute(state.getEvaluationContext(),arguments);
     }
  catch (    AccessException ae) {
+      this.cachedExecutor=null;
     }
   }
   String typename=(String)getChild(0).getValueInternal(state);
-  cachedExecutor=findExecutorForConstructor(typename,argumentTypes,state);
+  executorToUse=findExecutorForConstructor(typename,argumentTypes,state);
   try {
-    return cachedExecutor.execute(state.getEvaluationContext(),arguments);
+    return executorToUse.execute(state.getEvaluationContext(),arguments);
   }
  catch (  AccessException ae) {
     throw new SpelException(ae,SpelMessages.EXCEPTION_DURING_CONSTRUCTOR_INVOCATION,typename,ae.getMessage());
-  }
- finally {
-    if (!useCaching) {
-      cachedExecutor=null;
-    }
   }
 }

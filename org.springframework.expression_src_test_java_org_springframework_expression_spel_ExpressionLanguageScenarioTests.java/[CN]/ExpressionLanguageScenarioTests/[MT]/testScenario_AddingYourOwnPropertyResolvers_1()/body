@@ -1,26 +1,15 @@
 {
+  SpelAntlrExpressionParser parser=new SpelAntlrExpressionParser();
+  StandardEvaluationContext ctx=new StandardEvaluationContext();
+  ctx.addPropertyAccessor(new FruitColourAccessor());
+  Expression expr=parser.parseExpression("orange");
+  Object value=expr.getValue(ctx);
+  assertEquals(Color.orange,value);
   try {
-    SpelExpressionParser parser=new SpelExpressionParser();
-    StandardEvaluationContext ctx=new StandardEvaluationContext();
-    ctx.addPropertyAccessor(new FruitColourAccessor());
-    Expression expr=parser.parseExpression("orange");
-    Object value=expr.getValue(ctx);
-    assertEquals(Color.orange,value);
-    try {
-      expr.setValue(ctx,Color.blue);
-      fail("Should not be allowed to set oranges to be blue !");
-    }
- catch (    EvaluationException ee) {
-      SpelException ele=(SpelException)ee;
-      assertEquals(ele.getMessageUnformatted(),SpelMessages.PROPERTY_OR_FIELD_SETTER_NOT_FOUND);
-    }
+    expr.setValue(ctx,Color.blue);
+    fail("Should not be allowed to set oranges to be blue !");
   }
- catch (  EvaluationException ee) {
-    ee.printStackTrace();
-    fail("Unexpected Exception: " + ee.getMessage());
-  }
-catch (  ParseException pe) {
-    pe.printStackTrace();
-    fail("Unexpected Exception: " + pe.getMessage());
+ catch (  SpelException ee) {
+    assertEquals(ee.getMessageUnformatted(),SpelMessages.PROPERTY_OR_FIELD_SETTER_NOT_FOUND);
   }
 }

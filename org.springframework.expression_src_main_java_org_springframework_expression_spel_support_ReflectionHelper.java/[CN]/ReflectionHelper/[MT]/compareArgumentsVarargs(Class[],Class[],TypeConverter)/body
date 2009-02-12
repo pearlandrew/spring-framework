@@ -1,0 +1,68 @@
+{
+  ArgsMatchKind match=ArgsMatchKind.EXACT;
+  List<Integer> argsRequiringConversion=null;
+  for (int i=0; i < expectedArgTypes.length - 1 && match != null; i++) {
+    Class suppliedArg=suppliedArgTypes[i];
+    Class expectedArg=expectedArgTypes[i];
+    if (expectedArg != suppliedArg) {
+      if (expectedArg.isAssignableFrom(suppliedArg) || ClassUtils.isAssignableValue(expectedArg,suppliedArg)) {
+        if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
+          match=ArgsMatchKind.CLOSE;
+        }
+      }
+ else       if (typeConverter.canConvert(suppliedArg,expectedArg)) {
+        if (argsRequiringConversion == null) {
+          argsRequiringConversion=new ArrayList<Integer>();
+        }
+        argsRequiringConversion.add(i);
+        match=ArgsMatchKind.REQUIRES_CONVERSION;
+      }
+ else {
+        match=null;
+      }
+    }
+  }
+  if (match == null) {
+    return null;
+  }
+  if (suppliedArgTypes.length == expectedArgTypes.length && expectedArgTypes[expectedArgTypes.length - 1] == suppliedArgTypes[suppliedArgTypes.length - 1]) {
+  }
+ else {
+    Class varargsParameterType=expectedArgTypes[expectedArgTypes.length - 1].getComponentType();
+    for (int i=expectedArgTypes.length - 1; i < suppliedArgTypes.length; i++) {
+      Class suppliedArg=suppliedArgTypes[i];
+      if (varargsParameterType != suppliedArg) {
+        if (ClassUtils.isAssignable(varargsParameterType,suppliedArg)) {
+          if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
+            match=ArgsMatchKind.CLOSE;
+          }
+        }
+ else         if (typeConverter.canConvert(suppliedArg,varargsParameterType)) {
+          if (argsRequiringConversion == null) {
+            argsRequiringConversion=new ArrayList<Integer>();
+          }
+          argsRequiringConversion.add(i);
+          match=ArgsMatchKind.REQUIRES_CONVERSION;
+        }
+ else {
+          match=null;
+        }
+      }
+    }
+  }
+  if (match == null) {
+    return null;
+  }
+ else {
+    if (match == ArgsMatchKind.REQUIRES_CONVERSION) {
+      int[] argsArray=new int[argsRequiringConversion.size()];
+      for (int i=0; i < argsRequiringConversion.size(); i++) {
+        argsArray[i]=argsRequiringConversion.get(i);
+      }
+      return new ArgumentsMatchInfo(match,argsArray);
+    }
+ else {
+      return new ArgumentsMatchInfo(match);
+    }
+  }
+}

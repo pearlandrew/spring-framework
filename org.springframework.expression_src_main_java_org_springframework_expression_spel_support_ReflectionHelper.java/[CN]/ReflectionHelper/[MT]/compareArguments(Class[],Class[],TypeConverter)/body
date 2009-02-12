@@ -1,0 +1,40 @@
+{
+  ArgsMatchKind match=ArgsMatchKind.EXACT;
+  List<Integer> argsRequiringConversion=null;
+  for (int i=0; i < expectedArgTypes.length && match != null; i++) {
+    Class suppliedArg=suppliedArgTypes[i];
+    Class expectedArg=expectedArgTypes[i];
+    if (expectedArg != suppliedArg) {
+      if (ClassUtils.isAssignable(expectedArg,suppliedArg)) {
+        if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
+          match=ArgsMatchKind.CLOSE;
+        }
+      }
+ else       if (typeConverter.canConvert(suppliedArg,expectedArg)) {
+        if (argsRequiringConversion == null) {
+          argsRequiringConversion=new ArrayList<Integer>();
+        }
+        argsRequiringConversion.add(i);
+        match=ArgsMatchKind.REQUIRES_CONVERSION;
+      }
+ else {
+        match=null;
+      }
+    }
+  }
+  if (match == null) {
+    return null;
+  }
+ else {
+    if (match == ArgsMatchKind.REQUIRES_CONVERSION) {
+      int[] argsArray=new int[argsRequiringConversion.size()];
+      for (int i=0; i < argsRequiringConversion.size(); i++) {
+        argsArray[i]=argsRequiringConversion.get(i);
+      }
+      return new ArgumentsMatchInfo(match,argsArray);
+    }
+ else {
+      return new ArgumentsMatchInfo(match);
+    }
+  }
+}

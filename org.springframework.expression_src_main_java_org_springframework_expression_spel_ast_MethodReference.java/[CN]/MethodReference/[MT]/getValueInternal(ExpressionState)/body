@@ -7,19 +7,21 @@
   if (currentContext == null) {
     throw new SpelException(getCharPositionInLine(),SpelMessages.ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT,formatMethodForMessage(name,getTypes(arguments)));
   }
-  if (fastInvocationAccessor != null) {
+  MethodExecutor executorToUse=this.cachedExecutor;
+  if (executorToUse != null) {
     try {
-      return fastInvocationAccessor.execute(state.getEvaluationContext(),state.getActiveContextObject(),arguments);
+      return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject(),arguments);
     }
  catch (    AccessException ae) {
+      this.cachedExecutor=null;
     }
   }
-  fastInvocationAccessor=findAccessorForMethod(name,getTypes(arguments),state);
+  executorToUse=findAccessorForMethod(this.name,getTypes(arguments),state);
+  this.cachedExecutor=executorToUse;
   try {
-    return fastInvocationAccessor.execute(state.getEvaluationContext(),state.getActiveContextObject(),arguments);
+    return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject(),arguments);
   }
  catch (  AccessException ae) {
-    ae.printStackTrace();
-    throw new SpelException(getCharPositionInLine(),ae,SpelMessages.EXCEPTION_DURING_METHOD_INVOCATION,name,state.getActiveContextObject().getClass().getName(),ae.getMessage());
+    throw new SpelException(getCharPositionInLine(),ae,SpelMessages.EXCEPTION_DURING_METHOD_INVOCATION,this.name,state.getActiveContextObject().getClass().getName(),ae.getMessage());
   }
 }

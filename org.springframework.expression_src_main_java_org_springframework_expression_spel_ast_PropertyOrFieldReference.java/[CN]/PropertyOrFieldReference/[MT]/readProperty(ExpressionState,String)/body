@@ -1,0 +1,29 @@
+{
+  Object contextObject=state.getActiveContextObject();
+  EvaluationContext eContext=state.getEvaluationContext();
+  PropertyAccessor accessorToUse=this.cachedReadAccessor;
+  if (accessorToUse != null) {
+    try {
+      return accessorToUse.read(state.getEvaluationContext(),contextObject,name);
+    }
+ catch (    AccessException ae) {
+      this.cachedReadAccessor=null;
+    }
+  }
+  Class<?> contextObjectClass=getObjectClass(contextObject);
+  List<PropertyAccessor> accessorsToTry=getPropertyAccessorsToTry(contextObjectClass,state);
+  if (accessorsToTry != null) {
+    try {
+      for (      PropertyAccessor accessor : accessorsToTry) {
+        if (accessor.canRead(eContext,contextObject,name)) {
+          this.cachedReadAccessor=accessor;
+          return accessor.read(eContext,contextObject,name);
+        }
+      }
+    }
+ catch (    AccessException ae) {
+      throw new SpelException(ae,SpelMessages.EXCEPTION_DURING_PROPERTY_READ,name,ae.getMessage());
+    }
+  }
+  throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_FOUND,name,FormatHelper.formatClassNameForMessage(contextObjectClass));
+}

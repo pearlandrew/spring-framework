@@ -1,0 +1,53 @@
+{
+  if (target == null) {
+    return null;
+  }
+  Class<?> type=(target instanceof Class ? (Class<?>)target : target.getClass());
+  if (type.isArray() && name.equals("length")) {
+    if (target instanceof Class) {
+      throw new AccessException("Cannot access length on array class itself");
+    }
+    return Array.getLength(target);
+  }
+  CacheKey cacheKey=new CacheKey(type,name);
+  Member cachedMember=this.readerCache.get(cacheKey);
+  if (cachedMember == null || cachedMember instanceof Method) {
+    Method method=(Method)cachedMember;
+    if (method == null) {
+      method=findGetterForProperty(name,type,target instanceof Class);
+      if (method != null) {
+        cachedMember=method;
+        this.readerCache.put(cacheKey,cachedMember);
+      }
+    }
+    if (method != null) {
+      try {
+        ReflectionUtils.makeAccessible(method);
+        return method.invoke(target);
+      }
+ catch (      Exception ex) {
+        throw new AccessException("Unable to access property '" + name + "' through getter",ex);
+      }
+    }
+  }
+  if (cachedMember == null || cachedMember instanceof Field) {
+    Field field=(Field)cachedMember;
+    if (field == null) {
+      field=findField(name,type,target instanceof Class);
+      if (field != null) {
+        cachedMember=field;
+        this.readerCache.put(cacheKey,cachedMember);
+      }
+    }
+    if (field != null) {
+      try {
+        ReflectionUtils.makeAccessible(field);
+        return field.get(target);
+      }
+ catch (      Exception ex) {
+        throw new AccessException("Unable to access field: " + name,ex);
+      }
+    }
+  }
+  throw new AccessException("Neither getter nor field found for property '" + name + "'");
+}

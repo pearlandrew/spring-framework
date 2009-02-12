@@ -7,15 +7,11 @@
     throw new SpelException(getCharPositionInLine(),SpelMessages.FUNCTION_MUST_BE_STATIC,m.getDeclaringClass().getName() + "." + m.getName(),name);
   }
   if (functionArgs != null) {
-    EvaluationContext ctx=state.getEvaluationContext();
-    TypeConverter converter=null;
-    if (ctx.getTypeUtils() != null) {
-      converter=ctx.getTypeUtils().getTypeConverter();
-    }
-    ReflectionUtils.convertArguments(m.getParameterTypes(),m.isVarArgs(),converter,functionArgs);
+    TypeConverter converter=state.getEvaluationContext().getTypeConverter();
+    ReflectionHelper.convertArguments(m.getParameterTypes(),m.isVarArgs(),converter,functionArgs);
   }
   if (m.isVarArgs()) {
-    functionArgs=ReflectionUtils.setupArgumentsForVarargsInvocation(m.getParameterTypes(),functionArgs);
+    functionArgs=ReflectionHelper.setupArgumentsForVarargsInvocation(m.getParameterTypes(),functionArgs);
   }
   try {
     return m.invoke(m.getClass(),functionArgs);
