@@ -1,14 +1,48 @@
 {
   Assert.notNull(lhsType,"Left-hand side type must not be null");
   Assert.notNull(rhsType,"Right-hand side type must not be null");
-  if (lhsType.equals(rhsType)) {
+  if (lhsType.equals(rhsType) || lhsType.equals(Object.class)) {
     return true;
   }
-  if (lhsType instanceof Class && rhsType instanceof Class) {
-    return ClassUtils.isAssignable((Class)lhsType,(Class)rhsType);
+  if (lhsType instanceof Class) {
+    Class lhsClass=(Class)lhsType;
+    if (rhsType instanceof Class) {
+      return ClassUtils.isAssignable(lhsClass,(Class)rhsType);
+    }
+ else     if (rhsType instanceof ParameterizedType) {
+      Type rhsRaw=((ParameterizedType)rhsType).getRawType();
+      if (rhsRaw instanceof Class) {
+        return ClassUtils.isAssignable(lhsClass,(Class)rhsRaw);
+      }
+    }
+ else     if (lhsClass.isArray() && rhsType instanceof GenericArrayType) {
+      Type rhsComponent=((GenericArrayType)rhsType).getGenericComponentType();
+      return isAssignable(lhsClass.getComponentType(),rhsComponent);
+    }
   }
-  if (lhsType instanceof ParameterizedType && rhsType instanceof ParameterizedType) {
-    return isAssignable((ParameterizedType)lhsType,(ParameterizedType)rhsType);
+  if (lhsType instanceof ParameterizedType) {
+    if (rhsType instanceof Class) {
+      Type lhsRaw=((ParameterizedType)lhsType).getRawType();
+      if (lhsRaw instanceof Class) {
+        return ClassUtils.isAssignable((Class)lhsRaw,(Class)rhsType);
+      }
+    }
+ else     if (rhsType instanceof ParameterizedType) {
+      return isAssignable((ParameterizedType)lhsType,(ParameterizedType)rhsType);
+    }
+  }
+  if (lhsType instanceof GenericArrayType) {
+    Type lhsComponent=((GenericArrayType)lhsType).getGenericComponentType();
+    if (rhsType instanceof Class) {
+      Class rhsClass=(Class)rhsType;
+      if (rhsClass.isArray()) {
+        return isAssignable(lhsComponent,rhsClass.getComponentType());
+      }
+    }
+ else     if (rhsType instanceof GenericArrayType) {
+      Type rhsComponent=((GenericArrayType)rhsType).getGenericComponentType();
+      return isAssignable(lhsComponent,rhsComponent);
+    }
   }
   if (lhsType instanceof WildcardType) {
     return isAssignable((WildcardType)lhsType,rhsType);
