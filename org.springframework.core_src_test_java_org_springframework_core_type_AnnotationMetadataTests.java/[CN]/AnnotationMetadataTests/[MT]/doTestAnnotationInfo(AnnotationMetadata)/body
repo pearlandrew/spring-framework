@@ -9,13 +9,19 @@
   assertEquals(Serializable.class.getName(),metadata.getInterfaceNames()[0]);
   assertTrue(metadata.hasAnnotation(Component.class.getName()));
   assertTrue(metadata.hasAnnotation(Scope.class.getName()));
-  assertEquals(2,metadata.getAnnotationTypes().size());
+  assertTrue(metadata.hasAnnotation(SpecialAttr.class.getName()));
+  assertEquals(3,metadata.getAnnotationTypes().size());
   assertTrue(metadata.getAnnotationTypes().contains(Component.class.getName()));
   assertTrue(metadata.getAnnotationTypes().contains(Scope.class.getName()));
-  Map<String,Object> cattrs=metadata.getAnnotationAttributes(Component.class.getName());
-  assertEquals(1,cattrs.size());
-  assertEquals("myName",cattrs.get("value"));
-  Map<String,Object> sattrs=metadata.getAnnotationAttributes(Scope.class.getName());
-  assertEquals(1,sattrs.size());
-  assertEquals("myScope",sattrs.get("value"));
+  assertTrue(metadata.getAnnotationTypes().contains(SpecialAttr.class.getName()));
+  Map<String,Object> compAttrs=metadata.getAnnotationAttributes(Component.class.getName());
+  assertEquals(1,compAttrs.size());
+  assertEquals("myName",compAttrs.get("value"));
+  Map<String,Object> scopeAttrs=metadata.getAnnotationAttributes(Scope.class.getName());
+  assertEquals(1,scopeAttrs.size());
+  assertEquals("myScope",scopeAttrs.get("value"));
+  Map<String,Object> specialAttrs=metadata.getAnnotationAttributes(SpecialAttr.class.getName());
+  assertEquals(2,specialAttrs.size());
+  assertEquals(String.class,specialAttrs.get("clazz"));
+  assertEquals(Thread.State.NEW,specialAttrs.get("state"));
 }
