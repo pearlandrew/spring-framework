@@ -1,18 +1,14 @@
 {
   Method[] ms=clazz.getMethods();
-  StringBuilder sb=new StringBuilder(propertyName.length() + 3);
-  sb.append("get").append(propertyName.substring(0,1).toUpperCase()).append(propertyName.substring(1));
-  String expectedGetterName=sb.toString();
+  String getterName="get" + StringUtils.capitalize(propertyName);
   for (  Method method : ms) {
-    if (method.getName().equals(expectedGetterName) && method.getParameterTypes().length == 0 && (!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
+    if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 && (!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
       return method;
     }
   }
-  sb=new StringBuilder(propertyName.length() + 2);
-  sb.append("is").append(propertyName.substring(0,1).toUpperCase()).append(propertyName.substring(1));
-  expectedGetterName=sb.toString();
+  getterName="is" + StringUtils.capitalize(propertyName);
   for (  Method method : ms) {
-    if (method.getName().equals(expectedGetterName) && method.getParameterTypes().length == 0 && boolean.class.equals(method.getReturnType()) && (!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
+    if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 && boolean.class.equals(method.getReturnType()) && (!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
       return method;
     }
   }
