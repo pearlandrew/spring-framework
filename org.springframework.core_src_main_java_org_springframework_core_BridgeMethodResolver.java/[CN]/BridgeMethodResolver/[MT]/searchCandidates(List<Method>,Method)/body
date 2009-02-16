@@ -1,9 +1,18 @@
 {
+  if (candidateMethods.isEmpty()) {
+    return null;
+  }
   Map<TypeVariable,Type> typeParameterMap=GenericTypeResolver.getTypeVariableMap(bridgeMethod.getDeclaringClass());
+  Method previousMethod=null;
+  boolean sameSig=true;
   for (  Method candidateMethod : candidateMethods) {
     if (isBridgeMethodFor(bridgeMethod,candidateMethod,typeParameterMap)) {
       return candidateMethod;
     }
+ else     if (previousMethod != null) {
+      sameSig=sameSig && Arrays.equals(candidateMethod.getGenericParameterTypes(),previousMethod.getGenericParameterTypes());
+    }
+    previousMethod=candidateMethod;
   }
-  return null;
+  return (sameSig ? candidateMethods.get(0) : null);
 }
