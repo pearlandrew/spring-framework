@@ -1,6 +1,9 @@
 {
   Assert.notNull(name,"Name must not be null");
   Class clazz=resolvePrimitiveClassName(name);
+  if (clazz == null) {
+    clazz=commonClassCache.get(name);
+  }
   if (clazz != null) {
     return clazz;
   }
@@ -9,16 +12,14 @@
     Class elementClass=forName(elementClassName,classLoader);
     return Array.newInstance(elementClass,0).getClass();
   }
-  int internalArrayMarker=name.indexOf(INTERNAL_ARRAY_PREFIX);
-  if (internalArrayMarker != -1 && name.endsWith(";")) {
-    String elementClassName=null;
-    if (internalArrayMarker == 0) {
-      elementClassName=name.substring(INTERNAL_ARRAY_PREFIX.length(),name.length() - 1);
-    }
- else     if (name.startsWith("[")) {
-      elementClassName=name.substring(1);
-    }
-    Class elementClass=forName(elementClassName,classLoader);
+  if (name.startsWith(NON_PRIMITIVE_ARRAY_PREFIX) && name.endsWith(";")) {
+    String elementName=name.substring(NON_PRIMITIVE_ARRAY_PREFIX.length(),name.length() - 1);
+    Class elementClass=forName(elementName,classLoader);
+    return Array.newInstance(elementClass,0).getClass();
+  }
+  if (name.startsWith(INTERNAL_ARRAY_PREFIX)) {
+    String elementName=name.substring(INTERNAL_ARRAY_PREFIX.length());
+    Class elementClass=forName(elementName,classLoader);
     return Array.newInstance(elementClass,0).getClass();
   }
   ClassLoader classLoaderToUse=classLoader;
