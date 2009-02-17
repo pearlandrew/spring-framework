@@ -1,0 +1,32 @@
+{
+  Class<? extends ApplicationEvent> eventType=event.getClass();
+  Class sourceType=event.getSource().getClass();
+  ListenerCacheKey cacheKey=new ListenerCacheKey(eventType,sourceType);
+  ListenerRetriever retriever=this.retrieverCache.get(cacheKey);
+  if (retriever != null) {
+    return retriever.getApplicationListeners();
+  }
+ else {
+    retriever=new ListenerRetriever();
+    LinkedList<ApplicationListener> allListeners=new LinkedList<ApplicationListener>();
+    for (    ApplicationListener listener : this.defaultRetriever.applicationListeners) {
+      if (supportsEvent(listener,eventType,sourceType)) {
+        retriever.applicationListeners.add(listener);
+        allListeners.add(listener);
+      }
+    }
+    if (!this.defaultRetriever.applicationListenerBeans.isEmpty()) {
+      BeanFactory beanFactory=getBeanFactory();
+      for (      String listenerBeanName : this.defaultRetriever.applicationListenerBeans) {
+        ApplicationListener listener=beanFactory.getBean(listenerBeanName,ApplicationListener.class);
+        if (supportsEvent(listener,eventType,sourceType)) {
+          retriever.applicationListenerBeans.add(listenerBeanName);
+          allListeners.add(listener);
+        }
+      }
+    }
+    OrderComparator.sort(allListeners);
+    this.retrieverCache.put(cacheKey,retriever);
+    return allListeners;
+  }
+}

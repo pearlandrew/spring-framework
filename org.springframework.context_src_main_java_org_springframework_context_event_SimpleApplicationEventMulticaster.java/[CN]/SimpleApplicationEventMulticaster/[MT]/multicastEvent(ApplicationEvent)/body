@@ -1,13 +1,16 @@
 {
-  for (  final ApplicationListener listener : getApplicationListeners()) {
-    SmartApplicationListener smartListener=(listener instanceof SmartApplicationListener ? (SmartApplicationListener)listener : new GenericApplicationListenerAdapter(listener));
-    if (smartListener.supportsEventType(event.getClass())) {
-      getTaskExecutor().execute(new Runnable(){
+  for (  final ApplicationListener listener : getApplicationListeners(event)) {
+    Executor executor=getTaskExecutor();
+    if (executor != null) {
+      executor.execute(new Runnable(){
         @SuppressWarnings("unchecked") public void run(){
           listener.onApplicationEvent(event);
         }
       }
 );
+    }
+ else {
+      listener.onApplicationEvent(event);
     }
   }
 }
