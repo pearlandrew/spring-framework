@@ -1,10 +1,12 @@
 {
+  Map singletonMap=Collections.singletonMap("myKey","myValue");
   if (parentChildSeparation) {
     MutablePropertyValues pvs1=new MutablePropertyValues();
     pvs1.addPropertyValue("age","${age}");
     MutablePropertyValues pvs2=new MutablePropertyValues();
     pvs2.addPropertyValue("name","name${var}${var}${");
     pvs2.addPropertyValue("spouse",new RuntimeBeanReference("${ref}"));
+    pvs2.addPropertyValue("someMap",singletonMap);
     RootBeanDefinition parent=new RootBeanDefinition(TestBean.class,pvs1);
     ChildBeanDefinition bd=new ChildBeanDefinition("${parent}",pvs2);
     factory.registerBeanDefinition("parent1",parent);
@@ -15,6 +17,7 @@
     pvs.addPropertyValue("age","${age}");
     pvs.addPropertyValue("name","name${var}${var}${");
     pvs.addPropertyValue("spouse",new RuntimeBeanReference("${ref}"));
+    pvs.addPropertyValue("someMap",singletonMap);
     RootBeanDefinition bd=new RootBeanDefinition(TestBean.class,pvs);
     factory.registerBeanDefinition("tb1",bd);
   }
@@ -61,6 +64,8 @@
   assertEquals("namemyvarmyvar${",tb1.getName());
   assertEquals("myvarname98",tb2.getName());
   assertEquals(tb2,tb1.getSpouse());
+  assertEquals(1,tb1.getSomeMap().size());
+  assertEquals("myValue",tb1.getSomeMap().get("myKey"));
   assertEquals(2,tb2.getFriends().size());
   assertEquals("na98me",tb2.getFriends().iterator().next());
   assertEquals(tb2,tb2.getFriends().toArray()[1]);

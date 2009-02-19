@@ -26,5 +26,19 @@
   if (classLoaderToUse == null) {
     classLoaderToUse=getDefaultClassLoader();
   }
-  return classLoaderToUse.loadClass(name);
+  try {
+    return classLoaderToUse.loadClass(name);
+  }
+ catch (  ClassNotFoundException ex) {
+    int lastDotIndex=name.lastIndexOf('.');
+    if (lastDotIndex != -1) {
+      String innerClassName=name.substring(0,lastDotIndex) + '$' + name.substring(lastDotIndex + 1);
+      try {
+        return classLoaderToUse.loadClass(innerClassName);
+      }
+ catch (      ClassNotFoundException ex2) {
+      }
+    }
+    throw ex;
+  }
 }
