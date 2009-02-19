@@ -1,0 +1,24 @@
+{
+  managerControl.expectAndReturn(manager.getTransaction(),tx);
+  txControl.expectAndReturn(tx.getRollbackOnly(),false);
+  managerControl.expectAndReturn(manager.getTransaction(),tx);
+  tx.commit();
+  manager.flush();
+  factoryControl.replay();
+  managerControl.replay();
+  txControl.replay();
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  tt.execute(new TransactionCallbackWithoutResult(){
+    public void doInTransactionWithoutResult(    TransactionStatus status){
+      assertTrue(TransactionSynchronizationManager.hasResource(factory));
+      status.flush();
+    }
+  }
+);
+  assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+  assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+  factoryControl.verify();
+  managerControl.verify();
+  txControl.verify();
+}
