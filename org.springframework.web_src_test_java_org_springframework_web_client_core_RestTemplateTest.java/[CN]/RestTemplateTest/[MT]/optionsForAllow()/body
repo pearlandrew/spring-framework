@@ -1,0 +1,14 @@
+{
+  expect(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.OPTIONS)).andReturn(request);
+  expect(request.execute()).andReturn(response);
+  expect(errorHandler.hasError(response)).andReturn(false);
+  HttpHeaders responseHeaders=new HttpHeaders();
+  EnumSet<HttpMethod> expected=EnumSet.of(HttpMethod.GET,HttpMethod.POST);
+  responseHeaders.setAllow(expected);
+  expect(response.getHeaders()).andReturn(responseHeaders);
+  response.close();
+  replayMocks();
+  EnumSet<HttpMethod> result=template.optionsForAllow("http://example.com");
+  assertEquals("Invalid OPTIONS result",expected,result);
+  verifyMocks();
+}

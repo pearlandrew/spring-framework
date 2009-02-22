@@ -1,0 +1,20 @@
+{
+  expect(converter.supports(String.class)).andReturn(true).times(3);
+  MediaType textPlain=new MediaType("text","plain");
+  expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain)).times(2);
+  expect(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.GET)).andReturn(request);
+  HttpHeaders requestHeaders=new HttpHeaders();
+  expect(request.getHeaders()).andReturn(requestHeaders);
+  expect(request.execute()).andReturn(response);
+  expect(errorHandler.hasError(response)).andReturn(false);
+  HttpHeaders responseHeaders=new HttpHeaders();
+  responseHeaders.setContentType(textPlain);
+  expect(response.getHeaders()).andReturn(responseHeaders);
+  String expected="Hello World";
+  expect(converter.read(String.class,response)).andReturn(expected);
+  response.close();
+  replayMocks();
+  String result=template.getForObject("http://example.com",String.class);
+  assertEquals("Invalid GET result",expected,result);
+  verifyMocks();
+}

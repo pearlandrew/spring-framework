@@ -1,0 +1,12 @@
+{
+  expect(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.HEAD)).andReturn(request);
+  expect(request.execute()).andReturn(response);
+  expect(errorHandler.hasError(response)).andReturn(false);
+  HttpHeaders responseHeaders=new HttpHeaders();
+  expect(response.getHeaders()).andReturn(responseHeaders);
+  response.close();
+  replayMocks();
+  HttpHeaders result=template.headForHeaders("http://example.com");
+  assertSame("Invalid headers returned",responseHeaders,result);
+  verifyMocks();
+}

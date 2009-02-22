@@ -1,0 +1,11 @@
+{
+  jettyServer=new Server(8889);
+  Context jettyContext=new Context(jettyServer,"/");
+  String s="H\u00e9llo W\u00f6rld";
+  byte[] bytes=s.getBytes("UTF-8");
+  jettyContext.addServlet(new ServletHolder(new GetServlet(bytes,"text/plain;charset=utf-8")),"/get");
+  jettyContext.addServlet(new ServletHolder(new PostServlet(s,new URI("http://localhost:8889/post/1"))),"/post");
+  jettyContext.addServlet(new ServletHolder(new ErrorServlet(404)),"/errors/notfound");
+  jettyContext.addServlet(new ServletHolder(new ErrorServlet(500)),"/errors/server");
+  jettyServer.start();
+}
