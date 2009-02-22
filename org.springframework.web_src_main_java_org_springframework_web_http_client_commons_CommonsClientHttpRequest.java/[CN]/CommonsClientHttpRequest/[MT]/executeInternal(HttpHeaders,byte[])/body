@@ -1,0 +1,15 @@
+{
+  for (  Map.Entry<String,List<String>> entry : headers.entrySet()) {
+    String headerName=entry.getKey();
+    for (    String headerValue : entry.getValue()) {
+      httpMethod.addRequestHeader(headerName,headerValue);
+    }
+  }
+  if (httpMethod instanceof EntityEnclosingMethod) {
+    EntityEnclosingMethod entityEnclosingMethod=(EntityEnclosingMethod)httpMethod;
+    RequestEntity requestEntity=new ByteArrayRequestEntity(output);
+    entityEnclosingMethod.setRequestEntity(requestEntity);
+  }
+  httpClient.executeMethod(httpMethod);
+  return new CommonsClientHttpResponse(httpMethod);
+}
