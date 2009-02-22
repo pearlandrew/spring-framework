@@ -1,0 +1,15 @@
+{
+  Assert.notNull(uriVariableValues,"'uriVariableValues' must not be null");
+  if (uriVariableValues.length != variableNames.size()) {
+    throw new IllegalArgumentException("Invalid amount of variables values in [" + uriTemplate + "]: expected "+ variableNames.size()+ "; got "+ uriVariableValues.length);
+  }
+  Matcher m=NAMES_PATTERN.matcher(uriTemplate);
+  StringBuffer buffer=new StringBuffer();
+  int i=0;
+  while (m.find()) {
+    String uriVariable=uriVariableValues[i++];
+    m.appendReplacement(buffer,uriVariable);
+  }
+  m.appendTail(buffer);
+  return URI.create(buffer.toString());
+}
