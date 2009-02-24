@@ -1,0 +1,12 @@
+{
+  expect(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.PUT)).andReturn(request);
+  HttpHeaders requestHeaders=new HttpHeaders();
+  expect(request.getHeaders()).andReturn(requestHeaders);
+  expect(request.execute()).andReturn(response);
+  expect(errorHandler.hasError(response)).andReturn(false);
+  response.close();
+  replayMocks();
+  template.put("http://example.com",null);
+  assertEquals("Invalid content length",0,requestHeaders.getContentLength());
+  verifyMocks();
+}
