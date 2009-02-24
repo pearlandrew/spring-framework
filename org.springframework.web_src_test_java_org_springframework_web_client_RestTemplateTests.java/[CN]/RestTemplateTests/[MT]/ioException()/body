@@ -1,0 +1,16 @@
+{
+  expect(converter.supports(String.class)).andReturn(true).times(2);
+  MediaType mediaType=new MediaType("foo","bar");
+  expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(mediaType));
+  expect(requestFactory.createRequest(new URI("http://example.com/resource"),HttpMethod.GET)).andReturn(request);
+  expect(request.getHeaders()).andReturn(new HttpHeaders());
+  expect(request.execute()).andThrow(new IOException());
+  replayMocks();
+  try {
+    template.getForObject("http://example.com/resource",String.class);
+    fail("RestClientException expected");
+  }
+ catch (  ResourceAccessException ex) {
+  }
+  verifyMocks();
+}
