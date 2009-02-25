@@ -1,14 +1,14 @@
 {
   prepare();
   String name=(this.name != null ? this.name : this.beanName);
-  Class jobClass=(this.concurrent ? (Class)MethodInvokingJob.class : StatefulMethodInvokingJob.class);
+  Class jobClass=(this.concurrent ? MethodInvokingJob.class : StatefulMethodInvokingJob.class);
   this.jobDetail=new JobDetail(name,this.group,jobClass);
   this.jobDetail.getJobDataMap().put("methodInvoker",this);
   this.jobDetail.setVolatility(true);
   this.jobDetail.setDurability(true);
   if (this.jobListenerNames != null) {
-    for (int i=0; i < this.jobListenerNames.length; i++) {
-      this.jobDetail.addJobListener(this.jobListenerNames[i]);
+    for (    String jobListenerName : this.jobListenerNames) {
+      this.jobDetail.addJobListener(jobListenerName);
     }
   }
   postProcessJobDetail(this.jobDetail);
