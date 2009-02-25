@@ -1,9 +1,9 @@
 {
   BeanWrapperImpl bw=new BeanWrapperImpl();
   this.beanFactory.initBeanWrapper(bw);
-  Class factoryClass=null;
-  Object factoryBean=null;
-  boolean isStatic=true;
+  Object factoryBean;
+  Class factoryClass;
+  boolean isStatic;
   String factoryBeanName=mbd.getFactoryBeanName();
   if (factoryBeanName != null) {
     if (factoryBeanName.equals(beanName)) {
@@ -17,7 +17,9 @@
     isStatic=false;
   }
  else {
+    factoryBean=null;
     factoryClass=mbd.getBeanClass();
+    isStatic=true;
   }
   Method factoryMethodToUse=null;
   Object[] argsToUse=null;
@@ -54,7 +56,7 @@
     boolean autowiring=(mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
     int minTypeDiffWeight=Integer.MAX_VALUE;
     ConstructorArgumentValues resolvedValues=null;
-    int minNrOfArgs=0;
+    int minNrOfArgs;
     if (explicitArgs != null) {
       minNrOfArgs=explicitArgs.length;
     }
@@ -68,7 +70,7 @@
       Method candidate=candidates[i];
       Class[] paramTypes=candidate.getParameterTypes();
       if (Modifier.isStatic(candidate.getModifiers()) == isStatic && candidate.getName().equals(mbd.getFactoryMethodName()) && paramTypes.length >= minNrOfArgs) {
-        ArgumentsHolder args=null;
+        ArgumentsHolder args;
         if (resolvedValues != null) {
           try {
             args=createArgumentArray(beanName,mbd,resolvedValues,bw,paramTypes,candidate,autowiring);

@@ -34,7 +34,7 @@
   if (constructorToUse == null) {
     boolean autowiring=(chosenCtors != null || mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
     ConstructorArgumentValues resolvedValues=null;
-    int minNrOfArgs=0;
+    int minNrOfArgs;
     if (explicitArgs != null) {
       minNrOfArgs=explicitArgs.length;
     }
@@ -43,7 +43,16 @@
       resolvedValues=new ConstructorArgumentValues();
       minNrOfArgs=resolveConstructorArguments(beanName,mbd,bw,cargs,resolvedValues);
     }
-    Constructor[] candidates=(chosenCtors != null ? chosenCtors : mbd.getBeanClass().getDeclaredConstructors());
+    Constructor[] candidates=chosenCtors;
+    if (candidates == null) {
+      Class beanClass=mbd.getBeanClass();
+      try {
+        candidates=beanClass.getDeclaredConstructors();
+      }
+ catch (      Throwable ex) {
+        throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Resolution of declared constructors on bean Class [" + beanClass.getName() + "] from ClassLoader ["+ beanClass.getClassLoader()+ "] failed",ex);
+      }
+    }
     AutowireUtils.sortConstructors(candidates);
     int minTypeDiffWeight=Integer.MAX_VALUE;
     for (int i=0; i < candidates.length; i++) {
@@ -55,7 +64,7 @@
       if (paramTypes.length < minNrOfArgs) {
         throw new BeanCreationException(mbd.getResourceDescription(),beanName,minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" + beanName+ "' "+ "(hint: specify index and/or type arguments for simple parameters to avoid type ambiguities)");
       }
-      ArgumentsHolder args=null;
+      ArgumentsHolder args;
       List<Exception> causes=null;
       if (resolvedValues != null) {
         try {
