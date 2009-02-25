@@ -1,27 +1,13 @@
 {
-  if (ex instanceof StreamException) {
+  if (ex instanceof StreamException || ex instanceof CannotResolveClassException || ex instanceof ConversionException) {
     if (marshalling) {
-      return new XStreamMarshallingFailureException((StreamException)ex);
+      return new MarshallingFailureException("XStream marshalling exception",ex);
     }
  else {
-      return new XStreamUnmarshallingFailureException((StreamException)ex);
+      return new UnmarshallingFailureException("XStream unmarshalling exception",ex);
     }
   }
- else   if (ex instanceof CannotResolveClassException) {
-    if (marshalling) {
-      return new XStreamMarshallingFailureException((CannotResolveClassException)ex);
-    }
  else {
-      return new XStreamUnmarshallingFailureException((CannotResolveClassException)ex);
-    }
+    return new UncategorizedMappingException("Unknown XStream exception",ex);
   }
- else   if (ex instanceof ConversionException) {
-    if (marshalling) {
-      return new XStreamMarshallingFailureException((ConversionException)ex);
-    }
- else {
-      return new XStreamUnmarshallingFailureException((ConversionException)ex);
-    }
-  }
-  return new XStreamSystemException("Unknown XStream exception: " + ex.getMessage(),ex);
 }

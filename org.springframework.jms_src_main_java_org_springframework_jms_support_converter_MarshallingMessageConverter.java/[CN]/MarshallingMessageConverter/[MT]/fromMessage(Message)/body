@@ -2,20 +2,20 @@
   try {
     if (message instanceof TextMessage) {
       TextMessage textMessage=(TextMessage)message;
-      return unmarshalFromTextMessage(textMessage,unmarshaller);
+      return unmarshalFromTextMessage(textMessage,this.unmarshaller);
     }
  else     if (message instanceof BytesMessage) {
       BytesMessage bytesMessage=(BytesMessage)message;
-      return unmarshalFromBytesMessage(bytesMessage,unmarshaller);
+      return unmarshalFromBytesMessage(bytesMessage,this.unmarshaller);
     }
  else {
-      return unmarshalFromMessage(message,unmarshaller);
+      return unmarshalFromMessage(message,this.unmarshaller);
     }
   }
- catch (  UnmarshallingFailureException ex) {
-    throw new MessageConversionException("Could not unmarshal message [" + message + "]",ex);
+ catch (  IOException ex) {
+    throw new MessageConversionException("Could not access message content: " + message,ex);
   }
-catch (  IOException ex) {
-    throw new MessageConversionException("Could not unmarshal message [" + message + "]",ex);
+catch (  XmlMappingException ex) {
+    throw new MessageConversionException("Could not unmarshal message: " + message,ex);
   }
 }

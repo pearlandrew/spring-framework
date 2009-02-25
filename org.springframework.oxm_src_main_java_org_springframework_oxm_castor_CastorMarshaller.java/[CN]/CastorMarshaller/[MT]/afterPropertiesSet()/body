@@ -1,25 +1,25 @@
 {
-  if (mappingLocations != null && targetClass != null) {
-    throw new IllegalArgumentException("Cannot set both the 'mappingLocations' and 'targetClass' property. " + "Set targetClass for unmarshalling a single class, and 'mappingLocations' for multiple classes'");
+  if (this.mappingLocations != null && this.targetClass != null) {
+    throw new IllegalArgumentException("Cannot set both the 'mappingLocations' and 'targetClass' property. " + "Set 'targetClass' for unmarshalling a single class, and 'mappingLocations' for multiple classes.");
   }
   if (logger.isInfoEnabled()) {
-    if (mappingLocations != null) {
-      logger.info("Configured using " + StringUtils.arrayToCommaDelimitedString(mappingLocations));
+    if (this.mappingLocations != null) {
+      logger.info("Configured using " + StringUtils.arrayToCommaDelimitedString(this.mappingLocations));
     }
- else     if (targetClass != null) {
-      logger.info("Configured for target class [" + targetClass.getName() + "]");
+ else     if (this.targetClass != null) {
+      logger.info("Configured for target class [" + this.targetClass.getName() + "]");
     }
  else {
       logger.info("Using default configuration");
     }
   }
   try {
-    xmlContext=createXMLContext(mappingLocations,targetClass);
+    this.xmlContext=createXMLContext(this.mappingLocations,this.targetClass);
   }
  catch (  MappingException ex) {
-    throw new CastorSystemException("Could not load Castor mapping: " + ex.getMessage(),ex);
+    throw new CastorMappingException("Could not load Castor mapping",ex);
   }
-catch (  ResolverException rex) {
-    throw new CastorSystemException("Could not load Castor mapping: " + rex.getMessage(),rex);
+catch (  ResolverException ex) {
+    throw new CastorMappingException("Could not resolve Castor mapping",ex);
   }
 }

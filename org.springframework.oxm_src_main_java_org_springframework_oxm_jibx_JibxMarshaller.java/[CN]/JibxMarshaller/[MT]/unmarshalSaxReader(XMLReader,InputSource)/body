@@ -1,15 +1,12 @@
 {
   try {
-    Transformer transformer=transformerFactory.newTransformer();
+    Transformer transformer=this.transformerFactory.newTransformer();
     ByteArrayOutputStream os=new ByteArrayOutputStream();
     transformer.transform(new SAXSource(xmlReader,inputSource),new StreamResult(os));
     ByteArrayInputStream is=new ByteArrayInputStream(os.toByteArray());
     return unmarshalInputStream(is);
   }
- catch (  IOException ex) {
-    throw new JibxSystemException(ex);
-  }
-catch (  TransformerException ex) {
-    throw new JibxSystemException(ex);
+ catch (  TransformerException ex) {
+    throw new UnmarshallingFailureException("JiBX unmarshalling exception",ex);
   }
 }

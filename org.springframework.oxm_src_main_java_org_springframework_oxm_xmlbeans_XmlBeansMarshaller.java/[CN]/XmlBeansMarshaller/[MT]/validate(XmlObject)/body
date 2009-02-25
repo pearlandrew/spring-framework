@@ -5,14 +5,13 @@
     validateOptions.setErrorListener(errorsList);
     if (!object.validate(validateOptions)) {
       StringBuilder builder=new StringBuilder("Could not validate XmlObject :");
-      for (Iterator iterator=errorsList.iterator(); iterator.hasNext(); ) {
-        XmlError xmlError=(XmlError)iterator.next();
+      for (      Object anErrorsList : errorsList) {
+        XmlError xmlError=(XmlError)anErrorsList;
         if (xmlError instanceof XmlValidationError) {
           builder.append(xmlError.toString());
         }
       }
-      XmlException ex=new XmlException(builder.toString(),null,errorsList);
-      throw new XmlBeansValidationFailureException(ex);
+      throw new ValidationFailureException("XMLBeans validation failure",new XmlException(builder.toString(),null,errorsList));
     }
   }
 }

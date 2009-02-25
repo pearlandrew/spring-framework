@@ -1,0 +1,17 @@
+{
+  if (domSource.getNode() == null) {
+    try {
+synchronized (this.documentBuilderFactoryMonitor) {
+        if (this.documentBuilderFactory == null) {
+          this.documentBuilderFactory=createDocumentBuilderFactory();
+        }
+      }
+      DocumentBuilder documentBuilder=createDocumentBuilder(this.documentBuilderFactory);
+      domSource.setNode(documentBuilder.newDocument());
+    }
+ catch (    ParserConfigurationException ex) {
+      throw new UnmarshallingFailureException("Could not create document placeholder for DOMSource: " + ex.getMessage(),ex);
+    }
+  }
+  return unmarshalDomNode(domSource.getNode());
+}
