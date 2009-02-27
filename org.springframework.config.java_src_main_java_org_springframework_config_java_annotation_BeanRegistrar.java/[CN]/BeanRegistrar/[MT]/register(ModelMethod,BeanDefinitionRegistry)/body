@@ -1,0 +1,32 @@
+{
+  RootBeanDefinition beanDef=new JavaConfigBeanDefinition();
+  ConfigurationClass configClass=method.getDeclaringClass();
+  beanDef.setFactoryBeanName(configClass.getBeanName());
+  beanDef.setFactoryMethodName(method.getName());
+  Bean bean=method.getRequiredAnnotation(Bean.class);
+  Configuration defaults=configClass.getMetadata();
+  beanDef.setScope(bean.scope());
+  if (bean.autowire() != AnnotationUtils.getDefaultValue(Bean.class,"autowire"))   beanDef.setAutowireMode(bean.autowire().value());
+ else   if (defaults.defaultAutowire() != AnnotationUtils.getDefaultValue(Configuration.class,"defaultAutowire"))   beanDef.setAutowireMode(defaults.defaultAutowire().value());
+  String beanName=method.getName();
+  if (containsBeanDefinitionIncludingAncestry(beanName,registry)) {
+    BeanDefinition existingBeanDef=getBeanDefinitionIncludingAncestry(beanName,registry);
+    if (!(existingBeanDef instanceof JavaConfigBeanDefinition)) {
+      if (bean.allowOverriding() == false) {
+        UsageError error=configClass.new IllegalBeanOverrideError(null,method);
+        throw new MalformedJavaConfigurationException(error);
+      }
+      logger.info(format("Skipping loading bean definition for %s: a definition for bean '%s' already exists. " + "This is likely due to an override in XML.",method,beanName));
+      return;
+    }
+  }
+  beanDef.setRole(bean.role());
+  for (  String alias : bean.aliases())   registry.registerAlias(beanName,alias);
+  String initMethodName=bean.initMethodName();
+  if (hasText(initMethodName))   beanDef.setInitMethodName(initMethodName);
+  String destroyMethodName=bean.destroyMethodName();
+  if (hasText(destroyMethodName))   beanDef.setDestroyMethodName(destroyMethodName);
+  if (bean.dependsOn().length > 0)   beanDef.setDependsOn(bean.dependsOn());
+  logger.info(format("Registering bean definition for @Bean method %s.%s()",configClass.getName(),beanName));
+  registry.registerBeanDefinition(beanName,beanDef);
+}

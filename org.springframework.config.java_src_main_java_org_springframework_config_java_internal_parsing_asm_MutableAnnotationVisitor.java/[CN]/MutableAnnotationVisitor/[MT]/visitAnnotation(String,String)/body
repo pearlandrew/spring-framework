@@ -1,0 +1,14 @@
+{
+  String annoTypeName=AsmUtils.convertTypeDescriptorToClassName(attribAnnoTypeDesc);
+  Class<? extends Annotation> annoType=loadToolingSafeClass(annoTypeName);
+  if (annoType == null)   return AsmUtils.EMPTY_VISITOR.visitAnnotation(attribName,attribAnnoTypeDesc);
+  Annotation anno=createMutableAnnotation(annoType);
+  try {
+    Field attribute=mutableAnno.getClass().getField(attribName);
+    attribute.set(mutableAnno,anno);
+  }
+ catch (  Exception ex) {
+    throw new RuntimeException(ex);
+  }
+  return new MutableAnnotationVisitor(anno);
+}

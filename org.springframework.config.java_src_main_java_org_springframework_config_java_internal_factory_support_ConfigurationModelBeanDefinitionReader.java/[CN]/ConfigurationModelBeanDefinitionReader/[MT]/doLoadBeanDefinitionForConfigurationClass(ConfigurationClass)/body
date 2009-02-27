@@ -1,0 +1,23 @@
+{
+  Configuration metadata=configClass.getMetadata();
+  if (metadata.checkRequired() == true) {
+    RootBeanDefinition requiredAnnotationPostProcessor=new RootBeanDefinition();
+    Class<?> beanClass=RequiredAnnotationBeanPostProcessor.class;
+    String beanName=beanClass.getName() + "#0";
+    requiredAnnotationPostProcessor.setBeanClass(beanClass);
+    requiredAnnotationPostProcessor.setResourceDescription("ensures @Required methods have been invoked");
+    beanFactory.registerBeanDefinition(beanName,requiredAnnotationPostProcessor);
+  }
+  GenericBeanDefinition configBeanDef=new GenericBeanDefinition();
+  configBeanDef.setBeanClassName(configClass.getName());
+  String configBeanName=configClass.getBeanName();
+  if (beanFactory.containsBeanDefinition(configBeanName)) {
+    if (log.isInfoEnabled())     log.info(format("Copying property and constructor arg values from existing bean definition for " + "@Configuration class %s to new bean definition",configBeanName));
+    AbstractBeanDefinition existing=(AbstractBeanDefinition)beanFactory.getBeanDefinition(configBeanName);
+    configBeanDef.setPropertyValues(existing.getPropertyValues());
+    configBeanDef.setConstructorArgumentValues(existing.getConstructorArgumentValues());
+    configBeanDef.setResource(existing.getResource());
+  }
+  if (log.isInfoEnabled())   log.info(format("Registering bean definition for @Configuration class %s",configBeanName));
+  beanFactory.registerBeanDefinition(configBeanName,configBeanDef);
+}

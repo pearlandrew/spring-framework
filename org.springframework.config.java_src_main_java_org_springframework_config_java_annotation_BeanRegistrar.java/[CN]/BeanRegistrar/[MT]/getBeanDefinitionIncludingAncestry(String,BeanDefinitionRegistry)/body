@@ -1,0 +1,19 @@
+{
+  Assert.isInstanceOf(ConfigurableListableBeanFactory.class,registry);
+  ConfigurableListableBeanFactory clbf=(ConfigurableListableBeanFactory)registry;
+  do {
+    if (clbf.containsBeanDefinition(beanName))     return registry.getBeanDefinition(beanName);
+    BeanFactory parent=clbf.getParentBeanFactory();
+    if (parent == null) {
+      clbf=null;
+    }
+ else     if (parent instanceof ConfigurableListableBeanFactory) {
+      clbf=(ConfigurableListableBeanFactory)parent;
+    }
+ else {
+      throw new IllegalStateException("unknown parent type: " + parent.getClass().getName());
+    }
+  }
+ while (clbf != null);
+  throw new NoSuchBeanDefinitionException(format("No bean definition matching name '%s' " + "could be found in %s or its ancestry",beanName,registry));
+}

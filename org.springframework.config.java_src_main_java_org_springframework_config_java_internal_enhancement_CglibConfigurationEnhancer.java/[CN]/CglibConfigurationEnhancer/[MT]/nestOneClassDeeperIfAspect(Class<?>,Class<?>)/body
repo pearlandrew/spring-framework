@@ -1,0 +1,18 @@
+{
+  boolean superclassIsAnAspect=false;
+  for (  Annotation anno : superclass.getAnnotations())   if (anno.annotationType().getName().equals("org.aspectj.lang.annotation.Aspect"))   superclassIsAnAspect=true;
+  if (!superclassIsAnAspect)   return origSubclass;
+  Enhancer enhancer=newEnhancer(origSubclass);
+  enhancer.setStrategy(new DefaultGeneratorStrategy(){
+    @Override protected byte[] transform(    byte[] b) throws Exception {
+      ClassWriter writer=new ClassWriter(false);
+      ClassAdapter adapter=new AddAnnotationAdapter(writer,"Lorg/aspectj/lang/annotation/Aspect;");
+      ClassReader reader=new ClassReader(b);
+      reader.accept(adapter,false);
+      return writer.toByteArray();
+    }
+  }
+);
+  Class<?> newSubclass=createClass(enhancer,origSubclass);
+  return newSubclass;
+}

@@ -1,0 +1,12 @@
+{
+  LinkedHashMap<String,ClassPathResource> configClassResources=new LinkedHashMap<String,ClassPathResource>();
+  for (  String beanName : beanFactory.getBeanDefinitionNames()) {
+    BeanDefinition beanDef=beanFactory.getBeanDefinition(beanName);
+    if (beanDef.isAbstract())     continue;
+    if (isConfigClass(beanDef)) {
+      String path=ClassUtils.convertClassNameToResourcePath(beanDef.getBeanClassName());
+      configClassResources.put(beanName,new ClassPathResource(path));
+    }
+  }
+  beanDefinitionReader(beanFactory).loadBeanDefinitions(model,configClassResources);
+}

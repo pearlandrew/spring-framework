@@ -1,0 +1,13 @@
+{
+  if (configurationClasses.isEmpty())   errors.add(new EmptyModelError());
+  for (  ConfigurationClass configClass : getAllConfigurationClasses()) {
+    for (    ModelMethod method : configClass.getMethods()) {
+      for (      Validator validator : method.getValidators()) {
+        if (validator.supports(method))         method.registerValidator(validator);
+        if (validator.supports(this))         this.registerValidator(validator);
+      }
+    }
+  }
+  for (  Validator validator : validators)   validator.validate(this,errors);
+  for (  ConfigurationClass configClass : configurationClasses)   configClass.validate(errors);
+}

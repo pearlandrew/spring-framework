@@ -1,0 +1,15 @@
+{
+  Assert.isInstanceOf(Annotation.class,proxy);
+  String methodName=method.getName();
+  if (attributes.containsKey(methodName))   return attributes.get(methodName);
+  if (methodName.equals("annotationType"))   return annoType;
+  if (methodName.equals("toString"))   return format("@%s(%s)",annoType.getName(),getAttribs());
+  if (methodName.equals("equals"))   return isEqualTo(proxy,args[0]);
+  if (methodName.equals("hashCode"))   return calculateHashCode(proxy);
+  if (methodName.equals("setAttributeValue")) {
+    attributes.put((String)args[0],args[1]);
+    return null;
+  }
+  if (methodName.equals("getAttributeType"))   return attributeTypes.get(args[0]);
+  throw new UnsupportedOperationException("this proxy does not support method: " + methodName);
+}

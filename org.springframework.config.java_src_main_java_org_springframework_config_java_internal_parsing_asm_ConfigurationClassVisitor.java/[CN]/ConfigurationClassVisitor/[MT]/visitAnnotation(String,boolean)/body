@@ -1,0 +1,19 @@
+{
+  String annoTypeName=AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
+  if (Configuration.class.getName().equals(annoTypeName)) {
+    Configuration mutableConfiguration=createMutableAnnotation(Configuration.class);
+    configClass.setMetadata(mutableConfiguration);
+    return new MutableAnnotationVisitor(mutableConfiguration);
+  }
+  PluginAnnotationDetectingClassVisitor classVisitor=new PluginAnnotationDetectingClassVisitor();
+  String className=AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
+  String resourcePath=ClassUtils.convertClassNameToResourcePath(className);
+  ClassReader reader=AsmUtils.newClassReader(resourcePath);
+  reader.accept(classVisitor,false);
+  if (!classVisitor.hasPluginAnnotation())   return super.visitAnnotation(annoTypeDesc,visible);
+  Class<? extends Annotation> annoType=loadToolingSafeClass(annoTypeName);
+  if (annoType == null)   return super.visitAnnotation(annoTypeDesc,visible);
+  Annotation pluginAnno=createMutableAnnotation(annoType);
+  configClass.addPluginAnnotation(pluginAnno);
+  return new MutableAnnotationVisitor(pluginAnno);
+}

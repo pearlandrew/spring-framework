@@ -1,0 +1,12 @@
+{
+  ConfigurationParser parser=new AsmConfigurationParser(model);
+  for (  String id : configClassResources.keySet()) {
+    String resourcePath=configClassResources.get(id).getPath();
+    ClassReader configClassReader=AsmUtils.newClassReader(getClassAsStream(resourcePath));
+    parser.parse(configClassReader,id);
+  }
+  ArrayList<UsageError> errors=new ArrayList<UsageError>();
+  model.validate(errors);
+  if (errors.size() > 0)   throw new MalformedJavaConfigurationException(errors.toArray(new UsageError[]{}));
+  return modelBeanDefinitionReader.loadBeanDefinitions(model);
+}

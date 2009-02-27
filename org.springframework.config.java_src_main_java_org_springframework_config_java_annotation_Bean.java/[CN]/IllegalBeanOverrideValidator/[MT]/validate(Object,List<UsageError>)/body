@@ -1,0 +1,11 @@
+{
+  ConfigurationModel model=(ConfigurationModel)object;
+  ConfigurationClass[] allClasses=model.getAllConfigurationClasses();
+  for (int i=0; i < allClasses.length; i++) {
+    for (    ModelMethod method : allClasses[i].getMethods()) {
+      Bean bean=method.getAnnotation(Bean.class);
+      if (bean == null || bean.allowOverriding())       continue;
+      for (int j=i + 1; j < allClasses.length; j++)       if (allClasses[j].hasMethod(method.getName()))       errors.add(allClasses[i].new IllegalBeanOverrideError(allClasses[j],method));
+    }
+  }
+}
