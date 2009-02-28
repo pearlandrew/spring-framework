@@ -1,0 +1,14 @@
+{
+  ConfigurationEnhancer enhancer=new ConfigurationEnhancer(beanFactory,model);
+  int configClassesEnhanced=0;
+  for (  String beanName : beanFactory.getBeanDefinitionNames()) {
+    BeanDefinition beanDef=beanFactory.getBeanDefinition(beanName);
+    if (!isConfigClass(beanDef))     continue;
+    String configClassName=beanDef.getBeanClassName();
+    String enhancedClassName=enhancer.enhance(configClassName);
+    if (logger.isDebugEnabled())     logger.debug(String.format("Replacing bean definition '%s' existing class name '%s' with enhanced class name '%s'",beanName,configClassName,enhancedClassName));
+    beanDef.setBeanClassName(enhancedClassName);
+    configClassesEnhanced++;
+  }
+  if (configClassesEnhanced == 0)   logger.warn("Found no @Configuration class BeanDefinitions within " + beanFactory);
+}
