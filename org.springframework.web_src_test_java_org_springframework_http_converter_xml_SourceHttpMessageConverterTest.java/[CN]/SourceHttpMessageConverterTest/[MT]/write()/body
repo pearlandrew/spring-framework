@@ -1,0 +1,14 @@
+{
+  DocumentBuilderFactory documentBuilderFactory=DocumentBuilderFactory.newInstance();
+  documentBuilderFactory.setNamespaceAware(true);
+  Document document=documentBuilderFactory.newDocumentBuilder().newDocument();
+  Element rootElement=document.createElement("root");
+  document.appendChild(rootElement);
+  rootElement.setTextContent("Hello World");
+  DOMSource domSource=new DOMSource(document);
+  SourceHttpMessageConverter<Source> converter=new SourceHttpMessageConverter<Source>();
+  MockHttpOutputMessage outputMessage=new MockHttpOutputMessage();
+  converter.write(domSource,outputMessage);
+  assertXMLEqual("Invalid result","<root>Hello World</root>",outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+  assertEquals("Invalid content-type",new MediaType("application","xml"),outputMessage.getHeaders().getContentType());
+}

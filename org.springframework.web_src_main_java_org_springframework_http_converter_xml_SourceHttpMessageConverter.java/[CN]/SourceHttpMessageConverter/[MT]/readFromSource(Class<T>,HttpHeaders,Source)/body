@@ -1,0 +1,18 @@
+{
+  if (DOMSource.class.equals(clazz)) {
+    DOMResult domResult=new DOMResult();
+    transform(source,domResult);
+    return (T)new DOMSource(domResult.getNode());
+  }
+ else   if (SAXSource.class.equals(clazz)) {
+    ByteArrayInputStream bis=transformToByteArray(source);
+    return (T)new SAXSource(new InputSource(bis));
+  }
+ else   if (StreamSource.class.equals(clazz) || Source.class.equals(clazz)) {
+    ByteArrayInputStream bis=transformToByteArray(source);
+    return (T)new StreamSource(bis);
+  }
+ else {
+    throw new HttpMessageConversionException("Could not read class [" + clazz + "]. Only DOMSource, SAXSource, and StreamSource are supported.");
+  }
+}
