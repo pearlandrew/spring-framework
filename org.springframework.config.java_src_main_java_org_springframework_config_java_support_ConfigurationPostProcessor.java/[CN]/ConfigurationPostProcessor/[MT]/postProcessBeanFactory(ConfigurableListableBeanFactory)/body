@@ -1,7 +1,7 @@
 {
-  if (!(clBeanFactory instanceof DefaultListableBeanFactory))   throw new IllegalStateException("beanFactory must be of type " + DefaultListableBeanFactory.class.getSimpleName());
-  DefaultListableBeanFactory beanFactory=(DefaultListableBeanFactory)clBeanFactory;
-  ConfigurationModel model=new ConfigurationModel();
-  parseAnyConfigurationClasses(beanFactory,model);
-  enhanceAnyConfigurationClasses(beanFactory,model);
+  Assert.isInstanceOf(DefaultListableBeanFactory.class,clBeanFactory);
+  beanFactory=(DefaultListableBeanFactory)clBeanFactory;
+  BeanDefinitionRegistry factoryBeanDefs=processConfigBeanDefinitions();
+  for (  String beanName : factoryBeanDefs.getBeanDefinitionNames())   beanFactory.registerBeanDefinition(beanName,factoryBeanDefs.getBeanDefinition(beanName));
+  enhanceConfigurationClasses();
 }

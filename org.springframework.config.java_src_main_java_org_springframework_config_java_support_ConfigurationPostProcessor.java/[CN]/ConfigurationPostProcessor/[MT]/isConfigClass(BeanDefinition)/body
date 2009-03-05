@@ -1,4 +1,12 @@
 {
   String className=beanDef.getBeanClassName();
-  return className != null && loadRequiredClass(className).isAnnotationPresent(Configuration.class);
+  if (className == null)   return false;
+  try {
+    MetadataReader metadataReader=new SimpleMetadataReaderFactory().getMetadataReader(className);
+    AnnotationMetadata annotationMetadata=metadataReader.getAnnotationMetadata();
+    return annotationMetadata.hasAnnotation(Configuration.class.getName());
+  }
+ catch (  IOException ex) {
+    throw new RuntimeException(ex);
+  }
 }
