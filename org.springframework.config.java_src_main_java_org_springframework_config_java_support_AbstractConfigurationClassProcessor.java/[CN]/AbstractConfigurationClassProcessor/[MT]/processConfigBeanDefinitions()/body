@@ -1,7 +1,13 @@
 {
   BeanDefinitionRegistry configBeanDefs=getConfigurationBeanDefinitions(false);
   if (configBeanDefs.getBeanDefinitionCount() == 0)   return configBeanDefs;
-  ConfigurationModel configModel=createConfigurationModelFor(configBeanDefs);
+  ConfigurationParser parser=createConfigurationParser();
+  for (  String beanName : configBeanDefs.getBeanDefinitionNames()) {
+    BeanDefinition beanDef=configBeanDefs.getBeanDefinition(beanName);
+    String className=beanDef.getBeanClassName();
+    parser.parse(className,beanName);
+  }
+  ConfigurationModel configModel=parser.getConfigurationModel();
   validateModel(configModel);
-  return renderModelAsBeanDefinitions(configModel);
+  return new ConfigurationModelBeanDefinitionReader().loadBeanDefinitions(configModel);
 }
