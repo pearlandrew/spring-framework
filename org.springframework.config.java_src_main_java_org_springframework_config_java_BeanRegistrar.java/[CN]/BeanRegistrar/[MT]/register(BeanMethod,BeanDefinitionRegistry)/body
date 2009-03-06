@@ -16,7 +16,7 @@
         UsageError error=configClass.new IllegalBeanOverrideError(null,method);
         throw new MalformedConfigurationException(error);
       }
-      logger.info(format("Skipping loading bean definition for %s: a definition for bean '%s' already exists. " + "This is likely due to an override in XML.",method,beanName));
+      logger.info(format("Skipping loading bean definition for %s: a definition for bean " + "'%s' already exists. This is likely due to an override in XML.",method,beanName));
       return;
     }
   }
@@ -26,6 +26,18 @@
   if (hasText(initMethodName))   beanDef.setInitMethodName(initMethodName);
   String destroyMethodName=bean.destroyMethodName();
   if (hasText(destroyMethodName))   beanDef.setDestroyMethodName(destroyMethodName);
+  ScopedProxy scopedProxy=method.getAnnotation(ScopedProxy.class);
+  if (scopedProxy != null) {
+    RootBeanDefinition targetDef=beanDef;
+    String targetBeanName=ScopedProxy.Util.resolveHiddenScopedProxyBeanName(beanName);
+    RootBeanDefinition scopedProxyDefinition=new RootBeanDefinition(ScopedProxyFactoryBean.class);
+    scopedProxyDefinition.getPropertyValues().addPropertyValue("targetBeanName",targetBeanName);
+    if (scopedProxy.proxyTargetClass())     targetDef.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE,Boolean.TRUE);
+ else     scopedProxyDefinition.getPropertyValues().addPropertyValue("proxyTargetClass",Boolean.FALSE);
+    targetDef.setAutowireCandidate(false);
+    registry.registerBeanDefinition(targetBeanName,targetDef);
+    beanDef=scopedProxyDefinition;
+  }
   if (bean.dependsOn().length > 0)   beanDef.setDependsOn(bean.dependsOn());
   logger.info(format("Registering bean definition for @Bean method %s.%s()",configClass.getName(),beanName));
   registry.registerBeanDefinition(beanName,beanDef);

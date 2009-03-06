@@ -1,5 +1,8 @@
 {
   String beanName=getBeanName(method);
+  boolean isScopedProxy=(AnnotationUtils.findAnnotation(method,ScopedProxy.class) != null);
+  String scopedBeanName=ScopedProxy.Util.resolveHiddenScopedProxyBeanName(beanName);
+  if (isScopedProxy && beanFactory.isCurrentlyInCreation(scopedBeanName))   beanName=scopedBeanName;
   if (factoryContainsBean(beanName)) {
     Object cachedBean=beanFactory.getBean(beanName);
     if (log.isInfoEnabled())     log.info(format("Returning cached singleton object [%s] for @Bean method %s.%s",cachedBean,method.getDeclaringClass().getSimpleName(),beanName));
