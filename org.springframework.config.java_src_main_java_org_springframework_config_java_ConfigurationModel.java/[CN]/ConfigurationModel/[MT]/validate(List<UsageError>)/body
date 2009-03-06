@@ -1,5 +1,12 @@
 {
   if (configurationClasses.isEmpty())   errors.add(new EmptyModelError());
-  new IllegalBeanOverrideValidator().validate(this,errors);
+  ConfigurationClass[] allClasses=getAllConfigurationClasses();
+  for (int i=0; i < allClasses.length; i++) {
+    for (    BeanMethod method : allClasses[i].getMethods()) {
+      Bean bean=method.getAnnotation(Bean.class);
+      if (bean == null || bean.allowOverriding())       continue;
+      for (int j=i + 1; j < allClasses.length; j++)       if (allClasses[j].hasMethod(method.getName()))       errors.add(allClasses[i].new IllegalBeanOverrideError(allClasses[j],method));
+    }
+  }
   for (  ConfigurationClass configClass : configurationClasses)   configClass.validate(errors);
 }

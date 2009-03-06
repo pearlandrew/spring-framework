@@ -1,5 +1,7 @@
 {
   if (Modifier.isPrivate(getModifiers()))   errors.add(new PrivateMethodError());
   if (Modifier.isFinal(getModifiers()))   errors.add(new FinalMethodError());
-  new BeanValidator().validate(this,errors);
+  if (this.getAnnotation(ScopedProxy.class) == null)   return;
+  Bean bean=this.getRequiredAnnotation(Bean.class);
+  if (bean.scope().equals(StandardScopes.SINGLETON) || bean.scope().equals(StandardScopes.PROTOTYPE))   errors.add(new InvalidScopedProxyDeclarationError(this));
 }
