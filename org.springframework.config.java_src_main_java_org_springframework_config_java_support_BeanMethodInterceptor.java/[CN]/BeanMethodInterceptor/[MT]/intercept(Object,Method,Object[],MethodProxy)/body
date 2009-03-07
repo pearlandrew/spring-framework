@@ -1,5 +1,8 @@
 {
-  String beanName=getBeanName(method);
+  String beanName;
+  Bean bean=method.getAnnotation(Bean.class);
+  if (bean != null && bean.name().length > 1)   beanName=bean.name()[0];
+ else   beanName=method.getName();
   Scope scope=AnnotationUtils.findAnnotation(method,Scope.class);
   boolean isScopedProxy=(scope != null && scope.proxyMode() != ScopedProxyMode.NO);
   String scopedBeanName=BeanRegistrar.resolveHiddenScopedProxyBeanName(beanName);
