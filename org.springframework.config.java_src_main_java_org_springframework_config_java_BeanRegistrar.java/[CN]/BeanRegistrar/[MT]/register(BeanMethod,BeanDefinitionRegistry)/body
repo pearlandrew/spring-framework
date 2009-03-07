@@ -20,13 +20,12 @@
   if (hasText(initMethodName))   beanDef.setInitMethodName(initMethodName);
   String destroyMethodName=bean.destroyMethod();
   if (hasText(destroyMethodName))   beanDef.setDestroyMethodName(destroyMethodName);
-  ScopedProxy scopedProxy=method.getAnnotation(ScopedProxy.class);
-  if (scopedProxy != null) {
+  if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
     RootBeanDefinition targetDef=beanDef;
-    String targetBeanName=ScopedProxy.Util.resolveHiddenScopedProxyBeanName(beanName);
+    String targetBeanName=resolveHiddenScopedProxyBeanName(beanName);
     RootBeanDefinition scopedProxyDefinition=new RootBeanDefinition(ScopedProxyFactoryBean.class);
     scopedProxyDefinition.getPropertyValues().addPropertyValue("targetBeanName",targetBeanName);
-    if (scopedProxy.proxyTargetClass())     targetDef.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE,Boolean.TRUE);
+    if (scope.proxyMode() == ScopedProxyMode.TARGET_CLASS)     targetDef.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE,Boolean.TRUE);
  else     scopedProxyDefinition.getPropertyValues().addPropertyValue("proxyTargetClass",Boolean.FALSE);
     targetDef.setAutowireCandidate(false);
     registry.registerBeanDefinition(targetBeanName,targetDef);
