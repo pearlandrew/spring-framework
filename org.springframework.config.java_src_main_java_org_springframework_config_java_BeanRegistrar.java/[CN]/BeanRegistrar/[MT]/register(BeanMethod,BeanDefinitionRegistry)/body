@@ -4,27 +4,21 @@
   beanDef.setFactoryBeanName(configClass.getBeanName());
   beanDef.setFactoryMethodName(method.getName());
   Bean bean=method.getRequiredAnnotation(Bean.class);
-  Configuration defaults=configClass.getMetadata();
-  beanDef.setScope(bean.scope());
-  if (bean.autowire() != AnnotationUtils.getDefaultValue(Bean.class,"autowire"))   beanDef.setAutowireMode(bean.autowire().value());
- else   if (defaults.defaultAutowire() != AnnotationUtils.getDefaultValue(Configuration.class,"defaultAutowire"))   beanDef.setAutowireMode(defaults.defaultAutowire().value());
-  String beanName=method.getName();
+  Scope scope=method.getAnnotation(Scope.class);
+  if (scope != null)   beanDef.setScope(scope.value());
+  ArrayList<String> names=new ArrayList<String>(Arrays.asList(bean.name()));
+  String beanName=(names.size() > 0) ? names.remove(0) : method.getName();
+  for (  String alias : bean.name())   registry.registerAlias(beanName,alias);
   if (containsBeanDefinitionIncludingAncestry(beanName,registry)) {
     BeanDefinition existingBeanDef=getBeanDefinitionIncludingAncestry(beanName,registry);
     if (!(existingBeanDef instanceof ConfigurationClassBeanDefinition)) {
-      if (bean.allowOverriding() == false) {
-        UsageError error=configClass.new IllegalBeanOverrideError(null,method);
-        throw new MalformedConfigurationException(error);
-      }
       logger.info(format("Skipping loading bean definition for %s: a definition for bean " + "'%s' already exists. This is likely due to an override in XML.",method,beanName));
       return;
     }
   }
-  beanDef.setRole(bean.role());
-  for (  String alias : bean.aliases())   registry.registerAlias(beanName,alias);
-  String initMethodName=bean.initMethodName();
+  String initMethodName=bean.initMethod();
   if (hasText(initMethodName))   beanDef.setInitMethodName(initMethodName);
-  String destroyMethodName=bean.destroyMethodName();
+  String destroyMethodName=bean.destroyMethod();
   if (hasText(destroyMethodName))   beanDef.setDestroyMethodName(destroyMethodName);
   ScopedProxy scopedProxy=method.getAnnotation(ScopedProxy.class);
   if (scopedProxy != null) {
