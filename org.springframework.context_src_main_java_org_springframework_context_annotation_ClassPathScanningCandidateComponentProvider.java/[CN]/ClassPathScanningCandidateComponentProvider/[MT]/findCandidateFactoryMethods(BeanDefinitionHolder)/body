@@ -1,0 +1,39 @@
+{
+  Set<BeanDefinition> candidates=new LinkedHashSet<BeanDefinition>();
+  AbstractBeanDefinition containingBeanDef=(AbstractBeanDefinition)beanDefinitionHolder.getBeanDefinition();
+  Resource resource=containingBeanDef.getResource();
+  boolean debugEnabled=logger.isDebugEnabled();
+  boolean traceEnabled=logger.isTraceEnabled();
+  try {
+    if (resource.isReadable()) {
+      MetadataReader metadataReader=this.metadataReaderFactory.getMetadataReader(resource);
+      Set<MethodMetadata> factoryMethodMetadataSet=metadataReader.getAnnotationMetadata().getAnnotatedMethods("org.springframework.beans.factory.annotation.FactoryMethod");
+      for (      MethodMetadata methodMetadata : factoryMethodMetadataSet) {
+        if (isCandidateFactoryMethod(methodMetadata)) {
+          ScannedGenericBeanDefinition factoryBeanDef=new ScannedGenericBeanDefinition(metadataReader);
+          if (!methodMetadata.isStatic()) {
+            factoryBeanDef.setFactoryBeanName(beanDefinitionHolder.getBeanName());
+          }
+          factoryBeanDef.setFactoryMethodName(methodMetadata.getMethodName());
+          addQualifierToFactoryMethodBeanDefinition(methodMetadata,factoryBeanDef);
+          addScopeToFactoryMethodBeanDefinition(containingBeanDef,methodMetadata,factoryBeanDef);
+          factoryBeanDef.setResource(containingBeanDef.getResource());
+          factoryBeanDef.setSource(containingBeanDef.getSource());
+          if (debugEnabled) {
+            logger.debug("Identified candidate factory method in class: " + resource);
+          }
+          candidates.add(factoryBeanDef);
+        }
+ else {
+          if (traceEnabled) {
+            logger.trace("Ignored because not matching any filter: " + resource);
+          }
+        }
+      }
+    }
+  }
+ catch (  IOException ex) {
+    throw new BeanDefinitionStoreException("I/O failure during classpath scanning",ex);
+  }
+  return candidates;
+}

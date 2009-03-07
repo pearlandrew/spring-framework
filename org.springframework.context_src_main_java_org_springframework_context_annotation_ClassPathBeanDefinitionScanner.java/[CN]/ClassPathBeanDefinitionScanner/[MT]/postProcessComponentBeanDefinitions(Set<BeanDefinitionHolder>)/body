@@ -1,0 +1,14 @@
+{
+  int count=0;
+  Set<BeanDefinitionHolder> factoryBeanDefinitions=new LinkedHashSet<BeanDefinitionHolder>();
+  for (  BeanDefinitionHolder beanDefinitionHolder : beanDefinitions) {
+    Set<BeanDefinition> candidates=findCandidateFactoryMethods(beanDefinitionHolder);
+    for (    BeanDefinition candidate : candidates) {
+      String beanName=beanDefinitionHolder.getBeanName() + "$" + candidate.getFactoryMethodName()+ "#"+ count++;
+      BeanDefinitionHolder definitionHolder=new BeanDefinitionHolder(candidate,beanName);
+      factoryBeanDefinitions.add(definitionHolder);
+      registerBeanDefinition(definitionHolder,this.registry);
+    }
+  }
+  beanDefinitions.addAll(factoryBeanDefinitions);
+}
