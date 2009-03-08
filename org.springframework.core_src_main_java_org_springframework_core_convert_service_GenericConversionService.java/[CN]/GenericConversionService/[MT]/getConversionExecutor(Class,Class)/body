@@ -19,7 +19,8 @@
   }
   if (targetClass.isArray()) {
     if (Collection.class.isAssignableFrom(sourceClass)) {
-      return new StaticSuperConversionExecutor(sourceClass,targetClass,new CollectionToArray(this));
+      SuperConverter collectionToArray=new ReverseSuperConverter(new ArrayToCollection(this));
+      return new StaticSuperConversionExecutor(sourceClass,targetClass,collectionToArray);
     }
  else {
       return new StaticSuperConversionExecutor(sourceClass,targetClass,new ObjectToArray(this));
@@ -30,6 +31,10 @@
     return new StaticConversionExecutor(sourceClass,targetClass,converter);
   }
  else {
+    SuperConverter superConverter=findRegisteredSuperConverter(sourceClass,targetClass);
+    if (superConverter != null) {
+      return new StaticSuperConversionExecutor(sourceClass,targetClass,superConverter);
+    }
     if (parent != null) {
       return parent.getConversionExecutor(sourceClass,targetClass);
     }

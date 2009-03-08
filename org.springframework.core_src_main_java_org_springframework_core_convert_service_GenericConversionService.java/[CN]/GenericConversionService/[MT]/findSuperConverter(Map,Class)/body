@@ -1,0 +1,40 @@
+{
+  if (converters.isEmpty()) {
+    return null;
+  }
+  if (targetClass.isInterface()) {
+    LinkedList classQueue=new LinkedList();
+    classQueue.addFirst(targetClass);
+    while (!classQueue.isEmpty()) {
+      Class currentClass=(Class)classQueue.removeLast();
+      SuperConverter converter=(SuperConverter)converters.get(currentClass);
+      if (converter != null) {
+        return converter;
+      }
+      Class[] interfaces=currentClass.getInterfaces();
+      for (int i=0; i < interfaces.length; i++) {
+        classQueue.addFirst(interfaces[i]);
+      }
+    }
+    return (SuperConverter)converters.get(Object.class);
+  }
+ else {
+    LinkedList classQueue=new LinkedList();
+    classQueue.addFirst(targetClass);
+    while (!classQueue.isEmpty()) {
+      Class currentClass=(Class)classQueue.removeLast();
+      SuperConverter converter=(SuperConverter)converters.get(currentClass);
+      if (converter != null) {
+        return converter;
+      }
+      if (currentClass.getSuperclass() != null) {
+        classQueue.addFirst(currentClass.getSuperclass());
+      }
+      Class[] interfaces=currentClass.getInterfaces();
+      for (int i=0; i < interfaces.length; i++) {
+        classQueue.addFirst(interfaces[i]);
+      }
+    }
+    return null;
+  }
+}
