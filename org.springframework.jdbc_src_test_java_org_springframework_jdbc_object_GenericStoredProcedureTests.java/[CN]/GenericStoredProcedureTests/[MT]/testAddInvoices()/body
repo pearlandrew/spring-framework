@@ -1,0 +1,20 @@
+{
+  mockCallable.setObject(1,new Integer(1106),Types.INTEGER);
+  expectLastCall();
+  mockCallable.setObject(2,new Integer(3),Types.INTEGER);
+  expectLastCall();
+  mockCallable.registerOutParameter(3,Types.INTEGER);
+  expectLastCall();
+  expect(mockCallable.execute()).andReturn(false);
+  expect(mockCallable.getUpdateCount()).andReturn(-1);
+  expect(mockCallable.getObject(3)).andReturn(new Integer(4));
+  if (debugEnabled) {
+    expect(mockCallable.getWarnings()).andReturn(null);
+  }
+  mockCallable.close();
+  expectLastCall();
+  mockConnection.prepareCall("{call " + "add_invoice" + "(?, ?, ?)}");
+  ctrlConnection.setReturnValue(mockCallable);
+  replay();
+  testAddInvoice(1106,3);
+}
