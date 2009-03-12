@@ -1,0 +1,36 @@
+{
+  expect(mockResultSet.next()).andReturn(true);
+  expect(mockResultSet.getInt("id")).andReturn(1);
+  expect(mockResultSet.getString("forename")).andReturn("rod");
+  expect(mockResultSet.next()).andReturn(false);
+  mockResultSet.close();
+  expectLastCall();
+  mockPreparedStatement.setObject(1,new Integer(1),Types.INTEGER);
+  expectLastCall();
+  mockPreparedStatement.setString(2,"UK");
+  expectLastCall();
+  expect(mockPreparedStatement.executeQuery()).andReturn(mockResultSet);
+  if (debugEnabled) {
+    expect(mockPreparedStatement.getWarnings()).andReturn(null);
+  }
+  mockPreparedStatement.close();
+  expectLastCall();
+  mockConnection.prepareStatement(SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  replay();
+  List l;
+  if (namedParameters) {
+    Map<String,Object> params=new HashMap<String,Object>(2);
+    params.put("id",new Integer(1));
+    params.put("country","UK");
+    l=query.executeByNamedParam(params);
+  }
+ else {
+    Object[] params=new Object[]{new Integer(1),"UK"};
+    l=query.execute(params);
+  }
+  assertTrue("Customer was returned correctly",l.size() == 1);
+  Customer cust=(Customer)l.get(0);
+  assertTrue("Customer id was assigned correctly",cust.getId() == 1);
+  assertTrue("Customer forename was assigned correctly",cust.getForename().equals("rod"));
+}
