@@ -12,6 +12,15 @@
     return dex;
   }
   if (this.sqlErrorCodes != null) {
+    SQLExceptionTranslator customTranslator=this.sqlErrorCodes.getCustomSqlExceptionTranslator();
+    if (customTranslator != null) {
+      DataAccessException customDex=customTranslator.translate(task,sql,sqlEx);
+      if (customDex != null) {
+        return customDex;
+      }
+    }
+  }
+  if (this.sqlErrorCodes != null) {
     String errorCode=null;
     if (this.sqlErrorCodes.isUseSqlStateForTranslation()) {
       errorCode=sqlEx.getSQLState();
