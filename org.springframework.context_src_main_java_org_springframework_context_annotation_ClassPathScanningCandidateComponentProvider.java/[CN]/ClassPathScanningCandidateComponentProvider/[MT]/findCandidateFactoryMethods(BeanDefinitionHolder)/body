@@ -23,6 +23,18 @@
             logger.debug("Identified candidate factory method in class: " + resource);
           }
           candidates.add(factoryBeanDef);
+          RootBeanDefinition scopedFactoryBeanDef=null;
+          if (methodMetadata.hasAnnotation(SCOPEDPROXY_CLASS_NAME)) {
+            Map<String,Object> attributes=methodMetadata.getAnnotationAttributes(SCOPEDPROXY_CLASS_NAME);
+            scopedFactoryBeanDef=new RootBeanDefinition(ScopedProxyFactoryBean.class);
+            String t=scopedFactoryBeanDef.getBeanClassName();
+            String targetBeanName=createFactoryBeanName(beanDefinitionHolder.getBeanName(),factoryBeanDef.getFactoryMethodName());
+            scopedFactoryBeanDef.getPropertyValues().addPropertyValue("targetBeanName",targetBeanName);
+            scopedFactoryBeanDef.setAutowireCandidate(false);
+            scopedFactoryBeanDef.setResource(containingBeanDef.getResource());
+            scopedFactoryBeanDef.setSource(containingBeanDef.getSource());
+            candidates.add(scopedFactoryBeanDef);
+          }
         }
  else {
           if (traceEnabled) {
