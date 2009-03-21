@@ -1,7 +1,6 @@
 {
   final String className=Type.getType(desc).getClassName();
   final Map<String,Object> attributes=new LinkedHashMap<String,Object>();
-  final Map<String,Object> metaAttributes=new LinkedHashMap<String,Object>();
   return new EmptyVisitor(){
     @Override public void visit(    String name,    Object value){
       Object valueToUse=value;
@@ -17,7 +16,7 @@
     @Override public void visitEnum(    String name,    String desc,    String value){
       Object valueToUse=value;
       try {
-        Class enumType=classLoader.loadClass(Type.getType(desc).getClassName());
+        Class<?> enumType=classLoader.loadClass(Type.getType(desc).getClassName());
         Field enumConstant=ReflectionUtils.findField(enumType,value);
         if (enumConstant != null) {
           valueToUse=enumConstant.get(null);
@@ -29,7 +28,7 @@
     }
     @Override public void visitEnd(){
       try {
-        Class annotationClass=classLoader.loadClass(className);
+        Class<?> annotationClass=classLoader.loadClass(className);
         Method[] annotationAttributes=annotationClass.getMethods();
         for (        Method annotationAttribute : annotationAttributes) {
           String attributeName=annotationAttribute.getName();
