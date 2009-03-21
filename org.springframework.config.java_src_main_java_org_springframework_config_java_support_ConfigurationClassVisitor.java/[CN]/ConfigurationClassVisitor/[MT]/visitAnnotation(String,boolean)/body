@@ -7,9 +7,12 @@
   }
   if (Import.class.getName().equals(annoTypeName)) {
     ImportStack importStack=ImportStackHolder.getImportStack();
-    if (importStack.contains(configClass))     throw new CircularImportException(configClass,importStack);
+    if (importStack.contains(configClass)) {
+      problemReporter.error(new CircularImportProblem(configClass,importStack));
+      return new EmptyVisitor();
+    }
     importStack.push(configClass);
-    return new ImportAnnotationVisitor(model,classLoader);
+    return new ImportAnnotationVisitor(model,problemReporter,classLoader);
   }
   Class<? extends Annotation> annoType=loadToolingSafeClass(annoTypeName,classLoader);
   if (annoType == null)   return super.visitAnnotation(annoTypeDesc,visible);
