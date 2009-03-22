@@ -1,11 +1,10 @@
 {
-  String beanName;
+  String beanName=method.getName();
   Bean bean=method.getAnnotation(Bean.class);
-  if (bean != null && bean.name().length > 1)   beanName=bean.name()[0];
- else   beanName=method.getName();
+  if (bean != null && bean.name().length > 0)   beanName=bean.name()[0];
   Scope scope=AnnotationUtils.findAnnotation(method,Scope.class);
   boolean isScopedProxy=(scope != null && scope.proxyMode() != ScopedProxyMode.NO);
-  String scopedBeanName=BeanRegistrar.resolveHiddenScopedProxyBeanName(beanName);
+  String scopedBeanName=ConfigurationModelBeanDefinitionReader.resolveHiddenScopedProxyBeanName(beanName);
   if (isScopedProxy && beanFactory.isCurrentlyInCreation(scopedBeanName))   beanName=scopedBeanName;
   if (factoryContainsBean(beanName)) {
     Object cachedBean=beanFactory.getBean(beanName);
