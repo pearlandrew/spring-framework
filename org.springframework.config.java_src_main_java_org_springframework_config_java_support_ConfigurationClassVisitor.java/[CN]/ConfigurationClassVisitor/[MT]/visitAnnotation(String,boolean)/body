@@ -2,21 +2,16 @@
   String annoTypeName=AsmUtils.convertTypeDescriptorToClassName(annoTypeDesc);
   if (Configuration.class.getName().equals(annoTypeName)) {
     Configuration mutableConfiguration=createMutableAnnotation(Configuration.class);
-    configClass.setMetadata(mutableConfiguration);
+    configClass.setConfigurationAnnotation(mutableConfiguration);
     return new MutableAnnotationVisitor(mutableConfiguration,classLoader);
   }
   if (Import.class.getName().equals(annoTypeName)) {
     ImportStack importStack=ImportStackHolder.getImportStack();
-    if (importStack.contains(configClass)) {
-      problemReporter.error(new CircularImportProblem(configClass,importStack));
-      return new EmptyVisitor();
+    if (!importStack.contains(configClass)) {
+      importStack.push(configClass);
+      return new ImportAnnotationVisitor(model,problemReporter,classLoader);
     }
-    importStack.push(configClass);
-    return new ImportAnnotationVisitor(model,problemReporter,classLoader);
+    problemReporter.error(new CircularImportProblem(configClass,importStack));
   }
-  Class<? extends Annotation> annoType=loadToolingSafeClass(annoTypeName,classLoader);
-  if (annoType == null)   return super.visitAnnotation(annoTypeDesc,visible);
-  Annotation pluginAnno=createMutableAnnotation(annoType);
-  configClass.addPluginAnnotation(pluginAnno);
-  return new MutableAnnotationVisitor(pluginAnno,classLoader);
+  return super.visitAnnotation(annoTypeDesc,visible);
 }
