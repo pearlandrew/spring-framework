@@ -1,0 +1,29 @@
+{
+  BeanMethod beanMethod=new BeanMethod(beanName,0,returnType,beanAnno);
+  assertThat(beanMethod.getName(),sameInstance(beanName));
+  assertThat(beanMethod.getModifiers(),equalTo(0));
+  assertThat(beanMethod.getReturnType(),sameInstance(returnType));
+  assertThat(beanMethod.getAnnotation(Bean.class),sameInstance(beanAnno));
+  assertThat(beanMethod.getAnnotation(Override.class),nullValue());
+  assertThat(beanMethod.getRequiredAnnotation(Bean.class),sameInstance(beanAnno));
+  try {
+    beanMethod.getRequiredAnnotation(Override.class);
+    fail("expected IllegalArgumentException ex");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+  try {
+    beanMethod.getLocation();
+    fail("expected IllegalStateException ex");
+  }
+ catch (  IllegalStateException ex) {
+  }
+  beanMethod.setDeclaringClass(declaringClass);
+  assertThat(beanMethod.getDeclaringClass(),sameInstance(declaringClass));
+  beanMethod.setSource(12);
+  assertEquals(beanMethod.getSource(),12);
+  Location location=beanMethod.getLocation();
+  assertEquals(location.getResource(),new ClassPathResource("test/Config"));
+  assertEquals(location.getSource(),12);
+  beanMethod.validate(problemReporter);
+}
