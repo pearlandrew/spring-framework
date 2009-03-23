@@ -1,12 +1,10 @@
 {
-  Map containers=context.getBeansOfType(DefaultMessageListenerContainer.class);
-  ConnectionFactory defaultConnectionFactory=(ConnectionFactory)context.getBean(DEFAULT_CONNECTION_FACTORY);
-  ConnectionFactory explicitConnectionFactory=(ConnectionFactory)context.getBean(EXPLICIT_CONNECTION_FACTORY);
+  Map<String,DefaultMessageListenerContainer> containers=context.getBeansOfType(DefaultMessageListenerContainer.class);
+  ConnectionFactory defaultConnectionFactory=context.getBean(DEFAULT_CONNECTION_FACTORY,ConnectionFactory.class);
+  ConnectionFactory explicitConnectionFactory=context.getBean(EXPLICIT_CONNECTION_FACTORY,ConnectionFactory.class);
   int defaultConnectionFactoryCount=0;
   int explicitConnectionFactoryCount=0;
-  Iterator iter=containers.values().iterator();
-  while (iter.hasNext()) {
-    DefaultMessageListenerContainer container=(DefaultMessageListenerContainer)iter.next();
+  for (  DefaultMessageListenerContainer container : containers.values()) {
     if (container.getConnectionFactory().equals(defaultConnectionFactory)) {
       defaultConnectionFactoryCount++;
     }
