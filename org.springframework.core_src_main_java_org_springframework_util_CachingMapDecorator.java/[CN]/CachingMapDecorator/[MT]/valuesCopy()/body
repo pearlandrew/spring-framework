@@ -1,7 +1,15 @@
 {
   LinkedList<V> values=new LinkedList<V>();
-  for (  Object value : this.targetMap.values()) {
-    values.add(value instanceof Reference ? ((Reference<V>)value).get() : (V)value);
+  for (Iterator<Object> it=this.targetMap.values().iterator(); it.hasNext(); ) {
+    Object value=it.next();
+    if (value instanceof Reference) {
+      value=((Reference)value).get();
+      if (value == null) {
+        it.remove();
+        continue;
+      }
+    }
+    values.add(value == NULL_VALUE ? null : (V)value);
   }
   return values;
 }

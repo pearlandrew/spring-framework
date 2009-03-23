@@ -1,7 +1,16 @@
 {
   Map<K,V> entries=new LinkedHashMap<K,V>();
-  for (  Entry<K,Object> entry : this.targetMap.entrySet()) {
-    entries.put(entry.getKey(),unwrapIfNecessary(entry.getValue()));
+  for (Iterator<Entry<K,Object>> it=this.targetMap.entrySet().iterator(); it.hasNext(); ) {
+    Entry<K,Object> entry=it.next();
+    Object value=entry.getValue();
+    if (value instanceof Reference) {
+      value=((Reference)value).get();
+      if (value == null) {
+        it.remove();
+        continue;
+      }
+    }
+    entries.put(entry.getKey(),value == NULL_VALUE ? null : (V)value);
   }
   return entries.entrySet();
 }

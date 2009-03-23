@@ -1,11 +1,12 @@
 {
   Object value=this.targetMap.get(key);
-  if (value == null) {
-    V newVal=create((K)key);
-    if (newVal != null) {
-      put((K)key,newVal);
-    }
-    return newVal;
+  if (value instanceof Reference) {
+    value=((Reference)value).get();
   }
-  return unwrapIfNecessary(value);
+  if (value == null) {
+    V newValue=create((K)key);
+    put((K)key,newValue);
+    return newValue;
+  }
+  return (value == NULL_VALUE ? null : (V)value);
 }
