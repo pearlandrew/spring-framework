@@ -1,22 +1,18 @@
 {
-  if (this.timerManager == null) {
-    if (this.timerManagerName == null) {
-      throw new IllegalArgumentException("Either 'timerManager' or 'timerManagerName' must be specified");
-    }
-    this.timerManager=lookup(this.timerManagerName,TimerManager.class);
-  }
+  super.afterPropertiesSet();
   if (this.scheduledTimerListeners != null) {
+    TimerManager timerManager=getTimerManager();
     for (    ScheduledTimerListener scheduledTask : this.scheduledTimerListeners) {
-      Timer timer=null;
+      Timer timer;
       if (scheduledTask.isOneTimeTask()) {
-        timer=this.timerManager.schedule(scheduledTask.getTimerListener(),scheduledTask.getDelay());
+        timer=timerManager.schedule(scheduledTask.getTimerListener(),scheduledTask.getDelay());
       }
  else {
         if (scheduledTask.isFixedRate()) {
-          timer=this.timerManager.scheduleAtFixedRate(scheduledTask.getTimerListener(),scheduledTask.getDelay(),scheduledTask.getPeriod());
+          timer=timerManager.scheduleAtFixedRate(scheduledTask.getTimerListener(),scheduledTask.getDelay(),scheduledTask.getPeriod());
         }
  else {
-          timer=this.timerManager.schedule(scheduledTask.getTimerListener(),scheduledTask.getDelay(),scheduledTask.getPeriod());
+          timer=timerManager.schedule(scheduledTask.getTimerListener(),scheduledTask.getDelay(),scheduledTask.getPeriod());
         }
       }
       this.timers.add(timer);
