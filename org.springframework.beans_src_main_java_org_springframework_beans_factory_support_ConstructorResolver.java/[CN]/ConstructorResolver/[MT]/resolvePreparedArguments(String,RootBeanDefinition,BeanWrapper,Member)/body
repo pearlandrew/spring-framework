@@ -1,0 +1,30 @@
+{
+  Class[] paramTypes=(methodOrCtor instanceof Method ? ((Method)methodOrCtor).getParameterTypes() : ((Constructor)methodOrCtor).getParameterTypes());
+  Object[] argsToResolve=mbd.preparedConstructorArguments;
+  TypeConverter converter=(this.typeConverter != null ? this.typeConverter : bw);
+  BeanDefinitionValueResolver valueResolver=new BeanDefinitionValueResolver(this.beanFactory,beanName,mbd,converter);
+  Object[] resolvedArgs=new Object[argsToResolve.length];
+  for (int argIndex=0; argIndex < argsToResolve.length; argIndex++) {
+    Object argValue=argsToResolve[argIndex];
+    MethodParameter methodParam=MethodParameter.forMethodOrConstructor(methodOrCtor,argIndex);
+    GenericTypeResolver.resolveParameterType(methodParam,methodOrCtor.getDeclaringClass());
+    if (argValue instanceof AutowiredArgumentMarker) {
+      argValue=resolveAutowiredArgument(methodParam,beanName,null,converter);
+    }
+ else     if (argValue instanceof BeanMetadataElement) {
+      argValue=valueResolver.resolveValueIfNecessary("constructor argument",argValue);
+    }
+ else     if (argValue instanceof String) {
+      argValue=this.beanFactory.evaluateBeanDefinitionString((String)argValue,mbd);
+    }
+    Class paramType=paramTypes[argIndex];
+    try {
+      resolvedArgs[argIndex]=converter.convertIfNecessary(argValue,paramType,methodParam);
+    }
+ catch (    TypeMismatchException ex) {
+      String methodType=(methodOrCtor instanceof Constructor ? "constructor" : "factory method");
+      throw new UnsatisfiedDependencyException(mbd.getResourceDescription(),beanName,argIndex,paramType,"Could not convert " + methodType + " argument value of type ["+ ObjectUtils.nullSafeClassName(argValue)+ "] to required type ["+ paramType.getName()+ "]: "+ ex.getMessage());
+    }
+  }
+  return resolvedArgs;
+}

@@ -31,23 +31,7 @@
     if (factoryMethodToUse != null) {
       argsToUse=mbd.resolvedConstructorArguments;
       if (argsToUse == null) {
-        Class[] paramTypes=factoryMethodToUse.getParameterTypes();
-        Object[] argsToResolve=mbd.preparedConstructorArguments;
-        TypeConverter converter=(this.typeConverter != null ? this.typeConverter : bw);
-        BeanDefinitionValueResolver valueResolver=new BeanDefinitionValueResolver(this.beanFactory,beanName,mbd,converter);
-        argsToUse=new Object[argsToResolve.length];
-        for (int i=0; i < argsToResolve.length; i++) {
-          Object argValue=argsToResolve[i];
-          MethodParameter methodParam=new MethodParameter(factoryMethodToUse,i);
-          GenericTypeResolver.resolveParameterType(methodParam,factoryClass);
-          if (argValue instanceof AutowiredArgumentMarker) {
-            argValue=resolveAutowiredArgument(methodParam,beanName,null,converter);
-          }
- else           if (argValue instanceof BeanMetadataElement) {
-            argValue=valueResolver.resolveValueIfNecessary("factory method argument",argValue);
-          }
-          argsToUse[i]=converter.convertIfNecessary(argValue,paramTypes[i],methodParam);
-        }
+        argsToUse=resolvePreparedArguments(beanName,mbd,bw,factoryMethodToUse);
       }
     }
   }

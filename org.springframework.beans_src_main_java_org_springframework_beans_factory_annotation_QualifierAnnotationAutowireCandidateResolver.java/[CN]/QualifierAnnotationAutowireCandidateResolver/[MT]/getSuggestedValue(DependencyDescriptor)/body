@@ -1,12 +1,10 @@
 {
-  for (  Annotation annotation : descriptor.getAnnotations()) {
-    if (this.valueAnnotationType.isInstance(annotation)) {
-      Object value=AnnotationUtils.getValue(annotation);
-      if (value == null) {
-        throw new IllegalStateException("Value annotation must have a value attribute");
-      }
-      return value;
+  Object value=findValue(descriptor.getAnnotations());
+  if (value == null) {
+    MethodParameter methodParam=descriptor.getMethodParameter();
+    if (methodParam != null) {
+      value=findValue(methodParam.getAnnotations());
     }
   }
-  return null;
+  return value;
 }
