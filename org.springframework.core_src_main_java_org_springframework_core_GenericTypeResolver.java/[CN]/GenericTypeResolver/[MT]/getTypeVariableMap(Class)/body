@@ -1,5 +1,6 @@
 {
-  Map<TypeVariable,Type> typeVariableMap=typeVariableCache.get(clazz);
+  Reference<Map<TypeVariable,Type>> ref=typeVariableCache.get(clazz);
+  Map<TypeVariable,Type> typeVariableMap=(ref != null ? ref.get() : null);
   if (typeVariableMap == null) {
     typeVariableMap=new HashMap<TypeVariable,Type>();
     extractTypeVariablesFromGenericInterfaces(clazz.getGenericInterfaces(),typeVariableMap);
@@ -23,7 +24,7 @@
       }
       type=type.getEnclosingClass();
     }
-    typeVariableCache.put(clazz,typeVariableMap);
+    typeVariableCache.put(clazz,new WeakReference<Map<TypeVariable,Type>>(typeVariableMap));
   }
   return typeVariableMap;
 }
