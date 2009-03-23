@@ -1,0 +1,16 @@
+{
+  String className=beanDef.getBeanClassName();
+  while (className != null && !(className.equals(Object.class.getName()))) {
+    try {
+      MetadataReader metadataReader=new SimpleMetadataReaderFactory().getMetadataReader(className);
+      AnnotationMetadata annotationMetadata=metadataReader.getAnnotationMetadata();
+      ClassMetadata classMetadata=metadataReader.getClassMetadata();
+      if (annotationMetadata.hasAnnotation(Configuration.class.getName()))       return true;
+      className=classMetadata.getSuperClassName();
+    }
+ catch (    IOException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+  return false;
+}
