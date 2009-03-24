@@ -7,15 +7,17 @@
     if (logger.isInfoEnabled()) {
       logger.info("Looking for RMI registry at port '" + registryPort + "', using custom socket factory");
     }
-    try {
-      Registry reg=LocateRegistry.getRegistry(null,registryPort,clientSocketFactory);
-      testRegistry(reg);
-      return reg;
-    }
- catch (    RemoteException ex) {
-      logger.debug("RMI registry access threw exception",ex);
-      logger.info("Could not detect RMI registry - creating new one");
-      return LocateRegistry.createRegistry(registryPort,clientSocketFactory,serverSocketFactory);
+synchronized (LocateRegistry.class) {
+      try {
+        Registry reg=LocateRegistry.getRegistry(null,registryPort,clientSocketFactory);
+        testRegistry(reg);
+        return reg;
+      }
+ catch (      RemoteException ex) {
+        logger.debug("RMI registry access threw exception",ex);
+        logger.info("Could not detect RMI registry - creating new one");
+        return LocateRegistry.createRegistry(registryPort,clientSocketFactory,serverSocketFactory);
+      }
     }
   }
  else {
