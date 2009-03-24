@@ -1,0 +1,22 @@
+{
+  StringBuilder patternBuilder=new StringBuilder();
+  Matcher m=GLOB_PATTERN.matcher(pattern);
+  int end=0;
+  while (m.find()) {
+    patternBuilder.append(quote(pattern,end,m.start()));
+    String match=m.group();
+    if ("?".equals(match)) {
+      patternBuilder.append('.');
+    }
+ else     if ("*".equals(match)) {
+      patternBuilder.append(".*");
+    }
+ else     if (match.startsWith("{") && match.endsWith("}")) {
+      patternBuilder.append("(.*)");
+      variableNames.add(m.group(1));
+    }
+    end=m.end();
+  }
+  patternBuilder.append(quote(pattern,end,pattern.length()));
+  return Pattern.compile(patternBuilder.toString());
+}
