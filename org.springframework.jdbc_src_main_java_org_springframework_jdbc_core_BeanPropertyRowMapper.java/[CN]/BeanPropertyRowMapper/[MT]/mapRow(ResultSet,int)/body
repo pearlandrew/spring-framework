@@ -15,7 +15,15 @@
         if (logger.isDebugEnabled() && rowNumber == 0) {
           logger.debug("Mapping column '" + column + "' to property '"+ pd.getName()+ "' of type "+ pd.getPropertyType());
         }
-        bw.setPropertyValue(pd.getName(),value);
+        try {
+          bw.setPropertyValue(pd.getName(),value);
+        }
+ catch (        TypeMismatchException e) {
+          logger.warn("Intercepted TypeMismatchException for row " + rowNumber + " and column '"+ column+ "' with value "+ value+ " when setting property '"+ pd.getName()+ "' of type "+ pd.getPropertyType()+ " on object: "+ mappedObject);
+          if (value != null) {
+            throw e;
+          }
+        }
         if (populatedProperties != null) {
           populatedProperties.add(pd.getName());
         }
