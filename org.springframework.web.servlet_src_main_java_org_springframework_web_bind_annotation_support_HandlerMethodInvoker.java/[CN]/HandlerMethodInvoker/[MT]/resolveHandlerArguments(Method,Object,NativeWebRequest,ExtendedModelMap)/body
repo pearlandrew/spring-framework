@@ -7,6 +7,7 @@
     GenericTypeResolver.resolveParameterType(methodParam,handler.getClass());
     String paramName=null;
     String headerName=null;
+    boolean requestBodyFound=false;
     String cookieName=null;
     String pathVarName=null;
     String attrName=null;
@@ -27,6 +28,10 @@
         headerName=requestHeader.value();
         required=requestHeader.required();
         defaultValue=requestHeader.defaultValue();
+        found++;
+      }
+ else       if (RequestBody.class.isInstance(paramAnn)) {
+        requestBodyFound=true;
         found++;
       }
  else       if (CookieValue.class.isInstance(paramAnn)) {
@@ -79,6 +84,9 @@
     }
  else     if (headerName != null) {
       args[i]=resolveRequestHeader(headerName,required,defaultValue,methodParam,webRequest,handler);
+    }
+ else     if (requestBodyFound) {
+      args[i]=resolveRequestBody(methodParam,webRequest,handler);
     }
  else     if (cookieName != null) {
       args[i]=resolveCookieValue(cookieName,required,defaultValue,methodParam,webRequest,handler);
