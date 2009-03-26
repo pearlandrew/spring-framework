@@ -6,11 +6,14 @@
   wmc.setReturnValue(new HashMap());
   wac.getParentBeanFactory();
   wmc.setReturnValue(null);
+  wac.getServletContext();
+  wmc.setReturnValue(new MockServletContext());
   wmc.replay();
   fv.setUrl("anythingButNull");
   try {
     fv.setApplicationContext(wac);
-    fail();
+    fv.afterPropertiesSet();
+    fail("Should have thrown BeanDefinitionStoreException");
   }
  catch (  ApplicationContextException ex) {
     assertTrue(ex.getMessage().indexOf("FreeMarkerConfig") != -1);
