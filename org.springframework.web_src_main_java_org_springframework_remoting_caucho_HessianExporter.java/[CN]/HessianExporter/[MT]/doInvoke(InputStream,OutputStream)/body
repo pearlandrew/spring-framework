@@ -4,28 +4,39 @@
   if (this.debugLogger != null && this.debugLogger.isDebugEnabled()) {
     PrintWriter debugWriter=new PrintWriter(new CommonsLogWriter(this.debugLogger));
     isToUse=new HessianDebugInputStream(inputStream,debugWriter);
-    if (debugOutputStreamAvailable) {
-      osToUse=DebugStreamFactory.createDebugOutputStream(outputStream,debugWriter);
+    osToUse=new HessianDebugOutputStream(outputStream,debugWriter);
+  }
+  int code=isToUse.read();
+  int major;
+  int minor;
+  AbstractHessianInput in;
+  AbstractHessianOutput out;
+  if (code == 'H') {
+    major=isToUse.read();
+    minor=isToUse.read();
+    if (major != 0x02) {
+      throw new IOException("Version " + major + "."+ minor+ " is not understood");
+    }
+    in=new Hessian2Input(isToUse);
+    out=new Hessian2Output(osToUse);
+    in.readCall();
+  }
+ else   if (code == 'c') {
+    major=isToUse.read();
+    minor=isToUse.read();
+    in=new HessianInput(isToUse);
+    if (major >= 2) {
+      out=new Hessian2Output(osToUse);
+    }
+ else {
+      out=new HessianOutput(osToUse);
     }
   }
-  Hessian2Input in=new Hessian2Input(isToUse);
+ else {
+    throw new IOException("Expected 'H' (Hessian 2.0) or 'c' (Hessian 1.0) in hessian input at " + code);
+  }
   if (this.serializerFactory != null) {
     in.setSerializerFactory(this.serializerFactory);
-  }
-  int code=in.read();
-  if (code != 'c') {
-    throw new IOException("expected 'c' in hessian input at " + code);
-  }
-  AbstractHessianOutput out=null;
-  int major=in.read();
-  int minor=in.read();
-  if (major >= 2) {
-    out=new Hessian2Output(osToUse);
-  }
- else {
-    out=new HessianOutput(osToUse);
-  }
-  if (this.serializerFactory != null) {
     out.setSerializerFactory(this.serializerFactory);
   }
   try {
