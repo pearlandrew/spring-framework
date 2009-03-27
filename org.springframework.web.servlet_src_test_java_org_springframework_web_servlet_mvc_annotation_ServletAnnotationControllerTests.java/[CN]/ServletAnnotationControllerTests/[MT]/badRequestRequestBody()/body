@@ -1,0 +1,22 @@
+{
+  @SuppressWarnings("serial") DispatcherServlet servlet=new DispatcherServlet(){
+    @Override protected WebApplicationContext createWebApplicationContext(    WebApplicationContext parent){
+      GenericWebApplicationContext wac=new GenericWebApplicationContext();
+      wac.registerBeanDefinition("controller",new RootBeanDefinition(RequestBodyController.class));
+      RootBeanDefinition adapterDef=new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+      adapterDef.getPropertyValues().addPropertyValue("messageConverters",new MyMessageConverter());
+      wac.registerBeanDefinition("handlerAdapter",adapterDef);
+      wac.refresh();
+      return wac;
+    }
+  }
+;
+  servlet.init(new MockServletConfig());
+  MockHttpServletRequest request=new MockHttpServletRequest("PUT","/something");
+  String requestBody="Hello World";
+  request.setContent(requestBody.getBytes("UTF-8"));
+  request.addHeader("Content-Type","application/pdf");
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  servlet.service(request,response);
+  assertEquals("Invalid response status code",HttpServletResponse.SC_BAD_REQUEST,response.getStatus());
+}
