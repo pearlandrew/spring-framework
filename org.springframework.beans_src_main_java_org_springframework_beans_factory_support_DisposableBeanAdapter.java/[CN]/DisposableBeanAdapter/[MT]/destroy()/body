@@ -4,8 +4,7 @@
       this.beanPostProcessors.get(i).postProcessBeforeDestruction(this.bean,this.beanName);
     }
   }
-  boolean isDisposableBean=(this.bean instanceof DisposableBean);
-  if (isDisposableBean && this.invokeDisposableBean) {
+  if (this.invokeDisposableBean) {
     if (logger.isDebugEnabled()) {
       logger.debug("Invoking destroy() on bean with name '" + this.beanName + "'");
     }
@@ -22,7 +21,11 @@
       }
     }
   }
-  if (this.destroyMethodName != null && !(isDisposableBean && "destroy".equals(this.destroyMethodName))) {
-    invokeCustomDestroyMethod();
+  if (this.destroyMethod != null) {
+    invokeCustomDestroyMethod(this.destroyMethod);
+  }
+ else   if (this.destroyMethodName != null) {
+    Method destroyMethod=BeanUtils.findMethodWithMinimalParameters(this.bean.getClass(),this.destroyMethodName);
+    invokeCustomDestroyMethod(destroyMethod);
   }
 }

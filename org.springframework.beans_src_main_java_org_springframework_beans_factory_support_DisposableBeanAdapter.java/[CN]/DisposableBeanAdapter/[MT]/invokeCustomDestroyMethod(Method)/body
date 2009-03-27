@@ -1,0 +1,26 @@
+{
+  Class[] paramTypes=destroyMethod.getParameterTypes();
+  Object[] args=new Object[paramTypes.length];
+  if (paramTypes.length == 1) {
+    args[0]=Boolean.TRUE;
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Invoking destroy method '" + this.destroyMethodName + "' on bean with name '"+ this.beanName+ "'");
+  }
+  ReflectionUtils.makeAccessible(destroyMethod);
+  try {
+    destroyMethod.invoke(this.bean,args);
+  }
+ catch (  InvocationTargetException ex) {
+    String msg="Invocation of destroy method '" + this.destroyMethodName + "' failed on bean with name '"+ this.beanName+ "'";
+    if (logger.isDebugEnabled()) {
+      logger.warn(msg,ex.getTargetException());
+    }
+ else {
+      logger.warn(msg + ": " + ex.getTargetException());
+    }
+  }
+catch (  Throwable ex) {
+    logger.error("Couldn't invoke destroy method '" + this.destroyMethodName + "' on bean with name '"+ this.beanName+ "'",ex);
+  }
+}

@@ -59,6 +59,11 @@ synchronized (mbd.postProcessingLock) {
       }
     }
   }
-  registerDisposableBeanIfNecessary(beanName,bean,mbd);
+  try {
+    registerDisposableBeanIfNecessary(beanName,bean,mbd);
+  }
+ catch (  BeanDefinitionValidationException ex) {
+    throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Invalid destruction signature",ex);
+  }
   return exposedObject;
 }
