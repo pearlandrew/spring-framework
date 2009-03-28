@@ -1,11 +1,8 @@
 {
   String annoTypeName=convertAsmTypeDescriptorToClassName(annoTypeDesc);
-  if (Configuration.class.getName().equals(annoTypeName)) {
-    Configuration mutableConfiguration=createMutableAnnotation(Configuration.class,classLoader);
-    configClass.setConfigurationAnnotation(mutableConfiguration);
-    return new MutableAnnotationVisitor(mutableConfiguration,classLoader);
-  }
-  if (Import.class.getName().equals(annoTypeName)) {
+  Class<? extends Annotation> annoClass=loadToolingSafeClass(annoTypeName,classLoader);
+  if (annoClass == null)   return super.visitAnnotation(annoTypeDesc,visible);
+  if (Import.class.equals(annoClass)) {
     ImportStack importStack=ImportStackHolder.getImportStack();
     if (!importStack.contains(configClass)) {
       importStack.push(configClass);
@@ -13,5 +10,7 @@
     }
     problemReporter.error(new CircularImportProblem(configClass,importStack));
   }
-  return super.visitAnnotation(annoTypeDesc,visible);
+  Annotation mutableAnnotation=createMutableAnnotation(annoClass,classLoader);
+  configClass.addAnnotation(mutableAnnotation);
+  return new MutableAnnotationVisitor(mutableAnnotation,classLoader);
 }
