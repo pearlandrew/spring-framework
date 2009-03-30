@@ -1,0 +1,24 @@
+{
+  Collection sourceCollection=(Collection)source;
+  Class targetCollectionType=getTargetType().getType();
+  Class implClass=CollectionConversionUtils.getImpl(targetCollectionType);
+  Collection targetCollection=(Collection)implClass.getConstructor((Class[])null).newInstance((Object[])null);
+  ConversionExecutor elementConverter=getElementConverter();
+  Class elementType;
+  if (elementConverter == null) {
+    elementType=GenericCollectionTypeResolver.getCollectionType(targetCollectionType);
+  }
+ else {
+    elementType=null;
+  }
+  Iterator it=sourceCollection.iterator();
+  while (it.hasNext()) {
+    Object value=it.next();
+    if (elementConverter == null && elementType != null) {
+      elementConverter=getConversionService().getElementConverter(value.getClass(),elementType);
+    }
+    value=elementConverter.execute(value);
+    targetCollection.add(value);
+  }
+  return targetCollection;
+}

@@ -1,0 +1,49 @@
+{
+  Assert.notNull(sourceType,"The sourceType to convert from is required");
+  Assert.notNull(targetType,"The targetType to convert to is required");
+  if (sourceType.isArray()) {
+    if (targetType.isArray()) {
+      return new ArrayToArray(sourceType,targetType,this);
+    }
+ else     if (targetType.isCollection()) {
+      if (targetType.isAbstractClass()) {
+        throw new IllegalArgumentException("Conversion target class [" + targetType.getName() + "] is invalid; cannot convert to abstract collection types--"+ "request an interface or concrete implementation instead");
+      }
+      return new ArrayToCollection(sourceType,targetType,this);
+    }
+  }
+  if (targetType.isArray()) {
+    if (sourceType.isCollection()) {
+      return new CollectionToArray(sourceType,targetType,this);
+    }
+ else {
+      throw new UnsupportedOperationException("Object to Array not yet supported");
+    }
+  }
+  if (sourceType.isCollection()) {
+    if (targetType.isCollection()) {
+      return new CollectionToCollection(sourceType,targetType,this);
+    }
+ else {
+      throw new UnsupportedOperationException("Object to collection not yet supported");
+    }
+  }
+  Class<?> sourceClass=sourceType.getWrapperTypeIfPrimitive();
+  Class<?> targetClass=targetType.getWrapperTypeIfPrimitive();
+  Converter converter=findRegisteredConverter(sourceClass,targetClass);
+  if (converter != null) {
+    return new StaticConversionExecutor(sourceType,targetType,converter);
+  }
+ else {
+    SuperConverter superConverter=findRegisteredSuperConverter(sourceClass,targetClass);
+    if (superConverter != null) {
+      return new StaticSuperConversionExecutor(sourceType,targetType,superConverter);
+    }
+    if (parent != null) {
+      return parent.getConversionExecutor(sourceType,targetType);
+    }
+ else {
+      throw new ConversionExecutorNotFoundException(sourceType,targetType,"No ConversionExecutor found for converting from sourceType [" + sourceType.getName() + "] to targetType ["+ targetType.getName()+ "]");
+    }
+  }
+}
