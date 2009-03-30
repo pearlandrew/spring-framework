@@ -1,0 +1,22 @@
+{
+  Object ctx=state.getActiveContextObject();
+  Object index=getChild(0).getValueInternal(state);
+  if (ctx instanceof Map) {
+    ((Map)ctx).put(index,newValue);
+    return;
+  }
+  int idx=state.convertValue(index,Integer.class);
+  if (ctx.getClass().isArray()) {
+    setArrayElement(state,ctx,idx,newValue);
+  }
+ else   if (ctx instanceof List) {
+    List<Object> c=(List<Object>)ctx;
+    if (idx >= c.size()) {
+      throw new SpelException(SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS,c.size(),idx);
+    }
+    c.set(idx,newValue);
+  }
+ else {
+    throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE,ctx.getClass().getName());
+  }
+}
