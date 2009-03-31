@@ -1,0 +1,18 @@
+{
+  String primaryBeanName=null;
+  String fallbackBeanName=null;
+  for (  Map.Entry<String,Object> entry : candidateBeans.entrySet()) {
+    String candidateBeanName=entry.getKey();
+    Object beanInstance=entry.getValue();
+    if (isPrimary(candidateBeanName,beanInstance)) {
+      if (primaryBeanName != null) {
+        throw new NoSuchBeanDefinitionException(descriptor.getDependencyType(),"more than one 'primary' bean found among candidates: " + candidateBeans.keySet());
+      }
+      primaryBeanName=candidateBeanName;
+    }
+    if (primaryBeanName == null && (this.resolvableDependencies.values().contains(beanInstance) || matchesBeanName(candidateBeanName,descriptor.getDependencyName()))) {
+      fallbackBeanName=candidateBeanName;
+    }
+  }
+  return (primaryBeanName != null ? primaryBeanName : fallbackBeanName);
+}

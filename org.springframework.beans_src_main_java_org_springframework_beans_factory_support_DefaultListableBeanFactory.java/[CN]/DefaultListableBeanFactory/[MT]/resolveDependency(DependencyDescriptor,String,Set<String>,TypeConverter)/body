@@ -1,9 +1,11 @@
 {
+  descriptor.initParameterNameDiscovery(this.parameterNameDiscoverer);
   Class type=descriptor.getDependencyType();
   Object value=getAutowireCandidateResolver().getSuggestedValue(descriptor);
   if (value != null) {
     if (value instanceof String) {
-      value=evaluateBeanDefinitionString((String)value,getMergedBeanDefinition(beanName));
+      String strVal=resolveEmbeddedValue((String)value);
+      value=evaluateBeanDefinitionString(strVal,getMergedBeanDefinition(beanName));
     }
     return typeConverter.convertIfNecessary(value,type);
   }
@@ -79,7 +81,7 @@
       return null;
     }
     if (matchingBeans.size() > 1) {
-      String primaryBeanName=determinePrimaryCandidate(matchingBeans,type);
+      String primaryBeanName=determinePrimaryCandidate(matchingBeans,descriptor);
       if (primaryBeanName == null) {
         throw new NoSuchBeanDefinitionException(type,"expected single matching bean but found " + matchingBeans.size() + ": "+ matchingBeans.keySet());
       }
