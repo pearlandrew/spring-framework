@@ -28,14 +28,12 @@
       throw new UnsupportedOperationException("Object to collection not yet supported");
     }
   }
-  Class<?> sourceClass=sourceType.getWrapperTypeIfPrimitive();
-  Class<?> targetClass=targetType.getWrapperTypeIfPrimitive();
-  Converter converter=findRegisteredConverter(sourceClass,targetClass);
+  Converter converter=findRegisteredConverter(sourceType,targetType);
   if (converter != null) {
     return new StaticConversionExecutor(sourceType,targetType,converter);
   }
  else {
-    SuperConverter superConverter=findRegisteredSuperConverter(sourceClass,targetClass);
+    SuperConverter superConverter=findRegisteredSuperConverter(sourceType,targetType);
     if (superConverter != null) {
       return new StaticSuperConversionExecutor(sourceType,targetType,superConverter);
     }
@@ -43,6 +41,9 @@
       return parent.getConversionExecutor(sourceType,targetType);
     }
  else {
+      if (sourceType.isAssignableTo(targetType)) {
+        return new StaticConversionExecutor(sourceType,targetType,NoOpConverter.INSTANCE);
+      }
       throw new ConversionExecutorNotFoundException(sourceType,targetType,"No ConversionExecutor found for converting from sourceType [" + sourceType.getName() + "] to targetType ["+ targetType.getName()+ "]");
     }
   }
