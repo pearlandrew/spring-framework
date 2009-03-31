@@ -13,11 +13,15 @@
  else   if (returnValue instanceof Model) {
     return new ModelAndView().addAllObjects(implicitModel).addAllObjects(((Model)returnValue).asMap());
   }
- else   if (returnValue instanceof Map) {
-    return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map)returnValue);
-  }
  else   if (returnValue instanceof View) {
     return new ModelAndView(returnValue).addAllObjects(implicitModel);
+  }
+ else   if (handlerMethod.isAnnotationPresent(ModelAttribute.class)) {
+    addReturnValueAsModelAttribute(handlerMethod,handlerType,returnValue,implicitModel);
+    return new ModelAndView().addAllObjects(implicitModel);
+  }
+ else   if (returnValue instanceof Map) {
+    return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map)returnValue);
   }
  else   if (returnValue instanceof String) {
     return new ModelAndView((String)returnValue).addAllObjects(implicitModel);
@@ -26,14 +30,8 @@
     return null;
   }
  else   if (!BeanUtils.isSimpleProperty(returnValue.getClass())) {
-    ModelAttribute attr=AnnotationUtils.findAnnotation(handlerMethod,ModelAttribute.class);
-    String attrName=(attr != null ? attr.value() : "");
-    ModelAndView mav=new ModelAndView().addAllObjects(implicitModel);
-    if ("".equals(attrName)) {
-      Class resolvedType=GenericTypeResolver.resolveReturnType(handlerMethod,handlerType);
-      attrName=Conventions.getVariableNameForReturnType(handlerMethod,resolvedType,returnValue);
-    }
-    return mav.addObject(attrName,returnValue);
+    addReturnValueAsModelAttribute(handlerMethod,handlerType,returnValue,implicitModel);
+    return new ModelAndView().addAllObjects(implicitModel);
   }
  else {
     throw new IllegalArgumentException("Invalid handler method return value: " + returnValue);
