@@ -1,0 +1,19 @@
+{
+  try {
+    Map map=(Map)source;
+    Map targetMap=(Map)getImpl(targetType.getType()).newInstance();
+    Iterator<Map.Entry<?,?>> it=map.entrySet().iterator();
+    while (it.hasNext()) {
+      Map.Entry entry=it.next();
+      Object key=entry.getKey();
+      Object value=entry.getValue();
+      key=conversionService.executeConversion(key,TypeDescriptor.valueOf(targetType.getMapKeyType()));
+      value=conversionService.executeConversion(value,TypeDescriptor.valueOf(targetType.getMapValueType()));
+      targetMap.put(key,value);
+    }
+    return targetMap;
+  }
+ catch (  Exception e) {
+    throw new ConversionExecutionException(source,sourceType,targetType,e);
+  }
+}
