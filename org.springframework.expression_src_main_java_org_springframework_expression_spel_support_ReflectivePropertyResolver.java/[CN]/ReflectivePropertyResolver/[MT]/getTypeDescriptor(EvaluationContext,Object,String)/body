@@ -1,0 +1,24 @@
+{
+  if (target == null) {
+    return null;
+  }
+  Class<?> type=(target instanceof Class ? (Class<?>)target : target.getClass());
+  if (type.isArray() && name.equals("length")) {
+    return TypeDescriptor.valueOf(Integer.TYPE);
+  }
+  CacheKey cacheKey=new CacheKey(type,name);
+  TypeDescriptor typeDescriptor=this.typeDescriptorCache.get(cacheKey);
+  if (typeDescriptor == null) {
+    try {
+      if (canRead(context,target,name)) {
+        typeDescriptor=this.typeDescriptorCache.get(cacheKey);
+      }
+ else       if (canWrite(context,target,name)) {
+        typeDescriptor=this.typeDescriptorCache.get(cacheKey);
+      }
+    }
+ catch (    AccessException e) {
+    }
+  }
+  return typeDescriptor;
+}
