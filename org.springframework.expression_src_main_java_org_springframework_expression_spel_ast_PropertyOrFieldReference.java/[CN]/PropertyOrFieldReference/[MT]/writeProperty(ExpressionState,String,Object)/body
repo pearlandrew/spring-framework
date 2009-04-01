@@ -4,19 +4,7 @@
   PropertyAccessor accessorToUse=this.cachedWriteAccessor;
   if (accessorToUse != null) {
     try {
-      Object possiblyConvertedValue=newValue;
-      if (cachedTypeDescriptor == null) {
-        cachedTypeDescriptor=accessorToUse.getTypeDescriptor(eContext,contextObject,name);
-      }
-      if (cachedTypeDescriptor != null) {
-        try {
-          possiblyConvertedValue=state.convertValue(newValue,cachedTypeDescriptor.getType());
-        }
- catch (        EvaluationException evaluationException) {
-          throw new SpelException(getCharPositionInLine(),evaluationException,SpelMessages.TYPE_CONVERSION_ERROR,newValue.getClass(),cachedTypeDescriptor.getType());
-        }
-      }
-      accessorToUse.write(state.getEvaluationContext(),contextObject,name,possiblyConvertedValue);
+      accessorToUse.write(state.getEvaluationContext(),contextObject,name,newValue);
       return;
     }
  catch (    AccessException ae) {
@@ -30,19 +18,7 @@
       for (      PropertyAccessor accessor : accessorsToTry) {
         if (accessor.canWrite(eContext,contextObject,name)) {
           this.cachedWriteAccessor=accessor;
-          Object possiblyConvertedValue=newValue;
-          if (cachedTypeDescriptor == null) {
-            cachedTypeDescriptor=accessor.getTypeDescriptor(eContext,contextObject,name);
-          }
-          if (cachedTypeDescriptor != null) {
-            try {
-              possiblyConvertedValue=state.convertValue(newValue,cachedTypeDescriptor);
-            }
- catch (            EvaluationException evaluationException) {
-              throw new SpelException(getCharPositionInLine(),evaluationException,SpelMessages.TYPE_CONVERSION_ERROR,newValue.getClass(),cachedTypeDescriptor.getType());
-            }
-          }
-          accessor.write(eContext,contextObject,name,possiblyConvertedValue);
+          accessor.write(eContext,contextObject,name,newValue);
           return;
         }
       }

@@ -3,6 +3,16 @@
     throw new AccessException("Cannot write property on null target");
   }
   Class<?> type=(target instanceof Class ? (Class<?>)target : target.getClass());
+  Object possiblyConvertedNewValue=newValue;
+  TypeDescriptor typeDescriptor=getTypeDescriptor(context,target,name);
+  if (typeDescriptor != null) {
+    try {
+      possiblyConvertedNewValue=context.getTypeConverter().convertValue(newValue,typeDescriptor);
+    }
+ catch (    EvaluationException evaluationException) {
+      throw new AccessException("Type conversion failure",evaluationException);
+    }
+  }
   CacheKey cacheKey=new CacheKey(type,name);
   Member cachedMember=this.writerCache.get(cacheKey);
   if (cachedMember == null || cachedMember instanceof Method) {
@@ -17,7 +27,7 @@
     if (method != null) {
       try {
         ReflectionUtils.makeAccessible(method);
-        method.invoke(target,newValue);
+        method.invoke(target,possiblyConvertedNewValue);
         return;
       }
  catch (      Exception ex) {
@@ -37,7 +47,7 @@
     if (field != null) {
       try {
         ReflectionUtils.makeAccessible(field);
-        field.set(target,newValue);
+        field.set(target,possiblyConvertedNewValue);
         return;
       }
  catch (      Exception ex) {
