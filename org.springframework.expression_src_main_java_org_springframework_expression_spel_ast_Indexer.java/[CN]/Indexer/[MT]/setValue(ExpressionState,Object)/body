@@ -1,22 +1,35 @@
 {
-  Object ctx=state.getActiveContextObject();
-  Object index=getChild(0).getValueInternal(state);
-  if (ctx instanceof Map) {
-    ((Map)ctx).put(index,newValue);
+  TypedValue contextObject=state.getActiveContextObject();
+  Object targetObject=contextObject.getValue();
+  TypeDescriptor targetObjectTypeDescriptor=contextObject.getTypeDescriptor();
+  TypedValue index=getChild(0).getValueInternal(state);
+  if (targetObjectTypeDescriptor.isMap()) {
+    Map map=(Map)targetObject;
+    Object possiblyConvertedKey=state.convertValue(index.getValue(),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
+    Object possiblyConvertedValue=state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
+    map.put(possiblyConvertedKey,possiblyConvertedValue);
     return;
   }
-  int idx=state.convertValue(index,INTEGER_TYPE_DESCRIPTOR);
-  if (ctx.getClass().isArray()) {
-    setArrayElement(state,ctx,idx,newValue);
+  if (targetObjectTypeDescriptor.isArray()) {
+    int idx=state.convertValue(index,INTEGER_TYPE_DESCRIPTOR);
+    setArrayElement(state,contextObject.getValue(),idx,newValue,targetObjectTypeDescriptor.getElementType());
   }
- else   if (ctx instanceof List) {
-    List<Object> c=(List<Object>)ctx;
+ else   if (targetObjectTypeDescriptor.isCollection()) {
+    int idx=state.convertValue(index,INTEGER_TYPE_DESCRIPTOR);
+    Collection c=(Collection)targetObject;
     if (idx >= c.size()) {
       throw new SpelException(SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS,c.size(),idx);
     }
-    c.set(idx,newValue);
+    if (targetObject instanceof List) {
+      List list=(List)targetObject;
+      Object possiblyConvertedValue=state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
+      list.set(idx,possiblyConvertedValue);
+    }
+ else {
+      throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE,contextObject.getClass().getName());
+    }
   }
  else {
-    throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE,ctx.getClass().getName());
+    throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE,contextObject.getClass().getName());
   }
 }

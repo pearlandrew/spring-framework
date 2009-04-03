@@ -1,12 +1,13 @@
 {
-  Object operand=state.getActiveContextObject();
+  TypedValue op=state.getActiveContextObject();
+  Object operand=op.getValue();
   SpelNodeImpl selectionCriteria=getChild(0);
   if (operand instanceof Map) {
     Map<?,?> mapdata=(Map<?,?>)operand;
     List<Object> result=new ArrayList<Object>();
     for (    Object k : mapdata.keySet()) {
       try {
-        Object kvpair=new KeyValuePair(k,mapdata.get(k));
+        TypedValue kvpair=new TypedValue(new KeyValuePair(k,mapdata.get(k)),TypeDescriptor.valueOf(KeyValuePair.class));
         state.pushActiveContextObject(kvpair);
         Object o=selectionCriteria.getValueInternal(state);
         if (o instanceof Boolean) {
@@ -26,10 +27,10 @@
         return null;
       }
       if (variant == LAST) {
-        return result.get(result.size() - 1);
+        return new TypedValue(result.get(result.size() - 1),TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
       }
     }
-    return result;
+    return new TypedValue(result,op.getTypeDescriptor());
   }
  else   if (operand instanceof Collection) {
     List<Object> data=new ArrayList<Object>();
@@ -38,12 +39,12 @@
     int idx=0;
     for (    Object element : data) {
       try {
-        state.pushActiveContextObject(element);
+        state.pushActiveContextObject(new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType())));
         state.enterScope("index",idx);
-        Object o=selectionCriteria.getValueInternal(state);
+        Object o=selectionCriteria.getValueInternal(state).getValue();
         if (o instanceof Boolean) {
           if (((Boolean)o).booleanValue() == true) {
-            if (variant == FIRST)             return element;
+            if (variant == FIRST)             return new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
             result.add(element);
           }
         }
@@ -61,9 +62,9 @@
       return null;
     }
     if (variant == LAST) {
-      return result.get(result.size() - 1);
+      return new TypedValue(result.get(result.size() - 1),TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
     }
-    return result;
+    return new TypedValue(result,op.getTypeDescriptor());
   }
  else {
     throw new SpelException(getCharPositionInLine(),SpelMessages.INVALID_TYPE_FOR_SELECTION,(operand == null ? "null" : operand.getClass().getName()));

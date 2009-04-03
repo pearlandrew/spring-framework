@@ -1,8 +1,8 @@
 {
-  Object currentContext=state.getActiveContextObject();
+  TypedValue currentContext=state.getActiveContextObject();
   Object[] arguments=new Object[getChildCount()];
   for (int i=0; i < arguments.length; i++) {
-    arguments[i]=getChild(i).getValueInternal(state);
+    arguments[i]=getChild(i).getValueInternal(state).getValue();
   }
   if (currentContext == null) {
     throw new SpelException(getCharPositionInLine(),SpelMessages.ATTEMPTED_METHOD_CALL_ON_NULL_CONTEXT_OBJECT,formatMethodForMessage(name,getTypes(arguments)));
@@ -10,7 +10,7 @@
   MethodExecutor executorToUse=this.cachedExecutor;
   if (executorToUse != null) {
     try {
-      return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject(),arguments);
+      return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
     }
  catch (    AccessException ae) {
       this.cachedExecutor=null;
@@ -19,7 +19,7 @@
   executorToUse=findAccessorForMethod(this.name,getTypes(arguments),state);
   this.cachedExecutor=executorToUse;
   try {
-    return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject(),arguments);
+    return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
   }
  catch (  AccessException ae) {
     throw new SpelException(getCharPositionInLine(),ae,SpelMessages.EXCEPTION_DURING_METHOD_INVOCATION,this.name,state.getActiveContextObject().getClass().getName(),ae.getMessage());

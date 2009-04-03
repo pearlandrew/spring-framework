@@ -1,6 +1,6 @@
 {
-  Object left=getLeftOperand().getValueInternal(state);
-  Object right=getRightOperand().getValueInternal(state);
+  Object left=getLeftOperand().getValueInternal(state).getValue();
+  Object right=getRightOperand().getValueInternal(state).getValue();
   if (!(right instanceof List) || ((List<?>)right).size() != 2) {
     throw new SpelException(getRightOperand().getCharPositionInLine(),SpelMessages.BETWEEN_RIGHT_OPERAND_MUST_BE_TWO_ELEMENT_LIST);
   }
@@ -9,7 +9,7 @@
   Object high=l.get(1);
   TypeComparator comparator=state.getTypeComparator();
   try {
-    return (comparator.compare(left,low) >= 0 && comparator.compare(left,high) <= 0);
+    return BooleanTypedValue.forValue((comparator.compare(left,low) >= 0 && comparator.compare(left,high) <= 0));
   }
  catch (  SpelException ex) {
     ex.setPosition(getCharPositionInLine());

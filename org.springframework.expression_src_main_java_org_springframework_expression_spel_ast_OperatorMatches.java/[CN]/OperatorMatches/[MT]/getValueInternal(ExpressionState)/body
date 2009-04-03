@@ -2,7 +2,7 @@
   SpelNodeImpl leftOp=getLeftOperand();
   SpelNodeImpl rightOp=getRightOperand();
   Object left=leftOp.getValue(state,String.class);
-  Object right=getRightOperand().getValueInternal(state);
+  Object right=getRightOperand().getValueInternal(state).getValue();
   try {
     if (!(left instanceof String)) {
       throw new SpelException(leftOp.getCharPositionInLine(),SpelMessages.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR,left);
@@ -12,7 +12,7 @@
     }
     Pattern pattern=Pattern.compile((String)right);
     Matcher matcher=pattern.matcher((String)left);
-    return matcher.matches();
+    return BooleanTypedValue.forValue(matcher.matches());
   }
  catch (  PatternSyntaxException pse) {
     throw new SpelException(rightOp.getCharPositionInLine(),pse,SpelMessages.INVALID_PATTERN,right);

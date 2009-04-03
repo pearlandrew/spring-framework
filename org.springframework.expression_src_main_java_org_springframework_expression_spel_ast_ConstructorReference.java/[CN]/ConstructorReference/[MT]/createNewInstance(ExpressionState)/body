@@ -2,9 +2,9 @@
   Object[] arguments=new Object[getChildCount() - 1];
   Class<?>[] argumentTypes=new Class[getChildCount() - 1];
   for (int i=0; i < arguments.length; i++) {
-    Object childValue=getChild(i + 1).getValueInternal(state);
-    arguments[i]=childValue;
-    argumentTypes[i]=childValue.getClass();
+    TypedValue childValue=getChild(i + 1).getValueInternal(state);
+    arguments[i]=childValue.getValue();
+    argumentTypes[i]=childValue.getValue().getClass();
   }
   ConstructorExecutor executorToUse=this.cachedExecutor;
   if (executorToUse != null) {
@@ -15,7 +15,7 @@
       this.cachedExecutor=null;
     }
   }
-  String typename=(String)getChild(0).getValueInternal(state);
+  String typename=(String)getChild(0).getValueInternal(state).getValue();
   executorToUse=findExecutorForConstructor(typename,argumentTypes,state);
   try {
     return executorToUse.execute(state.getEvaluationContext(),arguments);

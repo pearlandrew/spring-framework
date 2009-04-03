@@ -1,24 +1,24 @@
 {
-  Object contextObject=state.getActiveContextObject();
+  TypedValue contextObject=state.getActiveContextObject();
   EvaluationContext eContext=state.getEvaluationContext();
   PropertyAccessor accessorToUse=this.cachedWriteAccessor;
   if (accessorToUse != null) {
     try {
-      accessorToUse.write(state.getEvaluationContext(),contextObject,name,newValue);
+      accessorToUse.write(state.getEvaluationContext(),contextObject.getValue(),name,newValue);
       return;
     }
  catch (    AccessException ae) {
       this.cachedWriteAccessor=null;
     }
   }
-  Class<?> contextObjectClass=getObjectClass(contextObject);
+  Class<?> contextObjectClass=getObjectClass(contextObject.getValue());
   List<PropertyAccessor> accessorsToTry=getPropertyAccessorsToTry(contextObjectClass,state);
   if (accessorsToTry != null) {
     try {
       for (      PropertyAccessor accessor : accessorsToTry) {
-        if (accessor.canWrite(eContext,contextObject,name)) {
+        if (accessor.canWrite(eContext,contextObject.getValue(),name)) {
           this.cachedWriteAccessor=accessor;
-          accessor.write(eContext,contextObject,name,newValue);
+          accessor.write(eContext,contextObject.getValue(),name,newValue);
           return;
         }
       }

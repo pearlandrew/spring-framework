@@ -1,12 +1,14 @@
 {
-  Object left=getLeftOperand().getValueInternal(state);
-  Object right=getRightOperand().getValueInternal(state);
-  if (left == null) {
-    return false;
+  TypedValue left=getLeftOperand().getValueInternal(state);
+  TypedValue right=getRightOperand().getValueInternal(state);
+  Object leftValue=left.getValue();
+  Object rightValue=right.getValue();
+  if (leftValue == null) {
+    return BooleanTypedValue.False;
   }
-  if (right == null || !(right instanceof Class<?>)) {
-    throw new SpelException(getRightOperand().getCharPositionInLine(),SpelMessages.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND,(right == null ? "null" : right.getClass().getName()));
+  if (rightValue == null || !(rightValue instanceof Class<?>)) {
+    throw new SpelException(getRightOperand().getCharPositionInLine(),SpelMessages.INSTANCEOF_OPERATOR_NEEDS_CLASS_OPERAND,(rightValue == null ? "null" : rightValue.getClass().getName()));
   }
-  Class<?> rightClass=(Class<?>)right;
-  return rightClass.isAssignableFrom(left.getClass());
+  Class<?> rightClass=(Class<?>)rightValue;
+  return BooleanTypedValue.forValue(rightClass.isAssignableFrom(leftValue.getClass()));
 }

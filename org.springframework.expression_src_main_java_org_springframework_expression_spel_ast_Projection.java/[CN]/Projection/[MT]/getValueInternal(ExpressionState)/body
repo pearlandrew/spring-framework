@@ -1,27 +1,29 @@
 {
-  Object operand=state.getActiveContextObject();
+  TypedValue op=state.getActiveContextObject();
+  Object operand=op.getValue();
+  TypeDescriptor operandTypeDescriptor=op.getTypeDescriptor();
   if (operand instanceof Map) {
     Map<?,?> mapdata=(Map<?,?>)operand;
     List<Object> result=new ArrayList<Object>();
     for (    Object k : mapdata.keySet()) {
       try {
-        state.pushActiveContextObject(new KeyValuePair(k,mapdata.get(k)));
+        state.pushActiveContextObject(new TypedValue(new KeyValuePair(k,mapdata.get(k)),TypeDescriptor.valueOf(KeyValuePair.class)));
         result.add(getChild(0).getValueInternal(state));
       }
   finally {
         state.popActiveContextObject();
       }
     }
-    return result;
+    return new TypedValue(result,TypeDescriptor.valueOf(Map.class));
   }
- else   if (operand instanceof Collection) {
+ else   if (operand instanceof List) {
     List<Object> data=new ArrayList<Object>();
     data.addAll((Collection<?>)operand);
     List<Object> result=new ArrayList<Object>();
     int idx=0;
     for (    Object element : data) {
       try {
-        state.pushActiveContextObject(element);
+        state.pushActiveContextObject(new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getType())));
         state.enterScope("index",idx);
         result.add(getChild(0).getValueInternal(state));
       }
@@ -31,7 +33,7 @@
       }
       idx++;
     }
-    return result;
+    return new TypedValue(result,op.getTypeDescriptor());
   }
  else {
     throw new SpelException(SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE,operand.getClass().getName());
