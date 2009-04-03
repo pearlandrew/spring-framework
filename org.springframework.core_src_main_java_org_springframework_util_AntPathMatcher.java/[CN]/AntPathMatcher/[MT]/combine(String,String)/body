@@ -1,0 +1,47 @@
+{
+  if (!StringUtils.hasText(pattern1) && !StringUtils.hasText(pattern2)) {
+    return "";
+  }
+ else   if (!StringUtils.hasText(pattern1)) {
+    return pattern2;
+  }
+ else   if (!StringUtils.hasText(pattern2)) {
+    return pattern1;
+  }
+ else   if (pattern1.endsWith("/*")) {
+    if (pattern2.startsWith("/")) {
+      return pattern1.substring(0,pattern1.length() - 1) + pattern2.substring(1);
+    }
+ else {
+      return pattern1.substring(0,pattern1.length() - 1) + pattern2;
+    }
+  }
+ else   if (pattern1.endsWith("/**")) {
+    if (pattern2.startsWith("/")) {
+      return pattern1 + pattern2;
+    }
+ else {
+      return pattern1 + "/" + pattern2;
+    }
+  }
+ else {
+    int idx=pattern1.indexOf("*.");
+    if (idx == -1) {
+      if (pattern1.endsWith("/") || pattern2.startsWith("/")) {
+        return pattern1 + pattern2;
+      }
+ else {
+        return pattern1 + "/" + pattern2;
+      }
+    }
+ else {
+      String extension=pattern1.substring(idx + 1);
+      if (pattern2.endsWith(extension)) {
+        return pattern2;
+      }
+ else {
+        throw new IllegalArgumentException("Conflicting paths: \"" + pattern1 + "\" does not include \""+ pattern2+ "\"");
+      }
+    }
+  }
+}
