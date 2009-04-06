@@ -2,23 +2,20 @@
   SpelNodeImpl leftOp=getLeftOperand();
   SpelNodeImpl rightOp=getRightOperand();
   if (rightOp == null) {
-    Object left=leftOp.getValueInternal(state).getValue();
-    if (left instanceof Number) {
-      Number n=(Number)left;
-      if (left instanceof Double) {
+    Object operand=leftOp.getValueInternal(state).getValue();
+    if (operand instanceof Number) {
+      Number n=(Number)operand;
+      if (operand instanceof Double) {
         return new TypedValue(0 - n.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
       }
- else       if (left instanceof Float) {
-        return new TypedValue(0 - n.floatValue(),FLOAT_TYPE_DESCRIPTOR);
-      }
- else       if (left instanceof Long) {
+ else       if (operand instanceof Long) {
         return new TypedValue(0 - n.longValue(),LONG_TYPE_DESCRIPTOR);
       }
  else {
         return new TypedValue(0 - n.intValue(),INTEGER_TYPE_DESCRIPTOR);
       }
     }
-    throw new SpelException(SpelMessages.CANNOT_NEGATE_TYPE,left.getClass().getName());
+    return state.operate(Operation.SUBTRACT,operand,null);
   }
  else {
     Object left=leftOp.getValueInternal(state).getValue();
@@ -29,15 +26,17 @@
       if (op1 instanceof Double || op2 instanceof Double) {
         return new TypedValue(op1.doubleValue() - op2.doubleValue(),DOUBLE_TYPE_DESCRIPTOR);
       }
- else       if (op1 instanceof Float || op2 instanceof Float) {
-        return new TypedValue(op1.floatValue() - op2.floatValue(),FLOAT_TYPE_DESCRIPTOR);
-      }
  else       if (op1 instanceof Long || op2 instanceof Long) {
         return new TypedValue(op1.longValue() - op2.longValue(),LONG_TYPE_DESCRIPTOR);
       }
  else {
         return new TypedValue(op1.intValue() - op2.intValue(),INTEGER_TYPE_DESCRIPTOR);
       }
+    }
+ else     if (left instanceof String && right instanceof Integer && ((String)left).length() == 1) {
+      String theString=(String)left;
+      Integer theInteger=(Integer)right;
+      return new TypedValue(Character.toString((char)(theString.charAt(0) - theInteger)),STRING_TYPE_DESCRIPTOR);
     }
     return state.operate(Operation.SUBTRACT,left,right);
   }
