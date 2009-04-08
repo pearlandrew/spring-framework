@@ -18,7 +18,9 @@
   String typename=(String)getChild(0).getValueInternal(state).getValue();
   executorToUse=findExecutorForConstructor(typename,argumentTypes,state);
   try {
-    return executorToUse.execute(state.getEvaluationContext(),arguments);
+    this.cachedExecutor=executorToUse;
+    TypedValue result=executorToUse.execute(state.getEvaluationContext(),arguments);
+    return result;
   }
  catch (  AccessException ae) {
     throw new SpelException(ae,SpelMessages.EXCEPTION_DURING_CONSTRUCTOR_INVOCATION,typename,ae.getMessage());

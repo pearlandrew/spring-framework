@@ -4,16 +4,20 @@
   SpelNodeImpl selectionCriteria=getChild(0);
   if (operand instanceof Map) {
     Map<?,?> mapdata=(Map<?,?>)operand;
-    List<Object> result=new ArrayList<Object>();
+    Map<Object,Object> result=new HashMap<Object,Object>();
     for (    Object k : mapdata.keySet()) {
       try {
-        TypedValue kvpair=new TypedValue(new KeyValuePair(k,mapdata.get(k)),TypeDescriptor.valueOf(KeyValuePair.class));
+        KeyValuePair kvp=new KeyValuePair(k,mapdata.get(k));
+        TypedValue kvpair=new TypedValue(kvp,TypeDescriptor.valueOf(KeyValuePair.class));
         state.pushActiveContextObject(kvpair);
-        Object o=selectionCriteria.getValueInternal(state);
+        Object o=selectionCriteria.getValueInternal(state).getValue();
         if (o instanceof Boolean) {
           if (((Boolean)o).booleanValue() == true) {
-            if (variant == FIRST)             return kvpair;
-            result.add(kvpair);
+            if (variant == FIRST) {
+              result.put(kvp.key,kvp.value);
+              return new TypedValue(result);
+            }
+            result.put(kvp.key,kvp.value);
           }
         }
  else {
