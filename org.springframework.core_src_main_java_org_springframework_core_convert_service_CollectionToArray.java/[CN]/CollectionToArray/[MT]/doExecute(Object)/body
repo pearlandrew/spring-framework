@@ -1,15 +1,11 @@
 {
   Collection<?> collection=(Collection<?>)source;
-  Class<?> targetComponentType=getTargetType().getElementType();
-  Object array=Array.newInstance(targetComponentType,collection.size());
+  Object array=Array.newInstance(getTargetElementType(),collection.size());
   int i=0;
-  ConversionExecutor converter=getElementConverter();
+  ConversionExecutor elementConverter=getElementConverter(collection);
   for (Iterator<?> it=collection.iterator(); it.hasNext(); i++) {
     Object value=it.next();
-    if (converter == null) {
-      converter=getConversionService().getElementConverter(value.getClass(),targetComponentType);
-    }
-    value=converter.execute(value);
+    value=elementConverter.execute(value);
     Array.set(array,i,value);
   }
   return array;
