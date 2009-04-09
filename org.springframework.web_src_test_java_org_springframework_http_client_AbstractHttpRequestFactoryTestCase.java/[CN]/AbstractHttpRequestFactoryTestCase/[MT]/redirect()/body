@@ -1,0 +1,24 @@
+{
+  ClientHttpResponse response=null;
+  try {
+    ClientHttpRequest request=factory.createRequest(new URI(BASE_URL + "/redirect"),HttpMethod.PUT);
+    response=request.execute();
+    assertEquals("Invalid Location value",new URI(BASE_URL + "/status/ok"),response.getHeaders().getLocation());
+  }
+  finally {
+    if (response != null) {
+      response.close();
+      response=null;
+    }
+  }
+  try {
+    ClientHttpRequest request=factory.createRequest(new URI(BASE_URL + "/redirect"),HttpMethod.GET);
+    response=request.execute();
+    assertNull("Invalid Location value",response.getHeaders().getLocation());
+  }
+  finally {
+    if (response != null) {
+      response.close();
+    }
+  }
+}
