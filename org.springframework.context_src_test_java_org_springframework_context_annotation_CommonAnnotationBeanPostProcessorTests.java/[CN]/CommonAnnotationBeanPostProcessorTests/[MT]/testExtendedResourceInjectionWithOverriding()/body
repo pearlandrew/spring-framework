@@ -1,9 +1,14 @@
 {
   DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
   CommonAnnotationBeanPostProcessor bpp=new CommonAnnotationBeanPostProcessor();
-  bpp.setResourceFactory(bf);
+  bpp.setBeanFactory(bf);
   bf.addBeanPostProcessor(bpp);
   bf.registerResolvableDependency(BeanFactory.class,bf);
+  PropertyPlaceholderConfigurer ppc=new PropertyPlaceholderConfigurer();
+  Properties props=new Properties();
+  props.setProperty("tb","testBean3");
+  ppc.setProperties(props);
+  ppc.postProcessBeanFactory(bf);
   RootBeanDefinition annotatedBd=new RootBeanDefinition(ExtendedResourceInjectionBean.class);
   TestBean tb5=new TestBean();
   annotatedBd.getPropertyValues().addPropertyValue("testBean2",tb5);
