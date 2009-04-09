@@ -14,7 +14,9 @@
     functionArgs=ReflectionHelper.setupArgumentsForVarargsInvocation(m.getParameterTypes(),functionArgs);
   }
   try {
-    return new TypedValue(m.invoke(m.getClass(),functionArgs),new TypeDescriptor(new MethodParameter(m,-1)));
+    ReflectionUtils.makeAccessible(m);
+    Object result=m.invoke(m.getClass(),functionArgs);
+    return new TypedValue(result,new TypeDescriptor(new MethodParameter(m,-1)));
   }
  catch (  IllegalArgumentException e) {
     throw new SpelException(getCharPositionInLine(),e,SpelMessages.EXCEPTION_DURING_FUNCTION_CALL,name,e.getMessage());
