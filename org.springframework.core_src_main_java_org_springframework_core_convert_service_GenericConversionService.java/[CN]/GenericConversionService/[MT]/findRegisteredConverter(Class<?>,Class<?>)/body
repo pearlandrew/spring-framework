@@ -1,13 +1,11 @@
 {
-  Class<?> sourceClass=sourceType.getWrapperTypeIfPrimitive();
-  Class<?> targetClass=targetType.getWrapperTypeIfPrimitive();
-  if (sourceClass.isInterface()) {
+  if (sourceType.isInterface()) {
     LinkedList classQueue=new LinkedList();
-    classQueue.addFirst(sourceClass);
+    classQueue.addFirst(sourceType);
     while (!classQueue.isEmpty()) {
       Class currentClass=(Class)classQueue.removeLast();
-      Map converters=getSuperConvertersForSource(currentClass);
-      SuperConverter converter=findSuperConverter(converters,targetClass);
+      Map converters=getConvertersForSource(currentClass);
+      Converter converter=getConverter(converters,targetType);
       if (converter != null) {
         return converter;
       }
@@ -16,16 +14,16 @@
         classQueue.addFirst(interfaces[i]);
       }
     }
-    Map objectConverters=getSuperConvertersForSource(Object.class);
-    return findSuperConverter(objectConverters,targetClass);
+    Map objectConverters=getConvertersForSource(Object.class);
+    return getConverter(objectConverters,targetType);
   }
  else {
     LinkedList classQueue=new LinkedList();
-    classQueue.addFirst(sourceClass);
+    classQueue.addFirst(sourceType);
     while (!classQueue.isEmpty()) {
       Class currentClass=(Class)classQueue.removeLast();
-      Map converters=getSuperConvertersForSource(currentClass);
-      SuperConverter converter=findSuperConverter(converters,targetClass);
+      Map converters=getConvertersForSource(currentClass);
+      Converter converter=getConverter(converters,targetType);
       if (converter != null) {
         return converter;
       }
