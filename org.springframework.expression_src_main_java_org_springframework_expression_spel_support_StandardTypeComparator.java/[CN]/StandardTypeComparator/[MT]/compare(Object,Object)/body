@@ -9,14 +9,14 @@
     Number leftNumber=(Number)left;
     Number rightNumber=(Number)right;
     if (leftNumber instanceof Double || rightNumber instanceof Double) {
-      Double d1=leftNumber.doubleValue();
-      Double d2=rightNumber.doubleValue();
-      return d1.compareTo(d2);
+      double d1=leftNumber.doubleValue();
+      double d2=rightNumber.doubleValue();
+      return Double.compare(d1,d2);
     }
  else     if (leftNumber instanceof Float || rightNumber instanceof Float) {
-      Float f1=leftNumber.floatValue();
-      Float f2=rightNumber.floatValue();
-      return f1.compareTo(f2);
+      float f1=leftNumber.floatValue();
+      float f2=rightNumber.floatValue();
+      return Float.compare(f1,f2);
     }
  else     if (leftNumber instanceof Long || rightNumber instanceof Long) {
       Long l1=leftNumber.longValue();
@@ -29,11 +29,8 @@
       return i1.compareTo(i2);
     }
   }
-  boolean sameType=left.getClass() == right.getClass();
-  if (sameType) {
-    if (left instanceof Comparable) {
-      return ((Comparable)left).compareTo(right);
-    }
+  if (left instanceof Comparable) {
+    return ((Comparable)left).compareTo(right);
   }
-  return left == right ? 0 : 1;
+  throw new SpelException(SpelMessages.NOT_COMPARABLE,left.getClass(),right.getClass());
 }
