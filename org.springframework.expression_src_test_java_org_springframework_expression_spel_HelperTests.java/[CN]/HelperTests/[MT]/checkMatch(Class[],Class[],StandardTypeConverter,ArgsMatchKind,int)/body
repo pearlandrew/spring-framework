@@ -1,0 +1,27 @@
+{
+  ReflectionHelper.ArgumentsMatchInfo matchInfo=ReflectionHelper.compareArguments(expectedTypes,inputTypes,typeConverter);
+  if (expectedMatchKind == null) {
+    assertNull("Did not expect them to match in any way",matchInfo);
+  }
+ else {
+    assertNotNull("Should not be a null match",matchInfo);
+  }
+  if (expectedMatchKind == ArgsMatchKind.EXACT) {
+    assertTrue(matchInfo.isExactMatch());
+    assertNull(matchInfo.argsRequiringConversion);
+  }
+ else   if (expectedMatchKind == ArgsMatchKind.CLOSE) {
+    assertTrue(matchInfo.isCloseMatch());
+    assertNull(matchInfo.argsRequiringConversion);
+  }
+ else   if (expectedMatchKind == ArgsMatchKind.REQUIRES_CONVERSION) {
+    assertTrue("expected to be a match requiring conversion, but was " + matchInfo,matchInfo.isMatchRequiringConversion());
+    if (argsForConversion == null) {
+      fail("there are arguments that need conversion");
+    }
+    assertEquals("The array of args that need conversion is different length to that expected",argsForConversion.length,matchInfo.argsRequiringConversion.length);
+    for (int a=0; a < argsForConversion.length; a++) {
+      assertEquals(argsForConversion[a],matchInfo.argsRequiringConversion[a]);
+    }
+  }
+}
