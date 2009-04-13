@@ -1,0 +1,23 @@
+{
+  StandardTypeConverter tc=new StandardTypeConverter();
+  Object[] args=new Object[]{3};
+  ReflectionHelper.convertAllArguments(new Class[]{String.class},false,tc,args);
+  checkArguments(args,"3");
+  args=new Object[]{3,false,3.0f};
+  ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class},true,tc,args);
+  checkArguments(args,"3","false","3.0");
+  args=new Object[]{3};
+  ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class},true,tc,args);
+  checkArguments(args,"3");
+  args=new Object[]{3,false,3.0f};
+  try {
+    ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class},true,null,args);
+    fail("Should have failed because no converter supplied");
+  }
+ catch (  SpelException se) {
+    assertEquals(SpelMessages.TYPE_CONVERSION_ERROR,se.getMessageUnformatted());
+  }
+  args=new Object[]{3,null,3.0f};
+  ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class},true,tc,args);
+  checkArguments(args,"3",null,"3.0");
+}

@@ -1,0 +1,19 @@
+{
+  Assert.notNull(argumentsRequiringConversion,"should not be called if no conversions required");
+  Assert.notNull(arguments,"should not be called if no conversions required");
+  Class varargsType=null;
+  if (isVarargs) {
+    Assert.isTrue(requiredParameterTypes[requiredParameterTypes.length - 1].isArray(),"if varargs then last parameter type must be array");
+    varargsType=requiredParameterTypes[requiredParameterTypes.length - 1].getComponentType();
+  }
+  for (  Integer argPosition : argumentsRequiringConversion) {
+    Class<?> targetType=null;
+    if (isVarargs && argPosition >= (requiredParameterTypes.length - 1)) {
+      targetType=varargsType;
+    }
+ else {
+      targetType=requiredParameterTypes[argPosition];
+    }
+    arguments[argPosition]=converter.convertValue(arguments[argPosition],targetType);
+  }
+}

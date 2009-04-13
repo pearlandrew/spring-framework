@@ -1,4 +1,22 @@
 {
   StandardTypeConverter tc=new StandardTypeConverter();
-  checkMatch(new Class[]{String.class},new Class[]{String.class},tc,ArgsMatchKind.EXACT);
+  Class<?> stringArrayClass=new String[0].getClass();
+  Class<?> integerArrayClass=new Integer[0].getClass();
+  checkMatch2(new Class[]{stringArrayClass},new Class[]{stringArrayClass},tc,ArgsMatchKind.EXACT);
+  checkMatch2(new Class[]{Integer.class,stringArrayClass},new Class[]{Integer.class,stringArrayClass},tc,ArgsMatchKind.EXACT);
+  checkMatch2(new Class[]{String.class,Integer.class,stringArrayClass},new Class[]{String.class,Integer.class,stringArrayClass},tc,ArgsMatchKind.EXACT);
+  checkMatch2(new Class[]{Sub.class,stringArrayClass},new Class[]{Super.class,stringArrayClass},tc,ArgsMatchKind.CLOSE);
+  checkMatch2(new Class[]{Integer.class,stringArrayClass},new Class[]{String.class,stringArrayClass},tc,ArgsMatchKind.REQUIRES_CONVERSION,0);
+  checkMatch2(new Class[]{Integer.class,Sub.class,String[].class},new Class[]{String.class,Super.class,String[].class},tc,ArgsMatchKind.REQUIRES_CONVERSION,0);
+  checkMatch2(new Class[]{String.class},new Class[]{stringArrayClass},tc,ArgsMatchKind.EXACT);
+  checkMatch2(new Class[]{Integer.class,String.class},new Class[]{Integer.class,stringArrayClass},tc,ArgsMatchKind.EXACT);
+  checkMatch2(new Class[]{String.class},new Class[]{integerArrayClass},tc,ArgsMatchKind.REQUIRES_CONVERSION,0);
+  checkMatch2(new Class[]{Sub.class},new Class[]{new Super[0].getClass()},tc,ArgsMatchKind.CLOSE);
+  checkMatch2(new Class[]{Super.class},new Class[]{new Sub[0].getClass()},tc,null);
+  checkMatch2(new Class[]{Unconvertable.class,String.class},new Class[]{Sub.class,Super[].class},tc,null);
+  checkMatch2(new Class[]{Integer.class,Integer.class,String.class},new Class[]{String.class,String.class,Super[].class},tc,null);
+  checkMatch2(new Class[]{Unconvertable.class,String.class},new Class[]{Sub.class,Super[].class},tc,null);
+  checkMatch2(new Class[]{Integer.class,Integer.class,String.class},new Class[]{String.class,String.class,Super[].class},tc,null);
+  checkMatch2(new Class[]{Integer.class,Integer.class,Sub.class},new Class[]{String.class,String.class,Super[].class},tc,ArgsMatchKind.REQUIRES_CONVERSION,0,1);
+  checkMatch2(new Class[]{Integer.class,Integer.class,Integer.class},new Class[]{Integer.class,String[].class},tc,ArgsMatchKind.REQUIRES_CONVERSION,1,2);
 }
