@@ -4,31 +4,27 @@
   String prefix=context.getExpressionPrefix();
   String suffix=context.getExpressionSuffix();
   while (startIdx < expressionString.length()) {
-    int prefixIndex=expressionString.indexOf(prefix,startIdx);
+    int prefixIndex=findUnescapedOccurenceOf(prefix,expressionString,startIdx);
     if (prefixIndex >= startIdx) {
       if (prefixIndex > startIdx) {
-        expressions.add(new LiteralExpression(expressionString.substring(startIdx,prefixIndex)));
+        expressions.add(createLiteralExpression(context,expressionString.substring(startIdx,prefixIndex)));
       }
       int afterPrefixIndex=prefixIndex + prefix.length();
-      int suffixIndex=expressionString.indexOf(suffix,afterPrefixIndex);
-      int nextPrefixIndex=expressionString.indexOf(prefix,afterPrefixIndex);
+      int suffixIndex=skipToCorrectEndSuffix(prefix,suffix,expressionString,afterPrefixIndex);
       if (suffixIndex == -1) {
         throw new ParseException(expressionString,"No ending suffix '" + suffix + "' for expression starting at character "+ prefixIndex+ ": "+ expressionString.substring(prefixIndex));
       }
-      if (nextPrefixIndex != -1 && suffixIndex > nextPrefixIndex) {
-        throw new ParseException(expressionString,"No ending suffix '" + suffix + "' for expression starting at character "+ prefixIndex+ ": "+ expressionString.substring(prefixIndex));
-      }
- else       if (suffixIndex == afterPrefixIndex) {
+      if (suffixIndex == afterPrefixIndex) {
         throw new ParseException(expressionString,"No expression defined within delimiter '" + prefix + suffix+ "' at character "+ prefixIndex);
       }
  else {
         String expr=expressionString.substring(prefixIndex + prefix.length(),suffixIndex);
-        expressions.add(doParseExpression(expr,context));
+        expressions.add(doParseExpression(unescape(context,expr),context));
         startIdx=suffixIndex + suffix.length();
       }
     }
  else {
-      expressions.add(new LiteralExpression(expressionString.substring(startIdx)));
+      expressions.add(createLiteralExpression(context,expressionString.substring(startIdx)));
       startIdx=expressionString.length();
     }
   }

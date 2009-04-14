@@ -1,0 +1,22 @@
+{
+  int nextSuffix=findUnescapedOccurenceOf(suffix,expressionString,afterPrefixIndex);
+  int nextPrefix=findUnescapedOccurenceOf(prefix,expressionString,afterPrefixIndex);
+  if (nextPrefix == -1 || nextPrefix > nextSuffix) {
+    return nextSuffix;
+  }
+ else {
+    int depth=0;
+    while (nextPrefix != -1 && nextPrefix < nextSuffix) {
+      depth++;
+      nextPrefix=findUnescapedOccurenceOf(prefix,expressionString,nextPrefix + prefix.length());
+    }
+    while (depth > 0) {
+      depth--;
+      nextSuffix=findUnescapedOccurenceOf(suffix,expressionString,nextSuffix + suffix.length());
+      if (nextSuffix == -1) {
+        return -1;
+      }
+    }
+    return nextSuffix;
+  }
+}
