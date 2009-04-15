@@ -1,14 +1,18 @@
 {
   String value=DomUtils.getTextValue(ele);
-  String typeClassName=ele.getAttribute(TYPE_ATTRIBUTE);
-  if (!StringUtils.hasText(typeClassName)) {
-    typeClassName=defaultTypeClassName;
+  String specifiedTypeName=ele.getAttribute(TYPE_ATTRIBUTE);
+  String typeName=specifiedTypeName;
+  if (!StringUtils.hasText(typeName)) {
+    typeName=defaultTypeName;
   }
   try {
-    return buildTypedStringValue(value,typeClassName,ele);
+    TypedStringValue typedValue=buildTypedStringValue(value,typeName);
+    typedValue.setSource(extractSource(ele));
+    typedValue.setSpecifiedTypeName(specifiedTypeName);
+    return typedValue;
   }
  catch (  ClassNotFoundException ex) {
-    error("Type class [" + typeClassName + "] not found for <value> element",ele,ex);
+    error("Type class [" + typeName + "] not found for <value> element",ele,ex);
     return value;
   }
 }

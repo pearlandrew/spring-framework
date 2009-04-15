@@ -1,14 +1,10 @@
 {
-  String defaultTypeClassName=collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
+  String defaultElementType=collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
   NodeList nl=collectionEle.getChildNodes();
-  ManagedSet set=new ManagedSet(nl.getLength());
-  set.setSource(extractSource(collectionEle));
-  set.setMergeEnabled(parseMergeAttribute(collectionEle));
-  for (int i=0; i < nl.getLength(); i++) {
-    Node node=nl.item(i);
-    if (node instanceof Element && !DomUtils.nodeNameEquals(node,DESCRIPTION_ELEMENT)) {
-      set.add(parsePropertySubElement((Element)node,bd,defaultTypeClassName));
-    }
-  }
-  return set;
+  ManagedSet<Object> target=new ManagedSet<Object>(nl.getLength());
+  target.setSource(extractSource(collectionEle));
+  target.setElementTypeName(defaultElementType);
+  target.setMergeEnabled(parseMergeAttribute(collectionEle));
+  parseCollectionElements(nl,target,bd,defaultElementType);
+  return target;
 }

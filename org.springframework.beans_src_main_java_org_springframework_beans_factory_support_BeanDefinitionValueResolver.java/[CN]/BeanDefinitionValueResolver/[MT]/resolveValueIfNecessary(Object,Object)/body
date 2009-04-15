@@ -19,6 +19,26 @@
     BeanDefinition bd=(BeanDefinition)value;
     return resolveInnerBean(argName,"(inner bean)",bd);
   }
+ else   if (value instanceof ManagedArray) {
+    ManagedArray array=(ManagedArray)value;
+    Class elementType=array.resolvedElementType;
+    if (elementType == null) {
+      String elementTypeName=array.getElementTypeName();
+      if (StringUtils.hasText(elementTypeName)) {
+        try {
+          elementType=ClassUtils.forName(elementTypeName,this.beanFactory.getBeanClassLoader());
+          array.resolvedElementType=elementType;
+        }
+ catch (        Throwable ex) {
+          throw new BeanCreationException(this.beanDefinition.getResourceDescription(),this.beanName,"Error resolving array type for " + argName,ex);
+        }
+      }
+ else {
+        elementType=Object.class;
+      }
+    }
+    return resolveManagedArray(argName,(List<?>)value,elementType);
+  }
  else   if (value instanceof ManagedList) {
     return resolveManagedList(argName,(List<?>)value);
   }

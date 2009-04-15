@@ -1,10 +1,12 @@
 {
-  String defaultKeyTypeClassName=mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
-  String defaultValueTypeClassName=mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
+  String defaultKeyType=mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
+  String defaultValueType=mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
   List<Element> entryEles=DomUtils.getChildElementsByTagName(mapEle,ENTRY_ELEMENT);
-  ManagedMap map=new ManagedMap(entryEles.size());
-  map.setMergeEnabled(parseMergeAttribute(mapEle));
+  ManagedMap<Object,Object> map=new ManagedMap<Object,Object>(entryEles.size());
   map.setSource(extractSource(mapEle));
+  map.setKeyTypeName(defaultKeyType);
+  map.setValueTypeName(defaultValueType);
+  map.setMergeEnabled(parseMergeAttribute(mapEle));
   for (  Element entryEle : entryEles) {
     NodeList entrySubNodes=entryEle.getChildNodes();
     Element keyEle=null;
@@ -38,7 +40,7 @@
       error("<entry> element is only allowed to contain either " + "a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element",entryEle);
     }
     if (hasKeyAttribute) {
-      key=buildTypedStringValueForMap(entryEle.getAttribute(KEY_ATTRIBUTE),defaultKeyTypeClassName,entryEle);
+      key=buildTypedStringValueForMap(entryEle.getAttribute(KEY_ATTRIBUTE),defaultKeyType,entryEle);
     }
  else     if (hasKeyRefAttribute) {
       String refName=entryEle.getAttribute(KEY_REF_ATTRIBUTE);
@@ -50,7 +52,7 @@
       key=ref;
     }
  else     if (keyEle != null) {
-      key=parseKeyElement(keyEle,bd,defaultKeyTypeClassName);
+      key=parseKeyElement(keyEle,bd,defaultKeyType);
     }
  else {
       error("<entry> element must specify a key",entryEle);
@@ -62,7 +64,7 @@
       error("<entry> element is only allowed to contain either " + "'value' attribute OR 'value-ref' attribute OR <value> sub-element",entryEle);
     }
     if (hasValueAttribute) {
-      value=buildTypedStringValueForMap(entryEle.getAttribute(VALUE_ATTRIBUTE),defaultValueTypeClassName,entryEle);
+      value=buildTypedStringValueForMap(entryEle.getAttribute(VALUE_ATTRIBUTE),defaultValueType,entryEle);
     }
  else     if (hasValueRefAttribute) {
       String refName=entryEle.getAttribute(VALUE_REF_ATTRIBUTE);
@@ -74,7 +76,7 @@
       value=ref;
     }
  else     if (valueEle != null) {
-      value=parsePropertySubElement(valueEle,bd,defaultValueTypeClassName);
+      value=parsePropertySubElement(valueEle,bd,defaultValueType);
     }
  else {
       error("<entry> element must specify a value",entryEle);
