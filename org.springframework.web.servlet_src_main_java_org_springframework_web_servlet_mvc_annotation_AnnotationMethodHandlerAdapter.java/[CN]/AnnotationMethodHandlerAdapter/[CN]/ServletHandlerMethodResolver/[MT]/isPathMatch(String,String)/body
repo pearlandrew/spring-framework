@@ -1,10 +1,18 @@
 {
-  if (mappedPath.equals(lookupPath) || pathMatcher.match(mappedPath,lookupPath)) {
+  if (isPathMatchInternal(methodLevelPattern,lookupPath)) {
     return true;
   }
-  boolean hasSuffix=(mappedPath.indexOf('.') != -1);
-  if (!hasSuffix && pathMatcher.match(mappedPath + ".*",lookupPath)) {
-    return true;
+  if (hasTypeLevelMapping()) {
+    String[] typeLevelPatterns=getTypeLevelMapping().value();
+    for (    String typeLevelPattern : typeLevelPatterns) {
+      if (!typeLevelPattern.startsWith("/")) {
+        typeLevelPattern="/" + typeLevelPattern;
+      }
+      String combinedPattern=pathMatcher.combine(typeLevelPattern,methodLevelPattern);
+      if (isPathMatchInternal(combinedPattern,lookupPath)) {
+        return true;
+      }
+    }
   }
-  return (!mappedPath.startsWith("/") && (lookupPath.endsWith(mappedPath) || pathMatcher.match("/**/" + mappedPath,lookupPath) || (!hasSuffix && pathMatcher.match("/**/" + mappedPath + ".*",lookupPath))));
+  return false;
 }
