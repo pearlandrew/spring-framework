@@ -1,9 +1,19 @@
 {
   this.aspectName=aspectName;
-  this.ajType=AjTypeSystem.getAjType(aspectClass);
-  if (!this.ajType.isAspect()) {
+  Class<?> currClass=aspectClass;
+  AjType ajType=null;
+  while (!currClass.equals(Object.class)) {
+    AjType ajTypeToCheck=AjTypeSystem.getAjType(currClass);
+    if (ajTypeToCheck.isAspect()) {
+      ajType=ajTypeToCheck;
+      break;
+    }
+    currClass=currClass.getSuperclass();
+  }
+  if (ajType == null) {
     throw new IllegalArgumentException("Class '" + aspectClass.getName() + "' is not an @AspectJ aspect");
   }
+  this.ajType=ajType;
   if (this.ajType.getDeclarePrecedence().length > 0) {
     throw new IllegalArgumentException("DeclarePrecendence not presently supported in Spring AOP");
   }
