@@ -1,15 +1,11 @@
 {
-  ServletRequest servletRequest=null;
-  if (context.getRequest() instanceof ServletRequest) {
-    servletRequest=(ServletRequest)context.getRequest();
+  WebApplicationContext webApplicationContext=(WebApplicationContext)context.getRequestScope().get(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+  if (webApplicationContext == null) {
+    if (!(context instanceof ServletTilesRequestContext)) {
+      throw new IllegalStateException(getClass().getSimpleName() + " requires a ServletTilesRequestContext to operate on");
+    }
+    ServletTilesRequestContext servletRequestContext=(ServletTilesRequestContext)context;
+    webApplicationContext=WebApplicationContextUtils.getRequiredWebApplicationContext(servletRequestContext.getServletContext());
   }
-  ServletTilesApplicationContext tilesApplicationContext=null;
-  if (context instanceof ServletTilesApplicationContext) {
-    tilesApplicationContext=(ServletTilesApplicationContext)context;
-  }
-  if (servletRequest == null && tilesApplicationContext == null) {
-    throw new IllegalStateException("SpringBeanPreparerFactory requires either a " + "ServletRequest or a ServletTilesApplicationContext to operate on");
-  }
-  WebApplicationContext webApplicationContext=RequestContextUtils.getWebApplicationContext(servletRequest,tilesApplicationContext.getServletContext());
   return getPreparer(name,webApplicationContext);
 }
