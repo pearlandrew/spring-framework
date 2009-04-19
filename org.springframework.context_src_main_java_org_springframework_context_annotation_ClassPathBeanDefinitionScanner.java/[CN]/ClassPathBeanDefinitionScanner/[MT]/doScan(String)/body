@@ -1,21 +1,34 @@
 {
   Set<BeanDefinitionHolder> beanDefinitions=new LinkedHashSet<BeanDefinitionHolder>();
-  for (int i=0; i < basePackages.length; i++) {
-    Set<BeanDefinition> candidates=findCandidateComponents(basePackages[i]);
+  for (  String basePackage : basePackages) {
+    Set<BeanDefinition> candidates=findCandidateComponents(basePackage);
     for (    BeanDefinition candidate : candidates) {
       String beanName=this.beanNameGenerator.generateBeanName(candidate,this.registry);
       if (candidate instanceof AbstractBeanDefinition) {
         postProcessBeanDefinition((AbstractBeanDefinition)candidate,beanName);
       }
-      ScopeMetadata scopeMetadata=this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+      if (candidate instanceof AnnotatedBeanDefinition) {
+        AnnotatedBeanDefinition abd=(AnnotatedBeanDefinition)candidate;
+        if (abd.getMetadata().hasAnnotation(Primary.class.getName())) {
+          abd.setPrimary(true);
+        }
+        if (abd.getMetadata().hasAnnotation(Lazy.class.getName())) {
+          Boolean value=(Boolean)abd.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value");
+          abd.setLazyInit(value);
+        }
+        if (abd.getMetadata().hasAnnotation(DependsOn.class.getName())) {
+          String[] value=(String[])abd.getMetadata().getAnnotationAttributes(DependsOn.class.getName()).get("value");
+          abd.setDependsOn(value);
+        }
+      }
       if (checkCandidate(beanName,candidate)) {
         BeanDefinitionHolder definitionHolder=new BeanDefinitionHolder(candidate,beanName);
+        ScopeMetadata scopeMetadata=this.scopeMetadataResolver.resolveScopeMetadata(candidate);
         definitionHolder=applyScope(definitionHolder,scopeMetadata);
         beanDefinitions.add(definitionHolder);
         registerBeanDefinition(definitionHolder,this.registry);
       }
     }
   }
-  postProcessComponentBeanDefinitions(beanDefinitions);
   return beanDefinitions;
 }

@@ -1,0 +1,69 @@
+{
+  RootBeanDefinition beanDef=new ConfigurationClassBeanDefinition();
+  ConfigurationClass configClass=method.getDeclaringClass();
+  beanDef.setFactoryBeanName(configClass.getBeanName());
+  beanDef.setFactoryMethodName(method.getName());
+  beanDef.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+  Bean bean=method.getRequiredAnnotation(Bean.class);
+  List<String> names=new ArrayList<String>(Arrays.asList(bean.name()));
+  String beanName=(names.size() > 0) ? names.remove(0) : method.getName();
+  for (  String alias : bean.name()) {
+    registry.registerAlias(beanName,alias);
+  }
+  if (registry.containsBeanDefinition(beanName)) {
+    BeanDefinition existingBeanDef=registry.getBeanDefinition(beanName);
+    if (!(existingBeanDef instanceof ConfigurationClassBeanDefinition)) {
+      if (logger.isDebugEnabled()) {
+        logger.debug(String.format("Skipping loading bean definition for %s: a definition for bean " + "'%s' already exists. This is likely due to an override in XML.",method,beanName));
+      }
+      return;
+    }
+  }
+  if (method.getAnnotation(Primary.class) != null) {
+    beanDef.setPrimary(true);
+  }
+  Lazy lazy=method.getAnnotation(Lazy.class);
+  if (lazy != null) {
+    beanDef.setLazyInit(lazy.value());
+  }
+ else {
+    Lazy defaultLazy=configClass.getAnnotation(Lazy.class);
+    if (defaultLazy != null) {
+      beanDef.setLazyInit(defaultLazy.value());
+    }
+  }
+  DependsOn dependsOn=method.getAnnotation(DependsOn.class);
+  if (dependsOn != null && dependsOn.value().length > 0) {
+    beanDef.setDependsOn(dependsOn.value());
+  }
+  Autowire autowire=bean.autowire();
+  if (autowire.isAutowire()) {
+    beanDef.setAutowireMode(autowire.value());
+  }
+  String initMethodName=bean.initMethod();
+  if (StringUtils.hasText(initMethodName)) {
+    beanDef.setInitMethodName(initMethodName);
+  }
+  String destroyMethodName=bean.destroyMethod();
+  if (StringUtils.hasText(destroyMethodName)) {
+    beanDef.setDestroyMethodName(destroyMethodName);
+  }
+  Scope scope=method.getAnnotation(Scope.class);
+  ScopedProxyMode proxyMode=ScopedProxyMode.NO;
+  if (scope != null) {
+    beanDef.setScope(scope.value());
+    proxyMode=scope.proxyMode();
+    if (proxyMode == ScopedProxyMode.DEFAULT) {
+      proxyMode=ScopedProxyMode.NO;
+    }
+  }
+  BeanDefinition beanDefToRegister=beanDef;
+  if (proxyMode != ScopedProxyMode.NO) {
+    BeanDefinitionHolder proxyDef=ScopedProxyUtils.createScopedProxy(new BeanDefinitionHolder(beanDef,beanName),registry,proxyMode == ScopedProxyMode.TARGET_CLASS);
+    beanDefToRegister=proxyDef.getBeanDefinition();
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug(String.format("Registering bean definition for @Bean method %s.%s()",configClass.getName(),beanName));
+  }
+  registry.registerBeanDefinition(beanName,beanDefToRegister);
+}

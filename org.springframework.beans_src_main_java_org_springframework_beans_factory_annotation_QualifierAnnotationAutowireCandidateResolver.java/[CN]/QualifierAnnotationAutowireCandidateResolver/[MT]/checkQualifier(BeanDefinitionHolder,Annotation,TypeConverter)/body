@@ -1,13 +1,19 @@
 {
   Class<? extends Annotation> type=annotation.annotationType();
-  AbstractBeanDefinition bd=(AbstractBeanDefinition)bdHolder.getBeanDefinition();
+  RootBeanDefinition bd=(RootBeanDefinition)bdHolder.getBeanDefinition();
   AutowireCandidateQualifier qualifier=bd.getQualifier(type.getName());
   if (qualifier == null) {
     qualifier=bd.getQualifier(ClassUtils.getShortName(type));
   }
-  if (qualifier == null && bd.hasBeanClass()) {
-    Class<?> beanClass=bd.getBeanClass();
-    Annotation targetAnnotation=beanClass.getAnnotation(type);
+  if (qualifier == null) {
+    Annotation targetAnnotation=null;
+    if (bd.getFactoryMethodForIntrospection() != null) {
+      targetAnnotation=bd.getFactoryMethodForIntrospection().getAnnotation(type);
+    }
+    if (targetAnnotation == null && bd.hasBeanClass()) {
+      Class<?> beanClass=bd.getBeanClass();
+      targetAnnotation=beanClass.getAnnotation(type);
+    }
     if (targetAnnotation != null && targetAnnotation.equals(annotation)) {
       return true;
     }

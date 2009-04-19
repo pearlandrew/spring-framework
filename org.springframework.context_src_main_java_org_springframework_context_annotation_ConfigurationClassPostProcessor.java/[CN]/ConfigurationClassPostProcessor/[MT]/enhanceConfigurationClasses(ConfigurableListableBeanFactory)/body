@@ -1,0 +1,34 @@
+{
+  Set<BeanDefinitionHolder> configBeanDefs=new LinkedHashSet<BeanDefinitionHolder>();
+  for (  String beanName : beanFactory.getBeanDefinitionNames()) {
+    BeanDefinition beanDef=beanFactory.getBeanDefinition(beanName);
+    if ("full".equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE))) {
+      configBeanDefs.add(new BeanDefinitionHolder(beanDef,beanName));
+    }
+  }
+  if (configBeanDefs.isEmpty()) {
+    return;
+  }
+  if (!cglibAvailable) {
+    Set<String> beanNames=new LinkedHashSet<String>();
+    for (    BeanDefinitionHolder holder : configBeanDefs) {
+      beanNames.add(holder.getBeanName());
+    }
+    throw new IllegalStateException("CGLIB is required to process @Configuration classes. " + "Either add CGLIB to the classpath or remove the following @Configuration bean definitions: " + beanNames);
+  }
+  ConfigurationClassEnhancer enhancer=new ConfigurationClassEnhancer(beanFactory);
+  for (  BeanDefinitionHolder holder : configBeanDefs) {
+    AbstractBeanDefinition beanDef=(AbstractBeanDefinition)holder.getBeanDefinition();
+    try {
+      Class configClass=beanDef.resolveBeanClass(this.beanClassLoader);
+      Class enhancedClass=enhancer.enhance(configClass);
+      if (logger.isDebugEnabled()) {
+        logger.debug(String.format("Replacing bean definition '%s' existing class name '%s' " + "with enhanced class name '%s'",holder.getBeanName(),configClass.getName(),enhancedClass.getName()));
+      }
+      beanDef.setBeanClass(enhancedClass);
+    }
+ catch (    ClassNotFoundException ex) {
+      throw new IllegalStateException("Cannot load configuration class: " + beanDef.getBeanClassName(),ex);
+    }
+  }
+}

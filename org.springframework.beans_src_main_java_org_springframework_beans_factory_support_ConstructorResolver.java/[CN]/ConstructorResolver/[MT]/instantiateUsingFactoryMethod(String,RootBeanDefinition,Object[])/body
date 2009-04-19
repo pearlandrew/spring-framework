@@ -17,6 +17,9 @@
     isStatic=false;
   }
  else {
+    if (!mbd.hasBeanClass()) {
+      throw new BeanDefinitionStoreException(mbd.getResourceDescription(),beanName,"bean definition declares neither a bean class nor a factory-bean reference");
+    }
     factoryBean=null;
     factoryClass=mbd.getBeanClass();
     isStatic=true;
@@ -36,7 +39,16 @@
     }
   }
   if (factoryMethodToUse == null) {
-    Method[] candidates=ReflectionUtils.getAllDeclaredMethods(factoryClass);
+    factoryClass=ClassUtils.getUserClass(factoryClass);
+    Method[] rawCandidates=ReflectionUtils.getAllDeclaredMethods(factoryClass);
+    List<Method> candidateSet=new ArrayList<Method>();
+    for (    Method candidate : rawCandidates) {
+      if (Modifier.isStatic(candidate.getModifiers()) == isStatic && candidate.getName().equals(mbd.getFactoryMethodName())) {
+        candidateSet.add(candidate);
+      }
+    }
+    Method[] candidates=candidateSet.toArray(new Method[candidateSet.size()]);
+    AutowireUtils.sortFactoryMethods(candidates);
     boolean autowiring=(mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
     int minTypeDiffWeight=Integer.MAX_VALUE;
     ConstructorArgumentValues resolvedValues=null;
@@ -53,7 +65,7 @@
     for (int i=0; i < candidates.length; i++) {
       Method candidate=candidates[i];
       Class[] paramTypes=candidate.getParameterTypes();
-      if (Modifier.isStatic(candidate.getModifiers()) == isStatic && candidate.getName().equals(mbd.getFactoryMethodName()) && paramTypes.length >= minNrOfArgs) {
+      if (paramTypes.length >= minNrOfArgs) {
         ArgumentsHolder args;
         if (resolvedValues != null) {
           try {

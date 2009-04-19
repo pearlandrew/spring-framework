@@ -1,0 +1,22 @@
+{
+  String beanName=method.getName();
+  Bean bean=method.getAnnotation(Bean.class);
+  if (bean != null && bean.name().length > 0) {
+    beanName=bean.name()[0];
+  }
+  Scope scope=AnnotationUtils.findAnnotation(method,Scope.class);
+  if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
+    String scopedBeanName=ScopedProxyUtils.getTargetBeanName(beanName);
+    if (beanFactory.isCurrentlyInCreation(scopedBeanName)) {
+      beanName=scopedBeanName;
+    }
+  }
+  if (factoryContainsBean(beanName)) {
+    Object cachedBean=beanFactory.getBean(beanName);
+    if (logger.isDebugEnabled()) {
+      logger.debug(String.format("Returning cached object [%s] for @Bean method %s.%s",cachedBean,method.getDeclaringClass().getSimpleName(),beanName));
+    }
+    return cachedBean;
+  }
+  return proxy.invokeSuper(obj,args);
+}

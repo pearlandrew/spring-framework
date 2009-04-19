@@ -1,0 +1,36 @@
+{
+  if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition)beanDef).hasBeanClass()) {
+    if (AnnotationUtils.findAnnotation(((AbstractBeanDefinition)beanDef).getBeanClass(),Configuration.class) != null) {
+      beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE,"full");
+      return true;
+    }
+ else     if (AnnotationUtils.findAnnotation(((AbstractBeanDefinition)beanDef).getBeanClass(),Component.class) != null) {
+      beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE,"lite");
+      return true;
+    }
+ else {
+      return false;
+    }
+  }
+  SimpleMetadataReaderFactory metadataReaderFactory=new SimpleMetadataReaderFactory(this.beanClassLoader);
+  String className=beanDef.getBeanClassName();
+  while (className != null && !(className.equals(Object.class.getName()))) {
+    try {
+      MetadataReader metadataReader=metadataReaderFactory.getMetadataReader(className);
+      AnnotationMetadata metadata=metadataReader.getAnnotationMetadata();
+      if (metadata.hasAnnotation(Configuration.class.getName())) {
+        beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE,"full");
+        return true;
+      }
+      if (metadata.hasAnnotation(Component.class.getName())) {
+        beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE,"lite");
+        return true;
+      }
+      className=metadata.getSuperClassName();
+    }
+ catch (    IOException ex) {
+      throw new BeanDefinitionStoreException("Failed to load class file [" + className + "]",ex);
+    }
+  }
+  return false;
+}

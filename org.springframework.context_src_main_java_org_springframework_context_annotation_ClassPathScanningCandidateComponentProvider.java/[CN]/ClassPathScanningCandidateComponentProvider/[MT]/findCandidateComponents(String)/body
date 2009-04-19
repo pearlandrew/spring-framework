@@ -5,33 +5,37 @@
     Resource[] resources=this.resourcePatternResolver.getResources(packageSearchPath);
     boolean traceEnabled=logger.isTraceEnabled();
     boolean debugEnabled=logger.isDebugEnabled();
-    for (int i=0; i < resources.length; i++) {
-      Resource resource=resources[i];
+    for (    Resource resource : resources) {
       if (traceEnabled) {
         logger.trace("Scanning " + resource);
       }
       if (resource.isReadable()) {
-        MetadataReader metadataReader=this.metadataReaderFactory.getMetadataReader(resource);
-        if (isCandidateComponent(metadataReader)) {
-          ScannedGenericBeanDefinition sbd=new ScannedGenericBeanDefinition(metadataReader);
-          sbd.setResource(resource);
-          sbd.setSource(resource);
-          if (isCandidateComponent(sbd)) {
-            if (debugEnabled) {
-              logger.debug("Identified candidate component class: " + resource);
+        try {
+          MetadataReader metadataReader=this.metadataReaderFactory.getMetadataReader(resource);
+          if (isCandidateComponent(metadataReader)) {
+            ScannedGenericBeanDefinition sbd=new ScannedGenericBeanDefinition(metadataReader);
+            sbd.setResource(resource);
+            sbd.setSource(resource);
+            if (isCandidateComponent(sbd)) {
+              if (debugEnabled) {
+                logger.debug("Identified candidate component class: " + resource);
+              }
+              candidates.add(sbd);
             }
-            candidates.add(sbd);
+ else {
+              if (debugEnabled) {
+                logger.debug("Ignored because not a concrete top-level class: " + resource);
+              }
+            }
           }
  else {
-            if (debugEnabled) {
-              logger.debug("Ignored because not a concrete top-level class: " + resource);
+            if (traceEnabled) {
+              logger.trace("Ignored because not matching any filter: " + resource);
             }
           }
         }
- else {
-          if (traceEnabled) {
-            logger.trace("Ignored because not matching any filter: " + resource);
-          }
+ catch (        Throwable ex) {
+          throw new BeanDefinitionStoreException("Failed to read candidate component class: " + resource,ex);
         }
       }
  else {

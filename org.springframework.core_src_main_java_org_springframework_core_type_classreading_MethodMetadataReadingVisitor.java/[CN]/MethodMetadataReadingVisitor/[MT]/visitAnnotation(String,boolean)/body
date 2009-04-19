@@ -5,12 +5,24 @@
     @Override public void visit(    String name,    Object value){
       attributes.put(name,value);
     }
+    @Override public void visitEnum(    String name,    String desc,    String value){
+      Object valueToUse=value;
+      try {
+        Class<?> enumType=classLoader.loadClass(Type.getType(desc).getClassName());
+        Field enumConstant=ReflectionUtils.findField(enumType,value);
+        if (enumConstant != null) {
+          valueToUse=enumConstant.get(null);
+        }
+      }
+ catch (      Exception ex) {
+      }
+      attributes.put(name,valueToUse);
+    }
     @Override public void visitEnd(){
       try {
         Class<?> annotationClass=classLoader.loadClass(className);
         Method[] annotationAttributes=annotationClass.getMethods();
-        for (int i=0; i < annotationAttributes.length; i++) {
-          Method annotationAttribute=annotationAttributes[i];
+        for (        Method annotationAttribute : annotationAttributes) {
           String attributeName=annotationAttribute.getName();
           Object defaultValue=annotationAttribute.getDefaultValue();
           if (defaultValue != null && !attributes.containsKey(attributeName)) {

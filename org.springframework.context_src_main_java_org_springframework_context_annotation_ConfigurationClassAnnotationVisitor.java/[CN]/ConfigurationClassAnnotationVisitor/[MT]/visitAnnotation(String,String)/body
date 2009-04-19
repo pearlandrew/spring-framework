@@ -1,0 +1,16 @@
+{
+  String annoTypeName=ConfigurationClassReaderUtils.convertAsmTypeDescriptorToClassName(attribAnnoTypeDesc);
+  Class<? extends Annotation> annoType=ConfigurationClassReaderUtils.loadToolingSafeClass(annoTypeName,classLoader);
+  if (annoType == null) {
+    return new EmptyVisitor();
+  }
+  ConfigurationClassAnnotation anno=ConfigurationClassReaderUtils.createMutableAnnotation(annoType,classLoader);
+  try {
+    Field attribute=mutableAnno.getClass().getField(attribName);
+    attribute.set(mutableAnno,anno);
+  }
+ catch (  Exception ex) {
+    throw new IllegalStateException("Could not reflectively set annotation field",ex);
+  }
+  return new ConfigurationClassAnnotationVisitor(anno,classLoader);
+}

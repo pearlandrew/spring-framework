@@ -1,7 +1,7 @@
 {
-  Assert.isInstanceOf(DefaultListableBeanFactory.class,clBeanFactory);
-  beanFactory=(DefaultListableBeanFactory)clBeanFactory;
-  BeanDefinitionRegistry factoryBeanDefs=processConfigBeanDefinitions();
-  for (  String beanName : factoryBeanDefs.getBeanDefinitionNames())   beanFactory.registerBeanDefinition(beanName,factoryBeanDefs.getBeanDefinition(beanName));
-  enhanceConfigurationClasses();
+  if (!(beanFactory instanceof BeanDefinitionRegistry)) {
+    throw new IllegalStateException("ConfigurationClassPostProcessor expects a BeanFactory that implements BeanDefinitionRegistry");
+  }
+  processConfigBeanDefinitions((BeanDefinitionRegistry)beanFactory);
+  enhanceConfigurationClasses(beanFactory);
 }

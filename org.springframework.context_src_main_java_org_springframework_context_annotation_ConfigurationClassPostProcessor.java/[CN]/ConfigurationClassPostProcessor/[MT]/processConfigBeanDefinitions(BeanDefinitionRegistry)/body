@@ -1,0 +1,18 @@
+{
+  Set<BeanDefinitionHolder> configBeanDefs=new LinkedHashSet<BeanDefinitionHolder>();
+  for (  String beanName : registry.getBeanDefinitionNames()) {
+    BeanDefinition beanDef=registry.getBeanDefinition(beanName);
+    if (checkConfigurationClassBeanDefinition(beanDef)) {
+      configBeanDefs.add(new BeanDefinitionHolder(beanDef,beanName));
+    }
+  }
+  if (configBeanDefs.isEmpty()) {
+    return;
+  }
+  ConfigurationClassParser parser=new ConfigurationClassParser(this.problemReporter,this.beanClassLoader);
+  for (  BeanDefinitionHolder holder : configBeanDefs) {
+    parser.parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
+  }
+  parser.validate();
+  new ConfigurationClassBeanDefinitionReader(registry).loadBeanDefinitions(parser.getModel());
+}

@@ -1,8 +1,9 @@
 {
   DefaultListableBeanFactory beanFactory=new DefaultListableBeanFactory();
-  beanFactory.registerBeanDefinition("config",rootBeanDefinition(SingletonBeanConfig.class).getBeanDefinition());
-  new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+  beanFactory.registerBeanDefinition("config",new RootBeanDefinition(SingletonBeanConfig.class));
+  ConfigurationClassPostProcessor pp=new ConfigurationClassPostProcessor();
+  pp.postProcessBeanFactory(beanFactory);
   Foo foo=(Foo)beanFactory.getBean("foo");
   Bar bar=(Bar)beanFactory.getBean("bar");
-  assertThat(foo,sameInstance(bar.foo));
+  assertSame(foo,bar.foo);
 }
