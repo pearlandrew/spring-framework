@@ -3,10 +3,11 @@
   if (node instanceof Element) {
     Element ele=(Element)node;
     if (ele.hasAttribute(PROXY_TARGET_CLASS)) {
-      proxyTargetClass=Boolean.valueOf(ele.getAttribute(PROXY_TARGET_CLASS)).booleanValue();
+      proxyTargetClass=Boolean.valueOf(ele.getAttribute(PROXY_TARGET_CLASS));
     }
   }
+  BeanDefinitionHolder holder=ScopedProxyUtils.createScopedProxy(definition,parserContext.getRegistry(),proxyTargetClass);
   String targetBeanName=ScopedProxyUtils.getTargetBeanName(definition.getBeanName());
   parserContext.getReaderContext().fireComponentRegistered(new BeanComponentDefinition(definition.getBeanDefinition(),targetBeanName));
-  return ScopedProxyUtils.createScopedProxy(definition,parserContext.getRegistry(),proxyTargetClass);
+  return holder;
 }
