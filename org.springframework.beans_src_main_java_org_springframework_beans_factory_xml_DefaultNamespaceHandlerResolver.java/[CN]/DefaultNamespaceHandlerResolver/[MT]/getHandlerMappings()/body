@@ -1,15 +1,20 @@
 {
   if (this.handlerMappings == null) {
-    try {
-      Properties mappings=PropertiesLoaderUtils.loadAllProperties(this.handlerMappingsLocation,this.classLoader);
-      if (logger.isDebugEnabled()) {
-        logger.debug("Loaded mappings [" + mappings + "]");
+synchronized (this) {
+      if (this.handlerMappings == null) {
+        try {
+          Properties mappings=PropertiesLoaderUtils.loadAllProperties(this.handlerMappingsLocation,this.classLoader);
+          if (logger.isDebugEnabled()) {
+            logger.debug("Loaded NamespaceHandler mappings: " + mappings);
+          }
+          Map<String,Object> handlerMappings=new ConcurrentHashMap<String,Object>();
+          CollectionUtils.mergePropertiesIntoMap(mappings,handlerMappings);
+          this.handlerMappings=handlerMappings;
+        }
+ catch (        IOException ex) {
+          throw new IllegalStateException("Unable to load NamespaceHandler mappings from location [" + this.handlerMappingsLocation + "]",ex);
+        }
       }
-      this.handlerMappings=new HashMap<String,NamespaceHandler>();
-      CollectionUtils.mergePropertiesIntoMap(mappings,this.handlerMappings);
-    }
- catch (    IOException ex) {
-      throw new IllegalStateException("Unable to load NamespaceHandler mappings from location [" + this.handlerMappingsLocation + "]",ex);
     }
   }
   return this.handlerMappings;

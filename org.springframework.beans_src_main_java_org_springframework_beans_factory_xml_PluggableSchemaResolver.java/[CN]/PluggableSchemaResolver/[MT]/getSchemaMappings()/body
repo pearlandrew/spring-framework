@@ -1,0 +1,24 @@
+{
+  if (this.schemaMappings == null) {
+synchronized (this) {
+      if (this.schemaMappings == null) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Loading schema mappings from [" + this.schemaMappingsLocation + "]");
+        }
+        try {
+          Properties mappings=PropertiesLoaderUtils.loadAllProperties(this.schemaMappingsLocation,this.classLoader);
+          if (logger.isDebugEnabled()) {
+            logger.debug("Loaded schema mappings: " + mappings);
+          }
+          Map<String,String> schemaMappings=new ConcurrentHashMap<String,String>();
+          CollectionUtils.mergePropertiesIntoMap(mappings,schemaMappings);
+          this.schemaMappings=schemaMappings;
+        }
+ catch (        IOException ex) {
+          throw new IllegalStateException("Unable to load schema mappings from location [" + this.schemaMappingsLocation + "]",ex);
+        }
+      }
+    }
+  }
+  return this.schemaMappings;
+}
