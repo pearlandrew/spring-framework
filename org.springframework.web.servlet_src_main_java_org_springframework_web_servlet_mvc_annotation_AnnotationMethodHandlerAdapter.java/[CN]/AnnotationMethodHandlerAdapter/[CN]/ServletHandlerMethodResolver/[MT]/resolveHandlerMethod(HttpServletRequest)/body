@@ -14,12 +14,15 @@
     if (!hasTypeLevelMapping() || !Arrays.equals(mapping.params(),getTypeLevelMapping().params())) {
       mappingInfo.params=mapping.params();
     }
+    if (!hasTypeLevelMapping() || !Arrays.equals(mapping.headers(),getTypeLevelMapping().headers())) {
+      mappingInfo.headers=mapping.headers();
+    }
     boolean match=false;
     if (mappingInfo.paths.length > 0) {
       List<String> matchedPaths=new ArrayList<String>(mappingInfo.paths.length);
       for (      String methodLevelPattern : mappingInfo.paths) {
         if (isPathMatch(methodLevelPattern,lookupPath)) {
-          if (checkParameters(mappingInfo,request)) {
+          if (mappingInfo.matches(request)) {
             match=true;
             matchedPaths.add(methodLevelPattern);
           }
@@ -35,7 +38,7 @@
       mappingInfo.matchedPaths=matchedPaths.toArray(new String[matchedPaths.size()]);
     }
  else {
-      match=checkParameters(mappingInfo,request);
+      match=mappingInfo.matches(request);
       if (match && mappingInfo.methods.length == 0 && mappingInfo.params.length == 0 && resolvedMethodName != null && !resolvedMethodName.equals(handlerMethod.getName())) {
         match=false;
       }
