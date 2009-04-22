@@ -1,11 +1,16 @@
 {
   ConfigurationClass configClass=new ConfigurationClass();
-  ClassReader reader=ConfigurationClassReaderUtils.newAsmClassReader(ClassUtils.convertClassNameToResourcePath(classToImport),classLoader);
-  reader.accept(new ConfigurationClassVisitor(configClass,model,problemReporter,classLoader,importStack),false);
-  if (configClass.getAnnotation(Configuration.class) == null) {
-    problemReporter.error(new NonAnnotatedConfigurationProblem(configClass.getName(),configClass.getLocation()));
-  }
+  try {
+    ClassReader reader=metadataReaderFactory.getMetadataReader(classToImport).getClassReader();
+    reader.accept(new ConfigurationClassVisitor(configClass,model,problemReporter,metadataReaderFactory,importStack),false);
+    if (configClass.getAnnotation(Configuration.class) == null) {
+      problemReporter.error(new NonAnnotatedConfigurationProblem(configClass.getName(),configClass.getLocation()));
+    }
  else {
-    model.add(configClass);
+      model.add(configClass);
+    }
+  }
+ catch (  IOException ex) {
+    throw new BeanDefinitionStoreException("Failed to load imported configuration class [" + classToImport + "]",ex);
   }
 }

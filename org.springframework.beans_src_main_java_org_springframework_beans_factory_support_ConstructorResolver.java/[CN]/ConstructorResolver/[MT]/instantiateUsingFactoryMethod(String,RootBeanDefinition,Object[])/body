@@ -33,17 +33,17 @@
     factoryMethodToUse=(Method)mbd.resolvedConstructorOrFactoryMethod;
     if (factoryMethodToUse != null) {
       argsToUse=mbd.resolvedConstructorArguments;
-      if (argsToUse == null) {
+      if (argsToUse == null && mbd.preparedConstructorArguments != null) {
         argsToUse=resolvePreparedArguments(beanName,mbd,bw,factoryMethodToUse);
       }
     }
   }
-  if (factoryMethodToUse == null) {
+  if (factoryMethodToUse == null || argsToUse == null) {
     factoryClass=ClassUtils.getUserClass(factoryClass);
     Method[] rawCandidates=ReflectionUtils.getAllDeclaredMethods(factoryClass);
     List<Method> candidateSet=new ArrayList<Method>();
     for (    Method candidate : rawCandidates) {
-      if (Modifier.isStatic(candidate.getModifiers()) == isStatic && candidate.getName().equals(mbd.getFactoryMethodName())) {
+      if (Modifier.isStatic(candidate.getModifiers()) == isStatic && candidate.getName().equals(mbd.getFactoryMethodName()) && mbd.isFactoryMethod(candidate)) {
         candidateSet.add(candidate);
       }
     }

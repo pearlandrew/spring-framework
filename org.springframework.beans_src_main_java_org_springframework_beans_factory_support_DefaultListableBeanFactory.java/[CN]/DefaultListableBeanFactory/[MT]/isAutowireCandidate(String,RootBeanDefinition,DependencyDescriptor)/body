@@ -1,28 +1,7 @@
 {
   resolveBeanClass(mbd,beanName);
-  if (mbd.getFactoryMethodName() != null && mbd.factoryMethodForIntrospection == null) {
-    Class factoryClass;
-    if (mbd.getFactoryBeanName() != null) {
-      factoryClass=getType(mbd.getFactoryBeanName());
-    }
- else {
-      factoryClass=mbd.getBeanClass();
-    }
-    factoryClass=ClassUtils.getUserClass(factoryClass);
-    Method[] candidates=ReflectionUtils.getAllDeclaredMethods(factoryClass);
-    Method uniqueCandidate=null;
-    for (    Method candidate : candidates) {
-      if (candidate.getName().equals(mbd.getFactoryMethodName())) {
-        if (uniqueCandidate == null) {
-          uniqueCandidate=candidate;
-        }
- else         if (!Arrays.equals(uniqueCandidate.getParameterTypes(),candidate.getParameterTypes())) {
-          uniqueCandidate=null;
-          break;
-        }
-      }
-    }
-    mbd.factoryMethodForIntrospection=uniqueCandidate;
+  if (mbd.isFactoryMethodUnique && mbd.resolvedConstructorOrFactoryMethod == null) {
+    new ConstructorResolver(this,null,null,null).resolveFactoryMethodIfPossible(mbd);
   }
   return getAutowireCandidateResolver().isAutowireCandidate(new BeanDefinitionHolder(mbd,beanName,getAliases(beanName)),descriptor);
 }

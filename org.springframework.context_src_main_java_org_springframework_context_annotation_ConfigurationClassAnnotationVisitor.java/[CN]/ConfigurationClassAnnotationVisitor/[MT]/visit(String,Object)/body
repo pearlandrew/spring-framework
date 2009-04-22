@@ -1,13 +1,18 @@
 {
   Class<?> attribReturnType=mutableAnno.getAttributeType(attribName);
   if (attribReturnType.equals(Class.class)) {
-    String fqClassName=((Type)attribValue).getClassName();
-    Class<?> classVal=ConfigurationClassReaderUtils.loadToolingSafeClass(fqClassName,classLoader);
-    if (classVal == null) {
-      return;
+    String className=((Type)attribValue).getClassName();
+    try {
+      Class<?> classVal=classLoader.loadClass(className);
+      if (classVal != null) {
+        mutableAnno.setAttributeValue(attribName,classVal);
+      }
     }
-    mutableAnno.setAttributeValue(attribName,classVal);
-    return;
+ catch (    ClassNotFoundException ex) {
+      throw new IllegalStateException("Cannot resolve attribute type [" + className + "]",ex);
+    }
   }
-  mutableAnno.setAttributeValue(attribName,attribValue);
+ else {
+    mutableAnno.setAttributeValue(attribName,attribValue);
+  }
 }

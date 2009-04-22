@@ -1,9 +1,14 @@
 {
-  String enumClassName=ConfigurationClassReaderUtils.convertAsmTypeDescriptorToClassName(enumTypeDescriptor);
-  Class<? extends Enum> enumClass=ConfigurationClassReaderUtils.loadToolingSafeClass(enumClassName,classLoader);
-  if (enumClass == null) {
-    return;
+  String enumTypeName=ConfigurationClassReaderUtils.convertAsmTypeDescriptorToClassName(enumTypeDescriptor);
+  try {
+    Class<? extends Enum> enumType=(Class<? extends Enum>)classLoader.loadClass(enumTypeName);
+    if (enumType == null) {
+      return;
+    }
+    Enum enumValue=Enum.valueOf(enumType,strEnumValue);
+    mutableAnno.setAttributeValue(attribName,enumValue);
   }
-  Enum enumValue=Enum.valueOf(enumClass,strEnumValue);
-  mutableAnno.setAttributeValue(attribName,enumValue);
+ catch (  ClassNotFoundException ex) {
+    throw new IllegalStateException("Cannot resolve enum type [" + enumTypeName + "]",ex);
+  }
 }

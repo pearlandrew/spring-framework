@@ -1,10 +1,15 @@
 {
   final ConfigurationClassMethod.ReturnType returnType=new ConfigurationClassMethod.ReturnType(ConfigurationClassReaderUtils.getReturnTypeFromAsmMethodDescriptor(methodDescriptor));
-  ConfigurationClassReaderUtils.newAsmClassReader(ClassUtils.convertClassNameToResourcePath(returnType.getName()),classLoader).accept(new ClassAdapter(new EmptyVisitor()){
-    @Override public void visit(    int arg0,    int arg1,    String arg2,    String arg3,    String arg4,    String[] arg5){
-      returnType.setInterface((arg1 & Opcodes.ACC_INTERFACE) == Opcodes.ACC_INTERFACE);
+  try {
+    metadataReaderFactory.getMetadataReader(returnType.getName()).getClassReader().accept(new ClassAdapter(new EmptyVisitor()){
+      @Override public void visit(      int arg0,      int arg1,      String arg2,      String arg3,      String arg4,      String[] arg5){
+        returnType.setInterface((arg1 & Opcodes.ACC_INTERFACE) == Opcodes.ACC_INTERFACE);
+      }
     }
-  }
 ,false);
-  return returnType;
+    return returnType;
+  }
+ catch (  IOException ex) {
+    throw new BeanDefinitionStoreException("Failed to load bean return type [" + returnType.getName() + "]",ex);
+  }
 }

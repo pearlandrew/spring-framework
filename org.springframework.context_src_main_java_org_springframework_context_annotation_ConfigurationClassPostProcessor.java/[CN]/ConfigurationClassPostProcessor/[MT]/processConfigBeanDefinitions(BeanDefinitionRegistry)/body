@@ -9,9 +9,15 @@
   if (configBeanDefs.isEmpty()) {
     return;
   }
-  ConfigurationClassParser parser=new ConfigurationClassParser(this.problemReporter,this.beanClassLoader);
+  ConfigurationClassParser parser=new ConfigurationClassParser(this.metadataReaderFactory,this.problemReporter);
   for (  BeanDefinitionHolder holder : configBeanDefs) {
-    parser.parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
+    String beanClassName=holder.getBeanDefinition().getBeanClassName();
+    try {
+      parser.parse(beanClassName,holder.getBeanName());
+    }
+ catch (    IOException ex) {
+      throw new BeanDefinitionStoreException("Failed to load bean class [" + beanClassName + "]",ex);
+    }
   }
   parser.validate();
   new ConfigurationClassBeanDefinitionReader(registry).loadBeanDefinitions(parser.getModel());

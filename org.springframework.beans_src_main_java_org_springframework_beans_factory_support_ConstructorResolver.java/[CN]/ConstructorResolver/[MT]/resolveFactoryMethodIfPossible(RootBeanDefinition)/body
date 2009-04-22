@@ -1,0 +1,24 @@
+{
+  Class factoryClass;
+  if (mbd.getFactoryBeanName() != null) {
+    factoryClass=this.beanFactory.getType(mbd.getFactoryBeanName());
+  }
+ else {
+    factoryClass=mbd.getBeanClass();
+  }
+  factoryClass=ClassUtils.getUserClass(factoryClass);
+  Method[] candidates=ReflectionUtils.getAllDeclaredMethods(factoryClass);
+  Method uniqueCandidate=null;
+  for (  Method candidate : candidates) {
+    if (mbd.isFactoryMethod(candidate)) {
+      if (uniqueCandidate == null) {
+        uniqueCandidate=candidate;
+      }
+ else       if (!Arrays.equals(uniqueCandidate.getParameterTypes(),candidate.getParameterTypes())) {
+        uniqueCandidate=null;
+        break;
+      }
+    }
+  }
+  mbd.resolvedConstructorOrFactoryMethod=uniqueCandidate;
+}
