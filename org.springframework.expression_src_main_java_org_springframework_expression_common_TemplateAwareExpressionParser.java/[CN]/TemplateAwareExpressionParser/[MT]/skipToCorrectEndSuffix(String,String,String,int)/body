@@ -1,22 +1,50 @@
 {
-  int nextSuffix=findUnescapedOccurenceOf(suffix,expressionString,afterPrefixIndex);
-  int nextPrefix=findUnescapedOccurenceOf(prefix,expressionString,afterPrefixIndex);
-  if (nextPrefix == -1 || nextPrefix > nextSuffix) {
-    return nextSuffix;
+  int pos=afterPrefixIndex;
+  int maxlen=expressionString.length();
+  int nextSuffix=expressionString.indexOf(suffix,afterPrefixIndex);
+  if (nextSuffix == -1) {
+    return -1;
   }
- else {
-    int depth=0;
-    while (nextPrefix != -1 && nextPrefix < nextSuffix) {
-      depth++;
-      nextPrefix=findUnescapedOccurenceOf(prefix,expressionString,nextPrefix + prefix.length());
+  Stack<Bracket> stack=new Stack<Bracket>();
+  while (pos < maxlen) {
+    if (isSuffixHere(expressionString,pos,suffix) && stack.isEmpty()) {
+      break;
     }
-    while (depth > 0) {
-      depth--;
-      nextSuffix=findUnescapedOccurenceOf(suffix,expressionString,nextSuffix + suffix.length());
-      if (nextSuffix == -1) {
-        return -1;
-      }
-    }
-    return nextSuffix;
+    char ch=expressionString.charAt(pos);
+switch (ch) {
+case '{':
+case '[':
+case '(':
+      stack.push(new Bracket(ch,pos));
+    break;
+case '}':
+case ']':
+case ')':
+  if (stack.isEmpty()) {
+    throw new ParseException(expressionString,"Found closing '" + ch + "' at position "+ pos+ " without an opening '"+ Bracket.theOpenBracketFor(ch)+ "'");
   }
+Bracket p=stack.pop();
+if (!p.compatibleWithCloseBracket(ch)) {
+throw new ParseException(expressionString,"Found closing '" + ch + "' at position "+ pos+ " but most recent opening is '"+ p.bracket+ "' at position "+ p.pos);
+}
+break;
+case '\'':
+case '"':
+int endLiteral=expressionString.indexOf(ch,pos + 1);
+if (endLiteral == -1) {
+throw new ParseException(expressionString,"Found non terminating string literal starting at position " + pos);
+}
+pos=endLiteral;
+break;
+}
+pos++;
+}
+if (!stack.isEmpty()) {
+Bracket p=stack.pop();
+throw new ParseException(expressionString,"Missing closing '" + Bracket.theCloseBracketFor(p.bracket) + "' for '"+ p.bracket+ "' at position "+ p.pos);
+}
+if (!isSuffixHere(expressionString,pos,suffix)) {
+return -1;
+}
+return pos;
 }

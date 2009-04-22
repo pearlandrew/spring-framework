@@ -1,10 +1,10 @@
 {
   List<Expression> expressions=new LinkedList<Expression>();
-  int startIdx=0;
   String prefix=context.getExpressionPrefix();
   String suffix=context.getExpressionSuffix();
+  int startIdx=0;
   while (startIdx < expressionString.length()) {
-    int prefixIndex=findUnescapedOccurenceOf(prefix,expressionString,startIdx);
+    int prefixIndex=expressionString.indexOf(prefix,startIdx);
     if (prefixIndex >= startIdx) {
       if (prefixIndex > startIdx) {
         expressions.add(createLiteralExpression(context,expressionString.substring(startIdx,prefixIndex)));
@@ -19,7 +19,11 @@
       }
  else {
         String expr=expressionString.substring(prefixIndex + prefix.length(),suffixIndex);
-        expressions.add(doParseExpression(unescape(context,expr),context));
+        expr=expr.trim();
+        if (expr.length() == 0) {
+          throw new ParseException(expressionString,"No expression defined within delimiter '" + prefix + suffix+ "' at character "+ prefixIndex);
+        }
+        expressions.add(doParseExpression(expr,context));
         startIdx=suffixIndex + suffix.length();
       }
     }
