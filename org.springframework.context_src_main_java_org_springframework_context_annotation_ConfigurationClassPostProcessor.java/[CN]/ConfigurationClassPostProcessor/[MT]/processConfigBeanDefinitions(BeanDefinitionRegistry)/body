@@ -1,22 +1,27 @@
 {
-  Set<BeanDefinitionHolder> configBeanDefs=new LinkedHashSet<BeanDefinitionHolder>();
+  Set<BeanDefinitionHolder> configCandidates=new LinkedHashSet<BeanDefinitionHolder>();
   for (  String beanName : registry.getBeanDefinitionNames()) {
     BeanDefinition beanDef=registry.getBeanDefinition(beanName);
-    if (checkConfigurationClassBeanDefinition(beanDef)) {
-      configBeanDefs.add(new BeanDefinitionHolder(beanDef,beanName));
+    if (checkConfigurationClassCandidate(beanDef)) {
+      configCandidates.add(new BeanDefinitionHolder(beanDef,beanName));
     }
   }
-  if (configBeanDefs.isEmpty()) {
+  if (configCandidates.isEmpty()) {
     return;
   }
   ConfigurationClassParser parser=new ConfigurationClassParser(this.metadataReaderFactory,this.problemReporter);
-  for (  BeanDefinitionHolder holder : configBeanDefs) {
-    String beanClassName=holder.getBeanDefinition().getBeanClassName();
+  for (  BeanDefinitionHolder holder : configCandidates) {
+    BeanDefinition bd=holder.getBeanDefinition();
     try {
-      parser.parse(beanClassName,holder.getBeanName());
+      if (bd instanceof AbstractBeanDefinition && ((AbstractBeanDefinition)bd).hasBeanClass()) {
+        parser.parse(((AbstractBeanDefinition)bd).getBeanClass(),holder.getBeanName());
+      }
+ else {
+        parser.parse(bd.getBeanClassName(),holder.getBeanName());
+      }
     }
  catch (    IOException ex) {
-      throw new BeanDefinitionStoreException("Failed to load bean class [" + beanClassName + "]",ex);
+      throw new BeanDefinitionStoreException("Failed to load bean class: " + bd.getBeanClassName(),ex);
     }
   }
   parser.validate();

@@ -1,0 +1,24 @@
+{
+  try {
+    Class<?> annotationClass=this.classLoader.loadClass(this.annotationType);
+    Method[] annotationAttributes=annotationClass.getMethods();
+    for (    Method annotationAttribute : annotationAttributes) {
+      String attributeName=annotationAttribute.getName();
+      Object defaultValue=annotationAttribute.getDefaultValue();
+      if (defaultValue != null && !this.attributes.containsKey(attributeName)) {
+        this.attributes.put(attributeName,defaultValue);
+      }
+    }
+    if (this.metaAnnotationMap != null) {
+      Annotation[] metaAnnotations=annotationClass.getAnnotations();
+      Set<String> metaAnnotationTypeNames=new HashSet<String>();
+      for (      Annotation metaAnnotation : metaAnnotations) {
+        metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
+      }
+      this.metaAnnotationMap.put(this.annotationType,metaAnnotationTypeNames);
+    }
+  }
+ catch (  ClassNotFoundException ex) {
+  }
+  this.annotationMap.put(this.annotationType,this.attributes);
+}

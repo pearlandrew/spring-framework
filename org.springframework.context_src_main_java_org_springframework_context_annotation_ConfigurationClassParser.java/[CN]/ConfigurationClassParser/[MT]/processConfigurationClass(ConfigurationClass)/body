@@ -1,0 +1,21 @@
+{
+  AnnotationMetadata metadata=configClass.getMetadata();
+  while (metadata != null) {
+    doProcessConfigurationClass(configClass,metadata);
+    String superClassName=metadata.getSuperClassName();
+    if (superClassName != null && !Object.class.getName().equals(superClassName)) {
+      if (metadata instanceof StandardAnnotationMetadata) {
+        Class clazz=((StandardAnnotationMetadata)metadata).getIntrospectedClass();
+        metadata=new StandardAnnotationMetadata(clazz.getSuperclass());
+      }
+ else {
+        MetadataReader reader=this.metadataReaderFactory.getMetadataReader(superClassName);
+        metadata=reader.getAnnotationMetadata();
+      }
+    }
+ else {
+      metadata=null;
+    }
+  }
+  model.add(configClass);
+}

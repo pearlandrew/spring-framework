@@ -1,16 +1,16 @@
 {
-  for (  Map.Entry<String,Integer> entry : overloadedMethodMap.entrySet()) {
+  for (  Map.Entry<String,Integer> entry : this.overloadedMethodMap.entrySet()) {
     String methodName=entry.getKey();
     int count=entry.getValue();
     if (count > 1) {
       problemReporter.error(new OverloadedMethodProblem(methodName,count));
     }
   }
-  if (getAnnotation(Configuration.class) != null) {
-    if (Modifier.isFinal(modifiers)) {
+  if (getMetadata().hasAnnotation(Configuration.class.getName())) {
+    if (getMetadata().isFinal()) {
       problemReporter.error(new FinalConfigurationProblem());
     }
-    for (    ConfigurationClassMethod method : methods) {
+    for (    ConfigurationClassMethod method : this.methods) {
       method.validate(problemReporter);
     }
   }
