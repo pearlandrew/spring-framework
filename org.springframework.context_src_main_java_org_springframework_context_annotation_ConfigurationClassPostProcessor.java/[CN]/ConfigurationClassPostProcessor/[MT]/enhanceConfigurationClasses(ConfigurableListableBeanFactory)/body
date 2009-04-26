@@ -1,33 +1,32 @@
 {
-  Set<BeanDefinitionHolder> configBeanDefs=new LinkedHashSet<BeanDefinitionHolder>();
+  Map<String,AbstractBeanDefinition> configBeanDefs=new LinkedHashMap<String,AbstractBeanDefinition>();
   for (  String beanName : beanFactory.getBeanDefinitionNames()) {
     BeanDefinition beanDef=beanFactory.getBeanDefinition(beanName);
     if (CONFIGURATION_CLASS_FULL.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE))) {
-      configBeanDefs.add(new BeanDefinitionHolder(beanDef,beanName));
+      if (!(beanDef instanceof AbstractBeanDefinition)) {
+        throw new BeanDefinitionStoreException("Cannot enhance @Configuration bean definition '" + beanName + "' since it is not stored in an AbstractBeanDefinition subclass");
+      }
+      configBeanDefs.put(beanName,(AbstractBeanDefinition)beanDef);
     }
   }
   if (configBeanDefs.isEmpty()) {
     return;
   }
   if (!cglibAvailable) {
-    Set<String> beanNames=new LinkedHashSet<String>();
-    for (    BeanDefinitionHolder holder : configBeanDefs) {
-      beanNames.add(holder.getBeanName());
-    }
-    throw new IllegalStateException("CGLIB is required to process @Configuration classes. " + "Either add CGLIB to the classpath or remove the following @Configuration bean definitions: " + beanNames);
+    throw new IllegalStateException("CGLIB is required to process @Configuration classes. " + "Either add CGLIB to the classpath or remove the following @Configuration bean definitions: " + configBeanDefs.keySet());
   }
   ConfigurationClassEnhancer enhancer=new ConfigurationClassEnhancer(beanFactory);
-  for (  BeanDefinitionHolder holder : configBeanDefs) {
-    AbstractBeanDefinition beanDef=(AbstractBeanDefinition)holder.getBeanDefinition();
+  for (  Map.Entry<String,AbstractBeanDefinition> entry : configBeanDefs.entrySet()) {
+    AbstractBeanDefinition beanDef=entry.getValue();
     try {
       Class configClass=beanDef.resolveBeanClass(this.beanClassLoader);
       Class enhancedClass=enhancer.enhance(configClass);
       if (logger.isDebugEnabled()) {
-        logger.debug(String.format("Replacing bean definition '%s' existing class name '%s' " + "with enhanced class name '%s'",holder.getBeanName(),configClass.getName(),enhancedClass.getName()));
+        logger.debug(String.format("Replacing bean definition '%s' existing class name '%s' " + "with enhanced class name '%s'",entry.getKey(),configClass.getName(),enhancedClass.getName()));
       }
       beanDef.setBeanClass(enhancedClass);
     }
- catch (    ClassNotFoundException ex) {
+ catch (    Throwable ex) {
       throw new IllegalStateException("Cannot load configuration class: " + beanDef.getBeanClassName(),ex);
     }
   }

@@ -2,10 +2,13 @@
   Annotation[] anns=getIntrospectedClass().getAnnotations();
   for (  Annotation ann : anns) {
     if (ann.annotationType().getName().equals(annotationType)) {
-      Set<String> types=new HashSet<String>();
+      Set<String> types=new LinkedHashSet<String>();
       Annotation[] metaAnns=ann.annotationType().getAnnotations();
-      for (      Annotation meta : metaAnns) {
-        types.add(meta.annotationType().getName());
+      for (      Annotation metaAnn : metaAnns) {
+        types.add(metaAnn.annotationType().getName());
+        for (        Annotation metaMetaAnn : metaAnn.annotationType().getAnnotations()) {
+          types.add(metaMetaAnn.annotationType().getName());
+        }
       }
       return types;
     }

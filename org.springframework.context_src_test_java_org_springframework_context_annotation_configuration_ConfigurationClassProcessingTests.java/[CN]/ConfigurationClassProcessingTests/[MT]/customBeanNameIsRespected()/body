@@ -1,8 +1,11 @@
 {
-  BeanFactory factory=initBeanFactory(ConfigWithBeanWithCustomName.class);
-  assertSame(factory.getBean("customName"),ConfigWithBeanWithCustomName.testBean);
+  GenericApplicationContext ac=new GenericApplicationContext();
+  AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
+  ac.registerBeanDefinition("config",new RootBeanDefinition(ConfigWithBeanWithCustomName.class));
+  ac.refresh();
+  assertSame(ac.getBean("customName"),ConfigWithBeanWithCustomName.testBean);
   try {
-    factory.getBean("methodName");
+    ac.getBean("methodName");
     fail("bean should not have been registered with 'methodName'");
   }
  catch (  NoSuchBeanDefinitionException ex) {

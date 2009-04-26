@@ -1,4 +1,5 @@
 {
+  this.annotationMap.put(this.annotationType,this.attributes);
   try {
     Class<?> annotationClass=this.classLoader.loadClass(this.annotationType);
     Method[] annotationAttributes=annotationClass.getMethods();
@@ -10,15 +11,19 @@
       }
     }
     if (this.metaAnnotationMap != null) {
-      Annotation[] metaAnnotations=annotationClass.getAnnotations();
-      Set<String> metaAnnotationTypeNames=new HashSet<String>();
-      for (      Annotation metaAnnotation : metaAnnotations) {
+      Set<String> metaAnnotationTypeNames=new LinkedHashSet<String>();
+      for (      Annotation metaAnnotation : annotationClass.getAnnotations()) {
         metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
+        if (!this.annotationMap.containsKey(metaAnnotation.annotationType().getName())) {
+          this.annotationMap.put(metaAnnotation.annotationType().getName(),AnnotationUtils.getAnnotationAttributes(metaAnnotation,true));
+        }
+        for (        Annotation metaMetaAnnotation : metaAnnotation.annotationType().getAnnotations()) {
+          metaAnnotationTypeNames.add(metaMetaAnnotation.annotationType().getName());
+        }
       }
       this.metaAnnotationMap.put(this.annotationType,metaAnnotationTypeNames);
     }
   }
  catch (  ClassNotFoundException ex) {
   }
-  this.annotationMap.put(this.annotationType,this.attributes);
 }
