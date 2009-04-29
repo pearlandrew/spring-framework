@@ -1,0 +1,20 @@
+{
+  EachTestNotifier eachNotifier=makeNotifier(frameworkMethod,notifier);
+  if (isTestMethodIgnored(frameworkMethod)) {
+    eachNotifier.fireTestIgnored();
+    return;
+  }
+  eachNotifier.fireTestStarted();
+  try {
+    methodBlock(frameworkMethod).evaluate();
+  }
+ catch (  AssumptionViolatedException e) {
+    eachNotifier.addFailedAssumption(e);
+  }
+catch (  Throwable e) {
+    eachNotifier.addFailure(e);
+  }
+ finally {
+    eachNotifier.fireTestFinished();
+  }
+}

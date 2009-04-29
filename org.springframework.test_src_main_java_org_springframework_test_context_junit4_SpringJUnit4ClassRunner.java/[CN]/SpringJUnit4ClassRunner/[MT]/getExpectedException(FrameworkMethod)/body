@@ -1,0 +1,12 @@
+{
+  Test testAnnotation=frameworkMethod.getAnnotation(Test.class);
+  Class<? extends Throwable> junitExpectedException=testAnnotation != null && testAnnotation.expected() != Test.None.class ? testAnnotation.expected() : null;
+  ExpectedException expectedExAnn=frameworkMethod.getAnnotation(ExpectedException.class);
+  Class<? extends Throwable> springExpectedException=(expectedExAnn != null ? expectedExAnn.value() : null);
+  if (springExpectedException != null && junitExpectedException != null) {
+    String msg="Test method [" + frameworkMethod.getMethod() + "] has been configured with Spring's @ExpectedException("+ springExpectedException.getName()+ ".class) and JUnit's @Test(expected="+ junitExpectedException.getName()+ ".class) annotations. "+ "Only one declaration of an 'expected exception' is permitted per test method.";
+    logger.error(msg);
+    throw new IllegalStateException(msg);
+  }
+  return springExpectedException != null ? springExpectedException : junitExpectedException;
+}

@@ -1,0 +1,20 @@
+{
+  Statement statement=null;
+  long springTimeout=getSpringTimeout(frameworkMethod);
+  long junitTimeout=getJUnitTimeout(frameworkMethod);
+  if (springTimeout > 0 && junitTimeout > 0) {
+    String msg="Test method [" + frameworkMethod.getMethod() + "] has been configured with Spring's @Timed(millis="+ springTimeout+ ") and JUnit's @Test(timeout="+ junitTimeout+ ") annotations. Only one declaration of a 'timeout' is permitted per test method.";
+    logger.error(msg);
+    throw new IllegalStateException(msg);
+  }
+ else   if (springTimeout > 0) {
+    statement=new SpringFailOnTimeout(next,springTimeout);
+  }
+ else   if (junitTimeout > 0) {
+    statement=new FailOnTimeout(next,junitTimeout);
+  }
+ else {
+    statement=next;
+  }
+  return statement;
+}
