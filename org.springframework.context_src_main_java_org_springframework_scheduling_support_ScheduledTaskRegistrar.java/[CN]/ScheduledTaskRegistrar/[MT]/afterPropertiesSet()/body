@@ -1,0 +1,25 @@
+{
+  if (this.taskScheduler == null) {
+    this.taskScheduler=new ConcurrentTaskScheduler(Executors.newSingleThreadScheduledExecutor());
+  }
+  if (this.triggerTasks != null) {
+    for (    Map.Entry<Runnable,Trigger> entry : this.triggerTasks.entrySet()) {
+      this.scheduledFutures.add(this.taskScheduler.schedule(entry.getKey(),entry.getValue()));
+    }
+  }
+  if (this.cronTasks != null) {
+    for (    Map.Entry<Runnable,String> entry : cronTasks.entrySet()) {
+      this.scheduledFutures.add(this.taskScheduler.schedule(entry.getKey(),new CronTrigger(entry.getValue())));
+    }
+  }
+  if (this.fixedRateTasks != null) {
+    for (    Map.Entry<Runnable,Long> entry : this.fixedRateTasks.entrySet()) {
+      this.scheduledFutures.add(this.taskScheduler.scheduleAtFixedRate(entry.getKey(),entry.getValue()));
+    }
+  }
+  if (this.fixedDelayTasks != null) {
+    for (    Map.Entry<Runnable,Long> entry : this.fixedDelayTasks.entrySet()) {
+      this.scheduledFutures.add(this.taskScheduler.scheduleWithFixedDelay(entry.getKey(),entry.getValue()));
+    }
+  }
+}
