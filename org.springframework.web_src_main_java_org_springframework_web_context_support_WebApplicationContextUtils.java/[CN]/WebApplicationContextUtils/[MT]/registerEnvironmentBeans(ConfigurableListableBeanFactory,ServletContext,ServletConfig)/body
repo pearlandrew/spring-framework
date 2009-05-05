@@ -1,0 +1,37 @@
+{
+  if (sc != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
+    bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME,sc);
+  }
+  if (config != null && !bf.containsBean(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME)) {
+    bf.registerSingleton(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME,config);
+  }
+  if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {
+    Map<String,String> parameterMap=new HashMap<String,String>();
+    if (sc != null) {
+      Enumeration paramNameEnum=sc.getInitParameterNames();
+      while (paramNameEnum.hasMoreElements()) {
+        String paramName=(String)paramNameEnum.nextElement();
+        parameterMap.put(paramName,sc.getInitParameter(paramName));
+      }
+    }
+    if (config != null) {
+      Enumeration paramNameEnum=config.getInitParameterNames();
+      while (paramNameEnum.hasMoreElements()) {
+        String paramName=(String)paramNameEnum.nextElement();
+        parameterMap.put(paramName,config.getInitParameter(paramName));
+      }
+    }
+    bf.registerSingleton(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME,Collections.unmodifiableMap(parameterMap));
+  }
+  if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {
+    Map<String,Object> attributeMap=new HashMap<String,Object>();
+    if (sc != null) {
+      Enumeration attrNameEnum=sc.getAttributeNames();
+      while (attrNameEnum.hasMoreElements()) {
+        String attrName=(String)attrNameEnum.nextElement();
+        attributeMap.put(attrName,sc.getAttribute(attrName));
+      }
+    }
+    bf.registerSingleton(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME,Collections.unmodifiableMap(attributeMap));
+  }
+}
