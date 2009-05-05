@@ -1,9 +1,7 @@
 {
-  Method bridgedMethod=TestEmailProvider.class.getDeclaredMethod("findBy",EmailSearchConditions.class);
-  assertNotNull(bridgedMethod);
+  Method bridgeMethod=ReflectionUtils.findMethod(TestEmailProvider.class,"findBy",Object.class);
+  assertTrue(bridgeMethod != null && bridgeMethod.isBridge());
+  Method bridgedMethod=BridgeMethodResolver.findBridgedMethod(bridgeMethod);
   assertFalse(bridgedMethod.isBridge());
-  Method bridgeMethod=TestEmailProvider.class.getDeclaredMethod("findBy",Object.class);
-  assertNotNull(bridgeMethod);
-  assertTrue(bridgeMethod.isBridge());
-  assertEquals(bridgedMethod,BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+  assertEquals("findBy",bridgedMethod.getName());
 }

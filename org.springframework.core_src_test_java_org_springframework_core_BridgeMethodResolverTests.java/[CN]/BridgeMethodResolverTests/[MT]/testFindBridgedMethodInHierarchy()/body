@@ -1,8 +1,9 @@
 {
-  Method unbridged=DateAdder.class.getMethod("add",Date.class);
-  Method bridged=DateAdder.class.getMethod("add",Object.class);
-  assertFalse(unbridged.isBridge());
-  assertTrue(bridged.isBridge());
-  assertEquals("Unbridged method not returned directly",unbridged,BridgeMethodResolver.findBridgedMethod(unbridged));
-  assertEquals("Incorrect bridged method returned",unbridged,BridgeMethodResolver.findBridgedMethod(bridged));
+  Method bridgeMethod=DateAdder.class.getMethod("add",Object.class);
+  assertTrue(bridgeMethod.isBridge());
+  Method bridgedMethod=BridgeMethodResolver.findBridgedMethod(bridgeMethod);
+  assertFalse(bridgedMethod.isBridge());
+  assertEquals("add",bridgedMethod.getName());
+  assertEquals(1,bridgedMethod.getParameterTypes().length);
+  assertEquals(Date.class,bridgedMethod.getParameterTypes()[0]);
 }
