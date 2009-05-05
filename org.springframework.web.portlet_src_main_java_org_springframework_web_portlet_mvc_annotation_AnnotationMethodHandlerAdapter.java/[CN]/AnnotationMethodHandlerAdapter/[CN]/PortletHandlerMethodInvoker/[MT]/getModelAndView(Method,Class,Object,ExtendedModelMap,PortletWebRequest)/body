@@ -1,4 +1,12 @@
 {
+  if (customModelAndViewResolvers != null) {
+    for (    ModelAndViewResolver mavResolver : customModelAndViewResolvers) {
+      org.springframework.web.servlet.ModelAndView smav=mavResolver.resolveModelAndView(handlerMethod,handlerType,returnValue,implicitModel,webRequest);
+      if (smav != ModelAndViewResolver.UNRESOLVED) {
+        return (smav.isReference() ? new ModelAndView(smav.getViewName(),smav.getModelMap()) : new ModelAndView(smav.getView(),smav.getModelMap()));
+      }
+    }
+  }
   if (returnValue instanceof ModelAndView) {
     ModelAndView mav=(ModelAndView)returnValue;
     mav.getModelMap().mergeAttributes(implicitModel);
