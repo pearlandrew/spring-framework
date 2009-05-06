@@ -1,9 +1,12 @@
 {
-  TransactionTemplate template=new TransactionTemplate(new DataSourceTransactionManager(dataSource));
-  template.execute(new TransactionCallbackWithoutResult(){
-    @Override protected void doInTransactionWithoutResult(    TransactionStatus status){
-      databasePopulator.populate(new JdbcTemplate(dataSource));
-    }
+  Connection connection=JdbcUtils.getConnection(dataSource);
+  try {
+    databasePopulator.populate(connection);
   }
-);
+ catch (  SQLException e) {
+    throw new RuntimeException("SQLException occurred populating embedded database",e);
+  }
+ finally {
+    JdbcUtils.closeConnection(connection);
+  }
 }

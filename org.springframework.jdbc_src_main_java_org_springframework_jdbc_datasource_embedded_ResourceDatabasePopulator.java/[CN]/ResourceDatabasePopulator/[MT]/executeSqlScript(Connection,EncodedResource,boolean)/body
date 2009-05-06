@@ -1,0 +1,48 @@
+{
+  if (logger.isInfoEnabled()) {
+    logger.info("Executing SQL script from " + resource);
+  }
+  long startTime=System.currentTimeMillis();
+  List<String> statements=new LinkedList<String>();
+  String script;
+  try {
+    script=readScript(resource);
+  }
+ catch (  IOException e) {
+    throw new CannotReadScriptException(resource,e);
+  }
+  char delimiter=';';
+  if (!containsSqlScriptDelimiters(script,delimiter)) {
+    delimiter='\n';
+  }
+  splitSqlScript(script,delimiter,statements);
+  int lineNumber=0;
+  for (  String statement : statements) {
+    lineNumber++;
+    Statement stmt=null;
+    try {
+      stmt=connection.createStatement();
+      int rowsAffected=stmt.executeUpdate(statement);
+      if (logger.isDebugEnabled()) {
+        logger.debug(rowsAffected + " rows affected by SQL: " + statement);
+      }
+    }
+ catch (    SQLException e) {
+      if (continueOnError) {
+        if (logger.isWarnEnabled()) {
+          logger.warn("Line " + lineNumber + " statement failed: "+ statement,e);
+        }
+      }
+ else {
+        throw e;
+      }
+    }
+ finally {
+      JdbcUtils.closeStatement(stmt);
+    }
+  }
+  long elapsedTime=System.currentTimeMillis() - startTime;
+  if (logger.isInfoEnabled()) {
+    logger.info("Done executing SQL script from " + resource + " in "+ elapsedTime+ " ms.");
+  }
+}
