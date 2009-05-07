@@ -7,26 +7,8 @@
     beanFactory.registerScope(WebApplicationContext.SCOPE_APPLICATION,appScope);
     sc.setAttribute(ServletContextScope.class.getName(),appScope);
   }
-  beanFactory.registerResolvableDependency(ServletRequest.class,new ObjectFactory<ServletRequest>(){
-    public ServletRequest getObject(){
-      RequestAttributes requestAttr=RequestContextHolder.currentRequestAttributes();
-      if (!(requestAttr instanceof ServletRequestAttributes)) {
-        throw new IllegalStateException("Current request is not a servlet request");
-      }
-      return ((ServletRequestAttributes)requestAttr).getRequest();
-    }
-  }
-);
-  beanFactory.registerResolvableDependency(HttpSession.class,new ObjectFactory<HttpSession>(){
-    public HttpSession getObject(){
-      RequestAttributes requestAttr=RequestContextHolder.currentRequestAttributes();
-      if (!(requestAttr instanceof ServletRequestAttributes)) {
-        throw new IllegalStateException("Current request is not a servlet request");
-      }
-      return ((ServletRequestAttributes)requestAttr).getRequest().getSession();
-    }
-  }
-);
+  beanFactory.registerResolvableDependency(ServletRequest.class,new RequestObjectFactory());
+  beanFactory.registerResolvableDependency(HttpSession.class,new SessionObjectFactory());
   if (jsfPresent) {
     FacesDependencyRegistrar.registerFacesDependencies(beanFactory);
   }

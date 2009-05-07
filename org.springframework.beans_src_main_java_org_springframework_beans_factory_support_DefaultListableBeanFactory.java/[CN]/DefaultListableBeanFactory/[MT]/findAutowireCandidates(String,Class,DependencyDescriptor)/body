@@ -4,9 +4,7 @@
   for (  Class autowiringType : this.resolvableDependencies.keySet()) {
     if (autowiringType.isAssignableFrom(requiredType)) {
       Object autowiringValue=this.resolvableDependencies.get(autowiringType);
-      if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue)) {
-        autowiringValue=((ObjectFactory)autowiringValue).getObject();
-      }
+      autowiringValue=AutowireUtils.resolveAutowiringValue(autowiringValue,requiredType);
       if (requiredType.isInstance(autowiringValue)) {
         result.put(ObjectUtils.identityToString(autowiringValue),autowiringValue);
         break;

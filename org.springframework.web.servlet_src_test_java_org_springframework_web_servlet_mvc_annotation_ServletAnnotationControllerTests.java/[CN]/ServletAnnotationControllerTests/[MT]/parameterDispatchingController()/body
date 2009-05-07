@@ -6,7 +6,6 @@
       GenericWebApplicationContext wac=new GenericWebApplicationContext();
       wac.setServletContext(servletContext);
       RootBeanDefinition bd=new RootBeanDefinition(MyParameterDispatchingController.class);
-      bd.setScope(WebApplicationContext.SCOPE_REQUEST);
       wac.registerBeanDefinition("controller",bd);
       AnnotationConfigUtils.registerAnnotationConfigProcessors(wac);
       wac.getBeanFactory().registerResolvableDependency(ServletConfig.class,servletConfig);
@@ -23,8 +22,8 @@
   assertEquals("myView",response.getContentAsString());
   assertSame(servletContext,request.getAttribute("servletContext"));
   assertSame(servletConfig,request.getAttribute("servletConfig"));
-  assertSame(session,request.getAttribute("session"));
-  assertSame(request,request.getAttribute("request"));
+  assertSame(session.getId(),request.getAttribute("sessionId"));
+  assertSame(request.getRequestURI(),request.getAttribute("requestUri"));
   request=new MockHttpServletRequest(servletContext,"GET","/myPath.do");
   response=new MockHttpServletResponse();
   session=request.getSession();
@@ -32,8 +31,8 @@
   assertEquals("myView",response.getContentAsString());
   assertSame(servletContext,request.getAttribute("servletContext"));
   assertSame(servletConfig,request.getAttribute("servletConfig"));
-  assertSame(session,request.getAttribute("session"));
-  assertSame(request,request.getAttribute("request"));
+  assertSame(session.getId(),request.getAttribute("sessionId"));
+  assertSame(request.getRequestURI(),request.getAttribute("requestUri"));
   request=new MockHttpServletRequest(servletContext,"GET","/myPath.do");
   request.addParameter("view","other");
   response=new MockHttpServletResponse();
@@ -50,4 +49,7 @@
   response=new MockHttpServletResponse();
   servlet.service(request,response);
   assertEquals("mySurpriseView",response.getContentAsString());
+  MyParameterDispatchingController deserialized=(MyParameterDispatchingController)SerializationTestUtils.serializeAndDeserialize(servlet.getWebApplicationContext().getBean("controller"));
+  assertNotNull(deserialized.request);
+  assertNotNull(deserialized.session);
 }
