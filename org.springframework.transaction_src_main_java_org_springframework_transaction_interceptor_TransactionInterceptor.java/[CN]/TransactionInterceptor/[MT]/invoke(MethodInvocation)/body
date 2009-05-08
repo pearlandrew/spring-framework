@@ -1,9 +1,10 @@
 {
   Class targetClass=(invocation.getThis() != null ? invocation.getThis().getClass() : null);
   final TransactionAttribute txAttr=getTransactionAttributeSource().getTransactionAttribute(invocation.getMethod(),targetClass);
+  final PlatformTransactionManager tm=determineTransactionManager(txAttr);
   final String joinpointIdentification=methodIdentification(invocation.getMethod());
-  if (txAttr == null || !(getTransactionManager() instanceof CallbackPreferringPlatformTransactionManager)) {
-    TransactionInfo txInfo=createTransactionIfNecessary(txAttr,joinpointIdentification);
+  if (txAttr == null || !(tm instanceof CallbackPreferringPlatformTransactionManager)) {
+    TransactionInfo txInfo=createTransactionIfNecessary(tm,txAttr,joinpointIdentification);
     Object retVal=null;
     try {
       retVal=invocation.proceed();
@@ -20,9 +21,9 @@
   }
  else {
     try {
-      Object result=((CallbackPreferringPlatformTransactionManager)getTransactionManager()).execute(txAttr,new TransactionCallback(){
+      Object result=((CallbackPreferringPlatformTransactionManager)tm).execute(txAttr,new TransactionCallback<Object>(){
         public Object doInTransaction(        TransactionStatus status){
-          TransactionInfo txInfo=prepareTransactionInfo(txAttr,joinpointIdentification,status);
+          TransactionInfo txInfo=prepareTransactionInfo(tm,txAttr,joinpointIdentification,status);
           try {
             return invocation.proceed();
           }
