@@ -18,7 +18,7 @@
       return new CollectionToArray(sourceType,targetType,this);
     }
  else {
-      throw new ConversionExecutorNotFoundException(sourceType,targetType,"Object to Array conversion not yet supported");
+      return null;
     }
   }
   if (sourceType.isCollection()) {
@@ -26,7 +26,7 @@
       return new CollectionToCollection(sourceType,targetType,this);
     }
  else {
-      throw new ConversionExecutorNotFoundException(sourceType,targetType,"Object to Collection conversion not yet supported");
+      return null;
     }
   }
   if (sourceType.isMap()) {
@@ -34,7 +34,7 @@
       return new MapToMap(sourceType,targetType,this);
     }
  else {
-      throw new ConversionExecutorNotFoundException(sourceType,targetType,"Object to Map conversion not yet supported");
+      return null;
     }
   }
   Converter converter=findRegisteredConverter(sourceClass,targetType.getType());
@@ -46,14 +46,11 @@
     if (superConverter != null) {
       return new StaticSuperConversionExecutor(sourceType,targetType,superConverter);
     }
-    if (parent != null) {
-      return parent.getConversionExecutor(sourceClass,targetType);
-    }
  else {
       if (sourceType.isAssignableTo(targetType)) {
         return new StaticConversionExecutor(sourceType,targetType,NoOpConverter.INSTANCE);
       }
-      throw new ConversionExecutorNotFoundException(sourceType,targetType,"No ConversionExecutor found for converting from sourceType [" + sourceType.getName() + "] to targetType ["+ targetType.getName()+ "]");
+      return null;
     }
   }
 }

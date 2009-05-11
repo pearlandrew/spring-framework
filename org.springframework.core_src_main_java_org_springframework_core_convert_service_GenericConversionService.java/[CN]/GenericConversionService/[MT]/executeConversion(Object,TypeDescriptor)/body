@@ -2,5 +2,16 @@
   if (source == null) {
     return null;
   }
-  return getConversionExecutor(source.getClass(),targetType).execute(source);
+  ConversionExecutor executor=getConversionExecutor(source.getClass(),targetType);
+  if (executor != null) {
+    return executor.execute(source);
+  }
+ else {
+    if (parent != null) {
+      return parent.executeConversion(source,targetType);
+    }
+ else {
+      throw new ConverterNotFoundException(source.getClass(),targetType,"No converter found that can convert from sourceType [" + source.getClass().getName() + "] to targetType ["+ targetType.getName()+ "]");
+    }
+  }
 }
