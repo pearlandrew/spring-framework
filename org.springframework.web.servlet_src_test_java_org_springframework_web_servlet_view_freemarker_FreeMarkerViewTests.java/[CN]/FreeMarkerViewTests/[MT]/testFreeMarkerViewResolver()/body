@@ -1,20 +1,17 @@
 {
-  VelocityConfig vc=new VelocityConfig(){
-    public VelocityEngine getVelocityEngine(){
-      return new TestVelocityEngine("prefix_test_suffix",new Template());
-    }
-  }
-;
+  FreeMarkerConfigurer configurer=new FreeMarkerConfigurer();
+  configurer.setConfiguration(new TestConfiguration());
   StaticWebApplicationContext wac=new StaticWebApplicationContext();
-  wac.getBeanFactory().registerSingleton("configurer",vc);
+  wac.setServletContext(new MockServletContext());
+  wac.getBeanFactory().registerSingleton("configurer",configurer);
   wac.refresh();
-  VelocityViewResolver vr=new VelocityViewResolver();
+  FreeMarkerViewResolver vr=new FreeMarkerViewResolver();
   vr.setPrefix("prefix_");
   vr.setSuffix("_suffix");
   vr.setApplicationContext(wac);
   View view=vr.resolveViewName("test",Locale.CANADA);
-  assertEquals("Correct view class",VelocityView.class,view.getClass());
-  assertEquals("Correct URL","prefix_test_suffix",((VelocityView)view).getUrl());
+  assertEquals("Correct view class",FreeMarkerView.class,view.getClass());
+  assertEquals("Correct URL","prefix_test_suffix",((FreeMarkerView)view).getUrl());
   view=vr.resolveViewName("non-existing",Locale.CANADA);
   assertNull(view);
   view=vr.resolveViewName("redirect:myUrl",Locale.getDefault());
