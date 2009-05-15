@@ -1,20 +1,20 @@
 {
   TypedValue context=state.getActiveContextObject();
   Object targetObject=context.getValue();
-  BindingPoint targetObjectTypeDescriptor=context.getTypeDescriptor();
+  ConversionPoint targetObjectTypeDescriptor=context.getTypeDescriptor();
   TypedValue indexValue=getChild(0).getValueInternal(state);
   Object index=indexValue.getValue();
   if (targetObject instanceof Map) {
-    Object possiblyConvertedKey=state.convertValue(indexValue,BindingPoint.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
+    Object possiblyConvertedKey=state.convertValue(indexValue,ConversionPoint.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
     Object o=((Map<?,?>)targetObject).get(possiblyConvertedKey);
-    return new TypedValue(o,BindingPoint.valueOf(targetObjectTypeDescriptor.getMapValueType()));
+    return new TypedValue(o,ConversionPoint.valueOf(targetObjectTypeDescriptor.getMapValueType()));
   }
   int idx=(Integer)state.convertValue(index,INTEGER_TYPE_DESCRIPTOR);
   if (targetObject == null) {
     throw new SpelException(SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
   }
   if (targetObject.getClass().isArray()) {
-    return new TypedValue(accessArrayElement(targetObject,idx),BindingPoint.valueOf(targetObjectTypeDescriptor.getElementType()));
+    return new TypedValue(accessArrayElement(targetObject,idx),ConversionPoint.valueOf(targetObjectTypeDescriptor.getElementType()));
   }
  else   if (targetObject instanceof Collection) {
     Collection<?> c=(Collection<?>)targetObject;
@@ -24,7 +24,7 @@
     int pos=0;
     for (    Object o : c) {
       if (pos == idx) {
-        return new TypedValue(o,BindingPoint.valueOf(targetObjectTypeDescriptor.getElementType()));
+        return new TypedValue(o,ConversionPoint.valueOf(targetObjectTypeDescriptor.getElementType()));
       }
       pos++;
     }
