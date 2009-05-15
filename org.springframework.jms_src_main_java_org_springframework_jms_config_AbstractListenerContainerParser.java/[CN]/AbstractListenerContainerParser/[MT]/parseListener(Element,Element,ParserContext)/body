@@ -5,7 +5,9 @@
   if (!StringUtils.hasText(ref)) {
     parserContext.getReaderContext().error("Listener 'ref' attribute contains empty value.",listenerEle);
   }
-  listenerDef.getPropertyValues().addPropertyValue("delegate",new RuntimeBeanReference(ref));
+ else {
+    listenerDef.getPropertyValues().addPropertyValue("delegate",new RuntimeBeanReference(ref));
+  }
   String method=null;
   if (listenerEle.hasAttribute(METHOD_ATTRIBUTE)) {
     method=listenerEle.getAttribute(METHOD_ATTRIBUTE);
@@ -16,7 +18,12 @@
   listenerDef.getPropertyValues().addPropertyValue("defaultListenerMethod",method);
   if (containerEle.hasAttribute(MESSAGE_CONVERTER_ATTRIBUTE)) {
     String messageConverter=containerEle.getAttribute(MESSAGE_CONVERTER_ATTRIBUTE);
-    listenerDef.getPropertyValues().addPropertyValue("messageConverter",new RuntimeBeanReference(messageConverter));
+    if (!StringUtils.hasText(messageConverter)) {
+      parserContext.getReaderContext().error("Listener container 'message-converter' attribute contains empty value.",containerEle);
+    }
+ else {
+      listenerDef.getPropertyValues().addPropertyValue("messageConverter",new RuntimeBeanReference(messageConverter));
+    }
   }
   BeanDefinition containerDef=parseContainer(listenerEle,containerEle,parserContext);
   if (listenerEle.hasAttribute(RESPONSE_DESTINATION_ATTRIBUTE)) {
