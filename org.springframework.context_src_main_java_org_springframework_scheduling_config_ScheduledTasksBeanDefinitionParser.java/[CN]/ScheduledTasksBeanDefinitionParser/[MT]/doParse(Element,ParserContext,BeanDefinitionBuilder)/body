@@ -11,7 +11,11 @@
     Element taskElement=(Element)child;
     String ref=taskElement.getAttribute("ref");
     String method=taskElement.getAttribute("method");
-    RuntimeBeanReference runnableBeanRef=new RuntimeBeanReference(this.createRunnableBean(ref,method,parserContext));
+    if (!StringUtils.hasText(ref) || !StringUtils.hasText(method)) {
+      parserContext.getReaderContext().error("Both 'ref' and 'method' are required",taskElement);
+      continue;
+    }
+    RuntimeBeanReference runnableBeanRef=new RuntimeBeanReference(this.createRunnableBean(ref,method,taskElement,parserContext));
     String cronAttribute=taskElement.getAttribute("cron");
     if (StringUtils.hasText(cronAttribute)) {
       cronTaskMap.put(runnableBeanRef,cronAttribute);
@@ -24,8 +28,8 @@
  else {
         String fixedRateAttribute=taskElement.getAttribute("fixed-rate");
         if (!StringUtils.hasText(fixedRateAttribute)) {
-          parserContext.getReaderContext().error("one of 'cron', 'fixed-delay', or 'fixed-rate' is required",taskElement);
-          return;
+          parserContext.getReaderContext().error("One of 'cron', 'fixed-delay', or 'fixed-rate' is required",taskElement);
+          continue;
         }
         fixedRateTaskMap.put(runnableBeanRef,fixedRateAttribute);
       }
