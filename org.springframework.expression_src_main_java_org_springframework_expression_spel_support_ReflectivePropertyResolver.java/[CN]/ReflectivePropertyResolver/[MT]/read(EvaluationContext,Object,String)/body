@@ -7,7 +7,7 @@
     if (target instanceof Class) {
       throw new AccessException("Cannot access length on array class itself");
     }
-    return new TypedValue(Array.getLength(target),TypeDescriptor.valueOf(Integer.TYPE));
+    return new TypedValue(Array.getLength(target),BindingPoint.valueOf(Integer.TYPE));
   }
   CacheKey cacheKey=new CacheKey(type,name);
   Member cachedMember=this.readerCache.get(cacheKey);
@@ -23,7 +23,7 @@
     if (method != null) {
       try {
         ReflectionUtils.makeAccessible(method);
-        TypeDescriptor resultTypeDescriptor=new TypeDescriptor(new MethodParameter(method,-1));
+        BindingPoint resultTypeDescriptor=new BindingPoint(new MethodParameter(method,-1));
         return new TypedValue(method.invoke(target),resultTypeDescriptor);
       }
  catch (      Exception ex) {
@@ -43,7 +43,7 @@
     if (field != null) {
       try {
         ReflectionUtils.makeAccessible(field);
-        return new TypedValue(field.get(target),new TypeDescriptor(field));
+        return new TypedValue(field.get(target),new BindingPoint(field));
       }
  catch (      Exception ex) {
         throw new AccessException("Unable to access field: " + name,ex);
