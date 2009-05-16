@@ -7,14 +7,11 @@
     connection=shutdownDataSource.getConnection();
   }
  catch (  SQLException e) {
-    if (e instanceof SQLNonTransientConnectionException) {
-      SQLNonTransientConnectionException ex=(SQLNonTransientConnectionException)e;
-      if (!SHUTDOWN_CODE.equals(ex.getSQLState())) {
-        logException(e);
-      }
+    if (SHUTDOWN_CODE.equals(e.getSQLState())) {
+      purgeDatabase(databaseName);
     }
  else {
-      logException(e);
+      logger.warn("Could not shutdown in-memory Derby database",e);
     }
   }
  finally {
