@@ -37,7 +37,10 @@
       return null;
     }
   }
-  Converter converter=findRegisteredConverter(sourceClass,targetType.getType());
+  if (sourceType.isAssignableTo(targetType)) {
+    return NoOpConversionExecutor.INSTANCE;
+  }
+  Converter converter=findRegisteredConverter(sourceType.getType(),targetType.getType());
   if (converter != null) {
     return new StaticConversionExecutor(sourceType,targetType,converter);
   }
