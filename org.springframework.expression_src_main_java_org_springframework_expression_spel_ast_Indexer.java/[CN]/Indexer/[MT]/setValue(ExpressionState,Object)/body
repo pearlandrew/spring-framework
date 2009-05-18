@@ -1,15 +1,15 @@
 {
   TypedValue contextObject=state.getActiveContextObject();
   Object targetObject=contextObject.getValue();
-  ConversionPoint targetObjectTypeDescriptor=contextObject.getTypeDescriptor();
+  ConversionContext targetObjectTypeDescriptor=contextObject.getTypeDescriptor();
   TypedValue index=getChild(0).getValueInternal(state);
   if (targetObject == null) {
     throw new SpelException(SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
   }
   if (targetObjectTypeDescriptor.isMap()) {
     Map map=(Map)targetObject;
-    Object possiblyConvertedKey=state.convertValue(index.getValue(),ConversionPoint.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
-    Object possiblyConvertedValue=state.convertValue(newValue,ConversionPoint.valueOf(targetObjectTypeDescriptor.getMapValueType()));
+    Object possiblyConvertedKey=state.convertValue(index.getValue(),ConversionContext.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
+    Object possiblyConvertedValue=state.convertValue(newValue,ConversionContext.valueOf(targetObjectTypeDescriptor.getMapValueType()));
     map.put(possiblyConvertedKey,possiblyConvertedValue);
     return;
   }
@@ -25,7 +25,7 @@
     }
     if (targetObject instanceof List) {
       List list=(List)targetObject;
-      Object possiblyConvertedValue=state.convertValue(newValue,ConversionPoint.valueOf(targetObjectTypeDescriptor.getElementType()));
+      Object possiblyConvertedValue=state.convertValue(newValue,ConversionContext.valueOf(targetObjectTypeDescriptor.getElementType()));
       list.set(idx,possiblyConvertedValue);
     }
  else {
