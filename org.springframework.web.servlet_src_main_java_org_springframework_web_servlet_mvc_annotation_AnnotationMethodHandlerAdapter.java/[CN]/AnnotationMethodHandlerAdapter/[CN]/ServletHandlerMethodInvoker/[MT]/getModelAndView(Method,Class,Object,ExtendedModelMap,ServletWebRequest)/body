@@ -1,4 +1,10 @@
 {
+  if (handlerMethod.isAnnotationPresent(ResponseStatus.class)) {
+    ResponseStatus responseStatus=handlerMethod.getAnnotation(ResponseStatus.class);
+    HttpServletResponse response=webRequest.getResponse();
+    response.setStatus(responseStatus.value().value());
+    responseArgumentUsed=true;
+  }
   if (customModelAndViewResolvers != null) {
     for (    ModelAndViewResolver mavResolver : customModelAndViewResolvers) {
       ModelAndView mav=mavResolver.resolveModelAndView(handlerMethod,handlerType,returnValue,implicitModel,webRequest);
@@ -6,12 +12,6 @@
         return mav;
       }
     }
-  }
-  if (handlerMethod.isAnnotationPresent(ResponseStatus.class)) {
-    ResponseStatus responseStatus=handlerMethod.getAnnotation(ResponseStatus.class);
-    HttpServletResponse response=webRequest.getResponse();
-    response.setStatus(responseStatus.value().value());
-    responseArgumentUsed=true;
   }
   if (returnValue instanceof ModelAndView) {
     ModelAndView mav=(ModelAndView)returnValue;
