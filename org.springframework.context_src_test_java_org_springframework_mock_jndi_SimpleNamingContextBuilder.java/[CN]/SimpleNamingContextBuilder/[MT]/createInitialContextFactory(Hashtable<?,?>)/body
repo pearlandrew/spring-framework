@@ -2,9 +2,9 @@
   if (activated == null && environment != null) {
     Object icf=environment.get(Context.INITIAL_CONTEXT_FACTORY);
     if (icf != null) {
-      Class icfClass=null;
+      Class<?> icfClass=null;
       if (icf instanceof Class) {
-        icfClass=(Class)icf;
+        icfClass=(Class<?>)icf;
       }
  else       if (icf instanceof String) {
         icfClass=ClassUtils.resolveClassName((String)icf,getClass().getClassLoader());
@@ -26,8 +26,8 @@
     }
   }
   return new InitialContextFactory(){
-    public Context getInitialContext(    Hashtable environment){
-      return new SimpleNamingContext("",boundObjects,environment);
+    @SuppressWarnings("unchecked") public Context getInitialContext(    Hashtable<?,?> environment){
+      return new SimpleNamingContext("",boundObjects,(Hashtable<String,Object>)environment);
     }
   }
 ;
