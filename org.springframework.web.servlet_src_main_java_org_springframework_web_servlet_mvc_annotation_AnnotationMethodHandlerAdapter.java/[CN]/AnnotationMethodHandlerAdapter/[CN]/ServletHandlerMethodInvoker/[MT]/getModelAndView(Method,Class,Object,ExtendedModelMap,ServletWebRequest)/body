@@ -13,6 +13,17 @@
       }
     }
   }
+  if (returnValue != null && handlerMethod.isAnnotationPresent(ResponseBody.class)) {
+    Class returnValueType=returnValue.getClass();
+    HttpOutputMessage outputMessage=new ServletServerHttpResponse(webRequest.getResponse());
+    for (    HttpMessageConverter messageConverter : messageConverters) {
+      if (messageConverter.supports(returnValueType)) {
+        messageConverter.write(returnValue,outputMessage);
+        responseArgumentUsed=true;
+        return null;
+      }
+    }
+  }
   if (returnValue instanceof ModelAndView) {
     ModelAndView mav=(ModelAndView)returnValue;
     mav.getModelMap().mergeAttributes(implicitModel);
