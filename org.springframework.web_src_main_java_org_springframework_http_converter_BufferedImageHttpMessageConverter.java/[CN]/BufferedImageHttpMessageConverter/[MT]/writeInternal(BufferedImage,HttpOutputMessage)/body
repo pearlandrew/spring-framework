@@ -1,0 +1,27 @@
+{
+  ImageOutputStream imageOutputStream=null;
+  ImageWriter imageWriter=null;
+  try {
+    imageOutputStream=createImageOutputStream(outputMessage.getBody());
+    Iterator<ImageWriter> imageWriters=ImageIO.getImageWritersByMIMEType(contentType.toString());
+    if (imageWriters.hasNext()) {
+      imageWriter=imageWriters.next();
+      ImageWriteParam iwp=imageWriter.getDefaultWriteParam();
+      process(iwp);
+      imageWriter.setOutput(imageOutputStream);
+      imageWriter.write(null,new IIOImage(image,null,null),iwp);
+    }
+  }
+  finally {
+    if (imageWriter != null) {
+      imageWriter.dispose();
+    }
+    if (imageOutputStream != null) {
+      try {
+        imageOutputStream.close();
+      }
+ catch (      IOException ex) {
+      }
+    }
+  }
+}
