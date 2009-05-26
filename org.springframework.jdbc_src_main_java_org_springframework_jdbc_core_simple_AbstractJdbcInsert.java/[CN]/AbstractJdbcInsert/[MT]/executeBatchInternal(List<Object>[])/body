@@ -2,11 +2,10 @@
   if (logger.isDebugEnabled()) {
     logger.debug("Executing statement " + getInsertString() + " with batch of size: "+ batchValues.length);
   }
-  final int[] columnTypes=getInsertTypes();
   int[] updateCounts=jdbcTemplate.batchUpdate(getInsertString(),new BatchPreparedStatementSetter(){
     public void setValues(    PreparedStatement ps,    int i) throws SQLException {
       List<Object> values=batchValues[i];
-      setParameterValues(ps,values,columnTypes);
+      setParameterValues(ps,values,getInsertTypes());
     }
     public int getBatchSize(){
       return batchValues.length;
