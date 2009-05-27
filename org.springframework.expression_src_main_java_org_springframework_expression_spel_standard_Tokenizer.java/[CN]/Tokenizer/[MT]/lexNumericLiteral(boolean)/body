@@ -1,0 +1,81 @@
+{
+  boolean isReal=false;
+  int start=pos;
+  char ch=toProcess[pos + 1];
+  boolean isHex=ch == 'x' || ch == 'X';
+  if (firstCharIsZero && isHex) {
+    pos=pos + 1;
+    do {
+      pos++;
+    }
+ while (isHexadecimalDigit(toProcess[pos]));
+    if (isChar('L','l')) {
+      pushHexIntToken(subarray(start + 2,pos),true,start,pos);
+      pos++;
+    }
+ else {
+      pushHexIntToken(subarray(start + 2,pos),false,start,pos);
+    }
+    return;
+  }
+  do {
+    pos++;
+  }
+ while (isDigit(toProcess[pos]));
+  ch=toProcess[pos];
+  if (ch == '.') {
+    isReal=true;
+    do {
+      pos++;
+    }
+ while (isDigit(toProcess[pos]));
+  }
+  int endOfNumber=pos;
+  if (isChar('L','l')) {
+    if (isReal) {
+      throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessages.REAL_CANNOT_BE_LONG));
+    }
+    pushIntToken(subarray(start,endOfNumber),true,start,endOfNumber);
+    pos++;
+  }
+ else   if (isExponentChar(toProcess[pos])) {
+    isReal=true;
+    pos++;
+    char possibleSign=toProcess[pos];
+    if (isSign(possibleSign)) {
+      pos++;
+    }
+    do {
+      pos++;
+    }
+ while (isDigit(toProcess[pos]));
+    boolean isFloat=false;
+    if (isFloatSuffix(toProcess[pos])) {
+      isFloat=true;
+      endOfNumber=++pos;
+    }
+ else     if (isDoubleSuffix(toProcess[pos])) {
+      endOfNumber=++pos;
+    }
+    pushRealToken(subarray(start,pos),isFloat,start,pos);
+  }
+ else {
+    ch=toProcess[pos];
+    boolean isFloat=false;
+    if (isFloatSuffix(ch)) {
+      isReal=true;
+      isFloat=true;
+      endOfNumber=++pos;
+    }
+ else     if (isDoubleSuffix(ch)) {
+      isReal=true;
+      endOfNumber=++pos;
+    }
+    if (isReal) {
+      pushRealToken(subarray(start,endOfNumber),isFloat,start,endOfNumber);
+    }
+ else {
+      pushIntToken(subarray(start,endOfNumber),false,start,endOfNumber);
+    }
+  }
+}

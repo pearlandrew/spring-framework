@@ -1,15 +1,15 @@
 {
-  SpelAntlrExpressionParser parser=new SpelAntlrExpressionParser();
+  SpelExpressionParser parser=new SpelExpressionParser();
   StandardEvaluationContext ctx=new StandardEvaluationContext();
   ctx.addPropertyAccessor(new FruitColourAccessor());
   Expression expr=parser.parseExpression("orange");
   Object value=expr.getValue(ctx);
-  assertEquals(Color.orange,value);
+  Assert.assertEquals(Color.orange,value);
   try {
     expr.setValue(ctx,Color.blue);
-    fail("Should not be allowed to set oranges to be blue !");
+    Assert.fail("Should not be allowed to set oranges to be blue !");
   }
- catch (  SpelException ee) {
-    assertEquals(ee.getMessageUnformatted(),SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
+ catch (  SpelEvaluationException ee) {
+    Assert.assertEquals(ee.getMessageUnformatted(),SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
   }
 }

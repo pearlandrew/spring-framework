@@ -1,0 +1,16 @@
+{
+  if (!peekToken(TokenKind.HASH)) {
+    return false;
+  }
+  Token t=nextToken();
+  Token functionOrVariableName=eatToken(TokenKind.IDENTIFIER);
+  SpelNodeImpl[] args=maybeEatMethodArgs();
+  if (args == null) {
+    push(new VariableReference(functionOrVariableName.data,toPos(t.startpos,functionOrVariableName.endpos)));
+    return true;
+  }
+ else {
+    push(new FunctionReference(functionOrVariableName.data,toPos(t.startpos,functionOrVariableName.endpos),args));
+    return true;
+  }
+}

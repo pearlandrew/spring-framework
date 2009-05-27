@@ -1,0 +1,25 @@
+{
+  ReflectivePropertyResolver rpr=new ReflectivePropertyResolver();
+  Tester t=new Tester();
+  t.setProperty("hello");
+  EvaluationContext ctx=new StandardEvaluationContext(t);
+  Assert.assertTrue(rpr.canRead(ctx,t,"property"));
+  Assert.assertEquals("hello",rpr.read(ctx,t,"property").getValue());
+  Assert.assertEquals("hello",rpr.read(ctx,t,"property").getValue());
+  Assert.assertTrue(rpr.canRead(ctx,t,"field"));
+  Assert.assertEquals(3,rpr.read(ctx,t,"field").getValue());
+  Assert.assertEquals(3,rpr.read(ctx,t,"field").getValue());
+  Assert.assertTrue(rpr.canWrite(ctx,t,"property"));
+  rpr.write(ctx,t,"property","goodbye");
+  rpr.write(ctx,t,"property","goodbye");
+  Assert.assertTrue(rpr.canWrite(ctx,t,"field"));
+  rpr.write(ctx,t,"field",12);
+  rpr.write(ctx,t,"field",12);
+  rpr.write(ctx,t,"field2",3);
+  rpr.write(ctx,t,"property2","doodoo");
+  Assert.assertEquals(3,rpr.read(ctx,t,"field2").getValue());
+  Assert.assertEquals(0,rpr.read(ctx,t,"field3").getValue());
+  Assert.assertEquals("doodoo",rpr.read(ctx,t,"property3").getValue());
+  Assert.assertEquals(false,rpr.read(ctx,t,"property4").getValue());
+  Assert.assertTrue(rpr.canRead(ctx,t,"property4"));
+}

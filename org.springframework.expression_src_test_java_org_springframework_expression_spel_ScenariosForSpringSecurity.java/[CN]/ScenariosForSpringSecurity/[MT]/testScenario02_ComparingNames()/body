@@ -1,22 +1,22 @@
 {
-  SpelAntlrExpressionParser parser=new SpelAntlrExpressionParser();
+  SpelExpressionParser parser=new SpelExpressionParser();
   StandardEvaluationContext ctx=new StandardEvaluationContext();
   ctx.addPropertyAccessor(new SecurityPrincipalAccessor());
   Expression expr=parser.parseExpression("name == principal.name");
   ctx.setRootObject(new Person("Andy"));
   Boolean value=expr.getValue(ctx,Boolean.class);
-  assertTrue(value);
+  Assert.assertTrue(value);
   ctx.setRootObject(new Person("Christian"));
   value=expr.getValue(ctx,Boolean.class);
-  assertFalse(value);
+  Assert.assertFalse(value);
   expr=parser.parseExpression("p.name == principal.name");
   PersonAccessor pAccessor=new PersonAccessor();
   ctx.addPropertyAccessor(pAccessor);
   ctx.setRootObject(null);
   pAccessor.setPerson(new Person("Andy"));
   value=expr.getValue(ctx,Boolean.class);
-  assertTrue(value);
+  Assert.assertTrue(value);
   pAccessor.setPerson(new Person("Christian"));
   value=expr.getValue(ctx,Boolean.class);
-  assertFalse(value);
+  Assert.assertFalse(value);
 }

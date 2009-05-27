@@ -1,0 +1,19 @@
+{
+  int pos=peekToken().startpos;
+  Token next=null;
+  do {
+    nextToken();
+    Token t=peekToken();
+    if (t == null) {
+      raiseInternalException(pos,SpelMessages.RUN_OUT_OF_ARGUMENTS);
+    }
+    if (t.kind != TokenKind.RPAREN) {
+      accumulatedArguments.add(eatExpression());
+    }
+    next=peekToken();
+  }
+ while (next != null && next.kind == TokenKind.COMMA);
+  if (next == null) {
+    raiseInternalException(pos,SpelMessages.RUN_OUT_OF_ARGUMENTS);
+  }
+}

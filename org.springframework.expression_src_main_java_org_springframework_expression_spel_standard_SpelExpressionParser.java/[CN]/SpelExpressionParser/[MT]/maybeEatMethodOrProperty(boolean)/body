@@ -1,0 +1,15 @@
+{
+  if (peekToken(TokenKind.IDENTIFIER)) {
+    Token methodOrPropertyName=nextToken();
+    SpelNodeImpl[] args=maybeEatMethodArgs();
+    if (args == null) {
+      push(new PropertyOrFieldReference(nullSafeNavigation,methodOrPropertyName.data,toPos(methodOrPropertyName)));
+      return true;
+    }
+ else {
+      push(new MethodReference(nullSafeNavigation,methodOrPropertyName.data,toPos(methodOrPropertyName),args));
+      return true;
+    }
+  }
+  return false;
+}

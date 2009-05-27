@@ -2,12 +2,12 @@
   TypedValue result=null;
   SpelNodeImpl nextNode=null;
   try {
-    nextNode=getChild(0);
+    nextNode=children[0];
     result=nextNode.getValueInternal(state);
     for (int i=1; i < getChildCount(); i++) {
       try {
         state.pushActiveContextObject(result);
-        nextNode=getChild(i);
+        nextNode=children[i];
         result=nextNode.getValueInternal(state);
       }
   finally {
@@ -15,8 +15,8 @@
       }
     }
   }
- catch (  SpelException ee) {
-    ee.setPosition(nextNode.getCharPositionInLine());
+ catch (  SpelEvaluationException ee) {
+    ee.setPosition(nextNode.getStartPosition());
     throw ee;
   }
   return result;

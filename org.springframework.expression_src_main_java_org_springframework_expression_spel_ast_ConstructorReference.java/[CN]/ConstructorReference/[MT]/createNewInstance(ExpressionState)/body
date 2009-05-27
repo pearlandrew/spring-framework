@@ -2,7 +2,7 @@
   Object[] arguments=new Object[getChildCount() - 1];
   Class<?>[] argumentTypes=new Class[getChildCount() - 1];
   for (int i=0; i < arguments.length; i++) {
-    TypedValue childValue=getChild(i + 1).getValueInternal(state);
+    TypedValue childValue=children[i + 1].getValueInternal(state);
     Object value=childValue.getValue();
     arguments[i]=value;
     argumentTypes[i]=(value == null ? Object.class : value.getClass());
@@ -16,7 +16,7 @@
       this.cachedExecutor=null;
     }
   }
-  String typename=(String)getChild(0).getValueInternal(state).getValue();
+  String typename=(String)children[0].getValueInternal(state).getValue();
   executorToUse=findExecutorForConstructor(typename,argumentTypes,state);
   try {
     this.cachedExecutor=executorToUse;
@@ -24,6 +24,6 @@
     return result;
   }
  catch (  AccessException ae) {
-    throw new SpelException(ae,SpelMessages.EXCEPTION_DURING_CONSTRUCTOR_INVOCATION,typename,ae.getMessage());
+    throw new SpelEvaluationException(getStartPosition(),ae,SpelMessages.CONSTRUCTOR_INVOCATION_PROBLEM,typename,FormatHelper.formatMethodForMessage("",argumentTypes));
   }
 }

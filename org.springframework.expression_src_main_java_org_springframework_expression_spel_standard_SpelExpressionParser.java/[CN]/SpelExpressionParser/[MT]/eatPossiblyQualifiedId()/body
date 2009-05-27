@@ -1,0 +1,11 @@
+{
+  List<SpelNodeImpl> qualifiedIdPieces=new ArrayList<SpelNodeImpl>();
+  Token startnode=eatToken(TokenKind.IDENTIFIER);
+  qualifiedIdPieces.add(new Identifier(startnode.stringValue(),toPos(startnode)));
+  while (peekToken(TokenKind.DOT)) {
+    nextToken();
+    Token node=eatToken(TokenKind.IDENTIFIER);
+    qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));
+  }
+  return new QualifiedIdentifier(toPos(startnode.startpos,qualifiedIdPieces.get(qualifiedIdPieces.size() - 1).getEndPosition()),qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
+}

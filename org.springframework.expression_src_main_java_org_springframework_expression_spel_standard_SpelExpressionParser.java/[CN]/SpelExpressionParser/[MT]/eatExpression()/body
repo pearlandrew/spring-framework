@@ -1,0 +1,24 @@
+{
+  SpelNodeImpl expr=eatLogicalOrExpression();
+  if (moreTokens()) {
+    Token t=peekToken();
+    if (t.kind == TokenKind.ASSIGN) {
+      nextToken();
+      SpelNodeImpl assignedValue=eatLogicalOrExpression();
+      return new Assign(toPos(t),expr,assignedValue);
+    }
+ else     if (t.kind == TokenKind.ELVIS) {
+      nextToken();
+      SpelNodeImpl valueIfNull=eatLogicalOrExpression();
+      return new Elvis(toPos(t),expr,valueIfNull);
+    }
+ else     if (t.kind == TokenKind.QMARK) {
+      nextToken();
+      SpelNodeImpl ifTrueExprValue=eatLogicalOrExpression();
+      eatToken(TokenKind.COLON);
+      SpelNodeImpl ifFalseExprValue=eatLogicalOrExpression();
+      return new Ternary(toPos(t),expr,ifTrueExprValue,ifFalseExprValue);
+    }
+  }
+  return expr;
+}

@@ -1,0 +1,19 @@
+{
+  Token t=peekToken();
+  if (!peekSelectToken()) {
+    return false;
+  }
+  nextToken();
+  SpelNodeImpl expr=eatExpression();
+  eatToken(TokenKind.RSQUARE);
+  if (t.kind == TokenKind.SELECT_FIRST) {
+    constructedNodes.push(new Selection(nullSafeNavigation,Selection.FIRST,toPos(t),expr));
+  }
+ else   if (t.kind == TokenKind.SELECT_LAST) {
+    constructedNodes.push(new Selection(nullSafeNavigation,Selection.LAST,toPos(t),expr));
+  }
+ else {
+    constructedNodes.push(new Selection(nullSafeNavigation,Selection.ALL,toPos(t),expr));
+  }
+  return true;
+}

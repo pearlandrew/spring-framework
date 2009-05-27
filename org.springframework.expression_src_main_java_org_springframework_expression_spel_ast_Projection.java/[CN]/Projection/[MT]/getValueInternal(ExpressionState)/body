@@ -7,7 +7,7 @@
     for (    Map.Entry entry : mapdata.entrySet()) {
       try {
         state.pushActiveContextObject(new TypedValue(entry,TypeDescriptor.valueOf(Map.Entry.class)));
-        result.add(getChild(0).getValueInternal(state).getValue());
+        result.add(children[0].getValueInternal(state).getValue());
       }
   finally {
         state.popActiveContextObject();
@@ -24,7 +24,7 @@
       try {
         state.pushActiveContextObject(new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getType())));
         state.enterScope("index",idx);
-        result.add(getChild(0).getValueInternal(state).getValue());
+        result.add(children[0].getValueInternal(state).getValue());
       }
   finally {
         state.exitScope();
@@ -35,6 +35,11 @@
     return new TypedValue(result,op.getTypeDescriptor());
   }
  else {
-    throw new SpelException(SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE,operand.getClass().getName());
+    if (operand == null && nullSafe) {
+      return TypedValue.NULL_TYPED_VALUE;
+    }
+ else {
+      throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROJECTION_NOT_SUPPORTED_ON_TYPE,operand.getClass().getName());
+    }
   }
 }

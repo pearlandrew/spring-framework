@@ -1,7 +1,7 @@
 {
   TypedValue op=state.getActiveContextObject();
   Object operand=op.getValue();
-  SpelNodeImpl selectionCriteria=getChild(0);
+  SpelNodeImpl selectionCriteria=children[0];
   if (operand instanceof Map) {
     Map<?,?> mapdata=(Map<?,?>)operand;
     Map<Object,Object> result=new HashMap<Object,Object>();
@@ -22,7 +22,7 @@
           }
         }
  else {
-          throw new SpelException(selectionCriteria.getCharPositionInLine(),SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+          throw new SpelEvaluationException(selectionCriteria.getStartPosition(),SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
         }
       }
   finally {
@@ -59,7 +59,7 @@
           }
         }
  else {
-          throw new SpelException(selectionCriteria.getCharPositionInLine(),SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+          throw new SpelEvaluationException(selectionCriteria.getStartPosition(),SpelMessages.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
         }
         idx++;
       }
@@ -77,6 +77,11 @@
     return new TypedValue(result,op.getTypeDescriptor());
   }
  else {
-    throw new SpelException(getCharPositionInLine(),SpelMessages.INVALID_TYPE_FOR_SELECTION,(operand == null ? "null" : operand.getClass().getName()));
+    if (operand == null && nullSafe) {
+      return TypedValue.NULL_TYPED_VALUE;
+    }
+ else {
+      throw new SpelEvaluationException(getStartPosition(),SpelMessages.INVALID_TYPE_FOR_SELECTION,(operand == null ? "null" : operand.getClass().getName()));
+    }
   }
 }

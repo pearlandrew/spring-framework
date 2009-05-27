@@ -2,7 +2,7 @@
   TypedValue context=state.getActiveContextObject();
   Object targetObject=context.getValue();
   TypeDescriptor targetObjectTypeDescriptor=context.getTypeDescriptor();
-  TypedValue indexValue=getChild(0).getValueInternal(state);
+  TypedValue indexValue=children[0].getValueInternal(state);
   Object index=indexValue.getValue();
   if (targetObject instanceof Map) {
     Object possiblyConvertedKey=state.convertValue(indexValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
@@ -11,7 +11,7 @@
   }
   int idx=(Integer)state.convertValue(index,INTEGER_TYPE_DESCRIPTOR);
   if (targetObject == null) {
-    throw new SpelException(SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
+    throw new SpelEvaluationException(getStartPosition(),SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
   }
   if (targetObject.getClass().isArray()) {
     return new TypedValue(accessArrayElement(targetObject,idx),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
@@ -19,7 +19,7 @@
  else   if (targetObject instanceof Collection) {
     Collection<?> c=(Collection<?>)targetObject;
     if (idx >= c.size()) {
-      throw new SpelException(SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS,c.size(),idx);
+      throw new SpelEvaluationException(getStartPosition(),SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS,c.size(),idx);
     }
     int pos=0;
     for (    Object o : c) {
@@ -32,9 +32,9 @@
  else   if (targetObject instanceof String) {
     String ctxString=(String)targetObject;
     if (idx >= ctxString.length()) {
-      throw new SpelException(SpelMessages.STRING_INDEX_OUT_OF_BOUNDS,ctxString.length(),idx);
+      throw new SpelEvaluationException(getStartPosition(),SpelMessages.STRING_INDEX_OUT_OF_BOUNDS,ctxString.length(),idx);
     }
     return new TypedValue(String.valueOf(ctxString.charAt(idx)),STRING_TYPE_DESCRIPTOR);
   }
-  throw new SpelException(SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE,targetObjectTypeDescriptor.asString());
+  throw new SpelEvaluationException(getStartPosition(),SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE,targetObjectTypeDescriptor.asString());
 }

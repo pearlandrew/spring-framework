@@ -2,10 +2,15 @@
   TypedValue currentContext=state.getActiveContextObject();
   Object[] arguments=new Object[getChildCount()];
   for (int i=0; i < arguments.length; i++) {
-    arguments[i]=getChild(i).getValueInternal(state).getValue();
+    arguments[i]=children[i].getValueInternal(state).getValue();
   }
   if (currentContext.getValue() == null) {
-    throw new SpelException(getCharPositionInLine(),SpelMessages.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,FormatHelper.formatMethodForMessage(name,getTypes(arguments)));
+    if (nullSafe) {
+      return TypedValue.NULL_TYPED_VALUE;
+    }
+ else {
+      throw new SpelEvaluationException(getStartPosition(),SpelMessages.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,FormatHelper.formatMethodForMessage(name,getTypes(arguments)));
+    }
   }
   MethodExecutor executorToUse=this.cachedExecutor;
   if (executorToUse != null) {
@@ -22,6 +27,6 @@
     return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
   }
  catch (  AccessException ae) {
-    throw new SpelException(getCharPositionInLine(),ae,SpelMessages.EXCEPTION_DURING_METHOD_INVOCATION,this.name,state.getActiveContextObject().getValue().getClass().getName(),ae.getMessage());
+    throw new SpelEvaluationException(getStartPosition(),ae,SpelMessages.EXCEPTION_DURING_METHOD_INVOCATION,this.name,state.getActiveContextObject().getValue().getClass().getName(),ae.getMessage());
   }
 }

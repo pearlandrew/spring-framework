@@ -1,6 +1,9 @@
 {
   TypedValue contextObject=state.getActiveContextObject();
   EvaluationContext eContext=state.getEvaluationContext();
+  if (contextObject.getValue() == null && nullSafe) {
+    return;
+  }
   PropertyAccessor accessorToUse=this.cachedWriteAccessor;
   if (accessorToUse != null) {
     try {
@@ -24,13 +27,13 @@
       }
     }
  catch (    AccessException ae) {
-      throw new SpelException(getCharPositionInLine(),ae,SpelMessages.EXCEPTION_DURING_PROPERTY_WRITE,name,ae.getMessage());
+      throw new SpelEvaluationException(getStartPosition(),ae,SpelMessages.EXCEPTION_DURING_PROPERTY_WRITE,name,ae.getMessage());
     }
   }
   if (contextObject.getValue() == null) {
-    throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL,name);
+    throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL,name);
   }
  else {
-    throw new SpelException(SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE,name,FormatHelper.formatClassNameForMessage(contextObjectClass));
+    throw new SpelEvaluationException(getStartPosition(),SpelMessages.PROPERTY_OR_FIELD_NOT_WRITABLE,name,FormatHelper.formatClassNameForMessage(contextObjectClass));
   }
 }

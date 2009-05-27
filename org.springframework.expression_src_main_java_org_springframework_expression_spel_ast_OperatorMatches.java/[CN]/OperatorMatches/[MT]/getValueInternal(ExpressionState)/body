@@ -5,16 +5,16 @@
   Object right=getRightOperand().getValueInternal(state).getValue();
   try {
     if (!(left instanceof String)) {
-      throw new SpelException(leftOp.getCharPositionInLine(),SpelMessages.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR,left);
+      throw new SpelEvaluationException(leftOp.getStartPosition(),SpelMessages.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR,left);
     }
     if (!(right instanceof String)) {
-      throw new SpelException(rightOp.getCharPositionInLine(),SpelMessages.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR,right);
+      throw new SpelEvaluationException(rightOp.getStartPosition(),SpelMessages.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR,right);
     }
     Pattern pattern=Pattern.compile((String)right);
     Matcher matcher=pattern.matcher((String)left);
     return BooleanTypedValue.forValue(matcher.matches());
   }
  catch (  PatternSyntaxException pse) {
-    throw new SpelException(rightOp.getCharPositionInLine(),pse,SpelMessages.INVALID_PATTERN,right);
+    throw new SpelEvaluationException(rightOp.getStartPosition(),pse,SpelMessages.INVALID_PATTERN,right);
   }
 }
