@@ -1,0 +1,44 @@
+{
+  mockConnection.getMetaData();
+  ctrlConnection.setDefaultReturnValue(null);
+  mockConnection.close();
+  ctrlConnection.setDefaultVoidCallable();
+  mockDataSource.getConnection();
+  ctrlDataSource.setDefaultReturnValue(mockConnection);
+  mockPreparedStatement.getConnection();
+  ctrlPreparedStatement.setReturnValue(mockConnection);
+  int idLength=0;
+  if (ids instanceof SqlParameterSource[]) {
+    idLength=((SqlParameterSource[])ids).length;
+  }
+ else {
+    idLength=((List)ids).size();
+  }
+  for (int i=0; i < idLength; i++) {
+    if (ids instanceof SqlParameterSource[]) {
+      mockPreparedStatement.setObject(1,((SqlParameterSource[])ids)[i].getValue("id"));
+    }
+ else {
+      mockPreparedStatement.setObject(1,((Object[])((List)ids).get(i))[0]);
+    }
+    ctrlPreparedStatement.setVoidCallable();
+    mockPreparedStatement.addBatch();
+    ctrlPreparedStatement.setVoidCallable();
+  }
+  mockPreparedStatement.executeBatch();
+  ctrlPreparedStatement.setReturnValue(rowsAffected);
+  if (LogFactory.getLog(JdbcTemplate.class).isDebugEnabled()) {
+    mockPreparedStatement.getWarnings();
+    ctrlPreparedStatement.setReturnValue(null);
+  }
+  mockPreparedStatement.close();
+  ctrlPreparedStatement.setVoidCallable();
+  mockDatabaseMetaData.getDatabaseProductName();
+  ctrlDatabaseMetaData.setReturnValue("MySQL");
+  mockDatabaseMetaData.supportsBatchUpdates();
+  ctrlDatabaseMetaData.setReturnValue(true);
+  mockConnection.prepareStatement(sqlToUse);
+  ctrlConnection.setReturnValue(mockPreparedStatement);
+  mockConnection.getMetaData();
+  ctrlConnection.setReturnValue(mockDatabaseMetaData,2);
+}

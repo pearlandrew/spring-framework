@@ -1,8 +1,9 @@
 {
-  final String sql="UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
-  final List<Object[]> ids=new ArrayList<Object[]>();
-  ids.add(new Object[]{100});
-  ids.add(new Object[]{200});
+  final String sqlToUse="UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+  final String sql="UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id";
+  final SqlParameterSource[] ids=new SqlParameterSource[2];
+  ids[0]=new MapSqlParameterSource("id",100);
+  ids[1]=new MapSqlParameterSource("id",200);
   final int[] rowsAffected=new int[]{1,2};
   MockControl ctrlDataSource=MockControl.createControl(DataSource.class);
   DataSource mockDataSource=(DataSource)ctrlDataSource.getMock();
@@ -12,11 +13,11 @@
   PreparedStatement mockPreparedStatement=(PreparedStatement)ctrlPreparedStatement.getMock();
   MockControl ctrlDatabaseMetaData=MockControl.createControl(DatabaseMetaData.class);
   DatabaseMetaData mockDatabaseMetaData=(DatabaseMetaData)ctrlDatabaseMetaData.getMock();
-  BatchUpdateTestHelper.prepareBatchUpdateMocks(sql,ids,rowsAffected,ctrlDataSource,mockDataSource,ctrlConnection,mockConnection,ctrlPreparedStatement,mockPreparedStatement,ctrlDatabaseMetaData,mockDatabaseMetaData);
+  BatchUpdateTestHelper.prepareBatchUpdateMocks(sqlToUse,ids,rowsAffected,ctrlDataSource,mockDataSource,ctrlConnection,mockConnection,ctrlPreparedStatement,mockPreparedStatement,ctrlDatabaseMetaData,mockDatabaseMetaData);
   BatchUpdateTestHelper.replayBatchUpdateMocks(ctrlDataSource,ctrlConnection,ctrlPreparedStatement,ctrlDatabaseMetaData);
   JdbcTemplate template=new JdbcTemplate(mockDataSource,false);
-  SimpleJdbcTemplate simpleJdbcTemplate=new SimpleJdbcTemplate(template);
-  int[] actualRowsAffected=simpleJdbcTemplate.batchUpdate(sql,ids);
+  NamedParameterJdbcTemplate namedParameterJdbcTemplate=new NamedParameterJdbcTemplate(template);
+  int[] actualRowsAffected=namedParameterJdbcTemplate.batchUpdate(sql,ids);
   assertTrue("executed 2 updates",actualRowsAffected.length == 2);
   assertEquals(rowsAffected[0],actualRowsAffected[0]);
   assertEquals(rowsAffected[1],actualRowsAffected[1]);
