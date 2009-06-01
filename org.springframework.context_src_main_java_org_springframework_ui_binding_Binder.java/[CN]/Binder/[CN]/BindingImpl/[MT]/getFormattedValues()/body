@@ -1,0 +1,27 @@
+{
+  Object multiValue;
+  try {
+    multiValue=property.getValue(createEvaluationContext());
+  }
+ catch (  EvaluationException e) {
+    throw new IllegalStateException(e);
+  }
+  if (multiValue == null) {
+    return EMPTY_STRING_ARRAY;
+  }
+  TypeDescriptor<?> type=TypeDescriptor.valueOf(multiValue.getClass());
+  String[] formattedValues;
+  if (type.isCollection()) {
+    Collection<?> values=((Collection<?>)multiValue);
+    formattedValues=(String[])Array.newInstance(String.class,values.size());
+    copy(values,formattedValues);
+  }
+ else   if (type.isArray()) {
+    formattedValues=(String[])Array.newInstance(String.class,Array.getLength(multiValue));
+    copy((Iterable<?>)multiValue,formattedValues);
+  }
+ else {
+    throw new IllegalStateException();
+  }
+  return formattedValues;
+}
