@@ -1,0 +1,10 @@
+{
+  final int amount=1103;
+  final int custid=3;
+  initializeAddInvoiceWithoutMetaData(true);
+  replay();
+  SimpleJdbcCall adder=new SimpleJdbcCall(mockDataSource).withFunctionName("add_invoice");
+  adder.declareParameters(new SqlOutParameter("return",Types.INTEGER),new SqlParameter("amount",Types.INTEGER),new SqlParameter("custid",Types.INTEGER));
+  Number newId=adder.executeFunction(Number.class,new MapSqlParameterSource().addValue("amount",amount).addValue("custid",custid));
+  assertEquals(4,newId.intValue());
+}
