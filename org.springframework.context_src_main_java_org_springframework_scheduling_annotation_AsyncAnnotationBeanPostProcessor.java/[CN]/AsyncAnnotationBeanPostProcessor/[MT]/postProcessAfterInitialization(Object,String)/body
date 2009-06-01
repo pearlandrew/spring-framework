@@ -1,0 +1,24 @@
+{
+  if (bean instanceof AopInfrastructureBean) {
+    return bean;
+  }
+  Class<?> targetClass=AopUtils.getTargetClass(bean);
+  if (targetClass == null) {
+    return bean;
+  }
+  if (AopUtils.canApply(this.asyncAnnotationAdvisor,targetClass)) {
+    if (bean instanceof Advised) {
+      ((Advised)bean).addAdvisor(this.asyncAnnotationAdvisor);
+      return bean;
+    }
+ else {
+      ProxyFactory proxyFactory=new ProxyFactory(bean);
+      proxyFactory.copyFrom(this);
+      proxyFactory.addAdvisor(this.asyncAnnotationAdvisor);
+      return proxyFactory.getProxy(this.beanClassLoader);
+    }
+  }
+ else {
+    return bean;
+  }
+}
