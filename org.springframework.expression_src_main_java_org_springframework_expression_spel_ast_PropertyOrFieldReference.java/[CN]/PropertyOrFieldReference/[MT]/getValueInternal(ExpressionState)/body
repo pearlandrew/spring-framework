@@ -1,3 +1,19 @@
 {
-  return readProperty(state,this.name);
+  TypedValue result=readProperty(state,this.name);
+  if (result.getValue() == null && state.configuredToCreateCollection() && result.getTypeDescriptor().getType().equals(List.class) && nextChildIs(Indexer.class)) {
+    try {
+      if (isWritable(state)) {
+        List newList=ArrayList.class.newInstance();
+        writeProperty(state,name,newList);
+        result=readProperty(state,this.name);
+      }
+    }
+ catch (    InstantiationException e) {
+      throw new SpelEvaluationException(getStartPosition(),e,SpelMessages.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+    }
+catch (    IllegalAccessException e) {
+      throw new SpelEvaluationException(getStartPosition(),e,SpelMessages.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+    }
+  }
+  return result;
 }
