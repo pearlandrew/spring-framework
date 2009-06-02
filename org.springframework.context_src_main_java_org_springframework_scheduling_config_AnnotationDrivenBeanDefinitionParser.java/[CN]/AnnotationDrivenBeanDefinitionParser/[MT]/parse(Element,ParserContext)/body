@@ -1,0 +1,21 @@
+{
+  Object source=parserContext.extractSource(element);
+  CompositeComponentDefinition compDefinition=new CompositeComponentDefinition(element.getTagName(),source);
+  parserContext.pushContainingComponent(compDefinition);
+  BeanDefinitionRegistry registry=parserContext.getRegistry();
+  if (registry.containsBeanDefinition(ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+    parserContext.getReaderContext().error("Only one AsyncAnnotationBeanPostProcessor may exist within the context.",source);
+  }
+ else {
+    BeanDefinitionBuilder builder=BeanDefinitionBuilder.genericBeanDefinition("org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor");
+    builder.getRawBeanDefinition().setSource(source);
+    String executor=element.getAttribute("executor");
+    if (StringUtils.hasText(executor)) {
+      builder.addPropertyReference("executor",executor);
+    }
+    BeanDefinitionHolder holder=registerPostProcessor(registry,builder,ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME);
+    parserContext.registerComponent(new BeanComponentDefinition(holder));
+  }
+  parserContext.popAndRegisterContainingComponent();
+  return null;
+}
