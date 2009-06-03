@@ -11,15 +11,36 @@
   if (ids instanceof SqlParameterSource[]) {
     idLength=((SqlParameterSource[])ids).length;
   }
+ else   if (ids instanceof Map[]) {
+    idLength=((Map[])ids).length;
+  }
  else {
     idLength=((List)ids).size();
   }
   for (int i=0; i < idLength; i++) {
     if (ids instanceof SqlParameterSource[]) {
-      mockPreparedStatement.setObject(1,((SqlParameterSource[])ids)[i].getValue("id"));
+      if (sqlTypes != null) {
+        mockPreparedStatement.setObject(1,((SqlParameterSource[])ids)[i].getValue("id"),sqlTypes[0]);
+      }
+ else {
+        mockPreparedStatement.setObject(1,((SqlParameterSource[])ids)[i].getValue("id"));
+      }
+    }
+ else     if (ids instanceof Map[]) {
+      if (sqlTypes != null) {
+        mockPreparedStatement.setObject(1,((Map[])ids)[i].get("id"),sqlTypes[0]);
+      }
+ else {
+        mockPreparedStatement.setObject(1,((Map[])ids)[i].get("id"));
+      }
     }
  else {
-      mockPreparedStatement.setObject(1,((Object[])((List)ids).get(i))[0]);
+      if (sqlTypes != null) {
+        mockPreparedStatement.setObject(1,((Object[])((List)ids).get(i))[0],sqlTypes[0]);
+      }
+ else {
+        mockPreparedStatement.setObject(1,((Object[])((List)ids).get(i))[0]);
+      }
     }
     ctrlPreparedStatement.setVoidCallable();
     mockPreparedStatement.addBatch();
