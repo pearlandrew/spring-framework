@@ -1,6 +1,6 @@
 {
-  TypeConverter converterToUse=(this.typeConverter != null ? this.typeConverter : bw);
-  BeanDefinitionValueResolver valueResolver=new BeanDefinitionValueResolver(this.beanFactory,beanName,mbd,converterToUse);
+  TypeConverter converter=(this.beanFactory.getCustomTypeConverter() != null ? this.beanFactory.getCustomTypeConverter() : bw);
+  BeanDefinitionValueResolver valueResolver=new BeanDefinitionValueResolver(this.beanFactory,beanName,mbd,converter);
   int minNrOfArgs=cargs.getArgumentCount();
   for (  Map.Entry<Integer,ConstructorArgumentValues.ValueHolder> entry : cargs.getIndexedArgumentValues().entrySet()) {
     int index=entry.getKey();
@@ -16,7 +16,7 @@
     }
  else {
       Object resolvedValue=valueResolver.resolveValueIfNecessary("constructor argument",valueHolder.getValue());
-      ConstructorArgumentValues.ValueHolder resolvedValueHolder=new ConstructorArgumentValues.ValueHolder(resolvedValue,valueHolder.getType());
+      ConstructorArgumentValues.ValueHolder resolvedValueHolder=new ConstructorArgumentValues.ValueHolder(resolvedValue,valueHolder.getType(),valueHolder.getName());
       resolvedValueHolder.setSource(valueHolder);
       resolvedValues.addIndexedArgumentValue(index,resolvedValueHolder);
     }
@@ -27,7 +27,7 @@
     }
  else {
       Object resolvedValue=valueResolver.resolveValueIfNecessary("constructor argument",valueHolder.getValue());
-      ConstructorArgumentValues.ValueHolder resolvedValueHolder=new ConstructorArgumentValues.ValueHolder(resolvedValue,valueHolder.getType());
+      ConstructorArgumentValues.ValueHolder resolvedValueHolder=new ConstructorArgumentValues.ValueHolder(resolvedValue,valueHolder.getType(),valueHolder.getName());
       resolvedValueHolder.setSource(valueHolder);
       resolvedValues.addGenericArgumentValue(resolvedValueHolder);
     }

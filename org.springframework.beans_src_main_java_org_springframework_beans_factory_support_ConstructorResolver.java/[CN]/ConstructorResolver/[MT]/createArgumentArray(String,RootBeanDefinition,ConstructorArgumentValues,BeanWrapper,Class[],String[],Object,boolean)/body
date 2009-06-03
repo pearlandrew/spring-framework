@@ -1,15 +1,16 @@
 {
   String methodType=(methodOrCtor instanceof Constructor ? "constructor" : "factory method");
-  TypeConverter converter=(this.typeConverter != null ? this.typeConverter : bw);
+  TypeConverter converter=(this.beanFactory.getCustomTypeConverter() != null ? this.beanFactory.getCustomTypeConverter() : bw);
   ArgumentsHolder args=new ArgumentsHolder(paramTypes.length);
   Set<ConstructorArgumentValues.ValueHolder> usedValueHolders=new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
   Set<String> autowiredBeanNames=new LinkedHashSet<String>(4);
   boolean resolveNecessary=false;
   for (int paramIndex=0; paramIndex < paramTypes.length; paramIndex++) {
-    Class paramType=paramTypes[paramIndex];
-    ConstructorArgumentValues.ValueHolder valueHolder=resolvedValues.getArgumentValue(paramIndex,paramType,usedValueHolders);
+    Class<?> paramType=paramTypes[paramIndex];
+    String paramName=(paramNames != null ? paramNames[paramIndex] : null);
+    ConstructorArgumentValues.ValueHolder valueHolder=resolvedValues.getArgumentValue(paramIndex,paramType,paramName,usedValueHolders);
     if (valueHolder == null && !autowiring) {
-      valueHolder=resolvedValues.getGenericArgumentValue(null,usedValueHolders);
+      valueHolder=resolvedValues.getGenericArgumentValue(null,null,usedValueHolders);
     }
     if (valueHolder != null) {
       usedValueHolders.add(valueHolder);

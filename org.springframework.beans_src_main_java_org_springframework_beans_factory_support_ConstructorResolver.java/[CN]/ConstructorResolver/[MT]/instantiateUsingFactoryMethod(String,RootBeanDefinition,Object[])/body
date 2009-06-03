@@ -69,7 +69,12 @@
         ArgumentsHolder args;
         if (resolvedValues != null) {
           try {
-            args=createArgumentArray(beanName,mbd,resolvedValues,bw,paramTypes,candidate,autowiring);
+            String[] paramNames=null;
+            ParameterNameDiscoverer pnd=this.beanFactory.getParameterNameDiscoverer();
+            if (pnd != null) {
+              paramNames=pnd.getParameterNames(candidate);
+            }
+            args=createArgumentArray(beanName,mbd,resolvedValues,bw,paramTypes,paramNames,candidate,autowiring);
           }
  catch (          UnsatisfiedDependencyException ex) {
             if (this.beanFactory.logger.isTraceEnabled()) {
@@ -117,7 +122,7 @@
     }
   }
   try {
-    Object beanInstance=this.instantiationStrategy.instantiate(mbd,beanName,this.beanFactory,factoryBean,factoryMethodToUse,argsToUse);
+    Object beanInstance=this.beanFactory.getInstantiationStrategy().instantiate(mbd,beanName,this.beanFactory,factoryBean,factoryMethodToUse,argsToUse);
     if (beanInstance == null) {
       return null;
     }

@@ -40,19 +40,29 @@
     AutowireUtils.sortConstructors(candidates);
     int minTypeDiffWeight=Integer.MAX_VALUE;
     for (int i=0; i < candidates.length; i++) {
-      Constructor candidate=candidates[i];
+      Constructor<?> candidate=candidates[i];
       Class[] paramTypes=candidate.getParameterTypes();
       if (constructorToUse != null && argsToUse.length > paramTypes.length) {
         break;
       }
       if (paramTypes.length < minNrOfArgs) {
-        throw new BeanCreationException(mbd.getResourceDescription(),beanName,minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" + beanName+ "' "+ "(hint: specify index and/or type arguments for simple parameters to avoid type ambiguities)");
+        throw new BeanCreationException(mbd.getResourceDescription(),beanName,minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" + beanName+ "' "+ "(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");
       }
       ArgumentsHolder args;
       List<Exception> causes=null;
       if (resolvedValues != null) {
         try {
-          args=createArgumentArray(beanName,mbd,resolvedValues,bw,paramTypes,candidate,autowiring);
+          String[] paramNames=null;
+          if (constructorPropertiesAnnotationAvailable) {
+            paramNames=ConstructorPropertiesChecker.evaluateAnnotation(candidate,paramTypes.length);
+          }
+          if (paramNames == null) {
+            ParameterNameDiscoverer pnd=this.beanFactory.getParameterNameDiscoverer();
+            if (pnd != null) {
+              paramNames=pnd.getParameterNames(candidate);
+            }
+          }
+          args=createArgumentArray(beanName,mbd,resolvedValues,bw,paramTypes,paramNames,candidate,autowiring);
         }
  catch (        UnsatisfiedDependencyException ex) {
           if (this.beanFactory.logger.isTraceEnabled()) {
@@ -96,7 +106,7 @@
     }
   }
   try {
-    Object beanInstance=this.instantiationStrategy.instantiate(mbd,beanName,this.beanFactory,constructorToUse,argsToUse);
+    Object beanInstance=this.beanFactory.getInstantiationStrategy().instantiate(mbd,beanName,this.beanFactory,constructorToUse,argsToUse);
     bw.setWrappedInstance(beanInstance);
     return bw;
   }
