@@ -1,0 +1,37 @@
+{
+  String rejectionPolicy=element.getAttribute("rejection-policy");
+  if (!StringUtils.hasText(rejectionPolicy)) {
+    return;
+  }
+  Object handler=null;
+  boolean createBackportHandler=this.shouldUseBackport(element);
+  if (rejectionPolicy.equals("ABORT")) {
+    if (createBackportHandler) {
+      handler=new edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor.AbortPolicy();
+    }
+ else {
+      handler=new ThreadPoolExecutor.AbortPolicy();
+    }
+  }
+  if (rejectionPolicy.equals("CALLER_RUNS")) {
+    if (createBackportHandler) {
+      handler=new edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy();
+    }
+ else {
+      handler=new ThreadPoolExecutor.CallerRunsPolicy();
+    }
+  }
+  if (rejectionPolicy.equals("DISCARD")) {
+    if (createBackportHandler) {
+      handler=new edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor.DiscardPolicy();
+    }
+    handler=new ThreadPoolExecutor.DiscardPolicy();
+  }
+  if (rejectionPolicy.equals("DISCARD_OLDEST")) {
+    if (createBackportHandler) {
+      handler=new edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor.DiscardOldestPolicy();
+    }
+    handler=new ThreadPoolExecutor.DiscardOldestPolicy();
+  }
+  builder.addPropertyValue("rejectedExecutionHandler",handler);
+}

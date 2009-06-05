@@ -1,0 +1,47 @@
+{
+  String keepAliveSeconds=element.getAttribute("keep-alive");
+  if (StringUtils.hasText(keepAliveSeconds)) {
+    builder.addPropertyValue("keepAliveSeconds",keepAliveSeconds);
+  }
+  String queueCapacity=element.getAttribute("queue-capacity");
+  if (StringUtils.hasText(queueCapacity)) {
+    builder.addPropertyValue("queueCapacity",queueCapacity);
+  }
+  this.configureRejectionPolicy(element,builder);
+  String size=element.getAttribute("size");
+  if (!StringUtils.hasText(size)) {
+    return;
+  }
+  Integer[] range=null;
+  try {
+    int separatorIndex=size.indexOf('-');
+    if (separatorIndex != -1) {
+      range=new Integer[2];
+      range[0]=Integer.valueOf(size.substring(0,separatorIndex));
+      range[1]=Integer.valueOf(size.substring(separatorIndex + 1,size.length()));
+      if (range[0] > range[1]) {
+        parserContext.getReaderContext().error("Lower bound of size range must not exceed the upper bound.",element);
+      }
+      if (!StringUtils.hasText(queueCapacity)) {
+        if (range[0] == 0) {
+          builder.addPropertyValue("allowCoreThreadTimeOut",true);
+          range[0]=range[1];
+        }
+ else {
+          parserContext.getReaderContext().error("A non-zero lower bound for the size range requires a queue-capacity value.",element);
+        }
+      }
+    }
+ else {
+      Integer value=Integer.valueOf(size);
+      range=new Integer[]{value,value};
+    }
+  }
+ catch (  NumberFormatException ex) {
+    parserContext.getReaderContext().error("Invalid size value [" + size + "]: only "+ "single maximum integer (e.g. \"5\") and minimum-maximum combo (e.g. \"3-5\") supported.",element,ex);
+  }
+  if (range != null) {
+    builder.addPropertyValue("corePoolSize",range[0]);
+    builder.addPropertyValue("maxPoolSize",range[1]);
+  }
+}
