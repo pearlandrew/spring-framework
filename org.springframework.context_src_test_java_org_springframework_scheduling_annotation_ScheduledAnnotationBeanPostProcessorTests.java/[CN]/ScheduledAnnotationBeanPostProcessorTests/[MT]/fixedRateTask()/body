@@ -1,0 +1,19 @@
+{
+  StaticApplicationContext context=new StaticApplicationContext();
+  BeanDefinition processorDefinition=new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+  BeanDefinition targetDefinition=new RootBeanDefinition(ScheduledAnnotationBeanPostProcessorTests.FixedRateTestBean.class);
+  context.registerBeanDefinition("postProcessor",processorDefinition);
+  context.registerBeanDefinition("target",targetDefinition);
+  context.refresh();
+  Object postProcessor=context.getBean("postProcessor");
+  Object target=context.getBean("target");
+  ScheduledTaskRegistrar registrar=(ScheduledTaskRegistrar)new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+  Map<Runnable,Long> fixedRateTasks=(Map<Runnable,Long>)new DirectFieldAccessor(registrar).getPropertyValue("fixedRateTasks");
+  assertEquals(1,fixedRateTasks.size());
+  MethodInvokingRunnable runnable=(MethodInvokingRunnable)fixedRateTasks.keySet().iterator().next();
+  Object targetObject=runnable.getTargetObject();
+  String targetMethod=runnable.getTargetMethod();
+  assertEquals(target,targetObject);
+  assertEquals("fixedRate",targetMethod);
+  assertEquals(new Long(3000),fixedRateTasks.values().iterator().next());
+}

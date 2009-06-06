@@ -1,0 +1,47 @@
+{
+  Class<?> targetClass=AopUtils.getTargetClass(bean);
+  if (targetClass == null) {
+    return bean;
+  }
+  ReflectionUtils.doWithMethods(targetClass,new MethodCallback(){
+    @Override public void doWith(    Method method) throws IllegalArgumentException, IllegalAccessException {
+      Scheduled annotation=AnnotationUtils.getAnnotation(method,Scheduled.class);
+      if (annotation != null) {
+        Assert.isTrue(void.class.equals(method.getReturnType()),"Only void-returning methods may be annotated with @Scheduled.");
+        Assert.isTrue(method.getParameterTypes().length == 0,"Only no-arg methods may be annotated with @Scheduled.");
+        MethodInvokingRunnable runnable=new MethodInvokingRunnable();
+        runnable.setTargetObject(bean);
+        runnable.setTargetMethod(method.getName());
+        runnable.setArguments(new Object[0]);
+        try {
+          runnable.prepare();
+        }
+ catch (        Exception e) {
+          throw new IllegalStateException("failed to prepare task",e);
+        }
+        boolean processedSchedule=false;
+        String errorMessage="Exactly one of 'cron', 'fixedDelay', or 'fixedRate' is required.";
+        String cron=annotation.cron();
+        if (!"".equals(cron)) {
+          processedSchedule=true;
+          cronTasks.put(runnable,cron);
+        }
+        long fixedDelay=annotation.fixedDelay();
+        if (fixedDelay >= 0) {
+          Assert.isTrue(!processedSchedule,errorMessage);
+          processedSchedule=true;
+          fixedDelayTasks.put(runnable,new Long(fixedDelay));
+        }
+        long fixedRate=annotation.fixedRate();
+        if (fixedRate >= 0) {
+          Assert.isTrue(!processedSchedule,errorMessage);
+          processedSchedule=true;
+          fixedRateTasks.put(runnable,new Long(fixedRate));
+        }
+        Assert.isTrue(processedSchedule,errorMessage);
+      }
+    }
+  }
+);
+  return bean;
+}
