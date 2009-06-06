@@ -13,8 +13,19 @@
     if (StringUtils.hasText(executor)) {
       builder.addPropertyReference("executor",executor);
     }
-    BeanDefinitionHolder holder=registerPostProcessor(registry,builder,ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME);
-    parserContext.registerComponent(new BeanComponentDefinition(holder));
+    registerPostProcessor(parserContext,builder,ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME);
+  }
+  if (registry.containsBeanDefinition(SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+    parserContext.getReaderContext().error("Only one ScheduledAnnotationBeanPostProcessor may exist within the context.",source);
+  }
+ else {
+    BeanDefinitionBuilder builder=BeanDefinitionBuilder.genericBeanDefinition("org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor");
+    builder.getRawBeanDefinition().setSource(source);
+    String scheduler=element.getAttribute("scheduler");
+    if (StringUtils.hasText(scheduler)) {
+      builder.addPropertyReference("scheduler",scheduler);
+    }
+    registerPostProcessor(parserContext,builder,SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME);
   }
   parserContext.popAndRegisterContainingComponent();
   return null;
