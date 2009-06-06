@@ -1,0 +1,17 @@
+{
+  StaticApplicationContext context=new StaticApplicationContext();
+  BeanDefinition processorDefinition=new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class);
+  ThreadPoolTaskExecutor executor=new ThreadPoolTaskExecutor();
+  executor.setThreadNamePrefix("testExecutor");
+  executor.afterPropertiesSet();
+  processorDefinition.getPropertyValues().addPropertyValue("executor",executor);
+  BeanDefinition targetDefinition=new RootBeanDefinition(AsyncAnnotationBeanPostProcessorTests.TestBean.class);
+  context.registerBeanDefinition("postProcessor",processorDefinition);
+  context.registerBeanDefinition("target",targetDefinition);
+  context.refresh();
+  ITestBean testBean=(ITestBean)context.getBean("target");
+  testBean.test();
+  testBean.await(1000);
+  Thread asyncThread=testBean.getThread();
+  assertTrue(asyncThread.getName().startsWith("testExecutor"));
+}

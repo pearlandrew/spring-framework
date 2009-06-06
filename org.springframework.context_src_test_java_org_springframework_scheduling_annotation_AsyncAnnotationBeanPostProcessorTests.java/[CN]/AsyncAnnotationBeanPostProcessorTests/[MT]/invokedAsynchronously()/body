@@ -1,0 +1,14 @@
+{
+  StaticApplicationContext context=new StaticApplicationContext();
+  BeanDefinition processorDefinition=new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class);
+  BeanDefinition targetDefinition=new RootBeanDefinition(AsyncAnnotationBeanPostProcessorTests.TestBean.class);
+  context.registerBeanDefinition("postProcessor",processorDefinition);
+  context.registerBeanDefinition("target",targetDefinition);
+  context.refresh();
+  ITestBean testBean=(ITestBean)context.getBean("target");
+  testBean.test();
+  Thread mainThread=Thread.currentThread();
+  testBean.await(1000);
+  Thread asyncThread=testBean.getThread();
+  assertNotSame(mainThread,asyncThread);
+}
