@@ -1,0 +1,16 @@
+{
+  Class classToIntrospect=formatter.getClass();
+  while (classToIntrospect != null) {
+    Type[] genericInterfaces=classToIntrospect.getGenericInterfaces();
+    for (    Type genericInterface : genericInterfaces) {
+      if (genericInterface instanceof ParameterizedType) {
+        ParameterizedType pInterface=(ParameterizedType)genericInterface;
+        if (Formatter.class.isAssignableFrom((Class)pInterface.getRawType())) {
+          return getParameterClass(pInterface.getActualTypeArguments()[0],formatter.getClass());
+        }
+      }
+    }
+    classToIntrospect=classToIntrospect.getSuperclass();
+  }
+  return null;
+}
