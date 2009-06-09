@@ -1,12 +1,25 @@
 {
-  Formatter formatter=getFormatter();
+  Formatter formatter;
+  try {
+    formatter=getFormatter();
+  }
+ catch (  EvaluationException e) {
+    return new ExpressionEvaluationErrorResult(property.getExpressionString(),formatted,e);
+  }
   Class parsedType=getFormattedObjectType(formatter);
   if (parsedType == null) {
     parsedType=String.class;
   }
-  Object values=Array.newInstance(parsedType,formattedValues.length);
-  for (int i=0; i < formattedValues.length; i++) {
-    Array.set(values,i,parse(formattedValues[i],formatter));
+  Object parsed=Array.newInstance(parsedType,formatted.length);
+  for (int i=0; i < formatted.length; i++) {
+    Object parsedValue;
+    try {
+      parsedValue=formatter.parse(formatted[i],LocaleContextHolder.getLocale());
+    }
+ catch (    ParseException e) {
+      return new InvalidFormatResult(property.getExpressionString(),formatted,e);
+    }
+    Array.set(parsed,i,parsedValue);
   }
-  setValue(values);
+  return setValue(parsed,formatted);
 }

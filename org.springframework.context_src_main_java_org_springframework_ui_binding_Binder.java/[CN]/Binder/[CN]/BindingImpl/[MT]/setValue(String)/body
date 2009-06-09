@@ -1,3 +1,17 @@
 {
-  setValue(parse(formatted,getFormatter()));
+  Formatter formatter;
+  try {
+    formatter=getFormatter();
+  }
+ catch (  EvaluationException e) {
+    return new ExpressionEvaluationErrorResult(property.getExpressionString(),formatted,e);
+  }
+  Object parsed;
+  try {
+    parsed=formatter.parse(formatted,LocaleContextHolder.getLocale());
+  }
+ catch (  ParseException e) {
+    return new InvalidFormatResult(property.getExpressionString(),formatted,e);
+  }
+  return setValue(parsed,formatted);
 }
