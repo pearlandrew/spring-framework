@@ -1,0 +1,44 @@
+{
+  Connection con=databaseMetaData.getConnection();
+  Method methodToInvoke=null;
+  Boolean origValueForIncludeSynonyms=null;
+  if (includeSynonyms) {
+    if (con.getClass().getName().startsWith("oracle")) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Including synonyms in table metadata lookup.");
+      }
+    }
+ else {
+      logger.warn("Unable to include synonyms in table metadata lookup. Connection used for " + "DatabaseMetaData is not recognized as an Oracle connection; " + "class is "+ con.getClass().getName());
+    }
+  }
+ else {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Defaulting to no synonyms in table metadata lookup.");
+    }
+  }
+  if (includeSynonyms && con.getClass().getName().startsWith("oracle")) {
+    try {
+      methodToInvoke=con.getClass().getMethod("getIncludeSynonyms",(Class[])null);
+      methodToInvoke.setAccessible(true);
+      origValueForIncludeSynonyms=(Boolean)methodToInvoke.invoke(con);
+      methodToInvoke=con.getClass().getMethod("setIncludeSynonyms",new Class[]{boolean.class});
+      methodToInvoke.setAccessible(true);
+      methodToInvoke.invoke(con,Boolean.TRUE);
+    }
+ catch (    Exception ex) {
+      throw new InvalidDataAccessApiUsageException("Couldn't initialize Oracle Connection.",ex);
+    }
+  }
+  super.initializeWithTableColumnMetaData(databaseMetaData,catalogName,schemaName,tableName);
+  if (includeSynonyms && con.getClass().getName().startsWith("oracle")) {
+    try {
+      methodToInvoke=con.getClass().getMethod("setIncludeSynonyms",new Class[]{boolean.class});
+      methodToInvoke.setAccessible(true);
+      methodToInvoke.invoke(con,origValueForIncludeSynonyms);
+    }
+ catch (    Exception ex) {
+      throw new InvalidDataAccessApiUsageException("Couldn't restore Oracle Connection.",ex);
+    }
+  }
+}
