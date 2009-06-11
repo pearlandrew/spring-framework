@@ -3,20 +3,7 @@
     return formatter;
   }
  else {
-    Class<?> type=property.getValueType(createEvaluationContext());
-    Formatter<?> formatter=typeFormatters.get(type);
-    if (formatter != null) {
-      return formatter;
-    }
- else {
-      Annotation[] annotations=getAnnotations();
-      for (      Annotation a : annotations) {
-        AnnotationFormatterFactory factory=annotationFormatters.get(a.annotationType());
-        if (factory != null) {
-          return factory.getFormatter(a);
-        }
-      }
-      return defaultFormatter;
-    }
+    Formatter<?> formatter=formatterRegistry.getFormatter(property.getValueTypeDescriptor(createEvaluationContext()));
+    return formatter != null ? formatter : defaultFormatter;
   }
 }
