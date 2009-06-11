@@ -11,7 +11,7 @@
   }
   int idx=(Integer)state.convertValue(index,INTEGER_TYPE_DESCRIPTOR);
   if (targetObject == null) {
-    throw new SpelEvaluationException(getStartPosition(),SpelMessages.CANNOT_INDEX_INTO_NULL_VALUE);
+    throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
   }
   if (targetObject.getClass().isArray()) {
     return new TypedValue(accessArrayElement(targetObject,idx),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
@@ -25,7 +25,7 @@
           int newElements=idx - c.size();
           Class elementClass=targetObjectTypeDescriptor.getElementType();
           if (elementClass == null) {
-            throw new SpelEvaluationException(getStartPosition(),SpelMessages.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);
+            throw new SpelEvaluationException(getStartPosition(),SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);
           }
           while (newElements > 0) {
             c.add(elementClass.newInstance());
@@ -34,16 +34,16 @@
           newCollectionElement=targetObjectTypeDescriptor.getElementType().newInstance();
         }
  catch (        InstantiationException e) {
-          throw new SpelEvaluationException(getStartPosition(),e,SpelMessages.UNABLE_TO_GROW_COLLECTION);
+          throw new SpelEvaluationException(getStartPosition(),e,SpelMessage.UNABLE_TO_GROW_COLLECTION);
         }
 catch (        IllegalAccessException e) {
-          throw new SpelEvaluationException(getStartPosition(),e,SpelMessages.UNABLE_TO_GROW_COLLECTION);
+          throw new SpelEvaluationException(getStartPosition(),e,SpelMessage.UNABLE_TO_GROW_COLLECTION);
         }
         c.add(newCollectionElement);
         return new TypedValue(newCollectionElement,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
       }
  else {
-        throw new SpelEvaluationException(getStartPosition(),SpelMessages.COLLECTION_INDEX_OUT_OF_BOUNDS,c.size(),idx);
+        throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,c.size(),idx);
       }
     }
     int pos=0;
@@ -57,9 +57,9 @@ catch (        IllegalAccessException e) {
  else   if (targetObject instanceof String) {
     String ctxString=(String)targetObject;
     if (idx >= ctxString.length()) {
-      throw new SpelEvaluationException(getStartPosition(),SpelMessages.STRING_INDEX_OUT_OF_BOUNDS,ctxString.length(),idx);
+      throw new SpelEvaluationException(getStartPosition(),SpelMessage.STRING_INDEX_OUT_OF_BOUNDS,ctxString.length(),idx);
     }
     return new TypedValue(String.valueOf(ctxString.charAt(idx)),STRING_TYPE_DESCRIPTOR);
   }
-  throw new SpelEvaluationException(getStartPosition(),SpelMessages.INDEXING_NOT_SUPPORTED_FOR_TYPE,targetObjectTypeDescriptor.asString());
+  throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,targetObjectTypeDescriptor.asString());
 }
