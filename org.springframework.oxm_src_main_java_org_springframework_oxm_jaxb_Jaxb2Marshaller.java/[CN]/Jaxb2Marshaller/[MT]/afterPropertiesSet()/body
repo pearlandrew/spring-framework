@@ -1,5 +1,13 @@
 {
-  this.jaxbContext=createJaxbContext();
+  if (StringUtils.hasLength(this.contextPath) && !ObjectUtils.isEmpty(this.classesToBeBound)) {
+    throw new IllegalArgumentException("Specify either 'contextPath' or 'classesToBeBound property'; not both");
+  }
+ else   if (!StringUtils.hasLength(this.contextPath) && ObjectUtils.isEmpty(this.classesToBeBound)) {
+    throw new IllegalArgumentException("Setting either 'contextPath' or 'classesToBeBound' is required");
+  }
+  if (!lazyInit) {
+    getJaxbContext();
+  }
   if (!ObjectUtils.isEmpty(this.schemaResources)) {
     this.schema=loadSchema(this.schemaResources,this.schemaLanguage);
   }
