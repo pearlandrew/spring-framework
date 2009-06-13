@@ -1,4 +1,21 @@
 {
-  String text=messageSource.getMessage(this,locale);
-  return new TextMessage(severity,text);
+  String messageString=messageSource.getMessage(this,locale);
+  Expression message;
+  try {
+    message=expressionParser.parseExpression(messageString,ParserContext.TEMPLATE_EXPRESSION);
+  }
+ catch (  ParseException e) {
+    throw new MessageResolutionException("Failed to parse message expression",e);
+  }
+  try {
+    StandardEvaluationContext context=new StandardEvaluationContext();
+    context.setRootObject(args);
+    context.addPropertyAccessor(new MapAccessor());
+    context.addPropertyAccessor(new MessageSourceResolvableAccessor(messageSource,locale));
+    String text=(String)message.getValue(context);
+    return new TextMessage(severity,text);
+  }
+ catch (  EvaluationException e) {
+    throw new MessageResolutionException("Failed to evaluate expression to generate message text",e);
+  }
 }
