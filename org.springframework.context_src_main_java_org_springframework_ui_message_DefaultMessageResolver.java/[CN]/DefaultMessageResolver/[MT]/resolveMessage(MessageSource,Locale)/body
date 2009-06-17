@@ -1,5 +1,11 @@
 {
-  String messageString=messageSource.getMessage(this,locale);
+  String messageString;
+  try {
+    messageString=messageSource.getMessage(this,locale);
+  }
+ catch (  NoSuchMessageException e) {
+    throw new MessageResolutionException("Unable to resolve message in MessageSource [" + messageSource + "]",e);
+  }
   Expression message;
   try {
     message=expressionParser.parseExpression(messageString,ParserContext.TEMPLATE_EXPRESSION);
@@ -15,6 +21,6 @@
     return new TextMessage(severity,text);
   }
  catch (  EvaluationException e) {
-    throw new MessageResolutionException("Failed to evaluate expression to generate message text",e);
+    throw new MessageResolutionException("Failed to evaluate message expression '" + message.getExpressionString() + "' to generate final message text",e);
   }
 }
