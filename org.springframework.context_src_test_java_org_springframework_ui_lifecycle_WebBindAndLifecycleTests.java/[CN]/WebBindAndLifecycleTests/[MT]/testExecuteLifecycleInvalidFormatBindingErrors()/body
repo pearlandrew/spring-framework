@@ -1,0 +1,13 @@
+{
+  Map<String,Object> userMap=new HashMap<String,Object>();
+  GenericFormatterRegistry registry=new GenericFormatterRegistry();
+  registry.add(new IntegerFormatter(),Integer.class);
+  lifecycle.setFormatterRegistry(registry);
+  userMap.put("string","test");
+  userMap.put("integer","bogus");
+  userMap.put("foo","BAR");
+  lifecycle.execute(userMap);
+  assertEquals(1,alertContext.getAlerts().size());
+  assertEquals(Severity.ERROR,alertContext.getAlerts("integer").get(0).getSeverity());
+  assertEquals("Failed to bind to property 'integer'; the user value 'bogus' has an invalid format and could no be parsed",alertContext.getAlerts("integer").get(0).getMessage());
+}
