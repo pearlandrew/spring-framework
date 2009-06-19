@@ -1,0 +1,18 @@
+{
+  for (  Map.Entry<String,?> entry : aliases.entrySet()) {
+    String alias=entry.getKey();
+    Object value=entry.getValue();
+    Class type;
+    if (value instanceof Class) {
+      type=(Class)value;
+    }
+ else     if (value instanceof String) {
+      String s=(String)value;
+      type=ClassUtils.forName(s,classLoader);
+    }
+ else {
+      throw new IllegalArgumentException("Unknown value [" + value + "], expected String or Class");
+    }
+    this.getXStream().alias(alias,type);
+  }
+}
