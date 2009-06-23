@@ -1,0 +1,24 @@
+{
+  Model m=AnnotationUtils.findAnnotation(model.getClass(),Model.class);
+  if (m != null) {
+    if (StringUtils.hasText(m.value())) {
+    }
+    binder.setStrict(m.strictBinding());
+  }
+  if (binder.isStrict()) {
+    BeanInfo beanInfo;
+    try {
+      beanInfo=Introspector.getBeanInfo(model.getClass());
+    }
+ catch (    IntrospectionException e) {
+      throw new IllegalStateException("Unable to introspect model " + model,e);
+    }
+    for (    PropertyDescriptor prop : beanInfo.getPropertyDescriptors()) {
+      Method getter=prop.getReadMethod();
+      Bound b=AnnotationUtils.getAnnotation(getter,Bound.class);
+      if (b != null) {
+        binder.add(new BindingConfiguration(prop.getName(),null));
+      }
+    }
+  }
+}
