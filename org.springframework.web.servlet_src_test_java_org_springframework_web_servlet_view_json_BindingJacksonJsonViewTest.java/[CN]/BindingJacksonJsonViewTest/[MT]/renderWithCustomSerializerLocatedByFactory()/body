@@ -1,0 +1,14 @@
+{
+  SerializerFactory factory=new DelegatingSerializerFactory();
+  ObjectMapper mapper=new ObjectMapper(factory);
+  view.setObjectMapper(mapper);
+  Object bean=new TestBeanSimple();
+  Map<String,Object> model=new HashMap<String,Object>();
+  model.put("foo",bean);
+  model.put("bar",new TestChildBean());
+  view.render(model,request,response);
+  String result=response.getContentAsString();
+  assertTrue(result.length() > 0);
+  assertTrue(result.contains("\"foo\":{\"testBeanSimple\":\"custom\"}"));
+  validateResult();
+}
