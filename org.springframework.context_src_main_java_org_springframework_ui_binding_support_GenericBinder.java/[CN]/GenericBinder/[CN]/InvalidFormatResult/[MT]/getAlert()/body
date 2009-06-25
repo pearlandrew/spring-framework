@@ -10,7 +10,13 @@
       return Severity.ERROR;
     }
     public String getMessage(){
-      return "Failed to bind to property '" + property + "'; the user value "+ StylerUtils.style(formatted)+ " has an invalid format and could no be parsed";
+      MessageBuilder builder=new MessageBuilder(messageSource);
+      builder.code(getCode());
+      builder.arg("label",new ResolvableArgument(property));
+      builder.arg("value",sourceValue);
+      builder.arg("errorOffset",cause.getErrorOffset());
+      builder.defaultMessage("Failed to bind to property '" + property + "'; the user value "+ StylerUtils.style(sourceValue)+ " has an invalid format and could no be parsed");
+      return builder.build();
     }
   }
 ;
