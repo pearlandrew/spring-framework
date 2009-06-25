@@ -1,0 +1,24 @@
+{
+  LinkedHashMap<String,Object> filteredValues=new LinkedHashMap<String,Object>();
+  for (  Map.Entry<String,? extends Object> entry : sourceValues.entrySet()) {
+    String field=entry.getKey();
+    Object value=entry.getValue();
+    if (field.startsWith(defaultPrefix)) {
+      field=field.substring(defaultPrefix.length());
+      if (!sourceValues.containsKey(field)) {
+        filteredValues.put(field,value);
+      }
+    }
+ else     if (field.startsWith(presentPrefix)) {
+      field=field.substring(presentPrefix.length());
+      if (!sourceValues.containsKey(field) && !sourceValues.containsKey(defaultPrefix + field)) {
+        value=getEmptyValue((BindingImpl)getBinding(field));
+        filteredValues.put(field,value);
+      }
+    }
+ else {
+      filteredValues.put(entry.getKey(),entry.getValue());
+    }
+  }
+  return filteredValues;
+}
