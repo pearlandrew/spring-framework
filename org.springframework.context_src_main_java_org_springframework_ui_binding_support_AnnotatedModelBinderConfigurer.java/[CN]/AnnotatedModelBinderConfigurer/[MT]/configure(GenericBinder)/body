@@ -1,17 +1,16 @@
 {
-  Model m=AnnotationUtils.findAnnotation(model.getClass(),Model.class);
+  Class<?> modelClass=binder.getModel().getClass();
+  Model m=AnnotationUtils.findAnnotation(modelClass,Model.class);
   if (m != null) {
-    if (StringUtils.hasText(m.value())) {
-    }
     binder.setStrict(m.strictBinding());
   }
   if (binder.isStrict()) {
     BeanInfo beanInfo;
     try {
-      beanInfo=Introspector.getBeanInfo(model.getClass());
+      beanInfo=Introspector.getBeanInfo(modelClass);
     }
  catch (    IntrospectionException e) {
-      throw new IllegalStateException("Unable to introspect model " + model,e);
+      throw new IllegalStateException("Unable to introspect model " + binder.getModel(),e);
     }
     for (    PropertyDescriptor prop : beanInfo.getPropertyDescriptors()) {
       Method getter=prop.getReadMethod();
