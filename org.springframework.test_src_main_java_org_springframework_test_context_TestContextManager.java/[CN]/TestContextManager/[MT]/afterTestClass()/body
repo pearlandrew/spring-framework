@@ -1,0 +1,23 @@
+{
+  final Class<?> testClass=getTestContext().getTestClass();
+  if (logger.isTraceEnabled()) {
+    logger.trace("afterTestClass(): class [" + testClass + "]");
+  }
+  List<TestExecutionListener> listenersReversed=new ArrayList<TestExecutionListener>(getTestExecutionListeners());
+  Collections.reverse(listenersReversed);
+  Exception afterTestClassException=null;
+  for (  TestExecutionListener testExecutionListener : listenersReversed) {
+    try {
+      testExecutionListener.afterTestClass(getTestContext());
+    }
+ catch (    Exception ex) {
+      logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener + "] to process 'after class' callback for test class ["+ testClass+ "]",ex);
+      if (afterTestClassException == null) {
+        afterTestClassException=ex;
+      }
+    }
+  }
+  if (afterTestClassException != null) {
+    throw afterTestClassException;
+  }
+}
