@@ -4,5 +4,14 @@
     pos++;
   }
  while (isIdentifier(toProcess[pos]));
-  tokens.add(new Token(TokenKind.IDENTIFIER,subarray(start,pos),start,pos));
+  char[] subarray=subarray(start,pos);
+  if ((pos - start) == 2 || (pos - start) == 3) {
+    String asString=new String(subarray).toUpperCase();
+    int idx=Arrays.binarySearch(alternativeOperatorNames,asString);
+    if (idx >= 0) {
+      pushOneCharOrTwoCharToken(TokenKind.valueOf(asString),start);
+      return;
+    }
+  }
+  tokens.add(new Token(TokenKind.IDENTIFIER,subarray,start,pos));
 }
