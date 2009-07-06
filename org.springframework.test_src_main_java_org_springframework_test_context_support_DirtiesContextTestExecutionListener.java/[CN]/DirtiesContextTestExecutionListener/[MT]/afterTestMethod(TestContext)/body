@@ -1,11 +1,17 @@
 {
+  Class<?> testClass=testContext.getTestClass();
+  Assert.notNull(testClass,"The test class of the supplied TestContext must not be null");
   Method testMethod=testContext.getTestMethod();
   Assert.notNull(testMethod,"The test method of the supplied TestContext must not be null");
-  boolean dirtiesContext=testMethod.isAnnotationPresent(DirtiesContext.class);
+  final Class<DirtiesContext> annotationType=DirtiesContext.class;
+  boolean methodDirtiesContext=testMethod.isAnnotationPresent(annotationType);
+  boolean classDirtiesContext=testClass.isAnnotationPresent(annotationType);
+  DirtiesContext classDirtiesContextAnnotation=testClass.getAnnotation(annotationType);
+  ClassMode classMode=classDirtiesContext ? classDirtiesContextAnnotation.classMode() : null;
   if (logger.isDebugEnabled()) {
-    logger.debug("After test method: context [" + testContext + "], dirtiesContext ["+ dirtiesContext+ "].");
+    logger.debug("After test method: context [" + testContext + "], class-level dirtiesContext ["+ classDirtiesContext+ "], class mode ["+ classMode+ "], method-level dirtiesContext ["+ methodDirtiesContext+ "].");
   }
-  if (dirtiesContext) {
+  if (methodDirtiesContext || (classDirtiesContext && classMode == ClassMode.AFTER_EACH_TEST_METHOD)) {
     dirtyContext(testContext);
   }
 }
