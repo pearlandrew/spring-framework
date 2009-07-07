@@ -2,12 +2,25 @@
   TypedValue context=state.getActiveContextObject();
   Object targetObject=context.getValue();
   TypeDescriptor targetObjectTypeDescriptor=context.getTypeDescriptor();
-  TypedValue indexValue=children[0].getValueInternal(state);
-  Object index=indexValue.getValue();
+  TypedValue indexValue=null;
+  Object index=null;
+  if (targetObject instanceof Map && (children[0] instanceof PropertyOrFieldReference)) {
+    PropertyOrFieldReference reference=(PropertyOrFieldReference)children[0];
+    index=reference.getName();
+    indexValue=new TypedValue(index,CommonTypeDescriptors.STRING_TYPE_DESCRIPTOR);
+  }
+ else {
+    indexValue=children[0].getValueInternal(state);
+    index=indexValue.getValue();
+  }
   if (targetObject instanceof Map) {
-    Object possiblyConvertedKey=state.convertValue(indexValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
+    Object possiblyConvertedKey=index;
+    if (targetObjectTypeDescriptor.isMapEntryTypeKnown()) {
+      possiblyConvertedKey=state.convertValue(index,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
+    }
     Object o=((Map<?,?>)targetObject).get(possiblyConvertedKey);
-    return new TypedValue(o,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
+    TypeDescriptor resultDescriptor=targetObjectTypeDescriptor.isMapEntryTypeKnown() ? TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()) : CommonTypeDescriptors.OBJECT_TYPE_DESCRIPTOR;
+    return new TypedValue(o,resultDescriptor);
   }
   int idx=(Integer)state.convertValue(index,INTEGER_TYPE_DESCRIPTOR);
   if (targetObject == null) {

@@ -8,8 +8,12 @@
   }
   if (targetObjectTypeDescriptor.isMap()) {
     Map map=(Map)targetObject;
-    Object possiblyConvertedKey=state.convertValue(index.getValue(),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
-    Object possiblyConvertedValue=state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
+    Object possiblyConvertedKey=index;
+    Object possiblyConvertedValue=newValue;
+    if (targetObjectTypeDescriptor.isMapEntryTypeKnown()) {
+      possiblyConvertedKey=state.convertValue(index.getValue(),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
+      possiblyConvertedValue=state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()));
+    }
     map.put(possiblyConvertedKey,possiblyConvertedValue);
     return;
   }
