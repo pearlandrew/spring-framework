@@ -10,8 +10,14 @@
     indexValue=new TypedValue(index,CommonTypeDescriptors.STRING_TYPE_DESCRIPTOR);
   }
  else {
-    indexValue=children[0].getValueInternal(state);
-    index=indexValue.getValue();
+    try {
+      state.pushActiveContextObject(state.getRootContextObject());
+      indexValue=children[0].getValueInternal(state);
+      index=indexValue.getValue();
+    }
+  finally {
+      state.popActiveContextObject();
+    }
   }
   if (targetObject instanceof Map) {
     Object possiblyConvertedKey=index;
