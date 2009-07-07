@@ -2,9 +2,15 @@
   List<SpelNodeImpl> qualifiedIdPieces=new ArrayList<SpelNodeImpl>();
   Token startnode=eatToken(TokenKind.IDENTIFIER);
   qualifiedIdPieces.add(new Identifier(startnode.stringValue(),toPos(startnode)));
-  while (peekToken(TokenKind.DOT,true)) {
+  boolean dollar=false;
+  while (peekToken(TokenKind.DOT,true) || (dollarAllowed && (dollar=peekToken(TokenKind.DOLLAR,true)))) {
     Token node=eatToken(TokenKind.IDENTIFIER);
-    qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));
+    if (dollar) {
+      qualifiedIdPieces.add(new Identifier("$" + node.stringValue(),((node.startpos - 1) << 16) + node.endpos));
+    }
+ else {
+      qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));
+    }
   }
   return new QualifiedIdentifier(toPos(startnode.startpos,qualifiedIdPieces.get(qualifiedIdPieces.size() - 1).getEndPosition()),qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
 }
