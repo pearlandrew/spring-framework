@@ -11,6 +11,23 @@
     return formatter;
   }
  else {
-    return null;
+    Formatted formatted=AnnotationUtils.findAnnotation(propertyType.getType(),Formatted.class);
+    if (formatted != null) {
+      Class formatterClass=formatted.value();
+      try {
+        formatter=(Formatter)formatterClass.newInstance();
+      }
+ catch (      InstantiationException e) {
+        throw new IllegalStateException(e);
+      }
+catch (      IllegalAccessException e) {
+        throw new IllegalStateException(e);
+      }
+      typeFormatters.put(propertyType.getType(),formatter);
+      return formatter;
+    }
+ else {
+      return null;
+    }
   }
 }
