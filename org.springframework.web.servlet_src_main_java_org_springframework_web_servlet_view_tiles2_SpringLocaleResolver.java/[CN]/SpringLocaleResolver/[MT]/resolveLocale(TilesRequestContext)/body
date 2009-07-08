@@ -1,6 +1,10 @@
 {
-  if (context.getRequest() instanceof HttpServletRequest) {
-    return RequestContextUtils.getLocale((HttpServletRequest)context.getRequest());
+  if (context instanceof ServletTilesRequestContext) {
+    return RequestContextUtils.getLocale(((ServletTilesRequestContext)context).getRequest());
+  }
+ else   if (context instanceof JspTilesRequestContext) {
+    PageContext pc=((JspTilesRequestContext)context).getPageContext();
+    return RequestContextUtils.getLocale((HttpServletRequest)pc.getRequest());
   }
  else {
     return super.resolveLocale(context);

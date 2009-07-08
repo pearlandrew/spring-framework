@@ -1,11 +1,10 @@
 {
   WebApplicationContext webApplicationContext=(WebApplicationContext)context.getRequestScope().get(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
   if (webApplicationContext == null) {
-    if (!(context instanceof ServletTilesRequestContext)) {
-      throw new IllegalStateException(getClass().getSimpleName() + " requires a ServletTilesRequestContext to operate on");
+    webApplicationContext=(WebApplicationContext)context.getApplicationContext().getApplicationScope().get(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+    if (webApplicationContext == null) {
+      throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
     }
-    ServletTilesRequestContext servletRequestContext=(ServletTilesRequestContext)context;
-    webApplicationContext=WebApplicationContextUtils.getRequiredWebApplicationContext(servletRequestContext.getServletContext());
   }
   return getPreparer(name,webApplicationContext);
 }
