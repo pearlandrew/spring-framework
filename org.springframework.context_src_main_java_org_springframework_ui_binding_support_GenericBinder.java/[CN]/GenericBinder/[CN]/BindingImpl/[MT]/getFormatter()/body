@@ -3,7 +3,14 @@
     return formatter;
   }
  else {
-    Formatter<?> formatter=formatterRegistry.getFormatter(property.getValueTypeDescriptor(createEvaluationContext()));
+    TypeDescriptor type;
+    try {
+      type=property.getValueTypeDescriptor(createEvaluationContext());
+    }
+ catch (    EvaluationException e) {
+      throw new IllegalArgumentException("Failed to get property expression value type descriptor - this should not happen",e);
+    }
+    Formatter formatter=formatterRegistry.getFormatter(type);
     return formatter != null ? formatter : defaultFormatter;
   }
 }

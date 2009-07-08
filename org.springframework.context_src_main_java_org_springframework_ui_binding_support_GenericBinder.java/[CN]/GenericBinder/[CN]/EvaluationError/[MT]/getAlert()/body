@@ -1,0 +1,41 @@
+{
+  return new AbstractAlert(){
+    public String getCode(){
+      SpelMessage spelCode=((SpelEvaluationException)cause).getMessageCode();
+      if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
+        return "conversionFailed";
+      }
+ else {
+        return "couldNotSetValue";
+      }
+    }
+    public Severity getSeverity(){
+      return Severity.FATAL;
+    }
+    public String getMessage(){
+      SpelMessage spelCode=((SpelEvaluationException)cause).getMessageCode();
+      if (spelCode == SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE) {
+        AccessException accessException=(AccessException)cause.getCause();
+        if (accessException.getCause() != null) {
+          Throwable cause=accessException.getCause();
+          if (cause instanceof SpelEvaluationException && ((SpelEvaluationException)cause).getMessageCode() == SpelMessage.TYPE_CONVERSION_ERROR) {
+            ConversionFailedException failure=(ConversionFailedException)cause.getCause();
+            MessageBuilder builder=new MessageBuilder(messageSource);
+            builder.code("conversionFailed");
+            builder.arg("label",new ResolvableArgument(property));
+            builder.arg("value",sourceValue);
+            builder.defaultMessage("Failed to bind to property '" + property + "'; user value "+ StylerUtils.style(sourceValue)+ " could not be converted to property type ["+ failure.getTargetType().getName()+ "]");
+            return builder.build();
+          }
+        }
+      }
+      MessageBuilder builder=new MessageBuilder(messageSource);
+      builder.code("couldNotSetValue");
+      builder.arg("label",new ResolvableArgument(property));
+      builder.arg("value",sourceValue);
+      builder.defaultMessage("Failed to bind to property '" + property + "'; reason = "+ cause.getLocalizedMessage());
+      return builder.build();
+    }
+  }
+;
+}

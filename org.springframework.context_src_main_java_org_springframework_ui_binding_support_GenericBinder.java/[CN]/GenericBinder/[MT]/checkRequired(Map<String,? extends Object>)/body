@@ -1,0 +1,19 @@
+{
+  List<String> missingRequired=new ArrayList<String>();
+  for (  BindingFactory factory : bindingFactories) {
+    if (factory.configuration.isRequired()) {
+      boolean found=false;
+      for (      String property : sourceValues.keySet()) {
+        if (factory.hasBindingFor(property)) {
+          found=true;
+        }
+      }
+      if (!found) {
+        missingRequired.add(factory.getPropertyPath());
+      }
+    }
+  }
+  if (!missingRequired.isEmpty()) {
+    throw new MissingSourceValuesException(missingRequired,sourceValues);
+  }
+}

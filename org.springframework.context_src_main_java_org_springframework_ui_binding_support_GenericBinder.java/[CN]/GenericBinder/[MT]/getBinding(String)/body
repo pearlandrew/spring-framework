@@ -1,9 +1,8 @@
 {
-  Binding binding=bindings.get(property);
-  if (binding == null && !strict) {
-    return configureBinding(new BindingConfiguration(property,null));
+  for (  BindingFactory factory : bindingFactories) {
+    if (factory.hasBindingFor(property)) {
+      return factory.getBinding(property);
+    }
   }
- else {
-    return binding;
-  }
+  throw new NoSuchBindingException(property);
 }

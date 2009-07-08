@@ -1,9 +1,10 @@
 {
   BindingResults bindingResults=binder.bind(sourceValues);
-  if (validator != null && validationDecider.shouldValidateAfter(bindingResults)) {
-    validator.validate(binder.getModel(),bindingResults.successes().properties());
-  }
+  List<ValidationFailure> validationFailures=validate(bindingResults);
   for (  BindingResult result : bindingResults.failures()) {
     alertContext.add(result.getProperty(),result.getAlert());
+  }
+  for (  ValidationFailure failure : validationFailures) {
+    alertContext.add(failure.getProperty(),failure.getAlert());
   }
 }

@@ -1,0 +1,16 @@
+{
+  Expression propertyExpression;
+  try {
+    propertyExpression=expressionParser.parseExpression(property);
+  }
+ catch (  org.springframework.expression.ParseException e) {
+    throw new IllegalArgumentException("Unable to get model binding; cannot parse property expression from property string [" + property + "]",e);
+  }
+  try {
+    propertyExpression.getValueType(createEvaluationContext());
+  }
+ catch (  EvaluationException e) {
+    throw new IllegalArgumentException("Unable to get model binding; cannot access property '" + propertyExpression.getExpressionString() + "'",e);
+  }
+  return new BindingImpl(propertyExpression,configuration.getFormatter());
+}
