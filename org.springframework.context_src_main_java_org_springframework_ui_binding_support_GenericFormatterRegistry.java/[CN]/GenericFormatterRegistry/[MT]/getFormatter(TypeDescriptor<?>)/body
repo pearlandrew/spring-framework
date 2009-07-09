@@ -6,12 +6,13 @@
       return factory.getFormatter(a);
     }
   }
-  Formatter<?> formatter=typeFormatters.get(propertyType.getType());
+  Class<?> type=getType(propertyType);
+  Formatter<?> formatter=typeFormatters.get(type);
   if (formatter != null) {
     return formatter;
   }
  else {
-    Formatted formatted=AnnotationUtils.findAnnotation(propertyType.getType(),Formatted.class);
+    Formatted formatted=AnnotationUtils.findAnnotation(type,Formatted.class);
     if (formatted != null) {
       Class formatterClass=formatted.value();
       try {
@@ -23,7 +24,7 @@
 catch (      IllegalAccessException e) {
         throw new IllegalStateException(e);
       }
-      typeFormatters.put(propertyType.getType(),formatter);
+      typeFormatters.put(type,formatter);
       return formatter;
     }
  else {
