@@ -6,8 +6,21 @@
       return factory.getFormatter(a);
     }
   }
-  Class<?> type=getType(propertyType);
-  Formatter<?> formatter=typeFormatters.get(type);
+  Formatter<?> formatter=null;
+  Class<?> type;
+  if (propertyType.isCollection()) {
+    formatter=collectionTypeFormatters.get(new GenericCollectionPropertyType(propertyType.getType(),propertyType.getElementType()));
+    if (formatter != null) {
+      return formatter;
+    }
+ else {
+      type=propertyType.getElementType();
+    }
+  }
+ else {
+    type=propertyType.getType();
+  }
+  formatter=typeFormatters.get(type);
   if (formatter != null) {
     return formatter;
   }
