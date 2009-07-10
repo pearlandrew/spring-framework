@@ -1,10 +1,9 @@
 {
-  IfProfileValue ifProfileValue=testMethod.getAnnotation(IfProfileValue.class);
-  if (ifProfileValue == null) {
-    ifProfileValue=testClass.getAnnotation(IfProfileValue.class);
-    if (ifProfileValue == null) {
-      return true;
-    }
+  IfProfileValue ifProfileValue=testClass.getAnnotation(IfProfileValue.class);
+  boolean classLevelEnabled=isTestEnabledInThisEnvironment(profileValueSource,ifProfileValue);
+  if (classLevelEnabled) {
+    ifProfileValue=testMethod.getAnnotation(IfProfileValue.class);
+    return isTestEnabledInThisEnvironment(profileValueSource,ifProfileValue);
   }
-  return isTestEnabledInThisEnvironment(profileValueSource,ifProfileValue);
+  return false;
 }
