@@ -19,7 +19,10 @@
       state.popActiveContextObject();
     }
   }
-  if (targetObject instanceof Map) {
+  if (targetObjectTypeDescriptor.isMap()) {
+    if (targetObject == null) {
+      throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
+    }
     Object possiblyConvertedKey=index;
     if (targetObjectTypeDescriptor.isMapEntryTypeKnown()) {
       possiblyConvertedKey=state.convertValue(index,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
