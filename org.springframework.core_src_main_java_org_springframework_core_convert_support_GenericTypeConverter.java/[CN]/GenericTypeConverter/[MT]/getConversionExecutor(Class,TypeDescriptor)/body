@@ -24,7 +24,12 @@
       }
     }
  else {
-      return null;
+      if (targetType.equals(String.class)) {
+        return null;
+      }
+ else {
+        return null;
+      }
     }
   }
   if (sourceType.isCollection()) {
@@ -36,14 +41,19 @@
     }
  else     if (targetType.isMap()) {
       if (sourceType.getElementType().equals(String.class)) {
-        return null;
+        return new StringCollectionToMap(sourceType,targetType,this);
       }
  else {
         return null;
       }
     }
  else {
-      return null;
+      if (targetType.equals(String.class)) {
+        return null;
+      }
+ else {
+        return null;
+      }
     }
   }
   if (sourceType.isMap()) {
@@ -52,7 +62,7 @@
     }
  else     if (targetType.isArray()) {
       if (targetType.getElementType().equals(String.class)) {
-        return null;
+        return new MapToStringArray(sourceType,targetType,this);
       }
  else {
         return null;
@@ -60,7 +70,7 @@
     }
  else     if (targetType.isCollection()) {
       if (targetType.getElementType().equals(String.class)) {
-        return null;
+        return new MapToStringCollection(sourceType,targetType,this);
       }
  else {
         return null;
@@ -71,10 +81,20 @@
     }
   }
   if (targetType.isArray()) {
-    return null;
+    if (sourceType.getType().equals(String.class)) {
+      return new StringToArray(sourceType,targetType,this);
+    }
+ else {
+      return new ObjectToArray(sourceType,targetType,this);
+    }
   }
   if (targetType.isCollection()) {
-    return null;
+    if (sourceType.getType().equals(String.class)) {
+      return new StringToCollection(sourceType,targetType,this);
+    }
+ else {
+      return new ObjectToCollection(sourceType,targetType,this);
+    }
   }
   if (targetType.isMap()) {
     if (sourceType.getType().equals(String.class)) {
