@@ -1,5 +1,9 @@
 {
-  if (StringUtils.hasText(text) && !ResourceUtils.isUrl(text)) {
+  if (!StringUtils.hasText(text)) {
+    setValue(null);
+    return;
+  }
+  if (!ResourceUtils.isUrl(text)) {
     File file=new File(text);
     if (file.isAbsolute()) {
       setValue(file);
@@ -10,14 +14,13 @@
   Resource resource=(Resource)this.resourceEditor.getValue();
   if (ResourceUtils.isUrl(text) || resource.exists()) {
     try {
-      setValue(resource != null ? resource.getFile() : null);
+      setValue(resource.getFile());
     }
  catch (    IOException ex) {
       throw new IllegalArgumentException("Could not retrieve File for " + resource + ": "+ ex.getMessage());
     }
   }
  else {
-    File file=new File(text);
-    setValue(file);
+    setValue(new File(text));
   }
 }
