@@ -3,11 +3,12 @@
   this.bean=bean;
   this.beanName=beanName;
   this.invokeDisposableBean=(this.bean instanceof DisposableBean && !beanDefinition.isExternallyManagedDestroyMethod("destroy"));
+  this.nonPublicAccessAllowed=beanDefinition.isNonPublicAccessAllowed();
   String destroyMethodName=beanDefinition.getDestroyMethodName();
   if (destroyMethodName != null && !(this.invokeDisposableBean && "destroy".equals(destroyMethodName)) && !beanDefinition.isExternallyManagedDestroyMethod(destroyMethodName)) {
     this.destroyMethodName=destroyMethodName;
     try {
-      this.destroyMethod=BeanUtils.findMethodWithMinimalParameters(bean.getClass(),destroyMethodName);
+      this.destroyMethod=(this.nonPublicAccessAllowed ? BeanUtils.findMethodWithMinimalParameters(bean.getClass(),destroyMethodName) : BeanUtils.findMethodWithMinimalParameters(bean.getClass().getMethods(),destroyMethodName));
     }
  catch (    IllegalArgumentException ex) {
       throw new BeanDefinitionValidationException("Couldn't find a unique destroy method on bean with name '" + this.beanName + ": "+ ex.getMessage());

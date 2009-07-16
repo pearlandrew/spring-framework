@@ -40,7 +40,7 @@
   }
   if (factoryMethodToUse == null || argsToUse == null) {
     factoryClass=ClassUtils.getUserClass(factoryClass);
-    Method[] rawCandidates=ReflectionUtils.getAllDeclaredMethods(factoryClass);
+    Method[] rawCandidates=(mbd.isNonPublicAccessAllowed() ? ReflectionUtils.getAllDeclaredMethods(factoryClass) : factoryClass.getMethods());
     List<Method> candidateSet=new ArrayList<Method>();
     for (    Method candidate : rawCandidates) {
       if (Modifier.isStatic(candidate.getModifiers()) == isStatic && candidate.getName().equals(mbd.getFactoryMethodName()) && mbd.isFactoryMethod(candidate)) {
