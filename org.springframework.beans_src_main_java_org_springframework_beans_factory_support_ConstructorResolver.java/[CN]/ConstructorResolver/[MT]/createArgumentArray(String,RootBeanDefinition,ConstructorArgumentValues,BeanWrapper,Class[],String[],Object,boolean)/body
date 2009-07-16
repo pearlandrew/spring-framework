@@ -14,19 +14,20 @@
     }
     if (valueHolder != null) {
       usedValueHolders.add(valueHolder);
-      args.rawArguments[paramIndex]=valueHolder.getValue();
+      ConstructorArgumentValues.ValueHolder sourceHolder=(ConstructorArgumentValues.ValueHolder)valueHolder.getSource();
+      Object originalValue=valueHolder.getValue();
+      Object sourceValue=sourceHolder.getValue();
       if (valueHolder.isConverted()) {
         Object convertedValue=valueHolder.getConvertedValue();
+        args.rawArguments[paramIndex]=(mbd.isLenientConstructorResolution() ? originalValue : convertedValue);
         args.arguments[paramIndex]=convertedValue;
         args.preparedArguments[paramIndex]=convertedValue;
       }
  else {
         try {
-          Object originalValue=valueHolder.getValue();
           Object convertedValue=converter.convertIfNecessary(originalValue,paramType,MethodParameter.forMethodOrConstructor(methodOrCtor,paramIndex));
+          args.rawArguments[paramIndex]=(mbd.isLenientConstructorResolution() ? originalValue : convertedValue);
           args.arguments[paramIndex]=convertedValue;
-          ConstructorArgumentValues.ValueHolder sourceHolder=(ConstructorArgumentValues.ValueHolder)valueHolder.getSource();
-          Object sourceValue=sourceHolder.getValue();
           if (originalValue == sourceValue || sourceValue instanceof TypedStringValue) {
             sourceHolder.setConvertedValue(convertedValue);
             args.preparedArguments[paramIndex]=convertedValue;
