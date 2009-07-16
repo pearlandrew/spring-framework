@@ -17,17 +17,14 @@
       ConstructorArgumentValues.ValueHolder sourceHolder=(ConstructorArgumentValues.ValueHolder)valueHolder.getSource();
       Object originalValue=valueHolder.getValue();
       Object sourceValue=sourceHolder.getValue();
+      Object convertedValue;
       if (valueHolder.isConverted()) {
-        Object convertedValue=valueHolder.getConvertedValue();
-        args.rawArguments[paramIndex]=(mbd.isLenientConstructorResolution() ? originalValue : convertedValue);
-        args.arguments[paramIndex]=convertedValue;
+        convertedValue=valueHolder.getConvertedValue();
         args.preparedArguments[paramIndex]=convertedValue;
       }
  else {
         try {
-          Object convertedValue=converter.convertIfNecessary(originalValue,paramType,MethodParameter.forMethodOrConstructor(methodOrCtor,paramIndex));
-          args.rawArguments[paramIndex]=(mbd.isLenientConstructorResolution() ? originalValue : convertedValue);
-          args.arguments[paramIndex]=convertedValue;
+          convertedValue=converter.convertIfNecessary(originalValue,paramType,MethodParameter.forMethodOrConstructor(methodOrCtor,paramIndex));
           if (originalValue == sourceValue || sourceValue instanceof TypedStringValue) {
             sourceHolder.setConvertedValue(convertedValue);
             args.preparedArguments[paramIndex]=convertedValue;
@@ -40,6 +37,13 @@
  catch (        TypeMismatchException ex) {
           throw new UnsatisfiedDependencyException(mbd.getResourceDescription(),beanName,paramIndex,paramType,"Could not convert " + methodType + " argument value of type ["+ ObjectUtils.nullSafeClassName(valueHolder.getValue())+ "] to required type ["+ paramType.getName()+ "]: "+ ex.getMessage());
         }
+      }
+      args.arguments[paramIndex]=convertedValue;
+      if (mbd.isLenientConstructorResolution()) {
+        args.rawArguments[paramIndex]=originalValue;
+      }
+ else {
+        args.rawArguments[paramIndex]=((sourceValue instanceof TypedStringValue && !((TypedStringValue)sourceValue).hasTargetType()) ? convertedValue : originalValue);
       }
     }
  else {
