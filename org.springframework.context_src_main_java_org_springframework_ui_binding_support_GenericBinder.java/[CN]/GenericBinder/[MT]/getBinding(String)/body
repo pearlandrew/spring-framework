@@ -1,8 +1,25 @@
 {
-  for (  BindingFactory factory : bindingFactories) {
-    if (factory.hasBindingFor(property)) {
-      return factory.getBinding(property);
+  PropertyPath path=new PropertyPath(property);
+  Binding binding=bindings.get(path.getFirstElement().getValue());
+  if (binding == null) {
+    binding=new PropertyBinding(path.getFirstElement().getValue(),model,typeConverter);
+    bindings.put(path.getFirstElement().getValue(),binding);
+  }
+  for (  PropertyPathElement element : path.getNestedElements()) {
+    if (element.isIndex()) {
+      if (binding.isMap()) {
+        binding=binding.getKeyedBinding(element.getValue());
+      }
+ else       if (binding.isIndexable()) {
+        binding=binding.getIndexedBinding(element.getIntValue());
+      }
+ else {
+        throw new IllegalArgumentException("Attempted to index a property that is not a Collection or Map");
+      }
+    }
+ else {
+      binding=binding.getBinding(element.getValue());
     }
   }
-  throw new NoSuchBindingException(property);
+  return binding;
 }

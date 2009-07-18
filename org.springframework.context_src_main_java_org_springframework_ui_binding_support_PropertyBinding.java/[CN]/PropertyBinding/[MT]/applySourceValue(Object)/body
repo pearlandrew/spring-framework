@@ -1,0 +1,35 @@
+{
+  if (isReadOnly()) {
+    throw new IllegalStateException("Property is read-only");
+  }
+  this.sourceValue=sourceValue;
+  if (sourceValue instanceof String) {
+    try {
+      this.bufferedValue=valueFormatter.parse((String)sourceValue,getLocale());
+    }
+ catch (    ParseException e) {
+    }
+  }
+ else   if (sourceValue instanceof String[]) {
+    String[] sourceValues=(String[])sourceValue;
+    Class<?> parsedType=getFormattedObjectType(indexedValueFormatter.getClass());
+    if (parsedType == null) {
+      parsedType=String.class;
+    }
+    Object parsed=Array.newInstance(parsedType,sourceValues.length);
+    boolean parseError=false;
+    for (int i=0; i < sourceValues.length; i++) {
+      Object parsedValue;
+      try {
+        parsedValue=indexedValueFormatter.parse(sourceValues[i],LocaleContextHolder.getLocale());
+        Array.set(parsed,i,parsedValue);
+      }
+ catch (      ParseException e) {
+        parseError=true;
+      }
+    }
+    if (!parseError) {
+      bufferedValue=parsed;
+    }
+  }
+}
