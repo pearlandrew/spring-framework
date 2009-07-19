@@ -1,14 +1,12 @@
 {
-  if (!isDirty()) {
+  if (bindingStatus != BindingStatus.DIRTY) {
     throw new IllegalStateException("Binding not dirty; nothing to commit");
   }
-  if (!isValid()) {
-    throw new IllegalStateException("Binding is invalid; only commit valid bindings");
+  buffer.flush();
+  if (buffer.flushFailed()) {
+    bindingStatus=BindingStatus.COMMIT_FAILURE;
   }
-  try {
-    getModel().setValue(bufferedValue);
-    this.bufferedValue=null;
-  }
- catch (  Exception e) {
+ else {
+    bindingStatus=BindingStatus.COMMITTED;
   }
 }
