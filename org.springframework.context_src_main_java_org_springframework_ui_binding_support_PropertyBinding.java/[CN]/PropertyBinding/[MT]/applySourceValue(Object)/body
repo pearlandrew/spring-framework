@@ -3,7 +3,7 @@
   assertEnabled();
   if (sourceValue instanceof String) {
     try {
-      Object parsed=bindingContext.getFormatter().parse((String)sourceValue,getLocale());
+      Object parsed=getFormatter().parse((String)sourceValue,getLocale());
       buffer.setValue(coerseToValueType(parsed));
       sourceValue=null;
       status=BindingStatus.DIRTY;
@@ -42,14 +42,26 @@ catch (    ConversionFailedException e) {
     if (status != BindingStatus.INVALID_SOURCE_VALUE) {
       try {
         buffer.setValue(coerseToValueType(parsed));
+        sourceValue=null;
+        status=BindingStatus.DIRTY;
       }
  catch (      ConversionFailedException e) {
         this.sourceValue=sourceValue;
         invalidSourceValueCause=e;
         status=BindingStatus.INVALID_SOURCE_VALUE;
       }
+    }
+  }
+ else {
+    try {
+      buffer.setValue(coerseToValueType(sourceValue));
       sourceValue=null;
       status=BindingStatus.DIRTY;
+    }
+ catch (    ConversionFailedException e) {
+      this.sourceValue=sourceValue;
+      invalidSourceValueCause=e;
+      status=BindingStatus.INVALID_SOURCE_VALUE;
     }
   }
 }
