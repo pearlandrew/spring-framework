@@ -1,9 +1,15 @@
 {
   sourceValues=filter(sourceValues);
+  checkRequired(sourceValues);
   ArrayListBindingResults results=new ArrayListBindingResults(sourceValues.size());
   for (  Map.Entry<String,? extends Object> sourceValue : sourceValues.entrySet()) {
-    Binding binding=getBinding(sourceValue.getKey());
-    results.add(bind(sourceValue,binding));
+    try {
+      Binding binding=getBinding(sourceValue.getKey());
+      results.add(bind(sourceValue,binding));
+    }
+ catch (    PropertyNotFoundException e) {
+      results.add(new PropertyNotFoundResult(sourceValue.getKey(),sourceValue.getValue(),messageSource));
+    }
   }
   return results;
 }
