@@ -1,4 +1,5 @@
 {
+  TypeDescriptor<?> propertyType=new TypeDescriptor(new MethodParameter(property.getReadMethod(),-1));
   Annotation[] annotations=propertyType.getAnnotations();
   for (  Annotation a : annotations) {
     AnnotationFormatterFactory factory=annotationFormatters.get(a.annotationType());
@@ -20,28 +21,5 @@
  else {
     type=propertyType.getType();
   }
-  formatter=typeFormatters.get(type);
-  if (formatter != null) {
-    return formatter;
-  }
- else {
-    Formatted formatted=AnnotationUtils.findAnnotation(type,Formatted.class);
-    if (formatted != null) {
-      Class formatterClass=formatted.value();
-      try {
-        formatter=(Formatter)formatterClass.newInstance();
-      }
- catch (      InstantiationException e) {
-        throw new IllegalStateException(e);
-      }
-catch (      IllegalAccessException e) {
-        throw new IllegalStateException(e);
-      }
-      typeFormatters.put(type,formatter);
-      return formatter;
-    }
- else {
-      return null;
-    }
-  }
+  return getFormatter(type);
 }

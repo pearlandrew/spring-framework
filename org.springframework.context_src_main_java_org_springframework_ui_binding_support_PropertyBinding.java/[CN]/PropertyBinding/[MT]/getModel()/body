@@ -1,17 +1,18 @@
 {
   return new Model(){
     public Object getValue(){
-      return ReflectionUtils.invokeMethod(propertyDescriptor.getReadMethod(),model);
+      return ReflectionUtils.invokeMethod(property.getReadMethod(),object);
     }
     public Class<?> getValueType(){
-      return propertyDescriptor.getPropertyType();
+      return property.getPropertyType();
     }
     public void setValue(    Object value){
-      TypeDescriptor targetType=new TypeDescriptor(new MethodParameter(propertyDescriptor.getWriteMethod(),0));
-      if (value != null && typeConverter.canConvert(value.getClass(),targetType)) {
-        value=typeConverter.convert(value,targetType);
+      TypeDescriptor targetType=new TypeDescriptor(new MethodParameter(property.getWriteMethod(),0));
+      TypeConverter converter=bindingContext.getTypeConverter();
+      if (value != null && converter.canConvert(value.getClass(),targetType)) {
+        value=converter.convert(value,targetType);
       }
-      ReflectionUtils.invokeMethod(propertyDescriptor.getWriteMethod(),model,value);
+      ReflectionUtils.invokeMethod(property.getWriteMethod(),object,value);
     }
   }
 ;
