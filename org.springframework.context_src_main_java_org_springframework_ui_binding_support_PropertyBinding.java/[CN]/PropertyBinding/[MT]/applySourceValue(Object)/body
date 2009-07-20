@@ -3,13 +3,19 @@
   assertEnabled();
   if (sourceValue instanceof String) {
     try {
-      buffer.setValue(bindingContext.getFormatter().parse((String)sourceValue,getLocale()));
+      Object parsed=bindingContext.getFormatter().parse((String)sourceValue,getLocale());
+      buffer.setValue(coerseToValueType(parsed));
       sourceValue=null;
       status=BindingStatus.DIRTY;
     }
  catch (    ParseException e) {
       this.sourceValue=sourceValue;
-      sourceValueParseException=e;
+      invalidSourceValueCause=e;
+      status=BindingStatus.INVALID_SOURCE_VALUE;
+    }
+catch (    ConversionFailedException e) {
+      this.sourceValue=sourceValue;
+      invalidSourceValueCause=e;
       status=BindingStatus.INVALID_SOURCE_VALUE;
     }
   }
@@ -23,18 +29,25 @@
     for (int i=0; i < sourceValues.length; i++) {
       Object parsedValue;
       try {
-        parsedValue=bindingContext.getElementFormatter().parse(sourceValues[i],LocaleContextHolder.getLocale());
+        parsedValue=bindingContext.getElementFormatter().parse(sourceValues[i],getLocale());
         Array.set(parsed,i,parsedValue);
       }
  catch (      ParseException e) {
         this.sourceValue=sourceValue;
-        sourceValueParseException=e;
+        invalidSourceValueCause=e;
         status=BindingStatus.INVALID_SOURCE_VALUE;
         break;
       }
     }
     if (status != BindingStatus.INVALID_SOURCE_VALUE) {
-      buffer.setValue(parsed);
+      try {
+        buffer.setValue(coerseToValueType(parsed));
+      }
+ catch (      ConversionFailedException e) {
+        this.sourceValue=sourceValue;
+        invalidSourceValueCause=e;
+        status=BindingStatus.INVALID_SOURCE_VALUE;
+      }
       sourceValue=null;
       status=BindingStatus.DIRTY;
     }

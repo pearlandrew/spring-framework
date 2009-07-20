@@ -1,10 +1,16 @@
 {
+  binder.bindingRule("currency").formatWith(new CurrencyFormatter());
   Binding b=binder.getBinding("currency");
   assertFalse(b.isList());
   assertFalse(b.isMap());
-  assertEquals("",b.getValue());
+  assertEquals(null,b.getValue());
+  assertEquals("",b.getRenderValue());
   b.applySourceValue("$23.56");
-  assertEquals("$23.56",b.getValue());
+  assertEquals(BindingStatus.DIRTY,b.getStatus());
+  assertEquals(new BigDecimal("23.56"),b.getValue());
+  assertEquals("$23.56",b.getRenderValue());
   b.commit();
-  assertEquals("$23.56",b.getValue());
+  assertEquals(new BigDecimal("23.56"),b.getValue());
+  assertEquals("$23.56",b.getRenderValue());
+  assertEquals(BindingStatus.COMMITTED,b.getStatus());
 }
