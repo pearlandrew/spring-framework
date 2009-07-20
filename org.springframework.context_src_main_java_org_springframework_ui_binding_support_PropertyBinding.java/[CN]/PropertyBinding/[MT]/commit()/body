@@ -1,12 +1,16 @@
 {
-  if (bindingStatus != BindingStatus.DIRTY) {
-    throw new IllegalStateException("Binding not dirty; nothing to commit");
-  }
-  buffer.flush();
-  if (buffer.flushFailed()) {
-    bindingStatus=BindingStatus.COMMIT_FAILURE;
+  assertEditable();
+  assertEnabled();
+  if (status == BindingStatus.DIRTY) {
+    buffer.flush();
+    if (buffer.flushFailed()) {
+      status=BindingStatus.COMMIT_FAILURE;
+    }
+ else {
+      status=BindingStatus.COMMITTED;
+    }
   }
  else {
-    bindingStatus=BindingStatus.COMMITTED;
+    throw new IllegalStateException("Binding is not dirty; nothing to commit");
   }
 }

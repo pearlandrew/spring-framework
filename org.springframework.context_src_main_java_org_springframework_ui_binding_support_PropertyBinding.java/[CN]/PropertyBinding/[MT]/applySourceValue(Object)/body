@@ -1,17 +1,16 @@
 {
-  if (isReadOnly()) {
-    throw new IllegalStateException("Property is read only");
-  }
+  assertEditable();
+  assertEnabled();
   if (sourceValue instanceof String) {
     try {
       buffer.setValue(valueFormatter.parse((String)sourceValue,getLocale()));
       sourceValue=null;
-      bindingStatus=BindingStatus.DIRTY;
+      status=BindingStatus.DIRTY;
     }
  catch (    ParseException e) {
       this.sourceValue=sourceValue;
       sourceValueParseException=e;
-      bindingStatus=BindingStatus.INVALID_SOURCE_VALUE;
+      status=BindingStatus.INVALID_SOURCE_VALUE;
     }
   }
  else   if (sourceValue instanceof String[]) {
@@ -30,14 +29,14 @@
  catch (      ParseException e) {
         this.sourceValue=sourceValue;
         sourceValueParseException=e;
-        bindingStatus=BindingStatus.INVALID_SOURCE_VALUE;
+        status=BindingStatus.INVALID_SOURCE_VALUE;
         break;
       }
     }
-    if (bindingStatus != BindingStatus.INVALID_SOURCE_VALUE) {
+    if (status != BindingStatus.INVALID_SOURCE_VALUE) {
       buffer.setValue(parsed);
       sourceValue=null;
-      bindingStatus=BindingStatus.DIRTY;
+      status=BindingStatus.DIRTY;
     }
   }
 }
