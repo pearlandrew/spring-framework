@@ -3,7 +3,7 @@
   assertEnabled();
   if (sourceValue instanceof String) {
     try {
-      buffer.setValue(valueFormatter.parse((String)sourceValue,getLocale()));
+      buffer.setValue(bindingRule.getFormatter().parse((String)sourceValue,getLocale()));
       sourceValue=null;
       status=BindingStatus.DIRTY;
     }
@@ -15,7 +15,7 @@
   }
  else   if (sourceValue instanceof String[]) {
     String[] sourceValues=(String[])sourceValue;
-    Class<?> parsedType=getFormattedObjectType(indexedValueFormatter.getClass());
+    Class<?> parsedType=getFormattedObjectType(bindingRule.getElementFormatter().getClass());
     if (parsedType == null) {
       parsedType=String.class;
     }
@@ -23,7 +23,7 @@
     for (int i=0; i < sourceValues.length; i++) {
       Object parsedValue;
       try {
-        parsedValue=indexedValueFormatter.parse(sourceValues[i],LocaleContextHolder.getLocale());
+        parsedValue=bindingRule.getElementFormatter().parse(sourceValues[i],LocaleContextHolder.getLocale());
         Array.set(parsed,i,parsedValue);
       }
  catch (      ParseException e) {
