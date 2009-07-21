@@ -13,8 +13,13 @@
  else {
     scopedProxyDefinition.getPropertyValues().addPropertyValue("proxyTargetClass",Boolean.FALSE);
   }
+  if (targetDefinition instanceof AbstractBeanDefinition) {
+    scopedProxyDefinition.copyQualifiersFrom((AbstractBeanDefinition)targetDefinition);
+  }
   scopedProxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
+  scopedProxyDefinition.setPrimary(targetDefinition.isPrimary());
   targetDefinition.setAutowireCandidate(false);
+  targetDefinition.setPrimary(false);
   registry.registerBeanDefinition(targetBeanName,targetDefinition);
   return new BeanDefinitionHolder(scopedProxyDefinition,originalBeanName,definition.getAliases());
 }
