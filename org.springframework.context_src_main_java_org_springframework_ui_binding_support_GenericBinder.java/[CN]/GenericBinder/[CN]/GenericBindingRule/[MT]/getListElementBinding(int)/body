@@ -5,6 +5,7 @@
   growListIfNecessary(index);
   Binding binding=listElementBindings.get(index);
   if (binding == null) {
+    final Map<String,Binding> nestedBindings=new HashMap<String,Binding>();
     BindingContext listContext=new BindingContext(){
       public MessageSource getMessageSource(){
         return GenericBindingRule.this.getMessageSource();
@@ -13,8 +14,14 @@
         return GenericBindingRule.this.getTypeConverter();
       }
       public Binding getBinding(      String property){
+        GenericBindingRule rule=GenericBindingRule.this.getBindingRule(property,getElementType());
         Object model=((List)GenericBindingRule.this.binding.getValue()).get(index);
-        return GenericBindingRule.this.getBindingRule(property,getElementType()).getBinding(model);
+        Binding binding=nestedBindings.get(property);
+        if (binding == null) {
+          binding=new PropertyBinding(rule.property,model,rule);
+          nestedBindings.put(property,binding);
+        }
+        return binding;
       }
       public Formatter getFormatter(){
         return GenericBindingRule.this.getElementFormatter();
