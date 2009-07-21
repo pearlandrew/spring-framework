@@ -3,13 +3,16 @@
   if (isFactoryBean) {
     beanName=BeanFactoryUtils.transformedBeanName(beanName);
   }
-  if (!containsBeanDefinition(beanName)) {
-    if (containsSingleton(beanName)) {
-      return isAutowireCandidate(beanName,new RootBeanDefinition(getType(beanName)),descriptor);
-    }
- else     if (getParentBeanFactory() instanceof ConfigurableListableBeanFactory) {
-      return ((ConfigurableListableBeanFactory)getParentBeanFactory()).isAutowireCandidate(beanName,descriptor);
-    }
+  if (containsBeanDefinition(beanName)) {
+    return isAutowireCandidate(beanName,getMergedLocalBeanDefinition(beanName),descriptor);
   }
-  return isAutowireCandidate(beanName,getMergedLocalBeanDefinition(beanName),descriptor);
+ else   if (containsSingleton(beanName)) {
+    return isAutowireCandidate(beanName,new RootBeanDefinition(getType(beanName)),descriptor);
+  }
+ else   if (getParentBeanFactory() instanceof ConfigurableListableBeanFactory) {
+    return ((ConfigurableListableBeanFactory)getParentBeanFactory()).isAutowireCandidate(beanName,descriptor);
+  }
+ else {
+    return true;
+  }
 }

@@ -10,9 +10,17 @@
     if (bd.getResolvedFactoryMethod() != null) {
       targetAnnotation=bd.getResolvedFactoryMethod().getAnnotation(type);
     }
-    if (targetAnnotation == null && bd.hasBeanClass()) {
-      Class<?> beanClass=bd.getBeanClass();
-      targetAnnotation=beanClass.getAnnotation(type);
+    if (targetAnnotation == null) {
+      Class<?> beanType=null;
+      if (this.beanFactory != null) {
+        beanType=this.beanFactory.getType(bdHolder.getBeanName());
+      }
+ else       if (bd.hasBeanClass()) {
+        beanType=bd.getBeanClass();
+      }
+      if (beanType != null) {
+        targetAnnotation=ClassUtils.getUserClass(beanType).getAnnotation(type);
+      }
     }
     if (targetAnnotation != null && targetAnnotation.equals(annotation)) {
       return true;
