@@ -1,4 +1,5 @@
 {
+  Assert.notNull(type,"The Class of the object to format is required");
   Formatter formatter=typeFormatters.get(type);
   if (formatter != null) {
     return formatter;
@@ -11,16 +12,16 @@
         formatter=(Formatter)formatterClass.newInstance();
       }
  catch (      InstantiationException e) {
-        throw new IllegalStateException(e);
+        throw new IllegalStateException("Formatter referenced by @Formatted annotation does not have default constructor",e);
       }
 catch (      IllegalAccessException e) {
-        throw new IllegalStateException(e);
+        throw new IllegalStateException("Formatter referenced by @Formatted annotation does not have public constructor",e);
       }
       typeFormatters.put(type,formatter);
       return formatter;
     }
  else {
-      return DefaultFormatter.INSTANCE;
+      return new DefaultFormatter(type,typeConverter);
     }
   }
 }

@@ -1,4 +1,5 @@
 {
+  Assert.notNull(property,"The PropertyDescriptor is required");
   TypeDescriptor<?> propertyType=new TypeDescriptor(new MethodParameter(property.getReadMethod(),-1));
   Annotation[] annotations=propertyType.getAnnotations();
   for (  Annotation a : annotations) {
@@ -10,12 +11,13 @@
   Formatter<?> formatter=null;
   Class<?> type;
   if (propertyType.isCollection() || propertyType.isArray()) {
-    formatter=collectionTypeFormatters.get(new GenericCollectionPropertyType(propertyType.getType(),propertyType.getElementType()));
+    GenericCollectionPropertyType collectionType=new GenericCollectionPropertyType(propertyType.getType(),propertyType.getElementType());
+    formatter=collectionTypeFormatters.get(collectionType);
     if (formatter != null) {
       return formatter;
     }
  else {
-      return DefaultFormatter.COLLECTION_FORMATTER;
+      return new DefaultCollectionFormatter(collectionType,this);
     }
   }
  else {
