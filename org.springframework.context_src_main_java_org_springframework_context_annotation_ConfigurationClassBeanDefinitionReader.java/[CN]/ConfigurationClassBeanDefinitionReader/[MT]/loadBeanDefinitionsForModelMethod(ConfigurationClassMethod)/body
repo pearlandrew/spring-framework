@@ -11,9 +11,9 @@
   List<String> names=new ArrayList<String>(Arrays.asList((String[])beanAttributes.get("name")));
   String beanName=(names.size() > 0 ? names.remove(0) : method.getMetadata().getMethodName());
   for (  String alias : names) {
-    registry.registerAlias(beanName,alias);
+    this.registry.registerAlias(beanName,alias);
   }
-  if (registry.containsBeanDefinition(beanName)) {
+  if (this.registry.containsBeanDefinition(beanName)) {
     BeanDefinition existingBeanDef=registry.getBeanDefinition(beanName);
     if (!(existingBeanDef instanceof ConfigurationClassBeanDefinition)) {
       if (logger.isDebugEnabled()) {
@@ -22,16 +22,16 @@
       return;
     }
   }
-  if (metadata.hasAnnotation(Primary.class.getName())) {
+  if (metadata.isAnnotated(Primary.class.getName())) {
     beanDef.setPrimary(true);
   }
-  if (metadata.hasAnnotation(Lazy.class.getName())) {
+  if (metadata.isAnnotated(Lazy.class.getName())) {
     beanDef.setLazyInit((Boolean)metadata.getAnnotationAttributes(Lazy.class.getName()).get("value"));
   }
- else   if (configClass.getMetadata().hasAnnotation(Lazy.class.getName())) {
+ else   if (configClass.getMetadata().isAnnotated(Lazy.class.getName())) {
     beanDef.setLazyInit((Boolean)configClass.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value"));
   }
-  if (metadata.hasAnnotation(DependsOn.class.getName())) {
+  if (metadata.isAnnotated(DependsOn.class.getName())) {
     String[] dependsOn=(String[])metadata.getAnnotationAttributes(DependsOn.class.getName()).get("value");
     if (dependsOn.length > 0) {
       beanDef.setDependsOn(dependsOn);

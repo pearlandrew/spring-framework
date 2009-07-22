@@ -1,26 +1,26 @@
 {
-  this.annotationMap.put(this.annotationType,this.attributes);
+  this.attributesMap.put(this.annotationType,this.localAttributes);
   try {
     Class<?> annotationClass=this.classLoader.loadClass(this.annotationType);
     Method[] annotationAttributes=annotationClass.getMethods();
     for (    Method annotationAttribute : annotationAttributes) {
       String attributeName=annotationAttribute.getName();
       Object defaultValue=annotationAttribute.getDefaultValue();
-      if (defaultValue != null && !this.attributes.containsKey(attributeName)) {
-        this.attributes.put(attributeName,defaultValue);
+      if (defaultValue != null && !this.localAttributes.containsKey(attributeName)) {
+        this.localAttributes.put(attributeName,defaultValue);
+      }
+    }
+    Set<String> metaAnnotationTypeNames=new LinkedHashSet<String>();
+    for (    Annotation metaAnnotation : annotationClass.getAnnotations()) {
+      metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
+      if (!this.attributesMap.containsKey(metaAnnotation.annotationType().getName())) {
+        this.attributesMap.put(metaAnnotation.annotationType().getName(),AnnotationUtils.getAnnotationAttributes(metaAnnotation,true));
+      }
+      for (      Annotation metaMetaAnnotation : metaAnnotation.annotationType().getAnnotations()) {
+        metaAnnotationTypeNames.add(metaMetaAnnotation.annotationType().getName());
       }
     }
     if (this.metaAnnotationMap != null) {
-      Set<String> metaAnnotationTypeNames=new LinkedHashSet<String>();
-      for (      Annotation metaAnnotation : annotationClass.getAnnotations()) {
-        metaAnnotationTypeNames.add(metaAnnotation.annotationType().getName());
-        if (!this.annotationMap.containsKey(metaAnnotation.annotationType().getName())) {
-          this.annotationMap.put(metaAnnotation.annotationType().getName(),AnnotationUtils.getAnnotationAttributes(metaAnnotation,true));
-        }
-        for (        Annotation metaMetaAnnotation : metaAnnotation.annotationType().getAnnotations()) {
-          metaAnnotationTypeNames.add(metaMetaAnnotation.annotationType().getName());
-        }
-      }
       this.metaAnnotationMap.put(this.annotationType,metaAnnotationTypeNames);
     }
   }
