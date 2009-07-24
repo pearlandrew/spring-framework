@@ -1,0 +1,63 @@
+{
+  if (bindingStatus == BindingStatus.INVALID_SUBMITTED_VALUE) {
+    return new AbstractAlert(){
+      public String getCode(){
+        return "typeMismatch";
+      }
+      public String getMessage(){
+        MessageBuilder builder=new MessageBuilder(context.getMessageSource());
+        builder.code(getCode());
+        if (invalidSubmittedValueCause instanceof ParseException) {
+          ParseException e=(ParseException)invalidSubmittedValueCause;
+          builder.arg("label",context.getLabel());
+          builder.arg("value",submittedValue);
+          builder.arg("errorOffset",e.getErrorOffset());
+          builder.defaultMessage("Failed to bind '" + context.getLabel() + "'; the submitted value "+ StylerUtils.style(submittedValue)+ " has an invalid format and could no be parsed");
+        }
+ else {
+          ConversionFailedException e=(ConversionFailedException)invalidSubmittedValueCause;
+          builder.arg("label",new ResolvableArgument(context.getLabel()));
+          builder.arg("value",submittedValue);
+          builder.defaultMessage("Failed to bind '" + context.getLabel() + "'; the submitted value "+ StylerUtils.style(submittedValue)+ " has could not be converted to "+ e.getTargetType().getName());
+        }
+        return builder.build();
+      }
+      public Severity getSeverity(){
+        return Severity.ERROR;
+      }
+    }
+;
+  }
+ else   if (bindingStatus == BindingStatus.COMMIT_FAILURE) {
+    return new AbstractAlert(){
+      public String getCode(){
+        return "internalError";
+      }
+      public String getMessage(){
+        buffer.getFlushException().printStackTrace();
+        return "Internal error occurred; message = [" + buffer.getFlushException().getMessage() + "]";
+      }
+      public Severity getSeverity(){
+        return Severity.FATAL;
+      }
+    }
+;
+  }
+ else   if (bindingStatus == BindingStatus.COMMITTED) {
+    return new AbstractAlert(){
+      public String getCode(){
+        return "bindSuccess";
+      }
+      public String getMessage(){
+        return "Binding successful";
+      }
+      public Severity getSeverity(){
+        return Severity.INFO;
+      }
+    }
+;
+  }
+ else {
+    return null;
+  }
+}

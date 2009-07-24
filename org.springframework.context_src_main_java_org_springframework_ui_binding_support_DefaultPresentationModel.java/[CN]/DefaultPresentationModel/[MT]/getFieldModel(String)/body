@@ -1,0 +1,21 @@
+{
+  FieldPath path=new FieldPath(fieldName);
+  FieldModel field=getRule(path.getFirstElement().getValue()).getFieldModel(domainModel);
+  for (  FieldPathElement element : path.getNestedElements()) {
+    if (element.isIndex()) {
+      if (field.isMap()) {
+        field=field.getMapValue(element.getValue());
+      }
+ else       if (field.isList()) {
+        field=field.getListElement(element.getIntValue());
+      }
+ else {
+        throw new IllegalArgumentException("Attempted to index a field that is not a List, Array, or a Map");
+      }
+    }
+ else {
+      field=field.getNested(element.getValue());
+    }
+  }
+  return field;
+}
