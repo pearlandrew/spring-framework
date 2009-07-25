@@ -1,0 +1,21 @@
+{
+  String fieldName=fieldValue.getKey();
+  Object value=fieldValue.getValue();
+  FieldModel field;
+  try {
+    field=getFieldModel(fieldName);
+  }
+ catch (  FieldNotFoundException e) {
+    return new FieldNotFoundResult(fieldName,value,getMessageSource());
+  }
+  if (!field.isEditable()) {
+    return new FieldNotEditableResult(fieldName,value,getMessageSource());
+  }
+ else {
+    field.applySubmittedValue(value);
+    if (field.getBindingStatus() == BindingStatus.DIRTY) {
+      field.commit();
+    }
+    return new AlertBindingResult(fieldName,value,field.getStatusAlert());
+  }
+}
