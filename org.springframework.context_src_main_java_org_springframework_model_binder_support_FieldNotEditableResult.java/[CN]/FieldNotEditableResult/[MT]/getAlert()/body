@@ -9,9 +9,14 @@
     public String getMessage(){
       MessageBuilder builder=new MessageBuilder(messageSource);
       builder.code("bindSuccess");
-      builder.arg("label",new ResolvableArgument(property));
+      builder.arg("label",new ResolvableArgument(fieldName));
       builder.arg("value",submittedValue);
-      builder.defaultMessage("Successfully bound user value " + StylerUtils.style(submittedValue) + " to property '"+ property+ "'");
+      builder.defaultMessage(new DefaultMessageFactory(){
+        public String createDefaultMessage(){
+          return "Failed to bind submitted value " + StylerUtils.style(submittedValue) + "; field '"+ fieldName+ "' is not editable";
+        }
+      }
+);
       return builder.build();
     }
   }
