@@ -1,0 +1,19 @@
+{
+  FieldModel field;
+  try {
+    field=presentationModel.getFieldModel(fieldName);
+  }
+ catch (  FieldNotFoundException e) {
+    return new FieldNotFoundResult(fieldName,value,messageSource);
+  }
+  if (!field.isEditable()) {
+    return new FieldNotEditableResult(fieldName,value,messageSource);
+  }
+ else {
+    field.applySubmittedValue(value);
+    if (field.getBindingStatus() == BindingStatus.DIRTY) {
+      field.commit();
+    }
+    return new AlertBindingResult(fieldName,value,field.getStatusAlert());
+  }
+}
