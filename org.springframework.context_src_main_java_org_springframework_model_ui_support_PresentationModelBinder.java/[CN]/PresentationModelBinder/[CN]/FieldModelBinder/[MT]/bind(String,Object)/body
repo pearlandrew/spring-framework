@@ -4,14 +4,14 @@
     field=presentationModel.getFieldModel(fieldName);
   }
  catch (  FieldNotFoundException e) {
-    return new FieldNotFoundResult(fieldName,value,messageSource);
+    return new FieldNotFoundResult(fieldName,value,getMessageSource());
   }
   if (!field.isEditable()) {
-    return new FieldNotEditableResult(fieldName,value,messageSource);
+    return new FieldNotEditableResult(fieldName,value,getMessageSource());
   }
  else {
     field.applySubmittedValue(value);
-    if (field.getBindingStatus() == BindingStatus.DIRTY) {
+    if (field.getBindingStatus() == BindingStatus.DIRTY && commitDirtyValue) {
       field.commit();
     }
     return new AlertBindingResult(fieldName,value,field.getStatusAlert());
