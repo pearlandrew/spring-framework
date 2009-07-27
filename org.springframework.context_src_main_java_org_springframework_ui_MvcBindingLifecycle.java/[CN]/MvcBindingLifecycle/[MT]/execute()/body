@@ -1,0 +1,16 @@
+{
+  boolean bindEagerCommit=false;
+  if (model == null) {
+    initModel();
+    bindEagerCommit=true;
+  }
+  modelMap.addAttribute(model);
+  PresentationModel presentationModel=presentationModelFactory.getPresentationModel(model);
+  PresentationModelBinder binder=new PresentationModelBinder();
+  binder.setCommitDirtyValue(bindEagerCommit);
+  binder.bind(fieldValues,presentationModel);
+  presentationModel.validate();
+  if (!presentationModel.hasErrors() && !bindEagerCommit) {
+    presentationModel.commit();
+  }
+}
