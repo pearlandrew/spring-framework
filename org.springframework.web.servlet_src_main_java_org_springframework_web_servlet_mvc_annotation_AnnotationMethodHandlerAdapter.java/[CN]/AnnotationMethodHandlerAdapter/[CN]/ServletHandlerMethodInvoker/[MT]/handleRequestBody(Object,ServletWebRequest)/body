@@ -1,0 +1,23 @@
+{
+  HttpInputMessage inputMessage=new ServletServerHttpRequest(webRequest.getRequest());
+  List<MediaType> acceptedMediaTypes=inputMessage.getHeaders().getAccept();
+  HttpOutputMessage outputMessage=new ServletServerHttpResponse(webRequest.getResponse());
+  Class<?> returnValueType=returnValue.getClass();
+  List<MediaType> allSupportedMediaTypes=new ArrayList<MediaType>();
+  for (  HttpMessageConverter messageConverter : messageConverters) {
+    allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
+    if (messageConverter.supports(returnValueType)) {
+      for (      Object o : messageConverter.getSupportedMediaTypes()) {
+        MediaType supportedMediaType=(MediaType)o;
+        for (        MediaType acceptedMediaType : acceptedMediaTypes) {
+          if (supportedMediaType.includes(acceptedMediaType)) {
+            messageConverter.write(returnValue,outputMessage);
+            responseArgumentUsed=true;
+            return;
+          }
+        }
+      }
+    }
+  }
+  throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
+}
