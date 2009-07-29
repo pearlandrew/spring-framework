@@ -39,6 +39,7 @@
     }
     AutowireUtils.sortConstructors(candidates);
     int minTypeDiffWeight=Integer.MAX_VALUE;
+    Set<Constructor> ambiguousConstructors=null;
     for (int i=0; i < candidates.length; i++) {
       Constructor<?> candidate=candidates[i];
       Class[] paramTypes=candidate.getParameterTypes();
@@ -96,13 +97,21 @@
         constructorToUse=candidate;
         argsToUse=args.arguments;
         minTypeDiffWeight=typeDiffWeight;
+        ambiguousConstructors=null;
       }
- else       if (typeDiffWeight < Integer.MAX_VALUE && typeDiffWeight == minTypeDiffWeight && !mbd.isLenientConstructorResolution()) {
-        throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Ambiguous constructor matches found in bean '" + beanName + "' "+ "(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");
+ else       if (constructorToUse != null && typeDiffWeight == minTypeDiffWeight) {
+        if (ambiguousConstructors == null) {
+          ambiguousConstructors=new LinkedHashSet<Constructor>();
+          ambiguousConstructors.add(constructorToUse);
+        }
+        ambiguousConstructors.add(candidate);
       }
     }
     if (constructorToUse == null) {
       throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Could not resolve matching constructor");
+    }
+ else     if (ambiguousConstructors != null && !mbd.isLenientConstructorResolution()) {
+      throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Ambiguous constructor matches found in bean '" + beanName + "' "+ "(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities): "+ ambiguousConstructors);
     }
     if (explicitArgs == null) {
       mbd.resolvedConstructorOrFactoryMethod=constructorToUse;
