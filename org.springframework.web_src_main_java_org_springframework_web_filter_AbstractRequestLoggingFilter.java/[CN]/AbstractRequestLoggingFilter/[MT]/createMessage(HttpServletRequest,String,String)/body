@@ -19,6 +19,21 @@
       msg.append(";user=").append(user);
     }
   }
+  if (isIncludePayload() && request instanceof RequestCachingRequestWrapper) {
+    RequestCachingRequestWrapper wrapper=(RequestCachingRequestWrapper)request;
+    byte[] buf=wrapper.toByteArray();
+    if (buf.length > 0) {
+      int length=Math.min(buf.length,getMaxPayloadLength());
+      String payload;
+      try {
+        payload=new String(buf,0,length,wrapper.getCharacterEncoding());
+      }
+ catch (      UnsupportedEncodingException e) {
+        payload="[unknown]";
+      }
+      msg.append(";payload=").append(payload);
+    }
+  }
   msg.append(suffix);
   return msg.toString();
 }
