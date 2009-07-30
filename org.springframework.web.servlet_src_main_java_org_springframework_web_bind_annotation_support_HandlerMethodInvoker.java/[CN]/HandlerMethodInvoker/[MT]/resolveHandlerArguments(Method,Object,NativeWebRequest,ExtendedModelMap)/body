@@ -71,6 +71,12 @@
  else         if (Errors.class.isAssignableFrom(paramType)) {
           throw new IllegalStateException("Errors/BindingResult argument declared " + "without preceding model attribute. Check your handler method signature!");
         }
+ else         if (BindingLifecycle.class.isAssignableFrom(paramType)) {
+          Class<?> modelType=resolveBindingLifecycleModelType(methodParam);
+          PresentationModelFactory factory=PresentationModelUtils.getPresentationModelFactory(webRequest);
+          Map<String,Object> fieldValues=new NativeWebRequestParameterMap(webRequest);
+          args[i]=new MvcBindingLifecycle(modelType,factory,implicitModel,fieldValues);
+        }
  else         if (BeanUtils.isSimpleProperty(paramType)) {
           paramName="";
         }
