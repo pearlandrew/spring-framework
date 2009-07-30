@@ -1,0 +1,24 @@
+{
+  final Class<?> handlerType=handler.getClass();
+  final Class<? extends Throwable> thrownExceptionType=thrownException.getClass();
+  final Map<Class<? extends Throwable>,Method> resolverMethods=new LinkedHashMap<Class<? extends Throwable>,Method>();
+  ReflectionUtils.doWithMethods(handlerType,new ReflectionUtils.MethodCallback(){
+    public void doWith(    Method method){
+      method=ClassUtils.getMostSpecificMethod(method,handlerType);
+      List<Class<? extends Throwable>> handledExceptions=getHandledExceptions(method);
+      for (      Class<? extends Throwable> handledException : handledExceptions) {
+        if (handledException.isAssignableFrom(thrownExceptionType)) {
+          if (!resolverMethods.containsKey(handledException)) {
+            resolverMethods.put(handledException,method);
+          }
+ else {
+            Method oldMappedMethod=resolverMethods.get(handledException);
+            throw new IllegalStateException("Ambiguous exception handler mapped for " + handledException + "]: {"+ oldMappedMethod+ ", "+ method+ "}.");
+          }
+        }
+      }
+    }
+  }
+);
+  return getBestMatchingMethod(thrownException,resolverMethods);
+}
