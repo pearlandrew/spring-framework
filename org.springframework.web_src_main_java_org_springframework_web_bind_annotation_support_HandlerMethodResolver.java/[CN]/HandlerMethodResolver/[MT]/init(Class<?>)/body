@@ -1,0 +1,23 @@
+{
+  ReflectionUtils.doWithMethods(handlerType,new ReflectionUtils.MethodCallback(){
+    public void doWith(    Method method){
+      if (isHandlerMethod(method)) {
+        handlerMethods.add(ClassUtils.getMostSpecificMethod(method,handlerType));
+      }
+ else       if (method.isAnnotationPresent(InitBinder.class)) {
+        initBinderMethods.add(ClassUtils.getMostSpecificMethod(method,handlerType));
+      }
+ else       if (method.isAnnotationPresent(ModelAttribute.class)) {
+        modelAttributeMethods.add(ClassUtils.getMostSpecificMethod(method,handlerType));
+      }
+    }
+  }
+);
+  this.typeLevelMapping=handlerType.getAnnotation(RequestMapping.class);
+  SessionAttributes sessionAttributes=handlerType.getAnnotation(SessionAttributes.class);
+  this.sessionAttributesFound=(sessionAttributes != null);
+  if (this.sessionAttributesFound) {
+    this.sessionAttributeNames.addAll(Arrays.asList(sessionAttributes.value()));
+    this.sessionAttributeTypes.addAll(Arrays.asList(sessionAttributes.types()));
+  }
+}

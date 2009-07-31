@@ -1,0 +1,23 @@
+{
+  Class paramType=methodParam.getParameterType();
+  if (headerName.length() == 0) {
+    headerName=getRequiredParameterName(methodParam);
+  }
+  Object headerValue=null;
+  String[] headerValues=webRequest.getHeaderValues(headerName);
+  if (headerValues != null) {
+    headerValue=(headerValues.length == 1 ? headerValues[0] : headerValues);
+  }
+  if (headerValue == null) {
+    if (StringUtils.hasText(defaultValue)) {
+      headerValue=defaultValue;
+    }
+ else     if (required) {
+      raiseMissingHeaderException(headerName,paramType);
+    }
+    headerValue=checkValue(headerName,headerValue,paramType);
+  }
+  WebDataBinder binder=createBinder(webRequest,null,headerName);
+  initBinder(handlerForInitBinderCall,headerName,binder,webRequest);
+  return binder.convertIfNecessary(headerValue,paramType,methodParam);
+}

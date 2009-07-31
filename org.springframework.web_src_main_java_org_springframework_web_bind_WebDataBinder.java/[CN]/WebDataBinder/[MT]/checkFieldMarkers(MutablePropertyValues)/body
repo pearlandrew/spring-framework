@@ -1,0 +1,16 @@
+{
+  if (getFieldMarkerPrefix() != null) {
+    String fieldMarkerPrefix=getFieldMarkerPrefix();
+    PropertyValue[] pvArray=mpvs.getPropertyValues();
+    for (    PropertyValue pv : pvArray) {
+      if (pv.getName().startsWith(fieldMarkerPrefix)) {
+        String field=pv.getName().substring(fieldMarkerPrefix.length());
+        if (getPropertyAccessor().isWritableProperty(field) && !mpvs.contains(field)) {
+          Class fieldType=getPropertyAccessor().getPropertyType(field);
+          mpvs.addPropertyValue(field,getEmptyValue(field,fieldType));
+        }
+        mpvs.removePropertyValue(pv);
+      }
+    }
+  }
+}

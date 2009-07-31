@@ -1,0 +1,118 @@
+{
+  Class[] paramTypes=handlerMethod.getParameterTypes();
+  Object[] args=new Object[paramTypes.length];
+  for (int i=0; i < args.length; i++) {
+    MethodParameter methodParam=new MethodParameter(handlerMethod,i);
+    methodParam.initParameterNameDiscovery(this.parameterNameDiscoverer);
+    GenericTypeResolver.resolveParameterType(methodParam,handler.getClass());
+    String paramName=null;
+    String headerName=null;
+    boolean requestBodyFound=false;
+    String cookieName=null;
+    String pathVarName=null;
+    String attrName=null;
+    boolean required=false;
+    String defaultValue=null;
+    int found=0;
+    Annotation[] paramAnns=methodParam.getParameterAnnotations();
+    for (    Annotation paramAnn : paramAnns) {
+      if (RequestParam.class.isInstance(paramAnn)) {
+        RequestParam requestParam=(RequestParam)paramAnn;
+        paramName=requestParam.value();
+        required=requestParam.required();
+        defaultValue=requestParam.defaultValue();
+        found++;
+      }
+ else       if (RequestHeader.class.isInstance(paramAnn)) {
+        RequestHeader requestHeader=(RequestHeader)paramAnn;
+        headerName=requestHeader.value();
+        required=requestHeader.required();
+        defaultValue=requestHeader.defaultValue();
+        found++;
+      }
+ else       if (RequestBody.class.isInstance(paramAnn)) {
+        requestBodyFound=true;
+        found++;
+      }
+ else       if (CookieValue.class.isInstance(paramAnn)) {
+        CookieValue cookieValue=(CookieValue)paramAnn;
+        cookieName=cookieValue.value();
+        required=cookieValue.required();
+        defaultValue=cookieValue.defaultValue();
+        found++;
+      }
+ else       if (PathVariable.class.isInstance(paramAnn)) {
+        PathVariable pathVar=(PathVariable)paramAnn;
+        pathVarName=pathVar.value();
+        found++;
+      }
+ else       if (ModelAttribute.class.isInstance(paramAnn)) {
+        ModelAttribute attr=(ModelAttribute)paramAnn;
+        attrName=attr.value();
+        found++;
+      }
+    }
+    if (found > 1) {
+      throw new IllegalStateException("Handler parameter annotations are exclusive choices - " + "do not specify more than one such annotation on the same parameter: " + handlerMethod);
+    }
+    if (found == 0) {
+      Object argValue=resolveCommonArgument(methodParam,webRequest);
+      if (argValue != WebArgumentResolver.UNRESOLVED) {
+        args[i]=argValue;
+      }
+ else {
+        Class paramType=methodParam.getParameterType();
+        if (Model.class.isAssignableFrom(paramType) || Map.class.isAssignableFrom(paramType)) {
+          args[i]=implicitModel;
+        }
+ else         if (SessionStatus.class.isAssignableFrom(paramType)) {
+          args[i]=this.sessionStatus;
+        }
+ else         if (Errors.class.isAssignableFrom(paramType)) {
+          throw new IllegalStateException("Errors/BindingResult argument declared " + "without preceding model attribute. Check your handler method signature!");
+        }
+ else         if (BindingLifecycle.class.isAssignableFrom(paramType)) {
+          Class<?> modelType=resolveBindingLifecycleModelType(methodParam);
+          PresentationModelFactory factory=PresentationModelUtils.getPresentationModelFactory(webRequest);
+          Map<String,Object> fieldValues=new NativeWebRequestParameterMap(webRequest);
+          args[i]=new MvcBindingLifecycle(modelType,factory,implicitModel,fieldValues);
+        }
+ else         if (BeanUtils.isSimpleProperty(paramType)) {
+          paramName="";
+        }
+ else {
+          attrName="";
+        }
+      }
+    }
+    if (paramName != null) {
+      args[i]=resolveRequestParam(paramName,required,defaultValue,methodParam,webRequest,handler);
+    }
+ else     if (headerName != null) {
+      args[i]=resolveRequestHeader(headerName,required,defaultValue,methodParam,webRequest,handler);
+    }
+ else     if (requestBodyFound) {
+      args[i]=resolveRequestBody(methodParam,webRequest,handler);
+    }
+ else     if (cookieName != null) {
+      args[i]=resolveCookieValue(cookieName,required,defaultValue,methodParam,webRequest,handler);
+    }
+ else     if (pathVarName != null) {
+      args[i]=resolvePathVariable(pathVarName,methodParam,webRequest,handler);
+    }
+ else     if (attrName != null) {
+      WebDataBinder binder=resolveModelAttribute(attrName,methodParam,implicitModel,webRequest,handler);
+      boolean assignBindingResult=(args.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
+      if (binder.getTarget() != null) {
+        doBind(webRequest,binder,!assignBindingResult);
+      }
+      args[i]=binder.getTarget();
+      if (assignBindingResult) {
+        args[i + 1]=binder.getBindingResult();
+        i++;
+      }
+      implicitModel.putAll(binder.getBindingResult().getModel());
+    }
+  }
+  return args;
+}
