@@ -1,7 +1,8 @@
 {
   ScheduledExecutorService executor=getScheduledExecutor();
   try {
-    return new ReschedulingRunnable(task,trigger,executor).schedule();
+    ErrorHandler errorHandler=this.errorHandler != null ? this.errorHandler : TaskUtils.getDefaultErrorHandler(true);
+    return new ReschedulingRunnable(task,trigger,executor,errorHandler).schedule();
   }
  catch (  RejectedExecutionException ex) {
     throw new TaskRejectedException("Executor [" + executor + "] did not accept task: "+ task,ex);

@@ -1,8 +1,10 @@
 {
   Date actualExecutionTime=new Date();
-  getDelegate().run();
+  super.run();
   Date completionTime=new Date();
-  this.triggerContext.update(this.scheduledExecutionTime,actualExecutionTime,completionTime);
+synchronized (this.triggerContextMonitor) {
+    this.triggerContext.update(this.scheduledExecutionTime,actualExecutionTime,completionTime);
+  }
   if (!this.currentFuture.isCancelled()) {
     schedule();
   }

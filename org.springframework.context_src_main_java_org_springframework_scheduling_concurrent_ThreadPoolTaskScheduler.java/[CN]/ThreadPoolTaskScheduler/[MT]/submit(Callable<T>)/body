@@ -1,6 +1,9 @@
 {
   ExecutorService executor=getScheduledExecutor();
   try {
+    if (this.errorHandler != null) {
+      task=new DelegatingErrorHandlingCallable<T>(task,this.errorHandler);
+    }
     return executor.submit(task);
   }
  catch (  RejectedExecutionException ex) {
