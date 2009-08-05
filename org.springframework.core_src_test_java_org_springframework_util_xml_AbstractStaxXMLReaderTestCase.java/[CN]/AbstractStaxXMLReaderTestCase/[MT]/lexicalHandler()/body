@@ -1,12 +1,12 @@
 {
-  MockControl lexicalHandlerControl=MockControl.createControl(LexicalHandler.class);
+  MockControl lexicalHandlerControl=MockControl.createStrictControl(LexicalHandler.class);
   lexicalHandlerControl.setDefaultMatcher(new SaxArgumentMatcher());
   LexicalHandler lexicalHandlerMock=(LexicalHandler)lexicalHandlerControl.getMock();
   LexicalHandler lexicalHandler=new CopyingLexicalHandler(lexicalHandlerMock);
   Resource testLexicalHandlerXml=new ClassPathResource("testLexicalHandler.xml",getClass());
   standardReader.setContentHandler(null);
   standardReader.setProperty("http://xml.org/sax/properties/lexical-handler",lexicalHandler);
-  standardReader.parse(new InputSource(createTestInputStream()));
+  standardReader.parse(new InputSource(testLexicalHandlerXml.getInputStream()));
   lexicalHandlerControl.replay();
   inputFactory.setProperty("javax.xml.stream.isCoalescing",Boolean.FALSE);
   inputFactory.setProperty("http://java.sun.com/xml/stream/properties/report-cdata-event",Boolean.TRUE);
