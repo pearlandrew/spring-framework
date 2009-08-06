@@ -1,6 +1,12 @@
 {
   try {
-    ReflectionUtils.makeAccessible(factoryMethod);
+    AccessController.doPrivileged(new PrivilegedAction<Object>(){
+      public Object run(){
+        ReflectionUtils.makeAccessible(factoryMethod);
+        return null;
+      }
+    }
+);
     return factoryMethod.invoke(factoryBean,args);
   }
  catch (  IllegalArgumentException ex) {

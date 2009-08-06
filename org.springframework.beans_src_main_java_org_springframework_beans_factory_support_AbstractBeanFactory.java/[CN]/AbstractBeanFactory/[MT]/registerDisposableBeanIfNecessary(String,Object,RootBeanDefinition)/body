@@ -1,14 +1,15 @@
 {
+  AccessControlContext acc=(System.getSecurityManager() != null ? getAccessControlContext() : null);
   if (!mbd.isPrototype() && requiresDestruction(bean,mbd)) {
     if (mbd.isSingleton()) {
-      registerDisposableBean(beanName,new DisposableBeanAdapter(bean,beanName,mbd,getBeanPostProcessors()));
+      registerDisposableBean(beanName,new DisposableBeanAdapter(bean,beanName,mbd,getBeanPostProcessors(),acc));
     }
  else {
       Scope scope=this.scopes.get(mbd.getScope());
       if (scope == null) {
         throw new IllegalStateException("No Scope registered for scope '" + mbd.getScope() + "'");
       }
-      scope.registerDestructionCallback(beanName,new DisposableBeanAdapter(bean,beanName,mbd,getBeanPostProcessors()));
+      scope.registerDestructionCallback(beanName,new DisposableBeanAdapter(bean,beanName,mbd,getBeanPostProcessors(),acc));
     }
   }
 }

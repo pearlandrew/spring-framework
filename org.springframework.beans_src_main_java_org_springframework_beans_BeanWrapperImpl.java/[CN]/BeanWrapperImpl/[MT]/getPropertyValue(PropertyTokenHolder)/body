@@ -5,12 +5,28 @@
   if (pd == null || pd.getReadMethod() == null) {
     throw new NotReadablePropertyException(getRootClass(),this.nestedPath + propertyName);
   }
-  Method readMethod=pd.getReadMethod();
+  final Method readMethod=pd.getReadMethod();
   try {
     if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
       readMethod.setAccessible(true);
     }
-    Object value=readMethod.invoke(this.object,(Object[])null);
+    Object value=null;
+    if (System.getSecurityManager() != null) {
+      try {
+        value=AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
+          public Object run() throws Exception {
+            return readMethod.invoke(object,(Object[])null);
+          }
+        }
+,acc);
+      }
+ catch (      PrivilegedActionException pae) {
+        throw pae.getException();
+      }
+    }
+ else {
+      value=readMethod.invoke(object,(Object[])null);
+    }
     if (tokens.keys != null) {
       for (int i=0; i < tokens.keys.length; i++) {
         String key=tokens.keys[i];
@@ -62,6 +78,9 @@ catch (  IndexOutOfBoundsException ex) {
     throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Index of out of bounds in property path '" + propertyName + "'",ex);
   }
 catch (  NumberFormatException ex) {
+    throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Invalid index in property path '" + propertyName + "'",ex);
+  }
+catch (  Exception ex) {
     throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Invalid index in property path '" + propertyName + "'",ex);
   }
 }

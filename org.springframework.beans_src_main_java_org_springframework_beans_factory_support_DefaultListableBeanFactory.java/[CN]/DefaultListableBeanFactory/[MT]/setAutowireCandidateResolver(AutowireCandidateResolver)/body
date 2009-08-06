@@ -1,7 +1,19 @@
 {
   Assert.notNull(autowireCandidateResolver,"AutowireCandidateResolver must not be null");
   if (autowireCandidateResolver instanceof BeanFactoryAware) {
-    ((BeanFactoryAware)autowireCandidateResolver).setBeanFactory(this);
+    if (System.getSecurityManager() != null) {
+      final BeanFactory target=this;
+      AccessController.doPrivileged(new PrivilegedAction<Object>(){
+        public Object run(){
+          ((BeanFactoryAware)autowireCandidateResolver).setBeanFactory(target);
+          return null;
+        }
+      }
+,getAccessControlContext());
+    }
+ else {
+      ((BeanFactoryAware)autowireCandidateResolver).setBeanFactory(this);
+    }
   }
   this.autowireCandidateResolver=autowireCandidateResolver;
 }

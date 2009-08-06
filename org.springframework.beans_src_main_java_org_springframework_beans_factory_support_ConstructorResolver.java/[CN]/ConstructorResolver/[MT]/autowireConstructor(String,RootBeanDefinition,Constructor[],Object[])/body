@@ -118,7 +118,20 @@
     }
   }
   try {
-    Object beanInstance=this.beanFactory.getInstantiationStrategy().instantiate(mbd,beanName,this.beanFactory,constructorToUse,argsToUse);
+    Object beanInstance=null;
+    if (System.getSecurityManager() != null) {
+      final Constructor ctorToUse=constructorToUse;
+      final Object[] argumentsToUse=argsToUse;
+      beanInstance=AccessController.doPrivileged(new PrivilegedAction<Object>(){
+        public Object run(){
+          return beanFactory.getInstantiationStrategy().instantiate(mbd,beanName,beanFactory,ctorToUse,argumentsToUse);
+        }
+      }
+,beanFactory.getAccessControlContext());
+    }
+ else {
+      beanInstance=beanFactory.getInstantiationStrategy().instantiate(mbd,beanName,beanFactory,constructorToUse,argsToUse);
+    }
     bw.setWrappedInstance(beanInstance);
     return bw;
   }

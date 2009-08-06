@@ -1,0 +1,16 @@
+{
+  if (typesToMatch != null) {
+    ClassLoader tempClassLoader=getTempClassLoader();
+    if (tempClassLoader != null) {
+      if (tempClassLoader instanceof DecoratingClassLoader) {
+        DecoratingClassLoader dcl=(DecoratingClassLoader)tempClassLoader;
+        for (        Class<?> typeToMatch : typesToMatch) {
+          dcl.excludeClass(typeToMatch.getName());
+        }
+      }
+      String className=mbd.getBeanClassName();
+      return (className != null ? ClassUtils.forName(className,tempClassLoader) : null);
+    }
+  }
+  return mbd.resolveBeanClass(getBeanClassLoader());
+}

@@ -1,6 +1,6 @@
 {
   Class[] paramTypes=destroyMethod.getParameterTypes();
-  Object[] args=new Object[paramTypes.length];
+  final Object[] args=new Object[paramTypes.length];
   if (paramTypes.length == 1) {
     args[0]=Boolean.TRUE;
   }
@@ -9,7 +9,23 @@
   }
   ReflectionUtils.makeAccessible(destroyMethod);
   try {
-    destroyMethod.invoke(this.bean,args);
+    if (System.getSecurityManager() != null) {
+      try {
+        AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
+          public Object run() throws Exception {
+            destroyMethod.invoke(bean,args);
+            return null;
+          }
+        }
+,acc);
+      }
+ catch (      PrivilegedActionException pax) {
+        throw (InvocationTargetException)pax.getException();
+      }
+    }
+ else {
+      destroyMethod.invoke(bean,args);
+    }
   }
  catch (  InvocationTargetException ex) {
     String msg="Invocation of destroy method '" + this.destroyMethodName + "' failed on bean with name '"+ this.beanName+ "'";

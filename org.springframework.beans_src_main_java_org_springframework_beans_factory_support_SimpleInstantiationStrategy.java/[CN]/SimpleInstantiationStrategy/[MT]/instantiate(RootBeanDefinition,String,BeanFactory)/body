@@ -2,12 +2,17 @@
   if (beanDefinition.getMethodOverrides().isEmpty()) {
     Constructor constructorToUse=(Constructor)beanDefinition.resolvedConstructorOrFactoryMethod;
     if (constructorToUse == null) {
-      Class clazz=beanDefinition.getBeanClass();
+      final Class clazz=beanDefinition.getBeanClass();
       if (clazz.isInterface()) {
         throw new BeanInstantiationException(clazz,"Specified class is an interface");
       }
       try {
-        constructorToUse=clazz.getDeclaredConstructor((Class[])null);
+        constructorToUse=AccessController.doPrivileged(new PrivilegedExceptionAction<Constructor>(){
+          public Constructor run() throws Exception {
+            return clazz.getDeclaredConstructor((Class[])null);
+          }
+        }
+);
         beanDefinition.resolvedConstructorOrFactoryMethod=constructorToUse;
       }
  catch (      Exception ex) {

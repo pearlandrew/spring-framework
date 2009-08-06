@@ -1,15 +1,24 @@
 {
-  if (bean instanceof ResourceLoaderAware) {
-    ((ResourceLoaderAware)bean).setResourceLoader(this.applicationContext);
+  AccessControlContext acc=null;
+  if (System.getSecurityManager() != null) {
+    if (applicationContext instanceof ConfigurableApplicationContext) {
+      ConfigurableListableBeanFactory factory=((ConfigurableApplicationContext)applicationContext).getBeanFactory();
+      if (factory instanceof AbstractBeanFactory) {
+        acc=((AbstractBeanFactory)factory).getSecurityContextProvider().getAccessControlContext();
+      }
+    }
+    if (bean instanceof ResourceLoaderAware || bean instanceof ApplicationEventPublisherAware || bean instanceof MessageSourceAware|| bean instanceof ApplicationContextAware) {
+      AccessController.doPrivileged(new PrivilegedAction<Object>(){
+        public Object run(){
+          doProcess(bean);
+          return null;
+        }
+      }
+,acc);
+    }
   }
-  if (bean instanceof ApplicationEventPublisherAware) {
-    ((ApplicationEventPublisherAware)bean).setApplicationEventPublisher(this.applicationContext);
-  }
-  if (bean instanceof MessageSourceAware) {
-    ((MessageSourceAware)bean).setMessageSource(this.applicationContext);
-  }
-  if (bean instanceof ApplicationContextAware) {
-    ((ApplicationContextAware)bean).setApplicationContext(this.applicationContext);
+ else {
+    doProcess(bean);
   }
   return bean;
 }

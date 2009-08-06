@@ -1,32 +1,26 @@
 {
-  AccessControlContext acc=AccessController.getContext();
-  return AccessController.doPrivileged(new PrivilegedAction<Object>(){
-    public Object run(){
-      if (logger.isDebugEnabled()) {
-        logger.debug("Creating instance of bean '" + beanName + "'");
-      }
-      resolveBeanClass(mbd,beanName);
-      try {
-        mbd.prepareMethodOverrides();
-      }
- catch (      BeanDefinitionValidationException ex) {
-        throw new BeanDefinitionStoreException(mbd.getResourceDescription(),beanName,"Validation of method overrides failed",ex);
-      }
-      try {
-        Object bean=resolveBeforeInstantiation(beanName,mbd);
-        if (bean != null) {
-          return bean;
-        }
-      }
- catch (      Throwable ex) {
-        throw new BeanCreationException(mbd.getResourceDescription(),beanName,"BeanPostProcessor before instantiation of bean failed",ex);
-      }
-      Object beanInstance=doCreateBean(beanName,mbd,args);
-      if (logger.isDebugEnabled()) {
-        logger.debug("Finished creating instance of bean '" + beanName + "'");
-      }
-      return beanInstance;
+  if (logger.isDebugEnabled()) {
+    logger.debug("Creating instance of bean '" + beanName + "'");
+  }
+  resolveBeanClass(mbd,beanName);
+  try {
+    mbd.prepareMethodOverrides();
+  }
+ catch (  BeanDefinitionValidationException ex) {
+    throw new BeanDefinitionStoreException(mbd.getResourceDescription(),beanName,"Validation of method overrides failed",ex);
+  }
+  try {
+    Object bean=resolveBeforeInstantiation(beanName,mbd);
+    if (bean != null) {
+      return bean;
     }
   }
-,acc);
+ catch (  Throwable ex) {
+    throw new BeanCreationException(mbd.getResourceDescription(),beanName,"BeanPostProcessor before instantiation of bean failed",ex);
+  }
+  Object beanInstance=doCreateBean(beanName,mbd,args);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Finished creating instance of bean '" + beanName + "'");
+  }
+  return beanInstance;
 }

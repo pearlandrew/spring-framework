@@ -123,14 +123,27 @@ catch (      IndexOutOfBoundsException ex) {
         }
  else {
           if (isExtractOldValueForEditor() && pd.getReadMethod() != null) {
-            Method readMethod=pd.getReadMethod();
+            final Method readMethod=pd.getReadMethod();
             if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
               readMethod.setAccessible(true);
             }
             try {
-              oldValue=readMethod.invoke(this.object);
+              if (System.getSecurityManager() != null) {
+                oldValue=AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
+                  public Object run() throws Exception {
+                    return readMethod.invoke(object);
+                  }
+                }
+,acc);
+              }
+ else {
+                oldValue=readMethod.invoke(object);
+              }
             }
  catch (            Exception ex) {
+              if (ex instanceof PrivilegedActionException) {
+                ex=((PrivilegedActionException)ex).getException();
+              }
               if (logger.isDebugEnabled()) {
                 logger.debug("Could not read previous value of property '" + this.nestedPath + propertyName+ "'",ex);
               }
@@ -140,11 +153,28 @@ catch (      IndexOutOfBoundsException ex) {
         }
         pv.getOriginalPropertyValue().conversionNecessary=(valueToApply != originalValue);
       }
-      Method writeMethod=pd.getWriteMethod();
+      final Method writeMethod=pd.getWriteMethod();
       if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
         writeMethod.setAccessible(true);
       }
-      writeMethod.invoke(this.object,valueToApply);
+      final Object value=valueToApply;
+      if (System.getSecurityManager() != null) {
+        try {
+          AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
+            public Object run() throws Exception {
+              writeMethod.invoke(object,value);
+              return null;
+            }
+          }
+,acc);
+        }
+ catch (        PrivilegedActionException ex) {
+          throw ex.getException();
+        }
+      }
+ else {
+        writeMethod.invoke(object,value);
+      }
     }
  catch (    InvocationTargetException ex) {
       PropertyChangeEvent propertyChangeEvent=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
@@ -164,6 +194,10 @@ catch (    IllegalStateException ex) {
       throw new ConversionNotSupportedException(pce,pd.getPropertyType(),ex);
     }
 catch (    IllegalAccessException ex) {
+      PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
+      throw new MethodInvocationException(pce,ex);
+    }
+catch (    Exception ex) {
       PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
       throw new MethodInvocationException(pce,ex);
     }

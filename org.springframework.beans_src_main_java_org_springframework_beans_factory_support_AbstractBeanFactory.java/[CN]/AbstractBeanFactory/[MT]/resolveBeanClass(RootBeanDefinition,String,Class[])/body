@@ -3,23 +3,24 @@
     if (mbd.hasBeanClass()) {
       return mbd.getBeanClass();
     }
-    if (typesToMatch != null) {
-      ClassLoader tempClassLoader=getTempClassLoader();
-      if (tempClassLoader != null) {
-        if (tempClassLoader instanceof DecoratingClassLoader) {
-          DecoratingClassLoader dcl=(DecoratingClassLoader)tempClassLoader;
-          for (          Class typeToMatch : typesToMatch) {
-            dcl.excludeClass(typeToMatch.getName());
-          }
+    if (System.getSecurityManager() != null) {
+      return AccessController.doPrivileged(new PrivilegedExceptionAction<Class>(){
+        public Class run() throws Exception {
+          return doResolveBeanClass(mbd,typesToMatch);
         }
-        String className=mbd.getBeanClassName();
-        return (className != null ? ClassUtils.forName(className,tempClassLoader) : null);
       }
+,getAccessControlContext());
     }
-    return mbd.resolveBeanClass(getBeanClassLoader());
+ else {
+      return doResolveBeanClass(mbd,typesToMatch);
+    }
   }
- catch (  ClassNotFoundException ex) {
-    throw new CannotLoadBeanClassException(mbd.getResourceDescription(),beanName,mbd.getBeanClassName(),ex);
+ catch (  PrivilegedActionException pae) {
+    ClassNotFoundException ex=(ClassNotFoundException)pae.getException();
+    throw new CannotLoadBeanClassException(mbd.getResourceDescription(),beanName,mbd.getBeanClassName(),(ClassNotFoundException)ex);
+  }
+catch (  ClassNotFoundException ex) {
+    throw new CannotLoadBeanClassException(mbd.getResourceDescription(),beanName,mbd.getBeanClassName(),(ClassNotFoundException)ex);
   }
 catch (  LinkageError err) {
     throw new CannotLoadBeanClassException(mbd.getResourceDescription(),beanName,mbd.getBeanClassName(),err);

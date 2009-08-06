@@ -1,12 +1,15 @@
 {
-  if (bean instanceof BeanNameAware) {
-    ((BeanNameAware)bean).setBeanName(beanName);
+  if (System.getSecurityManager() != null) {
+    AccessController.doPrivileged(new PrivilegedAction<Object>(){
+      public Object run(){
+        invokeAwareMethods(beanName,bean);
+        return null;
+      }
+    }
+,getAccessControlContext());
   }
-  if (bean instanceof BeanClassLoaderAware) {
-    ((BeanClassLoaderAware)bean).setBeanClassLoader(getBeanClassLoader());
-  }
-  if (bean instanceof BeanFactoryAware) {
-    ((BeanFactoryAware)bean).setBeanFactory(this);
+ else {
+    invokeAwareMethods(beanName,bean);
   }
   Object wrappedBean=bean;
   if (mbd == null || !mbd.isSynthetic()) {

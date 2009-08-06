@@ -1,6 +1,6 @@
 {
   String initMethodName=mbd.getInitMethodName();
-  Method initMethod=(mbd.isNonPublicAccessAllowed() ? BeanUtils.findMethod(bean.getClass(),initMethodName) : ClassUtils.getMethodIfAvailable(bean.getClass(),initMethodName));
+  final Method initMethod=(mbd.isNonPublicAccessAllowed() ? BeanUtils.findMethod(bean.getClass(),initMethodName) : ClassUtils.getMethodIfAvailable(bean.getClass(),initMethodName));
   if (initMethod == null) {
     if (mbd.isEnforceInitMethod()) {
       throw new BeanDefinitionValidationException("Couldn't find an init method named '" + initMethodName + "' on bean with name '"+ beanName+ "'");
@@ -16,10 +16,22 @@
     logger.debug("Invoking init method  '" + initMethodName + "' on bean with name '"+ beanName+ "'");
   }
   ReflectionUtils.makeAccessible(initMethod);
-  try {
-    initMethod.invoke(bean,(Object[])null);
+  if (System.getSecurityManager() != null) {
+    try {
+      AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
+        public Object run() throws Exception {
+          initMethod.invoke(bean,(Object[])null);
+          return null;
+        }
+      }
+,getAccessControlContext());
+    }
+ catch (    PrivilegedActionException pae) {
+      InvocationTargetException ex=(InvocationTargetException)pae.getException();
+      throw ex.getTargetException();
+    }
   }
- catch (  InvocationTargetException ex) {
-    throw ex.getTargetException();
+ else {
+    initMethod.invoke(bean,(Object[])null);
   }
 }

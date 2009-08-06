@@ -4,7 +4,23 @@
     if (logger.isDebugEnabled()) {
       logger.debug("Invoking afterPropertiesSet() on bean with name '" + beanName + "'");
     }
-    ((InitializingBean)bean).afterPropertiesSet();
+    if (System.getSecurityManager() != null) {
+      try {
+        AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
+          public Object run() throws Exception {
+            ((InitializingBean)bean).afterPropertiesSet();
+            return null;
+          }
+        }
+,getAccessControlContext());
+      }
+ catch (      PrivilegedActionException pae) {
+        throw pae.getException();
+      }
+    }
+ else {
+      ((InitializingBean)bean).afterPropertiesSet();
+    }
   }
   if (mbd != null) {
     String initMethodName=mbd.getInitMethodName();

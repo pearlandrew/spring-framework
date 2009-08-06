@@ -13,8 +13,18 @@
       return false;
     }
     if (isFactoryBean(beanName,mbd)) {
-      FactoryBean factoryBean=(FactoryBean)getBean(FACTORY_BEAN_PREFIX + beanName);
-      return ((factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean)factoryBean).isPrototype()) || !factoryBean.isSingleton());
+      final FactoryBean factoryBean=(FactoryBean)getBean(FACTORY_BEAN_PREFIX + beanName);
+      if (System.getSecurityManager() != null) {
+        return AccessController.doPrivileged(new PrivilegedAction<Boolean>(){
+          public Boolean run(){
+            return Boolean.valueOf(((factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean)factoryBean).isPrototype()) || !factoryBean.isSingleton()));
+          }
+        }
+,getAccessControlContext()).booleanValue();
+      }
+ else {
+        return ((factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean)factoryBean).isPrototype()) || !factoryBean.isSingleton());
+      }
     }
  else {
       return false;

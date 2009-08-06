@@ -1,30 +1,40 @@
 {
-  AccessControlContext acc=AccessController.getContext();
-  return AccessController.doPrivileged(new PrivilegedAction<Object>(){
-    public Object run(){
-      Object object;
+  Object object;
+  try {
+    if (System.getSecurityManager() != null) {
+      AccessControlContext acc=getAccessControlContext();
       try {
-        object=factory.getObject();
-      }
- catch (      FactoryBeanNotInitializedException ex) {
-        throw new BeanCurrentlyInCreationException(beanName,ex.toString());
-      }
-catch (      Throwable ex) {
-        throw new BeanCreationException(beanName,"FactoryBean threw exception on object creation",ex);
-      }
-      if (object == null && isSingletonCurrentlyInCreation(beanName)) {
-        throw new BeanCurrentlyInCreationException(beanName,"FactoryBean which is currently in creation returned null from getObject");
-      }
-      if (object != null && shouldPostProcess) {
-        try {
-          object=postProcessObjectFromFactoryBean(object,beanName);
+        object=AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
+          public Object run() throws Exception {
+            return factory.getObject();
+          }
         }
- catch (        Throwable ex) {
-          throw new BeanCreationException(beanName,"Post-processing of the FactoryBean's object failed",ex);
-        }
+,acc);
       }
-      return object;
+ catch (      PrivilegedActionException pae) {
+        throw pae.getException();
+      }
+    }
+ else {
+      object=factory.getObject();
     }
   }
-,acc);
+ catch (  FactoryBeanNotInitializedException ex) {
+    throw new BeanCurrentlyInCreationException(beanName,ex.toString());
+  }
+catch (  Throwable ex) {
+    throw new BeanCreationException(beanName,"FactoryBean threw exception on object creation",ex);
+  }
+  if (object == null && isSingletonCurrentlyInCreation(beanName)) {
+    throw new BeanCurrentlyInCreationException(beanName,"FactoryBean which is currently in creation returned null from getObject");
+  }
+  if (object != null && shouldPostProcess) {
+    try {
+      object=postProcessObjectFromFactoryBean(object,beanName);
+    }
+ catch (    Throwable ex) {
+      throw new BeanCreationException(beanName,"Post-processing of the FactoryBean's object failed",ex);
+    }
+  }
+  return object;
 }

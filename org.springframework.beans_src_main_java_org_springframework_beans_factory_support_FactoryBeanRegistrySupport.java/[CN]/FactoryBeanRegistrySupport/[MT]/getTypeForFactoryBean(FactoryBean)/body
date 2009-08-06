@@ -1,6 +1,16 @@
 {
   try {
-    return factoryBean.getObjectType();
+    if (System.getSecurityManager() != null) {
+      return AccessController.doPrivileged(new PrivilegedAction<Class>(){
+        public Class run(){
+          return factoryBean.getObjectType();
+        }
+      }
+,getAccessControlContext());
+    }
+ else {
+      return factoryBean.getObjectType();
+    }
   }
  catch (  Throwable ex) {
     logger.warn("FactoryBean threw exception from getObjectType, despite the contract saying " + "that it should return null if the type of its object cannot be determined yet",ex);

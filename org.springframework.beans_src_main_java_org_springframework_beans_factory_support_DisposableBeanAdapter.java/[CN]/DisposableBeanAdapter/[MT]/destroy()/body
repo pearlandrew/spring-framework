@@ -9,7 +9,18 @@
       logger.debug("Invoking destroy() on bean with name '" + this.beanName + "'");
     }
     try {
-      ((DisposableBean)this.bean).destroy();
+      if (System.getSecurityManager() != null) {
+        AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
+          public Object run() throws Exception {
+            ((DisposableBean)bean).destroy();
+            return null;
+          }
+        }
+,acc);
+      }
+ else {
+        ((DisposableBean)bean).destroy();
+      }
     }
  catch (    Throwable ex) {
       String msg="Invocation of destroy method failed on bean with name '" + this.beanName + "'";

@@ -1,6 +1,18 @@
 {
   try {
-    Object beanInstance=getInstantiationStrategy().instantiate(mbd,beanName,this);
+    Object beanInstance=null;
+    final BeanFactory parent=this;
+    if (System.getSecurityManager() != null) {
+      beanInstance=AccessController.doPrivileged(new PrivilegedAction<Object>(){
+        public Object run(){
+          return getInstantiationStrategy().instantiate(mbd,beanName,parent);
+        }
+      }
+,getAccessControlContext());
+    }
+ else {
+      beanInstance=getInstantiationStrategy().instantiate(mbd,beanName,parent);
+    }
     BeanWrapper bw=new BeanWrapperImpl(beanInstance);
     initBeanWrapper(bw);
     return bw;
