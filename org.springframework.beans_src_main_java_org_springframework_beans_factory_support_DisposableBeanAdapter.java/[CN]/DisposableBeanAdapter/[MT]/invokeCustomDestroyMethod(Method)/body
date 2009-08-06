@@ -7,9 +7,15 @@
   if (logger.isDebugEnabled()) {
     logger.debug("Invoking destroy method '" + this.destroyMethodName + "' on bean with name '"+ this.beanName+ "'");
   }
-  ReflectionUtils.makeAccessible(destroyMethod);
   try {
     if (System.getSecurityManager() != null) {
+      AccessController.doPrivileged(new PrivilegedAction<Object>(){
+        public Object run(){
+          ReflectionUtils.makeAccessible(destroyMethod);
+          return null;
+        }
+      }
+);
       try {
         AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
           public Object run() throws Exception {
@@ -24,6 +30,7 @@
       }
     }
  else {
+      ReflectionUtils.makeAccessible(destroyMethod);
       destroyMethod.invoke(bean,args);
     }
   }

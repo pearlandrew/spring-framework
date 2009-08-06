@@ -7,8 +7,19 @@
   }
   final Method readMethod=pd.getReadMethod();
   try {
-    if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
-      readMethod.setAccessible(true);
+    if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers()) && !readMethod.isAccessible()) {
+      if (System.getSecurityManager() != null) {
+        AccessController.doPrivileged(new PrivilegedAction<Object>(){
+          public Object run(){
+            readMethod.setAccessible(true);
+            return null;
+          }
+        }
+);
+      }
+ else {
+        readMethod.setAccessible(true);
+      }
     }
     Object value=null;
     if (System.getSecurityManager() != null) {

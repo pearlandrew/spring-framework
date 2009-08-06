@@ -1,17 +1,14 @@
 {
   final DefaultListableBeanFactory lbf=new DefaultListableBeanFactory();
-  RootBeanDefinition bd=new RootBeanDefinition(TestSecuredBean.class);
-  bd.setScope(ConfigurableBeanFactory.SCOPE_PROTOTYPE);
-  bd.setInitMethodName("init");
-  lbf.registerBeanDefinition("test",bd);
+  BeanDefinitionBuilder bdb=BeanDefinitionBuilder.genericBeanDefinition(NonPrivilegedBean.class).setScope(ConfigurableBeanFactory.SCOPE_PROTOTYPE).setInitMethodName("init").setDestroyMethodName("destroy").addConstructorArgValue("user1");
+  lbf.registerBeanDefinition("test",bdb.getBeanDefinition());
   final Subject subject=new Subject();
   subject.getPrincipals().add(new TestPrincipal("user1"));
-  TestSecuredBean bean=(TestSecuredBean)Subject.doAsPrivileged(subject,new PrivilegedAction(){
+  NonPrivilegedBean bean=(NonPrivilegedBean)Subject.doAsPrivileged(subject,new PrivilegedAction(){
     public Object run(){
       return lbf.getBean("test");
     }
   }
 ,null);
   assertNotNull(bean);
-  assertEquals(null,bean.getUserName());
 }

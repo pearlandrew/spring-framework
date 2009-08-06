@@ -1,5 +1,14 @@
 {
   if (beanDefinition.getMethodOverrides().isEmpty()) {
+    if (System.getSecurityManager() != null) {
+      AccessController.doPrivileged(new PrivilegedAction<Object>(){
+        public Object run(){
+          ReflectionUtils.makeAccessible(ctor);
+          return null;
+        }
+      }
+);
+    }
     return BeanUtils.instantiateClass(ctor,args);
   }
  else {

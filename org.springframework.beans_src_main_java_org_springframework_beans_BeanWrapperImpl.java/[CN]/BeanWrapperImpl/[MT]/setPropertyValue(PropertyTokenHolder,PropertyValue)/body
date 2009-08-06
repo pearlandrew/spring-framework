@@ -124,8 +124,19 @@ catch (      IndexOutOfBoundsException ex) {
  else {
           if (isExtractOldValueForEditor() && pd.getReadMethod() != null) {
             final Method readMethod=pd.getReadMethod();
-            if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
-              readMethod.setAccessible(true);
+            if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers()) && !readMethod.isAccessible()) {
+              if (System.getSecurityManager() != null) {
+                AccessController.doPrivileged(new PrivilegedAction<Object>(){
+                  public Object run(){
+                    readMethod.setAccessible(true);
+                    return null;
+                  }
+                }
+);
+              }
+ else {
+                readMethod.setAccessible(true);
+              }
             }
             try {
               if (System.getSecurityManager() != null) {
@@ -154,8 +165,19 @@ catch (      IndexOutOfBoundsException ex) {
         pv.getOriginalPropertyValue().conversionNecessary=(valueToApply != originalValue);
       }
       final Method writeMethod=pd.getWriteMethod();
-      if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
-        writeMethod.setAccessible(true);
+      if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers()) && !writeMethod.isAccessible()) {
+        if (System.getSecurityManager() != null) {
+          AccessController.doPrivileged(new PrivilegedAction<Object>(){
+            public Object run(){
+              writeMethod.setAccessible(true);
+              return null;
+            }
+          }
+);
+        }
+ else {
+          writeMethod.setAccessible(true);
+        }
       }
       final Object value=valueToApply;
       if (System.getSecurityManager() != null) {
