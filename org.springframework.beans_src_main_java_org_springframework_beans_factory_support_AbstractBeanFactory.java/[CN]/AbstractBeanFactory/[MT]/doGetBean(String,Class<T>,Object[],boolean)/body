@@ -1,8 +1,13 @@
 {
-  return AccessController.doPrivileged(new PrivilegedAction<T>(){
-    public T run(){
-      return doGetBeanRaw(name,requiredType,args,typeCheckOnly);
+  if (System.getSecurityManager() != null) {
+    return AccessController.doPrivileged(new PrivilegedAction<T>(){
+      public T run(){
+        return doGetBeanRaw(name,requiredType,args,typeCheckOnly);
+      }
     }
-  }
 );
+  }
+ else {
+    return doGetBeanRaw(name,requiredType,args,typeCheckOnly);
+  }
 }
