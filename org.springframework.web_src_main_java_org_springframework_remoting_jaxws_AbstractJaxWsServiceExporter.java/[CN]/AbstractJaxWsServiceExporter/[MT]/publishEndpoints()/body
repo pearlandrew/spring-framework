@@ -2,8 +2,9 @@
   String[] beanNames=this.beanFactory.getBeanNamesForType(Object.class,false,false);
   for (  String beanName : beanNames) {
     Class<?> type=this.beanFactory.getType(beanName);
-    WebService annotation=type.getAnnotation(WebService.class);
-    if (annotation != null) {
+    WebService wsAnnotation=type.getAnnotation(WebService.class);
+    WebServiceProvider wsProviderAnnotation=type.getAnnotation(WebServiceProvider.class);
+    if (wsAnnotation != null || wsProviderAnnotation != null) {
       Endpoint endpoint=Endpoint.create(this.beanFactory.getBean(beanName));
       if (this.endpointProperties != null) {
         endpoint.setProperties(this.endpointProperties);
@@ -11,7 +12,12 @@
       if (this.executor != null) {
         endpoint.setExecutor(this.executor);
       }
-      publishEndpoint(endpoint,annotation);
+      if (wsAnnotation != null) {
+        publishEndpoint(endpoint,wsAnnotation);
+      }
+ else {
+        publishEndpoint(endpoint,wsProviderAnnotation);
+      }
       this.publishedEndpoints.add(endpoint);
     }
   }
