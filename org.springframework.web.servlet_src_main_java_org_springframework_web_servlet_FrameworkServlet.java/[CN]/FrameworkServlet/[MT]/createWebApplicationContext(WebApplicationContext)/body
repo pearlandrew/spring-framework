@@ -1,12 +1,25 @@
 {
+  Class<?> contextClass=getContextClass();
   if (this.logger.isDebugEnabled()) {
-    this.logger.debug("Servlet with name '" + getServletName() + "' will try to create custom WebApplicationContext context of class '"+ getContextClass().getName()+ "'"+ ", using parent context ["+ parent+ "]");
+    this.logger.debug("Servlet with name '" + getServletName() + "' will try to create custom WebApplicationContext context of class '"+ contextClass.getName()+ "'"+ ", using parent context ["+ parent+ "]");
   }
-  if (!ConfigurableWebApplicationContext.class.isAssignableFrom(getContextClass())) {
-    throw new ApplicationContextException("Fatal initialization error in servlet with name '" + getServletName() + "': custom WebApplicationContext class ["+ getContextClass().getName()+ "] is not of type ConfigurableWebApplicationContext");
+  if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
+    throw new ApplicationContextException("Fatal initialization error in servlet with name '" + getServletName() + "': custom WebApplicationContext class ["+ contextClass.getName()+ "] is not of type ConfigurableWebApplicationContext");
   }
-  ConfigurableWebApplicationContext wac=(ConfigurableWebApplicationContext)BeanUtils.instantiateClass(getContextClass());
-  wac.setId(getServletContext().getServletContextName() + "." + getServletName());
+  ConfigurableWebApplicationContext wac=(ConfigurableWebApplicationContext)BeanUtils.instantiateClass(contextClass);
+  ServletContext servletContext=getServletContext();
+  if (servletContext.getMajorVersion() > 2 || servletContext.getMinorVersion() >= 5) {
+    wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContext.getContextPath() + "/"+ getServletName());
+  }
+ else {
+    String servletContextName=servletContext.getServletContextName();
+    if (servletContextName != null) {
+      wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName + "."+ getServletName());
+    }
+ else {
+      wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + getServletName());
+    }
+  }
   wac.setParent(parent);
   wac.setServletContext(getServletContext());
   wac.setServletConfig(getServletConfig());

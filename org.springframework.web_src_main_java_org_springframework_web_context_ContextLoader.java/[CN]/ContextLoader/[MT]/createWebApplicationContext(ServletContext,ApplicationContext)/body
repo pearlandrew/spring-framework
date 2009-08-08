@@ -1,10 +1,21 @@
 {
-  Class contextClass=determineContextClass(servletContext);
+  Class<?> contextClass=determineContextClass(servletContext);
   if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
     throw new ApplicationContextException("Custom context class [" + contextClass.getName() + "] is not of type ["+ ConfigurableWebApplicationContext.class.getName()+ "]");
   }
   ConfigurableWebApplicationContext wac=(ConfigurableWebApplicationContext)BeanUtils.instantiateClass(contextClass);
-  wac.setId(servletContext.getServletContextName());
+  if (servletContext.getMajorVersion() > 2 || servletContext.getMinorVersion() >= 5) {
+    wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContext.getContextPath());
+  }
+ else {
+    String servletContextName=servletContext.getServletContextName();
+    if (servletContextName != null) {
+      wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName);
+    }
+ else {
+      wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX);
+    }
+  }
   wac.setParent(parent);
   wac.setServletContext(servletContext);
   wac.setConfigLocation(servletContext.getInitParameter(CONFIG_LOCATION_PARAM));
