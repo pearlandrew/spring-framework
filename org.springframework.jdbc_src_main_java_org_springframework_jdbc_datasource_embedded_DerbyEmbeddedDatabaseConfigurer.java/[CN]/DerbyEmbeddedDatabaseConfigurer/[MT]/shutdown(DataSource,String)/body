@@ -1,20 +1,13 @@
 {
-  Connection connection=null;
   try {
-    SimpleDriverDataSource shutdownDataSource=new SimpleDriverDataSource();
-    shutdownDataSource.setDriverClass(EmbeddedDriver.class);
-    shutdownDataSource.setUrl(String.format(URL_TEMPLATE,databaseName,"shutdown=true"));
-    connection=shutdownDataSource.getConnection();
+    new EmbeddedDriver().connect(String.format(URL_TEMPLATE,databaseName,"shutdown=true"),new Properties());
   }
- catch (  SQLException e) {
-    if (SHUTDOWN_CODE.equals(e.getSQLState())) {
+ catch (  SQLException ex) {
+    if (SHUTDOWN_CODE.equals(ex.getSQLState())) {
       purgeDatabase(databaseName);
     }
  else {
-      logger.warn("Could not shutdown in-memory Derby database",e);
+      logger.warn("Could not shutdown in-memory Derby database",ex);
     }
-  }
- finally {
-    JdbcUtils.closeConnection(connection);
   }
 }

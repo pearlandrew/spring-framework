@@ -1,12 +1,18 @@
 {
-  Connection connection=JdbcUtils.getConnection(dataSource);
   try {
-    databasePopulator.populate(connection);
+    Connection connection=this.dataSource.getConnection();
+    try {
+      this.databasePopulator.populate(connection);
+    }
+  finally {
+      try {
+        connection.close();
+      }
+ catch (      SQLException ex) {
+      }
+    }
   }
- catch (  SQLException e) {
-    throw new RuntimeException("SQLException occurred populating embedded database",e);
-  }
- finally {
-    JdbcUtils.closeConnection(connection);
+ catch (  SQLException ex) {
+    throw new DataAccessResourceFailureException("Failed to populate database",ex);
   }
 }

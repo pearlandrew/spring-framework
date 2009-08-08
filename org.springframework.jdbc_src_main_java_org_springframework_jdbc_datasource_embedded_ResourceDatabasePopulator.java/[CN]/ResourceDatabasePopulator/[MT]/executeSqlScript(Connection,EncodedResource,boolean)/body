@@ -17,28 +17,34 @@
   }
   splitSqlScript(script,delimiter,statements);
   int lineNumber=0;
-  for (  String statement : statements) {
-    lineNumber++;
-    Statement stmt=null;
-    try {
-      stmt=connection.createStatement();
-      int rowsAffected=stmt.executeUpdate(statement);
-      if (logger.isDebugEnabled()) {
-        logger.debug(rowsAffected + " rows affected by SQL: " + statement);
-      }
-    }
- catch (    SQLException e) {
-      if (continueOnError) {
-        if (logger.isWarnEnabled()) {
-          logger.warn("Line " + lineNumber + " statement failed: "+ statement,e);
+  Statement stmt=connection.createStatement();
+  try {
+    for (    String statement : statements) {
+      lineNumber++;
+      try {
+        int rowsAffected=stmt.executeUpdate(statement);
+        if (logger.isDebugEnabled()) {
+          logger.debug(rowsAffected + " rows affected by SQL: " + statement);
         }
       }
+ catch (      SQLException ex) {
+        if (continueOnError) {
+          if (logger.isWarnEnabled()) {
+            logger.warn("Line " + lineNumber + " statement failed: "+ statement,ex);
+          }
+        }
  else {
-        throw e;
+          throw ex;
+        }
       }
     }
- finally {
-      JdbcUtils.closeStatement(stmt);
+  }
+  finally {
+    try {
+      stmt.close();
+    }
+ catch (    Throwable ex) {
+      logger.debug("Could not close JDBC Statement",ex);
     }
   }
   long elapsedTime=System.currentTimeMillis() - startTime;
