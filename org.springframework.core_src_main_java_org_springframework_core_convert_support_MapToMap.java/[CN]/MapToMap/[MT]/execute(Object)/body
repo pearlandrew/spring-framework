@@ -1,16 +1,14 @@
 {
   try {
-    Map map=(Map)source;
-    Map targetMap=(Map)ConversionUtils.getMapImpl(targetType.getType()).newInstance();
+    Map<?,?> map=(Map<?,?>)source;
+    Map targetMap=CollectionFactory.createMap(this.targetType.getType(),map.size());
     MapEntryConverter converter=getEntryConverter(map);
-    Iterator<Map.Entry<?,?>> it=map.entrySet().iterator();
-    while (it.hasNext()) {
-      Map.Entry entry=it.next();
+    for (    Map.Entry<?,?> entry : map.entrySet()) {
       targetMap.put(converter.convertKey(entry.getKey()),converter.convertValue(entry.getValue()));
     }
     return targetMap;
   }
- catch (  Exception e) {
-    throw new ConversionFailedException(source,sourceType.getType(),targetType.getType(),e);
+ catch (  Exception ex) {
+    throw new ConversionFailedException(source,this.sourceType.getType(),this.targetType.getType(),ex);
   }
 }

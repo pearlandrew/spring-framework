@@ -1,11 +1,9 @@
 {
   Collection sourceCollection=(Collection)source;
-  Class implClass=ConversionUtils.getCollectionImpl((Class<? extends Collection>)getTargetCollectionType());
-  Collection targetCollection=(Collection)implClass.newInstance();
+  Collection targetCollection=CollectionFactory.createCollection(getTargetCollectionType(),sourceCollection.size());
   ConversionExecutor elementConverter=getElementConverter(sourceCollection);
-  Iterator it=sourceCollection.iterator();
-  while (it.hasNext()) {
-    targetCollection.add(elementConverter.execute(it.next()));
+  for (  Object aSourceCollection : sourceCollection) {
+    targetCollection.add(elementConverter.execute(aSourceCollection));
   }
   return targetCollection;
 }

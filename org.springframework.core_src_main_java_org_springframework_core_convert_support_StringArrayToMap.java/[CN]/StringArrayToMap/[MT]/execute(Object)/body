@@ -1,17 +1,20 @@
 {
   try {
-    Map targetMap=(Map)ConversionUtils.getMapImpl(targetType.getType()).newInstance();
     int length=Array.getLength(source);
+    Map targetMap=CollectionFactory.createMap(this.targetType.getType(),length);
     for (int i=0; i < length; i++) {
       String property=(String)Array.get(source,i);
       String[] fields=property.split("=");
+      if (fields.length < 2) {
+        throw new IllegalArgumentException("Invalid String property: " + property);
+      }
       String key=fields[0];
       String value=fields[1];
-      targetMap.put(entryConverter.convertKey(key),entryConverter.convertValue(value));
+      targetMap.put(this.entryConverter.convertKey(key),this.entryConverter.convertValue(value));
     }
     return targetMap;
   }
- catch (  Exception e) {
-    throw new ConversionFailedException(source,sourceType.getType(),targetType.getType(),e);
+ catch (  Exception ex) {
+    throw new ConversionFailedException(source,this.sourceType.getType(),this.targetType.getType(),ex);
   }
 }

@@ -1,0 +1,40 @@
+{
+  Class classToIntrospect=converterClass;
+  while (classToIntrospect != null) {
+    Type[] ifcs=classToIntrospect.getGenericInterfaces();
+    for (    Type ifc : ifcs) {
+      if (ifc instanceof ParameterizedType) {
+        ParameterizedType paramIfc=(ParameterizedType)ifc;
+        Type rawType=paramIfc.getRawType();
+        if (Converter.class.equals(rawType) || ConverterFactory.class.equals(rawType)) {
+          List<Class> typeInfo=new ArrayList<Class>(2);
+          Type arg1=paramIfc.getActualTypeArguments()[0];
+          if (arg1 instanceof TypeVariable) {
+            arg1=GenericTypeResolver.resolveTypeVariable((TypeVariable)arg1,converterClass);
+          }
+          if (arg1 instanceof Class) {
+            typeInfo.add((Class)arg1);
+          }
+          Type arg2=paramIfc.getActualTypeArguments()[1];
+          if (arg2 instanceof TypeVariable) {
+            arg2=GenericTypeResolver.resolveTypeVariable((TypeVariable)arg2,converterClass);
+          }
+          if (arg2 instanceof Class) {
+            typeInfo.add((Class)arg2);
+          }
+          if (typeInfo.size() == 2) {
+            return typeInfo;
+          }
+        }
+ else         if (Converter.class.isAssignableFrom((Class)rawType)) {
+          return getConverterTypeInfo((Class)rawType);
+        }
+      }
+ else       if (Converter.class.isAssignableFrom((Class)ifc)) {
+        return getConverterTypeInfo((Class)ifc);
+      }
+    }
+    classToIntrospect=classToIntrospect.getSuperclass();
+  }
+  return null;
+}

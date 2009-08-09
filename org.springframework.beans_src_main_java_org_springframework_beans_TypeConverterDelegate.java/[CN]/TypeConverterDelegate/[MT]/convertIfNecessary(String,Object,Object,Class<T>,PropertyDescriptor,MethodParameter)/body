@@ -1,6 +1,15 @@
 {
   Object convertedValue=newValue;
   PropertyEditor editor=this.propertyEditorRegistry.findCustomEditor(requiredType,propertyName);
+  ConversionService conversionService=this.propertyEditorRegistry.getConversionService();
+  if (editor == null && conversionService != null && convertedValue != null && conversionService.canConvert(convertedValue.getClass(),requiredType)) {
+    if (methodParam != null) {
+      return (T)conversionService.convert(convertedValue,new TypeDescriptor(methodParam));
+    }
+ else {
+      return conversionService.convert(convertedValue,requiredType);
+    }
+  }
   if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType,convertedValue))) {
     if (editor == null) {
       editor=findDefaultEditor(requiredType,descriptor);

@@ -1,0 +1,27 @@
+{
+  if (collectionType.isInterface()) {
+    if (List.class.equals(collectionType)) {
+      return new ArrayList(initialCapacity);
+    }
+ else     if (SortedSet.class.equals(collectionType) || collectionType.equals(navigableSet)) {
+      return new TreeSet();
+    }
+ else     if (Set.class.equals(collectionType) || Collection.class.equals(collectionType)) {
+      return new LinkedHashSet(initialCapacity);
+    }
+ else {
+      throw new IllegalArgumentException("Unsupported Collection interface: " + collectionType.getName());
+    }
+  }
+ else {
+    if (!Collection.class.isAssignableFrom(collectionType)) {
+      throw new IllegalArgumentException("Unsupported Collection type: " + collectionType.getName());
+    }
+    try {
+      return (Collection)collectionType.newInstance();
+    }
+ catch (    Exception ex) {
+      throw new IllegalArgumentException("Could not instantiate Collection type: " + collectionType.getName());
+    }
+  }
+}

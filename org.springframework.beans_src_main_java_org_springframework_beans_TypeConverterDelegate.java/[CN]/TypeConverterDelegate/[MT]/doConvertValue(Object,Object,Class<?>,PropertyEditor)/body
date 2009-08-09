@@ -1,0 +1,53 @@
+{
+  Object convertedValue=newValue;
+  boolean sharedEditor=false;
+  if (editor != null) {
+    sharedEditor=this.propertyEditorRegistry.isSharedEditor(editor);
+  }
+  if (editor != null && !(convertedValue instanceof String)) {
+    try {
+      Object newConvertedValue;
+      if (sharedEditor) {
+synchronized (editor) {
+          editor.setValue(convertedValue);
+          newConvertedValue=editor.getValue();
+        }
+      }
+ else {
+        editor.setValue(convertedValue);
+        newConvertedValue=editor.getValue();
+      }
+      if (newConvertedValue != convertedValue) {
+        convertedValue=newConvertedValue;
+        editor=null;
+      }
+    }
+ catch (    Exception ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("PropertyEditor [" + editor.getClass().getName() + "] does not support setValue call",ex);
+      }
+    }
+  }
+  Object returnValue=convertedValue;
+  if (requiredType != null && !requiredType.isArray() && convertedValue instanceof String[]) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Converting String array to comma-delimited String [" + convertedValue + "]");
+    }
+    convertedValue=StringUtils.arrayToCommaDelimitedString((String[])convertedValue);
+  }
+  if (editor != null && convertedValue instanceof String) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Converting String to [" + requiredType + "] using property editor ["+ editor+ "]");
+    }
+    String newTextValue=(String)convertedValue;
+    if (sharedEditor) {
+synchronized (editor) {
+        return doConvertTextValue(oldValue,newTextValue,editor);
+      }
+    }
+ else {
+      return doConvertTextValue(oldValue,newTextValue,editor);
+    }
+  }
+  return returnValue;
+}
