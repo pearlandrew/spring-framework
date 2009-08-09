@@ -1,17 +1,15 @@
 {
   try {
     if (argsRequiringConversion != null && arguments != null) {
-      ReflectionHelper.convertArguments(c.getParameterTypes(),c.isVarArgs(),context.getTypeConverter(),argsRequiringConversion,arguments);
+      ReflectionHelper.convertArguments(this.ctor.getParameterTypes(),this.ctor.isVarArgs(),context.getTypeConverter(),this.argsRequiringConversion,arguments);
     }
-    if (c.isVarArgs()) {
-      arguments=ReflectionHelper.setupArgumentsForVarargsInvocation(c.getParameterTypes(),arguments);
+    if (this.ctor.isVarArgs()) {
+      arguments=ReflectionHelper.setupArgumentsForVarargsInvocation(this.ctor.getParameterTypes(),arguments);
     }
-    if (!c.isAccessible()) {
-      c.setAccessible(true);
-    }
-    return new TypedValue(c.newInstance(arguments),TypeDescriptor.valueOf(c.getClass()));
+    ReflectionUtils.makeAccessible(this.ctor);
+    return new TypedValue(this.ctor.newInstance(arguments),TypeDescriptor.valueOf(this.ctor.getClass()));
   }
  catch (  Exception ex) {
-    throw new AccessException("Problem invoking constructor: " + c,ex);
+    throw new AccessException("Problem invoking constructor: " + this.ctor,ex);
   }
 }
