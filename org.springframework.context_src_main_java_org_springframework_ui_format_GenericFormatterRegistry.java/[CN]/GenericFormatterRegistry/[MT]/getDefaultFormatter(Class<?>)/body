@@ -1,0 +1,20 @@
+{
+  Formatted formatted=AnnotationUtils.findAnnotation(type,Formatted.class);
+  if (formatted != null) {
+    Class formatterClass=formatted.value();
+    try {
+      Formatter formatter=(Formatter)formatterClass.newInstance();
+      typeFormatters.put(type,formatter);
+      return formatter;
+    }
+ catch (    InstantiationException e) {
+      throw new IllegalStateException("Formatter referenced by @Formatted annotation does not have default constructor",e);
+    }
+catch (    IllegalAccessException e) {
+      throw new IllegalStateException("Formatter referenced by @Formatted annotation does not have public constructor",e);
+    }
+  }
+ else {
+    return null;
+  }
+}
