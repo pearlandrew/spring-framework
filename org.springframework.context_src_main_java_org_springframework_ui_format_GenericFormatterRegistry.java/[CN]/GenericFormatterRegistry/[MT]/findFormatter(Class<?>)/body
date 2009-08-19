@@ -1,0 +1,19 @@
+{
+  LinkedList<Class> classQueue=new LinkedList<Class>();
+  classQueue.addFirst(type);
+  while (!classQueue.isEmpty()) {
+    Class currentClass=classQueue.removeLast();
+    Formatter<?> formatter=typeFormatters.get(currentClass);
+    if (formatter != null) {
+      return formatter;
+    }
+    if (currentClass.getSuperclass() != null) {
+      classQueue.addFirst(currentClass.getSuperclass());
+    }
+    Class[] interfaces=currentClass.getInterfaces();
+    for (    Class ifc : interfaces) {
+      classQueue.addFirst(ifc);
+    }
+  }
+  return null;
+}
