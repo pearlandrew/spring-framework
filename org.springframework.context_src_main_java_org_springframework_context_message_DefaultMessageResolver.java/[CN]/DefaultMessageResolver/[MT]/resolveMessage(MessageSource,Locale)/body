@@ -1,0 +1,33 @@
+{
+  if (messageSource == null) {
+    if (defaultMessageFactory != null) {
+      return defaultMessageFactory.createDefaultMessage();
+    }
+ else {
+      throw new MessageResolutionException("Unable to resolve message; MessagSource argument is null and no defaultMessage is configured");
+    }
+  }
+  String messageString;
+  try {
+    messageString=messageSource.getMessage(this,locale);
+  }
+ catch (  NoSuchMessageException e) {
+    throw new MessageResolutionException("Unable to resolve message in" + messageSource,e);
+  }
+  Expression message;
+  try {
+    message=expressionParser.parseExpression(messageString,ParserContext.TEMPLATE_EXPRESSION);
+  }
+ catch (  ParseException e) {
+    throw new MessageResolutionException("Failed to parse message expression",e);
+  }
+  try {
+    StandardEvaluationContext context=new StandardEvaluationContext();
+    context.setRootObject(args);
+    context.addPropertyAccessor(new MessageArgumentAccessor(messageSource,locale));
+    return (String)message.getValue(context);
+  }
+ catch (  EvaluationException e) {
+    throw new MessageResolutionException("Failed to evaluate message expression '" + message.getExpressionString() + "' to generate final message text",e);
+  }
+}
