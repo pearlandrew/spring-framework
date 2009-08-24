@@ -1,12 +1,17 @@
 {
   try {
-    AccessController.doPrivileged(new PrivilegedAction<Object>(){
-      public Object run(){
-        ReflectionUtils.makeAccessible(factoryMethod);
-        return null;
+    if (System.getSecurityManager() != null) {
+      AccessController.doPrivileged(new PrivilegedAction<Object>(){
+        public Object run(){
+          ReflectionUtils.makeAccessible(factoryMethod);
+          return null;
+        }
       }
-    }
 );
+    }
+ else {
+      ReflectionUtils.makeAccessible(factoryMethod);
+    }
     return factoryMethod.invoke(factoryBean,args);
   }
  catch (  IllegalArgumentException ex) {

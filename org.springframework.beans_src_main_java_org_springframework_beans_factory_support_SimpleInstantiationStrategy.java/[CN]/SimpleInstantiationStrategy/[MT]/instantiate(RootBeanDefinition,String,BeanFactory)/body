@@ -7,12 +7,17 @@
         throw new BeanInstantiationException(clazz,"Specified class is an interface");
       }
       try {
-        constructorToUse=AccessController.doPrivileged(new PrivilegedExceptionAction<Constructor>(){
-          public Constructor run() throws Exception {
-            return clazz.getDeclaredConstructor((Class[])null);
+        if (System.getSecurityManager() != null) {
+          constructorToUse=AccessController.doPrivileged(new PrivilegedExceptionAction<Constructor>(){
+            public Constructor run() throws Exception {
+              return clazz.getDeclaredConstructor((Class[])null);
+            }
           }
-        }
 );
+        }
+ else {
+          constructorToUse=clazz.getDeclaredConstructor((Class[])null);
+        }
         beanDefinition.resolvedConstructorOrFactoryMethod=constructorToUse;
       }
  catch (      Exception ex) {
