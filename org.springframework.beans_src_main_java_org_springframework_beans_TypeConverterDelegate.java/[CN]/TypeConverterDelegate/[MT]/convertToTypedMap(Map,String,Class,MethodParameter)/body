@@ -1,4 +1,14 @@
 {
+  boolean originalAllowed=requiredType.isInstance(original);
+  Class keyType=null;
+  Class valueType=null;
+  if (methodParam != null) {
+    keyType=GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
+    valueType=GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
+  }
+  if (keyType == null && valueType == null && originalAllowed && !this.propertyEditorRegistry.hasCustomEditorForElement(null,propertyName)) {
+    return original;
+  }
   Iterator it;
   try {
     it=original.entrySet().iterator();
@@ -28,16 +38,6 @@
     if (logger.isDebugEnabled()) {
       logger.debug("Cannot create copy of Map type [" + original.getClass().getName() + "] - injecting original Map as-is",ex);
     }
-    return original;
-  }
-  boolean originalAllowed=requiredType.isInstance(original);
-  Class keyType=null;
-  Class valueType=null;
-  if (methodParam != null) {
-    keyType=GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
-    valueType=GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
-  }
-  if (keyType == null && valueType == null && originalAllowed && !this.propertyEditorRegistry.hasCustomEditorForElement(null,propertyName)) {
     return original;
   }
   while (it.hasNext()) {
