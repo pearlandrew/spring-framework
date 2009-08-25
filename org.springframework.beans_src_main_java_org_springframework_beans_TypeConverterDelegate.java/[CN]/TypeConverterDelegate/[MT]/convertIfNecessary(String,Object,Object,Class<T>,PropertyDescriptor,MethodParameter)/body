@@ -24,25 +24,27 @@
  else       if (requiredType.isArray()) {
         return (T)convertToTypedArray(convertedValue,propertyName,requiredType.getComponentType());
       }
- else       if (convertedValue instanceof Collection && CollectionFactory.isApproximableCollectionType(requiredType)) {
-        convertedValue=convertToTypedCollection((Collection)convertedValue,propertyName,methodParam);
+ else       if (convertedValue instanceof Collection) {
+        convertedValue=convertToTypedCollection((Collection)convertedValue,propertyName,requiredType,methodParam);
       }
- else       if (convertedValue instanceof Map && CollectionFactory.isApproximableMapType(requiredType)) {
-        convertedValue=convertToTypedMap((Map)convertedValue,propertyName,methodParam);
+ else       if (convertedValue instanceof Map) {
+        convertedValue=convertToTypedMap((Map)convertedValue,propertyName,requiredType,methodParam);
       }
  else       if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
-        try {
-          Constructor strCtor=requiredType.getConstructor(String.class);
-          return (T)BeanUtils.instantiateClass(strCtor,convertedValue);
-        }
- catch (        NoSuchMethodException ex) {
-          if (logger.isTraceEnabled()) {
-            logger.trace("No String constructor found on type [" + requiredType.getName() + "]",ex);
+        if (!requiredType.isInterface() && !requiredType.isEnum()) {
+          try {
+            Constructor strCtor=requiredType.getConstructor(String.class);
+            return (T)BeanUtils.instantiateClass(strCtor,convertedValue);
           }
-        }
-catch (        Exception ex) {
-          if (logger.isTraceEnabled()) {
-            logger.trace("Construction via String failed for type [" + requiredType.getName() + "]",ex);
+ catch (          NoSuchMethodException ex) {
+            if (logger.isTraceEnabled()) {
+              logger.trace("No String constructor found on type [" + requiredType.getName() + "]",ex);
+            }
+          }
+catch (          Exception ex) {
+            if (logger.isDebugEnabled()) {
+              logger.debug("Construction via String failed for type [" + requiredType.getName() + "]",ex);
+            }
           }
         }
         String trimmedValue=((String)convertedValue).trim();
