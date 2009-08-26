@@ -1,13 +1,15 @@
 {
-  List servers=MBeanServerFactory.findMBeanServer(agentId);
   MBeanServer server=null;
-  if (servers != null && servers.size() > 0) {
-    if (servers.size() > 1 && logger.isWarnEnabled()) {
-      logger.warn("Found more than one MBeanServer instance" + (agentId != null ? " with agent id [" + agentId + "]" : "") + ". Returning first from list.");
+  if (!"".equals(agentId)) {
+    List<MBeanServer> servers=MBeanServerFactory.findMBeanServer(agentId);
+    if (servers != null && servers.size() > 0) {
+      if (servers.size() > 1 && logger.isWarnEnabled()) {
+        logger.warn("Found more than one MBeanServer instance" + (agentId != null ? " with agent id [" + agentId + "]" : "") + ". Returning first from list.");
+      }
+      server=servers.get(0);
     }
-    server=(MBeanServer)servers.get(0);
   }
-  if (server == null && agentId == null) {
+  if (server == null && !StringUtils.hasLength(agentId)) {
     try {
       server=ManagementFactory.getPlatformMBeanServer();
     }
