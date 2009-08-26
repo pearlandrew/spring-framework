@@ -37,9 +37,11 @@
       config.setNamingStrategy(this.namingStrategy);
     }
     if (this.typeDefinitions != null) {
-      Mappings mappings=config.createMappings();
+      Method createMappings=Configuration.class.getMethod("createMappings");
+      Method addTypeDef=createMappings.getReturnType().getMethod("addTypeDef",String.class,String.class,Properties.class);
+      Object mappings=ReflectionUtils.invokeMethod(createMappings,config);
       for (      TypeDefinitionBean typeDef : this.typeDefinitions) {
-        mappings.addTypeDef(typeDef.getTypeName(),typeDef.getTypeClass(),typeDef.getParameters());
+        ReflectionUtils.invokeMethod(addTypeDef,mappings,typeDef.getTypeName(),typeDef.getTypeClass(),typeDef.getParameters());
       }
     }
     if (this.filterDefinitions != null) {
