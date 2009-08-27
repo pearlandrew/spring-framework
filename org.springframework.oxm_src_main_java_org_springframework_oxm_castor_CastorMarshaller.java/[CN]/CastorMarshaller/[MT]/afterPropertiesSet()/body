@@ -1,17 +1,20 @@
 {
   if (logger.isInfoEnabled()) {
-    if (this.mappingLocations != null) {
-      logger.info("Configured using " + StringUtils.arrayToCommaDelimitedString(this.mappingLocations));
+    if (!ObjectUtils.isEmpty(this.mappingLocations)) {
+      logger.info("Configured using [" + StringUtils.arrayToCommaDelimitedString(this.mappingLocations) + "]");
     }
-    if (this.targetClass != null) {
-      logger.info("Configured for target class [" + this.targetClass.getName() + "]");
+    if (!ObjectUtils.isEmpty(this.targetClasses)) {
+      logger.info("Configured for target classes " + StringUtils.arrayToCommaDelimitedString(targetClasses) + "]");
     }
-    if (this.mappingLocations == null && this.targetClass == null) {
+    if (!ObjectUtils.isEmpty(this.targetPackages)) {
+      logger.info("Configured for target packages [" + StringUtils.arrayToCommaDelimitedString(targetPackages) + "]");
+    }
+    if (ObjectUtils.isEmpty(this.mappingLocations) && ObjectUtils.isEmpty(this.targetClasses) && ObjectUtils.isEmpty(this.targetPackages)) {
       logger.info("Using default configuration");
     }
   }
   try {
-    this.xmlContext=createXMLContext(this.mappingLocations,this.targetClass);
+    this.xmlContext=createXMLContext(this.mappingLocations,this.targetClasses,this.targetPackages);
   }
  catch (  MappingException ex) {
     throw new CastorMappingException("Could not load Castor mapping",ex);
