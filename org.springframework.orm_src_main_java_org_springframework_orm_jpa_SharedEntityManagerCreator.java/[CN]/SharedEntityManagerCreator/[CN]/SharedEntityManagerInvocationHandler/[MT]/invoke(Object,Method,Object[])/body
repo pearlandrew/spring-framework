@@ -11,9 +11,9 @@
  else   if (method.getName().equals("getEntityManagerFactory")) {
     return this.targetFactory;
   }
- else   if (method.getName().equals("getQueryBuilder")) {
+ else   if (method.getName().equals("getQueryBuilder") || method.getName().equals("getMetamodel")) {
     try {
-      return EntityManagerFactory.class.getMethod("getQueryBuilder").invoke(this.targetFactory);
+      return EntityManagerFactory.class.getMethod(method.getName()).invoke(this.targetFactory);
     }
  catch (    InvocationTargetException ex) {
       throw ex.getTargetException();
@@ -45,10 +45,6 @@
     return target;
   }
  else   if (method.getName().equals("unwrap")) {
-    Class targetClass=(Class)args[0];
-    if (targetClass == null || targetClass.isInstance(proxy)) {
-      return proxy;
-    }
     if (target == null) {
       throw new IllegalStateException("No transactional EntityManager available");
     }
