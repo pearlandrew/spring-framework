@@ -1,5 +1,5 @@
 {
-  Map<String,MultipartFile> multipartFiles=new HashMap<String,MultipartFile>();
+  MultiValueMap<String,MultipartFile> multipartFiles=new LinkedMultiValueMap<String,MultipartFile>();
   Map<String,String[]> multipartParameters=new HashMap<String,String[]>();
   for (  FileItem fileItem : fileItems) {
     if (fileItem.isFormField()) {
@@ -29,9 +29,7 @@
     }
  else {
       CommonsMultipartFile file=new CommonsMultipartFile(fileItem);
-      if (multipartFiles.put(file.getName(),file) != null) {
-        throw new MultipartException("Multiple files for field name [" + file.getName() + "] found - not supported by MultipartResolver");
-      }
+      multipartFiles.add(file.getName(),file);
       if (logger.isDebugEnabled()) {
         logger.debug("Found multipart file [" + file.getName() + "] of size "+ file.getSize()+ " bytes with original filename ["+ file.getOriginalFilename()+ "], stored "+ file.getStorageDescription());
       }

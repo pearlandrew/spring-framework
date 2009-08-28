@@ -1,0 +1,51 @@
+{
+  Set<String> fileNames=new HashSet<String>();
+  Iterator fileIter=request.getFileNames();
+  while (fileIter.hasNext()) {
+    fileNames.add((String)fileIter.next());
+  }
+  assertEquals(3,fileNames.size());
+  assertTrue(fileNames.contains("field1"));
+  assertTrue(fileNames.contains("field2"));
+  assertTrue(fileNames.contains("field2x"));
+  CommonsMultipartFile file1=(CommonsMultipartFile)request.getFile("field1");
+  CommonsMultipartFile file2=(CommonsMultipartFile)request.getFile("field2");
+  CommonsMultipartFile file2x=(CommonsMultipartFile)request.getFile("field2x");
+  Map<String,MultipartFile> fileMap=request.getFileMap();
+  assertEquals(3,fileMap.size());
+  assertTrue(fileMap.containsKey("field1"));
+  assertTrue(fileMap.containsKey("field2"));
+  assertTrue(fileMap.containsKey("field2x"));
+  assertEquals(file1,fileMap.get("field1"));
+  assertEquals(file2,fileMap.get("field2"));
+  assertEquals(file2x,fileMap.get("field2x"));
+  MultiValueMap<String,MultipartFile> multiFileMap=request.getMultiFileMap();
+  assertEquals(3,multiFileMap.size());
+  assertTrue(multiFileMap.containsKey("field1"));
+  assertTrue(multiFileMap.containsKey("field2"));
+  assertTrue(multiFileMap.containsKey("field2x"));
+  List<MultipartFile> field1Files=multiFileMap.get("field1");
+  assertEquals(2,field1Files.size());
+  assertTrue(field1Files.contains(file1));
+  assertEquals(file1,multiFileMap.getFirst("field1"));
+  assertEquals(file2,multiFileMap.getFirst("field2"));
+  assertEquals(file2x,multiFileMap.getFirst("field2x"));
+  assertEquals("type1",file1.getContentType());
+  assertEquals("type2",file2.getContentType());
+  assertEquals("type2",file2x.getContentType());
+  assertEquals("field1.txt",file1.getOriginalFilename());
+  assertEquals("field2.txt",file2.getOriginalFilename());
+  assertEquals("field2x.txt",file2x.getOriginalFilename());
+  assertEquals("text1",new String(file1.getBytes()));
+  assertEquals("text2",new String(file2.getBytes()));
+  assertEquals(5,file1.getSize());
+  assertEquals(5,file2.getSize());
+  assertTrue(file1.getInputStream() instanceof ByteArrayInputStream);
+  assertTrue(file2.getInputStream() instanceof ByteArrayInputStream);
+  File transfer1=new File("C:/transfer1");
+  file1.transferTo(transfer1);
+  File transfer2=new File("C:/transfer2");
+  file2.transferTo(transfer2);
+  assertEquals(transfer1,((MockFileItem)file1.getFileItem()).writtenFile);
+  assertEquals(transfer2,((MockFileItem)file2.getFileItem()).writtenFile);
+}
