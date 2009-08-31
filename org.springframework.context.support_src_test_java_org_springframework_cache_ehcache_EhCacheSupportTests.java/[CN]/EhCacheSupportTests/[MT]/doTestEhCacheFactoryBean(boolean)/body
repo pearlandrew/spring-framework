@@ -9,36 +9,38 @@
       cacheManagerFb=new EhCacheManagerFactoryBean();
       cacheManagerFb.setConfigLocation(new ClassPathResource("testEhcache.xml",getClass()));
       cacheManagerFb.afterPropertiesSet();
-      cacheFb.setCacheManager((CacheManager)cacheManagerFb.getObject());
+      cacheFb.setCacheManager(cacheManagerFb.getObject());
     }
     cacheFb.setCacheName("myCache1");
     cacheFb.afterPropertiesSet();
     cache=(Cache)cacheFb.getObject();
+    CacheConfiguration config=cache.getCacheConfiguration();
     assertEquals("myCache1",cache.getName());
     if (useCacheManagerFb) {
-      assertEquals("myCache1.maxElements",300,cache.getMaxElementsInMemory());
+      assertEquals("myCache1.maxElements",300,config.getMaxElementsInMemory());
     }
  else {
-      assertEquals("myCache1.maxElements",10000,cache.getMaxElementsInMemory());
+      assertEquals("myCache1.maxElements",10000,config.getMaxElementsInMemory());
     }
     cacheFb=new EhCacheFactoryBean();
     if (useCacheManagerFb) {
-      cacheFb.setCacheManager((CacheManager)cacheManagerFb.getObject());
+      cacheFb.setCacheManager(cacheManagerFb.getObject());
     }
     cacheFb.setCacheName("undefinedCache");
     cacheFb.afterPropertiesSet();
     cache=(Cache)cacheFb.getObject();
+    config=cache.getCacheConfiguration();
     assertEquals("undefinedCache",cache.getName());
-    assertTrue("default maxElements is correct",cache.getMaxElementsInMemory() == 10000);
-    assertTrue("default overflowToDisk is correct",cache.isOverflowToDisk());
-    assertFalse("default eternal is correct",cache.isEternal());
-    assertTrue("default timeToLive is correct",cache.getTimeToLiveSeconds() == 120);
-    assertTrue("default timeToIdle is correct",cache.getTimeToIdleSeconds() == 120);
-    assertTrue("default diskPersistent is correct",!cache.isDiskPersistent());
-    assertTrue("default diskExpiryThreadIntervalSeconds is correct",cache.getDiskExpiryThreadIntervalSeconds() == 120);
+    assertTrue("default maxElements is correct",config.getMaxElementsInMemory() == 10000);
+    assertTrue("default overflowToDisk is correct",config.isOverflowToDisk());
+    assertFalse("default eternal is correct",config.isEternal());
+    assertTrue("default timeToLive is correct",config.getTimeToLiveSeconds() == 120);
+    assertTrue("default timeToIdle is correct",config.getTimeToIdleSeconds() == 120);
+    assertTrue("default diskPersistent is correct",!config.isDiskPersistent());
+    assertTrue("default diskExpiryThreadIntervalSeconds is correct",config.getDiskExpiryThreadIntervalSeconds() == 120);
     cacheFb=new EhCacheFactoryBean();
     if (useCacheManagerFb) {
-      cacheFb.setCacheManager((CacheManager)cacheManagerFb.getObject());
+      cacheFb.setCacheManager(cacheManagerFb.getObject());
     }
     cacheFb.setBeanName("undefinedCache2");
     cacheFb.setMaxElementsInMemory(5);
@@ -50,14 +52,15 @@
     cacheFb.setDiskExpiryThreadIntervalSeconds(10);
     cacheFb.afterPropertiesSet();
     cache=(Cache)cacheFb.getObject();
+    config=cache.getCacheConfiguration();
     assertEquals("undefinedCache2",cache.getName());
-    assertTrue("overridden maxElements is correct",cache.getMaxElementsInMemory() == 5);
-    assertFalse("overridden overflowToDisk is correct",cache.isOverflowToDisk());
-    assertTrue("overridden eternal is correct",cache.isEternal());
-    assertTrue("default timeToLive is correct",cache.getTimeToLiveSeconds() == 8);
-    assertTrue("default timeToIdle is correct",cache.getTimeToIdleSeconds() == 7);
-    assertTrue("overridden diskPersistent is correct",cache.isDiskPersistent());
-    assertTrue("overridden diskExpiryThreadIntervalSeconds is correct",cache.getDiskExpiryThreadIntervalSeconds() == 10);
+    assertTrue("overridden maxElements is correct",config.getMaxElementsInMemory() == 5);
+    assertFalse("overridden overflowToDisk is correct",config.isOverflowToDisk());
+    assertTrue("overridden eternal is correct",config.isEternal());
+    assertTrue("default timeToLive is correct",config.getTimeToLiveSeconds() == 8);
+    assertTrue("default timeToIdle is correct",config.getTimeToIdleSeconds() == 7);
+    assertTrue("overridden diskPersistent is correct",config.isDiskPersistent());
+    assertTrue("overridden diskExpiryThreadIntervalSeconds is correct",config.getDiskExpiryThreadIntervalSeconds() == 10);
   }
   finally {
     if (useCacheManagerFb) {
