@@ -12,6 +12,11 @@
       sec.addPropertyAccessor(new BeanExpressionContextAccessor());
       sec.addPropertyAccessor(new BeanFactoryAccessor());
       sec.addPropertyAccessor(new MapAccessor());
+      sec.setTypeLocator(new StandardTypeLocator(evalContext.getBeanFactory().getBeanClassLoader()));
+      ConversionService conversionService=evalContext.getBeanFactory().getConversionService();
+      if (conversionService != null) {
+        sec.setTypeConverter(new StandardTypeConverter(conversionService));
+      }
       customizeEvaluationContext(sec);
       this.evaluationCache.put(evalContext,sec);
     }
