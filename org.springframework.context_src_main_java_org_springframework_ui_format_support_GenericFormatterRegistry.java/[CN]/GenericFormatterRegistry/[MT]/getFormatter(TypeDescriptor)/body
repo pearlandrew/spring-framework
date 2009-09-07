@@ -1,8 +1,14 @@
 {
-  Assert.notNull(type,"The TypeDescriptor is required");
+  Assert.notNull(type,"TypeDescriptor is required");
   Formatter<Object> formatter=getAnnotationFormatter(type);
   if (formatter == null) {
     formatter=getTypeFormatter(type.getType());
+  }
+  if (formatter != null) {
+    Class<?> formattedObjectType=getFormattedObjectType(formatter.getClass());
+    if (!type.getType().isAssignableFrom(formattedObjectType)) {
+      return new ConvertingFormatter(type.getType(),formattedObjectType,formatter);
+    }
   }
   return formatter;
 }

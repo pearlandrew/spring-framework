@@ -1,9 +1,17 @@
 {
   Annotation[] annotations=type.getAnnotations();
-  for (  Annotation a : annotations) {
-    AnnotationFormatterFactory factory=annotationFormatters.get(a.annotationType());
+  for (  Annotation ann : annotations) {
+    AnnotationFormatterFactory factory=this.annotationFormatters.get(ann.annotationType());
     if (factory != null) {
-      return factory.getFormatter(a);
+      return factory.getFormatter(ann);
+    }
+ else {
+      Formatted formattedAnnotation=ann.annotationType().getAnnotation(Formatted.class);
+      if (formattedAnnotation != null) {
+        Formatter formatter=createFormatter(formattedAnnotation.value());
+        this.annotationFormatters.put(ann.annotationType(),new SimpleAnnotationFormatterFactory(formatter));
+        return formatter;
+      }
     }
   }
   return null;

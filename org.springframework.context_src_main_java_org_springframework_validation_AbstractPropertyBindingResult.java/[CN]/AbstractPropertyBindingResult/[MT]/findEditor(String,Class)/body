@@ -1,8 +1,11 @@
 {
-  TypeDescriptor td=(valueType != null ? TypeDescriptor.valueOf(valueType) : getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field)));
-  final Formatter<Object> formatter=(this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
-  if (formatter != null) {
-    return new FormattingPropertyEditorAdapter(formatter);
+  PropertyEditor editor=super.findEditor(field,valueType);
+  if (editor == null) {
+    TypeDescriptor td=(field != null ? getPropertyAccessor().getPropertyTypeDescriptor(fixedField(field)) : TypeDescriptor.valueOf(valueType));
+    Formatter<Object> formatter=(this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
+    if (formatter != null) {
+      editor=new FormattingPropertyEditorAdapter(formatter);
+    }
   }
-  return super.findEditor(field,valueType);
+  return editor;
 }

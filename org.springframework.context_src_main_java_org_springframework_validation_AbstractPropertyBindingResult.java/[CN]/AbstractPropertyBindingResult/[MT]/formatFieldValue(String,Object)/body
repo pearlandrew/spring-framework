@@ -1,10 +1,5 @@
 {
   String fixedField=fixedField(field);
-  TypeDescriptor td=getPropertyAccessor().getPropertyTypeDescriptor(fixedField);
-  Formatter<Object> formatter=(this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
-  if (formatter != null) {
-    return formatter.format(value,LocaleContextHolder.getLocale());
-  }
   PropertyEditor customEditor=getCustomEditor(fixedField);
   if (customEditor != null) {
     customEditor.setValue(value);
@@ -12,6 +7,11 @@
     if (textValue != null) {
       return textValue;
     }
+  }
+  TypeDescriptor td=getPropertyAccessor().getPropertyTypeDescriptor(fixedField);
+  Formatter<Object> formatter=(this.formatterRegistry != null ? this.formatterRegistry.getFormatter(td) : null);
+  if (formatter != null) {
+    return formatter.format(value,LocaleContextHolder.getLocale());
   }
   return value;
 }

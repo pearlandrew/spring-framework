@@ -35,18 +35,23 @@ synchronized (editor) {
     }
     convertedValue=StringUtils.arrayToCommaDelimitedString((String[])convertedValue);
   }
-  if (editor != null && convertedValue instanceof String) {
-    if (logger.isTraceEnabled()) {
-      logger.trace("Converting String to [" + requiredType + "] using property editor ["+ editor+ "]");
-    }
-    String newTextValue=(String)convertedValue;
-    if (sharedEditor) {
+  if (convertedValue instanceof String) {
+    if (editor != null) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Converting String to [" + requiredType + "] using property editor ["+ editor+ "]");
+      }
+      String newTextValue=(String)convertedValue;
+      if (sharedEditor) {
 synchronized (editor) {
+          return doConvertTextValue(oldValue,newTextValue,editor);
+        }
+      }
+ else {
         return doConvertTextValue(oldValue,newTextValue,editor);
       }
     }
- else {
-      return doConvertTextValue(oldValue,newTextValue,editor);
+ else     if (String.class.equals(requiredType)) {
+      returnValue=convertedValue;
     }
   }
   return returnValue;

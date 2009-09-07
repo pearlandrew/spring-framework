@@ -1,18 +1,10 @@
 {
-  if (formatted.length() == 0) {
-    return null;
+  BigDecimal decimal=(BigDecimal)super.parse(formatted,locale);
+  if (this.roundingMode != null) {
+    decimal=decimal.setScale(this.fractionDigits,this.roundingMode);
   }
-  NumberFormat format=currencyFormatFactory.getNumberFormat(locale);
-  ParsePosition position=new ParsePosition(0);
-  BigDecimal decimal=(BigDecimal)format.parse(formatted,position);
-  if (position.getErrorIndex() != -1) {
-    throw new ParseException(formatted,position.getIndex());
+ else {
+    decimal=decimal.setScale(this.fractionDigits);
   }
-  if (!lenient) {
-    if (formatted.length() != position.getIndex()) {
-      throw new ParseException(formatted,position.getIndex());
-    }
-  }
-  decimal=decimal.setScale(format.getMaximumFractionDigits(),format.getRoundingMode());
   return decimal;
 }

@@ -2,12 +2,16 @@
   Object convertedValue=newValue;
   PropertyEditor editor=this.propertyEditorRegistry.findCustomEditor(requiredType,propertyName);
   ConversionService conversionService=this.propertyEditorRegistry.getConversionService();
-  if (editor == null && conversionService != null && convertedValue != null && conversionService.canConvert(convertedValue.getClass(),requiredType)) {
+  if (editor == null && conversionService != null && convertedValue != null) {
+    TypeDescriptor typeDesc;
     if (methodParam != null) {
-      return (T)conversionService.convert(convertedValue,new TypeDescriptor(methodParam));
+      typeDesc=(descriptor != null ? new BeanTypeDescriptor(methodParam,descriptor) : new TypeDescriptor(methodParam));
     }
  else {
-      return conversionService.convert(convertedValue,requiredType);
+      typeDesc=TypeDescriptor.valueOf(requiredType);
+    }
+    if (conversionService.canConvert(convertedValue.getClass(),typeDesc)) {
+      return (T)conversionService.convert(convertedValue,typeDesc);
     }
   }
   if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType,convertedValue))) {

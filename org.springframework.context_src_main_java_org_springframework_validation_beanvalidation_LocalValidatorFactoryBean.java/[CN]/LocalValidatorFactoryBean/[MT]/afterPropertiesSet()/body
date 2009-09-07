@@ -1,0 +1,29 @@
+{
+  Configuration configuration=(this.providerClass != null ? Validation.byProvider(this.providerClass).configure() : Validation.byDefaultProvider().configure());
+  configuration.messageInterpolator(new LocaleContextMessageInterpolator(this.messageInterpolator,configuration.getDefaultMessageInterpolator()));
+  if (this.traversableResolver != null) {
+    configuration.traversableResolver(this.traversableResolver);
+  }
+  ConstraintValidatorFactory targetConstraintValidatorFactory=this.constraintValidatorFactory;
+  if (targetConstraintValidatorFactory == null && this.applicationContext != null) {
+    targetConstraintValidatorFactory=new SpringConstraintValidatorFactory(this.applicationContext.getAutowireCapableBeanFactory());
+  }
+  if (targetConstraintValidatorFactory != null) {
+    configuration.constraintValidatorFactory(targetConstraintValidatorFactory);
+  }
+  if (this.mappingLocations != null) {
+    for (    Resource location : this.mappingLocations) {
+      try {
+        configuration.addMapping(location.getInputStream());
+      }
+ catch (      IOException ex) {
+        throw new IllegalStateException("Cannot read mapping resource: " + location);
+      }
+    }
+  }
+  for (  Map.Entry<String,String> entry : this.validationPropertyMap.entrySet()) {
+    configuration.addProperty(entry.getKey(),entry.getValue());
+  }
+  this.validatorFactory=configuration.buildValidatorFactory();
+  setTargetValidator(this.validatorFactory.getValidator());
+}

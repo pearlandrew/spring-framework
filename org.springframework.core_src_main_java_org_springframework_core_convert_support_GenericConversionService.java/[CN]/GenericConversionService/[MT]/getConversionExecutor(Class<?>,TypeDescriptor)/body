@@ -11,7 +11,7 @@
     }
  else     if (targetType.isCollection()) {
       if (targetType.isAbstractClass()) {
-        throw new IllegalArgumentException("Conversion target class [" + targetType.getName() + "] is invalid; cannot convert to abstract collection types--"+ "request an interface or concrete implementation instead");
+        throw new IllegalArgumentException("Conversion target class [" + targetType.getName() + "] is invalid; cannot convert to abstract collection types. "+ "Request an interface or a concrete implementation instead!");
       }
       return new ArrayToCollection(sourceType,targetType,this);
     }
@@ -24,8 +24,8 @@
       }
     }
  else {
-      if (targetType.getType().equals(String.class)) {
-        return null;
+      if (sourceType.getElementType().equals(String.class)) {
+        return new StringArrayToObject(targetType,this);
       }
  else {
         return null;
@@ -82,7 +82,7 @@
   }
   if (targetType.isArray()) {
     if (sourceType.getType().equals(String.class)) {
-      return new StringToArray(sourceType,targetType,this);
+      return new StringToArray(targetType,this);
     }
  else {
       return new ObjectToArray(sourceType,targetType,this);
@@ -107,9 +107,20 @@
   if (sourceType.isAssignableTo(targetType)) {
     return NoOpConversionExecutor.INSTANCE;
   }
-  Converter converter=findRegisteredConverter(ClassUtils.resolvePrimitiveIfNecessary(sourceType.getType()),ClassUtils.resolvePrimitiveIfNecessary(targetType.getType()));
+  Converter converter=findRegisteredConverter(ClassUtils.resolvePrimitiveIfNecessary(sourceClass),ClassUtils.resolvePrimitiveIfNecessary(targetType.getType()));
   if (converter != null) {
     return new StaticConversionExecutor(sourceType,targetType,converter);
+  }
+ else   if (this.parent instanceof GenericConversionService) {
+    return ((GenericConversionService)this.parent).getConversionExecutor(sourceClass,targetType);
+  }
+ else   if (this.parent != null && this.parent.canConvert(sourceClass,targetType)) {
+    return new ConversionExecutor(){
+      public Object execute(      Object source){
+        return parent.convert(source,targetType);
+      }
+    }
+;
   }
  else {
     return null;
