@@ -1,6 +1,12 @@
 {
   if (!rootDir.isDirectory()) {
-    throw new IllegalArgumentException("Resource path [" + rootDir + "] does not denote a directory");
+    throw new IllegalStateException("Resource path [" + rootDir.getAbsolutePath() + "] does not denote a directory");
+  }
+  if (!rootDir.canRead()) {
+    if (logger.isWarnEnabled()) {
+      logger.warn("Cannot search for matching files underneath directory [" + rootDir.getAbsolutePath() + "] because the application is not allowed to read the directory");
+    }
+    return Collections.emptySet();
   }
   String fullPattern=StringUtils.replace(rootDir.getAbsolutePath(),File.separator,"/");
   if (!pattern.startsWith("/")) {
