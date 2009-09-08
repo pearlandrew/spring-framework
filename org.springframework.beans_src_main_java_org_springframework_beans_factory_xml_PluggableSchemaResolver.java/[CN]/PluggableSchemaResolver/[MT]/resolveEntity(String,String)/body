@@ -6,13 +6,20 @@
     String resourceLocation=getSchemaMappings().get(systemId);
     if (resourceLocation != null) {
       Resource resource=new ClassPathResource(resourceLocation,this.classLoader);
-      InputSource source=new InputSource(resource.getInputStream());
-      source.setPublicId(publicId);
-      source.setSystemId(systemId);
-      if (logger.isDebugEnabled()) {
-        logger.debug("Found XML schema [" + systemId + "] in classpath: "+ resourceLocation);
+      try {
+        InputSource source=new InputSource(resource.getInputStream());
+        source.setPublicId(publicId);
+        source.setSystemId(systemId);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Found XML schema [" + systemId + "] in classpath: "+ resourceLocation);
+        }
+        return source;
       }
-      return source;
+ catch (      FileNotFoundException ex) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Couldn't find XML schema [" + systemId + "]: "+ resource,ex);
+        }
+      }
     }
   }
   return null;
