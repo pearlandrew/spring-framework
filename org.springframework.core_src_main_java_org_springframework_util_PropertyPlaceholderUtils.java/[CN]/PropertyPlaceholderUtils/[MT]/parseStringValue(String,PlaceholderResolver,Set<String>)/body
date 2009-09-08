@@ -1,0 +1,28 @@
+{
+  StringBuilder buf=new StringBuilder(strVal);
+  int startIndex=strVal.indexOf(PLACEHOLDER_PREFIX);
+  while (startIndex != -1) {
+    int endIndex=findPlaceholderEndIndex(buf,startIndex);
+    if (endIndex != -1) {
+      String placeholder=buf.substring(startIndex + PLACEHOLDER_PREFIX.length(),endIndex);
+      if (!visitedPlaceholders.add(placeholder)) {
+        throw new IllegalArgumentException("Circular placeholder reference '" + placeholder + "' in property definitions");
+      }
+      placeholder=parseStringValue(placeholder,placeholderResolver,visitedPlaceholders);
+      String propVal=placeholderResolver.resolvePlaceholder(placeholder);
+      if (propVal != null) {
+        propVal=parseStringValue(propVal,placeholderResolver,visitedPlaceholders);
+        buf.replace(startIndex,endIndex + PLACEHOLDER_SUFFIX.length(),propVal);
+        startIndex=buf.indexOf(PLACEHOLDER_PREFIX,startIndex + propVal.length());
+      }
+ else {
+        startIndex=buf.indexOf(PLACEHOLDER_PREFIX,endIndex + PLACEHOLDER_SUFFIX.length());
+      }
+      visitedPlaceholders.remove(placeholder);
+    }
+ else {
+      startIndex=-1;
+    }
+  }
+  return buf.toString();
+}
