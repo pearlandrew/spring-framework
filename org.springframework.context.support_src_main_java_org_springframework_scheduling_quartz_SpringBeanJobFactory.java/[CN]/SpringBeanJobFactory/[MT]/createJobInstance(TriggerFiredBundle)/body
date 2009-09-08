@@ -1,5 +1,5 @@
 {
-  Object job=BeanUtils.instantiateClass(bundle.getJobDetail().getJobClass());
+  Object job=bundle.getJobDetail().getJobClass().newInstance();
   BeanWrapper bw=PropertyAccessorFactory.forBeanPropertyAccess(job);
   if (isEligibleForPropertyPopulation(bw.getWrappedInstance())) {
     MutablePropertyValues pvs=new MutablePropertyValues();
@@ -9,8 +9,7 @@
     pvs.addPropertyValues(bundle.getJobDetail().getJobDataMap());
     pvs.addPropertyValues(bundle.getTrigger().getJobDataMap());
     if (this.ignoredUnknownProperties != null) {
-      for (int i=0; i < this.ignoredUnknownProperties.length; i++) {
-        String propName=this.ignoredUnknownProperties[i];
+      for (      String propName : this.ignoredUnknownProperties) {
         if (pvs.contains(propName) && !bw.isWritableProperty(propName)) {
           pvs.removePropertyValue(propName);
         }
