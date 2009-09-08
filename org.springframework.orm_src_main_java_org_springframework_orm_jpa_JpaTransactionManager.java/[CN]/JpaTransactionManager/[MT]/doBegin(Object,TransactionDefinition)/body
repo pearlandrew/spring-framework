@@ -12,18 +12,23 @@
       txObject.setEntityManagerHolder(new EntityManagerHolder(newEm),true);
     }
     EntityManager em=txObject.getEntityManagerHolder().getEntityManager();
-    Object transactionData=getJpaDialect().beginTransaction(em,definition);
+    final int timeoutToUse=determineTimeout(definition);
+    Object transactionData=getJpaDialect().beginTransaction(em,new DelegatingTransactionDefinition(definition){
+      @Override public int getTimeout(){
+        return timeoutToUse;
+      }
+    }
+);
     txObject.setTransactionData(transactionData);
-    int timeout=determineTimeout(definition);
-    if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
-      txObject.getEntityManagerHolder().setTimeoutInSeconds(timeout);
+    if (timeoutToUse != TransactionDefinition.TIMEOUT_DEFAULT) {
+      txObject.getEntityManagerHolder().setTimeoutInSeconds(timeoutToUse);
     }
     if (getDataSource() != null) {
       ConnectionHandle conHandle=getJpaDialect().getJdbcConnection(em,definition.isReadOnly());
       if (conHandle != null) {
         ConnectionHolder conHolder=new ConnectionHolder(conHandle);
-        if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
-          conHolder.setTimeoutInSeconds(timeout);
+        if (timeoutToUse != TransactionDefinition.TIMEOUT_DEFAULT) {
+          conHolder.setTimeoutInSeconds(timeoutToUse);
         }
         if (logger.isDebugEnabled()) {
           logger.debug("Exposing JPA transaction as JDBC transaction [" + conHolder.getConnectionHandle() + "]");

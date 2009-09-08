@@ -3,7 +3,7 @@
   if (txObject.hasConnectionHolder() && !txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
     throw new IllegalTransactionStateException("Pre-bound JDBC Connection found! JdoTransactionManager does not support " + "running within DataSourceTransactionManager if told to manage the DataSource itself. " + "It is recommended to use a single JdoTransactionManager for all transactions "+ "on a single DataSource, no matter whether JDO or JDBC access.");
   }
-  PersistenceManager pm=null;
+  PersistenceManager pm;
   try {
     if (txObject.getPersistenceManagerHolder() == null || txObject.getPersistenceManagerHolder().isSynchronizedWithTransaction()) {
       PersistenceManager newPm=getPersistenceManagerFactory().getPersistenceManager();
@@ -13,18 +13,23 @@
       txObject.setPersistenceManagerHolder(new PersistenceManagerHolder(newPm),true);
     }
     pm=txObject.getPersistenceManagerHolder().getPersistenceManager();
-    Object transactionData=getJdoDialect().beginTransaction(pm.currentTransaction(),definition);
+    final int timeoutToUse=determineTimeout(definition);
+    Object transactionData=getJdoDialect().beginTransaction(pm.currentTransaction(),new DelegatingTransactionDefinition(definition){
+      @Override public int getTimeout(){
+        return timeoutToUse;
+      }
+    }
+);
     txObject.setTransactionData(transactionData);
-    int timeout=determineTimeout(definition);
-    if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
-      txObject.getPersistenceManagerHolder().setTimeoutInSeconds(timeout);
+    if (timeoutToUse != TransactionDefinition.TIMEOUT_DEFAULT) {
+      txObject.getPersistenceManagerHolder().setTimeoutInSeconds(timeoutToUse);
     }
     if (getDataSource() != null) {
       ConnectionHandle conHandle=getJdoDialect().getJdbcConnection(pm,definition.isReadOnly());
       if (conHandle != null) {
         ConnectionHolder conHolder=new ConnectionHolder(conHandle);
-        if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
-          conHolder.setTimeoutInSeconds(timeout);
+        if (timeoutToUse != TransactionDefinition.TIMEOUT_DEFAULT) {
+          conHolder.setTimeoutInSeconds(timeoutToUse);
         }
         if (logger.isDebugEnabled()) {
           logger.debug("Exposing JDO transaction as JDBC transaction [" + conHolder.getConnectionHandle() + "]");
