@@ -1,0 +1,11 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  AutowiredAnnotationBeanPostProcessor bpp=new AutowiredAnnotationBeanPostProcessor();
+  bpp.setBeanFactory(bf);
+  bf.addBeanPostProcessor(bpp);
+  bf.registerBeanDefinition("annotatedBean",new RootBeanDefinition(ObjectFactoryInjectionBean.class));
+  bf.registerBeanDefinition("testBean",new RootBeanDefinition(TestBean.class));
+  ObjectFactoryInjectionBean bean=(ObjectFactoryInjectionBean)bf.getBean("annotatedBean");
+  assertSame(bf.getBean("testBean"),bean.getTestBean());
+  bf.destroySingletons();
+}
