@@ -1,0 +1,38 @@
+{
+  Object convertedValue=currentConvertedValue;
+  if (Enum.class.equals(requiredType)) {
+    int index=trimmedValue.lastIndexOf(".");
+    if (index > -1) {
+      String enumType=trimmedValue.substring(0,index);
+      String fieldName=trimmedValue.substring(index + 1);
+      ClassLoader loader=this.targetObject.getClass().getClassLoader();
+      try {
+        Class<?> enumValueType=loader.loadClass(enumType);
+        Field enumField=enumValueType.getField(fieldName);
+        convertedValue=enumField.get(null);
+      }
+ catch (      ClassNotFoundException ex) {
+        if (logger.isTraceEnabled()) {
+          logger.trace("Enum class [" + enumType + "] cannot be loaded from ["+ loader+ "]",ex);
+        }
+      }
+catch (      Throwable ex) {
+        if (logger.isTraceEnabled()) {
+          logger.trace("Field [" + fieldName + "] isn't an enum value for type ["+ enumType+ "]",ex);
+        }
+      }
+    }
+  }
+  if (convertedValue == currentConvertedValue) {
+    try {
+      Field enumField=requiredType.getField(trimmedValue);
+      convertedValue=enumField.get(null);
+    }
+ catch (    Throwable ex) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Field [" + convertedValue + "] isn't an enum value",ex);
+      }
+    }
+  }
+  return convertedValue;
+}
