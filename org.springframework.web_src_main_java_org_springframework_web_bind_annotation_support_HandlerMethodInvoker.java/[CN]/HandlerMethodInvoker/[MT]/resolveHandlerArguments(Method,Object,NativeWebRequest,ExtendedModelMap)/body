@@ -52,6 +52,9 @@
         attrName=attr.value();
         found++;
       }
+ else       if (Value.class.isInstance(paramAnn)) {
+        defaultValue=((Value)paramAnn).value();
+      }
  else       if ("Valid".equals(paramAnn.annotationType().getSimpleName())) {
         validate=true;
       }
@@ -63,6 +66,9 @@
       Object argValue=resolveCommonArgument(methodParam,webRequest);
       if (argValue != WebArgumentResolver.UNRESOLVED) {
         args[i]=argValue;
+      }
+ else       if (defaultValue != null) {
+        args[i]=resolveDefaultValue(defaultValue);
       }
  else {
         Class paramType=methodParam.getParameterType();

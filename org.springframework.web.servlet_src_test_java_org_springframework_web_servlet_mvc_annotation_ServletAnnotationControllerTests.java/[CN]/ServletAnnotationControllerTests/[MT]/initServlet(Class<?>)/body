@@ -1,8 +1,11 @@
 {
   servlet=new DispatcherServlet(){
-    @Override protected WebApplicationContext createWebApplicationContext(    WebApplicationContext parent) throws BeansException {
+    @Override protected WebApplicationContext createWebApplicationContext(    WebApplicationContext parent){
       GenericWebApplicationContext wac=new GenericWebApplicationContext();
-      wac.registerBeanDefinition("controller",new RootBeanDefinition(controllerclass));
+      wac.registerBeanDefinition("controller",new RootBeanDefinition(controllerClass));
+      RootBeanDefinition ppc=new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
+      ppc.getPropertyValues().addPropertyValue("properties","myKey=foo");
+      wac.registerBeanDefinition("ppc",ppc);
       wac.refresh();
       return wac;
     }
