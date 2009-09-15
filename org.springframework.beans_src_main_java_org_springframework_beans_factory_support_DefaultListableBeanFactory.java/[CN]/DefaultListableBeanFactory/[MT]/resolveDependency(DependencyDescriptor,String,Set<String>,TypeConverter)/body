@@ -1,7 +1,10 @@
 {
   descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
-  if (ObjectFactory.class.equals(descriptor.getDependencyType())) {
+  if (descriptor.getDependencyType().equals(ObjectFactory.class)) {
     return new DependencyObjectFactory(descriptor,beanName);
+  }
+ else   if (descriptor.getDependencyType().getName().equals("javax.inject.Provider")) {
+    return new DependencyProviderFactory().createDependencyProvider(descriptor,beanName);
   }
  else {
     return doResolveDependency(descriptor,descriptor.getDependencyType(),beanName,autowiredBeanNames,typeConverter);

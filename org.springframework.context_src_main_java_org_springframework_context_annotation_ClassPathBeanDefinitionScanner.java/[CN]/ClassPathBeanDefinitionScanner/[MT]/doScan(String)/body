@@ -3,6 +3,8 @@
   for (  String basePackage : basePackages) {
     Set<BeanDefinition> candidates=findCandidateComponents(basePackage);
     for (    BeanDefinition candidate : candidates) {
+      ScopeMetadata scopeMetadata=this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+      candidate.setScope(scopeMetadata.getScopeName());
       String beanName=this.beanNameGenerator.generateBeanName(candidate,this.registry);
       if (candidate instanceof AbstractBeanDefinition) {
         postProcessBeanDefinition((AbstractBeanDefinition)candidate,beanName);
@@ -23,8 +25,7 @@
       }
       if (checkCandidate(beanName,candidate)) {
         BeanDefinitionHolder definitionHolder=new BeanDefinitionHolder(candidate,beanName);
-        ScopeMetadata scopeMetadata=this.scopeMetadataResolver.resolveScopeMetadata(candidate);
-        definitionHolder=applyScope(definitionHolder,scopeMetadata);
+        definitionHolder=applyScopedProxyMode(definitionHolder,scopeMetadata);
         beanDefinitions.add(definitionHolder);
         registerBeanDefinition(definitionHolder,this.registry);
       }
