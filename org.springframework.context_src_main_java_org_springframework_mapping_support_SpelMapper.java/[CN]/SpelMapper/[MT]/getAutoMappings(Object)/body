@@ -1,0 +1,23 @@
+{
+  if (autoMappingEnabled) {
+    Set<Mapping> autoMappings=new LinkedHashSet<Mapping>();
+    Set<String> fields=getMappableFields(source);
+    for (    String field : fields) {
+      if (!explicitlyMapped(field)) {
+        Expression exp;
+        try {
+          exp=expressionParser.parseExpression(field);
+        }
+ catch (        ParseException e) {
+          throw new IllegalArgumentException("The mapping source '" + source + "' is not a parseable value expression",e);
+        }
+        Mapping mapping=new Mapping(exp,exp);
+        autoMappings.add(mapping);
+      }
+    }
+    return autoMappings;
+  }
+ else {
+    return Collections.emptySet();
+  }
+}
