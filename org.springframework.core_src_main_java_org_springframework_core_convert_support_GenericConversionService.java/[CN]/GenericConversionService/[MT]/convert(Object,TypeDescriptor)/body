@@ -1,15 +1,30 @@
 {
+  Assert.notNull(targetType,"The targetType to convert to is required");
   if (source == null) {
     return null;
   }
-  ConversionExecutor executor=getConversionExecutor(source.getClass(),targetType);
-  if (executor != null) {
-    return executor.execute(source);
+  if (targetType == TypeDescriptor.NULL) {
+    return null;
   }
- else   if (this.parent != null) {
-    return this.parent.convert(source,targetType);
+  Class sourceType=ClassUtils.resolvePrimitiveIfNecessary(source.getClass());
+  GenericConverter converter=getConverter(sourceType,targetType.getObjectType());
+  if (converter != null) {
+    try {
+      return converter.convert(source,targetType);
+    }
+ catch (    ConversionFailedException e) {
+      throw e;
+    }
+catch (    Exception e) {
+      throw new ConversionFailedException(sourceType,targetType,source,e);
+    }
   }
  else {
-    throw new ConverterNotFoundException(source.getClass(),targetType.getType(),"No converter found that can convert from source type [" + source.getClass().getName() + "] to target type ["+ targetType.getName()+ "]");
+    if (targetType.isAssignableValue(source)) {
+      return source;
+    }
+ else {
+      throw new ConverterNotFoundException(sourceType,targetType.getObjectType());
+    }
   }
 }

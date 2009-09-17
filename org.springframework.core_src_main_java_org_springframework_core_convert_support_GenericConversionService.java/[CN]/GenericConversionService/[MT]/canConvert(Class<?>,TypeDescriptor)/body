@@ -1,4 +1,10 @@
 {
-  ConversionExecutor executor=getConversionExecutor(sourceType,targetType);
-  return (executor != null || (this.parent != null && this.parent.canConvert(sourceType,targetType)));
+  Assert.notNull(sourceType,"The sourceType to convert from is required");
+  Assert.notNull(targetType,"The targetType to convert to is required");
+  if (targetType == TypeDescriptor.NULL) {
+    return true;
+  }
+  Class sourceClass=ClassUtils.resolvePrimitiveIfNecessary(sourceType);
+  Class targetClass=targetType.getObjectType();
+  return getConverter(sourceClass,targetType.getObjectType()) != null || this.parent != null && this.parent.canConvert(sourceClass,targetClass);
 }
