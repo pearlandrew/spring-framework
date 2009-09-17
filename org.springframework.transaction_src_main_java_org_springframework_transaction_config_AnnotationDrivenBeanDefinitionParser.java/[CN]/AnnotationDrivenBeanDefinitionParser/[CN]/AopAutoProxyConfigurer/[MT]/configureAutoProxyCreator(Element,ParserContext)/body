@@ -2,8 +2,7 @@
   AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext,element);
   if (!parserContext.getRegistry().containsBeanDefinition(TRANSACTION_ADVISOR_BEAN_NAME)) {
     Object eleSource=parserContext.extractSource(element);
-    Class sourceClass=TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();
-    RootBeanDefinition sourceDef=new RootBeanDefinition(sourceClass);
+    RootBeanDefinition sourceDef=new RootBeanDefinition(AnnotationTransactionAttributeSource.class);
     sourceDef.setSource(eleSource);
     sourceDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
     String sourceName=parserContext.getReaderContext().registerWithGeneratedName(sourceDef);
@@ -11,12 +10,12 @@
     interceptorDef.setSource(eleSource);
     interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
     registerTransactionManager(element,interceptorDef);
-    interceptorDef.getPropertyValues().addPropertyValue(TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE,new RuntimeBeanReference(sourceName));
+    interceptorDef.getPropertyValues().addPropertyValue("transactionAttributeSource",new RuntimeBeanReference(sourceName));
     String interceptorName=parserContext.getReaderContext().registerWithGeneratedName(interceptorDef);
     RootBeanDefinition advisorDef=new RootBeanDefinition(BeanFactoryTransactionAttributeSourceAdvisor.class);
     advisorDef.setSource(eleSource);
     advisorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-    advisorDef.getPropertyValues().addPropertyValue(TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE,new RuntimeBeanReference(sourceName));
+    advisorDef.getPropertyValues().addPropertyValue("transactionAttributeSource",new RuntimeBeanReference(sourceName));
     advisorDef.getPropertyValues().addPropertyValue("adviceBeanName",interceptorName);
     if (element.hasAttribute("order")) {
       advisorDef.getPropertyValues().addPropertyValue("order",element.getAttribute("order"));
