@@ -1,13 +1,17 @@
 {
-  if (sourceType.isAssignableTo(targetType)) {
-    return source;
+  if (isArrayToArray(sourceType,targetType)) {
+    return convertArrayToArray(source,sourceType,targetType);
   }
-  TypeDescriptor targetElementType=targetType.getElementTypeDescriptor();
-  TypeDescriptor sourceElementType=sourceType.getElementTypeDescriptor();
-  Object target=Array.newInstance(targetElementType.getType(),Array.getLength(source));
-  GenericConverter converter=conversionService.getConverter(sourceElementType,targetElementType);
-  for (int i=0; i < Array.getLength(target); i++) {
-    Array.set(target,i,converter.convert(Array.get(source,i),sourceElementType,targetElementType));
+ else   if (isArrayToCollection(sourceType,targetType)) {
+    return convertArrayToCollection(source,sourceType,targetType);
   }
-  return target;
+ else   if (isCollectionToArray(sourceType,targetType)) {
+    return convertCollectionToArray(source,sourceType,targetType);
+  }
+ else   if (isArrayToObject(sourceType,targetType)) {
+    return convertArrayToObject(source,sourceType,targetType);
+  }
+ else {
+    return convertObjectToArray(source,sourceType,targetType);
+  }
 }
