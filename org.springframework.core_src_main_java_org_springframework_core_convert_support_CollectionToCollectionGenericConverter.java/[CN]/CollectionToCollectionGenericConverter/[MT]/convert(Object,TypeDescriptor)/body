@@ -1,17 +1,18 @@
 {
   Collection sourceCollection=(Collection)source;
-  Object firstNotNullElement=getFirstNotNullElement(sourceCollection);
-  if (firstNotNullElement == null) {
+  Class targetElementType=targetType.getElementType();
+  if (targetElementType == null) {
     return compatibleCollectionWithoutElementConversion(sourceCollection,targetType);
   }
-  Class targetElementType=targetType.getElementType();
-  if (targetElementType == null || targetElementType.isAssignableFrom(firstNotNullElement.getClass())) {
+  Class sourceElementType=getElementType(sourceCollection);
+  if (sourceElementType == null || targetElementType.isAssignableFrom(sourceElementType)) {
     return compatibleCollectionWithoutElementConversion(sourceCollection,targetType);
   }
   Collection targetCollection=CollectionFactory.createCollection(targetType.getType(),sourceCollection.size());
-  GenericConverter elementConverter=conversionService.getConverter(firstNotNullElement.getClass(),TypeDescriptor.valueOf(targetElementType));
+  TypeDescriptor targetElementTypeDescriptor=TypeDescriptor.valueOf(targetElementType);
+  GenericConverter elementConverter=conversionService.getConverter(sourceElementType,targetElementTypeDescriptor);
   for (  Object element : sourceCollection) {
-    targetCollection.add(elementConverter.convert(element,TypeDescriptor.valueOf(targetElementType)));
+    targetCollection.add(elementConverter.convert(element,targetElementTypeDescriptor));
   }
   return targetCollection;
 }
