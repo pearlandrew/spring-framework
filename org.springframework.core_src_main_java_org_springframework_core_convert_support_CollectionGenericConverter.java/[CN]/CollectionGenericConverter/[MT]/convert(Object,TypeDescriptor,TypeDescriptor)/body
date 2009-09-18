@@ -1,20 +1,26 @@
 {
-  Collection sourceCollection=(Collection)source;
-  TypeDescriptor targetElementType=targetType.getElementTypeDescriptor();
-  if (targetElementType == TypeDescriptor.NULL) {
-    return compatibleCollectionWithoutElementConversion(sourceCollection,targetType);
+  if (isArrayToArray(sourceType,targetType)) {
+    return convertArrayToArray(source,sourceType,targetType);
   }
-  TypeDescriptor sourceElementType=sourceType.getElementTypeDescriptor();
-  if (sourceElementType == TypeDescriptor.NULL) {
-    sourceElementType=getElementType(sourceCollection);
+ else   if (isArrayToCollection(sourceType,targetType)) {
+    return convertArrayToCollection(source,sourceType,targetType);
   }
-  if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetElementType)) {
-    return compatibleCollectionWithoutElementConversion(sourceCollection,targetType);
+ else   if (isCollectionToCollection(sourceType,targetType)) {
+    return convertCollectionToCollection(source,sourceType,targetType);
   }
-  Collection targetCollection=CollectionFactory.createCollection(targetType.getType(),sourceCollection.size());
-  GenericConverter elementConverter=conversionService.getConverter(sourceElementType,targetElementType);
-  for (  Object element : sourceCollection) {
-    targetCollection.add(elementConverter.convert(element,sourceElementType,targetElementType));
+ else   if (isCollectionToArray(sourceType,targetType)) {
+    return convertCollectionToArray(source,sourceType,targetType);
   }
-  return targetCollection;
+ else   if (isArrayToObject(sourceType,targetType)) {
+    return convertArrayToObject(source,sourceType,targetType);
+  }
+ else   if (isObjectToArray(sourceType,targetType)) {
+    return convertObjectToArray(source,sourceType,targetType);
+  }
+ else   if (isCollectionToObject(sourceType,targetType)) {
+    return convertCollectionToObject(source,sourceType,targetType);
+  }
+ else {
+    return convertObjectToCollection(source,sourceType,targetType);
+  }
 }

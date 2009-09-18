@@ -1,14 +1,14 @@
 {
   int length=Array.getLength(source);
   Collection collection=CollectionFactory.createCollection(targetType.getType(),length);
+  TypeDescriptor sourceElementType=sourceType.getElementTypeDescriptor();
   TypeDescriptor targetElementType=targetType.getElementTypeDescriptor();
-  if (targetElementType == TypeDescriptor.NULL) {
+  if (targetElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetElementType)) {
     for (int i=0; i < length; i++) {
       collection.add(Array.get(source,i));
     }
   }
  else {
-    TypeDescriptor sourceElementType=sourceType.getElementTypeDescriptor();
     GenericConverter converter=conversionService.getConverter(sourceElementType,targetElementType);
     for (int i=0; i < length; i++) {
       collection.add(converter.convert(Array.get(source,i),sourceElementType,targetElementType));

@@ -1,0 +1,22 @@
+{
+  Collection sourceCollection=(Collection)source;
+  TypeDescriptor sourceElementType=sourceType.getElementTypeDescriptor();
+  if (sourceElementType == TypeDescriptor.NULL) {
+    sourceElementType=getElementType(sourceCollection);
+  }
+  TypeDescriptor targetElementType=targetType.getElementTypeDescriptor();
+  Object array=Array.newInstance(targetElementType.getType(),sourceCollection.size());
+  int i=0;
+  if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetElementType)) {
+    for (Iterator it=sourceCollection.iterator(); it.hasNext(); i++) {
+      Array.set(array,i,it.next());
+    }
+  }
+ else {
+    GenericConverter converter=conversionService.getConverter(sourceElementType,targetElementType);
+    for (Iterator it=sourceCollection.iterator(); it.hasNext(); i++) {
+      Array.set(array,i,converter.convert(it.next(),sourceElementType,targetElementType));
+    }
+  }
+  return array;
+}
