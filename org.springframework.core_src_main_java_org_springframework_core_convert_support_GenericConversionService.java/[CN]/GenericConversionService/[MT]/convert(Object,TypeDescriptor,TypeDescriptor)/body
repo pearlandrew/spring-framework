@@ -1,0 +1,36 @@
+{
+  Assert.notNull(sourceType,"The source type to convert to is required");
+  Assert.notNull(targetType,"The targetType to convert to is required");
+  if (source == null) {
+    return null;
+  }
+  Assert.isTrue(sourceType != TypeDescriptor.NULL,"The source TypeDescriptor must not be TypeDescriptor.NULL when source != null");
+  if (targetType == TypeDescriptor.NULL) {
+    return null;
+  }
+  GenericConverter converter=getConverter(sourceType,targetType);
+  if (converter != null) {
+    try {
+      return converter.convert(source,sourceType,targetType);
+    }
+ catch (    ConversionFailedException e) {
+      throw e;
+    }
+catch (    Exception e) {
+      throw new ConversionFailedException(sourceType,targetType,source,e);
+    }
+  }
+ else {
+    if (this.parent != null) {
+      return this.parent.convert(source,sourceType,targetType);
+    }
+ else {
+      if (targetType.isAssignableValue(source)) {
+        return source;
+      }
+ else {
+        throw new ConverterNotFoundException(sourceType,targetType);
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  Collection sourceCollection=(Collection)source;
+  TypeDescriptor targetElementType=targetType.getElementTypeDescriptor();
+  if (targetElementType == TypeDescriptor.NULL) {
+    return compatibleCollectionWithoutElementConversion(sourceCollection,targetType);
+  }
+  TypeDescriptor sourceElementType=sourceType.getElementTypeDescriptor();
+  if (sourceElementType == TypeDescriptor.NULL) {
+    sourceElementType=getElementType(sourceCollection);
+  }
+  if (sourceElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetElementType)) {
+    return compatibleCollectionWithoutElementConversion(sourceCollection,targetType);
+  }
+  Collection targetCollection=CollectionFactory.createCollection(targetType.getType(),sourceCollection.size());
+  GenericConverter elementConverter=conversionService.getConverter(sourceElementType,targetElementType);
+  for (  Object element : sourceCollection) {
+    targetCollection.add(elementConverter.convert(element,sourceElementType,targetElementType));
+  }
+  return targetCollection;
+}
