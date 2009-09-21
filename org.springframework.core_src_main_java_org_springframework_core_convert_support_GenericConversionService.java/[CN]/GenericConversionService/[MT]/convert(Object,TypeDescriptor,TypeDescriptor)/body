@@ -9,28 +9,13 @@
     return null;
   }
   GenericConverter converter=getConverter(sourceType,targetType);
-  if (converter != null) {
-    try {
-      return converter.convert(source,sourceType,targetType);
-    }
- catch (    ConversionFailedException e) {
-      throw e;
-    }
-catch (    Exception e) {
-      throw new ConversionFailedException(sourceType,targetType,source,e);
-    }
+  try {
+    return converter.convert(source,sourceType,targetType);
   }
- else {
-    if (this.parent != null) {
-      return this.parent.convert(source,sourceType,targetType);
-    }
- else {
-      if (targetType.isAssignableValue(source)) {
-        return source;
-      }
- else {
-        throw new ConverterNotFoundException(sourceType,targetType);
-      }
-    }
+ catch (  ConversionFailedException e) {
+    throw e;
+  }
+catch (  Exception e) {
+    throw new ConversionFailedException(sourceType,targetType,source,e);
   }
 }
