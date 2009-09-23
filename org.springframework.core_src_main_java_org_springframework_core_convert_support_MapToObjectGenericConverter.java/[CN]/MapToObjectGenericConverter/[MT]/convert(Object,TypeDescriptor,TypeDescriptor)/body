@@ -1,0 +1,71 @@
+{
+  Map sourceMap=(Map)source;
+  if (sourceMap.size() == 0) {
+    if (targetType.typeEquals(String.class)) {
+      return "";
+    }
+ else {
+      return null;
+    }
+  }
+ else {
+    if (targetType.typeEquals(String.class)) {
+      TypeDescriptor sourceKeyType=sourceType.getMapKeyTypeDescriptor();
+      TypeDescriptor sourceValueType=sourceType.getMapValueTypeDescriptor();
+      boolean keysCompatible=false;
+      if (sourceKeyType == TypeDescriptor.NULL || sourceKeyType.isAssignableTo(targetType)) {
+        keysCompatible=true;
+      }
+      boolean valuesCompatible=false;
+      if (sourceValueType == TypeDescriptor.NULL || sourceValueType.isAssignableTo(targetType)) {
+        valuesCompatible=true;
+      }
+      if (keysCompatible && valuesCompatible) {
+        StringBuilder string=new StringBuilder();
+        int i=0;
+        for (        Object entry : sourceMap.entrySet()) {
+          Map.Entry mapEntry=(Map.Entry)entry;
+          if (i > 0) {
+            string.append(DELIMITER);
+          }
+          String property=mapEntry.getKey() + "=" + mapEntry.getValue();
+          string.append(property);
+          i++;
+        }
+        return string.toString();
+      }
+ else {
+        MapEntryConverter converter=new MapEntryConverter(sourceKeyType,sourceValueType,targetType,targetType,keysCompatible,valuesCompatible,conversionService);
+        StringBuilder string=new StringBuilder();
+        int i=0;
+        for (        Object entry : sourceMap.entrySet()) {
+          Map.Entry mapEntry=(Map.Entry)entry;
+          if (i > 0) {
+            string.append(DELIMITER);
+          }
+          Object key=converter.convertKey(mapEntry.getKey());
+          Object value=converter.convertValue(mapEntry.getValue());
+          String property=key + "=" + value;
+          string.append(property);
+          i++;
+        }
+        return string.toString();
+      }
+    }
+ else {
+      TypeDescriptor sourceValueType=sourceType.getMapValueTypeDescriptor();
+      boolean valuesCompatible=false;
+      if (sourceValueType == TypeDescriptor.NULL || sourceValueType.isAssignableTo(targetType)) {
+        valuesCompatible=true;
+      }
+      if (valuesCompatible) {
+        return sourceMap.values().iterator().next();
+      }
+ else {
+        MapEntryConverter converter=new MapEntryConverter(sourceValueType,sourceValueType,targetType,targetType,true,valuesCompatible,conversionService);
+        Object value=sourceMap.values().iterator().next();
+        return converter.convertValue(value);
+      }
+    }
+  }
+}

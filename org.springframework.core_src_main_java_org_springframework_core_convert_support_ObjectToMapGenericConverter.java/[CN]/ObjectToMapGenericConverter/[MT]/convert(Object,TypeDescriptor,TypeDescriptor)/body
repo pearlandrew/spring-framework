@@ -1,0 +1,30 @@
+{
+  if (sourceType.typeEquals(String.class)) {
+    String string=(String)source;
+    String[] properties=string.split(" ");
+    return this.helperConverter.convert(properties,TypeDescriptor.valueOf(String[].class),targetType);
+  }
+ else {
+    Map target=CollectionFactory.createMap(targetType.getType(),1);
+    TypeDescriptor targetKeyType=targetType.getMapKeyTypeDescriptor();
+    TypeDescriptor targetValueType=targetType.getMapValueTypeDescriptor();
+    boolean keysCompatible=false;
+    if (targetKeyType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetKeyType)) {
+      keysCompatible=true;
+    }
+    boolean valuesCompatible=false;
+    if (targetValueType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetValueType)) {
+      valuesCompatible=true;
+    }
+    if (keysCompatible && valuesCompatible) {
+      target.put(source,source);
+    }
+ else {
+      MapEntryConverter converter=new MapEntryConverter(sourceType,sourceType,targetKeyType,targetValueType,keysCompatible,valuesCompatible,conversionService);
+      Object key=converter.convertKey(source);
+      Object value=converter.convertValue(source);
+      target.put(key,value);
+    }
+    return target;
+  }
+}

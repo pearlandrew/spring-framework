@@ -1,15 +1,35 @@
 {
   TypeDescriptor targetElementType=targetType.getElementTypeDescriptor();
-  Object target=Array.newInstance(targetElementType.getType(),1);
-  if (sourceType.isAssignableTo(targetElementType)) {
-    Array.set(target,0,source);
+  if (sourceType.typeEquals(String.class)) {
+    String string=(String)source;
+    String[] fields=StringUtils.commaDelimitedListToStringArray(string);
+    if (sourceType.isAssignableTo(targetElementType)) {
+      return fields;
+    }
+ else {
+      Object target=Array.newInstance(targetElementType.getType(),fields.length);
+      GenericConverter converter=this.conversionService.getConverter(sourceType,targetElementType);
+      if (converter == null) {
+        throw new ConverterNotFoundException(sourceType,targetElementType);
+      }
+      for (int i=0; i < fields.length; i++) {
+        Array.set(target,i,invokeConverter(converter,fields[i],sourceType,targetElementType));
+      }
+      return target;
+    }
   }
  else {
-    GenericConverter converter=this.conversionService.getConverter(sourceType,targetElementType);
-    if (converter == null) {
-      throw new ConverterNotFoundException(sourceType,targetElementType);
+    Object target=Array.newInstance(targetElementType.getType(),1);
+    if (sourceType.isAssignableTo(targetElementType)) {
+      Array.set(target,0,source);
     }
-    Array.set(target,0,invokeConverter(converter,source,sourceType,targetElementType));
+ else {
+      GenericConverter converter=this.conversionService.getConverter(sourceType,targetElementType);
+      if (converter == null) {
+        throw new ConverterNotFoundException(sourceType,targetElementType);
+      }
+      Array.set(target,0,invokeConverter(converter,source,sourceType,targetElementType));
+    }
+    return target;
   }
-  return target;
 }
