@@ -1,0 +1,40 @@
+{
+  final SimpleMessageConsumer messageConsumer=new SimpleMessageConsumer();
+  Session session=EasyMock.createMock(Session.class);
+  session.createQueue(DESTINATION_NAME);
+  EasyMock.expectLastCall().andReturn(QUEUE_DESTINATION);
+  session.createConsumer(QUEUE_DESTINATION,null);
+  EasyMock.expectLastCall().andReturn(messageConsumer);
+  session.getTransacted();
+  EasyMock.expectLastCall().andReturn(false);
+  EasyMock.replay(session);
+  Connection connection=EasyMock.createMock(Connection.class);
+  connection.setExceptionListener(this.container);
+  connection.createSession(this.container.isSessionTransacted(),this.container.getSessionAcknowledgeMode());
+  EasyMock.expectLastCall().andReturn(session);
+  connection.start();
+  EasyMock.replay(connection);
+  ConnectionFactory connectionFactory=EasyMock.createMock(ConnectionFactory.class);
+  connectionFactory.createConnection();
+  EasyMock.expectLastCall().andReturn(connection);
+  EasyMock.replay(connectionFactory);
+  final IllegalStateException theException=new IllegalStateException("intentional test failure");
+  this.container.setConnectionFactory(connectionFactory);
+  this.container.setDestinationName(DESTINATION_NAME);
+  this.container.setMessageListener(new SessionAwareMessageListener(){
+    public void onMessage(    Message message,    Session session) throws JMSException {
+      throw theException;
+    }
+  }
+);
+  ErrorHandler errorHandler=EasyMock.createMock(ErrorHandler.class);
+  errorHandler.handleError(theException);
+  EasyMock.expectLastCall();
+  EasyMock.replay(errorHandler);
+  this.container.setErrorHandler(errorHandler);
+  this.container.afterPropertiesSet();
+  Message message=EasyMock.createMock(Message.class);
+  EasyMock.replay(message);
+  messageConsumer.sendMessage(message);
+  EasyMock.verify(errorHandler,message,session,connection,connectionFactory);
+}
