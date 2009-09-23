@@ -2,13 +2,13 @@
   Map sourceMap=(Map)source;
   TypeDescriptor targetKeyType=targetType.getMapKeyTypeDescriptor();
   TypeDescriptor targetValueType=targetType.getMapValueTypeDescriptor();
-  if (targetKeyType == null && targetValueType == null) {
+  if (targetKeyType == TypeDescriptor.NULL && targetValueType == TypeDescriptor.NULL) {
     return compatibleMapWithoutEntryConversion(sourceMap,targetType);
   }
   TypeDescriptor[] sourceEntryTypes=getMapEntryTypes(sourceMap);
   TypeDescriptor sourceKeyType=sourceEntryTypes[0];
   TypeDescriptor sourceValueType=sourceEntryTypes[1];
-  if (sourceKeyType == null && sourceValueType == null) {
+  if (sourceKeyType == TypeDescriptor.NULL && sourceValueType == TypeDescriptor.NULL) {
     return compatibleMapWithoutEntryConversion(sourceMap,targetType);
   }
   boolean keysCompatible=false;
@@ -26,7 +26,9 @@
   MapEntryConverter converter=new MapEntryConverter(sourceKeyType,sourceValueType,targetKeyType,targetValueType,keysCompatible,valuesCompatible,conversionService);
   for (  Object entry : sourceMap.entrySet()) {
     Map.Entry sourceMapEntry=(Map.Entry)entry;
-    targetMap.put(converter.convertKey(sourceMapEntry.getKey()),converter.convertValue(sourceMapEntry.getValue()));
+    Object targetKey=converter.convertKey(sourceMapEntry.getKey());
+    Object targetValue=converter.convertValue(sourceMapEntry.getValue());
+    targetMap.put(targetKey,targetValue);
   }
   return targetMap;
 }
