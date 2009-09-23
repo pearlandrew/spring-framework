@@ -7,16 +7,18 @@
     return invocation.getMethod().invoke(this.burlapProxy,invocation.getArguments());
   }
  catch (  InvocationTargetException ex) {
-    if (ex.getTargetException() instanceof BurlapRuntimeException) {
-      BurlapRuntimeException bre=(BurlapRuntimeException)ex.getTargetException();
-      Throwable rootCause=(bre.getRootCause() != null ? bre.getRootCause() : bre);
-      throw convertBurlapAccessException(rootCause);
+    Throwable targetEx=ex.getTargetException();
+    if (targetEx instanceof BurlapRuntimeException) {
+      Throwable cause=targetEx.getCause();
+      throw convertBurlapAccessException(cause != null ? cause : targetEx);
     }
- else     if (ex.getTargetException() instanceof UndeclaredThrowableException) {
-      UndeclaredThrowableException utex=(UndeclaredThrowableException)ex.getTargetException();
+ else     if (targetEx instanceof UndeclaredThrowableException) {
+      UndeclaredThrowableException utex=(UndeclaredThrowableException)targetEx;
       throw convertBurlapAccessException(utex.getUndeclaredThrowable());
     }
-    throw ex.getTargetException();
+ else {
+      throw targetEx;
+    }
   }
 catch (  Throwable ex) {
     throw new RemoteProxyFailureException("Failed to invoke Burlap proxy for remote service [" + getServiceUrl() + "]",ex);

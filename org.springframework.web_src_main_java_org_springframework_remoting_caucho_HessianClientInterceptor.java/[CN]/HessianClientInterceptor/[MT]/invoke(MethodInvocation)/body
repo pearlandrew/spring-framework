@@ -7,16 +7,21 @@
     return invocation.getMethod().invoke(this.hessianProxy,invocation.getArguments());
   }
  catch (  InvocationTargetException ex) {
-    if (ex.getTargetException() instanceof HessianRuntimeException) {
-      HessianRuntimeException hre=(HessianRuntimeException)ex.getTargetException();
-      Throwable rootCause=(hre.getRootCause() != null ? hre.getRootCause() : hre);
-      throw convertHessianAccessException(rootCause);
+    Throwable targetEx=ex.getTargetException();
+    if (targetEx instanceof HessianConnectionException) {
+      throw convertHessianAccessException(targetEx);
     }
- else     if (ex.getTargetException() instanceof UndeclaredThrowableException) {
-      UndeclaredThrowableException utex=(UndeclaredThrowableException)ex.getTargetException();
+ else     if (targetEx instanceof HessianException || targetEx instanceof HessianRuntimeException) {
+      Throwable cause=targetEx.getCause();
+      throw convertHessianAccessException(cause != null ? cause : targetEx);
+    }
+ else     if (targetEx instanceof UndeclaredThrowableException) {
+      UndeclaredThrowableException utex=(UndeclaredThrowableException)targetEx;
       throw convertHessianAccessException(utex.getUndeclaredThrowable());
     }
-    throw ex.getTargetException();
+ else {
+      throw targetEx;
+    }
   }
 catch (  Throwable ex) {
     throw new RemoteProxyFailureException("Failed to invoke Hessian proxy for remote service [" + getServiceUrl() + "]",ex);
