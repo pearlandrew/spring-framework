@@ -1,3 +1,7 @@
 {
-  this.annotationFormatters.put(getAnnotationType(factory.getClass()),factory);
+  Class[] typeArgs=GenericTypeResolver.resolveTypeArguments(factory.getClass(),AnnotationFormatterFactory.class);
+  if (typeArgs == null) {
+    throw new IllegalArgumentException("Unable to extract Annotation type A argument from AnnotationFormatterFactory [" + factory.getClass().getName() + "]; does the factory parameterize the <A> generic type?");
+  }
+  this.annotationFormatters.put(typeArgs[0],factory);
 }
