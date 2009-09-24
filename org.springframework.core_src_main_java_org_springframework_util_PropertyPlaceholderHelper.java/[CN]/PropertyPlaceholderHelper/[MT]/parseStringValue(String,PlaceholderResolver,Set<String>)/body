@@ -10,11 +10,22 @@
       }
       placeholder=parseStringValue(placeholder,placeholderResolver,visitedPlaceholders);
       String propVal=placeholderResolver.resolvePlaceholder(placeholder);
+      if (propVal == null && this.valueSeparator != null) {
+        int separatorIndex=placeholder.indexOf(this.valueSeparator);
+        if (separatorIndex != -1) {
+          String actualPlaceholder=placeholder.substring(0,separatorIndex);
+          String defaultValue=placeholder.substring(separatorIndex + this.valueSeparator.length());
+          propVal=placeholderResolver.resolvePlaceholder(actualPlaceholder);
+          if (propVal == null) {
+            propVal=defaultValue;
+          }
+        }
+      }
       if (propVal != null) {
         propVal=parseStringValue(propVal,placeholderResolver,visitedPlaceholders);
         buf.replace(startIndex,endIndex + this.placeholderSuffix.length(),propVal);
-        if (LOGGER.isTraceEnabled()) {
-          LOGGER.trace("Resolved placeholder '" + placeholder + "'");
+        if (logger.isTraceEnabled()) {
+          logger.trace("Resolved placeholder '" + placeholder + "'");
         }
         startIndex=buf.indexOf(this.placeholderPrefix,startIndex + propVal.length());
       }
