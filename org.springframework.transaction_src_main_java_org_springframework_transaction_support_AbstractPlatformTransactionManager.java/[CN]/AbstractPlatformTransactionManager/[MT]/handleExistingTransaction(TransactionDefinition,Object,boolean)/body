@@ -15,19 +15,27 @@
       logger.debug("Suspending current transaction, creating new transaction with name [" + definition.getName() + "]");
     }
     SuspendedResourcesHolder suspendedResources=suspend(transaction);
+    DefaultTransactionStatus status=null;
     try {
+      boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+      status=newTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,suspendedResources);
       doBegin(transaction,definition);
+      return status;
     }
  catch (    RuntimeException beginEx) {
+      if (status != null && status.isNewSynchronization()) {
+        TransactionSynchronizationManager.clear();
+      }
       resumeAfterBeginException(transaction,suspendedResources,beginEx);
       throw beginEx;
     }
 catch (    Error beginErr) {
+      if (status != null && status.isNewSynchronization()) {
+        TransactionSynchronizationManager.clear();
+      }
       resumeAfterBeginException(transaction,suspendedResources,beginErr);
       throw beginErr;
     }
-    boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-    return newTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,suspendedResources);
   }
   if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
     if (!isNestedTransactionAllowed()) {
@@ -42,9 +50,24 @@ catch (    Error beginErr) {
       return status;
     }
  else {
-      doBegin(transaction,definition);
       boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-      return newTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,null);
+      DefaultTransactionStatus status=newTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,null);
+      try {
+        doBegin(transaction,definition);
+      }
+ catch (      RuntimeException beginEx) {
+        if (status != null && status.isNewSynchronization()) {
+          TransactionSynchronizationManager.clear();
+        }
+        throw beginEx;
+      }
+catch (      Error beginErr) {
+        if (status != null && status.isNewSynchronization()) {
+          TransactionSynchronizationManager.clear();
+        }
+        throw beginErr;
+      }
+      return status;
     }
   }
   if (debugEnabled) {

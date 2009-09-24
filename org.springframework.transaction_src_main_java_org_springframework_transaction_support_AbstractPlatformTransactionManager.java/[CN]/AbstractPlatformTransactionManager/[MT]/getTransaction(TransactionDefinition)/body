@@ -15,22 +15,30 @@
   }
  else   if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED || definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW || definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
     SuspendedResourcesHolder suspendedResources=suspend(null);
-    if (debugEnabled) {
-      logger.debug("Creating new transaction with name [" + definition.getName() + "]: "+ definition);
-    }
+    DefaultTransactionStatus status=null;
     try {
+      if (debugEnabled) {
+        logger.debug("Creating new transaction with name [" + definition.getName() + "]: "+ definition);
+      }
+      boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+      status=newTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,suspendedResources);
       doBegin(transaction,definition);
+      return status;
     }
  catch (    RuntimeException ex) {
+      if (status != null && status.isNewSynchronization()) {
+        TransactionSynchronizationManager.clear();
+      }
       resume(null,suspendedResources);
       throw ex;
     }
 catch (    Error err) {
+      if (status != null && status.isNewSynchronization()) {
+        TransactionSynchronizationManager.clear();
+      }
       resume(null,suspendedResources);
       throw err;
     }
-    boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-    return newTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,suspendedResources);
   }
  else {
     boolean newSynchronization=(getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
