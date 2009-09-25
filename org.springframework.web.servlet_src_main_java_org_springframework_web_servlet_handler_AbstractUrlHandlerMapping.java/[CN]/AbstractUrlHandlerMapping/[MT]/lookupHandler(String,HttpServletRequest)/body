@@ -1,6 +1,10 @@
 {
   Object handler=this.handlerMap.get(urlPath);
   if (handler != null) {
+    if (handler instanceof String) {
+      String handlerName=(String)handler;
+      handler=getApplicationContext().getBean(handlerName);
+    }
     validateHandler(handler,request);
     return buildPathExposingHandler(handler,urlPath,null);
   }
@@ -12,6 +16,10 @@
   }
   if (bestPathMatch != null) {
     handler=this.handlerMap.get(bestPathMatch);
+    if (handler instanceof String) {
+      String handlerName=(String)handler;
+      handler=getApplicationContext().getBean(handlerName);
+    }
     validateHandler(handler,request);
     String pathWithinMapping=getPathMatcher().extractPathWithinPattern(bestPathMatch,urlPath);
     Map<String,String> uriTemplateVariables=getPathMatcher().extractUriTemplateVariables(bestPathMatch,urlPath);
