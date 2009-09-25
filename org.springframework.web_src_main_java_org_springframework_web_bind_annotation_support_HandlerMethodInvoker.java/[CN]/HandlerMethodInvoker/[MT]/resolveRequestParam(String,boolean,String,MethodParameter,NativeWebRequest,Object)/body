@@ -3,14 +3,14 @@
   if (paramName.length() == 0) {
     paramName=getRequiredParameterName(methodParam);
   }
-  Object paramValue=null;
-  if (webRequest.getNativeRequest() instanceof MultipartRequest) {
-    paramValue=((MultipartRequest)webRequest.getNativeRequest()).getFile(paramName);
-  }
+  Object paramValue=webRequest.getFile(paramName);
   if (paramValue == null) {
     String[] paramValues=webRequest.getParameterValues(paramName);
-    if (paramValues != null) {
+    if (paramValues != null && !paramType.isArray()) {
       paramValue=(paramValues.length == 1 ? paramValues[0] : paramValues);
+    }
+ else {
+      paramValue=paramValues;
     }
   }
   if (paramValue == null) {
