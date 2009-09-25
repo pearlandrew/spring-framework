@@ -5,15 +5,15 @@
     Class<?> handlerType=context.getType(beanName);
     RequestMapping mapping=context.findAnnotationOnBean(beanName,RequestMapping.class);
     if (mapping != null) {
+      this.cachedMappings.put(handlerType,mapping);
       String[] modeKeys=mapping.value();
       String[] params=mapping.params();
-      RequestMethod[] methods=mapping.method();
       boolean registerHandlerType=true;
       if (modeKeys.length == 0 || params.length == 0) {
         registerHandlerType=!detectHandlerMethods(handlerType,beanName,mapping);
       }
       if (registerHandlerType) {
-        ParameterMappingPredicate predicate=new ParameterMappingPredicate(params,methods);
+        ParameterMappingPredicate predicate=new ParameterMappingPredicate(params,mapping.headers(),mapping.method());
         for (        String modeKey : modeKeys) {
           registerHandler(new PortletMode(modeKey),beanName,predicate);
         }

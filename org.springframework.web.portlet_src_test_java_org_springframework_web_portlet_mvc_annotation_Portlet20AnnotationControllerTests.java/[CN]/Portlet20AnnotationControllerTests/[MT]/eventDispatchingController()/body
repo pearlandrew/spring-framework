@@ -14,7 +14,7 @@
   }
 ;
   portlet.init(new MockPortletConfig());
-  MockRenderRequest request=new MockRenderRequest(PortletMode.VIEW);
+  MockRenderRequest request=new MockRenderRequest();
   MockRenderResponse response=new MockRenderResponse();
   portlet.render(request,response);
   assertEquals("myView",response.getContentAsString());
@@ -26,15 +26,17 @@
   response=new MockRenderResponse();
   portlet.render(request,response);
   assertEquals("myLargeView-value",response.getContentAsString());
-  actionRequest=new MockActionRequest("that");
+  actionRequest=new MockActionRequest();
+  actionRequest.addParameter("action","details");
   actionResponse=new MockActionResponse();
   portlet.processAction(actionRequest,actionResponse);
   request=new MockRenderRequest(PortletMode.VIEW,WindowState.MAXIMIZED);
   request.setParameters(actionResponse.getRenderParameterMap());
   response=new MockRenderResponse();
   portlet.render(request,response);
-  assertEquals("myLargeView-value2",response.getContentAsString());
+  assertEquals("myLargeView-details",response.getContentAsString());
   MockEventRequest eventRequest=new MockEventRequest(new MockEvent("event1"));
+  eventRequest.setParameters(actionRequest.getParameterMap());
   MockEventResponse eventResponse=new MockEventResponse();
   portlet.processEvent(eventRequest,eventResponse);
   request=new MockRenderRequest(PortletMode.VIEW,WindowState.MAXIMIZED);
@@ -42,7 +44,8 @@
   response=new MockRenderResponse();
   portlet.render(request,response);
   assertEquals("myLargeView-value3",response.getContentAsString());
-  eventRequest=new MockEventRequest(new MockEvent("event2"));
+  eventRequest=new MockEventRequest(new MockEvent("event3"));
+  eventRequest.setParameters(actionRequest.getParameterMap());
   eventResponse=new MockEventResponse();
   portlet.processEvent(eventRequest,eventResponse);
   request=new MockRenderRequest(PortletMode.VIEW,WindowState.MAXIMIZED);

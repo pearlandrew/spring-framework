@@ -1,0 +1,19 @@
+{
+  RequestMethod[] mappedMethods=mapping.method();
+  if (!PortletAnnotationMappingUtils.checkRequestMethod(mappedMethods,request)) {
+    String[] supportedMethods=new String[mappedMethods.length];
+    for (int i=0; i < mappedMethods.length; i++) {
+      supportedMethods[i]=mappedMethods[i].name();
+    }
+    if (request instanceof ClientDataRequest) {
+      throw new PortletRequestMethodNotSupportedException(((ClientDataRequest)request).getMethod(),supportedMethods);
+    }
+ else {
+      throw new PortletRequestMethodNotSupportedException(supportedMethods);
+    }
+  }
+  String[] mappedHeaders=mapping.headers();
+  if (!PortletAnnotationMappingUtils.checkHeaders(mappedHeaders,request)) {
+    throw new PortletRequestBindingException("Header conditions \"" + StringUtils.arrayToDelimitedString(mappedHeaders,", ") + "\" not met for actual request");
+  }
+}
