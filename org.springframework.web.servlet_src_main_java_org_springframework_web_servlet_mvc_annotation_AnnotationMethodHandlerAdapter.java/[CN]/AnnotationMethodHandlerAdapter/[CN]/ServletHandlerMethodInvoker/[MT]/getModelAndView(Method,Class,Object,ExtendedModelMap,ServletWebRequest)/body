@@ -1,6 +1,6 @@
 {
-  if (handlerMethod.isAnnotationPresent(ResponseStatus.class)) {
-    ResponseStatus responseStatus=handlerMethod.getAnnotation(ResponseStatus.class);
+  ResponseStatus responseStatus=AnnotationUtils.findAnnotation(handlerMethod,ResponseStatus.class);
+  if (responseStatus != null) {
     HttpServletResponse response=webRequest.getResponse();
     response.setStatus(responseStatus.value().value());
     responseArgumentUsed=true;
@@ -13,8 +13,8 @@
       }
     }
   }
-  if (returnValue != null && handlerMethod.isAnnotationPresent(ResponseBody.class)) {
-    handleRequestBody(returnValue,webRequest);
+  if (returnValue != null && AnnotationUtils.findAnnotation(handlerMethod,ResponseBody.class) != null) {
+    handleResponseBody(returnValue,webRequest);
   }
   if (returnValue instanceof ModelAndView) {
     ModelAndView mav=(ModelAndView)returnValue;
@@ -27,7 +27,7 @@
  else   if (returnValue instanceof View) {
     return new ModelAndView((View)returnValue).addAllObjects(implicitModel);
   }
- else   if (handlerMethod.isAnnotationPresent(ModelAttribute.class)) {
+ else   if (AnnotationUtils.findAnnotation(handlerMethod,ModelAttribute.class) != null) {
     addReturnValueAsModelAttribute(handlerMethod,handlerType,returnValue,implicitModel);
     return new ModelAndView().addAllObjects(implicitModel);
   }
