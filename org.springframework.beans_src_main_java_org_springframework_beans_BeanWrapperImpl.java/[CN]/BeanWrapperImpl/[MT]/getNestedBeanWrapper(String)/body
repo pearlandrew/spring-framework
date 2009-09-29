@@ -6,7 +6,12 @@
   String canonicalName=tokens.canonicalName;
   Object propertyValue=getPropertyValue(tokens);
   if (propertyValue == null) {
-    throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + canonicalName);
+    if (autoGrowNestedPaths) {
+      propertyValue=setDefaultValue(tokens);
+    }
+ else {
+      throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + canonicalName);
+    }
   }
   BeanWrapperImpl nestedBw=this.nestedBeanWrappers.get(canonicalName);
   if (nestedBw == null || nestedBw.getWrappedInstance() != propertyValue) {

@@ -39,17 +39,30 @@
       value=readMethod.invoke(object,(Object[])null);
     }
     if (tokens.keys != null) {
+      if (value == null) {
+        if (autoGrowNestedPaths) {
+          value=setDefaultValue(tokens.actualName);
+        }
+ else {
+          throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + propertyName,"Cannot access indexed value of property referenced in indexed " + "property path '" + propertyName + "': returned null");
+        }
+      }
+      String indexedPropertyName=tokens.actualName;
       for (int i=0; i < tokens.keys.length; i++) {
         String key=tokens.keys[i];
         if (value == null) {
           throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + propertyName,"Cannot access indexed value of property referenced in indexed " + "property path '" + propertyName + "': returned null");
         }
  else         if (value.getClass().isArray()) {
-          value=Array.get(value,Integer.parseInt(key));
+          int index=Integer.parseInt(key);
+          value=growArrayIfNecessary(value,index,indexedPropertyName);
+          value=Array.get(value,index);
         }
  else         if (value instanceof List) {
+          int index=Integer.parseInt(key);
           List list=(List)value;
-          value=list.get(Integer.parseInt(key));
+          growCollectionIfNecessary(list,index,indexedPropertyName,pd,i + 1);
+          value=list.get(index);
         }
  else         if (value instanceof Set) {
           Set set=(Set)value;
@@ -75,6 +88,7 @@
  else {
           throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Property referenced in indexed property path '" + propertyName + "' is neither an array nor a List nor a Set nor a Map; returned value was ["+ value+ "]");
         }
+        indexedPropertyName+=PROPERTY_KEY_PREFIX + key + PROPERTY_KEY_SUFFIX;
       }
     }
     return value;

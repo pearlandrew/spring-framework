@@ -1,0 +1,29 @@
+{
+  try {
+    if (type.isArray()) {
+      Class<?> componentType=type.getComponentType();
+      if (componentType.isArray()) {
+        Object array=Array.newInstance(componentType,1);
+        Array.set(array,0,Array.newInstance(componentType.getComponentType(),0));
+        return array;
+      }
+ else {
+        return Array.newInstance(componentType,0);
+      }
+    }
+ else {
+      if (Collection.class.isAssignableFrom(type)) {
+        return CollectionFactory.createCollection(type,16);
+      }
+ else {
+        return type.newInstance();
+      }
+    }
+  }
+ catch (  InstantiationException e) {
+    throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + name,"Could not instantiate propertyType [" + type.getName() + "] to auto-grow nestd property path");
+  }
+catch (  IllegalAccessException e) {
+    throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + name,"Could not instantiate propertyType [" + type.getName() + "] to auto-grow nested property path");
+  }
+}
