@@ -3,17 +3,19 @@
   Assert.isInstanceOf(ServletRequestAttributes.class,attrs);
   ServletRequestAttributes servletAttrs=(ServletRequestAttributes)attrs;
   List<MediaType> requestedMediaTypes=getMediaTypes(servletAttrs.getRequest());
-  Collections.sort(requestedMediaTypes);
+  if (requestedMediaTypes.size() > 1) {
+    Collections.sort(requestedMediaTypes);
+  }
   SortedMap<MediaType,View> views=new TreeMap<MediaType,View>();
   List<View> candidateViews=new ArrayList<View>();
-  for (  ViewResolver viewResolver : viewResolvers) {
+  for (  ViewResolver viewResolver : this.viewResolvers) {
     View view=viewResolver.resolveViewName(viewName,locale);
     if (view != null) {
       candidateViews.add(view);
     }
   }
-  if (!CollectionUtils.isEmpty(defaultViews)) {
-    candidateViews.addAll(defaultViews);
+  if (!CollectionUtils.isEmpty(this.defaultViews)) {
+    candidateViews.addAll(this.defaultViews);
   }
   for (  View candidateView : candidateViews) {
     MediaType viewMediaType=MediaType.parseMediaType(candidateView.getContentType());
