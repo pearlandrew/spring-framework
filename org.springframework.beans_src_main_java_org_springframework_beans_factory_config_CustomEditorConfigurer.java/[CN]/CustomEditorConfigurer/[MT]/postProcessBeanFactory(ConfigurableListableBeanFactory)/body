@@ -5,15 +5,29 @@
     }
   }
   if (this.customEditors != null) {
-    for (    Map.Entry<String,String> entry : this.customEditors.entrySet()) {
+    for (    Map.Entry<String,?> entry : this.customEditors.entrySet()) {
       String key=entry.getKey();
-      String value=entry.getValue();
+      Object value=entry.getValue();
       Class requiredType=null;
       try {
         requiredType=ClassUtils.forName(key,this.beanClassLoader);
-        Class editorClass=ClassUtils.forName(value,this.beanClassLoader);
-        Assert.isAssignable(PropertyEditor.class,editorClass);
-        beanFactory.registerCustomEditor(requiredType,(Class<? extends PropertyEditor>)editorClass);
+        if (value instanceof PropertyEditor) {
+          if (logger.isWarnEnabled()) {
+            logger.warn("Passing PropertyEditor instances into CustomEditorConfigurer is deprecated: " + "use PropertyEditorRegistrars or PropertyEditor class names instead. " + "Offending key [" + key + "; offending editor instance: "+ value);
+          }
+          beanFactory.addPropertyEditorRegistrar(new SharedPropertyEditorRegistrar(requiredType,(PropertyEditor)value));
+        }
+ else         if (value instanceof Class) {
+          beanFactory.registerCustomEditor(requiredType,(Class)value);
+        }
+ else         if (value instanceof String) {
+          Class editorClass=ClassUtils.forName((String)value,this.beanClassLoader);
+          Assert.isAssignable(PropertyEditor.class,editorClass);
+          beanFactory.registerCustomEditor(requiredType,(Class<? extends PropertyEditor>)editorClass);
+        }
+ else {
+          throw new IllegalArgumentException("Mapped value [" + value + "] for custom editor key ["+ key+ "] is not of required type ["+ PropertyEditor.class.getName()+ "] or a corresponding Class or String value indicating a PropertyEditor implementation");
+        }
       }
  catch (      ClassNotFoundException ex) {
         if (this.ignoreUnresolvableEditors) {
