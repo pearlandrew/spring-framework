@@ -1,0 +1,31 @@
+{
+  if (this.autoMappingEnabled) {
+    Set<Mapping> autoMappings=new LinkedHashSet<Mapping>();
+    Set<String> sourceFields=getMappableFields(source);
+    Set<String> targetFields=getMappableFields(target);
+    for (    String field : sourceFields) {
+      if (!explicitlyMapped(field) && targetFields.contains(field)) {
+        Expression sourceExpression;
+        Expression targetExpression;
+        try {
+          sourceExpression=sourceExpressionParser.parseExpression(field);
+        }
+ catch (        ParseException e) {
+          throw new IllegalArgumentException("The mapping source '" + field + "' is not a parseable value expression",e);
+        }
+        try {
+          targetExpression=targetExpressionParser.parseExpression(field);
+        }
+ catch (        ParseException e) {
+          throw new IllegalArgumentException("The mapping target '" + field + "' is not a parseable value expression",e);
+        }
+        Mapping mapping=new Mapping(sourceExpression,targetExpression);
+        autoMappings.add(mapping);
+      }
+    }
+    return autoMappings;
+  }
+ else {
+    return Collections.emptySet();
+  }
+}

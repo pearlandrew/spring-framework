@@ -1,0 +1,15 @@
+{
+  EvaluationContext sourceContext=getMappingContext(source);
+  EvaluationContext targetContext=getMappingContext(target);
+  List<MappingFailure> failures=new LinkedList<MappingFailure>();
+  for (  Mapping mapping : this.mappings) {
+    mapping.map(sourceContext,targetContext,failures);
+  }
+  Set<Mapping> autoMappings=getAutoMappings(source,target);
+  for (  Mapping mapping : autoMappings) {
+    mapping.map(sourceContext,targetContext,failures);
+  }
+  if (!failures.isEmpty()) {
+    throw new MappingException(failures);
+  }
+}
