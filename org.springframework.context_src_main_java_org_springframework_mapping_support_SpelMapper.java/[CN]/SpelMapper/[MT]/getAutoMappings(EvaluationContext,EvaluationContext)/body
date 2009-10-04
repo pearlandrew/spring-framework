@@ -1,10 +1,9 @@
 {
   if (this.autoMappingEnabled) {
     Set<Mapping> autoMappings=new LinkedHashSet<Mapping>();
-    Set<String> sourceFields=getMappableFields(source);
-    Set<String> targetFields=getMappableFields(target);
+    Set<String> sourceFields=getMappableFields(sourceContext.getRootObject().getValue());
     for (    String field : sourceFields) {
-      if (!explicitlyMapped(field) && targetFields.contains(field)) {
+      if (!explicitlyMapped(field)) {
         Expression sourceExpression;
         Expression targetExpression;
         try {
@@ -19,8 +18,13 @@
  catch (        ParseException e) {
           throw new IllegalArgumentException("The mapping target '" + field + "' is not a parseable value expression",e);
         }
-        Mapping mapping=new Mapping(sourceExpression,targetExpression);
-        autoMappings.add(mapping);
+        try {
+          if (targetExpression.isWritable(targetContext)) {
+            autoMappings.add(new Mapping(sourceExpression,targetExpression));
+          }
+        }
+ catch (        EvaluationException e) {
+        }
       }
     }
     return autoMappings;
