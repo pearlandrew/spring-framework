@@ -1,0 +1,26 @@
+{
+  Assert.notEmpty(getConfigLocations(),"No config locations were specified. Is the 'contextConfigLocations' " + "context-param and/or init-param set properly in web.xml?");
+  Set<Class<?>> configClasses=new LinkedHashSet<Class<?>>();
+  for (  String configLocation : getConfigLocations()) {
+    try {
+      Class<?> configClass=ClassUtils.getDefaultClassLoader().loadClass(configLocation);
+      if (AnnotationUtils.findAnnotation(configClass,Configuration.class) == null) {
+        throw new IllegalArgumentException("Class [" + configClass.getName() + "] is not annotated with @Configuration");
+      }
+      configClasses.add(configClass);
+    }
+ catch (    ClassNotFoundException ex) {
+      throw new IOException("Could not load @Configuration class [" + configLocation + "]",ex);
+    }
+  }
+  AnnotationConfigUtils.registerAnnotationConfigProcessors(beanFactory);
+  for (  Class<?> configClass : configClasses) {
+    AbstractBeanDefinition def=BeanDefinitionBuilder.rootBeanDefinition(configClass).getBeanDefinition();
+    String name=AnnotationUtils.findAnnotation(configClass,Configuration.class).value();
+    if (!StringUtils.hasLength(name)) {
+      name=new DefaultBeanNameGenerator().generateBeanName(def,beanFactory);
+    }
+    beanFactory.registerBeanDefinition(name,def);
+  }
+  new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+}
