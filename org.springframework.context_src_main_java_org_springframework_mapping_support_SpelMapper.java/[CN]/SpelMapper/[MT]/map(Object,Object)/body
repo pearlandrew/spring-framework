@@ -1,16 +1,22 @@
 {
-  EvaluationContext sourceContext=getMappingContext(source);
-  EvaluationContext targetContext=getMappingContext(target);
-  List<MappingFailure> failures=new LinkedList<MappingFailure>();
-  for (  SpelMapping mapping : this.mappings) {
-    mapping.map(sourceContext,targetContext,failures);
+  try {
+    SpelMappingContextHolder.push(source);
+    EvaluationContext sourceContext=getEvaluationContext(source);
+    EvaluationContext targetContext=getEvaluationContext(target);
+    List<MappingFailure> failures=new LinkedList<MappingFailure>();
+    for (    SpelMapping mapping : this.mappings) {
+      doMap(mapping,sourceContext,targetContext,failures);
+    }
+    Set<SpelMapping> autoMappings=getAutoMappings(sourceContext,targetContext);
+    for (    SpelMapping mapping : autoMappings) {
+      doMap(mapping,sourceContext,targetContext,failures);
+    }
+    if (!failures.isEmpty()) {
+      throw new MappingException(failures);
+    }
+    return target;
   }
-  Set<SpelMapping> autoMappings=getAutoMappings(sourceContext,targetContext);
-  for (  SpelMapping mapping : autoMappings) {
-    mapping.map(sourceContext,targetContext,failures);
+  finally {
+    SpelMappingContextHolder.pop();
   }
-  if (!failures.isEmpty()) {
-    throw new MappingException(failures);
-  }
-  return target;
 }

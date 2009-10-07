@@ -2,6 +2,11 @@
   if (source == null) {
     return null;
   }
-  Object target=this.mappingTargetFactory.createTarget(source,sourceType,targetType);
-  return this.mapper.map(source,target);
+  if (SpelMappingContextHolder.contains(source)) {
+    return source;
+  }
+  if (sourceType.isAssignableTo(targetType) && isCopyByReference(sourceType,targetType)) {
+    return source;
+  }
+  return createAndMap(targetType,source,sourceType);
 }
