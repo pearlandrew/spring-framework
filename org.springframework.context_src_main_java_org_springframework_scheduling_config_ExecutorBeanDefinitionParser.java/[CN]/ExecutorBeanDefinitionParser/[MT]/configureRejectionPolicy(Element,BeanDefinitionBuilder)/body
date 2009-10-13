@@ -3,35 +3,25 @@
   if (!StringUtils.hasText(rejectionPolicy)) {
     return;
   }
-  Object handler=null;
-  boolean createBackportHandler=this.shouldUseBackport(element);
+  String prefix="java.util.concurrent.ThreadPoolExecutor.";
+  if (builder.getRawBeanDefinition().getBeanClassName().contains("backport")) {
+    prefix="edu.emory.mathcs.backport." + prefix;
+  }
+  String policyClassName;
   if (rejectionPolicy.equals("ABORT")) {
-    if (createBackportHandler) {
-      handler=new edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor.AbortPolicy();
-    }
+    policyClassName=prefix + "AbortPolicy";
+  }
+ else   if (rejectionPolicy.equals("CALLER_RUNS")) {
+    policyClassName=prefix + "CallerRunsPolicy";
+  }
+ else   if (rejectionPolicy.equals("DISCARD")) {
+    policyClassName=prefix + "DiscardPolicy";
+  }
+ else   if (rejectionPolicy.equals("DISCARD_OLDEST")) {
+    policyClassName=prefix + "DiscardOldestPolicy";
+  }
  else {
-      handler=new ThreadPoolExecutor.AbortPolicy();
-    }
+    policyClassName=rejectionPolicy;
   }
-  if (rejectionPolicy.equals("CALLER_RUNS")) {
-    if (createBackportHandler) {
-      handler=new edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy();
-    }
- else {
-      handler=new ThreadPoolExecutor.CallerRunsPolicy();
-    }
-  }
-  if (rejectionPolicy.equals("DISCARD")) {
-    if (createBackportHandler) {
-      handler=new edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor.DiscardPolicy();
-    }
-    handler=new ThreadPoolExecutor.DiscardPolicy();
-  }
-  if (rejectionPolicy.equals("DISCARD_OLDEST")) {
-    if (createBackportHandler) {
-      handler=new edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor.DiscardOldestPolicy();
-    }
-    handler=new ThreadPoolExecutor.DiscardOldestPolicy();
-  }
-  builder.addPropertyValue("rejectedExecutionHandler",handler);
+  builder.addPropertyValue("rejectedExecutionHandler",new RootBeanDefinition(policyClassName));
 }
