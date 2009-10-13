@@ -13,6 +13,9 @@
       throw new AccessException("Type conversion failure",evaluationException);
     }
   }
+  if (this.writerCache == null) {
+    this.writerCache=new ConcurrentHashMap<CacheKey,Member>();
+  }
   CacheKey cacheKey=new CacheKey(type,name);
   Member cachedMember=this.writerCache.get(cacheKey);
   if (cachedMember == null || cachedMember instanceof Method) {
@@ -41,7 +44,7 @@
       field=findField(name,type,target instanceof Class);
       if (field != null) {
         cachedMember=field;
-        this.readerCache.put(cacheKey,cachedMember);
+        this.writerCache.put(cacheKey,cachedMember);
       }
     }
     if (field != null) {

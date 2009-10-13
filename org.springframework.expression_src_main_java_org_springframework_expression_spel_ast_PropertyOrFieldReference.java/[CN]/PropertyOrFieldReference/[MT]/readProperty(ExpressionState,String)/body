@@ -1,6 +1,5 @@
 {
   TypedValue contextObject=state.getActiveContextObject();
-  EvaluationContext eContext=state.getEvaluationContext();
   Object targetObject=contextObject.getValue();
   if (targetObject == null && nullSafe) {
     return TypedValue.NULL_TYPED_VALUE;
@@ -16,10 +15,14 @@
   }
   Class<?> contextObjectClass=getObjectClass(contextObject.getValue());
   List<PropertyAccessor> accessorsToTry=getPropertyAccessorsToTry(contextObjectClass,state);
+  EvaluationContext eContext=state.getEvaluationContext();
   if (accessorsToTry != null) {
     try {
       for (      PropertyAccessor accessor : accessorsToTry) {
         if (accessor.canRead(eContext,contextObject.getValue(),name)) {
+          if (accessor instanceof ReflectivePropertyResolver) {
+            accessor=((ReflectivePropertyResolver)accessor).createOptimalAccessor(eContext,contextObject.getValue(),name);
+          }
           this.cachedReadAccessor=accessor;
           return accessor.read(eContext,contextObject.getValue(),name);
         }

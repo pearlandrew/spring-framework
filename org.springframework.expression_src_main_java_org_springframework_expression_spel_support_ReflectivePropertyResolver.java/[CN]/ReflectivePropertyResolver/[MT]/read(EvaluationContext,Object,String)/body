@@ -9,41 +9,43 @@
     }
     return new TypedValue(Array.getLength(target),TypeDescriptor.valueOf(Integer.TYPE));
   }
+  if (this.readerCache == null) {
+    this.readerCache=new ConcurrentHashMap<CacheKey,InvokerPair>();
+  }
   CacheKey cacheKey=new CacheKey(type,name);
-  Member cachedMember=this.readerCache.get(cacheKey);
-  if (cachedMember == null || cachedMember instanceof Method) {
-    Method method=(Method)cachedMember;
+  InvokerPair invoker=this.readerCache.get(cacheKey);
+  if (invoker == null || invoker.member instanceof Method) {
+    Method method=(Method)(invoker == null ? null : invoker.member);
     if (method == null) {
       method=findGetterForProperty(name,type,target instanceof Class);
       if (method != null) {
-        cachedMember=method;
-        this.readerCache.put(cacheKey,cachedMember);
+        invoker=new InvokerPair(method,new TypeDescriptor(new MethodParameter(method,-1)));
+        this.readerCache.put(cacheKey,invoker);
       }
     }
     if (method != null) {
       try {
         ReflectionUtils.makeAccessible(method);
-        TypeDescriptor resultTypeDescriptor=new TypeDescriptor(new MethodParameter(method,-1));
-        return new TypedValue(method.invoke(target),resultTypeDescriptor);
+        return new TypedValue(method.invoke(target),invoker.typeDescriptor);
       }
  catch (      Exception ex) {
         throw new AccessException("Unable to access property '" + name + "' through getter",ex);
       }
     }
   }
-  if (cachedMember == null || cachedMember instanceof Field) {
-    Field field=(Field)cachedMember;
+  if (invoker == null || invoker.member instanceof Field) {
+    Field field=(Field)(invoker == null ? null : invoker.member);
     if (field == null) {
       field=findField(name,type,target instanceof Class);
       if (field != null) {
-        cachedMember=field;
-        this.readerCache.put(cacheKey,cachedMember);
+        invoker=new InvokerPair(field,new TypeDescriptor(field));
+        this.readerCache.put(cacheKey,invoker);
       }
     }
     if (field != null) {
       try {
         ReflectionUtils.makeAccessible(field);
-        return new TypedValue(field.get(target),new TypeDescriptor(field));
+        return new TypedValue(field.get(target),invoker.typeDescriptor);
       }
  catch (      Exception ex) {
         throw new AccessException("Unable to access field: " + name,ex);

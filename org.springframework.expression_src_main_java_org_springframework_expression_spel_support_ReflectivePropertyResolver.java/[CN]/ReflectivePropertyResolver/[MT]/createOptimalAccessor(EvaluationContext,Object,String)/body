@@ -1,0 +1,46 @@
+{
+  if (target == null) {
+    return this;
+  }
+  Class<?> type=(target instanceof Class ? (Class<?>)target : target.getClass());
+  if (type.isArray()) {
+    return this;
+  }
+  CacheKey cacheKey=new CacheKey(type,name);
+  if (this.readerCache == null) {
+    this.readerCache=new ConcurrentHashMap<CacheKey,InvokerPair>();
+    if (this.typeDescriptorCache == null) {
+      this.typeDescriptorCache=new ConcurrentHashMap<CacheKey,TypeDescriptor>();
+    }
+  }
+  InvokerPair invocationTarget=this.readerCache.get(cacheKey);
+  if (invocationTarget == null || invocationTarget.member instanceof Method) {
+    Method method=(Method)(invocationTarget == null ? null : invocationTarget.member);
+    if (method == null) {
+      method=findGetterForProperty(name,type,target instanceof Class);
+      if (method != null) {
+        invocationTarget=new InvokerPair(method,new TypeDescriptor(new MethodParameter(method,-1)));
+        ReflectionUtils.makeAccessible(method);
+        this.readerCache.put(cacheKey,invocationTarget);
+      }
+    }
+    if (method != null) {
+      return new OptimalPropertyAccessor(invocationTarget);
+    }
+  }
+  if (invocationTarget == null || invocationTarget.member instanceof Field) {
+    Field field=(Field)(invocationTarget == null ? null : invocationTarget.member);
+    if (field == null) {
+      field=findField(name,type,target instanceof Class);
+      if (field != null) {
+        invocationTarget=new InvokerPair(field,new TypeDescriptor(field));
+        ReflectionUtils.makeAccessible(field);
+        this.readerCache.put(cacheKey,invocationTarget);
+      }
+    }
+    if (field != null) {
+      return new OptimalPropertyAccessor(invocationTarget);
+    }
+  }
+  return this;
+}

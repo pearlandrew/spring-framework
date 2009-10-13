@@ -6,21 +6,29 @@
   if ((type.isArray() && name.equals("length"))) {
     return true;
   }
+  if (this.readerCache == null) {
+    this.readerCache=new ConcurrentHashMap<CacheKey,InvokerPair>();
+    if (this.typeDescriptorCache == null) {
+      this.typeDescriptorCache=new ConcurrentHashMap<CacheKey,TypeDescriptor>();
+    }
+  }
   CacheKey cacheKey=new CacheKey(type,name);
   if (this.readerCache.containsKey(cacheKey)) {
     return true;
   }
   Method method=findGetterForProperty(name,type,target instanceof Class);
   if (method != null) {
-    this.readerCache.put(cacheKey,method);
-    this.typeDescriptorCache.put(cacheKey,new TypeDescriptor(new MethodParameter(method,-1)));
+    TypeDescriptor typeDescriptor=new TypeDescriptor(new MethodParameter(method,-1));
+    this.readerCache.put(cacheKey,new InvokerPair(method,typeDescriptor));
+    this.typeDescriptorCache.put(cacheKey,typeDescriptor);
     return true;
   }
  else {
     Field field=findField(name,type,target instanceof Class);
     if (field != null) {
-      this.readerCache.put(cacheKey,field);
-      this.typeDescriptorCache.put(cacheKey,new TypeDescriptor(field));
+      TypeDescriptor typeDescriptor=new TypeDescriptor(field);
+      this.readerCache.put(cacheKey,new InvokerPair(field,typeDescriptor));
+      this.typeDescriptorCache.put(cacheKey,typeDescriptor);
       return true;
     }
   }
