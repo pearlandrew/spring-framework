@@ -1,0 +1,20 @@
+{
+  Class type=typeDescriptor.getType();
+  Formatted formatted=AnnotationUtils.findAnnotation(type,Formatted.class);
+  if (formatted != null) {
+    Formatter formatter=createFormatter(formatted.value());
+    addFormatterByType(type,formatter);
+    return findFormatterHolderForType(type);
+  }
+ else {
+    Method valueOfMethod=getValueOfMethod(type);
+    if (valueOfMethod != null) {
+      Formatter formatter=createFormatter(valueOfMethod);
+      addFormatterByType(type,formatter);
+      return findFormatterHolderForType(type);
+    }
+ else {
+      return null;
+    }
+  }
+}

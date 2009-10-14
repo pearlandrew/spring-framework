@@ -1,0 +1,18 @@
+{
+  Class<? extends Annotation> annotationType=annotation.annotationType();
+  AnnotationFormatterFactoryHolder factory=this.annotationFormatters.get(annotationType);
+  if (factory != null) {
+    return factory.getFormatterHolder(annotation);
+  }
+ else {
+    Formatted formattedAnnotation=annotationType.getAnnotation(Formatted.class);
+    if (formattedAnnotation != null) {
+      Formatter formatter=createFormatter(formattedAnnotation.value());
+      addFormatterByAnnotation(annotationType,formatter);
+      return findFormatterHolderForAnnotation(annotation);
+    }
+ else {
+      return null;
+    }
+  }
+}
