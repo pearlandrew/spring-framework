@@ -1,0 +1,17 @@
+{
+  Method[] methods=this.formattedObjectType.getDeclaredMethods();
+  for (  Method method : methods) {
+    if (method.getName().equals(methodName) && method.getReturnType().equals(this.formattedObjectType) && Modifier.isPublic(method.getModifiers())&& Modifier.isStatic(method.getModifiers())) {
+      if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(String.class)) {
+        this.parseMethod=method;
+      }
+ else       if (method.getParameterTypes().length == 2 && method.getParameterTypes()[0].equals(String.class) && method.getParameterTypes()[1].equals(Locale.class)) {
+        this.parseMethod=method;
+        this.parseMethodLocaleArgumentPresent=true;
+      }
+    }
+  }
+  if (this.parseMethod == null) {
+    throw new IllegalArgumentException("Unable to resolve parse method '" + methodName + "' on class ["+ this.formattedObjectType.getName()+ "]; method should have signature [public static T <methodName>(String)] "+ "or [public static T <methodName>(String, Locale)]");
+  }
+}
