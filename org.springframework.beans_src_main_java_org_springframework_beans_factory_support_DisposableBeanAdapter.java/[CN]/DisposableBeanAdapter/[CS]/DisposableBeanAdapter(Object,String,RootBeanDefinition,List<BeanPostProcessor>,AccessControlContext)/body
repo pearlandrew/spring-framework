@@ -8,23 +8,7 @@
   final String destroyMethodName=beanDefinition.getDestroyMethodName();
   if (destroyMethodName != null && !(this.invokeDisposableBean && "destroy".equals(destroyMethodName)) && !beanDefinition.isExternallyManagedDestroyMethod(destroyMethodName)) {
     this.destroyMethodName=destroyMethodName;
-    try {
-      if (System.getSecurityManager() != null) {
-        AccessController.doPrivileged(new PrivilegedAction<Object>(){
-          public Object run(){
-            destroyMethod=(nonPublicAccessAllowed ? BeanUtils.findMethodWithMinimalParameters(bean.getClass(),destroyMethodName) : BeanUtils.findMethodWithMinimalParameters(bean.getClass().getMethods(),destroyMethodName));
-            return null;
-          }
-        }
-);
-      }
- else {
-        this.destroyMethod=(this.nonPublicAccessAllowed ? BeanUtils.findMethodWithMinimalParameters(bean.getClass(),destroyMethodName) : BeanUtils.findMethodWithMinimalParameters(bean.getClass().getMethods(),destroyMethodName));
-      }
-    }
- catch (    IllegalArgumentException ex) {
-      throw new BeanDefinitionValidationException("Couldn't find a unique destroy method on bean with name '" + this.beanName + ": "+ ex.getMessage());
-    }
+    this.destroyMethod=determineDestroyMethod();
     if (this.destroyMethod == null) {
       if (beanDefinition.isEnforceDestroyMethod()) {
         throw new BeanDefinitionValidationException("Couldn't find a destroy method named '" + destroyMethodName + "' on bean with name '"+ beanName+ "'");
