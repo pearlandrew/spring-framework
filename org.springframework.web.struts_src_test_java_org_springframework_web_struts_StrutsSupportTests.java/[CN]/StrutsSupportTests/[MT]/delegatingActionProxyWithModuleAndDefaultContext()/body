@@ -1,0 +1,35 @@
+{
+  final MockServletContext servletContext=new MockServletContext("/org/springframework/web/struts/WEB-INF");
+  ContextLoaderPlugIn plugin=new ContextLoaderPlugIn();
+  plugin.setContextConfigLocation("action-servlet.xml");
+  ActionServlet actionServlet=new ActionServlet(){
+    @Override public String getServletName(){
+      return "action";
+    }
+    @Override public ServletContext getServletContext(){
+      return servletContext;
+    }
+  }
+;
+  ModuleConfig defaultModuleConfig=createMock(ModuleConfig.class);
+  expect(defaultModuleConfig.getPrefix()).andReturn("").anyTimes();
+  ModuleConfig moduleConfig=createMock(ModuleConfig.class);
+  expect(moduleConfig.getPrefix()).andReturn("/module").anyTimes();
+  replay(defaultModuleConfig,moduleConfig);
+  plugin.init(actionServlet,defaultModuleConfig);
+  assertTrue(servletContext.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX) != null);
+  assertTrue(servletContext.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX + "/module") == null);
+  DelegatingActionProxy proxy=new DelegatingActionProxy();
+  proxy.setServlet(actionServlet);
+  ActionMapping mapping=new ActionMapping();
+  mapping.setPath("/test2");
+  mapping.setModuleConfig(moduleConfig);
+  ActionForward forward=proxy.execute(mapping,null,new MockHttpServletRequest(servletContext),new MockHttpServletResponse());
+  assertEquals("/module/test2",forward.getPath());
+  TestAction testAction=(TestAction)plugin.getWebApplicationContext().getBean("/module/test2");
+  assertTrue(testAction.getServlet() != null);
+  proxy.setServlet(null);
+  plugin.destroy();
+  assertTrue(testAction.getServlet() == null);
+  verify(defaultModuleConfig,moduleConfig);
+}

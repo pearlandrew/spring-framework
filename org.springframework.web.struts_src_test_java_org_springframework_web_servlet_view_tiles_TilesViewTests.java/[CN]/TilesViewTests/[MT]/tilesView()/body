@@ -1,0 +1,23 @@
+{
+  WebApplicationContext wac=prepareWebApplicationContext();
+  InternalResourceViewResolver irvr=new InternalResourceViewResolver();
+  irvr.setApplicationContext(wac);
+  irvr.setViewClass(TilesView.class);
+  View view=irvr.resolveViewName("testTile",new Locale("nl",""));
+  MockHttpServletRequest request=new MockHttpServletRequest(wac.getServletContext());
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE,wac);
+  request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,new AcceptHeaderLocaleResolver());
+  view.render(new HashMap<String,Object>(),request,response);
+  assertEquals("/WEB-INF/jsp/layout.jsp",response.getForwardedUrl());
+  ComponentContext cc=(ComponentContext)request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
+  assertNotNull(cc);
+  PathAttribute attr=(PathAttribute)cc.getAttribute("content");
+  assertEquals("/WEB-INF/jsp/content.jsp",attr.getValue());
+  view.render(new HashMap<String,Object>(),request,response);
+  assertEquals("/WEB-INF/jsp/layout.jsp",response.getForwardedUrl());
+  cc=(ComponentContext)request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
+  assertNotNull(cc);
+  attr=(PathAttribute)cc.getAttribute("content");
+  assertEquals("/WEB-INF/jsp/content.jsp",attr.getValue());
+}

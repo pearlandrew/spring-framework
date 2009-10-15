@@ -1,0 +1,23 @@
+{
+  ActionMessages actionMessages=new ActionMessages();
+  Iterator it=this.errors.getAllErrors().iterator();
+  while (it.hasNext()) {
+    ObjectError objectError=(ObjectError)it.next();
+    String effectiveMessageKey=findEffectiveMessageKey(objectError);
+    if (effectiveMessageKey == null && !defaultActionMessageAvailable) {
+      effectiveMessageKey=objectError.getCode();
+    }
+    ActionMessage message=(effectiveMessageKey != null) ? new ActionMessage(effectiveMessageKey,resolveArguments(objectError.getArguments())) : new ActionMessage(objectError.getDefaultMessage(),false);
+    if (objectError instanceof FieldError) {
+      FieldError fieldError=(FieldError)objectError;
+      actionMessages.add(fieldError.getField(),message);
+    }
+ else {
+      actionMessages.add(ActionMessages.GLOBAL_MESSAGE,message);
+    }
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Final ActionMessages used for binding: " + actionMessages);
+  }
+  return actionMessages;
+}

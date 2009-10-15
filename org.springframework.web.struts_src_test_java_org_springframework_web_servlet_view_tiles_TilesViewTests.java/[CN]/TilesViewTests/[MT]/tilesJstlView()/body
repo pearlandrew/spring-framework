@@ -1,0 +1,22 @@
+{
+  Locale locale=!Locale.GERMAN.equals(Locale.getDefault()) ? Locale.GERMAN : Locale.FRENCH;
+  StaticWebApplicationContext wac=prepareWebApplicationContext();
+  InternalResourceViewResolver irvr=new InternalResourceViewResolver();
+  irvr.setApplicationContext(wac);
+  irvr.setViewClass(TilesJstlView.class);
+  View view=irvr.resolveViewName("testTile",new Locale("nl",""));
+  MockHttpServletRequest request=new MockHttpServletRequest(wac.getServletContext());
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE,wac);
+  request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,new FixedLocaleResolver(locale));
+  wac.addMessage("code1",locale,"messageX");
+  view.render(new HashMap<String,Object>(),request,response);
+  assertEquals("/WEB-INF/jsp/layout.jsp",response.getForwardedUrl());
+  ComponentContext cc=(ComponentContext)request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
+  assertNotNull(cc);
+  PathAttribute attr=(PathAttribute)cc.getAttribute("content");
+  assertEquals("/WEB-INF/jsp/content.jsp",attr.getValue());
+  assertEquals(locale,Config.get(request,Config.FMT_LOCALE));
+  LocalizationContext lc=(LocalizationContext)Config.get(request,Config.FMT_LOCALIZATION_CONTEXT);
+  assertEquals("messageX",lc.getResourceBundle().getString("code1"));
+}

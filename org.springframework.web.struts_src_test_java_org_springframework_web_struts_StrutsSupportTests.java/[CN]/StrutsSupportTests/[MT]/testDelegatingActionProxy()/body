@@ -1,0 +1,31 @@
+{
+  final MockServletContext servletContext=new MockServletContext("/org/springframework/web/struts/");
+  ContextLoaderPlugIn plugin=new ContextLoaderPlugIn();
+  ActionServlet actionServlet=new ActionServlet(){
+    @Override public String getServletName(){
+      return "action";
+    }
+    @Override public ServletContext getServletContext(){
+      return servletContext;
+    }
+  }
+;
+  ModuleConfig moduleConfig=createMock(ModuleConfig.class);
+  expect(moduleConfig.getPrefix()).andReturn("").anyTimes();
+  replay(moduleConfig);
+  plugin.init(actionServlet,moduleConfig);
+  assertTrue(servletContext.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX) != null);
+  DelegatingActionProxy proxy=new DelegatingActionProxy();
+  proxy.setServlet(actionServlet);
+  ActionMapping mapping=new ActionMapping();
+  mapping.setPath("/test");
+  mapping.setModuleConfig(moduleConfig);
+  ActionForward forward=proxy.execute(mapping,null,new MockHttpServletRequest(servletContext),new MockHttpServletResponse());
+  assertEquals("/test",forward.getPath());
+  TestAction testAction=(TestAction)plugin.getWebApplicationContext().getBean("/test");
+  assertTrue(testAction.getServlet() != null);
+  proxy.setServlet(null);
+  plugin.destroy();
+  assertTrue(testAction.getServlet() == null);
+  verify(moduleConfig);
+}

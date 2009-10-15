@@ -1,0 +1,23 @@
+{
+  Locale locale=!Locale.GERMAN.equals(Locale.getDefault()) ? Locale.GERMAN : Locale.FRENCH;
+  StaticWebApplicationContext wac=prepareWebApplicationContext();
+  ((MockServletContext)wac.getServletContext()).addInitParameter(Config.FMT_LOCALIZATION_CONTEXT,"org/springframework/web/servlet/view/tiles/context-messages");
+  InternalResourceViewResolver irvr=new InternalResourceViewResolver();
+  irvr.setApplicationContext(wac);
+  irvr.setViewClass(TilesJstlView.class);
+  View view=irvr.resolveViewName("testTile",new Locale("nl",""));
+  MockHttpServletRequest request=new MockHttpServletRequest(wac.getServletContext());
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  wac.addMessage("code1",locale,"messageX");
+  request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE,wac);
+  request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,new FixedLocaleResolver(locale));
+  view.render(new HashMap<String,Object>(),request,response);
+  assertEquals("/WEB-INF/jsp/layout.jsp",response.getForwardedUrl());
+  ComponentContext cc=(ComponentContext)request.getAttribute(ComponentConstants.COMPONENT_CONTEXT);
+  assertNotNull(cc);
+  PathAttribute attr=(PathAttribute)cc.getAttribute("content");
+  assertEquals("/WEB-INF/jsp/content.jsp",attr.getValue());
+  LocalizationContext lc=(LocalizationContext)Config.get(request,Config.FMT_LOCALIZATION_CONTEXT);
+  assertEquals("message1",lc.getResourceBundle().getString("code1"));
+  assertEquals("message2",lc.getResourceBundle().getString("code2"));
+}

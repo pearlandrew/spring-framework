@@ -1,0 +1,24 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("ContextLoaderPlugIn for Struts ActionServlet '" + getServletName() + "', module '"+ getModulePrefix()+ "' will try to create custom WebApplicationContext "+ "context of class '"+ getContextClass().getName()+ "', using parent context ["+ parent+ "]");
+  }
+  if (!ConfigurableWebApplicationContext.class.isAssignableFrom(getContextClass())) {
+    throw new ApplicationContextException("Fatal initialization error in ContextLoaderPlugIn for Struts ActionServlet '" + getServletName() + "', module '"+ getModulePrefix()+ "': custom WebApplicationContext class ["+ getContextClass().getName()+ "] is not of type ConfigurableWebApplicationContext");
+  }
+  ConfigurableWebApplicationContext wac=(ConfigurableWebApplicationContext)BeanUtils.instantiateClass(getContextClass());
+  wac.setParent(parent);
+  wac.setServletContext(getServletContext());
+  wac.setNamespace(getNamespace());
+  if (getContextConfigLocation() != null) {
+    wac.setConfigLocations(StringUtils.tokenizeToStringArray(getContextConfigLocation(),ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
+  }
+  wac.addBeanFactoryPostProcessor(new BeanFactoryPostProcessor(){
+    public void postProcessBeanFactory(    ConfigurableListableBeanFactory beanFactory){
+      beanFactory.addBeanPostProcessor(new ActionServletAwareProcessor(getActionServlet()));
+      beanFactory.ignoreDependencyType(ActionServlet.class);
+    }
+  }
+);
+  wac.refresh();
+  return wac;
+}

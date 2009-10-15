@@ -1,0 +1,19 @@
+{
+  ComponentDefinition definition=getComponentDefinition(this.definitionsFactory,request);
+  if (definition == null) {
+    throw new ServletException("No Tiles definition found for name '" + getUrl() + "'");
+  }
+  ComponentContext context=getComponentContext(definition,request);
+  Controller controller=getController(definition,request);
+  if (controller != null) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Executing Tiles controller [" + controller + "]");
+    }
+    executeController(controller,context,request,response);
+  }
+  String path=getDispatcherPath(definition,request);
+  if (path == null) {
+    throw new ServletException("Could not determine a path for Tiles definition '" + definition.getName() + "'");
+  }
+  return path;
+}

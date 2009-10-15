@@ -1,0 +1,27 @@
+{
+  if (arguments == null || arguments.length == 0) {
+    return arguments;
+  }
+  for (int i=0; i < arguments.length; i++) {
+    Object arg=arguments[i];
+    if (arg instanceof MessageSourceResolvable) {
+      MessageSourceResolvable resolvable=(MessageSourceResolvable)arg;
+      String[] codes=resolvable.getCodes();
+      boolean resolved=false;
+      if (this.messageResources != null) {
+        for (int j=0; j < codes.length; j++) {
+          String code=codes[j];
+          if (this.messageResources.isPresent(this.locale,code)) {
+            arguments[i]=this.messageResources.getMessage(this.locale,code,resolveArguments(resolvable.getArguments()));
+            resolved=true;
+            break;
+          }
+        }
+      }
+      if (!resolved) {
+        arguments[i]=resolvable.getDefaultMessage();
+      }
+    }
+  }
+  return arguments;
+}
