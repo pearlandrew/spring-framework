@@ -1,0 +1,16 @@
+{
+  PersonDto source=new PersonDto();
+  NestedDto nested=new NestedDto();
+  nested.foo="bar";
+  source.setNested(nested);
+  Person target=new Person();
+  Mapper<NestedDto,Nested> nestedMapper=MapperFactory.mapperBuilder(NestedDto.class,Nested.class).addMapping("foo",new Converter<String,String>(){
+    public String convert(    String source){
+      return source + " and baz";
+    }
+  }
+).getMapper();
+  Mapper<PersonDto,Person> mapper=MapperFactory.mapperBuilder(PersonDto.class,Person.class).setAutoMappingEnabled(false).addMapping("nested").addNestedMapper(nestedMapper).getMapper();
+  mapper.map(source,target);
+  assertEquals("bar and baz",target.nested.foo);
+}

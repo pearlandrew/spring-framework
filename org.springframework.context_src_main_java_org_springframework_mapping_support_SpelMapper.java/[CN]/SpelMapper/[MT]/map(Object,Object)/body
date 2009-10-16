@@ -5,17 +5,21 @@
     MappingContextHolder.push(source);
     EvaluationContext sourceContext=getEvaluationContext(source);
     EvaluationContext targetContext=getEvaluationContext(target);
-    List<MappingFailure> failures=new LinkedList<MappingFailure>();
+    SpelMappingContext context=new SpelMappingContext(sourceContext,targetContext);
     for (    SpelMapping mapping : this.mappings) {
-      doMap(mapping,sourceContext,targetContext,failures);
+      if (logger.isDebugEnabled()) {
+        logger.debug(MappingContextHolder.getLevel() + mapping);
+      }
+      mapping.map(context);
     }
-    Set<SpelMapping> autoMappings=getAutoMappings(sourceContext,targetContext);
+    Set<FieldToFieldMapping> autoMappings=getAutoMappings(sourceContext,targetContext);
     for (    SpelMapping mapping : autoMappings) {
-      doMap(mapping,sourceContext,targetContext,failures);
+      if (logger.isDebugEnabled()) {
+        logger.debug(MappingContextHolder.getLevel() + mapping + " (auto)");
+      }
+      mapping.map(context);
     }
-    if (!failures.isEmpty()) {
-      throw new MappingException(failures);
-    }
+    context.handleFailures();
     return target;
   }
   finally {

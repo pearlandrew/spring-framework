@@ -1,0 +1,43 @@
+{
+  Mapper<CreateAccountDto,Account> mapper=MapperFactory.mapperBuilder(CreateAccountDto.class,Account.class).setAutoMappingEnabled(false).addMapping("accountNumber","number").addMapping("name",new Mapper<String,Account>(){
+    public Account map(    String name,    Account account){
+      String[] names=name.split(" ");
+      account.setFirstName(names[0]);
+      account.setLastName(names[1]);
+      return account;
+    }
+  }
+).addMapping("address",new Converter<String,Address>(){
+    public Address convert(    String address){
+      String[] fields=address.split(" ");
+      Address addr=new Address();
+      addr.setStreet(fields[0]);
+      addr.setCity(fields[1]);
+      addr.setState(fields[2]);
+      addr.setZip(fields[3]);
+      return addr;
+    }
+  }
+).addMapping(new Mapper<CreateAccountDto,Account>(){
+    public Account map(    CreateAccountDto source,    Account target){
+      DateTime dateTime=ISODateTimeFormat.dateTime().parseDateTime(source.getActivationDate() + "T" + source.getActivationTime());
+      target.setActivationDateTime(dateTime);
+      return target;
+    }
+  }
+).getMapper();
+  CreateAccountDto dto=new CreateAccountDto();
+  dto.setAccountNumber("123456789");
+  dto.setName("Keith Donald");
+  dto.setActivationDate("2009-10-12");
+  dto.setActivationTime("12:00:00.000Z");
+  dto.setAddress("2009BelAireEstates PalmBay FL 35452");
+  Account account=mapper.map(dto,new Account());
+  assertEquals("Keith",account.getFirstName());
+  assertEquals("Donald",account.getLastName());
+  assertEquals("2009BelAireEstates",account.getAddress().getStreet());
+  assertEquals("PalmBay",account.getAddress().getCity());
+  assertEquals("FL",account.getAddress().getState());
+  assertEquals("35452",account.getAddress().getZip());
+  assertEquals(ISODateTimeFormat.dateTime().parseDateTime("2009-10-12T12:00:00.000Z"),account.getActivationDateTime());
+}
