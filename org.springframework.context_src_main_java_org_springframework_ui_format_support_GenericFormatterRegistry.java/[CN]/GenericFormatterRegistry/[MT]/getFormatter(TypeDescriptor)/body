@@ -1,17 +1,18 @@
 {
   Assert.notNull(type,"TypeDescriptor is required");
   FormatterHolder holder=findFormatterHolderForAnnotatedProperty(type.getAnnotations());
+  Class<?> objectType=type.getObjectType();
   if (holder == null) {
-    holder=findFormatterHolderForType(type.getType());
+    holder=findFormatterHolderForType(objectType);
   }
   if (holder == null) {
-    holder=getDefaultFormatterHolder(type);
+    holder=getDefaultFormatterHolder(objectType);
   }
   if (holder == null) {
     return null;
   }
-  Class formattedObjectType=holder.getFormattedObjectType();
-  if (formattedObjectType != null && !type.getType().isAssignableFrom(formattedObjectType)) {
+  Class<?> formatterObjectType=holder.getFormatterObjectType();
+  if (formatterObjectType != null && !objectType.isAssignableFrom(formatterObjectType)) {
     if (this.conversionService != null) {
       return new ConvertingFormatter(type,holder);
     }
