@@ -4,22 +4,21 @@
 synchronized (this.injectionMetadataCache) {
       metadata=this.injectionMetadataCache.get(clazz);
       if (metadata == null) {
-        final InjectionMetadata newMetadata=new InjectionMetadata(clazz);
-        ReflectionUtils.doWithFields(clazz,new ReflectionUtils.FieldCallback(){
-          public void doWith(          Field field){
+        LinkedList<InjectionMetadata.InjectedElement> elements=new LinkedList<InjectionMetadata.InjectedElement>();
+        Class<?> targetClass=clazz;
+        do {
+          LinkedList<InjectionMetadata.InjectedElement> currElements=new LinkedList<InjectionMetadata.InjectedElement>();
+          for (          Field field : targetClass.getDeclaredFields()) {
             PersistenceContext pc=field.getAnnotation(PersistenceContext.class);
             PersistenceUnit pu=field.getAnnotation(PersistenceUnit.class);
             if (pc != null || pu != null) {
               if (Modifier.isStatic(field.getModifiers())) {
                 throw new IllegalStateException("Persistence annotations are not supported on static fields");
               }
-              newMetadata.addInjectedField(new PersistenceElement(field,null));
+              currElements.add(new PersistenceElement(field,null));
             }
           }
-        }
-);
-        ReflectionUtils.doWithMethods(clazz,new ReflectionUtils.MethodCallback(){
-          public void doWith(          Method method){
+          for (          Method method : targetClass.getDeclaredMethods()) {
             PersistenceContext pc=method.getAnnotation(PersistenceContext.class);
             PersistenceUnit pu=method.getAnnotation(PersistenceUnit.class);
             if (pc != null || pu != null && method.equals(ClassUtils.getMostSpecificMethod(method,clazz))) {
@@ -30,12 +29,14 @@ synchronized (this.injectionMetadataCache) {
                 throw new IllegalStateException("Persistence annotation requires a single-arg method: " + method);
               }
               PropertyDescriptor pd=BeanUtils.findPropertyForMethod(method);
-              newMetadata.addInjectedMethod(new PersistenceElement(method,pd));
+              currElements.add(new PersistenceElement(method,pd));
             }
           }
+          elements.addAll(0,currElements);
+          targetClass=targetClass.getSuperclass();
         }
-);
-        metadata=newMetadata;
+ while (targetClass != null && targetClass != Object.class);
+        metadata=new InjectionMetadata(clazz,elements);
         this.injectionMetadataCache.put(clazz,metadata);
       }
     }

@@ -1,0 +1,26 @@
+{
+  GenericApplicationContext ac=new GenericApplicationContext();
+  AnnotatedBeanDefinitionReader bdr=new AnnotatedBeanDefinitionReader(ac);
+  bdr.setScopeMetadataResolver(new ScopeMetadataResolver(){
+    public ScopeMetadata resolveScopeMetadata(    BeanDefinition definition){
+      ScopeMetadata metadata=new ScopeMetadata();
+      if (definition instanceof AnnotatedBeanDefinition) {
+        AnnotatedBeanDefinition annDef=(AnnotatedBeanDefinition)definition;
+        metadata.setScopeName(annDef.getMetadata().hasAnnotation(javax.inject.Singleton.class.getName()) ? BeanDefinition.SCOPE_SINGLETON : BeanDefinition.SCOPE_PROTOTYPE);
+      }
+      return metadata;
+    }
+  }
+);
+  bdr.registerBean(Convertible.class);
+  bdr.registerBean(DriversSeat.class,Drivers.class);
+  bdr.registerBean(Seat.class,Primary.class);
+  bdr.registerBean(V8Engine.class);
+  bdr.registerBean(SpareTire.class,"spare");
+  bdr.registerBean(Cupholder.class);
+  bdr.registerBean(Tire.class,Primary.class);
+  bdr.registerBean(FuelTank.class);
+  ac.refresh();
+  Car car=ac.getBean("convertible",Car.class);
+  return Tck.testsFor(car,false,true);
+}
