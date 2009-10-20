@@ -7,18 +7,18 @@
     throw new ApplicationContextException("Fatal initialization error in servlet with name '" + getServletName() + "': custom WebApplicationContext class ["+ contextClass.getName()+ "] is not of type ConfigurableWebApplicationContext");
   }
   ConfigurableWebApplicationContext wac=(ConfigurableWebApplicationContext)BeanUtils.instantiateClass(contextClass);
-  ServletContext servletContext=getServletContext();
-  if (servletContext.getMajorVersion() > 2 || servletContext.getMinorVersion() >= 5) {
-    wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContext.getContextPath() + "/"+ getServletName());
-  }
- else {
-    String servletContextName=servletContext.getServletContextName();
+  ServletContext sc=getServletContext();
+  if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+    String servletContextName=sc.getServletContextName();
     if (servletContextName != null) {
       wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName + "."+ getServletName());
     }
  else {
       wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + getServletName());
     }
+  }
+ else {
+    wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + sc.getContextPath() + "/"+ getServletName());
   }
   wac.setParent(parent);
   wac.setServletContext(getServletContext());
