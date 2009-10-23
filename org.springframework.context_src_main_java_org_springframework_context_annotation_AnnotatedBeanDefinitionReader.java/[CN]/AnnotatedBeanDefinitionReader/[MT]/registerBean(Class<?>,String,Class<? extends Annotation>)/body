@@ -3,17 +3,7 @@
   ScopeMetadata scopeMetadata=this.scopeMetadataResolver.resolveScopeMetadata(abd);
   abd.setScope(scopeMetadata.getScopeName());
   String beanName=(name != null ? name : this.beanNameGenerator.generateBeanName(abd,this.registry));
-  if (abd.getMetadata().isAnnotated(Primary.class.getName())) {
-    abd.setPrimary(true);
-  }
-  if (abd.getMetadata().isAnnotated(Lazy.class.getName())) {
-    Boolean value=(Boolean)abd.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value");
-    abd.setLazyInit(value);
-  }
-  if (abd.getMetadata().isAnnotated(DependsOn.class.getName())) {
-    String[] value=(String[])abd.getMetadata().getAnnotationAttributes(DependsOn.class.getName()).get("value");
-    abd.setDependsOn(value);
-  }
+  AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
   if (qualifiers != null) {
     for (    Class<? extends Annotation> qualifier : qualifiers) {
       if (Primary.class.equals(qualifier)) {
@@ -28,9 +18,6 @@
     }
   }
   BeanDefinitionHolder definitionHolder=new BeanDefinitionHolder(abd,beanName);
-  definitionHolder=applyScopedProxyMode(definitionHolder,scopeMetadata);
+  definitionHolder=AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata,definitionHolder,this.registry);
   BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder,this.registry);
-  if (this.includeAnnotationConfig) {
-    AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
-  }
 }

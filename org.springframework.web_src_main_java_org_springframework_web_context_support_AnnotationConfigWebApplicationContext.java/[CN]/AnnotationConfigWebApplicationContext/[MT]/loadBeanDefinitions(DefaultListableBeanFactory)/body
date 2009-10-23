@@ -1,0 +1,40 @@
+{
+  AnnotatedBeanDefinitionReader reader=new AnnotatedBeanDefinitionReader(beanFactory);
+  ClassPathBeanDefinitionScanner scanner=new ClassPathBeanDefinitionScanner(beanFactory);
+  BeanNameGenerator beanNameGenerator=getBeanNameGenerator();
+  ScopeMetadataResolver scopeMetadataResolver=getScopeMetadataResolver();
+  if (beanNameGenerator != null) {
+    reader.setBeanNameGenerator(beanNameGenerator);
+    scanner.setBeanNameGenerator(beanNameGenerator);
+  }
+  if (scopeMetadataResolver != null) {
+    reader.setScopeMetadataResolver(scopeMetadataResolver);
+    scanner.setScopeMetadataResolver(scopeMetadataResolver);
+  }
+  String[] configLocations=getConfigLocations();
+  if (configLocations != null) {
+    for (    String configLocation : configLocations) {
+      try {
+        Class<?> clazz=getClassLoader().loadClass(configLocation);
+        if (logger.isInfoEnabled()) {
+          logger.info("Successfully resolved class for [" + configLocation + "]");
+        }
+        reader.register(clazz);
+      }
+ catch (      ClassNotFoundException ex) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Could not load class for config location [" + configLocation + "] - trying package scan. "+ ex);
+        }
+        int count=scanner.scan(configLocation);
+        if (logger.isInfoEnabled()) {
+          if (count == 0) {
+            logger.info("No annotated classes found for specified class/package [" + configLocation + "]");
+          }
+ else {
+            logger.info("Found " + count + " annotated classes in package ["+ configLocation+ "]");
+          }
+        }
+      }
+    }
+  }
+}
