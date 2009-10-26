@@ -16,13 +16,13 @@
   assertEquals("protectedInstance",tb.getName());
   assertSame(tb,context.getBean("protectedInstance"));
   assertEquals("0",tb.getCountry());
-  tb2=(TestBean)context.getBean("protectedInstance");
+  tb2=context.getBean("protectedInstance",TestBean.class);
   assertEquals("protectedInstance",tb2.getName());
   assertSame(tb2,tb);
-  tb=(TestBean)context.getBean("privateInstance");
+  tb=context.getBean("privateInstance",TestBean.class);
   assertEquals("privateInstance",tb.getName());
   assertEquals(1,tb.getAge());
-  tb2=(TestBean)context.getBean("privateInstance");
+  tb2=context.getBean("privateInstance",TestBean.class);
   assertEquals(2,tb2.getAge());
   assertNotSame(tb2,tb);
   Object bean=context.getBean("requestScopedInstance");
@@ -30,4 +30,5 @@
   assertTrue(bean instanceof ScopedObject);
   QualifiedClientBean clientBean=context.getBean("clientBean",QualifiedClientBean.class);
   assertSame(clientBean.testBean,context.getBean("publicInstance"));
+  assertSame(clientBean.dependencyBean,context.getBean("dependencyBean"));
 }
