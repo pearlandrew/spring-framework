@@ -1,0 +1,14 @@
+{
+  DummyJob.param=0;
+  DummyJob.count=0;
+  ClassPathXmlApplicationContext ctx=new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/databasePersistence.xml");
+  SimpleJdbcTemplate jdbcTemplate=new SimpleJdbcTemplate(ctx.getBean(DataSource.class));
+  assertTrue("No triggers were persisted",jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").size() > 0);
+  Thread.sleep(3000);
+  try {
+    assertTrue(DummyJob.count > 0);
+  }
+  finally {
+    ctx.close();
+  }
+}
