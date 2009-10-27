@@ -4,13 +4,14 @@
   for (  FileItem fileItem : fileItems) {
     if (fileItem.isFormField()) {
       String value;
-      if (encoding != null) {
+      String partEncoding=determineEncoding(fileItem.getContentType(),encoding);
+      if (partEncoding != null) {
         try {
-          value=fileItem.getString(encoding);
+          value=fileItem.getString(partEncoding);
         }
  catch (        UnsupportedEncodingException ex) {
           if (logger.isWarnEnabled()) {
-            logger.warn("Could not decode multipart item '" + fileItem.getFieldName() + "' with encoding '"+ encoding+ "': using platform default");
+            logger.warn("Could not decode multipart item '" + fileItem.getFieldName() + "' with encoding '"+ partEncoding+ "': using platform default");
           }
           value=fileItem.getString();
         }
