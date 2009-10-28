@@ -1,6 +1,10 @@
 {
   try {
-    boolean value=(Boolean)state.convertValue(children[0].getValueInternal(state),TypeDescriptor.valueOf(boolean.class));
+    TypedValue typedValue=children[0].getValueInternal(state);
+    if (TypedValue.NULL_TYPED_VALUE.equals(typedValue)) {
+      throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR,"null","boolean");
+    }
+    boolean value=(Boolean)state.convertValue(typedValue,BOOLEAN_TYPE_DESCRIPTOR);
     return BooleanTypedValue.forValue(!value);
   }
  catch (  SpelEvaluationException see) {
