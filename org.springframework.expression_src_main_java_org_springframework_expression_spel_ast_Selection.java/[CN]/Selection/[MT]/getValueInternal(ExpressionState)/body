@@ -40,9 +40,10 @@
     }
     return new TypedValue(result,op.getTypeDescriptor());
   }
- else   if (operand instanceof Collection) {
+ else   if ((operand instanceof Collection) || ObjectUtils.isArray(operand)) {
     List<Object> data=new ArrayList<Object>();
-    data.addAll((Collection<?>)operand);
+    Collection<?> c=(operand instanceof Collection) ? (Collection<?>)operand : Arrays.asList(ObjectUtils.toObjectArray(operand));
+    data.addAll(c);
     List<Object> result=new ArrayList<Object>();
     int idx=0;
     for (    Object element : data) {
@@ -74,7 +75,15 @@
     if (variant == LAST) {
       return new TypedValue(result.get(result.size() - 1),TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
     }
-    return new TypedValue(result,op.getTypeDescriptor());
+    if (operand instanceof Collection) {
+      return new TypedValue(result,op.getTypeDescriptor());
+    }
+ else {
+      Class<?> elementType=ClassUtils.resolvePrimitiveIfNecessary(op.getTypeDescriptor().getElementType());
+      Object resultArray=Array.newInstance(elementType,result.size());
+      System.arraycopy(result.toArray(),0,resultArray,0,result.size());
+      return new TypedValue(resultArray,op.getTypeDescriptor());
+    }
   }
  else {
     if (operand == null) {
