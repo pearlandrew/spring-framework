@@ -1,0 +1,29 @@
+{
+  this.tag.setPath("realCountry");
+  this.tag.setItems("${countries}");
+  this.tag.setItemValue("isoCode");
+  this.tag.setItemLabel("name");
+  TestBeanWithRealCountry testBean=(TestBeanWithRealCountry)getTestBean();
+  testBean.setRealCountry(null);
+  BeanPropertyBindingResult bindingResult=new BeanPropertyBindingResult(testBean,"testBean");
+  bindingResult.getPropertyAccessor().registerCustomEditor(Country.class,new PropertyEditorSupport(){
+    public void setAsText(    String text) throws IllegalArgumentException {
+      setValue(Country.getCountryWithIsoCode(text));
+    }
+    public String getAsText(){
+      Country value=(Country)getValue();
+      if (value == null) {
+        return "";
+      }
+      return ((Country)value).getName();
+    }
+  }
+);
+  getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean",bindingResult);
+  this.tag.doStartTag();
+  String output=getOutput();
+  System.err.println(output);
+  assertTrue(output.startsWith("<select "));
+  assertTrue(output.endsWith("</select>"));
+  assertFalse(output.contains("selected=\"selected\""));
+}

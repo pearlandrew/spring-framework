@@ -1,6 +1,8 @@
 {
   this.tag.setPath("realCountry");
   this.tag.setItems("${countries}");
+  this.tag.setItemValue("isoCode");
+  this.tag.setItemLabel("name");
   BeanPropertyBindingResult bindingResult=new BeanPropertyBindingResult(getTestBean(),"testBean");
   bindingResult.getPropertyAccessor().registerCustomEditor(Country.class,new PropertyEditorSupport(){
     public void setAsText(    String text) throws IllegalArgumentException {
@@ -13,13 +15,8 @@
 );
   getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean",bindingResult);
   this.tag.doStartTag();
-  TransformTag transformTag=new TransformTag();
-  transformTag.setValue(Country.getCountries().get(0));
-  transformTag.setVar("key");
-  transformTag.setParent(this.tag);
-  transformTag.setPageContext(getPageContext());
-  transformTag.doStartTag();
   String output=getOutput();
-  System.err.println(output);
-  assertEquals("Austria",getPageContext().findAttribute("key"));
+  assertTrue(output.startsWith("<select "));
+  assertTrue(output.endsWith("</select>"));
+  assertTrue(output.contains("option value=\"AT\" selected=\"selected\">Austria"));
 }
