@@ -1,7 +1,7 @@
 {
   Mapper<Map,Account> mapper=MapperFactory.mapperBuilder(Map.class,Account.class).setAutoMappingEnabled(false).addAssemblerMapping("activationDateTime",new Converter<Map<String,String>,DateTime>(){
     public DateTime convert(    Map<String,String> source){
-      MutableDateTime dateTime=new MutableDateTime();
+      MutableDateTime dateTime=new MutableDateTime(DateTimeZone.UTC);
       dateTime.setYear(Integer.parseInt(source.get("year")));
       dateTime.setMonthOfYear(Integer.parseInt(source.get("month")));
       dateTime.setDayOfMonth(Integer.parseInt(source.get("day")));
@@ -20,5 +20,5 @@
   source.put("activationDateTime.hour","12");
   source.put("activationDateTime.minute","0");
   Account account=mapper.map(source,new Account());
-  assertEquals(ISODateTimeFormat.dateTime().parseDateTime("2009-10-12T12:00:00.000-04:00"),account.getActivationDateTime());
+  assertEquals(ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC).parseDateTime("2009-10-12T12:00:00.000-04:00"),account.getActivationDateTime());
 }
