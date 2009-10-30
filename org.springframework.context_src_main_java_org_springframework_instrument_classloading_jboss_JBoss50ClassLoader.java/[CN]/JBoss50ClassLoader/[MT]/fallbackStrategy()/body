@@ -1,0 +1,17 @@
+{
+  try {
+    addTranslator=getMethod(BaseClassLoaderPolicy.class,"addTranslator");
+  }
+ catch (  Exception ignored) {
+    Method getClassLoaderDomain=getMethod(BaseClassLoaderPolicy.class,"getClassLoaderDomain");
+    BaseClassLoaderDomain domain=invokeMethod(getClassLoaderDomain,getPolicy(),BaseClassLoaderDomain.class);
+    Method getClassLoaderSystem=getMethod(BaseClassLoaderDomain.class,"getClassLoaderSystem");
+    BaseClassLoaderSystem system=invokeMethod(getClassLoaderSystem,domain,BaseClassLoaderSystem.class);
+    if (system instanceof ClassLoaderSystem) {
+      this.system=ClassLoaderSystem.class.cast(system);
+    }
+ else {
+      throw new IllegalArgumentException("ClassLoaderSystem must be instance of [" + ClassLoaderSystem.class.getName() + "]");
+    }
+  }
+}

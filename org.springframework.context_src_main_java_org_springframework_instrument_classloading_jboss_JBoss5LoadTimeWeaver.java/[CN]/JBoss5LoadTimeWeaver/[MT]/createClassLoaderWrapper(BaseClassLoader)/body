@@ -1,0 +1,29 @@
+{
+  int versionNumber=0;
+  String tag;
+  try {
+    Class<?> versionClass=bcl.loadClass("org.jboss.Version");
+    Method getInstance=getMethod(versionClass,"getInstance");
+    Object version=getInstance.invoke(null);
+    Method getMajor=getMethod(versionClass,"getMajor");
+    versionNumber+=100 * invokeMethod(getMajor,version,Integer.class);
+    Method getMinor=getMethod(versionClass,"getMinor");
+    versionNumber+=10 * invokeMethod(getMinor,version,Integer.class);
+    Method getRevision=getMethod(versionClass,"getRevision");
+    versionNumber+=invokeMethod(getRevision,version,Integer.class);
+    Method getTag=getMethod(versionClass,"getTag");
+    tag=invokeMethod(getTag,version,String.class);
+  }
+ catch (  Exception e) {
+    return new JBoss50ClassLoader(bcl);
+  }
+  if (versionNumber < 500) {
+    throw new IllegalArgumentException("JBoss5LoadTimeWeaver can only be used on new JBoss Microcontainer ClassLoader.");
+  }
+ else   if (versionNumber <= 501 || (versionNumber == 510 && "Beta1".equals(tag))) {
+    return new JBoss50ClassLoader(bcl);
+  }
+ else {
+    return new JBoss51ClassLoader(bcl);
+  }
+}
