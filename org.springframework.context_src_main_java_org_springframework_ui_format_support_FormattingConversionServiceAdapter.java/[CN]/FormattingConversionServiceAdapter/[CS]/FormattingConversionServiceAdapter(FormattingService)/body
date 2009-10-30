@@ -1,0 +1,20 @@
+{
+  this.formattingService=formattingService;
+  addGenericConverter(String.class,Object.class,new GenericConverter(){
+    public Object convert(    Object source,    TypeDescriptor sourceType,    TypeDescriptor targetType){
+      try {
+        return FormattingConversionServiceAdapter.this.formattingService.parse((String)source,targetType,LocaleContextHolder.getLocale());
+      }
+ catch (      ParseException e) {
+        throw new ConversionFailedException(sourceType,targetType,source,e);
+      }
+    }
+  }
+);
+  addGenericConverter(Object.class,String.class,new GenericConverter(){
+    public Object convert(    Object source,    TypeDescriptor sourceType,    TypeDescriptor targetType){
+      return FormattingConversionServiceAdapter.this.formattingService.print(source,targetType,LocaleContextHolder.getLocale());
+    }
+  }
+);
+}

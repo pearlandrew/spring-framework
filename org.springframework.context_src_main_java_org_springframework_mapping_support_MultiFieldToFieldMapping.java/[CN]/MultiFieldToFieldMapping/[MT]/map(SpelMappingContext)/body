@@ -3,7 +3,9 @@
     return;
   }
   try {
-    this.multiFieldMapper.map(context.getSource(),context.getTarget());
+    Map<String,Object> nestedFields=context.getSourceNestedFields(this.sourceField);
+    Object value=this.targetFieldValueAssembler.convert(nestedFields);
+    context.setTargetFieldValue(this.targetField,value);
   }
  catch (  Exception e) {
     context.addMappingFailure(e);

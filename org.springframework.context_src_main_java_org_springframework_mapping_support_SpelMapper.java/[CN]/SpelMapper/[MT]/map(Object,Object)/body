@@ -3,16 +3,16 @@
   Assert.notNull(target,"The target to map to cannot be null");
   try {
     MappingContextHolder.push(source);
-    EvaluationContext sourceContext=getEvaluationContext(source);
-    EvaluationContext targetContext=getEvaluationContext(target);
-    SpelMappingContext context=new SpelMappingContext(sourceContext,targetContext);
+    MappableType<?> sourceType=this.mappableTypeFactory.getMappableType(source);
+    MappableType<?> targetType=this.mappableTypeFactory.getMappableType(target);
+    SpelMappingContext context=new SpelMappingContext(source,sourceType,target,targetType,this.conversionService);
     for (    SpelMapping mapping : this.mappings) {
       if (logger.isDebugEnabled()) {
         logger.debug(MappingContextHolder.getLevel() + mapping);
       }
       mapping.map(context);
     }
-    Set<FieldToFieldMapping> autoMappings=getAutoMappings(sourceContext,targetContext);
+    Set<FieldToFieldMapping> autoMappings=getAutoMappings(context);
     for (    SpelMapping mapping : autoMappings) {
       if (logger.isDebugEnabled()) {
         logger.debug(MappingContextHolder.getLevel() + mapping + " (auto)");

@@ -1,0 +1,19 @@
+{
+  formattingService.getConverterRegistry().addConverter(new Converter<Date,Long>(){
+    public Long convert(    Date source){
+      return source.getTime();
+    }
+  }
+);
+  formattingService.getConverterRegistry().addConverter(new Converter<DateTime,Date>(){
+    public Date convert(    DateTime source){
+      return source.toDate();
+    }
+  }
+);
+  formattingService.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
+  String formatted=formattingService.print(new LocalDate(2009,10,31).toDateTimeAtCurrentTime().toDate(),new TypeDescriptor(Model.class.getField("date")),Locale.US);
+  assertEquals("10/31/09",formatted);
+  LocalDate date=new LocalDate(formattingService.parse("10/31/09",new TypeDescriptor(Model.class.getField("date")),Locale.US));
+  assertEquals(new LocalDate(2009,10,31),date);
+}
