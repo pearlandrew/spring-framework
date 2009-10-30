@@ -1,35 +1,15 @@
 {
-  ResourceDatabasePopulator populator=new ResourceDatabasePopulator();
-  populator.setIgnoreFailedDrops(element.getAttribute("ignore-failures").equals("DROPS"));
-  populator.setContinueOnError(element.getAttribute("ignore-failures").equals("ALL"));
+  BeanDefinitionBuilder builder=BeanDefinitionBuilder.genericBeanDefinition(ResourceDatabasePopulator.class);
+  builder.addPropertyValue("ignoreFailedDrops",element.getAttribute("ignore-failures").equals("DROPS"));
+  builder.addPropertyValue("continueOnError",element.getAttribute("ignore-failures").equals("ALL"));
+  List<String> locations=new ArrayList<String>();
   for (  Element scriptElement : scripts) {
     String location=scriptElement.getAttribute("location");
-    ResourceLoader resourceLoader=context.getReaderContext().getResourceLoader();
-    if (resourceLoader instanceof ResourcePatternResolver) {
-      try {
-        List<Resource> resources=new ArrayList<Resource>(Arrays.asList(((ResourcePatternResolver)resourceLoader).getResources(location)));
-        Collections.<Resource>sort(resources,new Comparator<Resource>(){
-          public int compare(          Resource o1,          Resource o2){
-            try {
-              return o1.getURL().toString().compareTo(o2.getURL().toString());
-            }
- catch (            IOException e) {
-              return 0;
-            }
-          }
-        }
-);
-        for (        Resource resource : resources) {
-          populator.addScript(resource);
-        }
-      }
- catch (      IOException e) {
-        context.getReaderContext().error("Cannot locate resources for script from location=" + location,scriptElement);
-      }
-    }
- else {
-      populator.addScript(resourceLoader.getResource(location));
-    }
+    locations.add(location);
   }
-  return populator;
+  BeanDefinitionBuilder resourcesFactory=BeanDefinitionBuilder.genericBeanDefinition(SortedResourcesFactoryBean.class);
+  resourcesFactory.addConstructorArgValue(context.getReaderContext().getResourceLoader());
+  resourcesFactory.addConstructorArgValue(locations);
+  builder.addPropertyValue("scripts",resourcesFactory.getBeanDefinition());
+  return builder.getBeanDefinition();
 }
