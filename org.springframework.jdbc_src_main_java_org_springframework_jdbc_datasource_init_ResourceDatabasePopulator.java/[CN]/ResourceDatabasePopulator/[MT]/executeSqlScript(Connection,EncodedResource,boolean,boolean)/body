@@ -1,0 +1,55 @@
+{
+  if (logger.isInfoEnabled()) {
+    logger.info("Executing SQL script from " + resource);
+  }
+  long startTime=System.currentTimeMillis();
+  List<String> statements=new LinkedList<String>();
+  String script;
+  try {
+    script=readScript(resource);
+  }
+ catch (  IOException e) {
+    throw new CannotReadScriptException(resource,e);
+  }
+  char delimiter=';';
+  if (!containsSqlScriptDelimiters(script,delimiter)) {
+    delimiter='\n';
+  }
+  splitSqlScript(script,delimiter,statements);
+  int lineNumber=0;
+  Statement stmt=connection.createStatement();
+  try {
+    for (    String statement : statements) {
+      lineNumber++;
+      try {
+        int rowsAffected=stmt.executeUpdate(statement);
+        if (logger.isDebugEnabled()) {
+          logger.debug(rowsAffected + " rows affected by SQL: " + statement);
+        }
+      }
+ catch (      SQLException ex) {
+        boolean dropStatement=statement.trim().toLowerCase().startsWith("drop");
+        if (continueOnError || (dropStatement && ignoreFailedDrops)) {
+          if (logger.isWarnEnabled()) {
+            logger.warn("Line " + lineNumber + " statement failed: "+ statement,ex);
+          }
+        }
+ else {
+          throw ex;
+        }
+      }
+    }
+  }
+  finally {
+    try {
+      stmt.close();
+    }
+ catch (    Throwable ex) {
+      logger.debug("Could not close JDBC Statement",ex);
+    }
+  }
+  long elapsedTime=System.currentTimeMillis() - startTime;
+  if (logger.isInfoEnabled()) {
+    logger.info("Done executing SQL script from " + resource + " in "+ elapsedTime+ " ms.");
+  }
+}
