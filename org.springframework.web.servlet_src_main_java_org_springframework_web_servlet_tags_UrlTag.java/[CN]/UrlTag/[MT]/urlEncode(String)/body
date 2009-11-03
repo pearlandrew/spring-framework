@@ -3,7 +3,13 @@
     return null;
   }
   try {
-    return URLEncoder.encode(value,pageContext.getResponse().getCharacterEncoding());
+    String encoding=pageContext.getResponse().getCharacterEncoding();
+    String formUrlEncodedValue=URLEncoder.encode(value,encoding);
+    if (!formUrlEncodedValue.contains("+")) {
+      return formUrlEncodedValue;
+    }
+    String spaceEncoding=this.urlEncode(' ',encoding);
+    return formUrlEncodedValue.replace("+",spaceEncoding);
   }
  catch (  UnsupportedEncodingException ex) {
     throw new JspException(ex);
