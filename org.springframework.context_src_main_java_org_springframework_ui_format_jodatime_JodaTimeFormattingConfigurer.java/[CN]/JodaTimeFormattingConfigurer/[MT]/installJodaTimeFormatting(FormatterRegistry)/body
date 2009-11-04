@@ -1,0 +1,15 @@
+{
+  JodaTimeConverters.registerConverters(formatterRegistry.getConverterRegistry());
+  DateTimeFormatter jodaDateFormatter=getJodaDateFormatter();
+  formatterRegistry.addFormatterForFieldType(LocalDate.class,new ReadablePartialPrinter(jodaDateFormatter),new DateTimeParser(jodaDateFormatter));
+  DateTimeFormatter jodaTimeFormatter=getJodaTimeFormatter();
+  formatterRegistry.addFormatterForFieldType(LocalTime.class,new ReadablePartialPrinter(jodaTimeFormatter),new DateTimeParser(jodaTimeFormatter));
+  DateTimeFormatter jodaDateTimeFormatter=getJodaDateTimeFormatter();
+  Parser<DateTime> dateTimeParser=new DateTimeParser(jodaDateTimeFormatter);
+  formatterRegistry.addFormatterForFieldType(LocalDateTime.class,new ReadablePartialPrinter(jodaDateTimeFormatter),dateTimeParser);
+  Printer<ReadableInstant> readableInstantPrinter=new ReadableInstantPrinter(jodaDateTimeFormatter);
+  formatterRegistry.addFormatterForFieldType(ReadableInstant.class,readableInstantPrinter,dateTimeParser);
+  formatterRegistry.addFormatterForFieldType(Calendar.class,readableInstantPrinter,dateTimeParser);
+  formatterRegistry.addFormatterForFieldType(Date.class,new MillisecondInstantPrinter(jodaDateTimeFormatter),dateTimeParser);
+  formatterRegistry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
+}
