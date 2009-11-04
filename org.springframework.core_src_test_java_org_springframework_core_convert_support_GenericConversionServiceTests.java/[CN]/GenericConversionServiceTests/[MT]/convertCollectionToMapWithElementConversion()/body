@@ -1,0 +1,11 @@
+{
+  conversionService.addGenericConverter(Collection.class,Map.class,new CollectionToMapConverter(conversionService));
+  conversionService.addConverterFactory(new StringToNumberConverterFactory());
+  conversionService.addConverterFactory(new StringToEnumConverterFactory());
+  List<String> list=new ArrayList<String>();
+  list.add("1=BAR");
+  list.add("2=BAZ");
+  Map result=(Map)conversionService.convert(list,TypeDescriptor.valueOf(List.class),new TypeDescriptor(getClass().getField("genericMap")));
+  assertEquals(FooEnum.BAR,result.get(1));
+  assertEquals(FooEnum.BAZ,result.get(2));
+}

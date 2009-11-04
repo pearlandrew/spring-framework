@@ -1,9 +1,10 @@
 {
+  conversionService.addGenericConverter(Map.class,Map.class,new MapToMapConverter(conversionService));
+  conversionService.addConverterFactory(new StringToNumberConverterFactory());
+  conversionService.addConverterFactory(new StringToEnumConverterFactory());
   Map<String,String> foo=new HashMap<String,String>();
   foo.put("1","BAR");
   foo.put("2","BAZ");
-  conversionService.addConverterFactory(new StringToNumberConverterFactory());
-  conversionService.addConverterFactory(new StringToEnumConverterFactory());
   Map<String,FooEnum> map=(Map<String,FooEnum>)conversionService.convert(foo,TypeDescriptor.valueOf(Map.class),new TypeDescriptor(getClass().getField("genericMap")));
   assertEquals(FooEnum.BAR,map.get(1));
   assertEquals(FooEnum.BAZ,map.get(2));
