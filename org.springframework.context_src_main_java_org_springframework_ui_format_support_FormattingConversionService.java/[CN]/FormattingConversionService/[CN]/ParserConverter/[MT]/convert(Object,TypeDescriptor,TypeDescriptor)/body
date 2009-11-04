@@ -1,0 +1,23 @@
+{
+  String submittedValue=(String)source;
+  if (submittedValue.isEmpty()) {
+    return null;
+  }
+  Object parsedValue;
+  try {
+    parsedValue=this.parser.parse(submittedValue,LocaleContextHolder.getLocale());
+  }
+ catch (  ParseException e) {
+    throw new ConversionFailedException(sourceType,targetType,source,e);
+  }
+  TypeDescriptor parsedObjectType=TypeDescriptor.valueOf(parsedValue.getClass());
+  if (!parsedObjectType.isAssignableTo(targetType)) {
+    try {
+      parsedValue=this.conversionService.convert(parsedValue,parsedObjectType,targetType);
+    }
+ catch (    ConversionFailedException e) {
+      throw new ConversionFailedException(sourceType,targetType,source,e);
+    }
+  }
+  return parsedValue;
+}
