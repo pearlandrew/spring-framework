@@ -1,10 +1,12 @@
 {
-  if (targetType.isInterface()) {
+  Class<?> targetObjectType=targetType.getObjectType();
+  if (targetObjectType.isInterface()) {
     LinkedList<Class<?>> classQueue=new LinkedList<Class<?>>();
-    classQueue.addFirst(targetType);
+    classQueue.addFirst(targetObjectType);
     while (!classQueue.isEmpty()) {
       Class<?> currentClass=classQueue.removeLast();
-      MatchableConverters converter=converters.get(currentClass);
+      MatchableConverters matchable=converters.get(currentClass);
+      GenericConverter converter=matchConverter(matchable,sourceType,targetType);
       if (converter != null) {
         return converter;
       }
@@ -13,14 +15,15 @@
         classQueue.addFirst(ifc);
       }
     }
-    return converters.get(Object.class);
+    return matchConverter(converters.get(Object.class),sourceType,targetType);
   }
  else {
     LinkedList<Class<?>> classQueue=new LinkedList<Class<?>>();
-    classQueue.addFirst(targetType);
+    classQueue.addFirst(targetObjectType);
     while (!classQueue.isEmpty()) {
       Class<?> currentClass=classQueue.removeLast();
-      MatchableConverters converter=converters.get(currentClass);
+      MatchableConverters matchable=converters.get(currentClass);
+      GenericConverter converter=matchConverter(matchable,sourceType,targetType);
       if (converter != null) {
         return converter;
       }

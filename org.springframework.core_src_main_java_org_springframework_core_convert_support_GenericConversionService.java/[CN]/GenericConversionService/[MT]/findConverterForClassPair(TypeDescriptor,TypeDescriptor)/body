@@ -1,13 +1,14 @@
 {
-  if (sourceType.isInterface()) {
+  Class<?> sourceObjectType=sourceType.getObjectType();
+  if (sourceObjectType.isInterface()) {
     LinkedList<Class<?>> classQueue=new LinkedList<Class<?>>();
-    classQueue.addFirst(sourceType);
+    classQueue.addFirst(sourceObjectType);
     while (!classQueue.isEmpty()) {
       Class<?> currentClass=classQueue.removeLast();
       Map<Class<?>,MatchableConverters> converters=getTargetConvertersForSource(currentClass);
-      MatchableConverters matchable=getMatchableConvertersForTarget(converters,targetType);
-      if (matchable != null) {
-        return matchable;
+      GenericConverter converter=getMatchingConverterForTarget(sourceType,targetType,converters);
+      if (converter != null) {
+        return converter;
       }
       Class<?>[] interfaces=currentClass.getInterfaces();
       for (      Class<?> ifc : interfaces) {
@@ -15,17 +16,17 @@
       }
     }
     Map<Class<?>,MatchableConverters> objectConverters=getTargetConvertersForSource(Object.class);
-    return getMatchableConvertersForTarget(objectConverters,targetType);
+    return getMatchingConverterForTarget(sourceType,targetType,objectConverters);
   }
  else {
     LinkedList<Class<?>> classQueue=new LinkedList<Class<?>>();
-    classQueue.addFirst(sourceType);
+    classQueue.addFirst(sourceObjectType);
     while (!classQueue.isEmpty()) {
       Class<?> currentClass=classQueue.removeLast();
       Map<Class<?>,MatchableConverters> converters=getTargetConvertersForSource(currentClass);
-      MatchableConverters matchable=getMatchableConvertersForTarget(converters,targetType);
-      if (matchable != null) {
-        return matchable;
+      GenericConverter converter=getMatchingConverterForTarget(sourceType,targetType,converters);
+      if (converter != null) {
+        return converter;
       }
       if (currentClass.isArray()) {
         Class<?> componentType=ClassUtils.resolvePrimitiveIfNecessary(currentClass.getComponentType());
