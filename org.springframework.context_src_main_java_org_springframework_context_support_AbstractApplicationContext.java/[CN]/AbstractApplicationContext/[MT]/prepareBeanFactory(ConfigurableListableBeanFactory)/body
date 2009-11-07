@@ -16,9 +16,29 @@
     beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
   }
   if (!beanFactory.containsBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
-    beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME,System.getProperties());
+    Properties systemProperties;
+    try {
+      systemProperties=System.getProperties();
+    }
+ catch (    AccessControlException ex) {
+      if (logger.isInfoEnabled()) {
+        logger.info("Not allowed to obtain system properties: " + ex.getMessage());
+      }
+      systemProperties=new Properties();
+    }
+    beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME,systemProperties);
   }
   if (!beanFactory.containsBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
-    beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME,System.getenv());
+    Map<String,String> systemEnvironment;
+    try {
+      systemEnvironment=System.getenv();
+    }
+ catch (    AccessControlException ex) {
+      if (logger.isInfoEnabled()) {
+        logger.info("Not allowed to obtain system environment: " + ex.getMessage());
+      }
+      systemEnvironment=Collections.emptyMap();
+    }
+    beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME,systemEnvironment);
   }
 }
