@@ -1,6 +1,10 @@
 {
   Set<ConstraintViolation<Object>> result=this.targetValidator.validate(target);
   for (  ConstraintViolation<Object> violation : result) {
-    errors.rejectValue(violation.getPropertyPath().toString(),violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),violation.getConstraintDescriptor().getAttributes().values().toArray(),violation.getMessage());
+    String field=violation.getPropertyPath().toString();
+    FieldError fieldError=errors.getFieldError(field);
+    if (fieldError == null || !fieldError.isBindingFailure()) {
+      errors.rejectValue(field,violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),violation.getConstraintDescriptor().getAttributes().values().toArray(),violation.getMessage());
+    }
   }
 }
