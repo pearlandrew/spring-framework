@@ -6,7 +6,13 @@
   }
   location=SystemPropertyUtils.resolvePlaceholders(location);
   Set<Resource> actualResources=new LinkedHashSet<Resource>(4);
-  if (ResourcePatternUtils.isUrl(location)) {
+  boolean absoluteLocation=false;
+  try {
+    absoluteLocation=ResourceUtils.toURI(location).isAbsolute();
+  }
+ catch (  Exception ex) {
+  }
+  if (absoluteLocation) {
     try {
       int importCount=getReaderContext().getReader().loadBeanDefinitions(location,actualResources);
       if (logger.isDebugEnabled()) {
