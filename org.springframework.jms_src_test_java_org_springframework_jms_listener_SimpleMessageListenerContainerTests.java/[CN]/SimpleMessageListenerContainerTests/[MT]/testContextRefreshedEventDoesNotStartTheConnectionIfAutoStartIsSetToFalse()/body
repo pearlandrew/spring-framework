@@ -29,7 +29,9 @@
   this.container.setMessageListener(new TestMessageListener());
   this.container.setAutoStartup(false);
   this.container.afterPropertiesSet();
-  this.container.onApplicationEvent(new ContextRefreshedEvent(new StaticApplicationContext()));
+  GenericApplicationContext context=new GenericApplicationContext();
+  context.getBeanFactory().registerSingleton("messageListenerContainer",this.container);
+  context.refresh();
   mockMessageConsumer.verify();
   mockSession.verify();
   mockConnection.verify();
