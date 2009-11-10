@@ -1,0 +1,16 @@
+{
+  Map<String,SmartLifecycle> lifecycleBeans=getSmartLifecycleBeans();
+  for (  String beanName : new LinkedHashSet<String>(lifecycleBeans.keySet())) {
+    SmartLifecycle bean=lifecycleBeans.get(beanName);
+    if (bean != null && bean.isAutoStartup()) {
+      String[] dependenciesForBean=this.beanFactory.getDependenciesForBean(beanName);
+      for (      String dependency : dependenciesForBean) {
+        doStart(lifecycleBeans,dependency);
+      }
+      if (!bean.isRunning()) {
+        bean.start();
+      }
+      lifecycleBeans.remove(beanName);
+    }
+  }
+}
