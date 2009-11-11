@@ -1,0 +1,18 @@
+{
+  HashMap<String,BeanDefinitionReader> readerInstanceCache=new HashMap<String,BeanDefinitionReader>();
+  for (  String resource : importedResources.keySet()) {
+    String readerClassName=importedResources.get(resource);
+    if (!readerInstanceCache.containsKey(readerClassName)) {
+      try {
+        @SuppressWarnings("unchecked") Class<? extends BeanDefinitionReader> readerClass=(Class<? extends BeanDefinitionReader>)ClassUtils.forName(readerClassName,ClassUtils.getDefaultClassLoader());
+        BeanDefinitionReader readerInstance=readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
+        readerInstanceCache.put(readerClassName,readerInstance);
+      }
+ catch (      Exception ex) {
+        ReflectionUtils.handleReflectionException(ex);
+      }
+    }
+    BeanDefinitionReader reader=readerInstanceCache.get(readerClassName);
+    reader.loadBeanDefinitions(importedResources.keySet().toArray(new String[]{}));
+  }
+}
