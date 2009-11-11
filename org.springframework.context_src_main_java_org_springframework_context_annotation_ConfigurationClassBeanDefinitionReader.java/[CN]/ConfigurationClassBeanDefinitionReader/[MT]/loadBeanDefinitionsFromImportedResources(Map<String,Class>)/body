@@ -1,0 +1,18 @@
+{
+  Map<Class,BeanDefinitionReader> readerInstanceCache=new HashMap<Class,BeanDefinitionReader>();
+  for (  Map.Entry<String,Class> entry : importedResources.entrySet()) {
+    String resource=entry.getKey();
+    Class readerClass=entry.getValue();
+    if (!readerInstanceCache.containsKey(readerClass)) {
+      try {
+        BeanDefinitionReader readerInstance=(BeanDefinitionReader)readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
+        readerInstanceCache.put(readerClass,readerInstance);
+      }
+ catch (      Exception ex) {
+        throw new IllegalStateException("Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
+      }
+    }
+    BeanDefinitionReader reader=readerInstanceCache.get(readerClass);
+    reader.loadBeanDefinitions(resource);
+  }
+}
