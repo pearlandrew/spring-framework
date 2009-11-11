@@ -16,15 +16,23 @@
     beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
   }
   if (!beanFactory.containsBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
-    Properties systemProperties;
+    Map systemProperties;
     try {
       systemProperties=System.getProperties();
     }
  catch (    AccessControlException ex) {
-      if (logger.isInfoEnabled()) {
-        logger.info("Not allowed to obtain system properties: " + ex.getMessage());
+      systemProperties=new ReadOnlySystemAttributesMap(){
+        @Override protected String getSystemAttribute(        String propertyName){
+          try {
+            return System.getProperty(propertyName);
+          }
+ catch (          AccessControlException ex) {
+            logger.info("Not allowed to obtain system property [" + propertyName + "]: "+ ex.getMessage());
+            return null;
+          }
+        }
       }
-      systemProperties=new Properties();
+;
     }
     beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME,systemProperties);
   }
@@ -34,10 +42,18 @@
       systemEnvironment=System.getenv();
     }
  catch (    AccessControlException ex) {
-      if (logger.isInfoEnabled()) {
-        logger.info("Not allowed to obtain system environment: " + ex.getMessage());
+      systemEnvironment=new ReadOnlySystemAttributesMap(){
+        @Override protected String getSystemAttribute(        String variableName){
+          try {
+            return System.getenv(variableName);
+          }
+ catch (          AccessControlException ex) {
+            logger.info("Not allowed to obtain system environment variable [" + variableName + "]: "+ ex.getMessage());
+            return null;
+          }
+        }
       }
-      systemEnvironment=Collections.emptyMap();
+;
     }
     beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME,systemEnvironment);
   }
