@@ -1,0 +1,29 @@
+{
+  CopyOnWriteArrayList<Lifecycle> stoppedBeans=new CopyOnWriteArrayList<Lifecycle>();
+  TestSmartLifecycleBean bean1=new TestSmartLifecycleBean(1,200,stoppedBeans);
+  TestSmartLifecycleBean bean99=new TestSmartLifecycleBean(99,100,stoppedBeans);
+  TestSmartLifecycleBean bean2=new TestSmartLifecycleBean(2,300,stoppedBeans);
+  TestSmartLifecycleBean bean7=new TestSmartLifecycleBean(7,400,stoppedBeans);
+  TestSmartLifecycleBean beanLast=new TestSmartLifecycleBean(Integer.MAX_VALUE,400,stoppedBeans);
+  StaticApplicationContext context=new StaticApplicationContext();
+  context.getBeanFactory().registerSingleton("bean1",bean1);
+  context.getBeanFactory().registerSingleton("bean2",bean2);
+  context.getBeanFactory().registerSingleton("bean7",bean7);
+  context.getBeanFactory().registerSingleton("bean99",bean99);
+  context.getBeanFactory().registerSingleton("beanLast",beanLast);
+  context.getBeanFactory().registerDependentBean("bean2","bean99");
+  context.refresh();
+  assertTrue(bean1.isRunning());
+  assertTrue(bean7.isRunning());
+  assertTrue(bean99.isRunning());
+  context.stop();
+  assertFalse(bean1.isRunning());
+  assertFalse(bean7.isRunning());
+  assertFalse(bean99.isRunning());
+  assertEquals(5,stoppedBeans.size());
+  assertEquals(1,getShutdownOrder(stoppedBeans.get(0)));
+  assertEquals(99,getShutdownOrder(stoppedBeans.get(1)));
+  assertEquals(2,getShutdownOrder(stoppedBeans.get(2)));
+  assertEquals(7,getShutdownOrder(stoppedBeans.get(3)));
+  assertEquals(Integer.MAX_VALUE,getShutdownOrder(stoppedBeans.get(4)));
+}
