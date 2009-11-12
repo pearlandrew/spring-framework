@@ -17,7 +17,7 @@
     Object policy=method.invoke(this.classLoader);
     Object addTarget=null;
     Method addMethod=null;
-    Class<?> translatorClass=classLoader.loadClass(TRANSLATOR_NAME);
+    this.translatorClass=classLoader.loadClass(TRANSLATOR_NAME);
     Class<?> clazz=classLoader.loadClass(POLICY_NAME);
     try {
       addMethod=clazz.getDeclaredMethod(ADD_TRANSLATOR_NAME,translatorClass);
@@ -33,15 +33,13 @@
       method=clazz.getDeclaredMethod(GET_SYSTEM);
       ReflectionUtils.makeAccessible(method);
       Object system=method.invoke(domain);
-      addTarget=system;
       clazz=classLoader.loadClass(DEDICATED_SYSTEM);
       Assert.isInstanceOf(clazz,system,"JBoss LoadTimeWeaver requires JBoss loader system of type " + clazz.getName() + " on JBoss 5.0.x");
       addMethod=clazz.getDeclaredMethod(SET_TRANSLATOR_NAME,translatorClass);
+      addTarget=system;
     }
     this.addTranslator=addMethod;
     this.target=addTarget;
-    clazz=classLoader.loadClass(TRANSLATOR_ADAPTER_NAME);
-    this.constructor=clazz.getDeclaredConstructor(ClassFileTransformer.class);
   }
  catch (  Exception ex) {
     throw new IllegalStateException("Could not initialize JBoss LoadTimeWeaver because the JBoss 5 API classes are not available",ex);

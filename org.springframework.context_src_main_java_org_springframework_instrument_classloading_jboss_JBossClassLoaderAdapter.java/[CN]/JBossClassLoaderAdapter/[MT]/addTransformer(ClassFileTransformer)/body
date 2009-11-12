@@ -1,13 +1,8 @@
 {
-  Object translator=null;
+  InvocationHandler adapter=new JBossTranslatorAdapter(transformer);
+  Object adapterInstance=Proxy.newProxyInstance(this.translatorClass.getClassLoader(),new Class[]{this.translatorClass},adapter);
   try {
-    translator=this.constructor.newInstance(transformer);
-  }
- catch (  Exception ex) {
-    throw new IllegalStateException("Could not instantiate a JBoss class translator",ex);
-  }
-  try {
-    addTranslator.invoke(target,translator);
+    addTranslator.invoke(target,adapterInstance);
   }
  catch (  Exception ex) {
     throw new IllegalStateException("Could not add transformer on JBoss classloader " + classLoader,ex);
