@@ -1,0 +1,36 @@
+{
+  if (sourceType.isAssignableTo(targetType)) {
+    return source;
+  }
+  Class<?> sourceClass=sourceType.getObjectType();
+  Class<?> targetClass=targetType.getObjectType();
+  Object target;
+  Method method=ClassUtils.getStaticMethod(targetClass,"valueOf",sourceClass);
+  if (method != null) {
+    target=ReflectionUtils.invokeMethod(method,null,source);
+  }
+ else {
+    Constructor<?> constructor=ClassUtils.getConstructorIfAvailable(targetClass,sourceClass);
+    if (constructor != null) {
+      try {
+        target=constructor.newInstance(source);
+      }
+ catch (      IllegalArgumentException e) {
+        throw new ConversionFailedException(sourceType,targetType,source,e);
+      }
+catch (      InstantiationException e) {
+        throw new ConversionFailedException(sourceType,targetType,source,e);
+      }
+catch (      IllegalAccessException e) {
+        throw new ConversionFailedException(sourceType,targetType,source,e);
+      }
+catch (      InvocationTargetException e) {
+        throw new ConversionFailedException(sourceType,targetType,source,e);
+      }
+    }
+ else {
+      throw new IllegalStateException("No static valueOf(" + sourceClass.getName() + ") method or Constructor("+ sourceClass.getName()+ ") exists on "+ targetClass.getName());
+    }
+  }
+  return target;
+}
