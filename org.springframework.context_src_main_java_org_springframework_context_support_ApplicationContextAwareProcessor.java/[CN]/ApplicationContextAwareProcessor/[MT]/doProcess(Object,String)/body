@@ -1,0 +1,28 @@
+{
+  if (bean instanceof ResourceLoaderAware) {
+    ((ResourceLoaderAware)bean).setResourceLoader(this.applicationContext);
+  }
+  if (bean instanceof ApplicationEventPublisherAware) {
+    ((ApplicationEventPublisherAware)bean).setApplicationEventPublisher(this.applicationContext);
+  }
+  if (bean instanceof MessageSourceAware) {
+    ((MessageSourceAware)bean).setMessageSource(this.applicationContext);
+  }
+  if (bean instanceof ApplicationContextAware) {
+    ((ApplicationContextAware)bean).setApplicationContext(this.applicationContext);
+  }
+  if (bean instanceof ApplicationListener) {
+    if (!this.applicationContext.containsBean(beanName)) {
+      Boolean flag=this.singletonNames.get(beanName);
+      if (Boolean.TRUE.equals(flag)) {
+        this.applicationContext.addApplicationListener((ApplicationListener)bean);
+      }
+ else       if (flag == null) {
+        if (logger.isWarnEnabled()) {
+          logger.warn("Inner bean '" + beanName + "' implements ApplicationListener interface "+ "but is not reachable for event multicasting by its containing ApplicationContext "+ "because it does not have singleton scope. Only top-level listener beans are allowed "+ "to be of non-singleton scope.");
+        }
+        this.singletonNames.put(beanName,Boolean.FALSE);
+      }
+    }
+  }
+}
