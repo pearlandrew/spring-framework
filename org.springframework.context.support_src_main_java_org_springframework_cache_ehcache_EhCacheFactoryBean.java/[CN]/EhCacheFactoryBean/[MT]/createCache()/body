@@ -1,3 +1,9 @@
 {
-  return new Cache(this.cacheName,this.maxElementsInMemory,this.memoryStoreEvictionPolicy,this.overflowToDisk,null,this.eternal,this.timeToLive,this.timeToIdle,this.diskPersistent,this.diskExpiryThreadIntervalSeconds,null,null,this.maxElementsOnDisk);
+  Cache cache=(!this.clearOnFlush) ? new Cache(this.cacheName,this.maxElementsInMemory,this.memoryStoreEvictionPolicy,this.overflowToDisk,null,this.eternal,this.timeToLive,this.timeToIdle,this.diskPersistent,this.diskExpiryThreadIntervalSeconds,null,this.bootstrapCacheLoader,this.maxElementsOnDisk,this.diskSpoolBufferSize,this.clearOnFlush) : new Cache(this.cacheName,this.maxElementsInMemory,this.memoryStoreEvictionPolicy,this.overflowToDisk,null,this.eternal,this.timeToLive,this.timeToIdle,this.diskPersistent,this.diskExpiryThreadIntervalSeconds,null,this.bootstrapCacheLoader,this.maxElementsOnDisk,this.diskSpoolBufferSize);
+  if (this.cacheEventListeners != null) {
+    for (    CacheEventListener listener : this.cacheEventListeners) {
+      cache.getCacheEventNotificationService().registerListener(listener);
+    }
+  }
+  return cache;
 }
