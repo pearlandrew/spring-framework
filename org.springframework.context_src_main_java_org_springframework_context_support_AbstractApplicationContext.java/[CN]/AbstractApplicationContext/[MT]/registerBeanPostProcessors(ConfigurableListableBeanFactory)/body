@@ -3,11 +3,16 @@
   int beanProcessorTargetCount=beanFactory.getBeanPostProcessorCount() + 1 + postProcessorNames.length;
   beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory,beanProcessorTargetCount));
   List<BeanPostProcessor> priorityOrderedPostProcessors=new ArrayList<BeanPostProcessor>();
+  List<BeanPostProcessor> internalPostProcessors=new ArrayList<BeanPostProcessor>();
   List<String> orderedPostProcessorNames=new ArrayList<String>();
   List<String> nonOrderedPostProcessorNames=new ArrayList<String>();
   for (  String ppName : postProcessorNames) {
     if (isTypeMatch(ppName,PriorityOrdered.class)) {
-      priorityOrderedPostProcessors.add(beanFactory.getBean(ppName,BeanPostProcessor.class));
+      BeanPostProcessor pp=beanFactory.getBean(ppName,BeanPostProcessor.class);
+      priorityOrderedPostProcessors.add(pp);
+      if (pp instanceof MergedBeanDefinitionPostProcessor) {
+        internalPostProcessors.add(pp);
+      }
     }
  else     if (isTypeMatch(ppName,Ordered.class)) {
       orderedPostProcessorNames.add(ppName);
@@ -19,14 +24,24 @@
   OrderComparator.sort(priorityOrderedPostProcessors);
   registerBeanPostProcessors(beanFactory,priorityOrderedPostProcessors);
   List<BeanPostProcessor> orderedPostProcessors=new ArrayList<BeanPostProcessor>();
-  for (  String postProcessorName : orderedPostProcessorNames) {
-    orderedPostProcessors.add(getBean(postProcessorName,BeanPostProcessor.class));
+  for (  String ppName : orderedPostProcessorNames) {
+    BeanPostProcessor pp=beanFactory.getBean(ppName,BeanPostProcessor.class);
+    orderedPostProcessors.add(pp);
+    if (pp instanceof MergedBeanDefinitionPostProcessor) {
+      internalPostProcessors.add(pp);
+    }
   }
   OrderComparator.sort(orderedPostProcessors);
   registerBeanPostProcessors(beanFactory,orderedPostProcessors);
   List<BeanPostProcessor> nonOrderedPostProcessors=new ArrayList<BeanPostProcessor>();
-  for (  String postProcessorName : nonOrderedPostProcessorNames) {
-    nonOrderedPostProcessors.add(getBean(postProcessorName,BeanPostProcessor.class));
+  for (  String ppName : nonOrderedPostProcessorNames) {
+    BeanPostProcessor pp=beanFactory.getBean(ppName,BeanPostProcessor.class);
+    nonOrderedPostProcessors.add(pp);
+    if (pp instanceof MergedBeanDefinitionPostProcessor) {
+      internalPostProcessors.add(pp);
+    }
   }
   registerBeanPostProcessors(beanFactory,nonOrderedPostProcessors);
+  OrderComparator.sort(internalPostProcessors);
+  registerBeanPostProcessors(beanFactory,internalPostProcessors);
 }
