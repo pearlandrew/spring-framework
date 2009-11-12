@@ -1,0 +1,49 @@
+{
+  Class<?> clazzLoaderType=null;
+  try {
+    clazzLoaderType=classLoader.loadClass(LOADER_NAME);
+    ClassLoader clazzLoader=null;
+    for (ClassLoader cl=classLoader; cl != null && clazzLoader == null; cl=cl.getParent()) {
+      if (clazzLoaderType.isInstance(cl)) {
+        clazzLoader=cl;
+      }
+    }
+    if (clazzLoader == null) {
+      throw new IllegalArgumentException(classLoader + " and its parents are not suitable ClassLoaders: " + "A ["+ LOADER_NAME+ "] implementation is required.");
+    }
+    this.classLoader=clazzLoader;
+    Method method=clazzLoaderType.getDeclaredMethod(GET_POLICY);
+    ReflectionUtils.makeAccessible(method);
+    Object policy=method.invoke(this.classLoader);
+    Object addTarget=null;
+    Method addMethod=null;
+    Class<?> translatorClass=classLoader.loadClass(TRANSLATOR_NAME);
+    Class<?> clazz=classLoader.loadClass(POLICY_NAME);
+    try {
+      addMethod=clazz.getDeclaredMethod(ADD_TRANSLATOR_NAME,translatorClass);
+      addTarget=policy;
+    }
+ catch (    NoSuchMethodException ex) {
+    }
+    if (addMethod == null) {
+      method=clazz.getDeclaredMethod(GET_DOMAIN);
+      ReflectionUtils.makeAccessible(method);
+      Object domain=method.invoke(policy);
+      clazz=classLoader.loadClass(DOMAIN_NAME);
+      method=clazz.getDeclaredMethod(GET_SYSTEM);
+      ReflectionUtils.makeAccessible(method);
+      Object system=method.invoke(domain);
+      addTarget=system;
+      clazz=classLoader.loadClass(DEDICATED_SYSTEM);
+      Assert.isInstanceOf(clazz,system,"JBoss LoadTimeWeaver requires JBoss loader system of type " + clazz.getName() + " on JBoss 5.0.x");
+      addMethod=clazz.getDeclaredMethod(SET_TRANSLATOR_NAME,translatorClass);
+    }
+    this.addTranslator=addMethod;
+    this.target=addTarget;
+    clazz=classLoader.loadClass(TRANSLATOR_ADAPTER_NAME);
+    this.constructor=clazz.getDeclaredConstructor(ClassFileTransformer.class);
+  }
+ catch (  Exception ex) {
+    throw new IllegalStateException("Could not initialize JBoss LoadTimeWeaver because the JBoss 5 API classes are not available",ex);
+  }
+}
