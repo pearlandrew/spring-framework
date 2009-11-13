@@ -1,17 +1,23 @@
 {
+  String encoding=pageContext.getResponse().getCharacterEncoding();
   StringBuilder qs=new StringBuilder();
   for (  Param param : params) {
-    if (!usedParams.contains(param.getName()) && param.getName() != null && !"".equals(param.getName())) {
+    if (!usedParams.contains(param.getName()) && StringUtils.hasLength(param.getName())) {
       if (includeQueryStringDelimiter && qs.length() == 0) {
         qs.append("?");
       }
  else {
         qs.append("&");
       }
-      qs.append(urlEncode(param.getName()));
-      if (param.getValue() != null) {
-        qs.append("=");
-        qs.append(urlEncode(param.getValue()));
+      try {
+        qs.append(UriUtils.encodeQueryParam(param.getName(),encoding));
+        if (param.getValue() != null) {
+          qs.append("=");
+          qs.append(UriUtils.encodeQueryParam(param.getValue(),encoding));
+        }
+      }
+ catch (      UnsupportedEncodingException ex) {
+        throw new JspException(ex);
       }
     }
   }

@@ -1,9 +1,15 @@
 {
+  String encoding=pageContext.getResponse().getCharacterEncoding();
   for (  Param param : params) {
     String template=URL_TEMPLATE_DELIMITER_PREFIX + param.getName() + URL_TEMPLATE_DELIMITER_SUFFIX;
     if (uri.contains(template)) {
       usedParams.add(param.getName());
-      uri=uri.replace(template,urlEncode(param.getValue()));
+      try {
+        uri=uri.replace(template,UriUtils.encodePath(param.getValue(),encoding));
+      }
+ catch (      UnsupportedEncodingException ex) {
+        throw new JspException(ex);
+      }
     }
   }
   return uri;
