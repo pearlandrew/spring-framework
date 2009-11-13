@@ -1,17 +1,7 @@
 {
   GenericApplicationContext ac=new GenericApplicationContext();
   AnnotatedBeanDefinitionReader bdr=new AnnotatedBeanDefinitionReader(ac);
-  bdr.setScopeMetadataResolver(new ScopeMetadataResolver(){
-    public ScopeMetadata resolveScopeMetadata(    BeanDefinition definition){
-      ScopeMetadata metadata=new ScopeMetadata();
-      if (definition instanceof AnnotatedBeanDefinition) {
-        AnnotatedBeanDefinition annDef=(AnnotatedBeanDefinition)definition;
-        metadata.setScopeName(annDef.getMetadata().hasAnnotation(javax.inject.Singleton.class.getName()) ? BeanDefinition.SCOPE_SINGLETON : BeanDefinition.SCOPE_PROTOTYPE);
-      }
-      return metadata;
-    }
-  }
-);
+  bdr.setScopeMetadataResolver(new Jsr330ScopeMetadataResolver());
   bdr.registerBean(Convertible.class);
   bdr.registerBean(DriversSeat.class,Drivers.class);
   bdr.registerBean(Seat.class,Primary.class);
