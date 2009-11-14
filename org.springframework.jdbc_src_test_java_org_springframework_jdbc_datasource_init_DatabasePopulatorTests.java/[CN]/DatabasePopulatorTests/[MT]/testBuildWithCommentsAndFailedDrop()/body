@@ -1,0 +1,12 @@
+{
+  EmbeddedDatabaseBuilder builder=new EmbeddedDatabaseBuilder();
+  EmbeddedDatabase db=builder.build();
+  ResourceDatabasePopulator databasePopulator=new ResourceDatabasePopulator();
+  ClassRelativeResourceLoader resourceLoader=new ClassRelativeResourceLoader(getClass());
+  databasePopulator.addScript(resourceLoader.getResource("db-schema-failed-drop-comments.sql"));
+  databasePopulator.addScript(resourceLoader.getResource("db-test-data.sql"));
+  databasePopulator.setIgnoreFailedDrops(true);
+  databasePopulator.populate(db.getConnection());
+  assertDatabaseCreated(db);
+  db.shutdown();
+}
