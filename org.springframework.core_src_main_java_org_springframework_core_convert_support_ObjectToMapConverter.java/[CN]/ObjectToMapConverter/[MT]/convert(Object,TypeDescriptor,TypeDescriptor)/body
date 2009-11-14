@@ -4,19 +4,18 @@
   }
   if (sourceType.typeEquals(String.class)) {
     String string=(String)source;
-    String[] properties=string.split(" ");
-    return this.helperConverter.convert(properties,TypeDescriptor.valueOf(String[].class),targetType);
+    return this.conversionService.convert(loadProperties(string),TypeDescriptor.valueOf(Properties.class),targetType);
   }
  else {
     Map target=CollectionFactory.createMap(targetType.getType(),1);
     TypeDescriptor targetKeyType=targetType.getMapKeyTypeDescriptor();
     TypeDescriptor targetValueType=targetType.getMapValueTypeDescriptor();
     boolean keysCompatible=false;
-    if (targetKeyType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetKeyType)) {
+    if (sourceType != TypeDescriptor.NULL && sourceType.isAssignableTo(targetKeyType)) {
       keysCompatible=true;
     }
     boolean valuesCompatible=false;
-    if (targetValueType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetValueType)) {
+    if (sourceType != TypeDescriptor.NULL && sourceType.isAssignableTo(targetValueType)) {
       valuesCompatible=true;
     }
     if (keysCompatible && valuesCompatible) {
