@@ -1,8 +1,13 @@
 {
-  ResourceDatabasePopulator populator=new ResourceDatabasePopulator();
+  BeanDefinitionBuilder builder=BeanDefinitionBuilder.genericBeanDefinition(ResourceDatabasePopulator.class);
+  List<String> locations=new ArrayList<String>();
   for (  Element scriptElement : scripts) {
-    Resource script=context.getReaderContext().getResourceLoader().getResource(scriptElement.getAttribute("location"));
-    populator.addScript(script);
+    String location=scriptElement.getAttribute("location");
+    locations.add(location);
   }
-  return populator;
+  BeanDefinitionBuilder resourcesFactory=BeanDefinitionBuilder.genericBeanDefinition(SortedResourcesFactoryBean.class);
+  resourcesFactory.addConstructorArgValue(context.getReaderContext().getResourceLoader());
+  resourcesFactory.addConstructorArgValue(locations);
+  builder.addPropertyValue("scripts",resourcesFactory.getBeanDefinition());
+  return builder.getBeanDefinition();
 }
