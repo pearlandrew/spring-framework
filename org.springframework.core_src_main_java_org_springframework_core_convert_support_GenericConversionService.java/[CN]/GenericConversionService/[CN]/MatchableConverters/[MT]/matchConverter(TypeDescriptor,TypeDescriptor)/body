@@ -1,16 +1,21 @@
 {
-  for (  MatchableConverter matchable : this.matchableConverters) {
-    if (matchable.matches(sourceType,targetType)) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("Converter Lookup [MATCHED] " + matchable);
+  if (this.conditionalConverters != null) {
+    for (    ConditionalGenericConverter conditional : this.conditionalConverters) {
+      if (conditional.matches(sourceType,targetType)) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Converter Lookup [MATCHED] " + conditional);
+        }
+        return conditional;
       }
-      return matchable.getConverter();
-    }
  else {
-      if (logger.isDebugEnabled()) {
-        logger.debug("Converter Lookup [DID NOT MATCH] " + matchable);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Converter Lookup [DID NOT MATCH] " + conditional);
+        }
       }
     }
   }
-  return null;
+  if (logger.isDebugEnabled()) {
+    logger.debug("Converter Lookup [MATCHED] " + this.defaultConverter);
+  }
+  return this.defaultConverter;
 }
