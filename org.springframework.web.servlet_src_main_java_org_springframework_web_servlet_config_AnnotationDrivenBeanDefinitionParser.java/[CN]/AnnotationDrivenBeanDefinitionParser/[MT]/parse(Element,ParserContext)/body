@@ -1,11 +1,21 @@
 {
   Object source=parserContext.extractSource(element);
-  BeanDefinitionHolder handlerMappingHolder=registerDefaultAnnotationHandlerMapping(element,source,parserContext);
-  BeanDefinitionHolder handlerAdapterHolder=registerAnnotationMethodHandlerAdapter(element,source,parserContext);
+  RootBeanDefinition mappingDef=new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
+  mappingDef.setSource(source);
+  mappingDef.getPropertyValues().add("order",0);
+  String mappingName=parserContext.getReaderContext().registerWithGeneratedName(mappingDef);
+  RootBeanDefinition bindingDef=new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
+  bindingDef.setSource(source);
+  bindingDef.getPropertyValues().add("conversionService",getConversionService(element,source,parserContext));
+  bindingDef.getPropertyValues().add("validator",getValidator(element,source,parserContext));
+  RootBeanDefinition adapterDef=new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+  adapterDef.setSource(source);
+  adapterDef.getPropertyValues().add("webBindingInitializer",bindingDef);
+  String adapterName=parserContext.getReaderContext().registerWithGeneratedName(adapterDef);
   CompositeComponentDefinition compDefinition=new CompositeComponentDefinition(element.getTagName(),source);
   parserContext.pushContainingComponent(compDefinition);
-  parserContext.registerComponent(new BeanComponentDefinition(handlerMappingHolder));
-  parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterHolder));
+  parserContext.registerComponent(new BeanComponentDefinition(mappingDef,mappingName));
+  parserContext.registerComponent(new BeanComponentDefinition(adapterDef,adapterName));
   parserContext.popAndRegisterContainingComponent();
   return null;
 }

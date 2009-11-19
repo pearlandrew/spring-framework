@@ -1,12 +1,16 @@
 {
   XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(container);
   reader.loadBeanDefinitions(new ClassPathResource("mvc-config.xml",getClass()));
-  assertEquals(2,container.getBeanDefinitionCount());
+  assertEquals(4,container.getBeanDefinitionCount());
   DefaultAnnotationHandlerMapping mapping=container.getBean(DefaultAnnotationHandlerMapping.class);
   assertNotNull(mapping);
   assertEquals(0,mapping.getOrder());
   AnnotationMethodHandlerAdapter adapter=container.getBean(AnnotationMethodHandlerAdapter.class);
   assertNotNull(adapter);
+  assertNotNull(container.getBean(FormattingConversionServiceFactoryBean.class));
+  assertNotNull(container.getBean(ConversionService.class));
+  assertNotNull(container.getBean(LocalValidatorFactoryBean.class));
+  assertNotNull(container.getBean(Validator.class));
   TestController handler=new TestController();
   MockHttpServletRequest request=new MockHttpServletRequest();
   request.addParameter("date","2009-10-31");
