@@ -1,0 +1,14 @@
+{
+  Assert.notNull(transformer,"ClassFileTransformer must not be null");
+  try {
+    OC4JClassPreProcessorAdapter adapter=new OC4JClassPreProcessorAdapter(transformer);
+    Object adapterInstance=Proxy.newProxyInstance(this.processorClass.getClassLoader(),new Class[]{this.processorClass},adapter);
+    this.addTransformer.invoke(null,new Object[]{this.classLoader,adapterInstance});
+  }
+ catch (  InvocationTargetException ex) {
+    throw new IllegalStateException("OC4J addPreprocessor method threw exception",ex.getCause());
+  }
+catch (  Exception ex) {
+    throw new IllegalStateException("Could not invoke OC4J addPreprocessor method",ex);
+  }
+}
