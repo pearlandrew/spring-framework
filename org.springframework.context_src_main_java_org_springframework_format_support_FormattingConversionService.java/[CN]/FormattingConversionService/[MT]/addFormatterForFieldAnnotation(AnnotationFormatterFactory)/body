@@ -5,26 +5,32 @@
   }
   Set<Class<?>> fieldTypes=annotationFormatterFactory.getFieldTypes();
   for (  final Class<?> fieldType : fieldTypes) {
-    this.conversionService.addGenericConverter(fieldType,String.class,new ConditionalGenericConverter(){
+    getConverterRegistry().addGenericConverter(new ConditionalGenericConverter(){
+      public Class<?>[][] getConvertibleTypes(){
+        return new Class<?>[][]{{fieldType,String.class}};
+      }
       public boolean matches(      TypeDescriptor sourceFieldType,      TypeDescriptor targetFieldType){
         return sourceFieldType.getAnnotation(annotationType) != null;
       }
       public Object convert(      Object source,      TypeDescriptor sourceType,      TypeDescriptor targetType){
         Printer<?> printer=annotationFormatterFactory.getPrinter(sourceType.getAnnotation(annotationType),sourceType.getType());
-        return new PrinterConverter(printer,conversionService).convert(source,sourceType,targetType);
+        return new PrinterConverter(fieldType,printer,conversionService).convert(source,sourceType,targetType);
       }
       public String toString(){
         return "@" + annotationType.getName() + " "+ fieldType.getName()+ " -> "+ String.class.getName();
       }
     }
 );
-    this.conversionService.addGenericConverter(String.class,fieldType,new ConditionalGenericConverter(){
+    getConverterRegistry().addGenericConverter(new ConditionalGenericConverter(){
+      public Class<?>[][] getConvertibleTypes(){
+        return new Class<?>[][]{{String.class,fieldType}};
+      }
       public boolean matches(      TypeDescriptor sourceFieldType,      TypeDescriptor targetFieldType){
         return targetFieldType.getAnnotation(annotationType) != null;
       }
       public Object convert(      Object source,      TypeDescriptor sourceType,      TypeDescriptor targetType){
         Parser<?> parser=annotationFormatterFactory.getParser(targetType.getAnnotation(annotationType),targetType.getType());
-        return new ParserConverter(parser,conversionService).convert(source,sourceType,targetType);
+        return new ParserConverter(fieldType,parser,conversionService).convert(source,sourceType,targetType);
       }
       public String toString(){
         return String.class.getName() + " -> @" + annotationType.getName()+ " "+ fieldType.getName();
