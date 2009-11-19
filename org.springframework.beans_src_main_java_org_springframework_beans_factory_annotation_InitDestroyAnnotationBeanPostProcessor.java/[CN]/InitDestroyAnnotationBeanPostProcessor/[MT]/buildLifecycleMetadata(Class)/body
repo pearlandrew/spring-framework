@@ -1,26 +1,34 @@
 {
-  final LifecycleMetadata newMetadata=new LifecycleMetadata();
   final boolean debug=logger.isDebugEnabled();
-  ReflectionUtils.doWithMethods(clazz,new ReflectionUtils.MethodCallback(){
-    public void doWith(    Method method){
-      if (initAnnotationType != null) {
-        if (method.getAnnotation(initAnnotationType) != null) {
-          newMetadata.addInitMethod(method);
+  LinkedList<LifecycleElement> initMethods=new LinkedList<LifecycleElement>();
+  LinkedList<LifecycleElement> destroyMethods=new LinkedList<LifecycleElement>();
+  Class<?> targetClass=clazz;
+  do {
+    LinkedList<LifecycleElement> currInitMethods=new LinkedList<LifecycleElement>();
+    LinkedList<LifecycleElement> currDestroyMethods=new LinkedList<LifecycleElement>();
+    for (    Method method : targetClass.getDeclaredMethods()) {
+      if (this.initAnnotationType != null) {
+        if (method.getAnnotation(this.initAnnotationType) != null) {
+          LifecycleElement element=new LifecycleElement(method);
+          currInitMethods.add(element);
           if (debug) {
             logger.debug("Found init method on class [" + clazz.getName() + "]: "+ method);
           }
         }
       }
-      if (destroyAnnotationType != null) {
-        if (method.getAnnotation(destroyAnnotationType) != null) {
-          newMetadata.addDestroyMethod(method);
+      if (this.destroyAnnotationType != null) {
+        if (method.getAnnotation(this.destroyAnnotationType) != null) {
+          currDestroyMethods.add(new LifecycleElement(method));
           if (debug) {
             logger.debug("Found destroy method on class [" + clazz.getName() + "]: "+ method);
           }
         }
       }
     }
+    initMethods.addAll(0,currInitMethods);
+    destroyMethods.addAll(currDestroyMethods);
+    targetClass=targetClass.getSuperclass();
   }
-);
-  return newMetadata;
+ while (targetClass != null && targetClass != Object.class);
+  return new LifecycleMetadata(clazz,initMethods,destroyMethods);
 }
