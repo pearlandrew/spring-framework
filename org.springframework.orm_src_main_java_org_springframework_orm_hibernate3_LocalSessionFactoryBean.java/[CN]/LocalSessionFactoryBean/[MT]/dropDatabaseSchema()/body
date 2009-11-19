@@ -1,12 +1,16 @@
 {
   logger.info("Dropping database schema for Hibernate SessionFactory");
   HibernateTemplate hibernateTemplate=new HibernateTemplate(getSessionFactory());
-  hibernateTemplate.execute(new HibernateCallback(){
+  hibernateTemplate.execute(new HibernateCallback<Object>(){
     public Object doInHibernate(    Session session) throws HibernateException, SQLException {
-      Connection con=session.connection();
-      Dialect dialect=Dialect.getDialect(getConfiguration().getProperties());
-      String[] sql=getConfiguration().generateDropSchemaScript(dialect);
-      executeSchemaScript(con,sql);
+      session.doWork(new Work(){
+        public void execute(        Connection connection) throws SQLException {
+          Dialect dialect=Dialect.getDialect(getConfiguration().getProperties());
+          String[] sql=getConfiguration().generateDropSchemaScript(dialect);
+          executeSchemaScript(connection,sql);
+        }
+      }
+);
       return null;
     }
   }

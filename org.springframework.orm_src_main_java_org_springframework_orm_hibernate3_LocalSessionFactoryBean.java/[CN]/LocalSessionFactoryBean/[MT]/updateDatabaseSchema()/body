@@ -2,13 +2,17 @@
   logger.info("Updating database schema for Hibernate SessionFactory");
   HibernateTemplate hibernateTemplate=new HibernateTemplate(getSessionFactory());
   hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
-  hibernateTemplate.execute(new HibernateCallback(){
+  hibernateTemplate.execute(new HibernateCallback<Object>(){
     public Object doInHibernate(    Session session) throws HibernateException, SQLException {
-      Connection con=session.connection();
-      Dialect dialect=Dialect.getDialect(getConfiguration().getProperties());
-      DatabaseMetadata metadata=new DatabaseMetadata(con,dialect);
-      String[] sql=getConfiguration().generateSchemaUpdateScript(dialect,metadata);
-      executeSchemaScript(con,sql);
+      session.doWork(new Work(){
+        public void execute(        Connection connection) throws SQLException {
+          Dialect dialect=Dialect.getDialect(getConfiguration().getProperties());
+          DatabaseMetadata metadata=new DatabaseMetadata(connection,dialect);
+          String[] sql=getConfiguration().generateSchemaUpdateScript(dialect,metadata);
+          executeSchemaScript(connection,sql);
+        }
+      }
+);
       return null;
     }
   }

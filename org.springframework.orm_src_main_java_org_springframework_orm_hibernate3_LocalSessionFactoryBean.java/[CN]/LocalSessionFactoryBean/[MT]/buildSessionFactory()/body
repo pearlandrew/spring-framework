@@ -7,6 +7,9 @@
   if (this.jtaTransactionManager != null) {
     configTimeTransactionManagerHolder.set(this.jtaTransactionManager);
   }
+  if (this.cacheRegionFactory != null) {
+    configTimeRegionFactoryHolder.set(this.cacheRegionFactory);
+  }
   if (this.cacheProvider != null) {
     configTimeCacheProviderHolder.set(this.cacheProvider);
   }
@@ -67,7 +70,10 @@
       }
       config.setProperty(Environment.CONNECTION_PROVIDER,providerClass.getName());
     }
-    if (this.cacheProvider != null) {
+    if (this.cacheRegionFactory != null) {
+      config.setProperty(Environment.CACHE_REGION_FACTORY,LocalRegionFactoryProxy.class.getName());
+    }
+ else     if (this.cacheProvider != null) {
       config.setProperty(Environment.CACHE_PROVIDER,LocalCacheProviderProxy.class.getName());
     }
     if (this.mappingResources != null) {
@@ -153,6 +159,9 @@
     }
     if (this.jtaTransactionManager != null) {
       configTimeTransactionManagerHolder.set(null);
+    }
+    if (this.cacheRegionFactory != null) {
+      configTimeCacheProviderHolder.set(null);
     }
     if (this.cacheProvider != null) {
       configTimeCacheProviderHolder.set(null);
