@@ -6,7 +6,7 @@
     parserContext.getReaderContext().error("Listener 'ref' attribute contains empty value.",listenerEle);
   }
  else {
-    listenerDef.getPropertyValues().addPropertyValue("delegate",new RuntimeBeanReference(ref));
+    listenerDef.getPropertyValues().add("delegate",new RuntimeBeanReference(ref));
   }
   String method=null;
   if (listenerEle.hasAttribute(METHOD_ATTRIBUTE)) {
@@ -15,28 +15,28 @@
       parserContext.getReaderContext().error("Listener 'method' attribute contains empty value.",listenerEle);
     }
   }
-  listenerDef.getPropertyValues().addPropertyValue("defaultListenerMethod",method);
+  listenerDef.getPropertyValues().add("defaultListenerMethod",method);
   if (containerEle.hasAttribute(MESSAGE_CONVERTER_ATTRIBUTE)) {
     String messageConverter=containerEle.getAttribute(MESSAGE_CONVERTER_ATTRIBUTE);
     if (!StringUtils.hasText(messageConverter)) {
       parserContext.getReaderContext().error("Listener container 'message-converter' attribute contains empty value.",containerEle);
     }
  else {
-      listenerDef.getPropertyValues().addPropertyValue("messageConverter",new RuntimeBeanReference(messageConverter));
+      listenerDef.getPropertyValues().add("messageConverter",new RuntimeBeanReference(messageConverter));
     }
   }
   BeanDefinition containerDef=parseContainer(listenerEle,containerEle,parserContext);
   if (listenerEle.hasAttribute(RESPONSE_DESTINATION_ATTRIBUTE)) {
     String responseDestination=listenerEle.getAttribute(RESPONSE_DESTINATION_ATTRIBUTE);
     boolean pubSubDomain=indicatesPubSub(containerDef);
-    listenerDef.getPropertyValues().addPropertyValue(pubSubDomain ? "defaultResponseTopicName" : "defaultResponseQueueName",responseDestination);
+    listenerDef.getPropertyValues().add(pubSubDomain ? "defaultResponseTopicName" : "defaultResponseQueueName",responseDestination);
     if (containerDef.getPropertyValues().contains("destinationResolver")) {
-      listenerDef.getPropertyValues().addPropertyValue("destinationResolver",containerDef.getPropertyValues().getPropertyValue("destinationResolver").getValue());
+      listenerDef.getPropertyValues().add("destinationResolver",containerDef.getPropertyValues().getPropertyValue("destinationResolver").getValue());
     }
   }
   boolean jms102=indicatesJms102(containerDef);
   listenerDef.setBeanClassName("org.springframework.jms.listener.adapter.MessageListenerAdapter" + (jms102 ? "102" : ""));
-  containerDef.getPropertyValues().addPropertyValue("messageListener",listenerDef);
+  containerDef.getPropertyValues().add("messageListener",listenerDef);
   String containerBeanName=listenerEle.getAttribute(ID_ATTRIBUTE);
   if (!StringUtils.hasText(containerBeanName)) {
     containerBeanName=parserContext.getReaderContext().generateBeanName(containerDef);
