@@ -1,5 +1,8 @@
 {
   logger.debug("Returning Oracle BLOB as binary stream");
   Blob blob=rs.getBlob(columnIndex);
-  return (blob != null ? blob.getBinaryStream() : null);
+  initializeResourcesBeforeRead(rs.getStatement().getConnection(),blob);
+  InputStream retVal=(blob != null ? blob.getBinaryStream() : null);
+  releaseResourcesAfterRead(rs.getStatement().getConnection(),blob);
+  return retVal;
 }

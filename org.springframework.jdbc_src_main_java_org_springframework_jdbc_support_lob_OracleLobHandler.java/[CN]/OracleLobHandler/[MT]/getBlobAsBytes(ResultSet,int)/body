@@ -1,5 +1,8 @@
 {
   logger.debug("Returning Oracle BLOB as bytes");
   Blob blob=rs.getBlob(columnIndex);
-  return (blob != null ? blob.getBytes(1,(int)blob.length()) : null);
+  initializeResourcesBeforeRead(rs.getStatement().getConnection(),blob);
+  byte[] retVal=(blob != null ? blob.getBytes(1,(int)blob.length()) : null);
+  releaseResourcesAfterRead(rs.getStatement().getConnection(),blob);
+  return retVal;
 }
