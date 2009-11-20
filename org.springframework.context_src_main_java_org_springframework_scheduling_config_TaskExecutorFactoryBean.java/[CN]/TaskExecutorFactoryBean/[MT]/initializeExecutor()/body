@@ -1,0 +1,19 @@
+{
+synchronized (this.initializationMonitor) {
+    if (this.target != null) {
+      return;
+    }
+    String executorClassName=(shouldUseBackport(this.poolSize)) ? "org.springframework.scheduling.backportconcurrent.ThreadPoolTaskExecutor" : "org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor";
+    Class<?> executorClass=getClass().getClassLoader().loadClass(executorClassName);
+    this.beanWrapper=new BeanWrapperImpl(executorClass);
+    this.setValueIfNotNull("queueCapacity",this.queueCapacity);
+    this.setValueIfNotNull("keepAliveSeconds",this.keepAliveSeconds);
+    this.setValueIfNotNull("rejectedExecutionHandler",this.rejectedExecutionHandler);
+    Integer[] range=this.determinePoolSizeRange();
+    if (range != null) {
+      this.setValueIfNotNull("corePoolSize",range[0]);
+      this.setValueIfNotNull("maxPoolSize",range[1]);
+    }
+    this.target=(TaskExecutor)this.beanWrapper.getWrappedInstance();
+  }
+}
