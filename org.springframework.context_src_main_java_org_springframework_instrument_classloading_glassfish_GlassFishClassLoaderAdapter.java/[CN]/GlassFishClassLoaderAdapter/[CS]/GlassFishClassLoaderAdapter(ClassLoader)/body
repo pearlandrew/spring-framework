@@ -1,0 +1,35 @@
+{
+  Class<?> instrumentableLoaderClass=null;
+  boolean glassV3=false;
+  try {
+    instrumentableLoaderClass=classLoader.loadClass(INSTRUMENTABLE_CLASSLOADER_GLASSFISH_V2);
+  }
+ catch (  ClassNotFoundException ex) {
+    try {
+      instrumentableLoaderClass=classLoader.loadClass(INSTRUMENTABLE_CLASSLOADER_GLASSFISH_V3);
+      glassV3=true;
+    }
+ catch (    ClassNotFoundException cnfe) {
+      throw new IllegalStateException("Could not initialize GlassFish LoadTimeWeaver because GlassFish (V1, V2 or V3) API classes are not available",ex);
+    }
+  }
+  try {
+    Class<?> classTransformerClass=(glassV3 ? ClassFileTransformer.class : classLoader.loadClass(CLASS_TRANSFORMER));
+    addTransformer=instrumentableLoaderClass.getMethod("addTransformer",classTransformerClass);
+    copy=instrumentableLoaderClass.getMethod("copy");
+  }
+ catch (  Exception ex) {
+    throw new IllegalStateException("Could not initialize GlassFish LoadTimeWeaver because GlassFish API classes are not available",ex);
+  }
+  ClassLoader clazzLoader=null;
+  for (ClassLoader cl=classLoader; cl != null && clazzLoader == null; cl=cl.getParent()) {
+    if (instrumentableLoaderClass.isInstance(cl)) {
+      clazzLoader=cl;
+    }
+  }
+  if (clazzLoader == null) {
+    throw new IllegalArgumentException(classLoader + " and its parents are not suitable ClassLoaders: " + "A ["+ instrumentableLoaderClass.getName()+ "] implementation is required.");
+  }
+  this.classLoader=clazzLoader;
+  this.glassFishV3=glassV3;
+}
