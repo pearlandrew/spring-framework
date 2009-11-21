@@ -4,8 +4,12 @@
   assertEquals(4,container.getBeanDefinitionCount());
   DefaultAnnotationHandlerMapping mapping=container.getBean(DefaultAnnotationHandlerMapping.class);
   assertNotNull(mapping);
-  assertEquals(0,mapping.getOrder());
-  AnnotationMethodHandlerAdapter adapter=container.getBean(AnnotationMethodHandlerAdapter.class);
-  assertNotNull(adapter);
-  assertNotNull(container.getBean(FormattingConversionServiceFactoryBean.class));
+  mapping.setRootHandler(new TestController());
+  MockHttpServletRequest request=new MockHttpServletRequest();
+  request.addParameter("locale","en");
+  request.addParameter("theme","green");
+  HandlerExecutionChain chain=mapping.getHandler(request);
+  assertEquals(2,chain.getInterceptors().length);
+  assertTrue(chain.getInterceptors()[0] instanceof LocaleChangeInterceptor);
+  assertTrue(chain.getInterceptors()[1] instanceof ThemeChangeInterceptor);
 }
