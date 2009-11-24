@@ -1,21 +1,21 @@
 {
   Map<String,Lifecycle> lifecycleBeans=getLifecycleBeans();
-  Map<Integer,ShutdownGroup> shutdownGroups=new HashMap<Integer,ShutdownGroup>();
+  Map<Integer,LifecycleGroup> phases=new HashMap<Integer,LifecycleGroup>();
   for (  Map.Entry<String,Lifecycle> entry : lifecycleBeans.entrySet()) {
     Lifecycle lifecycle=entry.getValue();
-    int shutdownOrder=getShutdownOrder(lifecycle);
-    ShutdownGroup group=shutdownGroups.get(shutdownOrder);
+    int shutdownOrder=getPhase(lifecycle);
+    LifecycleGroup group=phases.get(shutdownOrder);
     if (group == null) {
-      group=new ShutdownGroup(shutdownOrder,this.shutdownGroupTimeout,lifecycleBeans);
-      shutdownGroups.put(shutdownOrder,group);
+      group=new LifecycleGroup(shutdownOrder,this.timeoutPerShutdownPhase,lifecycleBeans);
+      phases.put(shutdownOrder,group);
     }
     group.add(entry.getKey(),lifecycle);
   }
-  if (shutdownGroups.size() > 0) {
-    List<Integer> keys=new ArrayList<Integer>(shutdownGroups.keySet());
-    Collections.sort(keys);
+  if (phases.size() > 0) {
+    List<Integer> keys=new ArrayList<Integer>(phases.keySet());
+    Collections.sort(keys,Collections.reverseOrder());
     for (    Integer key : keys) {
-      shutdownGroups.get(key).shutdown();
+      phases.get(key).stop();
     }
   }
   this.running=false;
