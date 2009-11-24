@@ -8,11 +8,19 @@
     validateHandler(handler,request);
     return buildPathExposingHandler(handler,urlPath,null);
   }
-  String bestPathMatch=null;
+  List<String> matchingPaths=new ArrayList<String>();
   for (  String registeredPath : this.handlerMap.keySet()) {
-    if (getPathMatcher().match(registeredPath,urlPath) && (bestPathMatch == null || bestPathMatch.length() < registeredPath.length())) {
-      bestPathMatch=registeredPath;
+    if (getPathMatcher().match(registeredPath,urlPath)) {
+      matchingPaths.add(registeredPath);
     }
+  }
+  String bestPathMatch=null;
+  if (!matchingPaths.isEmpty()) {
+    Collections.sort(matchingPaths,getPathMatcher().getPatternComparator(urlPath));
+    if (logger.isDebugEnabled()) {
+      logger.debug("Matching path for request [" + urlPath + "] are "+ matchingPaths);
+    }
+    bestPathMatch=matchingPaths.get(0);
   }
   if (bestPathMatch != null) {
     handler=this.handlerMap.get(bestPathMatch);
