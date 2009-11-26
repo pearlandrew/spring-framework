@@ -1,0 +1,30 @@
+{
+  XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(container);
+  reader.loadBeanDefinitions(new ClassPathResource("mvc-config-view-controllers.xml",getClass()));
+  assertEquals(8,container.getBeanDefinitionCount());
+  container.refresh();
+  DefaultAnnotationHandlerMapping mapping=container.getBean(DefaultAnnotationHandlerMapping.class);
+  assertNotNull(mapping);
+  mapping.setDefaultHandler(new TestController());
+  MockHttpServletRequest request=new MockHttpServletRequest();
+  HandlerExecutionChain chain=mapping.getHandler(request);
+  assertEquals(3,chain.getInterceptors().length);
+  assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
+  SimpleUrlHandlerMapping mapping2=container.getBean(SimpleUrlHandlerMapping.class);
+  assertNotNull(mapping2);
+  SimpleControllerHandlerAdapter adapter=container.getBean(SimpleControllerHandlerAdapter.class);
+  assertNotNull(adapter);
+  request.setRequestURI("/foo");
+  request.setMethod("GET");
+  chain=mapping2.getHandler(request);
+  assertEquals(3,chain.getInterceptors().length);
+  assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
+  ModelAndView mv=adapter.handle(request,new MockHttpServletResponse(),chain.getHandler());
+  assertNull(mv.getViewName());
+  request.setRequestURI("/bar");
+  chain=mapping2.getHandler(request);
+  assertEquals(3,chain.getInterceptors().length);
+  assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
+  ModelAndView mv2=adapter.handle(request,new MockHttpServletResponse(),chain.getHandler());
+  assertEquals("baz",mv2.getViewName());
+}

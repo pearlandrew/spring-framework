@@ -1,30 +1,21 @@
 {
   Object source=parserContext.extractSource(element);
-  RootBeanDefinition mappingDef=new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
-  mappingDef.setSource(source);
-  mappingDef.getPropertyValues().add("order",0);
-  String mappingName=parserContext.getReaderContext().registerWithGeneratedName(mappingDef);
-  Element interceptors=DomUtils.getChildElementByTagName(element,"interceptors");
-  if (interceptors != null) {
-    List<Element> beans=DomUtils.getChildElementsByTagName(interceptors,"bean");
-    List<BeanDefinition> interceptorBeans=new ManagedList<BeanDefinition>(beans.size());
-    for (    Element bean : beans) {
-      interceptorBeans.add(parserContext.getDelegate().parseBeanDefinitionElement(bean).getBeanDefinition());
-    }
-    mappingDef.getPropertyValues().add("interceptors",interceptorBeans);
-  }
+  RootBeanDefinition annMappingDef=new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
+  annMappingDef.setSource(source);
+  annMappingDef.getPropertyValues().add("order",0);
+  String annMappingName=parserContext.getReaderContext().registerWithGeneratedName(annMappingDef);
   RootBeanDefinition bindingDef=new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
   bindingDef.setSource(source);
   bindingDef.getPropertyValues().add("conversionService",getConversionService(element,source,parserContext));
   bindingDef.getPropertyValues().add("validator",getValidator(element,source,parserContext));
-  RootBeanDefinition adapterDef=new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-  adapterDef.setSource(source);
-  adapterDef.getPropertyValues().add("webBindingInitializer",bindingDef);
-  String adapterName=parserContext.getReaderContext().registerWithGeneratedName(adapterDef);
+  RootBeanDefinition annAdapterDef=new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+  annAdapterDef.setSource(source);
+  annAdapterDef.getPropertyValues().add("webBindingInitializer",bindingDef);
+  String adapterName=parserContext.getReaderContext().registerWithGeneratedName(annAdapterDef);
   CompositeComponentDefinition compDefinition=new CompositeComponentDefinition(element.getTagName(),source);
   parserContext.pushContainingComponent(compDefinition);
-  parserContext.registerComponent(new BeanComponentDefinition(mappingDef,mappingName));
-  parserContext.registerComponent(new BeanComponentDefinition(adapterDef,adapterName));
+  parserContext.registerComponent(new BeanComponentDefinition(annMappingDef,annMappingName));
+  parserContext.registerComponent(new BeanComponentDefinition(annAdapterDef,adapterName));
   parserContext.popAndRegisterContainingComponent();
   return null;
 }

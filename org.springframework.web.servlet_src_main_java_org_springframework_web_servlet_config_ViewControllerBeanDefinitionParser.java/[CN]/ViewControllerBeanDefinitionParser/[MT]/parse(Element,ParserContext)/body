@@ -1,0 +1,33 @@
+{
+  Object source=parserContext.extractSource(element);
+  if (this.handlerAdapterBeanName == null) {
+    RootBeanDefinition handlerAdapterDef=new RootBeanDefinition(SimpleControllerHandlerAdapter.class);
+    handlerAdapterDef.setSource(source);
+    this.handlerAdapterBeanName=parserContext.getReaderContext().registerWithGeneratedName(handlerAdapterDef);
+  }
+  RootBeanDefinition handlerMappingDef;
+  if (this.handlerMappingBeanName == null) {
+    handlerMappingDef=new RootBeanDefinition(SimpleUrlHandlerMapping.class);
+    handlerMappingDef.setSource(source);
+    handlerMappingDef.getPropertyValues().add("order","1");
+    this.handlerMappingBeanName=parserContext.getReaderContext().registerWithGeneratedName(handlerMappingDef);
+  }
+ else {
+    handlerMappingDef=(RootBeanDefinition)parserContext.getReaderContext().getRegistry().getBeanDefinition(this.handlerMappingBeanName);
+  }
+  RootBeanDefinition viewControllerDef=new RootBeanDefinition(ParameterizableViewController.class);
+  viewControllerDef.setSource(source);
+  if (element.hasAttribute("view-name")) {
+    viewControllerDef.getPropertyValues().add("viewName",element.getAttribute("view-name"));
+  }
+  Map<String,BeanDefinition> urlMap;
+  if (handlerMappingDef.getPropertyValues().contains("urlMap")) {
+    urlMap=(Map<String,BeanDefinition>)handlerMappingDef.getPropertyValues().getPropertyValue("urlMap").getValue();
+  }
+ else {
+    urlMap=new ManagedMap<String,BeanDefinition>();
+    handlerMappingDef.getPropertyValues().add("urlMap",urlMap);
+  }
+  urlMap.put(element.getAttribute("path"),viewControllerDef);
+  return null;
+}

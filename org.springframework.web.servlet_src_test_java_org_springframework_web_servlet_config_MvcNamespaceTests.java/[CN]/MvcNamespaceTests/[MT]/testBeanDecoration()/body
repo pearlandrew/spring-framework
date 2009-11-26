@@ -1,16 +1,15 @@
 {
   XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(container);
-  reader.loadBeanDefinitions(new ClassPathResource("mvc-config-interceptors.xml",getClass()));
-  assertEquals(6,container.getBeanDefinitionCount());
+  reader.loadBeanDefinitions(new ClassPathResource("mvc-config-bean-decoration.xml",getClass()));
+  assertEquals(5,container.getBeanDefinitionCount());
   container.refresh();
   DefaultAnnotationHandlerMapping mapping=container.getBean(DefaultAnnotationHandlerMapping.class);
   assertNotNull(mapping);
   mapping.setDefaultHandler(new TestController());
   MockHttpServletRequest request=new MockHttpServletRequest();
-  request.addParameter("locale","en");
-  request.addParameter("theme","green");
   HandlerExecutionChain chain=mapping.getHandler(request);
-  assertEquals(3,chain.getInterceptors().length);
+  assertEquals(2,chain.getInterceptors().length);
   assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
-  assertTrue(chain.getInterceptors()[2] instanceof ThemeChangeInterceptor);
+  LocaleChangeInterceptor interceptor=(LocaleChangeInterceptor)chain.getInterceptors()[1];
+  assertEquals("lang",interceptor.getParamName());
 }
