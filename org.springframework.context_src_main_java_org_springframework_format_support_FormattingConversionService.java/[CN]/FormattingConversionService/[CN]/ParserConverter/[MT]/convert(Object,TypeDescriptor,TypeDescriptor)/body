@@ -7,16 +7,16 @@
   try {
     parsedValue=this.parser.parse(submittedValue,LocaleContextHolder.getLocale());
   }
- catch (  ParseException e) {
-    throw new ConversionFailedException(sourceType,targetType,source,e);
+ catch (  ParseException ex) {
+    throw new ConversionFailedException(sourceType,targetType,source,ex);
   }
   TypeDescriptor parsedObjectType=TypeDescriptor.valueOf(parsedValue.getClass());
   if (!parsedObjectType.isAssignableTo(targetType)) {
     try {
       parsedValue=this.conversionService.convert(parsedValue,parsedObjectType,targetType);
     }
- catch (    ConversionFailedException e) {
-      throw new ConversionFailedException(sourceType,targetType,source,e);
+ catch (    ConversionException ex) {
+      throw new ConversionFailedException(sourceType,targetType,source,ex);
     }
   }
   return parsedValue;

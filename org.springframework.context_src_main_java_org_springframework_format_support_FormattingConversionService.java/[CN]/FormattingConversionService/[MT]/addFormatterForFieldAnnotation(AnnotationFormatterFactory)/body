@@ -1,39 +1,39 @@
 {
-  final Class<? extends Annotation> annotationType=resolveAnnotationType(annotationFormatterFactory);
+  final Class<? extends Annotation> annotationType=(Class<? extends Annotation>)GenericTypeResolver.resolveTypeArgument(annotationFormatterFactory.getClass(),AnnotationFormatterFactory.class);
   if (annotationType == null) {
     throw new IllegalArgumentException("Unable to extract parameterized Annotation type argument from AnnotationFormatterFactory [" + annotationFormatterFactory.getClass().getName() + "]; does the factory parameterize the <A extends Annotation> generic type?");
   }
   Set<Class<?>> fieldTypes=annotationFormatterFactory.getFieldTypes();
   for (  final Class<?> fieldType : fieldTypes) {
-    getConverterRegistry().addGenericConverter(new ConditionalGenericConverter(){
+    addGenericConverter(new ConditionalGenericConverter(){
       public Class<?>[][] getConvertibleTypes(){
         return new Class<?>[][]{{fieldType,String.class}};
       }
       public boolean matches(      TypeDescriptor sourceFieldType,      TypeDescriptor targetFieldType){
-        return sourceFieldType.getAnnotation(annotationType) != null;
+        return (sourceFieldType.getAnnotation(annotationType) != null);
       }
       public Object convert(      Object source,      TypeDescriptor sourceType,      TypeDescriptor targetType){
         Printer<?> printer=annotationFormatterFactory.getPrinter(sourceType.getAnnotation(annotationType),sourceType.getType());
-        return new PrinterConverter(fieldType,printer,conversionService).convert(source,sourceType,targetType);
+        return new PrinterConverter(fieldType,printer,FormattingConversionService.this).convert(source,sourceType,targetType);
       }
       public String toString(){
-        return "@" + annotationType.getName() + " "+ fieldType.getName()+ " -> "+ String.class.getName()+ " : "+ annotationFormatterFactory;
+        return "@" + annotationType.getName() + " "+ fieldType.getName()+ " -> "+ String.class.getName()+ ": "+ annotationFormatterFactory;
       }
     }
 );
-    getConverterRegistry().addGenericConverter(new ConditionalGenericConverter(){
+    addGenericConverter(new ConditionalGenericConverter(){
       public Class<?>[][] getConvertibleTypes(){
         return new Class<?>[][]{{String.class,fieldType}};
       }
       public boolean matches(      TypeDescriptor sourceFieldType,      TypeDescriptor targetFieldType){
-        return targetFieldType.getAnnotation(annotationType) != null;
+        return (targetFieldType.getAnnotation(annotationType) != null);
       }
       public Object convert(      Object source,      TypeDescriptor sourceType,      TypeDescriptor targetType){
         Parser<?> parser=annotationFormatterFactory.getParser(targetType.getAnnotation(annotationType),targetType.getType());
-        return new ParserConverter(fieldType,parser,conversionService).convert(source,sourceType,targetType);
+        return new ParserConverter(fieldType,parser,FormattingConversionService.this).convert(source,sourceType,targetType);
       }
       public String toString(){
-        return String.class.getName() + " -> @" + annotationType.getName()+ " "+ fieldType.getName()+ " : "+ annotationFormatterFactory;
+        return String.class.getName() + " -> @" + annotationType.getName()+ " "+ fieldType.getName()+ ": "+ annotationFormatterFactory;
       }
     }
 );
