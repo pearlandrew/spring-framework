@@ -1,10 +1,9 @@
 {
   Resource logo=new ClassPathResource("logo.jpg",BufferedImageHttpMessageConverterTests.class);
-  MediaType contentType=new MediaType("image","png");
-  converter.setContentType(contentType);
   BufferedImage body=ImageIO.read(logo.getFile());
   MockHttpOutputMessage outputMessage=new MockHttpOutputMessage();
-  converter.write(body,outputMessage);
+  MediaType contentType=new MediaType("image","png");
+  converter.write(body,contentType,outputMessage);
   assertEquals("Invalid content type",contentType,outputMessage.getHeaders().getContentType());
   assertTrue("Invalid size",outputMessage.getBodyAsBytes().length > 0);
   BufferedImage result=ImageIO.read(new ByteArrayInputStream(outputMessage.getBodyAsBytes()));

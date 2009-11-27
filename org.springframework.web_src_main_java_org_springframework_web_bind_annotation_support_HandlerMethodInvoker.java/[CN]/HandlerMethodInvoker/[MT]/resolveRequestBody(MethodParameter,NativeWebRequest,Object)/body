@@ -15,12 +15,8 @@
   if (this.messageConverters != null) {
     for (    HttpMessageConverter<?> messageConverter : this.messageConverters) {
       allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
-      if (messageConverter.supports(paramType)) {
-        for (        MediaType supportedMediaType : messageConverter.getSupportedMediaTypes()) {
-          if (supportedMediaType.includes(contentType)) {
-            return messageConverter.read(paramType,inputMessage);
-          }
-        }
+      if (messageConverter.canRead(paramType,contentType)) {
+        return messageConverter.read(paramType,inputMessage);
       }
     }
   }

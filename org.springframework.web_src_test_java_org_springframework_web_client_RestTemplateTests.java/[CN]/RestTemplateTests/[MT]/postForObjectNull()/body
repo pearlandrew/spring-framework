@@ -1,7 +1,7 @@
 {
-  expect(converter.supports(Integer.class)).andReturn(true).times(2);
   MediaType textPlain=new MediaType("text","plain");
-  expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain)).times(2);
+  expect(converter.canRead(Integer.class,null)).andReturn(true);
+  expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain));
   expect(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.POST)).andReturn(request);
   HttpHeaders requestHeaders=new HttpHeaders();
   expect(request.getHeaders()).andReturn(requestHeaders).times(2);
@@ -10,6 +10,7 @@
   HttpHeaders responseHeaders=new HttpHeaders();
   responseHeaders.setContentType(textPlain);
   expect(response.getHeaders()).andReturn(responseHeaders);
+  expect(converter.canRead(Integer.class,textPlain)).andReturn(true);
   expect(converter.read(Integer.class,response)).andReturn(null);
   response.close();
   replayMocks();

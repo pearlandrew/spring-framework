@@ -10,16 +10,11 @@
   if (messageConverters != null) {
     for (    HttpMessageConverter messageConverter : messageConverters) {
       allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
-      if (messageConverter.supports(returnValueType)) {
-        for (        Object o : messageConverter.getSupportedMediaTypes()) {
-          MediaType supportedMediaType=(MediaType)o;
-          for (          MediaType acceptedMediaType : acceptedMediaTypes) {
-            if (acceptedMediaType.includes(supportedMediaType)) {
-              messageConverter.write(returnValue,outputMessage);
-              this.responseArgumentUsed=true;
-              return;
-            }
-          }
+      for (      MediaType acceptedMediaType : acceptedMediaTypes) {
+        if (messageConverter.canWrite(returnValueType,acceptedMediaType)) {
+          messageConverter.write(returnValue,null,outputMessage);
+          this.responseArgumentUsed=true;
+          return;
         }
       }
     }

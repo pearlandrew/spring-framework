@@ -1,0 +1,35 @@
+{
+  if (contentType == null) {
+    contentType=getDefaultContentType();
+  }
+  Assert.notNull(contentType,"Count not determine Content-Type, set one using the 'defaultContentType' property");
+  outputMessage.getHeaders().setContentType(contentType);
+  ImageOutputStream imageOutputStream=null;
+  ImageWriter imageWriter=null;
+  try {
+    imageOutputStream=createImageOutputStream(outputMessage.getBody());
+    Iterator<ImageWriter> imageWriters=ImageIO.getImageWritersByMIMEType(contentType.toString());
+    if (imageWriters.hasNext()) {
+      imageWriter=imageWriters.next();
+      ImageWriteParam iwp=imageWriter.getDefaultWriteParam();
+      process(iwp);
+      imageWriter.setOutput(imageOutputStream);
+      imageWriter.write(null,new IIOImage(image,null,null),iwp);
+    }
+ else {
+      throw new HttpMessageNotWritableException("Could not find javax.imageio.ImageWriter for Content-Type [" + contentType + "]");
+    }
+  }
+  finally {
+    if (imageWriter != null) {
+      imageWriter.dispose();
+    }
+    if (imageOutputStream != null) {
+      try {
+        imageOutputStream.close();
+      }
+ catch (      IOException ex) {
+      }
+    }
+  }
+}

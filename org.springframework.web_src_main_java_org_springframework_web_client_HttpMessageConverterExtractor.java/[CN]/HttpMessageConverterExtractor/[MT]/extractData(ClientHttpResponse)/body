@@ -3,11 +3,9 @@
   if (contentType == null) {
     throw new RestClientException("Cannot extract response: no Content-Type found");
   }
-  for (  HttpMessageConverter<T> messageConverter : messageConverters) {
-    for (    MediaType supportedMediaType : messageConverter.getSupportedMediaTypes()) {
-      if (supportedMediaType.includes(contentType)) {
-        return messageConverter.read(this.responseType,response);
-      }
+  for (  HttpMessageConverter messageConverter : messageConverters) {
+    if (messageConverter.canRead(responseType,contentType)) {
+      return (T)messageConverter.read(this.responseType,response);
     }
   }
   throw new RestClientException("Could not extract response: no suitable HttpMessageConverter found for response type [" + this.responseType.getName() + "] and content type ["+ contentType+ "]");

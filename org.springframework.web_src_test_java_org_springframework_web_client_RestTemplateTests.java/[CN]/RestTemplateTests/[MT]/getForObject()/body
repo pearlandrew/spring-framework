@@ -1,7 +1,7 @@
 {
-  expect(converter.supports(String.class)).andReturn(true).times(2);
+  expect(converter.canRead(String.class,null)).andReturn(true);
   MediaType textPlain=new MediaType("text","plain");
-  expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain)).times(2);
+  expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain));
   expect(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.GET)).andReturn(request);
   HttpHeaders requestHeaders=new HttpHeaders();
   expect(request.getHeaders()).andReturn(requestHeaders);
@@ -10,6 +10,7 @@
   HttpHeaders responseHeaders=new HttpHeaders();
   responseHeaders.setContentType(textPlain);
   expect(response.getHeaders()).andReturn(responseHeaders);
+  expect(converter.canRead(String.class,textPlain)).andReturn(true);
   String expected="Hello World";
   expect(converter.read(String.class,response)).andReturn(expected);
   response.close();

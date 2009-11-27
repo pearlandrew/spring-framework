@@ -1,8 +1,5 @@
 {
-  if (request != null) {
-    checkForSupportedMessageConverter(request.getClass());
-  }
-  checkForSupportedMessageConverter(responseType);
-  List<HttpMessageConverter<T>> responseMessageConverters=getSupportedMessageConverters(responseType);
-  return execute(url,HttpMethod.POST,new PostPutCallback<T>(request,responseMessageConverters),new HttpMessageConverterExtractor<T>(responseType,responseMessageConverters));
+  PostPutCallback<T> requestCallback=new PostPutCallback<T>(request,responseType);
+  HttpMessageConverterExtractor<T> responseExtractor=new HttpMessageConverterExtractor<T>(responseType,getMessageConverters());
+  return execute(url,HttpMethod.POST,requestCallback,responseExtractor);
 }
