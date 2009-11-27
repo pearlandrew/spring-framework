@@ -1,7 +1,15 @@
 {
-  Map<String,HandlerInterceptor> globalInterceptors=getApplicationContext().getBeansOfType(HandlerInterceptor.class);
-  if (globalInterceptors != null) {
-    this.interceptors.addAll(globalInterceptors.values());
+  if (this.detectInterceptors) {
+    Map<String,HandlerInterceptor> handlerInterceptors=getApplicationContext().getBeansOfType(HandlerInterceptor.class);
+    if (handlerInterceptors != null && !handlerInterceptors.isEmpty()) {
+      this.interceptors.addAll(handlerInterceptors.values());
+    }
+    Map<String,WebRequestInterceptor> webInterceptors=getApplicationContext().getBeansOfType(WebRequestInterceptor.class);
+    if (webInterceptors != null && !webInterceptors.isEmpty()) {
+      for (      WebRequestInterceptor interceptor : webInterceptors.values()) {
+        this.interceptors.add(new WebRequestHandlerInterceptorAdapter(interceptor));
+      }
+    }
   }
   if (!this.interceptors.isEmpty()) {
     this.adaptedInterceptors=new HandlerInterceptor[this.interceptors.size()];
