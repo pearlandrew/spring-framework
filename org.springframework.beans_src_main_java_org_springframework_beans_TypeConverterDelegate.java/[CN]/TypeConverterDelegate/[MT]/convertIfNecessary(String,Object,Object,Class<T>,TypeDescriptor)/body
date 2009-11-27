@@ -4,20 +4,13 @@
   ConversionService conversionService=this.propertyEditorRegistry.getConversionService();
   if (editor == null && conversionService != null && convertedValue != null) {
     TypeDescriptor sourceTypeDesc=TypeDescriptor.valueOf(convertedValue.getClass());
-    TypeDescriptor targetTypeDesc;
-    if (methodParam != null) {
-      targetTypeDesc=(descriptor != null ? new BeanTypeDescriptor(methodParam,descriptor) : new TypeDescriptor(methodParam));
-    }
- else {
-      targetTypeDesc=TypeDescriptor.valueOf(requiredType);
-    }
-    if (conversionService.canConvert(sourceTypeDesc,targetTypeDesc)) {
-      return (T)conversionService.convert(convertedValue,sourceTypeDesc,targetTypeDesc);
+    if (conversionService.canConvert(sourceTypeDesc,typeDescriptor)) {
+      return (T)conversionService.convert(convertedValue,sourceTypeDesc,typeDescriptor);
     }
   }
   if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType,convertedValue))) {
     if (editor == null) {
-      editor=findDefaultEditor(requiredType,descriptor);
+      editor=findDefaultEditor(requiredType,typeDescriptor);
     }
     convertedValue=doConvertValue(oldValue,convertedValue,requiredType,editor);
   }
@@ -27,10 +20,10 @@
         return (T)convertToTypedArray(convertedValue,propertyName,requiredType.getComponentType());
       }
  else       if (convertedValue instanceof Collection) {
-        convertedValue=convertToTypedCollection((Collection)convertedValue,propertyName,requiredType,methodParam);
+        convertedValue=convertToTypedCollection((Collection)convertedValue,propertyName,requiredType,typeDescriptor);
       }
  else       if (convertedValue instanceof Map) {
-        convertedValue=convertToTypedMap((Map)convertedValue,propertyName,requiredType,methodParam);
+        convertedValue=convertToTypedMap((Map)convertedValue,propertyName,requiredType,typeDescriptor);
       }
       if (convertedValue.getClass().isArray() && Array.getLength(convertedValue) == 1) {
         convertedValue=Array.get(convertedValue,0);
