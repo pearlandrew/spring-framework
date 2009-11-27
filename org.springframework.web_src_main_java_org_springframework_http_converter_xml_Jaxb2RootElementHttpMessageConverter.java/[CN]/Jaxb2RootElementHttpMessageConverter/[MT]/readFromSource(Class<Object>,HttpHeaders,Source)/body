@@ -1,0 +1,18 @@
+{
+  try {
+    Unmarshaller unmarshaller=createUnmarshaller(clazz);
+    if (clazz.isAnnotationPresent(XmlRootElement.class)) {
+      return unmarshaller.unmarshal(source);
+    }
+ else {
+      JAXBElement<Object> jaxbElement=unmarshaller.unmarshal(source,clazz);
+      return jaxbElement.getValue();
+    }
+  }
+ catch (  UnmarshalException ex) {
+    throw new HttpMessageNotReadableException("Could not unmarshal to [" + clazz + "]: "+ ex.getMessage(),ex);
+  }
+catch (  JAXBException ex) {
+    throw new HttpMessageConversionException("Could not instantiate JAXBContext: " + ex.getMessage(),ex);
+  }
+}

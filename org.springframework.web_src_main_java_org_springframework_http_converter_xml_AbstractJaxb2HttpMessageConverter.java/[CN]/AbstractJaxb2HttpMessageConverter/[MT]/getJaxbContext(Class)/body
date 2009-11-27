@@ -1,0 +1,14 @@
+{
+  Assert.notNull(clazz,"'clazz' must not be null");
+  JAXBContext jaxbContext=jaxbContexts.get(clazz);
+  if (jaxbContext == null) {
+    try {
+      jaxbContext=JAXBContext.newInstance(clazz);
+      jaxbContexts.putIfAbsent(clazz,jaxbContext);
+    }
+ catch (    JAXBException ex) {
+      throw new HttpMessageConversionException("Could not instantiate JAXBContext for class [" + clazz + "]: "+ ex.getMessage(),ex);
+    }
+  }
+  return jaxbContext;
+}
