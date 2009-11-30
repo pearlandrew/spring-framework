@@ -7,11 +7,15 @@
   assertNotNull(mapping);
   mapping.setDefaultHandler(new TestController());
   MockHttpServletRequest request=new MockHttpServletRequest();
+  request.setRequestURI("/accounts/12345");
   request.addParameter("locale","en");
   request.addParameter("theme","green");
   HandlerExecutionChain chain=mapping.getHandler(request);
-  assertEquals(4,chain.getInterceptors().length);
+  assertEquals(3,chain.getInterceptors().length);
   assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
   assertTrue(chain.getInterceptors()[2] instanceof ThemeChangeInterceptor);
+  request.setRequestURI("/logged/accounts/12345");
+  chain=mapping.getHandler(request);
+  assertEquals(4,chain.getInterceptors().length);
   assertTrue(chain.getInterceptors()[3] instanceof WebRequestHandlerInterceptorAdapter);
 }

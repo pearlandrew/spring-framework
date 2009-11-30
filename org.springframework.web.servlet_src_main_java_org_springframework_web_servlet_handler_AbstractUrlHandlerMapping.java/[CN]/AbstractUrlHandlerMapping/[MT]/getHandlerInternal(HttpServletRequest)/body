@@ -18,6 +18,19 @@
       handler=buildPathExposingHandler(rawHandler,lookupPath,lookupPath,null);
     }
   }
+  if (handler != null & this.mappedInterceptors != null) {
+    Set<HandlerInterceptor> mappedInterceptors=this.mappedInterceptors.getInterceptors(lookupPath,this.pathMatcher);
+    if (!mappedInterceptors.isEmpty()) {
+      HandlerExecutionChain chain;
+      if (handler instanceof HandlerExecutionChain) {
+        chain=(HandlerExecutionChain)handler;
+      }
+ else {
+        chain=new HandlerExecutionChain(handler);
+      }
+      chain.addInterceptors(mappedInterceptors.toArray(new HandlerInterceptor[mappedInterceptors.size()]));
+    }
+  }
   if (handler != null && logger.isDebugEnabled()) {
     logger.debug("Mapping [" + lookupPath + "] to handler '"+ handler+ "'");
   }

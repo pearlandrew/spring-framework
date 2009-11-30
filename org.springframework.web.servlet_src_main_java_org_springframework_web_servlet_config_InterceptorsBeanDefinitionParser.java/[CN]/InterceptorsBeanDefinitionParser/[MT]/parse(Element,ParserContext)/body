@@ -1,0 +1,15 @@
+{
+  List<Element> interceptors=DomUtils.getChildElementsByTagName(element,"interceptor");
+  for (  Element interceptor : interceptors) {
+    RootBeanDefinition mappedInterceptorDef=new RootBeanDefinition(MappedInterceptor.class);
+    mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0,interceptor.getAttribute("path"));
+    RootBeanDefinition interceptorDef=new RootBeanDefinition(interceptor.getAttribute("class"));
+    BeanDefinitionHolder holder=new BeanDefinitionHolder(interceptorDef,parserContext.getReaderContext().generateBeanName(interceptorDef));
+    holder=parserContext.getDelegate().decorateBeanDefinitionIfRequired(interceptor,holder);
+    parserContext.getDelegate().parseConstructorArgElements(interceptor,interceptorDef);
+    parserContext.getDelegate().parsePropertyElements(interceptor,interceptorDef);
+    mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1,holder);
+    parserContext.getReaderContext().registerWithGeneratedName(mappedInterceptorDef);
+  }
+  return null;
+}
