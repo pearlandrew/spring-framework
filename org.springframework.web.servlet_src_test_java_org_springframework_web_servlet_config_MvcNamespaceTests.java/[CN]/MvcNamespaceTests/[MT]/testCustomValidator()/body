@@ -1,15 +1,15 @@
 {
-  XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(container);
+  XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(appContext);
   reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-validator.xml",getClass()));
-  assertEquals(4,container.getBeanDefinitionCount());
-  container.refresh();
-  AnnotationMethodHandlerAdapter adapter=container.getBean(AnnotationMethodHandlerAdapter.class);
+  assertEquals(4,appContext.getBeanDefinitionCount());
+  appContext.refresh();
+  AnnotationMethodHandlerAdapter adapter=appContext.getBean(AnnotationMethodHandlerAdapter.class);
   assertNotNull(adapter);
   TestController handler=new TestController();
   MockHttpServletRequest request=new MockHttpServletRequest();
   request.addParameter("date","2009-10-31");
   MockHttpServletResponse response=new MockHttpServletResponse();
   adapter.handle(request,response,handler);
-  assertTrue(container.getBean(TestValidator.class).validatorInvoked);
+  assertTrue(appContext.getBean(TestValidator.class).validatorInvoked);
   assertFalse(handler.recordedValidationError);
 }

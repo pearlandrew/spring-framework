@@ -1,18 +1,18 @@
 {
-  XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(container);
+  XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(appContext);
   reader.loadBeanDefinitions(new ClassPathResource("mvc-config-view-controllers.xml",getClass()));
-  assertEquals(8,container.getBeanDefinitionCount());
-  container.refresh();
-  DefaultAnnotationHandlerMapping mapping=container.getBean(DefaultAnnotationHandlerMapping.class);
+  assertEquals(8,appContext.getBeanDefinitionCount());
+  appContext.refresh();
+  DefaultAnnotationHandlerMapping mapping=appContext.getBean(DefaultAnnotationHandlerMapping.class);
   assertNotNull(mapping);
   mapping.setDefaultHandler(new TestController());
   MockHttpServletRequest request=new MockHttpServletRequest();
   HandlerExecutionChain chain=mapping.getHandler(request);
   assertEquals(3,chain.getInterceptors().length);
   assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
-  SimpleUrlHandlerMapping mapping2=container.getBean(SimpleUrlHandlerMapping.class);
+  SimpleUrlHandlerMapping mapping2=appContext.getBean(SimpleUrlHandlerMapping.class);
   assertNotNull(mapping2);
-  SimpleControllerHandlerAdapter adapter=container.getBean(SimpleControllerHandlerAdapter.class);
+  SimpleControllerHandlerAdapter adapter=appContext.getBean(SimpleControllerHandlerAdapter.class);
   assertNotNull(adapter);
   request.setRequestURI("/foo");
   request.setMethod("GET");
