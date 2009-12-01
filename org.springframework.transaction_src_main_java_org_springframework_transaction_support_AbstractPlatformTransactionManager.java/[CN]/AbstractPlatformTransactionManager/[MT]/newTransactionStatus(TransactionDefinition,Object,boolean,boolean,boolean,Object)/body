@@ -1,19 +1,5 @@
 {
-  boolean actualNewSynchronization=newSynchronization && !TransactionSynchronizationManager.isSynchronizationActive();
-  try {
-    if (actualNewSynchronization) {
-      TransactionSynchronizationManager.setActualTransactionActive(transaction != null);
-      TransactionSynchronizationManager.setCurrentTransactionIsolationLevel((definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) ? definition.getIsolationLevel() : null);
-      TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
-      TransactionSynchronizationManager.setCurrentTransactionName(definition.getName());
-      TransactionSynchronizationManager.initSynchronization();
-    }
-    return new DefaultTransactionStatus(transaction,newTransaction,actualNewSynchronization,definition.isReadOnly(),debug,suspendedResources);
-  }
- catch (  Error err) {
-    if (actualNewSynchronization) {
-      TransactionSynchronizationManager.clear();
-    }
-    throw err;
-  }
+  DefaultTransactionStatus status=instantiateTransactionStatus(definition,transaction,newTransaction,newSynchronization,debug,suspendedResources);
+  prepareSynchronization(status,definition);
+  return status;
 }

@@ -15,24 +15,18 @@
       logger.debug("Suspending current transaction, creating new transaction with name [" + definition.getName() + "]");
     }
     SuspendedResourcesHolder suspendedResources=suspend(transaction);
-    DefaultTransactionStatus status=null;
     try {
       boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-      status=newTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,suspendedResources);
+      DefaultTransactionStatus status=instantiateTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,suspendedResources);
       doBegin(transaction,definition);
+      prepareSynchronization(status,definition);
       return status;
     }
  catch (    RuntimeException beginEx) {
-      if (status != null && status.isNewSynchronization()) {
-        TransactionSynchronizationManager.clear();
-      }
       resumeAfterBeginException(transaction,suspendedResources,beginEx);
       throw beginEx;
     }
 catch (    Error beginErr) {
-      if (status != null && status.isNewSynchronization()) {
-        TransactionSynchronizationManager.clear();
-      }
       resumeAfterBeginException(transaction,suspendedResources,beginErr);
       throw beginErr;
     }
@@ -51,22 +45,9 @@ catch (    Error beginErr) {
     }
  else {
       boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-      DefaultTransactionStatus status=newTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,null);
-      try {
-        doBegin(transaction,definition);
-      }
- catch (      RuntimeException beginEx) {
-        if (status != null && status.isNewSynchronization()) {
-          TransactionSynchronizationManager.clear();
-        }
-        throw beginEx;
-      }
-catch (      Error beginErr) {
-        if (status != null && status.isNewSynchronization()) {
-          TransactionSynchronizationManager.clear();
-        }
-        throw beginErr;
-      }
+      DefaultTransactionStatus status=instantiateTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,null);
+      doBegin(transaction,definition);
+      prepareSynchronization(status,definition);
       return status;
     }
   }
