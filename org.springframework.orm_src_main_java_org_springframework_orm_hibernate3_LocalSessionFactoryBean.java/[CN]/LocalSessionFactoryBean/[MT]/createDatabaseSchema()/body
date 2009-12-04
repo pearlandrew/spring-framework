@@ -3,14 +3,10 @@
   HibernateTemplate hibernateTemplate=new HibernateTemplate(getSessionFactory());
   hibernateTemplate.execute(new HibernateCallback<Object>(){
     public Object doInHibernate(    Session session) throws HibernateException, SQLException {
-      session.doWork(new Work(){
-        public void execute(        Connection connection) throws SQLException {
-          Dialect dialect=Dialect.getDialect(getConfiguration().getProperties());
-          String[] sql=getConfiguration().generateSchemaCreationScript(dialect);
-          executeSchemaScript(connection,sql);
-        }
-      }
-);
+      Connection con=session.connection();
+      Dialect dialect=Dialect.getDialect(getConfiguration().getProperties());
+      String[] sql=getConfiguration().generateSchemaCreationScript(dialect);
+      executeSchemaScript(con,sql);
       return null;
     }
   }
