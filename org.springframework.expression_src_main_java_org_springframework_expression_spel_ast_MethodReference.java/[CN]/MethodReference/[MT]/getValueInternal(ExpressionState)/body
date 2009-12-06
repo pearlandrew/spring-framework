@@ -2,7 +2,13 @@
   TypedValue currentContext=state.getActiveContextObject();
   Object[] arguments=new Object[getChildCount()];
   for (int i=0; i < arguments.length; i++) {
-    arguments[i]=children[i].getValueInternal(state).getValue();
+    try {
+      state.pushActiveContextObject(state.getRootContextObject());
+      arguments[i]=children[i].getValueInternal(state).getValue();
+    }
+  finally {
+      state.popActiveContextObject();
+    }
   }
   if (currentContext.getValue() == null) {
     if (nullSafe) {
