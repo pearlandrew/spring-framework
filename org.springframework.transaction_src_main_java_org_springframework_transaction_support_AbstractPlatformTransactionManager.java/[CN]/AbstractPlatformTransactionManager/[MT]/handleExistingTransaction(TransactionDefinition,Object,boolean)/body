@@ -8,7 +8,7 @@
     }
     Object suspendedResources=suspend(transaction);
     boolean newSynchronization=(getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
-    return newTransactionStatus(definition,null,false,newSynchronization,debugEnabled,suspendedResources);
+    return prepareTransactionStatus(definition,null,false,newSynchronization,debugEnabled,suspendedResources);
   }
   if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) {
     if (debugEnabled) {
@@ -17,7 +17,7 @@
     SuspendedResourcesHolder suspendedResources=suspend(transaction);
     try {
       boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-      DefaultTransactionStatus status=instantiateTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,suspendedResources);
+      DefaultTransactionStatus status=newTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,suspendedResources);
       doBegin(transaction,definition);
       prepareSynchronization(status,definition);
       return status;
@@ -39,13 +39,13 @@ catch (    Error beginErr) {
       logger.debug("Creating nested transaction with name [" + definition.getName() + "]");
     }
     if (useSavepointForNestedTransaction()) {
-      DefaultTransactionStatus status=newTransactionStatus(definition,transaction,false,false,debugEnabled,null);
+      DefaultTransactionStatus status=prepareTransactionStatus(definition,transaction,false,false,debugEnabled,null);
       status.createAndHoldSavepoint();
       return status;
     }
  else {
       boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-      DefaultTransactionStatus status=instantiateTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,null);
+      DefaultTransactionStatus status=newTransactionStatus(definition,transaction,true,newSynchronization,debugEnabled,null);
       doBegin(transaction,definition);
       prepareSynchronization(status,definition);
       return status;
@@ -69,5 +69,5 @@ catch (    Error beginErr) {
     }
   }
   boolean newSynchronization=(getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-  return newTransactionStatus(definition,transaction,false,newSynchronization,debugEnabled,null);
+  return prepareTransactionStatus(definition,transaction,false,newSynchronization,debugEnabled,null);
 }
