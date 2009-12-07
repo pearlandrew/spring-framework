@@ -10,7 +10,7 @@
   try {
     absoluteLocation=ResourcePatternUtils.isUrl(location) || ResourceUtils.toURI(location).isAbsolute();
   }
- catch (  Exception ex) {
+ catch (  URISyntaxException ex) {
   }
   if (absoluteLocation) {
     try {
@@ -25,8 +25,16 @@
   }
  else {
     try {
-      String baseLocation=getReaderContext().getResource().getURL().toString();
-      int importCount=getReaderContext().getReader().loadBeanDefinitions(StringUtils.applyRelativePath(baseLocation,location),actualResources);
+      int importCount;
+      Resource relativeResource=getReaderContext().getResource().createRelative(location);
+      if (relativeResource.exists()) {
+        importCount=getReaderContext().getReader().loadBeanDefinitions(relativeResource);
+        actualResources.add(relativeResource);
+      }
+ else {
+        String baseLocation=getReaderContext().getResource().getURL().toString();
+        importCount=getReaderContext().getReader().loadBeanDefinitions(StringUtils.applyRelativePath(baseLocation,location),actualResources);
+      }
       if (logger.isDebugEnabled()) {
         logger.debug("Imported " + importCount + " bean definitions from relative location ["+ location+ "]");
       }
