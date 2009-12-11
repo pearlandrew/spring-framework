@@ -2,31 +2,25 @@
   if (source == null) {
     return this.conversionService.convertNullSource(sourceType,targetType);
   }
-  if (sourceType.typeEquals(String.class)) {
-    String string=(String)source;
-    return this.conversionService.convert(loadProperties(string),TypeDescriptor.valueOf(Properties.class),targetType);
+  Map target=CollectionFactory.createMap(targetType.getType(),1);
+  TypeDescriptor targetKeyType=targetType.getMapKeyTypeDescriptor();
+  TypeDescriptor targetValueType=targetType.getMapValueTypeDescriptor();
+  boolean keysCompatible=false;
+  if (sourceType != TypeDescriptor.NULL && sourceType.isAssignableTo(targetKeyType)) {
+    keysCompatible=true;
+  }
+  boolean valuesCompatible=false;
+  if (sourceType != TypeDescriptor.NULL && sourceType.isAssignableTo(targetValueType)) {
+    valuesCompatible=true;
+  }
+  if (keysCompatible && valuesCompatible) {
+    target.put(source,source);
   }
  else {
-    Map target=CollectionFactory.createMap(targetType.getType(),1);
-    TypeDescriptor targetKeyType=targetType.getMapKeyTypeDescriptor();
-    TypeDescriptor targetValueType=targetType.getMapValueTypeDescriptor();
-    boolean keysCompatible=false;
-    if (sourceType != TypeDescriptor.NULL && sourceType.isAssignableTo(targetKeyType)) {
-      keysCompatible=true;
-    }
-    boolean valuesCompatible=false;
-    if (sourceType != TypeDescriptor.NULL && sourceType.isAssignableTo(targetValueType)) {
-      valuesCompatible=true;
-    }
-    if (keysCompatible && valuesCompatible) {
-      target.put(source,source);
-    }
- else {
-      MapEntryConverter converter=new MapEntryConverter(sourceType,sourceType,targetKeyType,targetValueType,keysCompatible,valuesCompatible,this.conversionService);
-      Object key=converter.convertKey(source);
-      Object value=converter.convertValue(source);
-      target.put(key,value);
-    }
-    return target;
+    MapEntryConverter converter=new MapEntryConverter(sourceType,sourceType,targetKeyType,targetValueType,keysCompatible,valuesCompatible,this.conversionService);
+    Object key=converter.convertKey(source);
+    Object value=converter.convertValue(source);
+    target.put(key,value);
   }
+  return target;
 }
