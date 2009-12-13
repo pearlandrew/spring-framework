@@ -1,3 +1,12 @@
 {
-  return getBeansWithAnnotation(annotationType,true,true);
+  Set<String> beanNames=new LinkedHashSet<String>(getBeanDefinitionCount());
+  beanNames.addAll(Arrays.asList(getBeanDefinitionNames()));
+  beanNames.addAll(Arrays.asList(getSingletonNames()));
+  Map<String,Object> results=new LinkedHashMap<String,Object>();
+  for (  String beanName : beanNames) {
+    if (findAnnotationOnBean(beanName,annotationType) != null) {
+      results.put(beanName,getBean(beanName));
+    }
+  }
+  return results;
 }
