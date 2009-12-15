@@ -1,8 +1,11 @@
 {
   Assert.notNull(resource,"Resource must not be null");
   Object resourceRef=resource;
-  if (resource instanceof ScopedObject) {
-    resourceRef=((ScopedObject)resource).getTargetObject();
+  if (resourceRef instanceof InfrastructureProxy) {
+    resourceRef=((InfrastructureProxy)resourceRef).getWrappedObject();
   }
-  return (resourceRef instanceof InfrastructureProxy ? ((InfrastructureProxy)resourceRef).getWrappedObject() : resourceRef);
+  if (aopAvailable) {
+    resourceRef=ScopedProxyUnwrapper.unwrapIfNecessary(resource);
+  }
+  return resourceRef;
 }
