@@ -7,7 +7,7 @@
   if (targetObject instanceof Map && (children[0] instanceof PropertyOrFieldReference)) {
     PropertyOrFieldReference reference=(PropertyOrFieldReference)children[0];
     index=reference.getName();
-    indexValue=new TypedValue(index,TypeDescriptor.STRING);
+    indexValue=new TypedValue(index);
   }
  else {
     try {
@@ -28,10 +28,14 @@
       possiblyConvertedKey=state.convertValue(index,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
     }
     Object o=((Map<?,?>)targetObject).get(possiblyConvertedKey);
-    TypeDescriptor resultDescriptor=(targetObjectTypeDescriptor.isMapEntryTypeKnown() ? TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapValueType()) : TypeDescriptor.OBJECT);
-    return new TypedValue(o,resultDescriptor);
+    if (targetObjectTypeDescriptor.isMapEntryTypeKnown()) {
+      return new TypedValue(o,targetObjectTypeDescriptor.getMapValueTypeDescriptor());
+    }
+ else {
+      return new TypedValue(o);
+    }
   }
-  int idx=(Integer)state.convertValue(index,INTEGER_TYPE_DESCRIPTOR);
+  int idx=(Integer)state.convertValue(index,TypeDescriptor.valueOf(Integer.class));
   if (targetObject == null) {
     throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
   }
@@ -78,7 +82,7 @@
     if (idx >= ctxString.length()) {
       throw new SpelEvaluationException(getStartPosition(),SpelMessage.STRING_INDEX_OUT_OF_BOUNDS,ctxString.length(),idx);
     }
-    return new TypedValue(String.valueOf(ctxString.charAt(idx)),STRING_TYPE_DESCRIPTOR);
+    return new TypedValue(String.valueOf(ctxString.charAt(idx)));
   }
   throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,targetObjectTypeDescriptor.asString());
 }
