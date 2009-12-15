@@ -1,11 +1,23 @@
 {
+  if (this.field != null) {
+    return GenericCollectionTypeResolver.getCollectionFieldType(this.field);
+  }
+ else   if (this.methodParameter != null) {
+    return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
+  }
+ else   if (this.value instanceof Collection) {
+    Collection coll=(Collection)this.value;
+    if (!coll.isEmpty()) {
+      Object elem=coll.iterator().next();
+      if (elem != null) {
+        return elem.getClass();
+      }
+    }
+  }
   if (this.type != null) {
     return GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>)this.type);
   }
- else   if (this.field != null) {
-    return GenericCollectionTypeResolver.getCollectionFieldType(this.field);
-  }
  else {
-    return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
+    return null;
   }
 }
