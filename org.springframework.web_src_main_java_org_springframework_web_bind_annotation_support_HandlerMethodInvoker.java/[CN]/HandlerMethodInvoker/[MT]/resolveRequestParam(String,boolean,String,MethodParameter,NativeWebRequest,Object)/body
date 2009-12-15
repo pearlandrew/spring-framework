@@ -6,7 +6,10 @@
   if (paramName.length() == 0) {
     paramName=getRequiredParameterName(methodParam);
   }
-  Object paramValue=webRequest.getFile(paramName);
+  Object paramValue=null;
+  if (webRequest.getNativeRequest() instanceof MultipartRequest) {
+    paramValue=((MultipartRequest)webRequest.getNativeRequest()).getFile(paramName);
+  }
   if (paramValue == null) {
     String[] paramValues=webRequest.getParameterValues(paramName);
     if (paramValues != null && !paramType.isArray()) {
