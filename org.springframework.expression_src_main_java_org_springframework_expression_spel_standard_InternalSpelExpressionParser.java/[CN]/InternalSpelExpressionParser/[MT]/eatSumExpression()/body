@@ -1,2 +1,16 @@
 {
+  SpelNodeImpl expr=eatProductExpression();
+  while (peekToken(TokenKind.PLUS,TokenKind.MINUS)) {
+    Token t=nextToken();
+    SpelNodeImpl rhExpr=eatProductExpression();
+    checkRightOperand(t,rhExpr);
+    if (t.kind == TokenKind.PLUS) {
+      expr=new OpPlus(toPos(t),expr,rhExpr);
+    }
+ else {
+      Assert.isTrue(t.kind == TokenKind.MINUS);
+      expr=new OpMinus(toPos(t),expr,rhExpr);
+    }
+  }
+  return expr;
 }

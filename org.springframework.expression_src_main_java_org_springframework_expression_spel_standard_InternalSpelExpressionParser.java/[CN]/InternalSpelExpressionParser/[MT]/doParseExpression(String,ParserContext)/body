@@ -1,2 +1,20 @@
 {
+  try {
+    this.expressionString=expressionString;
+    Tokenizer tokenizer=new Tokenizer(expressionString);
+    tokenizer.process();
+    tokenStream=tokenizer.getTokens();
+    tokenStreamLength=tokenStream.size();
+    tokenStreamPointer=0;
+    constructedNodes.clear();
+    SpelNodeImpl ast=eatExpression();
+    if (moreTokens()) {
+      throw new SpelParseException(peekToken().startpos,SpelMessage.MORE_INPUT,toString(nextToken()));
+    }
+    Assert.isTrue(constructedNodes.isEmpty());
+    return new SpelExpression(expressionString,ast,configuration);
+  }
+ catch (  InternalParseException ipe) {
+    throw ipe.getCause();
+  }
 }

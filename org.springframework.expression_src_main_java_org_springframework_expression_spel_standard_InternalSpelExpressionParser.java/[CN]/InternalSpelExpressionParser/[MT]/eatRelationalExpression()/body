@@ -1,2 +1,43 @@
 {
+  SpelNodeImpl expr=eatSumExpression();
+  Token relationalOperatorToken=maybeEatRelationalOperator();
+  if (relationalOperatorToken != null) {
+    Token t=nextToken();
+    SpelNodeImpl rhExpr=eatSumExpression();
+    checkRightOperand(t,rhExpr);
+    TokenKind tk=relationalOperatorToken.kind;
+    if (relationalOperatorToken.isNumericRelationalOperator()) {
+      int pos=toPos(t);
+      if (tk == TokenKind.GT) {
+        return new OpGT(pos,expr,rhExpr);
+      }
+ else       if (tk == TokenKind.LT) {
+        return new OpLT(pos,expr,rhExpr);
+      }
+ else       if (tk == TokenKind.LE) {
+        return new OpLE(pos,expr,rhExpr);
+      }
+ else       if (tk == TokenKind.GE) {
+        return new OpGE(pos,expr,rhExpr);
+      }
+ else       if (tk == TokenKind.EQ) {
+        return new OpEQ(pos,expr,rhExpr);
+      }
+ else {
+        Assert.isTrue(tk == TokenKind.NE);
+        return new OpNE(pos,expr,rhExpr);
+      }
+    }
+    if (tk == TokenKind.INSTANCEOF) {
+      return new OperatorInstanceof(toPos(t),expr,rhExpr);
+    }
+ else     if (tk == TokenKind.MATCHES) {
+      return new OperatorMatches(toPos(t),expr,rhExpr);
+    }
+ else {
+      Assert.isTrue(tk == TokenKind.BETWEEN);
+      return new org.springframework.expression.spel.ast.OperatorBetween(toPos(t),expr,rhExpr);
+    }
+  }
+  return expr;
 }

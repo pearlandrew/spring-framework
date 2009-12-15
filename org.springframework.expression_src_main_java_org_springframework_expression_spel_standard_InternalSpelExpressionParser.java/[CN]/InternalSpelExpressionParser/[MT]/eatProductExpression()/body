@@ -1,2 +1,19 @@
 {
+  SpelNodeImpl expr=eatPowerExpression();
+  while (peekToken(TokenKind.STAR,TokenKind.DIV,TokenKind.MOD)) {
+    Token t=nextToken();
+    SpelNodeImpl rhExpr=eatPowerExpression();
+    checkRightOperand(t,rhExpr);
+    if (t.kind == TokenKind.STAR) {
+      expr=new OpMultiply(toPos(t),expr,rhExpr);
+    }
+ else     if (t.kind == TokenKind.DIV) {
+      expr=new OpDivide(toPos(t),expr,rhExpr);
+    }
+ else {
+      Assert.isTrue(t.kind == TokenKind.MOD);
+      expr=new OpModulus(toPos(t),expr,rhExpr);
+    }
+  }
+  return expr;
 }
