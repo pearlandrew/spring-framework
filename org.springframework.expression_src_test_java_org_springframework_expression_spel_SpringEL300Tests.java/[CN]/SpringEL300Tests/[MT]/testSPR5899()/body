@@ -1,27 +1,27 @@
 {
   StandardEvaluationContext eContext=new StandardEvaluationContext(new Spr5899Class());
-  Expression expr=new SpelExpressionParser().parse("tryToInvokeWithNull(12)");
+  Expression expr=new SpelExpressionParser().parseRaw("tryToInvokeWithNull(12)");
   Assert.assertEquals(12,expr.getValue(eContext));
-  expr=new SpelExpressionParser().parse("tryToInvokeWithNull(null)");
+  expr=new SpelExpressionParser().parseRaw("tryToInvokeWithNull(null)");
   Assert.assertEquals(null,expr.getValue(eContext));
   try {
-    expr=new SpelExpressionParser().parse("tryToInvokeWithNull2(null)");
+    expr=new SpelExpressionParser().parseRaw("tryToInvokeWithNull2(null)");
     expr.getValue();
     Assert.fail("Should have failed to find a method to which it could pass null");
   }
  catch (  EvaluationException see) {
   }
   eContext.setTypeLocator(new MyTypeLocator());
-  expr=new SpelExpressionParser().parse("tryToInvokeWithNull3(null,'a','b')");
+  expr=new SpelExpressionParser().parseRaw("tryToInvokeWithNull3(null,'a','b')");
   Assert.assertEquals("ab",expr.getValue(eContext));
-  expr=new SpelExpressionParser().parse("tryToInvokeWithNull3(12,'a',null,'c')");
+  expr=new SpelExpressionParser().parseRaw("tryToInvokeWithNull3(12,'a',null,'c')");
   Assert.assertEquals("anullc",expr.getValue(eContext));
-  expr=new SpelExpressionParser().parse("new Spr5899Class().toString()");
+  expr=new SpelExpressionParser().parseRaw("new Spr5899Class().toString()");
   Assert.assertEquals("instance",expr.getValue(eContext));
-  expr=new SpelExpressionParser().parse("new Spr5899Class(null).toString()");
+  expr=new SpelExpressionParser().parseRaw("new Spr5899Class(null).toString()");
   Assert.assertEquals("instance",expr.getValue(eContext));
-  expr=new SpelExpressionParser().parse("new Spr5899Class(null,'a','b').toString()");
+  expr=new SpelExpressionParser().parseRaw("new Spr5899Class(null,'a','b').toString()");
   Assert.assertEquals("instance",expr.getValue(eContext));
-  expr=new SpelExpressionParser().parse("new Spr5899Class(null,'a', null, 'b').toString()");
+  expr=new SpelExpressionParser().parseRaw("new Spr5899Class(null,'a', null, 'b').toString()");
   Assert.assertEquals("instance",expr.getValue(eContext));
 }

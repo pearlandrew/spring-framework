@@ -41,7 +41,7 @@
  else   if (targetObject instanceof Collection) {
     Collection c=(Collection)targetObject;
     if (idx >= c.size()) {
-      if (state.configuredToGrowCollection()) {
+      if (state.getConfiguration().isAutoGrowCollections()) {
         Object newCollectionElement=null;
         try {
           int newElements=idx - c.size();
@@ -55,11 +55,8 @@
           }
           newCollectionElement=targetObjectTypeDescriptor.getElementType().newInstance();
         }
- catch (        InstantiationException e) {
-          throw new SpelEvaluationException(getStartPosition(),e,SpelMessage.UNABLE_TO_GROW_COLLECTION);
-        }
-catch (        IllegalAccessException e) {
-          throw new SpelEvaluationException(getStartPosition(),e,SpelMessage.UNABLE_TO_GROW_COLLECTION);
+ catch (        Exception ex) {
+          throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_GROW_COLLECTION);
         }
         c.add(newCollectionElement);
         return new TypedValue(newCollectionElement,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
