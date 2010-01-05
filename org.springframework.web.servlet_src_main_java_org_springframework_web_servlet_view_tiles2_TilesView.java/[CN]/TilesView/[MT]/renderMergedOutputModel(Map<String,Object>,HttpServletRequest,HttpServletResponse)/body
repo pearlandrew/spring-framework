@@ -7,9 +7,13 @@
   exposeModelAsRequestAttributes(model,request);
   JstlUtils.exposeLocalizationContext(new RequestContext(request,servletContext));
   if (!response.isCommitted()) {
-    ServletContext sc=getServletContext();
-    if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
-      WebUtils.exposeForwardRequestAttributes(request);
+    if (this.exposeForwardAttributes) {
+      try {
+        WebUtils.exposeForwardRequestAttributes(request);
+      }
+ catch (      Exception ex) {
+        this.exposeForwardAttributes=false;
+      }
     }
   }
   container.render(getUrl(),request,response);
