@@ -9,24 +9,26 @@
  else {
     retriever=new ListenerRetriever();
     LinkedList<ApplicationListener> allListeners=new LinkedList<ApplicationListener>();
-    for (    ApplicationListener listener : this.defaultRetriever.applicationListeners) {
-      if (supportsEvent(listener,eventType,sourceType)) {
-        retriever.applicationListeners.add(listener);
-        allListeners.add(listener);
-      }
-    }
-    if (!this.defaultRetriever.applicationListenerBeans.isEmpty()) {
-      BeanFactory beanFactory=getBeanFactory();
-      for (      String listenerBeanName : this.defaultRetriever.applicationListenerBeans) {
-        ApplicationListener listener=beanFactory.getBean(listenerBeanName,ApplicationListener.class);
+synchronized (this.defaultRetriever) {
+      for (      ApplicationListener listener : this.defaultRetriever.applicationListeners) {
         if (supportsEvent(listener,eventType,sourceType)) {
-          retriever.applicationListenerBeans.add(listenerBeanName);
+          retriever.applicationListeners.add(listener);
           allListeners.add(listener);
         }
       }
+      if (!this.defaultRetriever.applicationListenerBeans.isEmpty()) {
+        BeanFactory beanFactory=getBeanFactory();
+        for (        String listenerBeanName : this.defaultRetriever.applicationListenerBeans) {
+          ApplicationListener listener=beanFactory.getBean(listenerBeanName,ApplicationListener.class);
+          if (supportsEvent(listener,eventType,sourceType)) {
+            retriever.applicationListenerBeans.add(listenerBeanName);
+            allListeners.add(listener);
+          }
+        }
+        OrderComparator.sort(allListeners);
+        this.retrieverCache.put(cacheKey,retriever);
+      }
     }
-    OrderComparator.sort(allListeners);
-    this.retrieverCache.put(cacheKey,retriever);
     return allListeners;
   }
 }
