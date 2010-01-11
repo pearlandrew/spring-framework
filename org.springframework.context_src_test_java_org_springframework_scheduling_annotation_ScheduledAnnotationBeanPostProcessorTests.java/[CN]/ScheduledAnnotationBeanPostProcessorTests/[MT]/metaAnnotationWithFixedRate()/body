@@ -1,19 +1,19 @@
 {
   StaticApplicationContext context=new StaticApplicationContext();
   BeanDefinition processorDefinition=new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-  BeanDefinition targetDefinition=new RootBeanDefinition(ScheduledAnnotationBeanPostProcessorTests.CronTestBean.class);
+  BeanDefinition targetDefinition=new RootBeanDefinition(ScheduledAnnotationBeanPostProcessorTests.MetaAnnotationFixedRateTestBean.class);
   context.registerBeanDefinition("postProcessor",processorDefinition);
   context.registerBeanDefinition("target",targetDefinition);
   context.refresh();
   Object postProcessor=context.getBean("postProcessor");
   Object target=context.getBean("target");
   ScheduledTaskRegistrar registrar=(ScheduledTaskRegistrar)new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
-  Map<Runnable,String> cronTasks=(Map<Runnable,String>)new DirectFieldAccessor(registrar).getPropertyValue("cronTasks");
-  assertEquals(1,cronTasks.size());
-  MethodInvokingRunnable runnable=(MethodInvokingRunnable)cronTasks.keySet().iterator().next();
+  Map<Runnable,Long> fixedRateTasks=(Map<Runnable,Long>)new DirectFieldAccessor(registrar).getPropertyValue("fixedRateTasks");
+  assertEquals(1,fixedRateTasks.size());
+  MethodInvokingRunnable runnable=(MethodInvokingRunnable)fixedRateTasks.keySet().iterator().next();
   Object targetObject=runnable.getTargetObject();
   String targetMethod=runnable.getTargetMethod();
   assertEquals(target,targetObject);
-  assertEquals("cron",targetMethod);
-  assertEquals("*/7 * * * * ?",cronTasks.values().iterator().next());
+  assertEquals("checkForUpdates",targetMethod);
+  assertEquals(new Long(5000),fixedRateTasks.values().iterator().next());
 }
