@@ -24,6 +24,9 @@
         String cron=annotation.cron();
         if (!"".equals(cron)) {
           processedSchedule=true;
+          if (applicationContext instanceof ConfigurableApplicationContext) {
+            cron=((ConfigurableApplicationContext)applicationContext).getBeanFactory().resolveEmbeddedValue(cron);
+          }
           cronTasks.put(runnable,cron);
         }
         long fixedDelay=annotation.fixedDelay();
