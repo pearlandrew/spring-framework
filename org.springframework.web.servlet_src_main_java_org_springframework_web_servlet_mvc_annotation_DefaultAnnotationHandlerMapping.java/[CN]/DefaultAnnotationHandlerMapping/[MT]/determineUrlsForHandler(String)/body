@@ -12,11 +12,19 @@
         if (!typeLevelPattern.startsWith("/")) {
           typeLevelPattern="/" + typeLevelPattern;
         }
+        boolean hasEmptyMethodLevelMappings=false;
         for (        String methodLevelPattern : methodLevelPatterns) {
-          String combinedPattern=getPathMatcher().combine(typeLevelPattern,methodLevelPattern);
-          addUrlsForPath(urls,combinedPattern);
+          if (methodLevelPattern == null) {
+            hasEmptyMethodLevelMappings=true;
+          }
+ else {
+            String combinedPattern=getPathMatcher().combine(typeLevelPattern,methodLevelPattern);
+            addUrlsForPath(urls,combinedPattern);
+          }
         }
-        addUrlsForPath(urls,typeLevelPattern);
+        if (hasEmptyMethodLevelMappings || org.springframework.web.servlet.mvc.Controller.class.isAssignableFrom(handlerType)) {
+          addUrlsForPath(urls,typeLevelPattern);
+        }
       }
       return StringUtils.toStringArray(urls);
     }
