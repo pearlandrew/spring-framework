@@ -2,8 +2,7 @@
   this.persistenceUnitInfoNames.clear();
   this.persistenceUnitInfos.clear();
   SpringPersistenceUnitInfo[] puis=readPersistenceUnitInfos();
-  for (int i=0; i < puis.length; i++) {
-    SpringPersistenceUnitInfo pui=puis[i];
+  for (  SpringPersistenceUnitInfo pui : puis) {
     if (pui.getPersistenceUnitRootUrl() == null) {
       pui.setPersistenceUnitRootUrl(determineDefaultPersistenceUnitRootUrl());
     }
@@ -19,6 +18,10 @@
     postProcessPersistenceUnitInfo(pui);
     String name=pui.getPersistenceUnitName();
     this.persistenceUnitInfoNames.add(name);
-    this.persistenceUnitInfos.put(name,pui);
+    PersistenceUnitInfo puiToStore=pui;
+    if (jpa2ApiPresent) {
+      puiToStore=(PersistenceUnitInfo)Proxy.newProxyInstance(SmartPersistenceUnitInfo.class.getClassLoader(),new Class[]{SmartPersistenceUnitInfo.class},new Jpa2PersistenceUnitInfoDecorator(pui));
+    }
+    this.persistenceUnitInfos.put(name,puiToStore);
   }
 }
