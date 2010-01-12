@@ -1,0 +1,47 @@
+{
+  Class targetClass=parameter.getParameterType();
+  try {
+    if (result == null) {
+      return null;
+    }
+    if (ClassUtils.isAssignableValue(targetClass,result)) {
+      return result;
+    }
+    if (result instanceof CompositeData) {
+      Method fromMethod=targetClass.getMethod("from",CompositeData.class);
+      return ReflectionUtils.invokeMethod(fromMethod,null,result);
+    }
+ else     if (result instanceof CompositeData[]) {
+      CompositeData[] array=(CompositeData[])result;
+      if (targetClass.isArray()) {
+        return convertDataArrayToTargetArray(array,targetClass);
+      }
+ else       if (Collection.class.isAssignableFrom(targetClass)) {
+        Class elementType=GenericCollectionTypeResolver.getCollectionParameterType(parameter);
+        if (elementType != null) {
+          return convertDataArrayToTargetCollection(array,targetClass,elementType);
+        }
+      }
+    }
+ else     if (result instanceof TabularData) {
+      Method fromMethod=targetClass.getMethod("from",TabularData.class);
+      return ReflectionUtils.invokeMethod(fromMethod,null,result);
+    }
+ else     if (result instanceof TabularData[]) {
+      TabularData[] array=(TabularData[])result;
+      if (targetClass.isArray()) {
+        return convertDataArrayToTargetArray(array,targetClass);
+      }
+ else       if (Collection.class.isAssignableFrom(targetClass)) {
+        Class elementType=GenericCollectionTypeResolver.getCollectionParameterType(parameter);
+        if (elementType != null) {
+          return convertDataArrayToTargetCollection(array,targetClass,elementType);
+        }
+      }
+    }
+    throw new InvocationFailureException("Incompatible result value [" + result + "] for target type ["+ targetClass.getName()+ "]");
+  }
+ catch (  NoSuchMethodException ex) {
+    throw new InvocationFailureException("Could not obtain 'from(CompositeData)' / 'from(TabularData)' method on target type [" + targetClass.getName() + "] for conversion of MXBean data structure ["+ result+ "]");
+  }
+}
