@@ -2,6 +2,21 @@
   if (enabled) {
     Assert.state(dataSource != null,"DataSource must be provided");
     Assert.state(databasePopulator != null,"DatabasePopulator must be provided");
-    databasePopulator.populate(dataSource.getConnection());
+    try {
+      Connection connection=this.dataSource.getConnection();
+      try {
+        this.databasePopulator.populate(connection);
+      }
+  finally {
+        try {
+          connection.close();
+        }
+ catch (        SQLException ex) {
+        }
+      }
+    }
+ catch (    SQLException ex) {
+      throw new DataAccessResourceFailureException("Failed to populate database",ex);
+    }
   }
 }
