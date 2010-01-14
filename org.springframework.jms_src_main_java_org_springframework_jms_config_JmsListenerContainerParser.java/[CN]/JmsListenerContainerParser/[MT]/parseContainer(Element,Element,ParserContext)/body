@@ -45,10 +45,6 @@
   if (StringUtils.hasText(destinationResolverBeanName)) {
     containerDef.getPropertyValues().add("destinationResolver",new RuntimeBeanReference(destinationResolverBeanName));
   }
-  String phase=containerEle.getAttribute(PHASE_ATTRIBUTE);
-  if (StringUtils.hasText(phase)) {
-    containerDef.getPropertyValues().add("phase",phase);
-  }
   String cache=containerEle.getAttribute(CACHE_ATTRIBUTE);
   if (StringUtils.hasText(cache)) {
     if (containerType.startsWith("simple")) {
@@ -78,21 +74,19 @@
       containerDef.getPropertyValues().add("transactionManager",new RuntimeBeanReference(transactionManagerBeanName));
     }
   }
-  int[] concurrency=parseConcurrency(containerEle,parserContext);
-  if (concurrency != null) {
-    if (containerType.startsWith("default")) {
-      containerDef.getPropertyValues().add("concurrentConsumers",concurrency[0]);
-      containerDef.getPropertyValues().add("maxConcurrentConsumers",concurrency[1]);
-    }
- else {
-      containerDef.getPropertyValues().add("concurrentConsumers",concurrency[1]);
-    }
+  String concurrency=containerEle.getAttribute(CONCURRENCY_ATTRIBUTE);
+  if (StringUtils.hasText(concurrency)) {
+    containerDef.getPropertyValues().add("concurrency",concurrency);
   }
   String prefetch=containerEle.getAttribute(PREFETCH_ATTRIBUTE);
   if (StringUtils.hasText(prefetch)) {
     if (containerType.startsWith("default")) {
       containerDef.getPropertyValues().add("maxMessagesPerTask",new Integer(prefetch));
     }
+  }
+  String phase=containerEle.getAttribute(PHASE_ATTRIBUTE);
+  if (StringUtils.hasText(phase)) {
+    containerDef.getPropertyValues().add("phase",phase);
   }
   return containerDef;
 }
