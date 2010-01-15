@@ -6,7 +6,6 @@
   if (requestedMediaTypes.size() > 1) {
     Collections.sort(requestedMediaTypes);
   }
-  SortedMap<MediaType,View> views=new TreeMap<MediaType,View>();
   List<View> candidateViews=new ArrayList<View>();
   for (  ViewResolver viewResolver : this.viewResolvers) {
     View view=viewResolver.resolveViewName(viewName,locale);
@@ -17,6 +16,7 @@
   if (!CollectionUtils.isEmpty(this.defaultViews)) {
     candidateViews.addAll(this.defaultViews);
   }
+  SortedMap<MediaType,View> views=new TreeMap<MediaType,View>();
   for (  View candidateView : candidateViews) {
     String contentType=candidateView.getContentType();
     if (StringUtils.hasText(contentType)) {
@@ -40,6 +40,6 @@
     return view;
   }
  else {
-    return null;
+    return useNotAcceptableStatusCode ? new NotAcceptableView() : null;
   }
 }
