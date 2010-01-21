@@ -60,7 +60,8 @@
     if (result instanceof Query) {
       Query query=(Query)result;
       if (isNewEm) {
-        result=Proxy.newProxyInstance(Query.class.getClassLoader(),new Class[]{Query.class},new DeferredQueryInvocationHandler(query,target));
+        Class[] ifcs=ClassUtils.getAllInterfacesForClass(query.getClass(),this.proxyClassLoader);
+        result=Proxy.newProxyInstance(this.proxyClassLoader,ifcs,new DeferredQueryInvocationHandler(query,target));
         isNewEm=false;
       }
  else {
