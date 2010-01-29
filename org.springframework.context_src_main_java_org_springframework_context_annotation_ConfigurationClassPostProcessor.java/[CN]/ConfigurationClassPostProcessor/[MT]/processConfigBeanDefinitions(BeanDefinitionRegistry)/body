@@ -2,7 +2,7 @@
   Set<BeanDefinitionHolder> configCandidates=new LinkedHashSet<BeanDefinitionHolder>();
   for (  String beanName : registry.getBeanDefinitionNames()) {
     BeanDefinition beanDef=registry.getBeanDefinition(beanName);
-    if (checkConfigurationClassCandidate(beanDef)) {
+    if (ConfigurationClassBeanDefinitionReader.checkConfigurationClassCandidate(beanDef,this.metadataReaderFactory)) {
       configCandidates.add(new BeanDefinitionHolder(beanDef,beanName));
     }
   }
@@ -25,5 +25,6 @@
     }
   }
   parser.validate();
-  new ConfigurationClassBeanDefinitionReader(registry,this.sourceExtractor).loadBeanDefinitions(parser.getConfigurationClasses());
+  ConfigurationClassBeanDefinitionReader reader=new ConfigurationClassBeanDefinitionReader(registry,this.sourceExtractor,this.problemReporter,this.metadataReaderFactory);
+  reader.loadBeanDefinitions(parser.getConfigurationClasses());
 }

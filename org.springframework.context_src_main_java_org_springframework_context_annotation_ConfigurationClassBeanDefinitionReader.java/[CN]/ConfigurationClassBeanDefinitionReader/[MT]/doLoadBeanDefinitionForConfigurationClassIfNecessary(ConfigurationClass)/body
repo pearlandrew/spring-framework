@@ -1,0 +1,25 @@
+{
+  if (configClass.getBeanName() != null) {
+    return;
+  }
+  GenericBeanDefinition configBeanDef=new GenericBeanDefinition();
+  String className=configClass.getMetadata().getClassName();
+  configBeanDef.setBeanClassName(className);
+  if (checkConfigurationClassCandidate(configBeanDef,this.metadataReaderFactory)) {
+    String configBeanName=BeanDefinitionReaderUtils.registerWithGeneratedName(configBeanDef,this.registry);
+    configClass.setBeanName(configBeanName);
+    if (logger.isDebugEnabled()) {
+      logger.debug(String.format("Registered bean definition for imported @Configuration class %s",configBeanName));
+    }
+  }
+ else {
+    try {
+      MetadataReader reader=this.metadataReaderFactory.getMetadataReader(className);
+      AnnotationMetadata metadata=reader.getAnnotationMetadata();
+      this.problemReporter.error(new InvalidConfigurationImportProblem(className,reader.getResource(),metadata));
+    }
+ catch (    IOException ex) {
+      throw new IllegalStateException("Could not create MetadataReader for class " + className);
+    }
+  }
+}
