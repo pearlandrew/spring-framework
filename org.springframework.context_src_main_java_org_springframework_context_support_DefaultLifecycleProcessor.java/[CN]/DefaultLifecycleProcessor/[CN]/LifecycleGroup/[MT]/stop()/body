@@ -1,12 +1,16 @@
 {
-  if (members.size() == 0) {
+  if (this.members.isEmpty()) {
     return;
   }
-  Collections.sort(members,Collections.reverseOrder());
-  final CountDownLatch latch=new CountDownLatch(this.smartMemberCount);
-  for (  LifecycleGroupMember member : members) {
-    if (lifecycleBeans.containsKey(member.name)) {
-      doStop(lifecycleBeans,member.name,latch);
+  if (logger.isInfoEnabled()) {
+    logger.info("Stopping beans in phase " + this.phase);
+  }
+  Collections.sort(this.members,Collections.reverseOrder());
+  CountDownLatch latch=new CountDownLatch(this.smartMemberCount);
+  Set<String> countDownBeanNames=Collections.synchronizedSet(new LinkedHashSet<String>());
+  for (  LifecycleGroupMember member : this.members) {
+    if (this.lifecycleBeans.containsKey(member.name)) {
+      doStop(this.lifecycleBeans,member.name,latch,countDownBeanNames);
     }
  else     if (member.bean instanceof SmartLifecycle) {
       latch.countDown();
@@ -14,13 +18,11 @@
   }
   try {
     latch.await(this.timeout,TimeUnit.MILLISECONDS);
-    if (latch.getCount() != 0) {
-      if (logger.isWarnEnabled()) {
-        logger.warn("failed to shutdown beans with phase value " + this.phase + " within timeout of "+ this.timeout);
-      }
+    if (latch.getCount() > 0 && !countDownBeanNames.isEmpty() && logger.isWarnEnabled()) {
+      logger.warn("Failed to shut down " + countDownBeanNames.size() + " bean"+ (countDownBeanNames.size() > 1 ? "s" : "")+ " with phase value "+ this.phase+ " within timeout of "+ this.timeout+ ": "+ countDownBeanNames);
     }
   }
- catch (  InterruptedException e) {
+ catch (  InterruptedException ex) {
     Thread.currentThread().interrupt();
   }
 }
