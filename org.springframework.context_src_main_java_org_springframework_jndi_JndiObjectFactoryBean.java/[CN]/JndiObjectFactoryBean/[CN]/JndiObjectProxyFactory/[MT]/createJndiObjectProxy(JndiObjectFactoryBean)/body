@@ -16,7 +16,12 @@
     if (targetClass == null) {
       throw new IllegalStateException("Cannot deactivate 'lookupOnStartup' without specifying a 'proxyInterface' or 'expectedType'");
     }
-    proxyFactory.setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass,jof.beanClassLoader));
+    Class[] ifcs=ClassUtils.getAllInterfacesForClass(targetClass,jof.beanClassLoader);
+    for (    Class ifc : ifcs) {
+      if (Modifier.isPublic(ifc.getModifiers())) {
+        proxyFactory.addInterface(ifc);
+      }
+    }
   }
   if (jof.exposeAccessContext) {
     proxyFactory.addAdvice(new JndiContextExposingInterceptor(jof.getJndiTemplate()));
