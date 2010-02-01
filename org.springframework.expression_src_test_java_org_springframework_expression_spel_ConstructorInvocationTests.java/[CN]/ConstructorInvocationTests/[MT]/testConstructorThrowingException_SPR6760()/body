@@ -1,0 +1,28 @@
+{
+  SpelExpressionParser parser=new SpelExpressionParser();
+  Expression expr=parser.parseExpression("new org.springframework.expression.spel.ConstructorInvocationTests$Tester(#bar).i");
+  StandardEvaluationContext eContext=TestScenarioCreator.getTestEvaluationContext();
+  eContext.setRootObject(new Tester());
+  eContext.setVariable("bar",3);
+  Object o=expr.getValue(eContext);
+  Assert.assertEquals(o,3);
+  Assert.assertEquals(1,parser.parseExpression("counter").getValue(eContext));
+  eContext.setVariable("bar",new PlaceOfBirth("London"));
+  o=expr.getValue(eContext);
+  Assert.assertEquals(0,o);
+  eContext.setVariable("bar",3);
+  o=expr.getValue(eContext);
+  Assert.assertEquals(3,o);
+  Assert.assertEquals(2,parser.parseExpression("counter").getValue(eContext));
+  eContext.setVariable("bar",1);
+  try {
+    o=expr.getValue(eContext);
+  }
+ catch (  Exception e) {
+    int idx=e.getMessage().indexOf("Tester");
+    if (idx == -1) {
+      Assert.fail("Expected reference to Tester in :" + e.getMessage());
+    }
+  }
+  Assert.assertEquals(3,parser.parseExpression("counter").getValue(eContext));
+}

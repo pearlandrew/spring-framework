@@ -1,0 +1,24 @@
+{
+  SpelExpressionParser parser=new SpelExpressionParser();
+  Expression expr=parser.parseExpression("throwException(#bar)");
+  StandardEvaluationContext eContext=TestScenarioCreator.getTestEvaluationContext();
+  eContext.setVariable("bar",3);
+  Object o=expr.getValue(eContext);
+  Assert.assertEquals(o,3);
+  Assert.assertEquals(1,parser.parseExpression("counter").getValue(eContext));
+  eContext.setVariable("bar",new PlaceOfBirth("London"));
+  o=expr.getValue(eContext);
+  Assert.assertEquals("London",o);
+  eContext.setVariable("bar",3);
+  o=expr.getValue(eContext);
+  Assert.assertEquals(3,o);
+  Assert.assertEquals(2,parser.parseExpression("counter").getValue(eContext));
+  eContext.setVariable("bar",1);
+  try {
+    o=expr.getValue(eContext);
+  }
+ catch (  Exception e) {
+    e.printStackTrace();
+  }
+  Assert.assertEquals(3,parser.parseExpression("counter").getValue(eContext));
+}

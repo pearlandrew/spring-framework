@@ -24,6 +24,11 @@
       return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
     }
  catch (    AccessException ae) {
+      Throwable causeOfAccessException=ae.getCause();
+      Throwable rootCause=(causeOfAccessException == null ? null : causeOfAccessException.getCause());
+      if (rootCause != null) {
+        throw new SpelEvaluationException(getStartPosition(),rootCause,SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,this.name,state.getActiveContextObject().getValue().getClass().getName(),rootCause.getMessage());
+      }
       this.cachedExecutor=null;
     }
   }
