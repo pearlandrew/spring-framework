@@ -1,0 +1,14 @@
+{
+  if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
+    return method.invoke(this,args);
+  }
+ else   if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {
+    return method.invoke(this.plusOperations,args);
+  }
+  Object retVal=method.invoke(this.nativeEntityManagerFactory,args);
+  if (retVal instanceof EntityManager) {
+    EntityManager rawEntityManager=(EntityManager)retVal;
+    retVal=ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager,this);
+  }
+  return retVal;
+}

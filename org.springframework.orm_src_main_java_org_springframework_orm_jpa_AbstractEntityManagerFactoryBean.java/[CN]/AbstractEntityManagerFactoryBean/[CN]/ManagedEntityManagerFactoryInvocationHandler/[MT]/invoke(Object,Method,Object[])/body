@@ -6,18 +6,7 @@
  else     if (method.getName().equals("hashCode")) {
       return System.identityHashCode(proxy);
     }
- else     if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
-      return method.invoke(this.entityManagerFactoryInfo,args);
-    }
- else     if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {
-      return method.invoke(this.entityManagerFactoryPlusOperations,args);
-    }
-    Object retVal=method.invoke(this.targetEntityManagerFactory,args);
-    if (retVal instanceof EntityManager) {
-      EntityManager rawEntityManager=(EntityManager)retVal;
-      retVal=ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager,this.entityManagerFactoryInfo);
-    }
-    return retVal;
+    return this.entityManagerFactoryBean.invokeProxyMethod(method,args);
   }
  catch (  InvocationTargetException ex) {
     throw ex.getTargetException();

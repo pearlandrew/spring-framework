@@ -7,10 +7,9 @@
     ifcs.addAll(ClassUtils.getAllInterfacesForClassAsSet(emf.getClass(),this.beanClassLoader));
   }
   ifcs.add(EntityManagerFactoryInfo.class);
-  EntityManagerFactoryPlusOperations plusOperations=null;
   if (getJpaDialect() != null && getJpaDialect().supportsEntityManagerFactoryPlusOperations()) {
-    plusOperations=getJpaDialect().getEntityManagerFactoryPlusOperations(emf);
+    this.plusOperations=getJpaDialect().getEntityManagerFactoryPlusOperations(emf);
     ifcs.add(EntityManagerFactoryPlusOperations.class);
   }
-  return (EntityManagerFactory)Proxy.newProxyInstance(this.beanClassLoader,ifcs.toArray(new Class[ifcs.size()]),new ManagedEntityManagerFactoryInvocationHandler(emf,this,plusOperations));
+  return (EntityManagerFactory)Proxy.newProxyInstance(this.beanClassLoader,ifcs.toArray(new Class[ifcs.size()]),new ManagedEntityManagerFactoryInvocationHandler(this));
 }
