@@ -16,9 +16,25 @@
   eContext.setVariable("bar",1);
   try {
     o=expr.getValue(eContext);
+    Assert.fail();
   }
  catch (  Exception e) {
-    e.printStackTrace();
+    if (e instanceof SpelEvaluationException) {
+      e.printStackTrace();
+      Assert.fail("Should not be a SpelEvaluationException");
+    }
   }
   Assert.assertEquals(3,parser.parseExpression("counter").getValue(eContext));
+  eContext.setVariable("bar",4);
+  try {
+    o=expr.getValue(eContext);
+    Assert.fail();
+  }
+ catch (  Exception e) {
+    if (!(e instanceof SpelEvaluationException)) {
+      e.printStackTrace();
+      Assert.fail("Should have been wrapped");
+    }
+  }
+  Assert.assertEquals(4,parser.parseExpression("counter").getValue(eContext));
 }

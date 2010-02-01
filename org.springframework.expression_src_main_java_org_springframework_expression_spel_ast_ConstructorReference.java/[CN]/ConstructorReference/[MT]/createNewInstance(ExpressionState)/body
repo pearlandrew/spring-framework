@@ -16,8 +16,13 @@
       Throwable causeOfAccessException=ae.getCause();
       Throwable rootCause=(causeOfAccessException == null ? null : causeOfAccessException.getCause());
       if (rootCause != null) {
-        String typename=(String)children[0].getValueInternal(state).getValue();
-        throw new SpelEvaluationException(getStartPosition(),rootCause,SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM,typename,FormatHelper.formatMethodForMessage("",argumentTypes));
+        if (rootCause instanceof RuntimeException) {
+          throw (RuntimeException)rootCause;
+        }
+ else {
+          String typename=(String)children[0].getValueInternal(state).getValue();
+          throw new SpelEvaluationException(getStartPosition(),rootCause,SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM,typename,FormatHelper.formatMethodForMessage("",argumentTypes));
+        }
       }
       this.cachedExecutor=null;
     }

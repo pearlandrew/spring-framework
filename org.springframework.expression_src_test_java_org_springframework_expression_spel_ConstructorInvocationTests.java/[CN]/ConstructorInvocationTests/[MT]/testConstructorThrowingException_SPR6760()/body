@@ -14,9 +14,10 @@
   o=expr.getValue(eContext);
   Assert.assertEquals(3,o);
   Assert.assertEquals(2,parser.parseExpression("counter").getValue(eContext));
-  eContext.setVariable("bar",1);
+  eContext.setVariable("bar",4);
   try {
     o=expr.getValue(eContext);
+    Assert.fail("Should have failed");
   }
  catch (  Exception e) {
     int idx=e.getMessage().indexOf("Tester");
@@ -25,4 +26,16 @@
     }
   }
   Assert.assertEquals(3,parser.parseExpression("counter").getValue(eContext));
+  eContext.setVariable("bar",1);
+  try {
+    o=expr.getValue(eContext);
+    Assert.fail("Should have failed");
+  }
+ catch (  Exception e) {
+    if (e instanceof SpelEvaluationException) {
+      e.printStackTrace();
+      Assert.fail("Should not have been wrapped");
+    }
+  }
+  Assert.assertEquals(4,parser.parseExpression("counter").getValue(eContext));
 }
