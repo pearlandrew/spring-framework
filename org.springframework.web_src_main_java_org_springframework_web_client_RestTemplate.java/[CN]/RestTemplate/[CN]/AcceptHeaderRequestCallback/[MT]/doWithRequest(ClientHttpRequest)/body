@@ -1,7 +1,7 @@
 {
   if (responseType != null) {
     List<MediaType> allSupportedMediaTypes=new ArrayList<MediaType>();
-    for (    HttpMessageConverter messageConverter : getMessageConverters()) {
+    for (    HttpMessageConverter<?> messageConverter : getMessageConverters()) {
       if (messageConverter.canRead(responseType,null)) {
         List<MediaType> supportedMediaTypes=messageConverter.getSupportedMediaTypes();
         for (        MediaType supportedMediaType : supportedMediaTypes) {
@@ -13,7 +13,7 @@
       }
     }
     if (!allSupportedMediaTypes.isEmpty()) {
-      Collections.sort(allSupportedMediaTypes);
+      MediaType.sortBySpecificity(allSupportedMediaTypes);
       request.getHeaders().setAccept(allSupportedMediaTypes);
     }
   }

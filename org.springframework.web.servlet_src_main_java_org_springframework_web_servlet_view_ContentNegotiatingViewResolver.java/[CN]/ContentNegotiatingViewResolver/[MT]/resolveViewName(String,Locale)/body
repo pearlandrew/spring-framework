@@ -3,9 +3,6 @@
   Assert.isInstanceOf(ServletRequestAttributes.class,attrs);
   ServletRequestAttributes servletAttrs=(ServletRequestAttributes)attrs;
   List<MediaType> requestedMediaTypes=getMediaTypes(servletAttrs.getRequest());
-  if (requestedMediaTypes.size() > 1) {
-    Collections.sort(requestedMediaTypes);
-  }
   List<View> candidateViews=new ArrayList<View>();
   for (  ViewResolver viewResolver : this.viewResolvers) {
     View view=viewResolver.resolveViewName(viewName,locale);
@@ -16,30 +13,41 @@
   if (!CollectionUtils.isEmpty(this.defaultViews)) {
     candidateViews.addAll(this.defaultViews);
   }
-  SortedMap<MediaType,View> views=new TreeMap<MediaType,View>();
-  for (  View candidateView : candidateViews) {
-    String contentType=candidateView.getContentType();
-    if (StringUtils.hasText(contentType)) {
-      MediaType viewMediaType=MediaType.parseMediaType(contentType);
-      for (      MediaType requestedMediaType : requestedMediaTypes) {
-        if (requestedMediaType.includes(viewMediaType)) {
-          if (!views.containsKey(requestedMediaType)) {
-            views.put(requestedMediaType,candidateView);
-            break;
-          }
+  MediaType bestRequestedMediaType=null;
+  View bestView=null;
+  for (  MediaType requestedMediaType : requestedMediaTypes) {
+    for (    View candidateView : candidateViews) {
+      if (StringUtils.hasText(candidateView.getContentType())) {
+        MediaType candidateContentType=MediaType.parseMediaType(candidateView.getContentType());
+        if (requestedMediaType.includes(candidateContentType)) {
+          bestRequestedMediaType=requestedMediaType;
+          bestView=candidateView;
+          break;
         }
       }
     }
-  }
-  if (!views.isEmpty()) {
-    MediaType mediaType=views.firstKey();
-    View view=views.get(mediaType);
-    if (logger.isDebugEnabled()) {
-      logger.debug("Returning [" + view + "] based on requested media type '"+ mediaType+ "'");
+    if (bestView != null) {
+      break;
     }
-    return view;
+  }
+  if (bestView != null) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Returning [" + bestView + "] based on requested media type '"+ bestRequestedMediaType+ "'");
+    }
+    return bestView;
   }
  else {
-    return useNotAcceptableStatusCode ? new NotAcceptableView() : null;
+    if (useNotAcceptableStatusCode) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("No acceptable view found; returning 406 (Not Acceptable) status code");
+      }
+      return NOT_ACCEPTABLE_VIEW;
+    }
+ else {
+      if (logger.isDebugEnabled()) {
+        logger.debug("No acceptable view found; returning null");
+      }
+      return null;
+    }
   }
 }
