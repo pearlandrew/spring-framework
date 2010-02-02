@@ -3,6 +3,20 @@
     TypeConverter typeConverter=context.getTypeConverter();
     Class<?> type=(targetObject instanceof Class ? (Class<?>)targetObject : targetObject.getClass());
     Method[] methods=type.getMethods();
+    MethodFilter methodfilter=(filters == null ? null : filters.get(type));
+    if (methodfilter != null) {
+      List<Method> methodsForFiltering=new ArrayList<Method>();
+      for (      Method method : methods) {
+        methodsForFiltering.add(method);
+      }
+      List<Method> methodsFiltered=methodfilter.filter(methodsForFiltering);
+      if (methodsFiltered == null || methodsFiltered.size() == 0) {
+        methods=NO_METHODS;
+      }
+ else {
+        methods=methodsFiltered.toArray(new Method[methodsFiltered.size()]);
+      }
+    }
     Method closeMatch=null;
     int[] argsToConvert=null;
     boolean multipleOptions=false;
