@@ -1,0 +1,15 @@
+{
+  if (bean instanceof ApplicationListener) {
+    Boolean flag=this.singletonNames.get(beanName);
+    if (Boolean.TRUE.equals(flag)) {
+      addApplicationListener((ApplicationListener)bean);
+    }
+ else     if (flag == null) {
+      if (logger.isWarnEnabled() && !containsBean(beanName)) {
+        logger.warn("Inner bean '" + beanName + "' implements ApplicationListener interface "+ "but is not reachable for event multicasting by its containing ApplicationContext "+ "because it does not have singleton scope. Only top-level listener beans are allowed "+ "to be of non-singleton scope.");
+      }
+      this.singletonNames.put(beanName,Boolean.FALSE);
+    }
+  }
+  return bean;
+}
