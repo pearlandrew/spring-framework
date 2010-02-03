@@ -6,18 +6,24 @@
     fullType="*/*";
   }
   int subIndex=fullType.indexOf('/');
+  if (subIndex == -1) {
+    throw new IllegalArgumentException("\"" + mediaType + "\" does not contain '/'");
+  }
+  if (subIndex == fullType.length() - 1) {
+    throw new IllegalArgumentException("\"" + mediaType + "\" does not contain subtype after '/'");
+  }
   String type=fullType.substring(0,subIndex);
   String subtype=fullType.substring(subIndex + 1,fullType.length());
   Map<String,String> parameters=null;
   if (parts.length > 1) {
     parameters=new LinkedHashMap<String,String>(parts.length - 1);
     for (int i=1; i < parts.length; i++) {
-      String part=parts[i];
-      int eqIndex=part.indexOf('=');
+      String parameter=parts[i];
+      int eqIndex=parameter.indexOf('=');
       if (eqIndex != -1) {
-        String name=part.substring(0,eqIndex);
-        String value=part.substring(eqIndex + 1,part.length());
-        parameters.put(name,value);
+        String attribute=parameter.substring(0,eqIndex);
+        String value=parameter.substring(eqIndex + 1,parameter.length());
+        parameters.put(attribute,value);
       }
     }
   }
