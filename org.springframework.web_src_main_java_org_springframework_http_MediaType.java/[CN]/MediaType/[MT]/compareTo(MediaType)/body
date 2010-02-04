@@ -1,5 +1,34 @@
 {
-  String s1=this.toString();
-  String s2=other.toString();
-  return s1.compareToIgnoreCase(s2);
+  int comp=this.type.compareToIgnoreCase(other.type);
+  if (comp != 0) {
+    return comp;
+  }
+  comp=this.subtype.compareToIgnoreCase(other.subtype);
+  if (comp != 0) {
+    return comp;
+  }
+  comp=this.parameters.size() - other.parameters.size();
+  if (comp != 0) {
+    return comp;
+  }
+  Iterator<String> thisAttributes=new TreeSet<String>(this.parameters.keySet()).iterator();
+  Iterator<String> otherAttributes=new TreeSet<String>(other.parameters.keySet()).iterator();
+  while (thisAttributes.hasNext()) {
+    String thisAttribute=thisAttributes.next();
+    String otherAttribute=otherAttributes.next();
+    comp=thisAttribute.compareToIgnoreCase(otherAttribute);
+    if (comp != 0) {
+      return comp;
+    }
+    String thisValue=this.parameters.get(thisAttribute);
+    String otherValue=other.parameters.get(otherAttribute);
+    if (otherValue == null) {
+      otherValue="";
+    }
+    comp=thisValue.compareTo(otherValue);
+    if (comp != 0) {
+      return comp;
+    }
+  }
+  return 0;
 }
