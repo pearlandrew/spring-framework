@@ -50,7 +50,15 @@
     if (methodParam != null) {
       methodParam.decreaseNestingLevel();
     }
-    convertedCopy.add(convertedElement);
+    try {
+      convertedCopy.add(convertedElement);
+    }
+ catch (    Throwable ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Collection type [" + original.getClass().getName() + "] seems to be read-only - injecting original Collection as-is",ex);
+      }
+      return original;
+    }
     originalAllowed=originalAllowed && (element == convertedElement);
   }
   return (originalAllowed ? original : convertedCopy);
