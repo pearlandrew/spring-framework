@@ -1,15 +1,14 @@
 {
   MockServletContext sc=new MockServletContext();
   TilesConfigurer tc=new TilesConfigurer();
-  tc.setDefinitions(new String[]{"/org/springframework/web/servlet/**/tiles-definitions.xml"});
+  tc.setDefinitions(new String[]{"/org/springframework/web/servlet/view/tiles2/tiles-definitions.xml"});
   Properties props=new Properties();
   props.setProperty(TilesContainerFactory.ATTRIBUTE_EVALUATOR_INIT_PARAM,DirectAttributeEvaluator.class.getName());
   tc.setTilesProperties(props);
   tc.setServletContext(sc);
   tc.afterPropertiesSet();
   BasicTilesContainer container=(BasicTilesContainer)ServletUtil.getContainer(sc);
-  TilesApplicationContext appContext=new ServletTilesApplicationContext(sc);
-  TilesRequestContext requestContext=new ServletTilesRequestContext(appContext,new MockHttpServletRequest(),new MockHttpServletResponse());
+  TilesRequestContext requestContext=new ServletTilesRequestContext(container.getApplicationContext(),new MockHttpServletRequest(),new MockHttpServletResponse());
   assertNotNull(container.getDefinitionsFactory().getDefinition("test",requestContext));
   tc.destroy();
 }
