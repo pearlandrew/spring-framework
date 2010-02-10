@@ -1,5 +1,10 @@
 {
-  if (isActive()) {
+  boolean actuallyClose;
+synchronized (this.activeMonitor) {
+    actuallyClose=this.active && !this.closed;
+    this.closed=true;
+  }
+  if (actuallyClose) {
     if (logger.isInfoEnabled()) {
       logger.info("Closing " + this);
     }
