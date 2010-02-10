@@ -2,5 +2,36 @@
   SpringTilesApplicationContextFactory factory=new SpringTilesApplicationContextFactory();
   factory.init(this.tilesPropertyMap);
   TilesApplicationContext preliminaryContext=factory.createApplicationContext(this.servletContext);
-  createTilesInitializer().initialize(preliminaryContext);
+  if (this.tilesInitializer == null) {
+    this.tilesInitializer=createTilesInitializer();
+  }
+  this.tilesInitializer.initialize(preliminaryContext);
+  if (this.overrideLocaleResolver) {
+    try {
+      BasicTilesContainer container=(BasicTilesContainer)ServletUtil.getContainer(this.servletContext);
+      DefinitionsFactory definitionsFactory=container.getDefinitionsFactory();
+      Method setter=definitionsFactory.getClass().getMethod("setLocaleResolver",LocaleResolver.class);
+      setter.invoke(definitionsFactory,new SpringLocaleResolver());
+    }
+ catch (    Exception ex) {
+      throw new IllegalStateException("Cannot override LocaleResolver with SpringLocaleResolver",ex);
+    }
+  }
+  if (jsp21Present && this.tilesInitializer instanceof SpringTilesInitializer) {
+    try {
+      BasicTilesContainer container=(BasicTilesContainer)ServletUtil.getContainer(this.servletContext);
+      Class aef=getClass().getClassLoader().loadClass("org.apache.tiles.evaluator.AttributeEvaluatorFactory");
+      Class baef=getClass().getClassLoader().loadClass("org.apache.tiles.evaluator.BasicAttributeEvaluatorFactory");
+      Constructor baefCtor=baef.getConstructor(AttributeEvaluator.class);
+      ELAttributeEvaluator evaluator=new ELAttributeEvaluator();
+      evaluator.setApplicationContext(container.getApplicationContext());
+      evaluator.init(new HashMap<String,String>());
+      Object baefValue=baefCtor.newInstance(evaluator);
+      Method setter=container.getClass().getMethod("setAttributeEvaluatorFactory",aef);
+      setter.invoke(container,baefValue);
+    }
+ catch (    Exception ex) {
+      throw new IllegalStateException("Cannot activate ELAttributeEvaluator",ex);
+    }
+  }
 }
