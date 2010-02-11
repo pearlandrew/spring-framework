@@ -2,8 +2,11 @@
   Class<?> declaringClass=ctor.getDeclaringClass();
   Map<Member,String[]> map=parameterNamesCache.get(declaringClass);
   if (map == null) {
-    map=cacheClass(declaringClass);
+    map=inspectClass(declaringClass);
+    parameterNamesCache.put(declaringClass,map);
   }
-  String[] paramNames=map.get(ctor);
-  return (paramNames == EMPTY_NAMES_ARRAY ? null : paramNames);
+  if (map != NO_DEBUG_INFO_MAP) {
+    return map.get(ctor);
+  }
+  return null;
 }
