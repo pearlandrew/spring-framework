@@ -1,17 +1,12 @@
 {
-  String[] paramNames=this.parameterNamesCache.get(method);
-  if (paramNames == null) {
-    try {
-      paramNames=visitMethod(method).getParameterNames();
-      if (paramNames != null) {
-        this.parameterNamesCache.put(method,paramNames);
-      }
-    }
- catch (    IOException ex) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("IOException whilst attempting to read '.class' file for class [" + method.getDeclaringClass().getName() + "] - unable to determine parameter names for method: "+ method,ex);
-      }
-    }
+  Class<?> declaringClass=method.getDeclaringClass();
+  Map<Member,String[]> map=parameterNamesCache.get(declaringClass);
+  if (map == null) {
+    map=cacheClass(declaringClass);
   }
-  return paramNames;
+  if (map != EMPTY_MAP) {
+    String[] paramNames=map.get(method);
+    return (paramNames == EMPTY_NAMES_ARRAY ? null : paramNames);
+  }
+  return null;
 }
