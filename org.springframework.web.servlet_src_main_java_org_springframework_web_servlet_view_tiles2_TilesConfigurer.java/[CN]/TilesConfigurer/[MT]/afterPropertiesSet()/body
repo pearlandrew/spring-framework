@@ -17,21 +17,8 @@
       throw new IllegalStateException("Cannot override LocaleResolver with SpringLocaleResolver",ex);
     }
   }
-  if (jsp21Present && this.tilesInitializer instanceof SpringTilesInitializer) {
-    try {
-      BasicTilesContainer container=(BasicTilesContainer)ServletUtil.getContainer(this.servletContext);
-      Class aef=getClass().getClassLoader().loadClass("org.apache.tiles.evaluator.AttributeEvaluatorFactory");
-      Class baef=getClass().getClassLoader().loadClass("org.apache.tiles.evaluator.BasicAttributeEvaluatorFactory");
-      Constructor baefCtor=baef.getConstructor(AttributeEvaluator.class);
-      ELAttributeEvaluator evaluator=new ELAttributeEvaluator();
-      evaluator.setApplicationContext(container.getApplicationContext());
-      evaluator.init(new HashMap<String,String>());
-      Object baefValue=baefCtor.newInstance(evaluator);
-      Method setter=container.getClass().getMethod("setAttributeEvaluatorFactory",aef);
-      setter.invoke(container,baefValue);
-    }
- catch (    Exception ex) {
-      throw new IllegalStateException("Cannot activate ELAttributeEvaluator",ex);
-    }
+  if (tilesElPresent && this.tilesInitializer instanceof SpringTilesInitializer) {
+    BasicTilesContainer container=(BasicTilesContainer)ServletUtil.getContainer(this.servletContext);
+    TilesElActivator.registerEvaluator(container);
   }
 }

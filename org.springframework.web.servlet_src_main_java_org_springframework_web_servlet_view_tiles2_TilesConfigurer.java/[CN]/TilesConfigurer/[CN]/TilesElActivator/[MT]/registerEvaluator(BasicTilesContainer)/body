@@ -1,0 +1,17 @@
+{
+  try {
+    ClassLoader cl=TilesElActivator.class.getClassLoader();
+    Class aef=cl.loadClass("org.apache.tiles.evaluator.AttributeEvaluatorFactory");
+    Class baef=cl.loadClass("org.apache.tiles.evaluator.BasicAttributeEvaluatorFactory");
+    Constructor baefCtor=baef.getConstructor(AttributeEvaluator.class);
+    ELAttributeEvaluator evaluator=new ELAttributeEvaluator();
+    evaluator.setApplicationContext(container.getApplicationContext());
+    evaluator.init(new HashMap<String,String>());
+    Object baefValue=baefCtor.newInstance(evaluator);
+    Method setter=container.getClass().getMethod("setAttributeEvaluatorFactory",aef);
+    setter.invoke(container,baefValue);
+  }
+ catch (  Exception ex) {
+    throw new IllegalStateException("Cannot activate ELAttributeEvaluator",ex);
+  }
+}
