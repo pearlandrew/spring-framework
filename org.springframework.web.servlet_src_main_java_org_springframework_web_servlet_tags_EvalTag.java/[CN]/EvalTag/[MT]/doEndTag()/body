@@ -1,0 +1,19 @@
+{
+  Expression expression=this.expressionParser.parseExpression(this.expression);
+  EvaluationContext context=createEvaluationContext();
+  if (this.var == null) {
+    try {
+      String result=expression.getValue(context,String.class);
+      result=isHtmlEscape() ? HtmlUtils.htmlEscape(result) : result;
+      result=this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(result) : result;
+      pageContext.getOut().print(result);
+    }
+ catch (    IOException e) {
+      throw new JspException(e);
+    }
+  }
+ else {
+    pageContext.setAttribute(var,expression.getValue(context),scope);
+  }
+  return EVAL_PAGE;
+}
