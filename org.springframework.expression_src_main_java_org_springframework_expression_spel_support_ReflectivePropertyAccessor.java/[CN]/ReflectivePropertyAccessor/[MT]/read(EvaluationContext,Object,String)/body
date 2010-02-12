@@ -19,7 +19,15 @@
     if (method == null) {
       method=findGetterForProperty(name,type,target instanceof Class);
       if (method != null) {
-        invoker=new InvokerPair(method,new TypeDescriptor(new MethodParameter(method,-1)));
+        PropertyDescriptor propertyDescriptor=null;
+        try {
+          propertyDescriptor=new PropertyDescriptor(name,method,null);
+        }
+ catch (        IntrospectionException ex) {
+          throw new AccessException("Unable to access property '" + name + "' through getter "+ method,ex);
+        }
+        TypeDescriptor typeDescriptor=new BeanTypeDescriptor(propertyDescriptor,new MethodParameter(method,-1),method.getReturnType());
+        invoker=new InvokerPair(method,typeDescriptor);
         this.readerCache.put(cacheKey,invoker);
       }
     }
