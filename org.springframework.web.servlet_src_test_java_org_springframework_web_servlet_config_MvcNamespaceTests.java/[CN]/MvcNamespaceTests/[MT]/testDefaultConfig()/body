@@ -1,14 +1,16 @@
 {
   XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(appContext);
   reader.loadBeanDefinitions(new ClassPathResource("mvc-config.xml",getClass()));
-  assertEquals(4,appContext.getBeanDefinitionCount());
+  assertEquals(5,appContext.getBeanDefinitionCount());
   appContext.refresh();
   DefaultAnnotationHandlerMapping mapping=appContext.getBean(DefaultAnnotationHandlerMapping.class);
   assertNotNull(mapping);
   assertEquals(0,mapping.getOrder());
+  TestController handler=new TestController();
+  mapping.setDefaultHandler(handler);
   AnnotationMethodHandlerAdapter adapter=appContext.getBean(AnnotationMethodHandlerAdapter.class);
   assertNotNull(adapter);
-  HttpMessageConverter[] messageConverters=adapter.getMessageConverters();
+  HttpMessageConverter<?>[] messageConverters=adapter.getMessageConverters();
   assertNotNull(messageConverters);
   assertEquals(6,messageConverters.length);
   assertTrue(ByteArrayHttpMessageConverter.class.equals(messageConverters[0].getClass()));
@@ -21,10 +23,15 @@
   assertNotNull(appContext.getBean(ConversionService.class));
   assertNotNull(appContext.getBean(LocalValidatorFactoryBean.class));
   assertNotNull(appContext.getBean(Validator.class));
-  TestController handler=new TestController();
   MockHttpServletRequest request=new MockHttpServletRequest();
   request.addParameter("date","2009-10-31");
   MockHttpServletResponse response=new MockHttpServletResponse();
+  HandlerExecutionChain chain=mapping.getHandler(request);
+  assertEquals(2,chain.getInterceptors().length);
+  assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
+  ConversionServiceHandlerInterceptor interceptor=(ConversionServiceHandlerInterceptor)chain.getInterceptors()[1];
+  interceptor.preHandle(request,response,handler);
+  assertSame(appContext.getBean(ConversionService.class),request.getAttribute(ConversionService.class.getName()));
   adapter.handle(request,response,handler);
   assertTrue(handler.recordedValidationError);
 }

@@ -1,13 +1,23 @@
 {
   XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(appContext);
   reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-conversion-service.xml",getClass()));
-  assertEquals(4,appContext.getBeanDefinitionCount());
+  assertEquals(5,appContext.getBeanDefinitionCount());
   appContext.refresh();
-  AnnotationMethodHandlerAdapter adapter=appContext.getBean(AnnotationMethodHandlerAdapter.class);
-  assertNotNull(adapter);
+  DefaultAnnotationHandlerMapping mapping=appContext.getBean(DefaultAnnotationHandlerMapping.class);
+  assertNotNull(mapping);
   TestController handler=new TestController();
+  mapping.setDefaultHandler(handler);
   MockHttpServletRequest request=new MockHttpServletRequest();
+  request.setRequestURI("/accounts/12345");
   request.addParameter("date","2009-10-31");
   MockHttpServletResponse response=new MockHttpServletResponse();
+  HandlerExecutionChain chain=mapping.getHandler(request);
+  assertEquals(2,chain.getInterceptors().length);
+  assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
+  ConversionServiceHandlerInterceptor interceptor=(ConversionServiceHandlerInterceptor)chain.getInterceptors()[1];
+  interceptor.preHandle(request,response,handler);
+  assertSame(appContext.getBean("conversionService"),request.getAttribute(ConversionService.class.getName()));
+  AnnotationMethodHandlerAdapter adapter=appContext.getBean(AnnotationMethodHandlerAdapter.class);
+  assertNotNull(adapter);
   adapter.handle(request,response,handler);
 }

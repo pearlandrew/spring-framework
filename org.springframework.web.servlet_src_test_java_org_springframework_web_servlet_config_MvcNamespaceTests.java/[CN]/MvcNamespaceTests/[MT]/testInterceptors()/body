@@ -1,7 +1,7 @@
 {
   XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(appContext);
   reader.loadBeanDefinitions(new ClassPathResource("mvc-config-interceptors.xml",getClass()));
-  assertEquals(7,appContext.getBeanDefinitionCount());
+  assertEquals(8,appContext.getBeanDefinitionCount());
   appContext.refresh();
   DefaultAnnotationHandlerMapping mapping=appContext.getBean(DefaultAnnotationHandlerMapping.class);
   assertNotNull(mapping);
@@ -11,15 +11,16 @@
   request.addParameter("locale","en");
   request.addParameter("theme","green");
   HandlerExecutionChain chain=mapping.getHandler(request);
-  assertEquals(3,chain.getInterceptors().length);
-  assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
-  assertTrue(chain.getInterceptors()[2] instanceof ThemeChangeInterceptor);
+  assertEquals(4,chain.getInterceptors().length);
+  assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceHandlerInterceptor);
+  assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
+  assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
   request.setRequestURI("/logged/accounts/12345");
   chain=mapping.getHandler(request);
-  assertEquals(4,chain.getInterceptors().length);
-  assertTrue(chain.getInterceptors()[3] instanceof WebRequestHandlerInterceptorAdapter);
+  assertEquals(5,chain.getInterceptors().length);
+  assertTrue(chain.getInterceptors()[4] instanceof WebRequestHandlerInterceptorAdapter);
   request.setRequestURI("/foo/logged");
   chain=mapping.getHandler(request);
-  assertEquals(4,chain.getInterceptors().length);
-  assertTrue(chain.getInterceptors()[3] instanceof WebRequestHandlerInterceptorAdapter);
+  assertEquals(5,chain.getInterceptors().length);
+  assertTrue(chain.getInterceptors()[4] instanceof WebRequestHandlerInterceptorAdapter);
 }
