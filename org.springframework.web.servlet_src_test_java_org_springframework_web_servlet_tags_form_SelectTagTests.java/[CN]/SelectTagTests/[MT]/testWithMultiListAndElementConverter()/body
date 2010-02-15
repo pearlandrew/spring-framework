@@ -3,6 +3,19 @@
   list.add(Country.COUNTRY_UK);
   list.add(Country.COUNTRY_AT);
   this.bean.setSomeList(list);
+  BeanPropertyBindingResult errors=new BeanPropertyBindingResult(this.bean,COMMAND_NAME);
+  FormattingConversionService cs=new FormattingConversionService();
+  cs.addFormatterForFieldType(Country.class,new Formatter<Country>(){
+    public String print(    Country object,    Locale locale){
+      return object.getName();
+    }
+    public Country parse(    String text,    Locale locale) throws ParseException {
+      return new Country(text,text);
+    }
+  }
+);
+  errors.initConversion(cs);
+  exposeBindingResult(errors);
   this.tag.setPath("someList");
   this.tag.setItems("${countries}");
   this.tag.setItemValue("isoCode");
@@ -21,8 +34,8 @@
   assertEquals("Incorrect number of children",4,children.size());
   Element e=(Element)selectElement.selectSingleNode("option[@value = 'UK']");
   assertEquals("UK node not selected","selected",e.attribute("selected").getValue());
-  assertEquals("United Kingdom(UK)",e.getText());
+  assertEquals("United Kingdom",e.getText());
   e=(Element)selectElement.selectSingleNode("option[@value = 'AT']");
   assertEquals("AT node not selected","selected",e.attribute("selected").getValue());
-  assertEquals("Austria(AT)",e.getText());
+  assertEquals("Austria",e.getText());
 }
