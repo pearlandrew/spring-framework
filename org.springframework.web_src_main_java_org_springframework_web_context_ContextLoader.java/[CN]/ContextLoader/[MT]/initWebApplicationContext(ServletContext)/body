@@ -12,7 +12,13 @@
     ApplicationContext parent=loadParentContext(servletContext);
     this.context=createWebApplicationContext(servletContext,parent);
     servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,this.context);
-    currentContextPerThread.put(Thread.currentThread().getContextClassLoader(),this.context);
+    ClassLoader ccl=Thread.currentThread().getContextClassLoader();
+    if (ccl == ContextLoader.class.getClassLoader()) {
+      currentContext=this.context;
+    }
+ else     if (ccl != null) {
+      currentContextPerThread.put(ccl,this.context);
+    }
     if (logger.isDebugEnabled()) {
       logger.debug("Published root WebApplicationContext as ServletContext attribute with name [" + WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "]");
     }

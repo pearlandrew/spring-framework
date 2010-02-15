@@ -6,7 +6,13 @@
     }
   }
   finally {
-    currentContextPerThread.remove(Thread.currentThread().getContextClassLoader());
+    ClassLoader ccl=Thread.currentThread().getContextClassLoader();
+    if (ccl == ContextLoader.class.getClassLoader()) {
+      currentContext=null;
+    }
+ else     if (ccl != null) {
+      currentContextPerThread.remove(ccl);
+    }
     servletContext.removeAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
     if (this.parentContextRef != null) {
       this.parentContextRef.release();
