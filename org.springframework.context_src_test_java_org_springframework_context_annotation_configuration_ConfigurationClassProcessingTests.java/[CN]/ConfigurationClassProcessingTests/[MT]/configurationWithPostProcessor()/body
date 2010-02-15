@@ -1,11 +1,16 @@
 {
-  BeanFactory factory=new AnnotationConfigApplicationContext(ConfigWithPostProcessor.class);
+  AnnotationConfigApplicationContext factory=new AnnotationConfigApplicationContext();
+  factory.register(ConfigWithPostProcessor.class);
+  RootBeanDefinition placeholderConfigurer=new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
+  placeholderConfigurer.getPropertyValues().add("properties","myProp=myValue");
+  factory.registerBeanDefinition("placeholderConfigurer",placeholderConfigurer);
+  factory.refresh();
   TestBean foo=factory.getBean("foo",TestBean.class);
   ITestBean bar=factory.getBean("bar",ITestBean.class);
   ITestBean baz=factory.getBean("baz",ITestBean.class);
-  assertEquals("foo-processed",foo.getName());
-  assertEquals("bar-processed",bar.getName());
-  assertEquals("baz-processed",baz.getName());
+  assertEquals("foo-processed-myValue",foo.getName());
+  assertEquals("bar-processed-myValue",bar.getName());
+  assertEquals("baz-processed-myValue",baz.getName());
   SpousyTestBean listener=factory.getBean("listenerTestBean",SpousyTestBean.class);
   assertTrue(listener.refreshed);
 }
