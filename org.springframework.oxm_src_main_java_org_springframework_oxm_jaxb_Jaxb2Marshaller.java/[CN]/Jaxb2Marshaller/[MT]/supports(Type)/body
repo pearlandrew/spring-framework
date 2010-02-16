@@ -1,13 +1,23 @@
 {
   if (genericType instanceof ParameterizedType) {
     ParameterizedType parameterizedType=(ParameterizedType)genericType;
-    if (JAXBElement.class.equals(parameterizedType.getRawType()) && parameterizedType.getActualTypeArguments().length == 1 && parameterizedType.getActualTypeArguments()[0] instanceof Class) {
-      Class typeArgument=(Class)parameterizedType.getActualTypeArguments()[0];
-      return supportsInternal(typeArgument,false);
+    if (JAXBElement.class.equals(parameterizedType.getRawType()) && parameterizedType.getActualTypeArguments().length == 1) {
+      Type typeArgument=parameterizedType.getActualTypeArguments()[0];
+      if (typeArgument instanceof Class) {
+        Class<?> classArgument=(Class<?>)typeArgument;
+        if (isPrimitiveWrapper(classArgument) || isStandardClass(classArgument)) {
+          return true;
+        }
+        return supportsInternal(classArgument,false);
+      }
+ else       if (typeArgument instanceof GenericArrayType) {
+        GenericArrayType arrayType=(GenericArrayType)typeArgument;
+        return arrayType.getGenericComponentType().equals(Byte.TYPE);
+      }
     }
   }
  else   if (genericType instanceof Class) {
-    Class clazz=(Class)genericType;
+    Class<?> clazz=(Class<?>)genericType;
     return supportsInternal(clazz,true);
   }
   return false;

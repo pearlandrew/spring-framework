@@ -1,0 +1,22 @@
+{
+  final StandardClasses standardClasses=new StandardClasses();
+  ReflectionUtils.doWithMethods(StandardClasses.class,new ReflectionUtils.MethodCallback(){
+    public void doWith(    Method method) throws IllegalArgumentException, IllegalAccessException {
+      Type returnType=method.getGenericReturnType();
+      assertTrue("Jaxb2Marshaller does not support JAXBElement<" + method.getName().substring(13) + ">",marshaller.supports(returnType));
+      try {
+        Object returnValue=method.invoke(standardClasses);
+        marshaller.marshal(returnValue,new StreamResult(new ByteArrayOutputStream()));
+      }
+ catch (      InvocationTargetException e) {
+        fail(e.getMessage());
+      }
+    }
+  }
+,new ReflectionUtils.MethodFilter(){
+    public boolean matches(    Method method){
+      return method.getName().startsWith("standardClass");
+    }
+  }
+);
+}
