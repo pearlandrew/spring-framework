@@ -1,4 +1,11 @@
 {
+  boolean activateEl=false;
+  if (tilesElPresent) {
+    activateEl=new JspExpressionChecker().isExpressionFactoryAvailable();
+    if (!this.tilesPropertyMap.containsKey(TilesContainerFactory.ATTRIBUTE_EVALUATOR_INIT_PARAM)) {
+      this.tilesPropertyMap.put(TilesContainerFactory.ATTRIBUTE_EVALUATOR_INIT_PARAM,activateEl ? "org.apache.tiles.evaluator.el.ELAttributeEvaluator" : DirectAttributeEvaluator.class.getName());
+    }
+  }
   SpringTilesApplicationContextFactory factory=new SpringTilesApplicationContextFactory();
   factory.init(this.tilesPropertyMap);
   TilesApplicationContext preliminaryContext=factory.createApplicationContext(this.servletContext);
@@ -7,6 +14,7 @@
   }
   this.tilesInitializer.initialize(preliminaryContext);
   if (this.overrideLocaleResolver) {
+    logger.debug("Registering Tiles 2.2 LocaleResolver for complete-autoload setup");
     try {
       BasicTilesContainer container=(BasicTilesContainer)ServletUtil.getContainer(this.servletContext);
       DefinitionsFactory definitionsFactory=container.getDefinitionsFactory();
@@ -17,8 +25,8 @@
       throw new IllegalStateException("Cannot override LocaleResolver with SpringLocaleResolver",ex);
     }
   }
-  if (tilesElPresent && this.tilesInitializer instanceof SpringTilesInitializer) {
+  if (activateEl && this.tilesInitializer instanceof SpringTilesInitializer) {
     BasicTilesContainer container=(BasicTilesContainer)ServletUtil.getContainer(this.servletContext);
-    TilesElActivator.registerEvaluator(container);
+    new TilesElActivator().registerEvaluator(container);
   }
 }
