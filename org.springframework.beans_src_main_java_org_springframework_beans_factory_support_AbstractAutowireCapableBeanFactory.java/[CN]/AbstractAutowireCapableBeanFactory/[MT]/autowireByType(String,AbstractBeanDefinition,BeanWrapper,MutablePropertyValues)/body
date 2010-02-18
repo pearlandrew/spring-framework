@@ -8,20 +8,22 @@
   for (  String propertyName : propertyNames) {
     try {
       PropertyDescriptor pd=bw.getPropertyDescriptor(propertyName);
-      MethodParameter methodParam=BeanUtils.getWriteMethodParameter(pd);
-      boolean eager=!PriorityOrdered.class.isAssignableFrom(bw.getWrappedClass());
-      DependencyDescriptor desc=new DependencyDescriptor(methodParam,false,eager);
-      Object autowiredArgument=resolveDependency(desc,beanName,autowiredBeanNames,converter);
-      if (autowiredArgument != null) {
-        pvs.add(propertyName,autowiredArgument);
-      }
-      for (      String autowiredBeanName : autowiredBeanNames) {
-        registerDependentBean(autowiredBeanName,beanName);
-        if (logger.isDebugEnabled()) {
-          logger.debug("Autowiring by type from bean name '" + beanName + "' via property '"+ propertyName+ "' to bean named '"+ autowiredBeanName+ "'");
+      if (!Object.class.equals(pd.getPropertyType())) {
+        MethodParameter methodParam=BeanUtils.getWriteMethodParameter(pd);
+        boolean eager=!PriorityOrdered.class.isAssignableFrom(bw.getWrappedClass());
+        DependencyDescriptor desc=new DependencyDescriptor(methodParam,false,eager);
+        Object autowiredArgument=resolveDependency(desc,beanName,autowiredBeanNames,converter);
+        if (autowiredArgument != null) {
+          pvs.add(propertyName,autowiredArgument);
         }
+        for (        String autowiredBeanName : autowiredBeanNames) {
+          registerDependentBean(autowiredBeanName,beanName);
+          if (logger.isDebugEnabled()) {
+            logger.debug("Autowiring by type from bean name '" + beanName + "' via property '"+ propertyName+ "' to bean named '"+ autowiredBeanName+ "'");
+          }
+        }
+        autowiredBeanNames.clear();
       }
-      autowiredBeanNames.clear();
     }
  catch (    BeansException ex) {
       throw new UnsatisfiedDependencyException(mbd.getResourceDescription(),beanName,propertyName,ex);
