@@ -15,8 +15,9 @@
     }
   }
   String bestPatternMatch=null;
+  Comparator<String> patternComparator=getPathMatcher().getPatternComparator(urlPath);
   if (!matchingPatterns.isEmpty()) {
-    Collections.sort(matchingPatterns,getPathMatcher().getPatternComparator(urlPath));
+    Collections.sort(matchingPatterns,patternComparator);
     if (logger.isDebugEnabled()) {
       logger.debug("Matching patterns for request [" + urlPath + "] are "+ matchingPatterns);
     }
@@ -30,7 +31,15 @@
     }
     validateHandler(handler,request);
     String pathWithinMapping=getPathMatcher().extractPathWithinPattern(bestPatternMatch,urlPath);
-    Map<String,String> uriTemplateVariables=getPathMatcher().extractUriTemplateVariables(bestPatternMatch,urlPath);
+    Map<String,String> uriTemplateVariables=new LinkedHashMap<String,String>();
+    for (    String matchingPattern : matchingPatterns) {
+      if (patternComparator.compare(bestPatternMatch,matchingPattern) == 0) {
+        uriTemplateVariables.putAll(getPathMatcher().extractUriTemplateVariables(matchingPattern,urlPath));
+      }
+    }
+    if (logger.isDebugEnabled()) {
+      logger.debug("URI Template variables for request [" + urlPath + "] are "+ uriTemplateVariables);
+    }
     return buildPathExposingHandler(handler,bestPatternMatch,pathWithinMapping,uriTemplateVariables);
   }
   return null;
