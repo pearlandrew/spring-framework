@@ -4,7 +4,10 @@
       GenericWebApplicationContext wac=new GenericWebApplicationContext();
       wac.registerBeanDefinition("controller",new RootBeanDefinition(RequestBodyController.class));
       RootBeanDefinition adapterDef=new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-      adapterDef.getPropertyValues().add("messageConverters",new NotReadableMessageConverter());
+      List<HttpMessageConverter> messageConverters=new ArrayList<HttpMessageConverter>();
+      messageConverters.add(new StringHttpMessageConverter());
+      messageConverters.add(new SimpleMessageConverter(new MediaType("application","json"),MediaType.ALL));
+      adapterDef.getPropertyValues().add("messageConverters",messageConverters);
       wac.registerBeanDefinition("handlerAdapter",adapterDef);
       wac.refresh();
       return wac;
@@ -13,10 +16,10 @@
 ;
   servlet.init(new MockServletConfig());
   MockHttpServletRequest request=new MockHttpServletRequest("PUT","/something");
-  String requestBody="Hello World";
-  request.setContent(requestBody.getBytes("UTF-8"));
-  request.addHeader("Content-Type","application/pdf");
+  request.setContent("Hello World".getBytes("UTF-8"));
+  request.addHeader("Content-Type","text/plain; charset=utf-8");
+  request.addHeader("Accept","application/json, text/javascript, */*");
   MockHttpServletResponse response=new MockHttpServletResponse();
   servlet.service(request,response);
-  assertEquals("Invalid response status code",HttpServletResponse.SC_BAD_REQUEST,response.getStatus());
+  assertEquals("Invalid response status code","application/json",response.getHeader("Content-Type"));
 }
