@@ -1,0 +1,26 @@
+{
+  AnnotationMethodHandlerAdapter.RequestMappingInfo html=new AnnotationMethodHandlerAdapter.RequestMappingInfo();
+  html.headers=new String[]{"accept=text/html"};
+  AnnotationMethodHandlerAdapter.RequestMappingInfo xml=new AnnotationMethodHandlerAdapter.RequestMappingInfo();
+  xml.headers=new String[]{"accept=application/xml"};
+  AnnotationMethodHandlerAdapter.RequestMappingInfo none=new AnnotationMethodHandlerAdapter.RequestMappingInfo();
+  MockHttpServletRequest request=new MockHttpServletRequest();
+  request.addHeader("Accept","application/xml, text/html");
+  comparator=new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator(),request);
+  assertTrue(comparator.compare(html,xml) > 0);
+  assertTrue(comparator.compare(xml,html) < 0);
+  assertTrue(comparator.compare(xml,none) < 0);
+  assertTrue(comparator.compare(none,xml) > 0);
+  assertTrue(comparator.compare(html,none) < 0);
+  assertTrue(comparator.compare(none,html) > 0);
+  request=new MockHttpServletRequest();
+  request.addHeader("Accept","application/xml, text/*");
+  comparator=new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator(),request);
+  assertTrue(comparator.compare(html,xml) > 0);
+  assertTrue(comparator.compare(xml,html) < 0);
+  request=new MockHttpServletRequest();
+  request.addHeader("Accept","application/pdf");
+  comparator=new AnnotationMethodHandlerAdapter.RequestMappingInfoComparator(new MockComparator(),request);
+  assertTrue(comparator.compare(html,xml) == 0);
+  assertTrue(comparator.compare(xml,html) == 0);
+}
