@@ -24,16 +24,7 @@
       return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
     }
  catch (    AccessException ae) {
-      Throwable causeOfAccessException=ae.getCause();
-      Throwable rootCause=(causeOfAccessException == null ? null : causeOfAccessException.getCause());
-      if (rootCause != null) {
-        if (rootCause instanceof RuntimeException) {
-          throw (RuntimeException)rootCause;
-        }
- else {
-          throw new SpelEvaluationException(getStartPosition(),rootCause,SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,this.name,state.getActiveContextObject().getValue().getClass().getName(),rootCause.getMessage());
-        }
-      }
+      throwSimpleExceptionIfPossible(state,ae);
       this.cachedExecutor=null;
     }
   }
@@ -43,6 +34,7 @@
     return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
   }
  catch (  AccessException ae) {
+    throwSimpleExceptionIfPossible(state,ae);
     throw new SpelEvaluationException(getStartPosition(),ae,SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,this.name,state.getActiveContextObject().getValue().getClass().getName(),ae.getMessage());
   }
 }
