@@ -1,0 +1,29 @@
+{
+  assertTrue(ServletFileUpload.isMultipartContent(req));
+  FileItemFactory factory=new DiskFileItemFactory();
+  ServletFileUpload upload=new ServletFileUpload(factory);
+  try {
+    List items=upload.parseRequest(req);
+    assertEquals(4,items.size());
+    FileItem item=(FileItem)items.get(0);
+    assertTrue(item.isFormField());
+    assertEquals("name 1",item.getFieldName());
+    assertEquals("value 1",item.getString());
+    item=(FileItem)items.get(1);
+    assertTrue(item.isFormField());
+    assertEquals("name 2",item.getFieldName());
+    assertEquals("value 2+1",item.getString());
+    item=(FileItem)items.get(2);
+    assertTrue(item.isFormField());
+    assertEquals("name 2",item.getFieldName());
+    assertEquals("value 2+2",item.getString());
+    item=(FileItem)items.get(3);
+    assertFalse(item.isFormField());
+    assertEquals("logo",item.getFieldName());
+    assertEquals("logo.jpg",item.getName());
+    assertEquals("application/octet-stream",item.getContentType());
+  }
+ catch (  FileUploadException ex) {
+    throw new ServletException(ex);
+  }
+}
