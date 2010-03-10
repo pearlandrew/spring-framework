@@ -1,0 +1,22 @@
+{
+  outputMessage.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+  StringBuilder builder=new StringBuilder();
+  for (Iterator<String> nameIterator=form.keySet().iterator(); nameIterator.hasNext(); ) {
+    String name=nameIterator.next();
+    for (Iterator<String> valueIterator=form.get(name).iterator(); valueIterator.hasNext(); ) {
+      String value=valueIterator.next();
+      builder.append(URLEncoder.encode(name,charset.name()));
+      if (value != null) {
+        builder.append('=');
+        builder.append(URLEncoder.encode(value,charset.name()));
+        if (valueIterator.hasNext()) {
+          builder.append('&');
+        }
+      }
+    }
+    if (nameIterator.hasNext()) {
+      builder.append('&');
+    }
+  }
+  FileCopyUtils.copy(builder.toString(),new OutputStreamWriter(outputMessage.getBody(),charset));
+}
