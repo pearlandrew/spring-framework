@@ -1,0 +1,12 @@
+{
+  Class<?> partType=part.getClass();
+  for (  HttpMessageConverter messageConverter : partConverters) {
+    if (messageConverter.canWrite(partType,null)) {
+      HttpOutputMessage multipartOutputMessage=new MultipartHttpOutputMessage(os);
+      multipartOutputMessage.getHeaders().setContentDispositionFormData(name,getFileName(part));
+      messageConverter.write(part,null,multipartOutputMessage);
+      return;
+    }
+  }
+  throw new HttpMessageNotWritableException("Could not write request: no suitable HttpMessageConverter found for request type [" + partType.getName() + "]");
+}
