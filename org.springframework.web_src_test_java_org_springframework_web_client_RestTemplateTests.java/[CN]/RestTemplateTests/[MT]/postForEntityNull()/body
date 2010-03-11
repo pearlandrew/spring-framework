@@ -1,0 +1,22 @@
+{
+  MediaType textPlain=new MediaType("text","plain");
+  expect(converter.canRead(Integer.class,null)).andReturn(true);
+  expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain));
+  expect(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.POST)).andReturn(request);
+  HttpHeaders requestHeaders=new HttpHeaders();
+  expect(request.getHeaders()).andReturn(requestHeaders).times(2);
+  expect(request.execute()).andReturn(response);
+  expect(errorHandler.hasError(response)).andReturn(false);
+  HttpHeaders responseHeaders=new HttpHeaders();
+  responseHeaders.setContentType(textPlain);
+  expect(response.getHeaders()).andReturn(responseHeaders).times(2);
+  expect(converter.canRead(Integer.class,textPlain)).andReturn(true);
+  expect(converter.read(Integer.class,response)).andReturn(null);
+  response.close();
+  replayMocks();
+  HttpEntity<Integer> result=template.postForEntity("http://example.com",null,Integer.class);
+  assertFalse("Invalid POST result",result.hasBody());
+  assertEquals("Invalid Content-Type",textPlain,result.getHeaders().getContentType());
+  assertEquals("Invalid content length",0,requestHeaders.getContentLength());
+  verifyMocks();
+}

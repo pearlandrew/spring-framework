@@ -1,0 +1,18 @@
+{
+  Object partBody=partEntity.getBody();
+  Class<?> partType=partBody.getClass();
+  HttpHeaders partHeaders=partEntity.getHeaders();
+  MediaType partContentType=partHeaders.getContentType();
+  for (  HttpMessageConverter messageConverter : partConverters) {
+    if (messageConverter.canWrite(partType,partContentType)) {
+      HttpOutputMessage multipartOutputMessage=new MultipartHttpOutputMessage(os);
+      multipartOutputMessage.getHeaders().setContentDispositionFormData(name,getFilename(partBody));
+      if (!partHeaders.isEmpty()) {
+        multipartOutputMessage.getHeaders().putAll(partHeaders);
+      }
+      messageConverter.write(partBody,partContentType,multipartOutputMessage);
+      return;
+    }
+  }
+  throw new HttpMessageNotWritableException("Could not write request: no suitable HttpMessageConverter found for request type [" + partType.getName() + "]");
+}

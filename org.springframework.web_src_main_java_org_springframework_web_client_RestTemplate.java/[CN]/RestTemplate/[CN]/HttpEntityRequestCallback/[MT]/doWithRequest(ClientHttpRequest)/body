@@ -1,0 +1,32 @@
+{
+  super.doWithRequest(httpRequest);
+  if (!requestEntity.hasBody()) {
+    HttpHeaders requestHeaders=requestEntity.getHeaders();
+    if (!requestHeaders.isEmpty()) {
+      httpRequest.getHeaders().putAll(requestHeaders);
+    }
+    if (httpRequest.getHeaders().getContentLength() == -1) {
+      httpRequest.getHeaders().setContentLength(0L);
+    }
+  }
+ else {
+    Object requestBody=requestEntity.getBody();
+    Class<?> requestType=requestBody.getClass();
+    HttpHeaders requestHeaders=requestEntity.getHeaders();
+    MediaType requestContentType=requestHeaders.getContentType();
+    for (    HttpMessageConverter messageConverter : getMessageConverters()) {
+      if (messageConverter.canWrite(requestType,requestContentType)) {
+        if (!requestHeaders.isEmpty()) {
+          httpRequest.getHeaders().putAll(requestHeaders);
+        }
+        messageConverter.write(requestBody,requestContentType,httpRequest);
+        return;
+      }
+    }
+    String message="Could not write request: no suitable HttpMessageConverter found for request type [" + requestType.getName() + "]";
+    if (requestContentType != null) {
+      message+=" and content type [" + requestContentType + "]";
+    }
+    throw new RestClientException(message);
+  }
+}

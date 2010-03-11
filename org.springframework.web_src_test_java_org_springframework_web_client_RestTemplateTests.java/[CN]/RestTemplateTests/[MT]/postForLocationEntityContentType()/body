@@ -1,0 +1,21 @@
+{
+  expect(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.POST)).andReturn(request);
+  String helloWorld="Hello World";
+  MediaType contentType=MediaType.TEXT_PLAIN;
+  expect(converter.canWrite(String.class,contentType)).andReturn(true);
+  HttpHeaders requestHeaders=new HttpHeaders();
+  expect(request.getHeaders()).andReturn(requestHeaders);
+  converter.write(helloWorld,contentType,request);
+  expect(request.execute()).andReturn(response);
+  expect(errorHandler.hasError(response)).andReturn(false);
+  HttpHeaders responseHeaders=new HttpHeaders();
+  URI expected=new URI("http://example.com/hotels");
+  responseHeaders.setLocation(expected);
+  expect(response.getHeaders()).andReturn(responseHeaders);
+  response.close();
+  replayMocks();
+  HttpEntity<String> entity=new HttpEntity<String>(helloWorld,contentType);
+  URI result=template.postForLocation("http://example.com",entity);
+  assertEquals("Invalid POST result",expected,result);
+  verifyMocks();
+}
