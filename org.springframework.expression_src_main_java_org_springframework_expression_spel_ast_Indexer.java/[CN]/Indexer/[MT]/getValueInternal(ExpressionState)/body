@@ -35,54 +35,83 @@
       return new TypedValue(o);
     }
   }
-  int idx=(Integer)state.convertValue(index,TypeDescriptor.valueOf(Integer.class));
   if (targetObject == null) {
     throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
   }
-  if (targetObject.getClass().isArray()) {
-    return new TypedValue(accessArrayElement(targetObject,idx),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
-  }
- else   if (targetObject instanceof Collection) {
-    Collection c=(Collection)targetObject;
-    if (idx >= c.size()) {
-      if (state.getConfiguration().isAutoGrowCollections()) {
-        Object newCollectionElement=null;
-        try {
-          int newElements=idx - c.size();
-          Class elementClass=targetObjectTypeDescriptor.getElementType();
-          if (elementClass == null) {
-            throw new SpelEvaluationException(getStartPosition(),SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);
+  if ((targetObject instanceof Collection) || targetObject.getClass().isArray() || targetObject instanceof String) {
+    int idx=(Integer)state.convertValue(index,TypeDescriptor.valueOf(Integer.class));
+    if (targetObject.getClass().isArray()) {
+      return new TypedValue(accessArrayElement(targetObject,idx),TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
+    }
+ else     if (targetObject instanceof Collection) {
+      Collection c=(Collection)targetObject;
+      if (idx >= c.size()) {
+        if (state.getConfiguration().isAutoGrowCollections()) {
+          Object newCollectionElement=null;
+          try {
+            int newElements=idx - c.size();
+            Class elementClass=targetObjectTypeDescriptor.getElementType();
+            if (elementClass == null) {
+              throw new SpelEvaluationException(getStartPosition(),SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);
+            }
+            while (newElements > 0) {
+              c.add(elementClass.newInstance());
+              newElements--;
+            }
+            newCollectionElement=targetObjectTypeDescriptor.getElementType().newInstance();
           }
-          while (newElements > 0) {
-            c.add(elementClass.newInstance());
-            newElements--;
+ catch (          Exception ex) {
+            throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_GROW_COLLECTION);
           }
-          newCollectionElement=targetObjectTypeDescriptor.getElementType().newInstance();
+          c.add(newCollectionElement);
+          return new TypedValue(newCollectionElement,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
         }
- catch (        Exception ex) {
-          throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_GROW_COLLECTION);
-        }
-        c.add(newCollectionElement);
-        return new TypedValue(newCollectionElement,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
-      }
  else {
-        throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,c.size(),idx);
+          throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,c.size(),idx);
+        }
+      }
+      int pos=0;
+      for (      Object o : c) {
+        if (pos == idx) {
+          return new TypedValue(o,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
+        }
+        pos++;
       }
     }
-    int pos=0;
-    for (    Object o : c) {
-      if (pos == idx) {
-        return new TypedValue(o,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
+ else     if (targetObject instanceof String) {
+      String ctxString=(String)targetObject;
+      if (idx >= ctxString.length()) {
+        throw new SpelEvaluationException(getStartPosition(),SpelMessage.STRING_INDEX_OUT_OF_BOUNDS,ctxString.length(),idx);
       }
-      pos++;
+      return new TypedValue(String.valueOf(ctxString.charAt(idx)));
     }
   }
- else   if (targetObject instanceof String) {
-    String ctxString=(String)targetObject;
-    if (idx >= ctxString.length()) {
-      throw new SpelEvaluationException(getStartPosition(),SpelMessage.STRING_INDEX_OUT_OF_BOUNDS,ctxString.length(),idx);
+  if (indexValue.getTypeDescriptor().getType() == String.class) {
+    Class<?> targetObjectRuntimeClass=getObjectClass(targetObject);
+    String name=(String)indexValue.getValue();
+    EvaluationContext eContext=state.getEvaluationContext();
+    try {
+      if (cachedReadName != null && cachedReadName.equals(name) && cachedReadTargetType != null && cachedReadTargetType.equals(targetObjectRuntimeClass)) {
+        return cachedReadAccessor.read(eContext,targetObject,name);
+      }
+      List<PropertyAccessor> accessorsToTry=AstUtils.getPropertyAccessorsToTry(targetObjectRuntimeClass,state);
+      if (accessorsToTry != null) {
+        for (        PropertyAccessor accessor : accessorsToTry) {
+          if (accessor.canRead(eContext,targetObject,name)) {
+            if (accessor instanceof ReflectivePropertyAccessor) {
+              accessor=((ReflectivePropertyAccessor)accessor).createOptimalAccessor(eContext,targetObject,name);
+            }
+            this.cachedReadAccessor=accessor;
+            this.cachedReadName=name;
+            this.cachedReadTargetType=targetObjectRuntimeClass;
+            return accessor.read(eContext,targetObject,name);
+          }
+        }
+      }
     }
-    return new TypedValue(String.valueOf(ctxString.charAt(idx)));
+ catch (    AccessException e) {
+      throw new SpelEvaluationException(getStartPosition(),e,SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,targetObjectTypeDescriptor.asString());
+    }
   }
   throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,targetObjectTypeDescriptor.asString());
 }

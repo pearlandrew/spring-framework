@@ -20,6 +20,7 @@
   if (targetObjectTypeDescriptor.isArray()) {
     int idx=(Integer)state.convertValue(index,TypeDescriptor.valueOf(Integer.class));
     setArrayElement(state,contextObject.getValue(),idx,newValue,targetObjectTypeDescriptor.getElementType());
+    return;
   }
  else   if (targetObjectTypeDescriptor.isCollection()) {
     int idx=(Integer)state.convertValue(index,TypeDescriptor.valueOf(Integer.class));
@@ -31,12 +32,37 @@
       List list=(List)targetObject;
       Object possiblyConvertedValue=state.convertValue(newValue,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
       list.set(idx,possiblyConvertedValue);
+      return;
     }
  else {
-      throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,contextObject.getClass().getName());
+      throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,targetObjectTypeDescriptor.asString());
     }
   }
- else {
-    throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,contextObject.getClass().getName());
+  if (index.getTypeDescriptor().getType() == String.class) {
+    Class<?> contextObjectClass=getObjectClass(contextObject.getValue());
+    String name=(String)index.getValue();
+    EvaluationContext eContext=state.getEvaluationContext();
+    try {
+      if (cachedWriteName != null && cachedWriteName.equals(name) && cachedWriteTargetType != null && cachedWriteTargetType.equals(contextObjectClass)) {
+        cachedWriteAccessor.write(eContext,targetObject,name,newValue);
+        return;
+      }
+      List<PropertyAccessor> accessorsToTry=AstUtils.getPropertyAccessorsToTry(contextObjectClass,state);
+      if (accessorsToTry != null) {
+        for (        PropertyAccessor accessor : accessorsToTry) {
+          if (accessor.canWrite(eContext,contextObject.getValue(),name)) {
+            this.cachedWriteName=name;
+            this.cachedWriteTargetType=contextObjectClass;
+            this.cachedWriteAccessor=accessor;
+            accessor.write(eContext,contextObject.getValue(),name,newValue);
+            return;
+          }
+        }
+      }
+    }
+ catch (    AccessException ae) {
+      throw new SpelEvaluationException(getStartPosition(),ae,SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE,name,ae.getMessage());
+    }
   }
+  throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,targetObjectTypeDescriptor.asString());
 }
