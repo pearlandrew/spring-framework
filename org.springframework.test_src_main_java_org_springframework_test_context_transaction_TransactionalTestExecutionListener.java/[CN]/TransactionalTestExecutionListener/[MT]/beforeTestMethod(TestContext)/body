@@ -21,7 +21,16 @@
     if (logger.isDebugEnabled()) {
       logger.debug("Explicit transaction definition [" + transactionDefinition + "] found for test context ["+ testContext+ "]");
     }
-    TransactionContext txContext=new TransactionContext(getTransactionManager(testContext),transactionDefinition);
+    String qualifier=transactionAttribute.getQualifier();
+    PlatformTransactionManager tm;
+    if (StringUtils.hasLength(qualifier)) {
+      BeanFactory bf=testContext.getApplicationContext().getAutowireCapableBeanFactory();
+      tm=TransactionAspectUtils.getTransactionManager(bf,qualifier);
+    }
+ else {
+      tm=getTransactionManager(testContext);
+    }
+    TransactionContext txContext=new TransactionContext(tm,transactionDefinition);
     runBeforeTransactionMethods(testContext);
     startNewTransaction(testContext,txContext);
     this.transactionContextCache.put(testMethod,txContext);

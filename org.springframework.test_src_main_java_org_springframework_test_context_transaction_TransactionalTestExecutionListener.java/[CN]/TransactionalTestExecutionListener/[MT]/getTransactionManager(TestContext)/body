@@ -1,14 +1,11 @@
 {
-  if (this.configAttributes == null) {
-    this.configAttributes=retrieveTransactionConfigurationAttributes(testContext.getTestClass());
-  }
-  String transactionManagerName=this.configAttributes.getTransactionManagerName();
+  String tmName=retrieveConfigurationAttributes(testContext).getTransactionManagerName();
   try {
-    return (PlatformTransactionManager)testContext.getApplicationContext().getBean(transactionManagerName,PlatformTransactionManager.class);
+    return testContext.getApplicationContext().getBean(tmName,PlatformTransactionManager.class);
   }
  catch (  BeansException ex) {
     if (logger.isWarnEnabled()) {
-      logger.warn("Caught exception while retrieving transaction manager with bean name [" + transactionManagerName + "] for test context ["+ testContext+ "]",ex);
+      logger.warn("Caught exception while retrieving transaction manager with bean name [" + tmName + "] for test context ["+ testContext+ "]",ex);
     }
     throw ex;
   }

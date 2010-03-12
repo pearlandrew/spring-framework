@@ -1,0 +1,25 @@
+{
+  Map<String,PlatformTransactionManager> tms=BeanFactoryUtils.beansOfTypeIncludingAncestors(bf,PlatformTransactionManager.class);
+  PlatformTransactionManager chosen=null;
+  for (  String beanName : tms.keySet()) {
+    if (bf.containsBeanDefinition(beanName)) {
+      BeanDefinition bd=bf.getBeanDefinition(beanName);
+      if (bd instanceof AbstractBeanDefinition) {
+        AbstractBeanDefinition abd=(AbstractBeanDefinition)bd;
+        AutowireCandidateQualifier candidate=abd.getQualifier(Qualifier.class.getName());
+        if ((candidate != null && qualifier.equals(candidate.getAttribute(AutowireCandidateQualifier.VALUE_KEY))) || qualifier.equals(beanName) || ObjectUtils.containsElement(bf.getAliases(beanName),qualifier)) {
+          if (chosen != null) {
+            throw new IllegalStateException("No unique PlatformTransactionManager bean found " + "for qualifier '" + qualifier + "'");
+          }
+          chosen=tms.get(beanName);
+        }
+      }
+    }
+  }
+  if (chosen != null) {
+    return chosen;
+  }
+ else {
+    throw new IllegalStateException("No matching PlatformTransactionManager bean found for qualifier '" + qualifier + "' - neither qualifier match nor bean name match!");
+  }
+}
