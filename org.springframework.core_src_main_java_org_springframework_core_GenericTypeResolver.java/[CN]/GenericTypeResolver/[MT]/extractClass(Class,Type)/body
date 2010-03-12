@@ -1,0 +1,19 @@
+{
+  if (arg instanceof TypeVariable) {
+    TypeVariable tv=(TypeVariable)arg;
+    arg=getTypeVariableMap(ownerClass).get(tv);
+    if (arg == null) {
+      arg=extractBoundForTypeVariable(tv);
+    }
+ else {
+      arg=extractClass(ownerClass,arg);
+    }
+  }
+ else   if (arg instanceof GenericArrayType) {
+    GenericArrayType gat=(GenericArrayType)arg;
+    Type gt=gat.getGenericComponentType();
+    Class<?> componentClass=extractClass(ownerClass,gt);
+    arg=Array.newInstance(componentClass,0).getClass();
+  }
+  return (arg instanceof Class ? (Class)arg : Object.class);
+}
