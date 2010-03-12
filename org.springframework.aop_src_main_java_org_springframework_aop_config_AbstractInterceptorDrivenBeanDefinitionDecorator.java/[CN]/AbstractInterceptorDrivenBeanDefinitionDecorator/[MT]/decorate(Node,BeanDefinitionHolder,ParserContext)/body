@@ -1,18 +1,21 @@
 {
   BeanDefinitionRegistry registry=parserContext.getRegistry();
   String existingBeanName=definitionHolder.getBeanName();
-  BeanDefinition existingDefinition=definitionHolder.getBeanDefinition();
+  BeanDefinition targetDefinition=definitionHolder.getBeanDefinition();
   BeanDefinition interceptorDefinition=createInterceptorDefinition(node);
   String interceptorName=existingBeanName + "." + getInterceptorNameSuffix(interceptorDefinition);
   BeanDefinitionReaderUtils.registerBeanDefinition(new BeanDefinitionHolder(interceptorDefinition,interceptorName),registry);
   BeanDefinitionHolder result=definitionHolder;
-  if (!isProxyFactoryBeanDefinition(existingDefinition)) {
+  if (!isProxyFactoryBeanDefinition(targetDefinition)) {
     RootBeanDefinition proxyDefinition=new RootBeanDefinition();
     proxyDefinition.setBeanClass(ProxyFactoryBean.class);
-    MutablePropertyValues mpvs=new MutablePropertyValues();
-    proxyDefinition.setPropertyValues(mpvs);
-    mpvs.add("target",existingDefinition);
-    mpvs.add("interceptorNames",new ManagedList<String>());
+    proxyDefinition.getPropertyValues().add("target",targetDefinition);
+    proxyDefinition.getPropertyValues().add("interceptorNames",new ManagedList<String>());
+    proxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
+    proxyDefinition.setPrimary(targetDefinition.isPrimary());
+    if (targetDefinition instanceof AbstractBeanDefinition) {
+      proxyDefinition.copyQualifiersFrom((AbstractBeanDefinition)targetDefinition);
+    }
     result=new BeanDefinitionHolder(proxyDefinition,existingBeanName);
   }
   addInterceptorNameToList(interceptorName,result.getBeanDefinition());

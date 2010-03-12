@@ -1,25 +1,25 @@
 {
   String originalBeanName=definition.getBeanName();
   BeanDefinition targetDefinition=definition.getBeanDefinition();
-  RootBeanDefinition scopedProxyDefinition=new RootBeanDefinition(ScopedProxyFactoryBean.class);
-  scopedProxyDefinition.setOriginatingBeanDefinition(definition.getBeanDefinition());
-  scopedProxyDefinition.setSource(definition.getSource());
-  scopedProxyDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  RootBeanDefinition proxyDefinition=new RootBeanDefinition(ScopedProxyFactoryBean.class);
+  proxyDefinition.setOriginatingBeanDefinition(definition.getBeanDefinition());
+  proxyDefinition.setSource(definition.getSource());
+  proxyDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
   String targetBeanName=getTargetBeanName(originalBeanName);
-  scopedProxyDefinition.getPropertyValues().add("targetBeanName",targetBeanName);
+  proxyDefinition.getPropertyValues().add("targetBeanName",targetBeanName);
   if (proxyTargetClass) {
     targetDefinition.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE,Boolean.TRUE);
   }
  else {
-    scopedProxyDefinition.getPropertyValues().add("proxyTargetClass",Boolean.FALSE);
+    proxyDefinition.getPropertyValues().add("proxyTargetClass",Boolean.FALSE);
   }
+  proxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
+  proxyDefinition.setPrimary(targetDefinition.isPrimary());
   if (targetDefinition instanceof AbstractBeanDefinition) {
-    scopedProxyDefinition.copyQualifiersFrom((AbstractBeanDefinition)targetDefinition);
+    proxyDefinition.copyQualifiersFrom((AbstractBeanDefinition)targetDefinition);
   }
-  scopedProxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
-  scopedProxyDefinition.setPrimary(targetDefinition.isPrimary());
   targetDefinition.setAutowireCandidate(false);
   targetDefinition.setPrimary(false);
   registry.registerBeanDefinition(targetBeanName,targetDefinition);
-  return new BeanDefinitionHolder(scopedProxyDefinition,originalBeanName,definition.getAliases());
+  return new BeanDefinitionHolder(proxyDefinition,originalBeanName,definition.getAliases());
 }
