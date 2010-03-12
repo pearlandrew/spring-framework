@@ -2,20 +2,21 @@
   if (other == null) {
     return false;
   }
-  if (this.isWildcardType()) {
+  if (isWildcardType() || other.isWildcardType()) {
     return true;
   }
  else   if (this.type.equals(other.type)) {
-    if (this.subtype.equals(other.subtype) || this.isWildcardSubtype()) {
+    if (this.subtype.equals(other.subtype) || this.isWildcardSubtype() || other.isWildcardSubtype()) {
       return true;
     }
     int thisPlusIdx=this.subtype.indexOf('+');
     int otherPlusIdx=other.subtype.indexOf('+');
     if (thisPlusIdx != -1 && otherPlusIdx != -1) {
       String thisSubtypeNoSuffix=this.subtype.substring(0,thisPlusIdx);
+      String otherSubtypeNoSuffix=other.subtype.substring(0,otherPlusIdx);
       String thisSubtypeSuffix=this.subtype.substring(thisPlusIdx + 1);
       String otherSubtypeSuffix=other.subtype.substring(otherPlusIdx + 1);
-      if (thisSubtypeSuffix.equals(otherSubtypeSuffix) && WILDCARD_TYPE.equals(thisSubtypeNoSuffix)) {
+      if (thisSubtypeSuffix.equals(otherSubtypeSuffix) && (WILDCARD_TYPE.equals(thisSubtypeNoSuffix) || WILDCARD_TYPE.equals(otherSubtypeNoSuffix))) {
         return true;
       }
     }
