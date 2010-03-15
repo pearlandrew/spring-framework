@@ -46,27 +46,7 @@
  else     if (targetObject instanceof Collection) {
       Collection c=(Collection)targetObject;
       if (idx >= c.size()) {
-        if (state.getConfiguration().isAutoGrowCollections()) {
-          Object newCollectionElement=null;
-          try {
-            int newElements=idx - c.size();
-            Class elementClass=targetObjectTypeDescriptor.getElementType();
-            if (elementClass == null) {
-              throw new SpelEvaluationException(getStartPosition(),SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);
-            }
-            while (newElements > 0) {
-              c.add(elementClass.newInstance());
-              newElements--;
-            }
-            newCollectionElement=targetObjectTypeDescriptor.getElementType().newInstance();
-          }
- catch (          Exception ex) {
-            throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_GROW_COLLECTION);
-          }
-          c.add(newCollectionElement);
-          return new TypedValue(newCollectionElement,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getElementType()));
-        }
- else {
+        if (!growCollection(state,targetObjectTypeDescriptor.getElementType(),idx,c)) {
           throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,c.size(),idx);
         }
       }

@@ -26,7 +26,9 @@
     int idx=(Integer)state.convertValue(index,TypeDescriptor.valueOf(Integer.class));
     Collection c=(Collection)targetObject;
     if (idx >= c.size()) {
-      throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,c.size(),idx);
+      if (!growCollection(state,targetObjectTypeDescriptor.getElementType(),idx,c)) {
+        throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,c.size(),idx);
+      }
     }
     if (targetObject instanceof List) {
       List list=(List)targetObject;
