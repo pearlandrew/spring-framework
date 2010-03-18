@@ -9,7 +9,20 @@
   try {
     tableColumns=databaseMetaData.getColumns(metaDataCatalogName,metaDataSchemaName,metaDataTableName,null);
     while (tableColumns.next()) {
-      TableParameterMetaData meta=new TableParameterMetaData(tableColumns.getString("COLUMN_NAME"),tableColumns.getInt("DATA_TYPE"),tableColumns.getBoolean("NULLABLE"));
+      String columnName=tableColumns.getString("COLUMN_NAME");
+      int dataType=tableColumns.getInt("DATA_TYPE");
+      if (dataType == Types.DECIMAL) {
+        String typeName=tableColumns.getString("TYPE_NAME");
+        int decimalDigits=tableColumns.getInt("DECIMAL_DIGITS");
+        if ("NUMBER".equals(typeName) && decimalDigits == 0) {
+          dataType=Types.NUMERIC;
+          if (logger.isDebugEnabled()) {
+            logger.debug("Overriding metadata: " + columnName + " now using NUMERIC instead of DECIMAL");
+          }
+        }
+      }
+      boolean nullable=tableColumns.getBoolean("NULLABLE");
+      TableParameterMetaData meta=new TableParameterMetaData(columnName,dataType,nullable);
       insertParameterMetaData.add(meta);
       if (logger.isDebugEnabled()) {
         logger.debug("Retrieved metadata: " + meta.getParameterName() + " "+ meta.getSqlType()+ " "+ meta.isNullable());
