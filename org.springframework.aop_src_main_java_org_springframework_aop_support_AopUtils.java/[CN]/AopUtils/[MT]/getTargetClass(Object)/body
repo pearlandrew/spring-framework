@@ -1,10 +1,11 @@
 {
   Assert.notNull(candidate,"Candidate object must not be null");
+  Class<?> result=null;
   if (candidate instanceof TargetClassAware) {
-    return ((TargetClassAware)candidate).getTargetClass();
+    result=((TargetClassAware)candidate).getTargetClass();
   }
-  if (isCglibProxy(candidate)) {
-    return candidate.getClass().getSuperclass();
+  if (result == null) {
+    result=(isCglibProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
   }
-  return candidate.getClass();
+  return result;
 }
