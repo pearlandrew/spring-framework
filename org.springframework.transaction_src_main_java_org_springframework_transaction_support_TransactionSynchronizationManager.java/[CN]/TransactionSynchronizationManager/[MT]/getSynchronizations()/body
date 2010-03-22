@@ -1,8 +1,13 @@
 {
-  if (!isSynchronizationActive()) {
+  List<TransactionSynchronization> synchs=synchronizations.get();
+  if (synchs == null) {
     throw new IllegalStateException("Transaction synchronization is not active");
   }
-  List<TransactionSynchronization> synchs=synchronizations.get();
-  OrderComparator.sort(synchs);
-  return Collections.unmodifiableList(new ArrayList<TransactionSynchronization>(synchs));
+  if (synchs.isEmpty()) {
+    return Collections.emptyList();
+  }
+ else {
+    OrderComparator.sort(synchs);
+    return Collections.unmodifiableList(new ArrayList<TransactionSynchronization>(synchs));
+  }
 }
