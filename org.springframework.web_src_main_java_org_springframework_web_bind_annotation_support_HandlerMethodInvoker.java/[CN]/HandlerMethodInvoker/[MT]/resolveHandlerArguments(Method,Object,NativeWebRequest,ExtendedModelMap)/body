@@ -14,7 +14,7 @@
     boolean required=false;
     String defaultValue=null;
     boolean validate=false;
-    int found=0;
+    int annotationsFound=0;
     Annotation[] paramAnns=methodParam.getParameterAnnotations();
     for (    Annotation paramAnn : paramAnns) {
       if (RequestParam.class.isInstance(paramAnn)) {
@@ -22,35 +22,35 @@
         paramName=requestParam.value();
         required=requestParam.required();
         defaultValue=parseDefaultValueAttribute(requestParam.defaultValue());
-        found++;
+        annotationsFound++;
       }
  else       if (RequestHeader.class.isInstance(paramAnn)) {
         RequestHeader requestHeader=(RequestHeader)paramAnn;
         headerName=requestHeader.value();
         required=requestHeader.required();
         defaultValue=parseDefaultValueAttribute(requestHeader.defaultValue());
-        found++;
+        annotationsFound++;
       }
  else       if (RequestBody.class.isInstance(paramAnn)) {
         requestBodyFound=true;
-        found++;
+        annotationsFound++;
       }
  else       if (CookieValue.class.isInstance(paramAnn)) {
         CookieValue cookieValue=(CookieValue)paramAnn;
         cookieName=cookieValue.value();
         required=cookieValue.required();
         defaultValue=parseDefaultValueAttribute(cookieValue.defaultValue());
-        found++;
+        annotationsFound++;
       }
  else       if (PathVariable.class.isInstance(paramAnn)) {
         PathVariable pathVar=(PathVariable)paramAnn;
         pathVarName=pathVar.value();
-        found++;
+        annotationsFound++;
       }
  else       if (ModelAttribute.class.isInstance(paramAnn)) {
         ModelAttribute attr=(ModelAttribute)paramAnn;
         attrName=attr.value();
-        found++;
+        annotationsFound++;
       }
  else       if (Value.class.isInstance(paramAnn)) {
         defaultValue=((Value)paramAnn).value();
@@ -59,10 +59,10 @@
         validate=true;
       }
     }
-    if (found > 1) {
+    if (annotationsFound > 1) {
       throw new IllegalStateException("Handler parameter annotations are exclusive choices - " + "do not specify more than one such annotation on the same parameter: " + handlerMethod);
     }
-    if (found == 0) {
+    if (annotationsFound == 0) {
       Object argValue=resolveCommonArgument(methodParam,webRequest);
       if (argValue != WebArgumentResolver.UNRESOLVED) {
         args[i]=argValue;
@@ -77,6 +77,9 @@
         }
  else         if (SessionStatus.class.isAssignableFrom(paramType)) {
           args[i]=this.sessionStatus;
+        }
+ else         if (HttpEntity.class.isAssignableFrom(paramType)) {
+          args[i]=resolveHttpEntityRequest(methodParam,webRequest,handler);
         }
  else         if (Errors.class.isAssignableFrom(paramType)) {
           throw new IllegalStateException("Errors/BindingResult argument declared " + "without preceding model attribute. Check your handler method signature!");
