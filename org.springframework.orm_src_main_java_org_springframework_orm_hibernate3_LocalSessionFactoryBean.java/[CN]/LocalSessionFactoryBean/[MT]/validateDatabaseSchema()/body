@@ -1,5 +1,5 @@
 {
-  logger.info("Updating database schema for Hibernate SessionFactory");
+  logger.info("Validating database schema for Hibernate SessionFactory");
   DataSource dataSource=getDataSource();
   if (dataSource != null) {
     configTimeDataSourceHolder.set(dataSource);
@@ -11,9 +11,8 @@
       public Object doInHibernate(      Session session) throws HibernateException, SQLException {
         Connection con=session.connection();
         Dialect dialect=Dialect.getDialect(getConfiguration().getProperties());
-        DatabaseMetadata metadata=new DatabaseMetadata(con,dialect);
-        String[] sql=getConfiguration().generateSchemaUpdateScript(dialect,metadata);
-        executeSchemaScript(con,sql);
+        DatabaseMetadata metadata=new DatabaseMetadata(con,dialect,false);
+        getConfiguration().validateSchema(dialect,metadata);
         return null;
       }
     }
