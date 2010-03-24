@@ -10,15 +10,23 @@
     Object convertedValue=this.typeConverterDelegate.convertIfNecessary(oldValue,newValue,field);
     field.set(this.target,convertedValue);
   }
- catch (  IllegalAccessException ex) {
-    throw new InvalidPropertyException(this.target.getClass(),propertyName,"Field is not accessible",ex);
+ catch (  ConverterNotFoundException ex) {
+    PropertyChangeEvent pce=new PropertyChangeEvent(this.target,propertyName,oldValue,newValue);
+    throw new ConversionNotSupportedException(pce,field.getType(),ex);
   }
-catch (  IllegalArgumentException ex) {
+catch (  ConversionException ex) {
     PropertyChangeEvent pce=new PropertyChangeEvent(this.target,propertyName,oldValue,newValue);
     throw new TypeMismatchException(pce,field.getType(),ex);
   }
 catch (  IllegalStateException ex) {
     PropertyChangeEvent pce=new PropertyChangeEvent(this.target,propertyName,oldValue,newValue);
     throw new ConversionNotSupportedException(pce,field.getType(),ex);
+  }
+catch (  IllegalArgumentException ex) {
+    PropertyChangeEvent pce=new PropertyChangeEvent(this.target,propertyName,oldValue,newValue);
+    throw new TypeMismatchException(pce,field.getType(),ex);
+  }
+catch (  IllegalAccessException ex) {
+    throw new InvalidPropertyException(this.target.getClass(),propertyName,"Field is not accessible",ex);
   }
 }
