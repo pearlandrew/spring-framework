@@ -4,14 +4,15 @@
   ConversionService conversionService=this.propertyEditorRegistry.getConversionService();
   if (editor == null && conversionService != null && convertedValue != null) {
     TypeDescriptor sourceTypeDesc=TypeDescriptor.forObject(convertedValue);
-    if (conversionService.canConvert(sourceTypeDesc,typeDescriptor)) {
-      return (T)conversionService.convert(convertedValue,sourceTypeDesc,typeDescriptor);
+    TypeDescriptor targetTypeDesc=typeDescriptor.forElementType(requiredType);
+    if (conversionService.canConvert(sourceTypeDesc,targetTypeDesc)) {
+      return (T)conversionService.convert(convertedValue,sourceTypeDesc,targetTypeDesc);
     }
   }
   if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType,convertedValue))) {
     if (requiredType != null && Collection.class.isAssignableFrom(requiredType) && convertedValue instanceof String && typeDescriptor.getMethodParameter() != null) {
-      Class elementType=GenericCollectionTypeResolver.getCollectionParameterType(typeDescriptor.getMethodParameter());
-      if (elementType != null && Enum.class.isAssignableFrom(elementType)) {
+      Class elemType=GenericCollectionTypeResolver.getCollectionParameterType(typeDescriptor.getMethodParameter());
+      if (elemType != null && Enum.class.isAssignableFrom(elemType)) {
         convertedValue=StringUtils.commaDelimitedListToStringArray((String)convertedValue);
       }
     }
