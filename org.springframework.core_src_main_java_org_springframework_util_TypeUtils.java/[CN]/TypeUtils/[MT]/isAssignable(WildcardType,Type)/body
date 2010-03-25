@@ -1,14 +1,57 @@
 {
-  Type[] upperBounds=lhsType.getUpperBounds();
-  Type[] lowerBounds=lhsType.getLowerBounds();
-  for (int size=upperBounds.length, i=0; i < size; ++i) {
-    if (!isAssignable(upperBounds[i],rhsType)) {
-      return false;
+  Type[] lUpperBounds=lhsType.getUpperBounds();
+  if (lUpperBounds.length == 0) {
+    lUpperBounds=new Type[]{Object.class};
+  }
+  Type[] lLowerBounds=lhsType.getLowerBounds();
+  if (lLowerBounds.length == 0) {
+    lLowerBounds=new Type[]{null};
+  }
+  if (rhsType instanceof WildcardType) {
+    WildcardType rhsWcType=(WildcardType)rhsType;
+    Type[] rUpperBounds=rhsWcType.getUpperBounds();
+    if (rUpperBounds.length == 0) {
+      rUpperBounds=new Type[]{Object.class};
+    }
+    Type[] rLowerBounds=rhsWcType.getLowerBounds();
+    if (rLowerBounds.length == 0) {
+      rLowerBounds=new Type[]{null};
+    }
+    for (    Type lBound : lUpperBounds) {
+      for (      Type rBound : rUpperBounds) {
+        if (!isAssignable(lBound,rBound)) {
+          return false;
+        }
+      }
+      for (      Type rBound : rLowerBounds) {
+        if (!isAssignable(lBound,rBound)) {
+          return false;
+        }
+      }
+    }
+    for (    Type lBound : lLowerBounds) {
+      for (      Type rBound : rUpperBounds) {
+        if (!isAssignable(rBound,lBound)) {
+          return false;
+        }
+      }
+      for (      Type rBound : rLowerBounds) {
+        if (!isAssignable(rBound,lBound)) {
+          return false;
+        }
+      }
     }
   }
-  for (int size=lowerBounds.length, i=0; i < size; ++i) {
-    if (!isAssignable(rhsType,lowerBounds[i])) {
-      return false;
+ else {
+    for (    Type lBound : lUpperBounds) {
+      if (!isAssignable(lBound,rhsType)) {
+        return false;
+      }
+    }
+    for (    Type lBound : lLowerBounds) {
+      if (!isAssignable(rhsType,lBound)) {
+        return false;
+      }
     }
   }
   return true;
