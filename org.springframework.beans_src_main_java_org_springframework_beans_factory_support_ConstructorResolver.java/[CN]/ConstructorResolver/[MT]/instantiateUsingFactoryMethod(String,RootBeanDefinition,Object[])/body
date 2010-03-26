@@ -133,7 +133,17 @@
       }
     }
     if (factoryMethodToUse == null) {
-      throw new BeanCreationException(mbd.getResourceDescription(),beanName,"No matching factory method found: " + (mbd.getFactoryBeanName() != null ? "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") + "factory method '"+ mbd.getFactoryMethodName()+ "'. "+ "Check that a method of the specified name exists and that it is "+ (isStatic ? "static" : "non-static")+ ".");
+      boolean hasArgs=resolvedValues.getArgumentCount() > 0;
+      String argDesc="";
+      if (hasArgs) {
+        List<String> argTypes=new ArrayList<String>();
+        for (        ValueHolder value : resolvedValues.getIndexedArgumentValues().values()) {
+          String argType=value.getType() != null ? ClassUtils.getShortName(value.getType()) : value.getValue().getClass().getSimpleName();
+          argTypes.add(argType);
+        }
+        argDesc=StringUtils.collectionToCommaDelimitedString(argTypes);
+      }
+      throw new BeanCreationException(mbd.getResourceDescription(),beanName,"No matching factory method found: " + (mbd.getFactoryBeanName() != null ? "factory bean '" + mbd.getFactoryBeanName() + "'; " : "") + "factory method '"+ mbd.getFactoryMethodName()+ "("+ argDesc+ ")'. "+ "Check that a method with the specified name "+ (hasArgs ? "and arguments " : "")+ "exists and that it is "+ (isStatic ? "static" : "non-static")+ ".");
     }
  else     if (void.class.equals(factoryMethodToUse.getReturnType())) {
       throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Invalid factory method '" + mbd.getFactoryMethodName() + "': needs to have a non-void return type!");
