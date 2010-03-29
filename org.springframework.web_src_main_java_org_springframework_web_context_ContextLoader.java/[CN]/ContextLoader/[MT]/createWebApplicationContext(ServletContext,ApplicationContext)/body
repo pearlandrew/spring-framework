@@ -6,15 +6,16 @@
   ConfigurableWebApplicationContext wac=(ConfigurableWebApplicationContext)BeanUtils.instantiateClass(contextClass);
   if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
     String servletContextName=sc.getServletContextName();
-    if (servletContextName != null) {
-      wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName);
-    }
- else {
-      wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX);
-    }
+    wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + ObjectUtils.getDisplayString(servletContextName));
   }
  else {
-    wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + sc.getContextPath());
+    try {
+      String contextPath=(String)ServletContext.class.getMethod("getContextPath").invoke(sc);
+      wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + ObjectUtils.getDisplayString(contextPath));
+    }
+ catch (    Exception ex) {
+      throw new IllegalStateException("Failed to invoke Servlet 2.5 getContextPath method",ex);
+    }
   }
   wac.setParent(parent);
   wac.setServletContext(sc);
