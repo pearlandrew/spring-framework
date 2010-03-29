@@ -5,14 +5,26 @@
       if (logger.isInfoEnabled()) {
         logger.info("Loading pre-compiled Jasper Report from " + resource);
       }
-      return (JasperReport)JRLoader.loadObject(resource.getInputStream());
+      InputStream is=resource.getInputStream();
+      try {
+        return (JasperReport)JRLoader.loadObject(is);
+      }
+  finally {
+        is.close();
+      }
     }
  else     if (fileName.endsWith(".jrxml")) {
       if (logger.isInfoEnabled()) {
         logger.info("Compiling Jasper Report loaded from " + resource);
       }
-      JasperDesign design=JRXmlLoader.load(resource.getInputStream());
-      return JasperCompileManager.compileReport(design);
+      InputStream is=resource.getInputStream();
+      try {
+        JasperDesign design=JRXmlLoader.load(is);
+        return JasperCompileManager.compileReport(design);
+      }
+  finally {
+        is.close();
+      }
     }
  else {
       throw new IllegalArgumentException("Report filename [" + fileName + "] must end in either .jasper or .jrxml");
