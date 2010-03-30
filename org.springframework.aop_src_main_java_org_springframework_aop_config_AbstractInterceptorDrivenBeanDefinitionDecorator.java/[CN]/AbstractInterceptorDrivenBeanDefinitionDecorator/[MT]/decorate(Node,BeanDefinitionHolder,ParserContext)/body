@@ -2,6 +2,7 @@
   BeanDefinitionRegistry registry=parserContext.getRegistry();
   String existingBeanName=definitionHolder.getBeanName();
   BeanDefinition targetDefinition=definitionHolder.getBeanDefinition();
+  BeanDefinitionHolder targetHolder=new BeanDefinitionHolder(targetDefinition,existingBeanName + ".TARGET");
   BeanDefinition interceptorDefinition=createInterceptorDefinition(node);
   String interceptorName=existingBeanName + "." + getInterceptorNameSuffix(interceptorDefinition);
   BeanDefinitionReaderUtils.registerBeanDefinition(new BeanDefinitionHolder(interceptorDefinition,interceptorName),registry);
@@ -9,7 +10,9 @@
   if (!isProxyFactoryBeanDefinition(targetDefinition)) {
     RootBeanDefinition proxyDefinition=new RootBeanDefinition();
     proxyDefinition.setBeanClass(ProxyFactoryBean.class);
-    proxyDefinition.getPropertyValues().add("target",targetDefinition);
+    proxyDefinition.setScope(targetDefinition.getScope());
+    proxyDefinition.setDecoratedDefinition(targetHolder);
+    proxyDefinition.getPropertyValues().add("target",targetHolder);
     proxyDefinition.getPropertyValues().add("interceptorNames",new ManagedList<String>());
     proxyDefinition.setAutowireCandidate(targetDefinition.isAutowireCandidate());
     proxyDefinition.setPrimary(targetDefinition.isPrimary());
