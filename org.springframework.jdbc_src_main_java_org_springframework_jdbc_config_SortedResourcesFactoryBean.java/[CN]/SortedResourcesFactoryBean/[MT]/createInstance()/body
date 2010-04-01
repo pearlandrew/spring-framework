@@ -1,25 +1,20 @@
 {
   List<Resource> scripts=new ArrayList<Resource>();
-  for (  String location : locations) {
-    if (resourceLoader instanceof ResourcePatternResolver) {
-      List<Resource> resources=new ArrayList<Resource>(Arrays.asList(((ResourcePatternResolver)resourceLoader).getResources(location)));
-      Collections.sort(resources,new Comparator<Resource>(){
-        public int compare(        Resource r1,        Resource r2){
-          try {
-            return r1.getURL().toString().compareTo(r2.getURL().toString());
-          }
- catch (          IOException ex) {
-            return 0;
-          }
+  for (  String location : this.locations) {
+    List<Resource> resources=new ArrayList<Resource>(Arrays.asList(this.resourcePatternResolver.getResources(location)));
+    Collections.sort(resources,new Comparator<Resource>(){
+      public int compare(      Resource r1,      Resource r2){
+        try {
+          return r1.getURL().toString().compareTo(r2.getURL().toString());
+        }
+ catch (        IOException ex) {
+          return 0;
         }
       }
-);
-      for (      Resource resource : resources) {
-        scripts.add(resource);
-      }
     }
- else {
-      scripts.add(resourceLoader.getResource(location));
+);
+    for (    Resource resource : resources) {
+      scripts.add(resource);
     }
   }
   return scripts.toArray(new Resource[scripts.size()]);
