@@ -12,11 +12,13 @@
   expect(response.getHeaders()).andReturn(responseHeaders).times(2);
   expect(converter.canRead(Integer.class,textPlain)).andReturn(true);
   expect(converter.read(Integer.class,response)).andReturn(null);
+  expect(response.getStatusCode()).andReturn(HttpStatus.OK);
   response.close();
   replayMocks();
-  HttpEntity<Integer> result=template.postForEntity("http://example.com",null,Integer.class);
+  ResponseEntity<Integer> result=template.postForEntity("http://example.com",null,Integer.class);
   assertFalse("Invalid POST result",result.hasBody());
   assertEquals("Invalid Content-Type",textPlain,result.getHeaders().getContentType());
   assertEquals("Invalid content length",0,requestHeaders.getContentLength());
+  assertEquals("Invalid status code",HttpStatus.OK,result.getStatusCode());
   verifyMocks();
 }

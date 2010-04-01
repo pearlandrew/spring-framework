@@ -13,7 +13,9 @@
   expect(response.getHeaders()).andReturn(responseHeaders);
   response.close();
   replayMocks();
-  HttpEntity<String> entity=new HttpEntity<String>(helloWorld,Collections.singletonMap("MyHeader","MyValue"));
+  HttpHeaders entityHeaders=new HttpHeaders();
+  entityHeaders.set("MyHeader","MyValue");
+  HttpEntity<String> entity=new HttpEntity<String>(helloWorld,entityHeaders);
   URI result=template.postForLocation("http://example.com",entity);
   assertEquals("Invalid POST result",expected,result);
   assertEquals("No custom header set","MyValue",requestHeaders.getFirst("MyHeader"));
