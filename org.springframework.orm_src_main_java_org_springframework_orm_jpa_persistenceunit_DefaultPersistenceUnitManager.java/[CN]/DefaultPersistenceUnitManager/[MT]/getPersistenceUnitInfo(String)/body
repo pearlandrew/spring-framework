@@ -1,3 +1,10 @@
 {
-  return this.persistenceUnitInfos.get(persistenceUnitName);
+  PersistenceUnitInfo pui=this.persistenceUnitInfos.get(persistenceUnitName);
+  if (Proxy.isProxyClass(pui.getClass())) {
+    Jpa2PersistenceUnitInfoDecorator dec=(Jpa2PersistenceUnitInfoDecorator)Proxy.getInvocationHandler(pui);
+    return dec.getTarget();
+  }
+ else {
+    return (MutablePersistenceUnitInfo)pui;
+  }
 }
