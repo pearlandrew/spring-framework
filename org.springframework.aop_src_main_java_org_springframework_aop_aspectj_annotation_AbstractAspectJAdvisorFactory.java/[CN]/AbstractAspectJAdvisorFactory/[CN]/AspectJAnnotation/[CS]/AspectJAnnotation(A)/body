@@ -1,19 +1,11 @@
 {
-  this.annotation=aspectjAnnotation;
-  for (  Class type : annotationTypes.keySet()) {
-    if (type.isInstance(this.annotation)) {
-      this.annotationType=annotationTypes.get(type);
-      break;
-    }
-  }
-  if (this.annotationType == null) {
-    throw new IllegalStateException("Unknown annotation type: " + this.annotation.toString());
-  }
+  this.annotation=annotation;
+  this.annotationType=determineAnnotationType(annotation);
   try {
-    this.expression=resolveExpression();
-    this.argNames=(String)this.annotation.getClass().getMethod("argNames",(Class[])null).invoke(this.annotation);
+    this.pointcutExpression=resolveExpression(annotation);
+    this.argumentNames=(String)annotation.getClass().getMethod("argNames").invoke(annotation);
   }
  catch (  Exception ex) {
-    throw new IllegalArgumentException(aspectjAnnotation + " cannot be an AspectJ annotation",ex);
+    throw new IllegalArgumentException(annotation + " cannot be an AspectJ annotation",ex);
   }
 }
