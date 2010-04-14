@@ -4,7 +4,6 @@
   ArgumentsHolder args=new ArgumentsHolder(paramTypes.length);
   Set<ConstructorArgumentValues.ValueHolder> usedValueHolders=new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
   Set<String> autowiredBeanNames=new LinkedHashSet<String>(4);
-  boolean resolveNecessary=false;
   for (int paramIndex=0; paramIndex < paramTypes.length; paramIndex++) {
     Class<?> paramType=paramTypes[paramIndex];
     String paramName=(paramNames != null ? paramNames[paramIndex] : null);
@@ -30,7 +29,7 @@
             args.preparedArguments[paramIndex]=convertedValue;
           }
  else {
-            resolveNecessary=true;
+            args.resolveNecessary=true;
             args.preparedArguments[paramIndex]=sourceValue;
           }
         }
@@ -51,7 +50,7 @@
         args.rawArguments[paramIndex]=autowiredArgument;
         args.arguments[paramIndex]=autowiredArgument;
         args.preparedArguments[paramIndex]=new AutowiredArgumentMarker();
-        resolveNecessary=true;
+        args.resolveNecessary=true;
       }
  catch (      BeansException ex) {
         throw new UnsatisfiedDependencyException(mbd.getResourceDescription(),beanName,paramIndex,paramType,ex);
@@ -64,12 +63,5 @@
       this.beanFactory.logger.debug("Autowiring by type from bean name '" + beanName + "' via "+ methodType+ " to bean named '"+ autowiredBeanName+ "'");
     }
   }
-  if (resolveNecessary) {
-    mbd.preparedConstructorArguments=args.preparedArguments;
-  }
- else {
-    mbd.resolvedConstructorArguments=args.arguments;
-  }
-  mbd.constructorArgumentsResolved=true;
   return args;
 }

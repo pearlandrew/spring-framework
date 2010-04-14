@@ -25,6 +25,7 @@
     isStatic=true;
   }
   Method factoryMethodToUse=null;
+  ArgumentsHolder argsHolderToUse=null;
   Object[] argsToUse=null;
   if (explicitArgs != null) {
     argsToUse=explicitArgs;
@@ -79,7 +80,7 @@
       Method candidate=candidates[i];
       Class[] paramTypes=candidate.getParameterTypes();
       if (paramTypes.length >= minNrOfArgs) {
-        ArgumentsHolder args;
+        ArgumentsHolder argsHolder;
         if (resolvedValues != null) {
           try {
             String[] paramNames=null;
@@ -87,7 +88,7 @@
             if (pnd != null) {
               paramNames=pnd.getParameterNames(candidate);
             }
-            args=createArgumentArray(beanName,mbd,resolvedValues,bw,paramTypes,paramNames,candidate,autowiring);
+            argsHolder=createArgumentArray(beanName,mbd,resolvedValues,bw,paramTypes,paramNames,candidate,autowiring);
           }
  catch (          UnsatisfiedDependencyException ex) {
             if (this.beanFactory.logger.isTraceEnabled()) {
@@ -114,12 +115,13 @@
           if (paramTypes.length != explicitArgs.length) {
             continue;
           }
-          args=new ArgumentsHolder(explicitArgs);
+          argsHolder=new ArgumentsHolder(explicitArgs);
         }
-        int typeDiffWeight=(mbd.isLenientConstructorResolution() ? args.getTypeDifferenceWeight(paramTypes) : args.getAssignabilityWeight(paramTypes));
+        int typeDiffWeight=(mbd.isLenientConstructorResolution() ? argsHolder.getTypeDifferenceWeight(paramTypes) : argsHolder.getAssignabilityWeight(paramTypes));
         if (typeDiffWeight < minTypeDiffWeight) {
           factoryMethodToUse=candidate;
-          argsToUse=args.arguments;
+          argsHolderToUse=argsHolder;
+          argsToUse=argsHolder.arguments;
           minTypeDiffWeight=typeDiffWeight;
           ambiguousFactoryMethods=null;
         }
@@ -153,6 +155,7 @@
     }
     if (explicitArgs == null) {
       mbd.resolvedConstructorOrFactoryMethod=factoryMethodToUse;
+      argsHolderToUse.storeCache(mbd);
     }
   }
   try {

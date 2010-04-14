@@ -2,6 +2,7 @@
   BeanWrapperImpl bw=new BeanWrapperImpl();
   this.beanFactory.initBeanWrapper(bw);
   Constructor constructorToUse=null;
+  ArgumentsHolder argsHolderToUse=null;
   Object[] argsToUse=null;
   if (explicitArgs != null) {
     argsToUse=explicitArgs;
@@ -50,7 +51,7 @@
       if (paramTypes.length < minNrOfArgs) {
         throw new BeanCreationException(mbd.getResourceDescription(),beanName,minNrOfArgs + " constructor arguments specified but no matching constructor found in bean '" + beanName+ "' "+ "(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");
       }
-      ArgumentsHolder args;
+      ArgumentsHolder argsHolder;
       if (resolvedValues != null) {
         try {
           String[] paramNames=null;
@@ -63,7 +64,7 @@
               paramNames=pnd.getParameterNames(candidate);
             }
           }
-          args=createArgumentArray(beanName,mbd,resolvedValues,bw,paramTypes,paramNames,candidate,autowiring);
+          argsHolder=createArgumentArray(beanName,mbd,resolvedValues,bw,paramTypes,paramNames,candidate,autowiring);
         }
  catch (        UnsatisfiedDependencyException ex) {
           if (this.beanFactory.logger.isTraceEnabled()) {
@@ -90,12 +91,13 @@
         if (paramTypes.length != explicitArgs.length) {
           continue;
         }
-        args=new ArgumentsHolder(explicitArgs);
+        argsHolder=new ArgumentsHolder(explicitArgs);
       }
-      int typeDiffWeight=(mbd.isLenientConstructorResolution() ? args.getTypeDifferenceWeight(paramTypes) : args.getAssignabilityWeight(paramTypes));
+      int typeDiffWeight=(mbd.isLenientConstructorResolution() ? argsHolder.getTypeDifferenceWeight(paramTypes) : argsHolder.getAssignabilityWeight(paramTypes));
       if (typeDiffWeight < minTypeDiffWeight) {
         constructorToUse=candidate;
-        argsToUse=args.arguments;
+        argsHolderToUse=argsHolder;
+        argsToUse=argsHolder.arguments;
         minTypeDiffWeight=typeDiffWeight;
         ambiguousConstructors=null;
       }
@@ -115,6 +117,7 @@
     }
     if (explicitArgs == null) {
       mbd.resolvedConstructorOrFactoryMethod=constructorToUse;
+      argsHolderToUse.storeCache(mbd);
     }
   }
   try {
@@ -130,7 +133,7 @@
 ,beanFactory.getAccessControlContext());
     }
  else {
-      beanInstance=beanFactory.getInstantiationStrategy().instantiate(mbd,beanName,beanFactory,constructorToUse,argsToUse);
+      beanInstance=this.beanFactory.getInstantiationStrategy().instantiate(mbd,beanName,this.beanFactory,constructorToUse,argsToUse);
     }
     bw.setWrappedInstance(beanInstance);
     return bw;
