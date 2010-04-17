@@ -1,30 +1,12 @@
 {
   if (source == null) {
-    return this.conversionService.convertNullSource(sourceType,targetType);
+    return null;
   }
   Collection<?> sourceCollection=(Collection<?>)source;
-  TypeDescriptor sourceElementType=sourceType.getElementTypeDescriptor();
-  if (sourceElementType == TypeDescriptor.NULL) {
-    sourceElementType=ConversionUtils.getElementType(sourceCollection);
-  }
-  TypeDescriptor targetElementType=targetType.getElementTypeDescriptor();
-  if (sourceElementType == TypeDescriptor.NULL || targetElementType == TypeDescriptor.NULL || sourceElementType.isAssignableTo(targetElementType)) {
-    if (sourceType.isAssignableTo(targetType)) {
-      return sourceCollection;
-    }
- else {
-      Collection target=CollectionFactory.createCollection(targetType.getType(),sourceCollection.size());
-      target.addAll(sourceCollection);
-      return target;
-    }
-  }
   Collection target=CollectionFactory.createCollection(targetType.getType(),sourceCollection.size());
-  GenericConverter converter=this.conversionService.getConverter(sourceElementType,targetElementType);
-  if (converter == null) {
-    throw new ConverterNotFoundException(sourceElementType,targetElementType);
-  }
-  for (  Object element : sourceCollection) {
-    target.add(ConversionUtils.invokeConverter(converter,element,sourceElementType,targetElementType));
+  for (  Object sourceElement : sourceCollection) {
+    Object targetElement=this.conversionService.convert(sourceElement,sourceType.getElementTypeDescriptor(sourceElement),targetType.getElementTypeDescriptor(sourceElement));
+    target.add(targetElement);
   }
   return target;
 }

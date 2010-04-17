@@ -1,25 +1,13 @@
 {
   if (source == null) {
-    return this.conversionService.convertNullSource(sourceType,targetType);
+    return null;
   }
   String string=(String)source;
   String[] fields=StringUtils.commaDelimitedListToStringArray(string);
   Collection target=CollectionFactory.createCollection(targetType.getType(),fields.length);
-  TypeDescriptor targetElementType=targetType.getElementTypeDescriptor();
-  if (targetElementType == TypeDescriptor.NULL || sourceType.isAssignableTo(targetElementType)) {
-    for (    String field : fields) {
-      target.add(field);
-    }
-  }
- else {
-    GenericConverter converter=this.conversionService.getConverter(sourceType,targetElementType);
-    if (converter == null) {
-      throw new ConverterNotFoundException(sourceType,targetElementType);
-    }
-    for (    String sourceElement : fields) {
-      Object targetElement=ConversionUtils.invokeConverter(converter,sourceElement,sourceType,targetElementType);
-      target.add(targetElement);
-    }
+  for (  String sourceElement : fields) {
+    Object targetElement=this.conversionService.convert(sourceElement,sourceType,targetType.getElementTypeDescriptor(sourceElement));
+    target.add(targetElement);
   }
   return target;
 }

@@ -1,18 +1,41 @@
 {
   assertNotNull(sourceType,targetType);
   if (logger.isDebugEnabled()) {
-    logger.debug("Converting value of " + sourceType + " to "+ targetType);
+    logger.debug("Converting value " + StylerUtils.style(source) + " of "+ sourceType+ " to "+ targetType);
   }
   if (sourceType == TypeDescriptor.NULL) {
-    Assert.isTrue(source == null,"The source must be null if sourceType == TypeDescriptor.NULL");
-    return convertNullSource(sourceType,targetType);
+    Assert.isTrue(source == null,"The value must be null if sourceType == TypeDescriptor.NULL");
+    Object result=convertNullSource(sourceType,targetType);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Converted to " + StylerUtils.style(result));
+    }
+    return result;
   }
   if (targetType == TypeDescriptor.NULL) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Converted to null");
+    }
     return null;
   }
   GenericConverter converter=getConverter(sourceType,targetType);
   if (converter == null) {
-    throw new ConverterNotFoundException(sourceType,targetType);
+    ConverterNotFoundException e=new ConverterNotFoundException(sourceType,targetType);
+    if (logger.isDebugEnabled()) {
+      logger.debug(e);
+    }
+    throw e;
   }
-  return ConversionUtils.invokeConverter(converter,source,sourceType,targetType);
+  try {
+    Object result=ConversionUtils.invokeConverter(converter,source,sourceType,targetType);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Converted to " + StylerUtils.style(result));
+    }
+    return result;
+  }
+ catch (  ConversionException e) {
+    if (logger.isDebugEnabled()) {
+      logger.debug(e);
+    }
+    throw e;
+  }
 }
