@@ -1,13 +1,13 @@
 {
-  if (logger.isTraceEnabled()) {
-    logger.trace("Looking for Converter to convert from " + sourceType + " to "+ targetType);
-  }
   Class<?> sourceObjectType=sourceType.getObjectType();
   if (sourceObjectType.isInterface()) {
     LinkedList<Class<?>> classQueue=new LinkedList<Class<?>>();
     classQueue.addFirst(sourceObjectType);
     while (!classQueue.isEmpty()) {
       Class<?> currentClass=classQueue.removeLast();
+      if (logger.isTraceEnabled()) {
+        logger.trace("Looking for converters indexed by sourceType [" + currentClass.getName() + "]");
+      }
       Map<Class<?>,MatchableConverters> converters=getTargetConvertersForSource(currentClass);
       GenericConverter converter=getMatchingConverterForTarget(sourceType,targetType,converters);
       if (converter != null) {
@@ -26,6 +26,9 @@
     classQueue.addFirst(sourceObjectType);
     while (!classQueue.isEmpty()) {
       Class<?> currentClass=classQueue.removeLast();
+      if (logger.isTraceEnabled()) {
+        logger.trace("Looking for converters indexed by sourceType [" + currentClass.getName() + "]");
+      }
       Map<Class<?>,MatchableConverters> converters=getTargetConvertersForSource(currentClass);
       GenericConverter converter=getMatchingConverterForTarget(sourceType,targetType,converters);
       if (converter != null) {
