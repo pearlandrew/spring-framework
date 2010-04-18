@@ -1,9 +1,33 @@
 {
-  GenericConverter converter=findConverterForClassPair(sourceType,targetType);
+  ConverterCacheKey key=new ConverterCacheKey(sourceType,targetType);
+  GenericConverter converter=converterCache.get(key);
   if (converter != null) {
-    return converter;
+    if (logger.isDebugEnabled()) {
+      logger.debug("Matched cached converter " + converter);
+    }
+    return converter != NO_MATCH ? converter : null;
   }
  else {
-    return getDefaultConverter(sourceType,targetType);
+    converter=findConverterForClassPair(sourceType,targetType);
+    if (converter != null) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Caching under " + key);
+      }
+      converterCache.put(key,converter);
+      return converter;
+    }
+    converter=getDefaultConverter(sourceType,targetType);
+    if (converter != null) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Caching under " + key);
+      }
+      converterCache.put(key,converter);
+      return converter;
+    }
+    if (logger.isTraceEnabled()) {
+      logger.trace("Caching NO_MATCH under " + key);
+    }
+    converterCache.put(key,NO_MATCH);
+    return null;
   }
 }
