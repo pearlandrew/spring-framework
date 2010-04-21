@@ -15,6 +15,14 @@
       return parentBeanFactory.getType(originalBeanName(name));
     }
     RootBeanDefinition mbd=getMergedLocalBeanDefinition(beanName);
+    BeanDefinitionHolder dbd=mbd.getDecoratedDefinition();
+    if (dbd != null && !BeanFactoryUtils.isFactoryDereference(name)) {
+      RootBeanDefinition tbd=getMergedBeanDefinition(dbd.getBeanName(),dbd.getBeanDefinition(),mbd);
+      Class targetClass=predictBeanType(dbd.getBeanName(),tbd);
+      if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
+        return targetClass;
+      }
+    }
     Class beanClass=predictBeanType(beanName,mbd);
     if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
       if (!BeanFactoryUtils.isFactoryDereference(name)) {
