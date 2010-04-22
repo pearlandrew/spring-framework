@@ -1,0 +1,17 @@
+{
+  Assert.notNull(candidate,"Candidate object must not be null");
+  Object current=candidate;
+  Class<?> result=null;
+  while (current instanceof TargetClassAware) {
+    result=((TargetClassAware)current).getTargetClass();
+    Object nested=null;
+    if (current instanceof Advised) {
+      TargetSource targetSource=((Advised)current).getTargetSource();
+      if (targetSource instanceof SingletonTargetSource) {
+        nested=((SingletonTargetSource)targetSource).getTarget();
+      }
+    }
+    current=nested;
+  }
+  return result;
+}
