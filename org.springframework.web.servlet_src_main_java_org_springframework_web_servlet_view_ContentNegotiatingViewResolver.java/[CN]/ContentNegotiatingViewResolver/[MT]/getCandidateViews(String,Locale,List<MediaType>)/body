@@ -1,0 +1,23 @@
+{
+  List<View> candidateViews=new ArrayList<View>();
+  for (  ViewResolver viewResolver : this.viewResolvers) {
+    View view=viewResolver.resolveViewName(viewName,locale);
+    if (view != null) {
+      candidateViews.add(view);
+    }
+    for (    MediaType requestedMediaType : requestedMediaTypes) {
+      List<String> extensions=getExtensionsForMediaType(requestedMediaType);
+      for (      String extension : extensions) {
+        String viewNameWithExtension=viewName + "." + extension;
+        view=viewResolver.resolveViewName(viewNameWithExtension,locale);
+        if (view != null) {
+          candidateViews.add(view);
+        }
+      }
+    }
+  }
+  if (!CollectionUtils.isEmpty(this.defaultViews)) {
+    candidateViews.addAll(this.defaultViews);
+  }
+  return candidateViews;
+}

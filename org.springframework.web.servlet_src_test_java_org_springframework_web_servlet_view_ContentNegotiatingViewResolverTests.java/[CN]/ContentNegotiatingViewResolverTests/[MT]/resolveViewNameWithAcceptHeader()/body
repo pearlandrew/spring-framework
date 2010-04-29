@@ -1,0 +1,16 @@
+{
+  request.addHeader("Accept","application/vnd.ms-excel");
+  viewResolver.setMediaTypes(Collections.singletonMap("xls","application/vnd.ms-excel"));
+  ViewResolver viewResolverMock=createMock(ViewResolver.class);
+  viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
+  View viewMock=createMock("application_xls",View.class);
+  String viewName="view";
+  Locale locale=Locale.ENGLISH;
+  expect(viewResolverMock.resolveViewName(viewName,locale)).andReturn(null);
+  expect(viewResolverMock.resolveViewName(viewName + ".xls",locale)).andReturn(viewMock);
+  expect(viewMock.getContentType()).andReturn("application/vnd.ms-excel").anyTimes();
+  replay(viewResolverMock,viewMock);
+  View result=viewResolver.resolveViewName(viewName,locale);
+  assertSame("Invalid view",viewMock,result);
+  verify(viewResolverMock,viewMock);
+}

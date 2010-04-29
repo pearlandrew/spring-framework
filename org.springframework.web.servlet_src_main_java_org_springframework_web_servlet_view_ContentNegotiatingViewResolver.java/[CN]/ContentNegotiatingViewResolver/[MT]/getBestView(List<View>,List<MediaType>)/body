@@ -1,0 +1,23 @@
+{
+  MediaType bestRequestedMediaType=null;
+  View bestView=null;
+  for (  MediaType requestedMediaType : requestedMediaTypes) {
+    for (    View candidateView : candidateViews) {
+      if (StringUtils.hasText(candidateView.getContentType())) {
+        MediaType candidateContentType=MediaType.parseMediaType(candidateView.getContentType());
+        if (requestedMediaType.includes(candidateContentType)) {
+          bestRequestedMediaType=requestedMediaType;
+          bestView=candidateView;
+          break;
+        }
+      }
+    }
+    if (bestView != null) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Returning [" + bestView + "] based on requested media type '"+ bestRequestedMediaType+ "'");
+      }
+      break;
+    }
+  }
+  return bestView;
+}

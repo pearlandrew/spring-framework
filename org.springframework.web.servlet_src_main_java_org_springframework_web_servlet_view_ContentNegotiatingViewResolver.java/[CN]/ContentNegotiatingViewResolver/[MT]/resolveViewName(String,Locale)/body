@@ -1,39 +1,10 @@
 {
   RequestAttributes attrs=RequestContextHolder.getRequestAttributes();
   Assert.isInstanceOf(ServletRequestAttributes.class,attrs);
-  ServletRequestAttributes servletAttrs=(ServletRequestAttributes)attrs;
-  List<MediaType> requestedMediaTypes=getMediaTypes(servletAttrs.getRequest());
-  List<View> candidateViews=new ArrayList<View>();
-  for (  ViewResolver viewResolver : this.viewResolvers) {
-    View view=viewResolver.resolveViewName(viewName,locale);
-    if (view != null) {
-      candidateViews.add(view);
-    }
-  }
-  if (!CollectionUtils.isEmpty(this.defaultViews)) {
-    candidateViews.addAll(this.defaultViews);
-  }
-  MediaType bestRequestedMediaType=null;
-  View bestView=null;
-  for (  MediaType requestedMediaType : requestedMediaTypes) {
-    for (    View candidateView : candidateViews) {
-      if (StringUtils.hasText(candidateView.getContentType())) {
-        MediaType candidateContentType=MediaType.parseMediaType(candidateView.getContentType());
-        if (requestedMediaType.includes(candidateContentType)) {
-          bestRequestedMediaType=requestedMediaType;
-          bestView=candidateView;
-          break;
-        }
-      }
-    }
-    if (bestView != null) {
-      break;
-    }
-  }
+  List<MediaType> requestedMediaTypes=getMediaTypes(((ServletRequestAttributes)attrs).getRequest());
+  List<View> candidateViews=getCandidateViews(viewName,locale,requestedMediaTypes);
+  View bestView=getBestView(candidateViews,requestedMediaTypes);
   if (bestView != null) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Returning [" + bestView + "] based on requested media type '"+ bestRequestedMediaType+ "'");
-    }
     return bestView;
   }
  else {

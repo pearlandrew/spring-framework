@@ -1,15 +1,11 @@
 {
-  MockHttpServletRequest request=new MockHttpServletRequest("GET","/test.json");
-  RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+  request.setRequestURI("/test.json");
   Map<String,String> mediaTypes=new HashMap<String,String>();
   mediaTypes.put("json","application/json");
   viewResolver.setMediaTypes(mediaTypes);
   ViewResolver viewResolverMock1=createMock(ViewResolver.class);
   ViewResolver viewResolverMock2=createMock(ViewResolver.class);
-  List<ViewResolver> viewResolverMocks=new ArrayList<ViewResolver>();
-  viewResolverMocks.add(viewResolverMock1);
-  viewResolverMocks.add(viewResolverMock2);
-  viewResolver.setViewResolvers(viewResolverMocks);
+  viewResolver.setViewResolvers(Arrays.asList(viewResolverMock1,viewResolverMock2));
   View viewMock1=createMock("application_xml",View.class);
   View viewMock2=createMock("text_html",View.class);
   View viewMock3=createMock("application_json",View.class);
@@ -19,7 +15,9 @@
   String viewName="view";
   Locale locale=Locale.ENGLISH;
   expect(viewResolverMock1.resolveViewName(viewName,locale)).andReturn(viewMock1);
+  expect(viewResolverMock1.resolveViewName(viewName + ".json",locale)).andReturn(null);
   expect(viewResolverMock2.resolveViewName(viewName,locale)).andReturn(viewMock2);
+  expect(viewResolverMock2.resolveViewName(viewName + ".json",locale)).andReturn(null);
   expect(viewMock1.getContentType()).andReturn("application/xml").anyTimes();
   expect(viewMock2.getContentType()).andReturn("text/html;charset=ISO-8859-1").anyTimes();
   expect(viewMock3.getContentType()).andReturn("application/json").anyTimes();
