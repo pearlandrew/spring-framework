@@ -1,0 +1,36 @@
+{
+  StandardEvaluationContext eContext=new StandardEvaluationContext(new XX());
+  Expression expr=null;
+  try {
+    expr=new SpelExpressionParser().parseRaw("@foo");
+    Assert.assertEquals("custard",expr.getValue(eContext,String.class));
+  }
+ catch (  SpelEvaluationException see) {
+    Assert.assertEquals(SpelMessage.NO_BEAN_RESOLVER_REGISTERED,see.getMessageCode());
+    Assert.assertEquals("foo",see.getInserts()[0]);
+  }
+  eContext.setBeanResolver(new MyBeanResolver());
+  expr=new SpelExpressionParser().parseRaw("@foo");
+  Assert.assertEquals("custard",expr.getValue(eContext,String.class));
+  expr=new SpelExpressionParser().parseRaw("@bar");
+  Assert.assertEquals(null,expr.getValue(eContext,String.class));
+  expr=new SpelExpressionParser().parseRaw("@goo");
+  try {
+    Assert.assertEquals(null,expr.getValue(eContext,String.class));
+  }
+ catch (  SpelEvaluationException see) {
+    Assert.assertEquals(SpelMessage.EXCEPTION_DURING_BEAN_RESOLUTION,see.getMessageCode());
+    Assert.assertEquals("goo",see.getInserts()[0]);
+    Assert.assertTrue(see.getCause() instanceof AccessException);
+    Assert.assertTrue(((AccessException)see.getCause()).getMessage().startsWith("DONT"));
+  }
+  expr=new SpelExpressionParser().parseRaw("@'foo.bar'");
+  Assert.assertEquals("trouble",expr.getValue(eContext,String.class));
+  try {
+    expr=new SpelExpressionParser().parseRaw("@378");
+    Assert.assertEquals("trouble",expr.getValue(eContext,String.class));
+  }
+ catch (  SpelParseException spe) {
+    Assert.assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
+  }
+}

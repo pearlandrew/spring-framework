@@ -1,0 +1,23 @@
+{
+  if (peekToken(TokenKind.BEAN_REF)) {
+    Token beanRefToken=nextToken();
+    Token beanNameToken=null;
+    String beanname=null;
+    if (peekToken(TokenKind.IDENTIFIER)) {
+      beanNameToken=eatToken(TokenKind.IDENTIFIER);
+      beanname=beanNameToken.data;
+    }
+ else     if (peekToken(TokenKind.LITERAL_STRING)) {
+      beanNameToken=eatToken(TokenKind.LITERAL_STRING);
+      beanname=beanNameToken.stringValue();
+      beanname=beanname.substring(1,beanname.length() - 1);
+    }
+ else {
+      raiseInternalException(beanRefToken.startpos,SpelMessage.INVALID_BEAN_REFERENCE);
+    }
+    BeanReference beanReference=new BeanReference(toPos(beanNameToken),beanname);
+    constructedNodes.push(beanReference);
+    return true;
+  }
+  return false;
+}

@@ -1,0 +1,13 @@
+{
+  BeanResolver beanResolver=state.getEvaluationContext().getBeanResolver();
+  if (beanResolver == null) {
+    throw new SpelEvaluationException(getStartPosition(),SpelMessage.NO_BEAN_RESOLVER_REGISTERED,beanname);
+  }
+  try {
+    TypedValue bean=new TypedValue(beanResolver.resolve(state.getEvaluationContext(),beanname));
+    return bean;
+  }
+ catch (  AccessException ae) {
+    throw new SpelEvaluationException(getStartPosition(),ae,SpelMessage.EXCEPTION_DURING_BEAN_RESOLUTION,beanname,ae.getMessage());
+  }
+}
