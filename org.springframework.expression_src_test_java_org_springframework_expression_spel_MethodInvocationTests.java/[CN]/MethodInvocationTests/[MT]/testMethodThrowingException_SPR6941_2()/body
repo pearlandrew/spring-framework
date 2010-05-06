@@ -1,0 +1,15 @@
+{
+  SpelExpressionParser parser=new SpelExpressionParser();
+  Expression expr=parser.parseExpression("throwException(#bar)");
+  eContext.setVariable("bar",4);
+  try {
+    expr.getValue(eContext);
+    Assert.fail();
+  }
+ catch (  ExpressionInvocationTargetException e) {
+    Throwable t=e.getCause();
+    Assert.assertEquals("org.springframework.expression.spel.testresources.Inventor$TestException",t.getClass().getName());
+    return;
+  }
+  Assert.fail("Should not be a SpelEvaluationException");
+}
