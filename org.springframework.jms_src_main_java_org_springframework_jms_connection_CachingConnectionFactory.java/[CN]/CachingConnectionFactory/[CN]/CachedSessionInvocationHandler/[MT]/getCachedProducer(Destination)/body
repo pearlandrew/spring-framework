@@ -1,5 +1,6 @@
 {
-  MessageProducer producer=this.cachedProducers.get(dest);
+  DestinationCacheKey cacheKey=new DestinationCacheKey(dest);
+  MessageProducer producer=this.cachedProducers.get(cacheKey);
   if (producer != null) {
     if (logger.isTraceEnabled()) {
       logger.trace("Found cached JMS MessageProducer for destination [" + dest + "]: "+ producer);
@@ -10,7 +11,7 @@
     if (logger.isDebugEnabled()) {
       logger.debug("Creating cached JMS MessageProducer for destination [" + dest + "]: "+ producer);
     }
-    this.cachedProducers.put(dest,producer);
+    this.cachedProducers.put(cacheKey,producer);
   }
   return new CachedMessageProducer(producer);
 }
