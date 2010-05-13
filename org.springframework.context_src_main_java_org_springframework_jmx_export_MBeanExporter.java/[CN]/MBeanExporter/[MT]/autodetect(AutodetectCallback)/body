@@ -5,7 +5,7 @@
     beanNames.addAll(Arrays.asList(((ConfigurableBeanFactory)this.beanFactory).getSingletonNames()));
   }
   for (  String beanName : beanNames) {
-    if (!isExcluded(beanName)) {
+    if (!isExcluded(beanName) && !isBeanDefinitionAbstract(this.beanFactory,beanName)) {
       try {
         Class beanClass=this.beanFactory.getType(beanName);
         if (beanClass != null && callback.include(beanClass,beanName)) {
@@ -28,8 +28,6 @@
         if (this.allowEagerInit) {
           throw ex;
         }
-      }
-catch (      BeanIsAbstractException ex) {
       }
     }
   }
