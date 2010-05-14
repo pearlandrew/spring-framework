@@ -1,0 +1,16 @@
+{
+  if (VFS_VER.V2.equals(version)) {
+    if ((Boolean)invokeVfsMethod(VFS_UTILS_METHOD_IS_NESTED_FILE,null,vfsResource)) {
+      throw new IOException("File resolution not supported for nested resource: " + vfsResource);
+    }
+    try {
+      return new File((URI)invokeVfsMethod(VFS_UTILS_METHOD_GET_COMPATIBLE_URI,null,vfsResource));
+    }
+ catch (    Exception ex) {
+      throw new NestedIOException("Failed to obtain File reference for " + vfsResource,ex);
+    }
+  }
+ else {
+    return (File)invokeVfsMethod(GET_PHYSICAL_FILE,vfsResource);
+  }
+}
