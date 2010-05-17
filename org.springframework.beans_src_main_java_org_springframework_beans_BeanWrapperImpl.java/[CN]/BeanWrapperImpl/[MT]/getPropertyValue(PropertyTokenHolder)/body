@@ -82,7 +82,7 @@
  else         if (value instanceof Map) {
           Map map=(Map)value;
           Class<?> mapKeyType=GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(),i + 1);
-          Object convertedMapKey=this.typeConverterDelegate.convertIfNecessary(key,mapKeyType);
+          Object convertedMapKey=convertIfNecessary(null,null,key,mapKeyType);
           value=map.get(convertedMapKey);
         }
  else {
@@ -93,19 +93,19 @@
     }
     return value;
   }
- catch (  InvocationTargetException ex) {
-    throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Getter for property '" + actualName + "' threw exception",ex);
-  }
-catch (  IllegalAccessException ex) {
-    throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Illegal attempt to get property '" + actualName + "' threw exception",ex);
-  }
-catch (  IndexOutOfBoundsException ex) {
+ catch (  IndexOutOfBoundsException ex) {
     throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Index of out of bounds in property path '" + propertyName + "'",ex);
   }
 catch (  NumberFormatException ex) {
     throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Invalid index in property path '" + propertyName + "'",ex);
   }
-catch (  Exception ex) {
+catch (  TypeMismatchException ex) {
     throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Invalid index in property path '" + propertyName + "'",ex);
+  }
+catch (  InvocationTargetException ex) {
+    throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Getter for property '" + actualName + "' threw exception",ex);
+  }
+catch (  Exception ex) {
+    throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Illegal attempt to get property '" + actualName + "' threw exception",ex);
   }
 }

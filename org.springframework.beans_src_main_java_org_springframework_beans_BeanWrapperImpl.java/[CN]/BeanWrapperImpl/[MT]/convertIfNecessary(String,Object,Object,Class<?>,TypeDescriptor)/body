@@ -1,0 +1,21 @@
+{
+  try {
+    return this.typeConverterDelegate.convertIfNecessary(propertyName,oldValue,newValue,requiredType,td);
+  }
+ catch (  ConverterNotFoundException ex) {
+    PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,newValue);
+    throw new ConversionNotSupportedException(pce,td.getType(),ex);
+  }
+catch (  ConversionException ex) {
+    PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,newValue);
+    throw new TypeMismatchException(pce,requiredType,ex);
+  }
+catch (  IllegalStateException ex) {
+    PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,newValue);
+    throw new ConversionNotSupportedException(pce,requiredType,ex);
+  }
+catch (  IllegalArgumentException ex) {
+    PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,newValue);
+    throw new TypeMismatchException(pce,requiredType,ex);
+  }
+}

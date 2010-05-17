@@ -26,18 +26,10 @@
         if (isExtractOldValueForEditor()) {
           oldValue=Array.get(propValue,arrayIndex);
         }
-        Object convertedValue=this.typeConverterDelegate.convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType);
-        Array.set(propValue,Integer.parseInt(key),convertedValue);
+        Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType);
+        Array.set(propValue,arrayIndex,convertedValue);
       }
- catch (      IllegalArgumentException ex) {
-        PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
-        throw new TypeMismatchException(pce,requiredType,ex);
-      }
-catch (      IllegalStateException ex) {
-        PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
-        throw new ConversionNotSupportedException(pce,requiredType,ex);
-      }
-catch (      IndexOutOfBoundsException ex) {
+ catch (      IndexOutOfBoundsException ex) {
         throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Invalid array index in property path '" + propertyName + "'",ex);
       }
     }
@@ -50,26 +42,20 @@ catch (      IndexOutOfBoundsException ex) {
       if (isExtractOldValueForEditor() && index < list.size()) {
         oldValue=list.get(index);
       }
-      try {
-        Object convertedValue=this.typeConverterDelegate.convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType);
-        if (index < list.size()) {
-          list.set(index,convertedValue);
-        }
- else         if (index >= list.size()) {
-          for (int i=list.size(); i < index; i++) {
-            try {
-              list.add(null);
-            }
- catch (            NullPointerException ex) {
-              throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Cannot set element with index " + index + " in List of size "+ list.size()+ ", accessed using property path '"+ propertyName+ "': List does not support filling up gaps with null elements");
-            }
-          }
-          list.add(convertedValue);
-        }
+      Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType);
+      if (index < list.size()) {
+        list.set(index,convertedValue);
       }
- catch (      IllegalArgumentException ex) {
-        PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
-        throw new TypeMismatchException(pce,requiredType,ex);
+ else       if (index >= list.size()) {
+        for (int i=list.size(); i < index; i++) {
+          try {
+            list.add(null);
+          }
+ catch (          NullPointerException ex) {
+            throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Cannot set element with index " + index + " in List of size "+ list.size()+ ", accessed using property path '"+ propertyName+ "': List does not support filling up gaps with null elements");
+          }
+        }
+        list.add(convertedValue);
       }
     }
  else     if (propValue instanceof Map) {
@@ -77,26 +63,12 @@ catch (      IndexOutOfBoundsException ex) {
       Class mapKeyType=GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(),tokens.keys.length);
       Class mapValueType=GenericCollectionTypeResolver.getMapValueReturnType(pd.getReadMethod(),tokens.keys.length);
       Map map=(Map)propValue;
-      Object convertedMapKey;
-      Object convertedMapValue;
-      try {
-        convertedMapKey=this.typeConverterDelegate.convertIfNecessary(key,mapKeyType);
-      }
- catch (      IllegalArgumentException ex) {
-        PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,null,pv.getValue());
-        throw new TypeMismatchException(pce,mapKeyType,ex);
-      }
+      Object convertedMapKey=convertIfNecessary(null,null,key,mapKeyType);
       Object oldValue=null;
       if (isExtractOldValueForEditor()) {
         oldValue=map.get(convertedMapKey);
       }
-      try {
-        convertedMapValue=this.typeConverterDelegate.convertIfNecessary(propertyName,oldValue,pv.getValue(),mapValueType,new MethodParameter(pd.getReadMethod(),-1,tokens.keys.length + 1));
-      }
- catch (      IllegalArgumentException ex) {
-        PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
-        throw new TypeMismatchException(pce,mapValueType,ex);
-      }
+      Object convertedMapValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),mapValueType,new TypeDescriptor(new MethodParameter(pd.getReadMethod(),-1,tokens.keys.length + 1)));
       map.put(convertedMapKey,convertedMapValue);
     }
  else {
@@ -166,7 +138,7 @@ catch (      IndexOutOfBoundsException ex) {
               }
             }
           }
-          valueToApply=this.typeConverterDelegate.convertIfNecessary(oldValue,originalValue,pd);
+          valueToApply=convertForProperty(propertyName,oldValue,originalValue,pd);
         }
         pv.getOriginalPropertyValue().conversionNecessary=(valueToApply != originalValue);
       }
@@ -201,10 +173,13 @@ catch (      IndexOutOfBoundsException ex) {
         }
       }
  else {
-        writeMethod.invoke(object,value);
+        writeMethod.invoke(this.object,value);
       }
     }
- catch (    InvocationTargetException ex) {
+ catch (    TypeMismatchException ex) {
+      throw ex;
+    }
+catch (    InvocationTargetException ex) {
       PropertyChangeEvent propertyChangeEvent=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
       if (ex.getTargetException() instanceof ClassCastException) {
         throw new TypeMismatchException(propertyChangeEvent,pd.getPropertyType(),ex.getTargetException());
@@ -212,26 +187,6 @@ catch (      IndexOutOfBoundsException ex) {
  else {
         throw new MethodInvocationException(propertyChangeEvent,ex.getTargetException());
       }
-    }
-catch (    ConverterNotFoundException ex) {
-      PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
-      throw new ConversionNotSupportedException(pce,pd.getPropertyType(),ex);
-    }
-catch (    ConversionException ex) {
-      PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
-      throw new TypeMismatchException(pce,pd.getPropertyType(),ex);
-    }
-catch (    IllegalStateException ex) {
-      PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
-      throw new ConversionNotSupportedException(pce,pd.getPropertyType(),ex);
-    }
-catch (    IllegalArgumentException ex) {
-      PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
-      throw new TypeMismatchException(pce,pd.getPropertyType(),ex);
-    }
-catch (    IllegalAccessException ex) {
-      PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
-      throw new MethodInvocationException(pce,ex);
     }
 catch (    Exception ex) {
       PropertyChangeEvent pce=new PropertyChangeEvent(this.rootObject,this.nestedPath + propertyName,oldValue,pv.getValue());
