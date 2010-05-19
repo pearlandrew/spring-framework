@@ -12,9 +12,14 @@ synchronized (this.activeMonitor) {
       publishEvent(new ContextClosedEvent(this));
     }
  catch (    Throwable ex) {
-      logger.error("Exception thrown from ApplicationListener handling ContextClosedEvent",ex);
+      logger.warn("Exception thrown from ApplicationListener handling ContextClosedEvent",ex);
     }
-    getLifecycleProcessor().onClose();
+    try {
+      getLifecycleProcessor().onClose();
+    }
+ catch (    Throwable ex) {
+      logger.warn("Exception thrown from LifecycleProcessor on context close",ex);
+    }
     destroyBeans();
     closeBeanFactory();
     onClose();
