@@ -8,6 +8,9 @@
       con.setReadOnly(true);
     }
  catch (    Throwable ex) {
+      if (ex instanceof SQLException && (ex.getClass().getSimpleName().contains("Timeout") || (ex.getCause() != null && ex.getCause().getClass().getSimpleName().contains("Timeout")))) {
+        throw (SQLException)ex;
+      }
       logger.debug("Could not set JDBC Connection read-only",ex);
     }
   }
