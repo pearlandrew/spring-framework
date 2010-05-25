@@ -7,9 +7,23 @@
       }
       con.setReadOnly(true);
     }
- catch (    Throwable ex) {
-      if (ex instanceof SQLException && (ex.getClass().getSimpleName().contains("Timeout") || (ex.getCause() != null && ex.getCause().getClass().getSimpleName().contains("Timeout")))) {
-        throw (SQLException)ex;
+ catch (    SQLException ex) {
+      Throwable exToCheck=ex;
+      while (exToCheck != null) {
+        if (exToCheck.getClass().getSimpleName().contains("Timeout")) {
+          throw ex;
+        }
+        exToCheck=exToCheck.getCause();
+      }
+      logger.debug("Could not set JDBC Connection read-only",ex);
+    }
+catch (    RuntimeException ex) {
+      Throwable exToCheck=ex;
+      while (exToCheck != null) {
+        if (exToCheck.getClass().getSimpleName().contains("Timeout")) {
+          throw ex;
+        }
+        exToCheck=exToCheck.getCause();
       }
       logger.debug("Could not set JDBC Connection read-only",ex);
     }
