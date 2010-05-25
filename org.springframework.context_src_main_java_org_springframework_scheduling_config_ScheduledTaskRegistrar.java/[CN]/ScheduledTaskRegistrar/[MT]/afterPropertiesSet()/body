@@ -1,6 +1,7 @@
 {
   if (this.taskScheduler == null) {
-    this.taskScheduler=new ConcurrentTaskScheduler(Executors.newSingleThreadScheduledExecutor());
+    this.localExecutor=Executors.newSingleThreadScheduledExecutor();
+    this.taskScheduler=new ConcurrentTaskScheduler(this.localExecutor);
   }
   if (this.triggerTasks != null) {
     for (    Map.Entry<Runnable,Trigger> entry : this.triggerTasks.entrySet()) {
@@ -8,7 +9,7 @@
     }
   }
   if (this.cronTasks != null) {
-    for (    Map.Entry<Runnable,String> entry : cronTasks.entrySet()) {
+    for (    Map.Entry<Runnable,String> entry : this.cronTasks.entrySet()) {
       this.scheduledFutures.add(this.taskScheduler.schedule(entry.getKey(),new CronTrigger(entry.getValue())));
     }
   }
