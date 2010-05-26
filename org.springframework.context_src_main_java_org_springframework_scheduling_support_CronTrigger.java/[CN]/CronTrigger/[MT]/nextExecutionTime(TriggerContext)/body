@@ -1,6 +1,12 @@
 {
   Date date=triggerContext.lastCompletionTime();
-  if (date == null) {
+  if (date != null) {
+    Date scheduled=triggerContext.lastScheduledExecutionTime();
+    if (scheduled != null && date.before(scheduled)) {
+      date=scheduled;
+    }
+  }
+ else {
     date=new Date();
   }
   return this.sequenceGenerator.next(date);
