@@ -9,14 +9,16 @@
     results=(CachedIntrospectionResults)value;
   }
   if (results == null) {
-    results=new CachedIntrospectionResults(beanClass);
-    if (ClassUtils.isCacheSafe(beanClass,CachedIntrospectionResults.class.getClassLoader()) || isClassLoaderAccepted(beanClass.getClassLoader()) || !ClassUtils.isPresent(beanClass.getName() + "BeanInfo",beanClass.getClassLoader())) {
+    boolean fullyCacheable=ClassUtils.isCacheSafe(beanClass,CachedIntrospectionResults.class.getClassLoader()) || isClassLoaderAccepted(beanClass.getClassLoader());
+    if (fullyCacheable || !ClassUtils.isPresent(beanClass.getName() + "BeanInfo",beanClass.getClassLoader())) {
+      results=new CachedIntrospectionResults(beanClass,fullyCacheable);
       classCache.put(beanClass,results);
     }
  else {
       if (logger.isDebugEnabled()) {
         logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
       }
+      results=new CachedIntrospectionResults(beanClass,true);
       classCache.put(beanClass,new WeakReference<CachedIntrospectionResults>(results));
     }
   }

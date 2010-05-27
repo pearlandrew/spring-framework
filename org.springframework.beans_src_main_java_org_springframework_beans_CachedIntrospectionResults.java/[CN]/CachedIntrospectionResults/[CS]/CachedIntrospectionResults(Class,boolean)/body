@@ -13,17 +13,22 @@
     if (logger.isTraceEnabled()) {
       logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
     }
-    this.propertyDescriptorCache=new HashMap<String,PropertyDescriptor>();
+    this.propertyDescriptorCache=new LinkedHashMap<String,PropertyDescriptor>();
     PropertyDescriptor[] pds=this.beanInfo.getPropertyDescriptors();
     for (    PropertyDescriptor pd : pds) {
+      if (Class.class.equals(beanClass) && "classLoader".equals(pd.getName())) {
+        continue;
+      }
       if (logger.isTraceEnabled()) {
         logger.trace("Found bean property '" + pd.getName() + "'"+ (pd.getPropertyType() != null ? " of type [" + pd.getPropertyType().getName() + "]" : "")+ (pd.getPropertyEditorClass() != null ? "; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
       }
-      pd=new GenericTypeAwarePropertyDescriptor(beanClass,pd.getName(),pd.getReadMethod(),pd.getWriteMethod(),pd.getPropertyEditorClass());
+      if (cacheFullMetadata) {
+        pd=buildGenericTypeAwarePropertyDescriptor(beanClass,pd);
+      }
       this.propertyDescriptorCache.put(pd.getName(),pd);
     }
   }
  catch (  IntrospectionException ex) {
-    throw new FatalBeanException("Cannot get BeanInfo for object of class [" + beanClass.getName() + "]",ex);
+    throw new FatalBeanException("Failed to obtain BeanInfo for class [" + beanClass.getName() + "]",ex);
   }
 }
