@@ -1,8 +1,14 @@
 {
-  ResponseStatus responseStatus=AnnotationUtils.findAnnotation(handlerMethod,ResponseStatus.class);
-  if (responseStatus != null) {
-    HttpServletResponse response=webRequest.getResponse();
-    response.setStatus(responseStatus.value().value());
+  ResponseStatus responseStatusAnn=AnnotationUtils.findAnnotation(handlerMethod,ResponseStatus.class);
+  if (responseStatusAnn != null) {
+    HttpStatus responseStatus=responseStatusAnn.value();
+    String reason=responseStatusAnn.reason();
+    if (!StringUtils.hasText(reason)) {
+      webRequest.getResponse().setStatus(responseStatus.value());
+    }
+ else {
+      webRequest.getResponse().sendError(responseStatus.value(),reason);
+    }
   }
   if (returnValue != null && AnnotationUtils.findAnnotation(handlerMethod,ResponseBody.class) != null) {
     return handleResponseBody(returnValue,webRequest);
