@@ -4,7 +4,12 @@
     String field=violation.getPropertyPath().toString();
     FieldError fieldError=errors.getFieldError(field);
     if (fieldError == null || !fieldError.isBindingFailure()) {
-      errors.rejectValue(field,violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),getArgumentsForConstraint(errors.getObjectName(),field,violation.getConstraintDescriptor()),violation.getMessage());
+      try {
+        errors.rejectValue(field,violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),getArgumentsForConstraint(errors.getObjectName(),field,violation.getConstraintDescriptor()),violation.getMessage());
+      }
+ catch (      NotReadablePropertyException ex) {
+        throw new IllegalStateException("JSR-303 validated property '" + field + "' does not have a corresponding accessor for Spring data binding - "+ "check your DataBinder's configuration (bean property versus direct field access)",ex);
+      }
     }
   }
 }
