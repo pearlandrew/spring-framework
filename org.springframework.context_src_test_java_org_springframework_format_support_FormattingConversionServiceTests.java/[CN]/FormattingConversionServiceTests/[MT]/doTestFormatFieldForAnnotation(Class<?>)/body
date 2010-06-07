@@ -12,13 +12,17 @@
   }
 );
   formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
+  String formatted=(String)formattingService.convert(new LocalDate(2009,10,31).toDateTimeAtCurrentTime().toDate(),new TypeDescriptor(modelClass.getField("date")),TypeDescriptor.valueOf(String.class));
+  assertEquals("10/31/09",formatted);
+  LocalDate date=new LocalDate(formattingService.convert("10/31/09",TypeDescriptor.valueOf(String.class),new TypeDescriptor(modelClass.getField("date"))));
+  assertEquals(new LocalDate(2009,10,31),date);
   List<Date> dates=new ArrayList<Date>();
   dates.add(new LocalDate(2009,10,31).toDateTimeAtCurrentTime().toDate());
   dates.add(new LocalDate(2009,11,1).toDateTimeAtCurrentTime().toDate());
   dates.add(new LocalDate(2009,11,2).toDateTimeAtCurrentTime().toDate());
-  String formatted=(String)formattingService.convert(dates,new TypeDescriptor(Model.class.getField("dates")),TypeDescriptor.valueOf(String.class));
+  formatted=(String)formattingService.convert(dates,new TypeDescriptor(modelClass.getField("dates")),TypeDescriptor.valueOf(String.class));
   assertEquals("10/31/09,11/1/09,11/2/09",formatted);
-  dates=(List<Date>)formattingService.convert("10/31/09,11/1/09,11/2/09",TypeDescriptor.valueOf(String.class),new TypeDescriptor(Model.class.getField("dates")));
+  dates=(List<Date>)formattingService.convert("10/31/09,11/1/09,11/2/09",TypeDescriptor.valueOf(String.class),new TypeDescriptor(modelClass.getField("dates")));
   assertEquals(new LocalDate(2009,10,31),new LocalDate(dates.get(0)));
   assertEquals(new LocalDate(2009,11,1),new LocalDate(dates.get(1)));
   assertEquals(new LocalDate(2009,11,2),new LocalDate(dates.get(2)));

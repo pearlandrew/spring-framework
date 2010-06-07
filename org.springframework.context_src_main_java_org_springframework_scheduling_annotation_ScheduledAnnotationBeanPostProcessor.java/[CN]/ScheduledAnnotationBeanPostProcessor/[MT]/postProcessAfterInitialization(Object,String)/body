@@ -13,16 +13,16 @@
         try {
           runnable.prepare();
         }
- catch (        Exception e) {
-          throw new IllegalStateException("failed to prepare task",e);
+ catch (        Exception ex) {
+          throw new IllegalStateException("failed to prepare task",ex);
         }
         boolean processedSchedule=false;
         String errorMessage="Exactly one of 'cron', 'fixedDelay', or 'fixedRate' is required.";
         String cron=annotation.cron();
         if (!"".equals(cron)) {
           processedSchedule=true;
-          if (applicationContext instanceof ConfigurableApplicationContext) {
-            cron=((ConfigurableApplicationContext)applicationContext).getBeanFactory().resolveEmbeddedValue(cron);
+          if (embeddedValueResolver != null) {
+            cron=embeddedValueResolver.resolveStringValue(cron);
           }
           cronTasks.put(runnable,cron);
         }
