@@ -1,4 +1,17 @@
 {
-  Assert.notNull(domResult.getNode(),"DOMResult does not contain Node");
+  if (domResult.getNode() == null) {
+    try {
+synchronized (this.documentBuilderFactoryMonitor) {
+        if (this.documentBuilderFactory == null) {
+          this.documentBuilderFactory=createDocumentBuilderFactory();
+        }
+      }
+      DocumentBuilder documentBuilder=createDocumentBuilder(this.documentBuilderFactory);
+      domResult.setNode(documentBuilder.newDocument());
+    }
+ catch (    ParserConfigurationException ex) {
+      throw new UnmarshallingFailureException("Could not create document placeholder for DOMResult: " + ex.getMessage(),ex);
+    }
+  }
   marshalDomNode(graph,domResult.getNode());
 }
