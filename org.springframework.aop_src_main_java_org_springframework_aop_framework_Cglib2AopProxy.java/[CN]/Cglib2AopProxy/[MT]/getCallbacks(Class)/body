@@ -3,7 +3,7 @@
   boolean isFrozen=this.advised.isFrozen();
   boolean isStatic=this.advised.getTargetSource().isStatic();
   Callback aopInterceptor=new DynamicAdvisedInterceptor(this.advised);
-  Callback targetInterceptor=null;
+  Callback targetInterceptor;
   if (exposeProxy) {
     targetInterceptor=isStatic ? new StaticUnadvisedExposedInterceptor(this.advised.getTargetSource().getTarget()) : new DynamicUnadvisedExposedInterceptor(this.advised.getTargetSource());
   }
@@ -23,12 +23,8 @@
       this.fixedInterceptorMap.put(methods[x].toString(),x);
     }
     callbacks=new Callback[mainCallbacks.length + fixedCallbacks.length];
-    for (int x=0; x < mainCallbacks.length; x++) {
-      callbacks[x]=mainCallbacks[x];
-    }
-    for (int x=0; x < fixedCallbacks.length; x++) {
-      callbacks[x + mainCallbacks.length]=fixedCallbacks[x];
-    }
+    System.arraycopy(mainCallbacks,0,callbacks,0,mainCallbacks.length);
+    System.arraycopy(fixedCallbacks,0,callbacks,mainCallbacks.length,fixedCallbacks.length);
     this.fixedInterceptorOffset=mainCallbacks.length;
   }
  else {
