@@ -1,17 +1,4 @@
 {
-  Assert.notNull(clazz,"Class must not be null");
-  if (clazz.isInterface()) {
-    return new Class[]{clazz};
-  }
-  List<Class<?>> interfaces=new ArrayList<Class<?>>();
-  while (clazz != null) {
-    Class<?>[] ifcs=clazz.getInterfaces();
-    for (    Class<?> ifc : ifcs) {
-      if (!interfaces.contains(ifc) && (classLoader == null || isVisible(ifc,classLoader))) {
-        interfaces.add(ifc);
-      }
-    }
-    clazz=clazz.getSuperclass();
-  }
-  return interfaces.toArray(new Class[interfaces.size()]);
+  Set<Class> ifcs=getAllInterfacesForClassAsSet(clazz,classLoader);
+  return ifcs.toArray(new Class[ifcs.size()]);
 }
