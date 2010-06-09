@@ -2,10 +2,15 @@
   ExtendedModelMap implicitModel=null;
   if (response instanceof MimeResponse) {
     MimeResponse mimeResponse=(MimeResponse)response;
-    if (request.getParameter(IMPLICIT_MODEL_ATTRIBUTE) != null) {
+    if (response instanceof RenderResponse) {
       PortletSession session=request.getPortletSession(false);
       if (session != null) {
-        implicitModel=(ExtendedModelMap)session.getAttribute(IMPLICIT_MODEL_ATTRIBUTE);
+        if (request.getParameter(IMPLICIT_MODEL_RENDER_PARAMETER) != null) {
+          implicitModel=(ExtendedModelMap)session.getAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE);
+        }
+ else {
+          session.removeAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE);
+        }
       }
     }
     if (handler.getClass().getAnnotation(SessionAttributes.class) != null) {
