@@ -11,6 +11,13 @@
     Object baefValue=baefCtor.newInstance(evaluator);
     Method setter=container.getClass().getMethod("setAttributeEvaluatorFactory",aef);
     setter.invoke(container,baefValue);
+    Method getRequestContextFactory=BasicTilesContainer.class.getDeclaredMethod("getRequestContextFactory");
+    getRequestContextFactory.setAccessible(true);
+    Method createRendererFactory=BasicTilesContainerFactory.class.getDeclaredMethod("createRendererFactory",TilesApplicationContext.class,TilesRequestContextFactory.class,TilesContainer.class,aef);
+    createRendererFactory.setAccessible(true);
+    BasicTilesContainerFactory tcf=new BasicTilesContainerFactory();
+    RendererFactory rendererFactory=(RendererFactory)createRendererFactory.invoke(tcf,container.getApplicationContext(),getRequestContextFactory.invoke(container),container,baefValue);
+    container.setRendererFactory(rendererFactory);
   }
  catch (  Exception ex) {
     throw new IllegalStateException("Cannot activate ELAttributeEvaluator",ex);
