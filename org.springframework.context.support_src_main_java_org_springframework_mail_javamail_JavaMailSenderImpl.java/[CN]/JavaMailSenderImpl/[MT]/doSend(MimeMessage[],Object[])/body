@@ -1,37 +1,52 @@
 {
   Map<Object,Exception> failedMessages=new LinkedHashMap<Object,Exception>();
+  Transport transport;
   try {
-    Transport transport=getTransport(getSession());
+    transport=getTransport(getSession());
     transport.connect(getHost(),getPort(),getUsername(),getPassword());
-    try {
-      for (int i=0; i < mimeMessages.length; i++) {
-        MimeMessage mimeMessage=mimeMessages[i];
-        try {
-          if (mimeMessage.getSentDate() == null) {
-            mimeMessage.setSentDate(new Date());
-          }
-          String messageId=mimeMessage.getMessageID();
-          mimeMessage.saveChanges();
-          if (messageId != null) {
-            mimeMessage.setHeader(HEADER_MESSAGE_ID,messageId);
-          }
-          transport.sendMessage(mimeMessage,mimeMessage.getAllRecipients());
-        }
- catch (        MessagingException ex) {
-          Object original=(originalMessages != null ? originalMessages[i] : mimeMessage);
-          failedMessages.put(original,ex);
-        }
-      }
-    }
-  finally {
-      transport.close();
-    }
   }
  catch (  AuthenticationFailedException ex) {
     throw new MailAuthenticationException(ex);
   }
 catch (  MessagingException ex) {
-    throw new MailSendException("Mail server connection failed",ex);
+    for (int i=0; i < mimeMessages.length; i++) {
+      Object original=(originalMessages != null ? originalMessages[i] : mimeMessages[i]);
+      failedMessages.put(original,ex);
+    }
+    throw new MailSendException("Mail server connection failed",ex,failedMessages);
+  }
+  try {
+    for (int i=0; i < mimeMessages.length; i++) {
+      MimeMessage mimeMessage=mimeMessages[i];
+      try {
+        if (mimeMessage.getSentDate() == null) {
+          mimeMessage.setSentDate(new Date());
+        }
+        String messageId=mimeMessage.getMessageID();
+        mimeMessage.saveChanges();
+        if (messageId != null) {
+          mimeMessage.setHeader(HEADER_MESSAGE_ID,messageId);
+        }
+        transport.sendMessage(mimeMessage,mimeMessage.getAllRecipients());
+      }
+ catch (      MessagingException ex) {
+        Object original=(originalMessages != null ? originalMessages[i] : mimeMessage);
+        failedMessages.put(original,ex);
+      }
+    }
+  }
+  finally {
+    try {
+      transport.close();
+    }
+ catch (    MessagingException ex) {
+      if (!failedMessages.isEmpty()) {
+        throw new MailSendException("Failed to close server connection after message failures",ex,failedMessages);
+      }
+ else {
+        throw new MailSendException("Failed to close server connection after message sending",ex);
+      }
+    }
   }
   if (!failedMessages.isEmpty()) {
     throw new MailSendException(failedMessages);
