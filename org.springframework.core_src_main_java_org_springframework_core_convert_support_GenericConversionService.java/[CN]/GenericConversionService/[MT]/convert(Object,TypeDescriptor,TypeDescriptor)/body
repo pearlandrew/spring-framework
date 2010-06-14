@@ -12,30 +12,16 @@
     return result;
   }
   if (targetType == TypeDescriptor.NULL) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Converted to null");
-    }
+    logger.debug("Converted to null");
     return null;
   }
   GenericConverter converter=getConverter(sourceType,targetType);
   if (converter == null) {
-    ConverterNotFoundException e=new ConverterNotFoundException(sourceType,targetType);
-    if (logger.isDebugEnabled()) {
-      logger.debug(e);
-    }
-    throw e;
+    throw new ConverterNotFoundException(sourceType,targetType);
   }
-  try {
-    Object result=ConversionUtils.invokeConverter(converter,source,sourceType,targetType);
-    if (logger.isDebugEnabled()) {
-      logger.debug("Converted to " + StylerUtils.style(result));
-    }
-    return result;
+  Object result=ConversionUtils.invokeConverter(converter,source,sourceType,targetType);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Converted to " + StylerUtils.style(result));
   }
- catch (  ConversionException e) {
-    if (logger.isDebugEnabled()) {
-      logger.debug(e);
-    }
-    throw e;
-  }
+  return result;
 }

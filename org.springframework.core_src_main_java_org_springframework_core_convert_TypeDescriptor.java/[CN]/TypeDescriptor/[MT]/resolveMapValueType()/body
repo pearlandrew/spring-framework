@@ -6,12 +6,9 @@
     return GenericCollectionTypeResolver.getMapValueParameterType(this.methodParameter);
   }
  else   if (this.value instanceof Map<?,?>) {
-    Map<?,?> map=(Map<?,?>)this.value;
-    if (!map.isEmpty()) {
-      Object val=map.values().iterator().next();
-      if (val != null) {
-        return val.getClass();
-      }
+    Class<?> valueType=CollectionUtils.findCommonElementType(((Map<?,?>)this.value).values());
+    if (valueType != null) {
+      return valueType;
     }
   }
   return (isMap() && this.type != null ? GenericCollectionTypeResolver.getMapValueType((Class<? extends Map>)this.type) : null);
