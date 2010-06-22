@@ -1,0 +1,22 @@
+{
+  String path=(String)request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+  if (path == null) {
+    throw new IllegalStateException("Required request attribute '" + HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");
+  }
+  String[] resourceElements=path.split(",");
+  if (resourceElements.length == 1 && resourceElements[0].length() == 0) {
+    throw new NoSuchRequestHandlingMethodException(request);
+  }
+  List<Resource> resources=new ArrayList<Resource>();
+  String[] dirAndFilename=splitDirectoryAndFilename(resourceElements[0]);
+  String dir=dirAndFilename[0];
+  String filename=dirAndFilename[1];
+  Resource parent=dir != null ? this.resourceDirectory.createRelative(dir) : this.resourceDirectory;
+  addResource(parent,filename,resources);
+  if (resourceElements.length > 1) {
+    for (int i=1; i < resourceElements.length; i++) {
+      addResource(parent,resourceElements[i],resources);
+    }
+  }
+  return resources;
+}

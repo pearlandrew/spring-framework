@@ -1,0 +1,14 @@
+{
+  Object source=parserContext.extractSource(element);
+  registerHandlerAdapterIfNecessary(parserContext,source);
+  BeanDefinition handlerMappingDef=registerHandlerMappingIfNecessary(parserContext,source);
+  String resourceDirectory="/resources/";
+  RootBeanDefinition resourceHandlerDef=new RootBeanDefinition(ResourceHttpRequestHandler.class);
+  resourceHandlerDef.setSource(source);
+  resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  resourceHandlerDef.getConstructorArgumentValues().addIndexedArgumentValue(0,resourceDirectory);
+  Map<String,BeanDefinition> urlMap=getUrlMap(handlerMappingDef);
+  String resourceRequestPath="/resources/**";
+  urlMap.put(resourceRequestPath,resourceHandlerDef);
+  return null;
+}
