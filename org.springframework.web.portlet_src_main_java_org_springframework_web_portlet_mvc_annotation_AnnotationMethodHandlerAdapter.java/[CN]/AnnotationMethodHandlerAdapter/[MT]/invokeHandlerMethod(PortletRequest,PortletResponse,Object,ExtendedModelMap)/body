@@ -6,11 +6,19 @@
   Object result=methodInvoker.invokeHandlerMethod(handlerMethod,handler,webRequest,implicitModel);
   ModelAndView mav=methodInvoker.getModelAndView(handlerMethod,handler.getClass(),result,implicitModel,webRequest);
   methodInvoker.updateModelAttributes(handler,(mav != null ? mav.getModel() : null),implicitModel,webRequest);
-  if (response instanceof ActionResponse && !implicitModel.isEmpty()) {
-    ActionResponse actionResponse=(ActionResponse)response;
+  if (response instanceof StateAwareResponse && !implicitModel.isEmpty()) {
+    StateAwareResponse stateResponse=(StateAwareResponse)response;
+    Map<?,?> modelToStore=implicitModel;
     try {
-      actionResponse.setRenderParameter(IMPLICIT_MODEL_RENDER_PARAMETER,Boolean.TRUE.toString());
-      request.getPortletSession().setAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE,implicitModel);
+      stateResponse.setRenderParameter(IMPLICIT_MODEL_RENDER_PARAMETER,Boolean.TRUE.toString());
+      if (response instanceof EventResponse) {
+        Map existingModel=(Map)request.getPortletSession().getAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE);
+        if (existingModel != null) {
+          existingModel.putAll(implicitModel);
+          modelToStore=existingModel;
+        }
+      }
+      request.getPortletSession().setAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE,modelToStore);
     }
  catch (    IllegalStateException ex) {
     }
