@@ -48,13 +48,13 @@
     int idx=0;
     for (    Object element : data) {
       try {
-        state.pushActiveContextObject(new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType())));
+        state.pushActiveContextObject(new TypedValue(element,op.getTypeDescriptor().getElementTypeDescriptor()));
         state.enterScope("index",idx);
         Object o=selectionCriteria.getValueInternal(state).getValue();
         if (o instanceof Boolean) {
           if (((Boolean)o).booleanValue() == true) {
             if (variant == FIRST) {
-              return new TypedValue(element,TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
+              return new TypedValue(element,op.getTypeDescriptor().getElementTypeDescriptor());
             }
             result.add(element);
           }
@@ -73,7 +73,7 @@
       return TypedValue.NULL;
     }
     if (variant == LAST) {
-      return new TypedValue(result.get(result.size() - 1),TypeDescriptor.valueOf(op.getTypeDescriptor().getElementType()));
+      return new TypedValue(result.get(result.size() - 1),op.getTypeDescriptor().getElementTypeDescriptor());
     }
     if (operand instanceof Collection) {
       return new TypedValue(result,op.getTypeDescriptor());
