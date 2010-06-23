@@ -1,17 +1,17 @@
 {
-  if (!(obj instanceof TypeDescriptor)) {
-    return false;
-  }
-  TypeDescriptor td=(TypeDescriptor)obj;
-  if (this == td) {
+  if (this == obj) {
     return true;
   }
-  boolean annotatedTypeEquals=getType().equals(td.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(),td.getAnnotations());
+  if (!(obj instanceof TypeDescriptor) || obj == TypeDescriptor.NULL) {
+    return false;
+  }
+  TypeDescriptor other=(TypeDescriptor)obj;
+  boolean annotatedTypeEquals=getType().equals(other.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(),other.getAnnotations());
   if (isCollection()) {
-    return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getElementType(),td.getElementType());
+    return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getElementType(),other.getElementType());
   }
  else   if (isMap()) {
-    return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getMapKeyType(),td.getMapKeyType()) && ObjectUtils.nullSafeEquals(getMapValueType(),td.getMapValueType());
+    return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getMapKeyType(),other.getMapKeyType()) && ObjectUtils.nullSafeEquals(getMapValueType(),other.getMapValueType());
   }
  else {
     return annotatedTypeEquals;
