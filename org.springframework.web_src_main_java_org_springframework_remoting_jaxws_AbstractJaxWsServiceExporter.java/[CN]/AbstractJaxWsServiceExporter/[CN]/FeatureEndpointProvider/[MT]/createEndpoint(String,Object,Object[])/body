@@ -1,0 +1,13 @@
+{
+  WebServiceFeature[] wsFeatures=new WebServiceFeature[features.length];
+  for (int i=0; i < features.length; i++) {
+    wsFeatures[i]=convertWebServiceFeature(features[i]);
+  }
+  try {
+    Method create=Endpoint.class.getMethod("create",String.class,Object.class,WebServiceFeature[].class);
+    return (Endpoint)ReflectionUtils.invokeMethod(create,null,bindingType,implementor,wsFeatures);
+  }
+ catch (  NoSuchMethodException ex) {
+    throw new IllegalStateException("JAX-WS 2.2 not available - cannot create feature endpoints",ex);
+  }
+}
