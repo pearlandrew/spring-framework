@@ -1,6 +1,10 @@
 {
   Configuration configuration=(this.providerClass != null ? Validation.byProvider(this.providerClass).configure() : Validation.byDefaultProvider().configure());
-  configuration.messageInterpolator(new LocaleContextMessageInterpolator(this.messageInterpolator,configuration.getDefaultMessageInterpolator()));
+  MessageInterpolator targetInterpolator=this.messageInterpolator;
+  if (targetInterpolator == null) {
+    targetInterpolator=configuration.getDefaultMessageInterpolator();
+  }
+  configuration.messageInterpolator(new LocaleContextMessageInterpolator(targetInterpolator));
   if (this.traversableResolver != null) {
     configuration.traversableResolver(this.traversableResolver);
   }

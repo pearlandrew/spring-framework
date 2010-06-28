@@ -3,7 +3,11 @@
     this.validatorFactory=Validation.buildDefaultValidatorFactory();
   }
   ValidatorContext validatorContext=this.validatorFactory.usingContext();
-  validatorContext.messageInterpolator(new LocaleContextMessageInterpolator(this.messageInterpolator,this.validatorFactory.getMessageInterpolator()));
+  MessageInterpolator targetInterpolator=this.messageInterpolator;
+  if (targetInterpolator == null) {
+    targetInterpolator=this.validatorFactory.getMessageInterpolator();
+  }
+  validatorContext.messageInterpolator(new LocaleContextMessageInterpolator(targetInterpolator));
   if (this.traversableResolver != null) {
     validatorContext.traversableResolver(this.traversableResolver);
   }
