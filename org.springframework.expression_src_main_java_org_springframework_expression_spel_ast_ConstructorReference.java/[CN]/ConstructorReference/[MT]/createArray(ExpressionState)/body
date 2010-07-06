@@ -1,0 +1,85 @@
+{
+  Object intendedArrayType=getChild(0).getValue(state);
+  if (!(intendedArrayType instanceof String)) {
+    throw new SpelEvaluationException(getChild(0).getStartPosition(),SpelMessage.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION,FormatHelper.formatClassNameForMessage(intendedArrayType.getClass()));
+  }
+  String type=(String)intendedArrayType;
+  Class<?> componentType=null;
+  TypeCode arrayTypeCode=TypeCode.forName(type);
+  if (arrayTypeCode == TypeCode.OBJECT) {
+    componentType=state.findType(type);
+  }
+ else {
+    componentType=arrayTypeCode.getType();
+  }
+  TypeDescriptor td=TypeDescriptor.valueOf(componentType);
+  Object newArray=null;
+  if (!hasInitializer()) {
+    for (int i=0; i < dimensions.length; i++) {
+      if (dimensions[i] == null) {
+        throw new SpelEvaluationException(getStartPosition(),SpelMessage.MISSING_ARRAY_DIMENSION);
+      }
+    }
+    TypeConverter typeConverter=state.getEvaluationContext().getTypeConverter();
+    if (dimensions.length == 1) {
+      TypedValue o=dimensions[0].getTypedValue(state);
+      int arraySize=ExpressionUtils.toInt(typeConverter,o);
+      newArray=Array.newInstance(componentType,arraySize);
+    }
+ else {
+      int[] dims=new int[dimensions.length];
+      for (int d=0; d < dimensions.length; d++) {
+        TypedValue o=dimensions[d].getTypedValue(state);
+        dims[d]=ExpressionUtils.toInt(typeConverter,o);
+      }
+      newArray=Array.newInstance(componentType,dims);
+    }
+  }
+ else {
+    if (dimensions.length > 1) {
+      throw new SpelEvaluationException(getStartPosition(),SpelMessage.MULTIDIM_ARRAY_INITIALIZER_NOT_SUPPORTED);
+    }
+    TypeConverter typeConverter=state.getEvaluationContext().getTypeConverter();
+    InlineList initializer=(InlineList)getChild(1);
+    if (dimensions[0] != null) {
+      TypedValue dValue=dimensions[0].getTypedValue(state);
+      int i=ExpressionUtils.toInt(typeConverter,dValue);
+      if (i != initializer.getChildCount()) {
+        throw new SpelEvaluationException(getStartPosition(),SpelMessage.INITIALIZER_LENGTH_INCORRECT);
+      }
+    }
+    int arraySize=initializer.getChildCount();
+    newArray=Array.newInstance(componentType,arraySize);
+    if (arrayTypeCode == TypeCode.OBJECT) {
+      populateReferenceTypeArray(state,newArray,typeConverter,initializer,componentType);
+    }
+ else     if (arrayTypeCode == TypeCode.INT) {
+      populateIntArray(state,newArray,typeConverter,initializer);
+    }
+ else     if (arrayTypeCode == TypeCode.BOOLEAN) {
+      populateBooleanArray(state,newArray,typeConverter,initializer);
+    }
+ else     if (arrayTypeCode == TypeCode.CHAR) {
+      populateCharArray(state,newArray,typeConverter,initializer);
+    }
+ else     if (arrayTypeCode == TypeCode.LONG) {
+      populateLongArray(state,newArray,typeConverter,initializer);
+    }
+ else     if (arrayTypeCode == TypeCode.SHORT) {
+      populateShortArray(state,newArray,typeConverter,initializer);
+    }
+ else     if (arrayTypeCode == TypeCode.DOUBLE) {
+      populateDoubleArray(state,newArray,typeConverter,initializer);
+    }
+ else     if (arrayTypeCode == TypeCode.FLOAT) {
+      populateFloatArray(state,newArray,typeConverter,initializer);
+    }
+ else     if (arrayTypeCode == TypeCode.BYTE) {
+      populateByteArray(state,newArray,typeConverter,initializer);
+    }
+ else {
+      throw new IllegalStateException(arrayTypeCode.name());
+    }
+  }
+  return new TypedValue(newArray,td);
+}

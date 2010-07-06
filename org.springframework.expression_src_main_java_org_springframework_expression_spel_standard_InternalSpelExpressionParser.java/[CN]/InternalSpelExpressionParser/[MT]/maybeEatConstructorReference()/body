@@ -4,8 +4,26 @@
     SpelNodeImpl possiblyQualifiedConstructorName=eatPossiblyQualifiedId();
     List<SpelNodeImpl> nodes=new ArrayList<SpelNodeImpl>();
     nodes.add(possiblyQualifiedConstructorName);
-    eatConstructorArgs(nodes);
-    push(new ConstructorReference(toPos(newToken),nodes.toArray(new SpelNodeImpl[nodes.size()])));
+    if (peekToken(TokenKind.LSQUARE)) {
+      List<SpelNodeImpl> dimensions=new ArrayList<SpelNodeImpl>();
+      while (peekToken(TokenKind.LSQUARE,true)) {
+        if (!peekToken(TokenKind.RSQUARE)) {
+          dimensions.add(eatExpression());
+        }
+ else {
+          dimensions.add(null);
+        }
+        eatToken(TokenKind.RSQUARE);
+      }
+      if (maybeEatInlineList()) {
+        nodes.add(pop());
+      }
+      push(new ConstructorReference(toPos(newToken),dimensions.toArray(new SpelNodeImpl[dimensions.size()]),nodes.toArray(new SpelNodeImpl[nodes.size()])));
+    }
+ else {
+      eatConstructorArgs(nodes);
+      push(new ConstructorReference(toPos(newToken),nodes.toArray(new SpelNodeImpl[nodes.size()])));
+    }
     return true;
   }
   return false;

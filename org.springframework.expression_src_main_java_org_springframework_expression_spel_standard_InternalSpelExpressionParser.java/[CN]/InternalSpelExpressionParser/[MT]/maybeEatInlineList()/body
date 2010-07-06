@@ -1,0 +1,22 @@
+{
+  Token t=peekToken();
+  if (!peekToken(TokenKind.LCURLY,true)) {
+    return false;
+  }
+  SpelNodeImpl expr=null;
+  Token closingCurly=peekToken();
+  if (peekToken(TokenKind.RCURLY,true)) {
+    expr=new InlineList(toPos(t.startpos,closingCurly.endpos));
+  }
+ else {
+    List<SpelNodeImpl> listElements=new ArrayList<SpelNodeImpl>();
+    do {
+      listElements.add(eatExpression());
+    }
+ while (peekToken(TokenKind.COMMA,true));
+    closingCurly=eatToken(TokenKind.RCURLY);
+    expr=new InlineList(toPos(t.startpos,closingCurly.endpos),listElements.toArray(new SpelNodeImpl[listElements.size()]));
+  }
+  constructedNodes.push(expr);
+  return true;
+}
