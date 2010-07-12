@@ -19,6 +19,7 @@
       throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + propertyName,"Cannot access indexed value in property referenced " + "in indexed property path '" + propertyName + "': returned null");
     }
  else     if (propValue.getClass().isArray()) {
+      PropertyDescriptor pd=getCachedIntrospectionResults().getPropertyDescriptor(actualName);
       Class requiredType=propValue.getClass().getComponentType();
       int arrayIndex=Integer.parseInt(key);
       Object oldValue=null;
@@ -26,7 +27,7 @@
         if (isExtractOldValueForEditor()) {
           oldValue=Array.get(propValue,arrayIndex);
         }
-        Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType);
+        Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType,new PropertyTypeDescriptor(pd,new MethodParameter(pd.getReadMethod(),-1),requiredType));
         Array.set(propValue,arrayIndex,convertedValue);
       }
  catch (      IndexOutOfBoundsException ex) {
@@ -42,7 +43,7 @@
       if (isExtractOldValueForEditor() && index < list.size()) {
         oldValue=list.get(index);
       }
-      Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType);
+      Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType,new PropertyTypeDescriptor(pd,new MethodParameter(pd.getReadMethod(),-1),requiredType));
       if (index < list.size()) {
         list.set(index,convertedValue);
       }
@@ -63,7 +64,7 @@
       Class mapKeyType=GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(),tokens.keys.length);
       Class mapValueType=GenericCollectionTypeResolver.getMapValueReturnType(pd.getReadMethod(),tokens.keys.length);
       Map map=(Map)propValue;
-      Object convertedMapKey=convertIfNecessary(null,null,key,mapKeyType);
+      Object convertedMapKey=convertIfNecessary(null,null,key,mapKeyType,new PropertyTypeDescriptor(pd,new MethodParameter(pd.getReadMethod(),-1),mapKeyType));
       Object oldValue=null;
       if (isExtractOldValueForEditor()) {
         oldValue=map.get(convertedMapKey);
