@@ -13,7 +13,8 @@
         }
       }
  else {
-        String key=header.substring(0,separator);
+        boolean negated=separator > 0 && header.charAt(separator - 1) == '!';
+        String key=!negated ? header.substring(0,separator) : header.substring(0,separator - 1);
         String value=header.substring(separator + 1);
         if (isMediaTypeHeader(key)) {
           List<MediaType> requestMediaTypes=MediaType.parseMediaTypes(request.getHeader(key));
@@ -29,11 +30,11 @@
             }
           }
           if (!found) {
-            return false;
+            return negated;
           }
         }
  else         if (!value.equals(request.getHeader(key))) {
-          return false;
+          return negated;
         }
       }
     }
