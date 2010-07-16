@@ -2,7 +2,7 @@
   @SuppressWarnings("serial") DispatcherServlet servlet=new DispatcherServlet(){
     @Override protected WebApplicationContext createWebApplicationContext(    WebApplicationContext parent){
       GenericWebApplicationContext wac=new GenericWebApplicationContext();
-      wac.registerBeanDefinition("controller",new RootBeanDefinition(RequestBodyController.class));
+      wac.registerBeanDefinition("controller",new RootBeanDefinition(RequestResponseBodyController.class));
       RootBeanDefinition adapterDef=new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
       adapterDef.getPropertyValues().add("messageConverters",new ByteArrayHttpMessageConverter());
       wac.registerBeanDefinition("handlerAdapter",adapterDef);
@@ -18,6 +18,6 @@
   request.addHeader("Content-Type","application/pdf");
   MockHttpServletResponse response=new MockHttpServletResponse();
   servlet.service(request,response);
-  assertEquals("Invalid response status code",HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE,response.getStatus());
+  assertEquals(415,response.getStatus());
   assertNotNull("No Accept response header set",response.getHeader("Accept"));
 }

@@ -5,41 +5,30 @@
   Set<String> allowedMethods=new LinkedHashSet<String>(7);
   String resolvedMethodName=null;
   for (  Method handlerMethod : getHandlerMethods()) {
-    RequestMappingInfo mappingInfo=new RequestMappingInfo();
-    RequestMapping mapping=AnnotationUtils.findAnnotation(handlerMethod,RequestMapping.class);
-    mappingInfo.paths=mapping.value();
-    if (!hasTypeLevelMapping() || !Arrays.equals(mapping.method(),getTypeLevelMapping().method())) {
-      mappingInfo.methods=mapping.method();
-    }
-    if (!hasTypeLevelMapping() || !Arrays.equals(mapping.params(),getTypeLevelMapping().params())) {
-      mappingInfo.params=mapping.params();
-    }
-    if (!hasTypeLevelMapping() || !Arrays.equals(mapping.headers(),getTypeLevelMapping().headers())) {
-      mappingInfo.headers=mapping.headers();
-    }
+    RequestMappingInfo mappingInfo=createRequestMappingInfo(handlerMethod);
     boolean match=false;
-    if (mappingInfo.paths.length > 0) {
-      List<String> matchedPaths=new ArrayList<String>(mappingInfo.paths.length);
-      for (      String mappedPattern : mappingInfo.paths) {
-        if (!hasTypeLevelMapping() && !mappedPattern.startsWith("/")) {
-          mappedPattern="/" + mappedPattern;
+    if (mappingInfo.hasPatterns()) {
+      List<String> matchingPatterns=new ArrayList<String>(mappingInfo.patterns.length);
+      for (      String pattern : mappingInfo.patterns) {
+        if (!hasTypeLevelMapping() && !pattern.startsWith("/")) {
+          pattern="/" + pattern;
         }
-        String matchedPattern=getMatchedPattern(mappedPattern,lookupPath,request);
-        if (matchedPattern != null) {
+        String combinedPattern=getCombinedPattern(pattern,lookupPath,request);
+        if (combinedPattern != null) {
           if (mappingInfo.matches(request)) {
             match=true;
-            matchedPaths.add(matchedPattern);
+            matchingPatterns.add(combinedPattern);
           }
  else {
-            for (            RequestMethod requestMethod : mappingInfo.methods) {
-              allowedMethods.add(requestMethod.toString());
+            if (!mappingInfo.matchesRequestMethod(request)) {
+              allowedMethods.addAll(mappingInfo.methodNames());
             }
             break;
           }
         }
       }
-      Collections.sort(matchedPaths,pathComparator);
-      mappingInfo.matchedPaths=matchedPaths;
+      Collections.sort(matchingPatterns,pathComparator);
+      mappingInfo.matchedPatterns=matchingPatterns;
     }
  else {
       match=mappingInfo.matches(request);
@@ -47,15 +36,15 @@
         match=false;
       }
  else {
-        for (        RequestMethod requestMethod : mappingInfo.methods) {
-          allowedMethods.add(requestMethod.toString());
+        if (!mappingInfo.matchesRequestMethod(request)) {
+          allowedMethods.addAll(mappingInfo.methodNames());
         }
       }
     }
     if (match) {
       Method oldMappedMethod=targetHandlerMethods.put(mappingInfo,handlerMethod);
       if (oldMappedMethod != null && oldMappedMethod != handlerMethod) {
-        if (methodNameResolver != null && mappingInfo.paths.length == 0) {
+        if (methodNameResolver != null && mappingInfo.patterns.length == 0) {
           if (!oldMappedMethod.getName().equals(handlerMethod.getName())) {
             if (resolvedMethodName == null) {
               resolvedMethodName=methodNameResolver.getHandlerMethodName(request);
@@ -85,7 +74,7 @@
     RequestMappingInfoComparator requestMappingInfoComparator=new RequestMappingInfoComparator(pathComparator,request);
     Collections.sort(matches,requestMappingInfoComparator);
     RequestMappingInfo bestMappingMatch=matches.get(0);
-    String bestMatchedPath=bestMappingMatch.bestMatchedPath();
+    String bestMatchedPath=bestMappingMatch.bestMatchedPattern();
     if (bestMatchedPath != null) {
       extractHandlerMethodUriTemplates(bestMatchedPath,lookupPath,request);
     }
@@ -95,8 +84,6 @@
     if (!allowedMethods.isEmpty()) {
       throw new HttpRequestMethodNotSupportedException(request.getMethod(),StringUtils.toStringArray(allowedMethods));
     }
- else {
-      throw new NoSuchRequestHandlingMethodException(lookupPath,request.getMethod(),request.getParameterMap());
-    }
+    throw new NoSuchRequestHandlingMethodException(lookupPath,request.getMethod(),request.getParameterMap());
   }
 }
