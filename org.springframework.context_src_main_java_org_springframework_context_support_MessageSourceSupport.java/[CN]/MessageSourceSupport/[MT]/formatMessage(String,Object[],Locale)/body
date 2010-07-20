@@ -1,14 +1,25 @@
 {
-  if (msg == null || (!this.alwaysUseMessageFormat && (args == null || args.length == 0))) {
+  if (msg == null || (!this.alwaysUseMessageFormat && ObjectUtils.isEmpty(args))) {
     return msg;
   }
   MessageFormat messageFormat;
 synchronized (this.cachedMessageFormats) {
     messageFormat=this.cachedMessageFormats.get(msg);
     if (messageFormat == null) {
-      messageFormat=createMessageFormat(msg,locale);
+      try {
+        messageFormat=createMessageFormat(msg,locale);
+      }
+ catch (      IllegalArgumentException ex) {
+        if (this.alwaysUseMessageFormat) {
+          throw ex;
+        }
+        messageFormat=INVALID_MESSAGE_FORMAT;
+      }
       this.cachedMessageFormats.put(msg,messageFormat);
     }
+  }
+  if (messageFormat == INVALID_MESSAGE_FORMAT) {
+    return msg;
   }
 synchronized (messageFormat) {
     return messageFormat.format(resolveArguments(args,locale));
