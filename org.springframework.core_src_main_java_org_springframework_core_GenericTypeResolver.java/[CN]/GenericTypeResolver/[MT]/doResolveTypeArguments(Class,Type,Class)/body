@@ -1,0 +1,22 @@
+{
+  if (ifc instanceof ParameterizedType) {
+    ParameterizedType paramIfc=(ParameterizedType)ifc;
+    Type rawType=paramIfc.getRawType();
+    if (genericIfc.equals(rawType)) {
+      Type[] typeArgs=paramIfc.getActualTypeArguments();
+      Class[] result=new Class[typeArgs.length];
+      for (int i=0; i < typeArgs.length; i++) {
+        Type arg=typeArgs[i];
+        result[i]=extractClass(ownerClass,arg);
+      }
+      return result;
+    }
+ else     if (genericIfc.isAssignableFrom((Class)rawType)) {
+      return doResolveTypeArguments(ownerClass,(Class)rawType,genericIfc);
+    }
+  }
+ else   if (genericIfc.isAssignableFrom((Class)ifc)) {
+    return doResolveTypeArguments(ownerClass,(Class)ifc,genericIfc);
+  }
+  return null;
+}

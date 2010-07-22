@@ -1,5 +1,14 @@
 {
-  if (arg instanceof TypeVariable) {
+  if (arg instanceof ParameterizedType) {
+    return extractClass(ownerClass,((ParameterizedType)arg).getRawType());
+  }
+ else   if (arg instanceof GenericArrayType) {
+    GenericArrayType gat=(GenericArrayType)arg;
+    Type gt=gat.getGenericComponentType();
+    Class<?> componentClass=extractClass(ownerClass,gt);
+    return Array.newInstance(componentClass,0).getClass();
+  }
+ else   if (arg instanceof TypeVariable) {
     TypeVariable tv=(TypeVariable)arg;
     arg=getTypeVariableMap(ownerClass).get(tv);
     if (arg == null) {
@@ -8,12 +17,6 @@
  else {
       arg=extractClass(ownerClass,arg);
     }
-  }
- else   if (arg instanceof GenericArrayType) {
-    GenericArrayType gat=(GenericArrayType)arg;
-    Type gt=gat.getGenericComponentType();
-    Class<?> componentClass=extractClass(ownerClass,gt);
-    arg=Array.newInstance(componentClass,0).getClass();
   }
   return (arg instanceof Class ? (Class)arg : Object.class);
 }
