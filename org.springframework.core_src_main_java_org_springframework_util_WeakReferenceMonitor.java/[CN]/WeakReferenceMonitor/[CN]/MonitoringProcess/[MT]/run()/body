@@ -1,24 +1,24 @@
 {
   logger.debug("Starting reference monitor thread");
-  try {
-    while (!trackedEntries.isEmpty()) {
-      try {
-        Reference reference=handleQueue.remove();
-        ReleaseListener entry=removeEntry(reference);
-        if (entry != null) {
+  while (keepMonitoringThreadAlive()) {
+    try {
+      Reference reference=handleQueue.remove();
+      ReleaseListener entry=removeEntry(reference);
+      if (entry != null) {
+        try {
           entry.released();
         }
-      }
- catch (      InterruptedException ex) {
-        logger.debug("Reference monitor thread interrupted",ex);
-        break;
+ catch (        Throwable ex) {
+          logger.warn("Reference release listener threw exception",ex);
+        }
       }
     }
-  }
-  finally {
-    logger.debug("Stopping reference monitor thread");
+ catch (    InterruptedException ex) {
 synchronized (WeakReferenceMonitor.class) {
-      monitoringThread=null;
+        monitoringThread=null;
+      }
+      logger.debug("Reference monitor thread interrupted",ex);
+      break;
     }
   }
 }
