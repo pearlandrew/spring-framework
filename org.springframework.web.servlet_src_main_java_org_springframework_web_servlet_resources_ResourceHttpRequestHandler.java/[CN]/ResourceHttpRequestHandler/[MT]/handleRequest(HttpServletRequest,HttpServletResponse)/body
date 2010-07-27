@@ -2,15 +2,11 @@
   if (!"GET".equals(request.getMethod())) {
     throw new HttpRequestMethodNotSupportedException(request.getMethod(),new String[]{"GET"},"ResourceHttpRequestHandler only supports GET requests");
   }
-  List<Resource> resources=getResources(request);
-  if (resources.size() == 0) {
+  URLResource resource=getResource(request);
+  if (resource == null) {
     response.sendError(HttpServletResponse.SC_NOT_FOUND);
     return;
   }
-  boolean notModified=checkNotModified(resources,request,response);
-  if (notModified) {
-    return;
-  }
-  prepareResponse(resources,response);
-  writeResponse(resources,response);
+  prepareResponse(resource,response);
+  writeResponse(resource,request,response);
 }

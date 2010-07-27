@@ -1,0 +1,22 @@
+{
+  String path=(String)request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+  if (path == null) {
+    throw new IllegalStateException("Required request attribute '" + HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");
+  }
+  if (path.contains("WEB-INF") || path.contains("META-INF")) {
+    return null;
+  }
+  for (  Resource resourcePath : this.resourcePaths) {
+    Resource resource;
+    try {
+      resource=resourcePath.createRelative(path);
+      if (isValidFile(resource)) {
+        return new URLResource(resource);
+      }
+    }
+ catch (    IOException e) {
+      return null;
+    }
+  }
+  return null;
+}
