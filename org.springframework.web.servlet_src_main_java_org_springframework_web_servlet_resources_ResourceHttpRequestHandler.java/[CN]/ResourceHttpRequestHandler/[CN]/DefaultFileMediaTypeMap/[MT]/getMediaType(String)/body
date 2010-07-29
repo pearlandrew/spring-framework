@@ -5,7 +5,13 @@
   }
   extension=extension.toLowerCase(Locale.ENGLISH);
   MediaType mediaType=this.mediaTypes.get(extension);
-  if (mediaType == null && useJaf && jafPresent) {
+  if (mediaType == null) {
+    String mimeType=servletContext.getMimeType(filename);
+    if (StringUtils.hasText(mimeType)) {
+      mediaType=MediaType.parseMediaType(mimeType);
+    }
+  }
+  if (mediaType == null && jafPresent) {
     mediaType=ActivationMediaTypeFactory.getMediaType(filename);
     if (mediaType != null) {
       this.mediaTypes.putIfAbsent(extension,mediaType);

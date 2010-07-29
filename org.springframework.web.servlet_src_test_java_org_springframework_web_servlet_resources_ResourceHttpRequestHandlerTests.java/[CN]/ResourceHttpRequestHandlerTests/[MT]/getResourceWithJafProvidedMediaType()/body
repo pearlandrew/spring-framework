@@ -1,0 +1,12 @@
+{
+  MockHttpServletRequest request=new MockHttpServletRequest();
+  request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,"/foo.html");
+  request.setMethod("GET");
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  handler.handleRequest(request,response);
+  assertEquals("text/html",response.getContentType());
+  assertTrue(((Long)response.getHeader("Expires")) > System.currentTimeMillis() + (31556926 * 1000) - 10000);
+  assertEquals("max-age=31556926",response.getHeader("Cache-Control"));
+  assertTrue(response.containsHeader("Last-Modified"));
+  assertEquals(response.getHeader("Last-Modified"),new ClassPathResource("test/foo.html",getClass()).getFile().lastModified());
+}
