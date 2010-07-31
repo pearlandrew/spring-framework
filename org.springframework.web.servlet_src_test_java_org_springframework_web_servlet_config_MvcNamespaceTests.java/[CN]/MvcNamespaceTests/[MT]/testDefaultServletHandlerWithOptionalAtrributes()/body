@@ -1,24 +1,21 @@
 {
   XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(appContext);
-  reader.loadBeanDefinitions(new ClassPathResource("mvc-config-resources.xml",getClass()));
+  reader.loadBeanDefinitions(new ClassPathResource("mvc-config-default-servlet-optional-attrs.xml",getClass()));
   assertEquals(3,appContext.getBeanDefinitionCount());
   appContext.refresh();
   HttpRequestHandlerAdapter adapter=appContext.getBean(HttpRequestHandlerAdapter.class);
   assertNotNull(adapter);
-  ResourceHttpRequestHandler handler=appContext.getBean(ResourceHttpRequestHandler.class);
+  DefaultServletHttpRequestHandler handler=appContext.getBean(DefaultServletHttpRequestHandler.class);
   assertNotNull(handler);
   SimpleUrlHandlerMapping mapping=appContext.getBean(SimpleUrlHandlerMapping.class);
   assertNotNull(mapping);
-  assertEquals(Ordered.LOWEST_PRECEDENCE - 1,mapping.getOrder());
+  assertEquals(Ordered.LOWEST_PRECEDENCE,mapping.getOrder());
   MockHttpServletRequest request=new MockHttpServletRequest();
-  request.setRequestURI("/resources/foo.css");
+  request.setRequestURI("/foo.css");
   request.setMethod("GET");
   HandlerExecutionChain chain=mapping.getHandler(request);
-  assertTrue(chain.getHandler() instanceof ResourceHttpRequestHandler);
+  assertTrue(chain.getHandler() instanceof DefaultServletHttpRequestHandler);
   MockHttpServletResponse response=new MockHttpServletResponse();
-  for (  HandlerInterceptor interceptor : chain.getInterceptors()) {
-    interceptor.preHandle(request,response,chain.getHandler());
-  }
   ModelAndView mv=adapter.handle(request,response,chain.getHandler());
   assertNull(mv);
 }

@@ -1,0 +1,20 @@
+{
+  String locationAttr=element.getAttribute("location");
+  if (!StringUtils.hasText(locationAttr)) {
+    parserContext.getReaderContext().error("The 'location' attribute is required.",parserContext.extractSource(element));
+    return "";
+  }
+  String[] locationPatterns=locationAttr.split(",\\s*");
+  List<String> locations=new ManagedList<String>();
+  for (  String location : locationPatterns) {
+    locations.add(location);
+  }
+  RootBeanDefinition resourceHandlerDef=new RootBeanDefinition(ResourceHttpRequestHandler.class);
+  resourceHandlerDef.setSource(source);
+  resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  resourceHandlerDef.getConstructorArgumentValues().addIndexedArgumentValue(0,locations);
+  String beanName=parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
+  parserContext.getRegistry().registerBeanDefinition(beanName,resourceHandlerDef);
+  parserContext.registerComponent(new BeanComponentDefinition(resourceHandlerDef,beanName));
+  return beanName;
+}

@@ -1,0 +1,22 @@
+{
+  String resourceHandlerName=registerResourceHandler(parserContext,element,source);
+  if (!StringUtils.hasText(resourceHandlerName)) {
+    return;
+  }
+  Map<String,String> urlMap=new ManagedMap<String,String>();
+  String resourceRequestPath=element.getAttribute("mapping");
+  if (!StringUtils.hasText(resourceRequestPath)) {
+    parserContext.getReaderContext().error("The 'mapping' attribute is required.",parserContext.extractSource(element));
+    return;
+  }
+  urlMap.put(resourceRequestPath,resourceHandlerName);
+  RootBeanDefinition handlerMappingDef=new RootBeanDefinition(SimpleUrlHandlerMapping.class);
+  handlerMappingDef.setSource(source);
+  handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  handlerMappingDef.getPropertyValues().add("urlMap",urlMap);
+  String mappingOrder=element.getAttribute("mapping-order");
+  handlerMappingDef.getPropertyValues().add("order",StringUtils.hasText(mappingOrder) ? mappingOrder : Ordered.LOWEST_PRECEDENCE - 1);
+  String beanName=parserContext.getReaderContext().generateBeanName(handlerMappingDef);
+  parserContext.getRegistry().registerBeanDefinition(beanName,handlerMappingDef);
+  parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef,beanName));
+}
