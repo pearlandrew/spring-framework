@@ -1,13 +1,13 @@
 {
   try {
     if (this.argsRequiringConversion != null && arguments != null) {
-      ReflectionHelper.convertArguments(this.method.getParameterTypes(),this.method.isVarArgs(),context.getTypeConverter(),this.argsRequiringConversion,arguments);
+      ReflectionHelper.convertArguments(context.getTypeConverter(),arguments,this.method,this.argsRequiringConversion,this.varargsPosition);
     }
     if (this.method.isVarArgs()) {
       arguments=ReflectionHelper.setupArgumentsForVarargsInvocation(this.method.getParameterTypes(),arguments);
     }
     ReflectionUtils.makeAccessible(this.method);
-    return new TypedValue(this.method.invoke(target,arguments),new TypeDescriptor(new MethodParameter(method,-1)));
+    return new TypedValue(this.method.invoke(target,arguments),new TypeDescriptor(new MethodParameter(this.method,-1)));
   }
  catch (  Exception ex) {
     throw new AccessException("Problem invoking method: " + this.method,ex);

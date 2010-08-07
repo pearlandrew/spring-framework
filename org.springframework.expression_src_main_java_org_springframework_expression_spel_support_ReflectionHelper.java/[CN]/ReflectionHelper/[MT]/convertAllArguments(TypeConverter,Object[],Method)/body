@@ -1,0 +1,34 @@
+{
+  Integer varargsPosition=null;
+  if (method.isVarArgs()) {
+    Class[] paramTypes=method.getParameterTypes();
+    varargsPosition=paramTypes.length - 1;
+  }
+  for (int argPosition=0; argPosition < arguments.length; argPosition++) {
+    TypeDescriptor targetType;
+    if (varargsPosition != null && argPosition >= varargsPosition) {
+      MethodParameter methodParam=new MethodParameter(method,varargsPosition);
+      targetType=new TypeDescriptor(methodParam,methodParam.getParameterType().getComponentType());
+    }
+ else {
+      targetType=new TypeDescriptor(new MethodParameter(method,argPosition));
+    }
+    try {
+      Object argument=arguments[argPosition];
+      if (argument != null && !targetType.getObjectType().isInstance(argument)) {
+        if (converter == null) {
+          throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR,argument.getClass().getName(),targetType);
+        }
+        arguments[argPosition]=converter.convertValue(argument,TypeDescriptor.forObject(argument),targetType);
+      }
+    }
+ catch (    EvaluationException ex) {
+      if (ex instanceof SpelEvaluationException) {
+        throw (SpelEvaluationException)ex;
+      }
+ else {
+        throw new SpelEvaluationException(ex,SpelMessage.TYPE_CONVERSION_ERROR,arguments[argPosition].getClass().getName(),targetType);
+      }
+    }
+  }
+}

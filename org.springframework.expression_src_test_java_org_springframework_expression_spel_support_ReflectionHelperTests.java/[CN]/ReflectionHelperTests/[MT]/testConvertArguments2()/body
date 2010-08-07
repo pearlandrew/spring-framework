@@ -1,23 +1,25 @@
 {
   StandardTypeConverter tc=new StandardTypeConverter();
+  Method oneArg=TestInterface.class.getMethod("oneArg",String.class);
+  Method twoArg=TestInterface.class.getMethod("twoArg",String.class,String[].class);
   Object[] args=new Object[]{3};
-  ReflectionHelper.convertAllArguments(new Class[]{String.class},false,tc,args);
+  ReflectionHelper.convertAllArguments(tc,args,oneArg);
   checkArguments(args,"3");
   args=new Object[]{3,false,3.0f};
-  ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class},true,tc,args);
+  ReflectionHelper.convertAllArguments(tc,args,twoArg);
   checkArguments(args,"3","false","3.0");
   args=new Object[]{3};
-  ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class},true,tc,args);
+  ReflectionHelper.convertAllArguments(tc,args,twoArg);
   checkArguments(args,"3");
   args=new Object[]{3,false,3.0f};
   try {
-    ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class},true,null,args);
+    ReflectionHelper.convertAllArguments(null,args,twoArg);
     Assert.fail("Should have failed because no converter supplied");
   }
  catch (  SpelEvaluationException se) {
     Assert.assertEquals(SpelMessage.TYPE_CONVERSION_ERROR,se.getMessageCode());
   }
   args=new Object[]{3,null,3.0f};
-  ReflectionHelper.convertAllArguments(new Class[]{String.class,String[].class},true,tc,args);
+  ReflectionHelper.convertAllArguments(tc,args,twoArg);
   checkArguments(args,"3",null,"3.0");
 }

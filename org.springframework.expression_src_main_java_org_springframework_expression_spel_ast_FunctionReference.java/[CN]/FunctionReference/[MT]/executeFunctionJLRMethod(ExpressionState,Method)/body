@@ -1,30 +1,24 @@
 {
   Object[] functionArgs=getArguments(state);
-  if (!m.isVarArgs() && m.getParameterTypes().length != functionArgs.length) {
-    throw new SpelEvaluationException(SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION,functionArgs.length,m.getParameterTypes().length);
+  if (!method.isVarArgs() && method.getParameterTypes().length != functionArgs.length) {
+    throw new SpelEvaluationException(SpelMessage.INCORRECT_NUMBER_OF_ARGUMENTS_TO_FUNCTION,functionArgs.length,method.getParameterTypes().length);
   }
-  if (!Modifier.isStatic(m.getModifiers())) {
-    throw new SpelEvaluationException(getStartPosition(),SpelMessage.FUNCTION_MUST_BE_STATIC,m.getDeclaringClass().getName() + "." + m.getName(),name);
+  if (!Modifier.isStatic(method.getModifiers())) {
+    throw new SpelEvaluationException(getStartPosition(),SpelMessage.FUNCTION_MUST_BE_STATIC,method.getDeclaringClass().getName() + "." + method.getName(),name);
   }
   if (functionArgs != null) {
     TypeConverter converter=state.getEvaluationContext().getTypeConverter();
-    ReflectionHelper.convertAllArguments(m.getParameterTypes(),m.isVarArgs(),converter,functionArgs);
+    ReflectionHelper.convertAllArguments(converter,functionArgs,method);
   }
-  if (m.isVarArgs()) {
-    functionArgs=ReflectionHelper.setupArgumentsForVarargsInvocation(m.getParameterTypes(),functionArgs);
+  if (method.isVarArgs()) {
+    functionArgs=ReflectionHelper.setupArgumentsForVarargsInvocation(method.getParameterTypes(),functionArgs);
   }
   try {
-    ReflectionUtils.makeAccessible(m);
-    Object result=m.invoke(m.getClass(),functionArgs);
-    return new TypedValue(result,new TypeDescriptor(new MethodParameter(m,-1)));
+    ReflectionUtils.makeAccessible(method);
+    Object result=method.invoke(method.getClass(),functionArgs);
+    return new TypedValue(result,new TypeDescriptor(new MethodParameter(method,-1)));
   }
- catch (  IllegalArgumentException e) {
-    throw new SpelEvaluationException(getStartPosition(),e,SpelMessage.EXCEPTION_DURING_FUNCTION_CALL,name,e.getMessage());
-  }
-catch (  IllegalAccessException e) {
-    throw new SpelEvaluationException(getStartPosition(),e,SpelMessage.EXCEPTION_DURING_FUNCTION_CALL,name,e.getMessage());
-  }
-catch (  InvocationTargetException e) {
-    throw new SpelEvaluationException(getStartPosition(),e,SpelMessage.EXCEPTION_DURING_FUNCTION_CALL,name,e.getMessage());
+ catch (  Exception ex) {
+    throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.EXCEPTION_DURING_FUNCTION_CALL,this.name,ex.getMessage());
   }
 }
