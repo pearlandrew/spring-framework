@@ -1,0 +1,21 @@
+{
+  String path=(String)request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+  if (path == null) {
+    throw new IllegalStateException("Required request attribute '" + HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");
+  }
+  if (!StringUtils.hasText(path) || path.contains("WEB-INF") || path.contains("META-INF")) {
+    return null;
+  }
+  for (  Resource resourcePath : this.locations) {
+    try {
+      Resource resource=resourcePath.createRelative(path);
+      if (resource.exists() && resource.isReadable()) {
+        return resource;
+      }
+    }
+ catch (    IOException ex) {
+      return null;
+    }
+  }
+  return null;
+}
