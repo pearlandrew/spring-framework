@@ -1,0 +1,23 @@
+{
+  try {
+    URL url=getURL();
+    if (ResourceUtils.isFileURL(url)) {
+      return getFile().exists();
+    }
+ else {
+      URLConnection con=url.openConnection();
+      con.setUseCaches(false);
+      if (con instanceof HttpURLConnection) {
+        ((HttpURLConnection)con).setRequestMethod("HEAD");
+      }
+      boolean doesExist=(con.getContentLength() >= 0);
+      if (!doesExist && con instanceof HttpURLConnection) {
+        ((HttpURLConnection)con).disconnect();
+      }
+      return doesExist;
+    }
+  }
+ catch (  IOException ex) {
+    return false;
+  }
+}
