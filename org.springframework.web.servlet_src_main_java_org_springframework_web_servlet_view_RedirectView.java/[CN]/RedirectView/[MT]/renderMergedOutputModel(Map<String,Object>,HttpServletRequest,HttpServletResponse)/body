@@ -1,18 +1,15 @@
 {
+  String encoding=getEncoding(request);
   StringBuilder targetUrl=new StringBuilder();
   if (this.contextRelative && getUrl().startsWith("/")) {
-    targetUrl.append(request.getContextPath());
+    targetUrl.append(UriUtils.encodePath(request.getContextPath(),encoding));
+    targetUrl.append(UriUtils.encodePath(getUrl(),encoding));
   }
-  targetUrl.append(getUrl());
+ else {
+    targetUrl.append(UriUtils.encodeUri(getUrl(),encoding));
+  }
   if (this.exposeModelAttributes) {
-    String enc=this.encodingScheme;
-    if (enc == null) {
-      enc=request.getCharacterEncoding();
-    }
-    if (enc == null) {
-      enc=WebUtils.DEFAULT_CHARACTER_ENCODING;
-    }
-    appendQueryProperties(targetUrl,model,enc);
+    appendQueryProperties(targetUrl,model,encoding);
   }
   sendRedirect(request,response,targetUrl.toString(),this.http10Compatible);
 }

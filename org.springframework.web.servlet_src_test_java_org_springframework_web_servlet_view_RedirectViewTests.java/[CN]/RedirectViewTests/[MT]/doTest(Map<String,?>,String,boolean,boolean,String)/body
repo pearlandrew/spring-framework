@@ -4,7 +4,7 @@ class TestRedirectView extends RedirectView {
     /** 
  * Test whether this callback method is called with correct args
  */
-    protected Map queryProperties(    Map model){
+    @Override protected Map<String,Object> queryProperties(    Map<String,Object> model){
       assertTrue("Map and model must be equal.",map.equals(model));
       this.queryPropertiesCalled=true;
       return super.queryProperties(model);
@@ -14,26 +14,21 @@ class TestRedirectView extends RedirectView {
   rv.setUrl(url);
   rv.setContextRelative(contextRelative);
   rv.setExposeModelAttributes(exposeModelAttributes);
-  MockControl requestControl=MockControl.createControl(HttpServletRequest.class);
-  HttpServletRequest request=(HttpServletRequest)requestControl.getMock();
-  request.getCharacterEncoding();
-  requestControl.setReturnValue(null,1);
+  HttpServletRequest request=createNiceMock("request",HttpServletRequest.class);
+  if (exposeModelAttributes) {
+    expect(request.getCharacterEncoding()).andReturn(WebUtils.DEFAULT_CHARACTER_ENCODING);
+  }
   if (contextRelative) {
     expectedUrlForEncoding="/context" + expectedUrlForEncoding;
-    request.getContextPath();
-    requestControl.setReturnValue("/context");
+    expect(request.getContextPath()).andReturn("/context");
   }
-  requestControl.replay();
-  MockControl responseControl=MockControl.createControl(HttpServletResponse.class);
-  HttpServletResponse resp=(HttpServletResponse)responseControl.getMock();
-  resp.encodeRedirectURL(expectedUrlForEncoding);
-  responseControl.setReturnValue(expectedUrlForEncoding);
-  resp.sendRedirect(expectedUrlForEncoding);
-  responseControl.setVoidCallable(1);
-  responseControl.replay();
-  rv.render(map,request,resp);
+  HttpServletResponse response=createMock("response",HttpServletResponse.class);
+  expect(response.encodeRedirectURL(expectedUrlForEncoding)).andReturn(expectedUrlForEncoding);
+  response.sendRedirect(expectedUrlForEncoding);
+  replay(request,response);
+  rv.render(map,request,response);
   if (exposeModelAttributes) {
     assertTrue("queryProperties() should have been called.",rv.queryPropertiesCalled);
   }
-  responseControl.verify();
+  verify(request,response);
 }
