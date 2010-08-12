@@ -5,8 +5,9 @@
     response.sendError(HttpServletResponse.SC_NOT_FOUND);
     return;
   }
-  if (checkNotModified(resource,request,response)) {
+  setHeaders(resource,response);
+  if (new ServletWebRequest(request,response).checkNotModified(resource.lastModified()) || METHOD_HEAD.equals(request.getMethod())) {
     return;
   }
-  writeResponse(resource,response);
+  writeContent(resource,response);
 }

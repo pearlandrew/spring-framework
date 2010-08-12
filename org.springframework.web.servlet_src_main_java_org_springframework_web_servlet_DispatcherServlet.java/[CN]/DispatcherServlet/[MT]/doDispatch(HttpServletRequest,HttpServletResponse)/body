@@ -7,10 +7,23 @@
     boolean errorView=false;
     try {
       processedRequest=checkMultipart(request);
-      mappedHandler=getHandler(processedRequest,false);
+      mappedHandler=getHandler(processedRequest);
       if (mappedHandler == null || mappedHandler.getHandler() == null) {
         noHandlerFound(processedRequest,response);
         return;
+      }
+      HandlerAdapter ha=getHandlerAdapter(mappedHandler.getHandler());
+      String method=request.getMethod();
+      boolean isGet="GET".equals(method);
+      if (isGet || "HEAD".equals(method)) {
+        long lastModified=ha.getLastModified(request,mappedHandler.getHandler());
+        if (logger.isDebugEnabled()) {
+          String requestUri=urlPathHelper.getRequestUri(request);
+          logger.debug("Last-Modified value for [" + requestUri + "] is: "+ lastModified);
+        }
+        if (new ServletWebRequest(request,response).checkNotModified(lastModified) && isGet) {
+          return;
+        }
       }
       HandlerInterceptor[] interceptors=mappedHandler.getInterceptors();
       if (interceptors != null) {
@@ -23,7 +36,6 @@
           interceptorIndex=i;
         }
       }
-      HandlerAdapter ha=getHandlerAdapter(mappedHandler.getHandler());
       mv=ha.handle(processedRequest,response,mappedHandler.getHandler());
       if (mv != null && !mv.hasView()) {
         mv.setViewName(getDefaultViewName(request));
