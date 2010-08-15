@@ -1,0 +1,22 @@
+{
+  if (this.mappings.containsKey(method)) {
+    return true;
+  }
+  RequestMapping mapping=AnnotationUtils.findAnnotation(method,RequestMapping.class);
+  if (mapping != null) {
+    RequestMappingInfo mappingInfo=new RequestMappingInfo();
+    mappingInfo.patterns=mapping.value();
+    if (!hasTypeLevelMapping() || !Arrays.equals(mapping.method(),getTypeLevelMapping().method())) {
+      mappingInfo.methods=mapping.method();
+    }
+    if (!hasTypeLevelMapping() || !Arrays.equals(mapping.params(),getTypeLevelMapping().params())) {
+      mappingInfo.params=mapping.params();
+    }
+    if (!hasTypeLevelMapping() || !Arrays.equals(mapping.headers(),getTypeLevelMapping().headers())) {
+      mappingInfo.headers=mapping.headers();
+    }
+    this.mappings.put(method,mappingInfo);
+    return true;
+  }
+  return false;
+}

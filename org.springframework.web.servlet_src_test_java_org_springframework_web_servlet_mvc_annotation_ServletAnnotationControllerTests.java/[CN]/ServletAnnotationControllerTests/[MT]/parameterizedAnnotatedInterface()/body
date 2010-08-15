@@ -2,12 +2,8 @@
   @SuppressWarnings("serial") DispatcherServlet servlet=new DispatcherServlet(){
     @Override protected WebApplicationContext createWebApplicationContext(    WebApplicationContext parent){
       GenericWebApplicationContext wac=new GenericWebApplicationContext();
-      wac.registerBeanDefinition("controller",new RootBeanDefinition(MySessionAttributesControllerImpl.class));
+      wac.registerBeanDefinition("controller",new RootBeanDefinition(MyParameterizedControllerImpl.class));
       wac.registerBeanDefinition("viewResolver",new RootBeanDefinition(ModelExposingViewResolver.class));
-      DefaultAdvisorAutoProxyCreator autoProxyCreator=new DefaultAdvisorAutoProxyCreator();
-      autoProxyCreator.setBeanFactory(wac.getBeanFactory());
-      wac.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
-      wac.getBeanFactory().registerSingleton("advisor",new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
       wac.refresh();
       return wac;
     }
@@ -23,6 +19,7 @@
   assertTrue(session.getAttribute("object2") != null);
   assertTrue(((Map)session.getAttribute("model")).containsKey("object1"));
   assertTrue(((Map)session.getAttribute("model")).containsKey("object2"));
+  assertTrue(((Map)session.getAttribute("model")).containsKey("testBeanList"));
   request=new MockHttpServletRequest("POST","/myPage");
   request.setSession(session);
   response=new MockHttpServletResponse();
@@ -32,4 +29,5 @@
   assertTrue(session.getAttribute("object2") != null);
   assertTrue(((Map)session.getAttribute("model")).containsKey("object1"));
   assertTrue(((Map)session.getAttribute("model")).containsKey("object2"));
+  assertTrue(((Map)session.getAttribute("model")).containsKey("testBeanList"));
 }

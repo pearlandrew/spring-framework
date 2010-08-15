@@ -4,7 +4,9 @@
     return subclassResult;
   }
   final Set<String> urls=new LinkedHashSet<String>();
-  Class<?>[] handlerTypes=Proxy.isProxyClass(handlerType) ? handlerType.getInterfaces() : new Class<?>[]{handlerType};
+  Set<Class<?>> handlerTypes=new LinkedHashSet<Class<?>>();
+  handlerTypes.add(handlerType);
+  handlerTypes.addAll(Arrays.asList(handlerType.getInterfaces()));
   for (  Class<?> currentHandlerType : handlerTypes) {
     ReflectionUtils.doWithMethods(currentHandlerType,new ReflectionUtils.MethodCallback(){
       public void doWith(      Method method){
@@ -25,7 +27,7 @@
         }
       }
     }
-,ReflectionUtils.NON_BRIDGED_METHODS);
+,ReflectionUtils.USER_DECLARED_METHODS);
   }
   return StringUtils.toStringArray(urls);
 }

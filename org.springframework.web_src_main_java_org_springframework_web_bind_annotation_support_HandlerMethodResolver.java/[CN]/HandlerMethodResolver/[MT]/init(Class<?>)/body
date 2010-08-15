@@ -1,10 +1,13 @@
 {
-  Class<?>[] handlerTypes=Proxy.isProxyClass(handlerType) ? handlerType.getInterfaces() : new Class<?>[]{handlerType};
-  for (  final Class<?> currentHandlerType : handlerTypes) {
+  Set<Class<?>> handlerTypes=new LinkedHashSet<Class<?>>();
+  handlerTypes.add(handlerType);
+  handlerTypes.addAll(Arrays.asList(handlerType.getInterfaces()));
+  for (  Class<?> currentHandlerType : handlerTypes) {
     ReflectionUtils.doWithMethods(currentHandlerType,new ReflectionUtils.MethodCallback(){
       public void doWith(      Method method){
-        Method specificMethod=ClassUtils.getMostSpecificMethod(method,currentHandlerType);
-        if (isHandlerMethod(method)) {
+        Method specificMethod=ClassUtils.getMostSpecificMethod(method,handlerType);
+        Method bridgedMethod=BridgeMethodResolver.findBridgedMethod(specificMethod);
+        if (isHandlerMethod(specificMethod) && (bridgedMethod == specificMethod || !isHandlerMethod(bridgedMethod))) {
           handlerMethods.add(specificMethod);
         }
  else         if (method.isAnnotationPresent(InitBinder.class)) {
@@ -15,7 +18,7 @@
         }
       }
     }
-,ReflectionUtils.NON_BRIDGED_METHODS);
+,ReflectionUtils.USER_DECLARED_METHODS);
   }
   this.typeLevelMapping=AnnotationUtils.findAnnotation(handlerType,RequestMapping.class);
   SessionAttributes sessionAttributes=AnnotationUtils.findAnnotation(handlerType,SessionAttributes.class);
