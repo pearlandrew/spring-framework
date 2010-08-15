@@ -9,15 +9,25 @@
   Object paramValue=null;
   MultipartRequest multipartRequest=webRequest.getNativeRequest(MultipartRequest.class);
   if (multipartRequest != null) {
-    paramValue=multipartRequest.getFile(paramName);
+    List<MultipartFile> files=multipartRequest.getFiles(paramName);
+    if (!files.isEmpty()) {
+      if (files.size() == 1 && !paramType.isArray() && !Collection.class.isAssignableFrom(paramType)) {
+        paramValue=files.get(0);
+      }
+ else {
+        paramValue=files;
+      }
+    }
   }
   if (paramValue == null) {
     String[] paramValues=webRequest.getParameterValues(paramName);
-    if (paramValues != null && !paramType.isArray()) {
-      paramValue=(paramValues.length == 1 ? paramValues[0] : paramValues);
-    }
+    if (paramValues != null) {
+      if (paramValues.length == 1 && !paramType.isArray() && !Collection.class.isAssignableFrom(paramType)) {
+        paramValue=paramValues[0];
+      }
  else {
-      paramValue=paramValues;
+        paramValue=paramValues;
+      }
     }
   }
   if (paramValue == null) {
