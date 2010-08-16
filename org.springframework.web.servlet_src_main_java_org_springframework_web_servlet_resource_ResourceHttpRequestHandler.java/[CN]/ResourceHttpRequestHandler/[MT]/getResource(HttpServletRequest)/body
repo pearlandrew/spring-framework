@@ -4,17 +4,29 @@
     throw new IllegalStateException("Required request attribute '" + HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");
   }
   if (!StringUtils.hasText(path) || path.contains("WEB-INF") || path.contains("META-INF")) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Ignoring invalid resource path [" + path + "]");
+    }
     return null;
   }
-  for (  Resource resourcePath : this.locations) {
+  for (  Resource location : this.locations) {
     try {
-      Resource resource=resourcePath.createRelative(path);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Trying relative path [" + path + "] against base location: "+ location);
+      }
+      Resource resource=location.createRelative(path);
       if (resource.exists() && resource.isReadable()) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Found matching resource: " + resource);
+        }
         return resource;
+      }
+ else       if (logger.isTraceEnabled()) {
+        logger.trace("Relative resource doesn't exist or isn't readable: " + resource);
       }
     }
  catch (    IOException ex) {
-      return null;
+      logger.debug("Failed to create relative resource - trying next resource location",ex);
     }
   }
   return null;

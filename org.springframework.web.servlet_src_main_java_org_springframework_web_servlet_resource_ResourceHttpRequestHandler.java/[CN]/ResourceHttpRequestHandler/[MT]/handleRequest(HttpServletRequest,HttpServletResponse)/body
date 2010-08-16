@@ -2,12 +2,31 @@
   checkAndPrepare(request,response,true);
   Resource resource=getResource(request);
   if (resource == null) {
+    logger.debug("No matching resource found - returning 404");
     response.sendError(HttpServletResponse.SC_NOT_FOUND);
     return;
   }
-  setHeaders(resource,response);
-  if (new ServletWebRequest(request,response).checkNotModified(resource.lastModified()) || METHOD_HEAD.equals(request.getMethod())) {
+  MediaType mediaType=getMediaType(resource);
+  if (mediaType != null) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Determined media type [" + mediaType + "] for "+ resource);
+    }
+  }
+ else {
+    if (logger.isDebugEnabled()) {
+      logger.debug("No media type found for " + resource + " - returning 404");
+    }
+    response.sendError(HttpServletResponse.SC_NOT_FOUND);
     return;
   }
-  writeContent(resource,response);
+  setHeaders(response,resource,mediaType);
+  if (new ServletWebRequest(request,response).checkNotModified(resource.lastModified())) {
+    logger.debug("Resource not modified - returning 304");
+    return;
+  }
+  if (METHOD_HEAD.equals(request.getMethod())) {
+    logger.trace("HEAD request - skipping content");
+    return;
+  }
+  writeContent(response,resource);
 }
