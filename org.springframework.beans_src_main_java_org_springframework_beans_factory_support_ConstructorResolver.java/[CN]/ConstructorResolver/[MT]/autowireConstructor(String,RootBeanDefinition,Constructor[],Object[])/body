@@ -8,12 +8,18 @@
     argsToUse=explicitArgs;
   }
  else {
-    constructorToUse=(Constructor)mbd.resolvedConstructorOrFactoryMethod;
-    if (constructorToUse != null) {
-      argsToUse=mbd.resolvedConstructorArguments;
-      if (argsToUse == null) {
-        argsToUse=resolvePreparedArguments(beanName,mbd,bw,constructorToUse);
+    Object[] argsToResolve=null;
+synchronized (mbd.constructorArgumentLock) {
+      constructorToUse=(Constructor)mbd.resolvedConstructorOrFactoryMethod;
+      if (constructorToUse != null && mbd.constructorArgumentsResolved) {
+        argsToUse=mbd.resolvedConstructorArguments;
+        if (argsToUse == null) {
+          argsToResolve=mbd.preparedConstructorArguments;
+        }
       }
+    }
+    if (argsToResolve != null) {
+      argsToUse=resolvePreparedArguments(beanName,mbd,bw,constructorToUse,argsToResolve);
     }
   }
   if (constructorToUse == null) {
@@ -116,8 +122,7 @@
       throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Ambiguous constructor matches found in bean '" + beanName + "' "+ "(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities): "+ ambiguousConstructors);
     }
     if (explicitArgs == null) {
-      mbd.resolvedConstructorOrFactoryMethod=constructorToUse;
-      argsHolderToUse.storeCache(mbd);
+      argsHolderToUse.storeCache(mbd,constructorToUse);
     }
   }
   try {

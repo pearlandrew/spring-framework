@@ -31,12 +31,18 @@
     argsToUse=explicitArgs;
   }
  else {
-    factoryMethodToUse=(Method)mbd.resolvedConstructorOrFactoryMethod;
-    if (factoryMethodToUse != null) {
-      argsToUse=mbd.resolvedConstructorArguments;
-      if (argsToUse == null && mbd.preparedConstructorArguments != null) {
-        argsToUse=resolvePreparedArguments(beanName,mbd,bw,factoryMethodToUse);
+    Object[] argsToResolve=null;
+synchronized (mbd.constructorArgumentLock) {
+      factoryMethodToUse=(Method)mbd.resolvedConstructorOrFactoryMethod;
+      if (factoryMethodToUse != null && mbd.constructorArgumentsResolved) {
+        argsToUse=mbd.resolvedConstructorArguments;
+        if (argsToUse == null) {
+          argsToResolve=mbd.preparedConstructorArguments;
+        }
       }
+    }
+    if (argsToResolve != null) {
+      argsToUse=resolvePreparedArguments(beanName,mbd,bw,factoryMethodToUse,argsToResolve);
     }
   }
   if (factoryMethodToUse == null || argsToUse == null) {
@@ -154,8 +160,7 @@
       throw new BeanCreationException(mbd.getResourceDescription(),beanName,"Ambiguous factory method matches found in bean '" + beanName + "' "+ "(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities): "+ ambiguousFactoryMethods);
     }
     if (explicitArgs == null) {
-      mbd.resolvedConstructorOrFactoryMethod=factoryMethodToUse;
-      argsHolderToUse.storeCache(mbd);
+      argsHolderToUse.storeCache(mbd,factoryMethodToUse);
     }
   }
   try {
