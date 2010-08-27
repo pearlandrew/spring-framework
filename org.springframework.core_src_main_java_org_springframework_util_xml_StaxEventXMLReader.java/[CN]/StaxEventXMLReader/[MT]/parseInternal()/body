@@ -5,14 +5,18 @@
   while (reader.hasNext() && elementDepth >= 0) {
     XMLEvent event=reader.nextEvent();
     if (!event.isStartDocument() && !event.isEndDocument() && !documentStarted) {
-      handleStartDocument();
+      handleStartDocument(event);
       documentStarted=true;
     }
 switch (event.getEventType()) {
-case XMLStreamConstants.START_ELEMENT:
-      elementDepth++;
-    handleStartElement(event.asStartElement());
+case XMLStreamConstants.START_DOCUMENT:
+      handleStartDocument(event);
+    documentStarted=true;
   break;
+case XMLStreamConstants.START_ELEMENT:
+elementDepth++;
+handleStartElement(event.asStartElement());
+break;
 case XMLStreamConstants.END_ELEMENT:
 elementDepth--;
 if (elementDepth >= 0) {
@@ -26,11 +30,6 @@ case XMLStreamConstants.CHARACTERS:
 case XMLStreamConstants.SPACE:
 case XMLStreamConstants.CDATA:
 handleCharacters(event.asCharacters());
-break;
-case XMLStreamConstants.START_DOCUMENT:
-setLocator(event.getLocation());
-handleStartDocument();
-documentStarted=true;
 break;
 case XMLStreamConstants.END_DOCUMENT:
 handleEndDocument();

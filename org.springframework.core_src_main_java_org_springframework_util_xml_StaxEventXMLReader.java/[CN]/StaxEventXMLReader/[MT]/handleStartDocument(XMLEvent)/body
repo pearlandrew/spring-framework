@@ -1,6 +1,6 @@
 {
   if (getContentHandler() != null) {
-    final Location location=reader.getLocation();
+    final Location location=event.getLocation();
     getContentHandler().setDocumentLocator(new Locator2(){
       public int getColumnNumber(){
         return location.getColumnNumber();
@@ -15,17 +15,24 @@
         return location.getSystemId();
       }
       public String getXMLVersion(){
-        String version=reader.getVersion();
-        return StringUtils.hasLength(version) ? version : "1.0";
+        if (event.isStartDocument()) {
+          StartDocument startDocument=(StartDocument)event;
+          String version=startDocument.getVersion();
+          return StringUtils.hasLength(version) ? version : "1.0";
+        }
+        return null;
       }
       public String getEncoding(){
-        return reader.getEncoding();
+        if (event.isStartDocument()) {
+          StartDocument startDocument=(StartDocument)event;
+          if (startDocument.encodingSet()) {
+            return startDocument.getCharacterEncodingScheme();
+          }
+        }
+        return null;
       }
     }
 );
     getContentHandler().startDocument();
-    if (reader.standaloneSet()) {
-      setStandalone(reader.isStandalone());
-    }
   }
 }
