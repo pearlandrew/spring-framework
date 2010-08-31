@@ -6,6 +6,18 @@
         Namespace namespace=(Namespace)i.next();
         getContentHandler().startPrefixMapping(namespace.getPrefix(),namespace.getNamespaceURI());
       }
+      for (Iterator i=startElement.getAttributes(); i.hasNext(); ) {
+        Attribute attribute=(Attribute)i.next();
+        String prefix=attribute.getName().getPrefix();
+        if (prefix == null) {
+          prefix="";
+        }
+        String namespace=attribute.getName().getNamespaceURI();
+        if (namespace == null) {
+          continue;
+        }
+        getContentHandler().startPrefixMapping(prefix,namespace);
+      }
       getContentHandler().startElement(qName.getNamespaceURI(),qName.getLocalPart(),toQualifiedName(qName),getAttributes(startElement));
     }
  else {

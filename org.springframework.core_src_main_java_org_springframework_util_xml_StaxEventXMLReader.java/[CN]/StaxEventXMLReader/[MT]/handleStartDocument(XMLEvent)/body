@@ -1,4 +1,14 @@
 {
+  if (event.isStartDocument()) {
+    StartDocument startDocument=(StartDocument)event;
+    String xmlVersion=startDocument.getVersion();
+    if (StringUtils.hasLength(xmlVersion)) {
+      this.xmlVersion=xmlVersion;
+    }
+    if (startDocument.encodingSet()) {
+      this.encoding=startDocument.getCharacterEncodingScheme();
+    }
+  }
   if (getContentHandler() != null) {
     final Location location=event.getLocation();
     getContentHandler().setDocumentLocator(new Locator2(){
@@ -15,21 +25,10 @@
         return location.getSystemId();
       }
       public String getXMLVersion(){
-        if (event.isStartDocument()) {
-          StartDocument startDocument=(StartDocument)event;
-          String version=startDocument.getVersion();
-          return StringUtils.hasLength(version) ? version : "1.0";
-        }
-        return null;
+        return xmlVersion;
       }
       public String getEncoding(){
-        if (event.isStartDocument()) {
-          StartDocument startDocument=(StartDocument)event;
-          if (startDocument.encodingSet()) {
-            return startDocument.getCharacterEncodingScheme();
-          }
-        }
-        return null;
+        return encoding;
       }
     }
 );
