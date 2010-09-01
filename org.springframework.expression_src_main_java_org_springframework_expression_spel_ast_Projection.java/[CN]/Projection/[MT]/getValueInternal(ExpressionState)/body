@@ -3,12 +3,12 @@
   Object operand=op.getValue();
   boolean operandIsArray=ObjectUtils.isArray(operand);
   if (operand instanceof Map) {
-    Map<?,?> mapdata=(Map<?,?>)operand;
+    Map<?,?> mapData=(Map<?,?>)operand;
     List<Object> result=new ArrayList<Object>();
-    for (    Map.Entry entry : mapdata.entrySet()) {
+    for (    Map.Entry entry : mapData.entrySet()) {
       try {
         state.pushActiveContextObject(new TypedValue(entry,TypeDescriptor.valueOf(Map.Entry.class)));
-        result.add(children[0].getValueInternal(state).getValue());
+        result.add(this.children[0].getValueInternal(state).getValue());
       }
   finally {
         state.popActiveContextObject();
@@ -16,10 +16,8 @@
     }
     return new TypedValue(result,TypeDescriptor.valueOf(List.class));
   }
- else   if (operand instanceof List || operandIsArray) {
-    List<Object> data=new ArrayList<Object>();
-    Collection<?> c=(operand instanceof List) ? (Collection<?>)operand : Arrays.asList(ObjectUtils.toObjectArray(operand));
-    data.addAll(c);
+ else   if (operand instanceof Collection || operandIsArray) {
+    Collection<?> data=(operand instanceof Collection ? (Collection<?>)operand : Arrays.asList(ObjectUtils.toObjectArray(operand)));
     List<Object> result=new ArrayList<Object>();
     int idx=0;
     Class<?> arrayElementType=null;
@@ -29,7 +27,7 @@
         state.enterScope("index",idx);
         Object value=children[0].getValueInternal(state).getValue();
         if (value != null && operandIsArray) {
-          arrayElementType=this.determineCommonType(arrayElementType,value.getClass());
+          arrayElementType=determineCommonType(arrayElementType,value.getClass());
         }
         result.add(value);
       }
@@ -51,7 +49,7 @@
   }
  else {
     if (operand == null) {
-      if (nullSafe) {
+      if (this.nullSafe) {
         return TypedValue.NULL;
       }
  else {
