@@ -3,7 +3,12 @@
     return null;
   }
   Collection target=CollectionFactory.createCollection(targetType.getType(),1);
-  Object targetElement=this.conversionService.convert(source,sourceType,targetType.getElementTypeDescriptor(source));
-  target.add(targetElement);
+  TypeDescriptor elementType=targetType.getElementTypeDescriptor(source);
+  if (!Collection.class.isAssignableFrom(elementType.getType())) {
+    target.add(this.conversionService.convert(source,sourceType,elementType));
+  }
+ else {
+    target.add(source);
+  }
   return target;
 }
