@@ -1,3 +1,20 @@
 {
-  return null;
+  try {
+    if (this.content != null) {
+      return new ByteArrayInputStream(this.content.getBytes("US-ASCII"));
+    }
+ else     if (this.characterStream != null) {
+      String tempContent=FileCopyUtils.copyToString(this.characterStream);
+      return new ByteArrayInputStream(tempContent.getBytes("US-ASCII"));
+    }
+ else {
+      return this.asciiStream;
+    }
+  }
+ catch (  UnsupportedEncodingException ex) {
+    throw new SQLException("US-ASCII encoding not supported: " + ex);
+  }
+catch (  IOException ex) {
+    throw new SQLException("Failed to read stream content: " + ex);
+  }
 }

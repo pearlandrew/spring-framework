@@ -1,3 +1,16 @@
 {
-  return (this.content != null ? new StringReader(this.content) : this.characterStream);
+  try {
+    if (this.content != null) {
+      return new StringReader(this.content);
+    }
+ else     if (this.characterStream != null) {
+      return this.characterStream;
+    }
+ else {
+      return new InputStreamReader(this.asciiStream,"US-ASCII");
+    }
+  }
+ catch (  UnsupportedEncodingException ex) {
+    throw new SQLException("US-ASCII encoding not supported: " + ex);
+  }
 }
