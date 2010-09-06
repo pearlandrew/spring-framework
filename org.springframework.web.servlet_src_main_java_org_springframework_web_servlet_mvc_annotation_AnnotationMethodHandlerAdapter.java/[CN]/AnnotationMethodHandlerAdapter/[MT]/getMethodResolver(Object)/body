@@ -1,9 +1,11 @@
 {
   Class handlerClass=ClassUtils.getUserClass(handler);
-  ServletHandlerMethodResolver resolver=this.methodResolverCache.get(handlerClass);
-  if (resolver == null) {
-    resolver=new ServletHandlerMethodResolver(handlerClass);
-    this.methodResolverCache.put(handlerClass,resolver);
+synchronized (this.methodResolverCache) {
+    ServletHandlerMethodResolver resolver=this.methodResolverCache.get(handlerClass);
+    if (resolver == null) {
+      resolver=new ServletHandlerMethodResolver(handlerClass);
+      this.methodResolverCache.put(handlerClass,resolver);
+    }
+    return resolver;
   }
-  return resolver;
 }
