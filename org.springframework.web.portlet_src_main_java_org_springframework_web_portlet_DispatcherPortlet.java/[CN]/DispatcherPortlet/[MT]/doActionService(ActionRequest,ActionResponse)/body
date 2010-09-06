@@ -30,7 +30,15 @@
  catch (  Exception ex) {
     triggerAfterActionCompletion(mappedHandler,interceptorIndex,processedRequest,response,ex);
     try {
-      response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER,ex.toString());
+      Enumeration<String> paramNames=request.getParameterNames();
+      while (paramNames.hasMoreElements()) {
+        String paramName=paramNames.nextElement();
+        String[] paramValues=request.getParameterValues(paramName);
+        if (paramValues != null && !response.getRenderParameterMap().containsKey(paramName)) {
+          response.setRenderParameter(paramName,paramValues);
+        }
+      }
+      response.setRenderParameter(ACTION_EXCEPTION_RENDER_PARAMETER,Boolean.TRUE.toString());
       request.getPortletSession().setAttribute(ACTION_EXCEPTION_SESSION_ATTRIBUTE,ex);
       logger.debug("Caught exception during action phase - forwarding to render phase",ex);
     }
