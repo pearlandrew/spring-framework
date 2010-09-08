@@ -6,4 +6,20 @@
  catch (  SQLException se) {
     throw new InvalidResultSetAccessException(se);
   }
+  try {
+    ResultSetMetaData rsmd=resultSet.getMetaData();
+    if (rsmd != null) {
+      int columnCount=rsmd.getColumnCount();
+      this.columnLabelMap=new HashMap<String,Integer>(columnCount);
+      for (int i=1; i <= columnCount; i++) {
+        columnLabelMap.put(rsmd.getColumnLabel(i),Integer.valueOf(i));
+      }
+    }
+ else {
+      this.columnLabelMap=new HashMap<String,Integer>(0);
+    }
+  }
+ catch (  SQLException se) {
+    throw new InvalidResultSetAccessException(se);
+  }
 }

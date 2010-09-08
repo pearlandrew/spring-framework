@@ -1,5 +1,13 @@
 {
-  rsetMethod.invoke(rset,new Object[]{arg});
+  if (arg instanceof String) {
+    Method findMethod=ResultSet.class.getDeclaredMethod("findColumn",new Class[]{String.class});
+    findMethod.invoke(rset,new Object[]{arg});
+    rsetControl.setReturnValue(1);
+    rsetMethod.invoke(rset,new Object[]{1});
+  }
+ else {
+    rsetMethod.invoke(rset,new Object[]{arg});
+  }
   if (ret instanceof Double) {
     rsetControl.setReturnValue(((Double)ret).doubleValue());
   }
@@ -24,7 +32,15 @@
  else {
     rsetControl.setReturnValue(ret);
   }
-  rsetMethod.invoke(rset,new Object[]{arg});
+  if (arg instanceof String) {
+    Method findMethod=ResultSet.class.getDeclaredMethod("findColumn",new Class[]{String.class});
+    findMethod.invoke(rset,new Object[]{arg});
+    rsetControl.setReturnValue(1);
+    rsetMethod.invoke(rset,new Object[]{1});
+  }
+ else {
+    rsetMethod.invoke(rset,new Object[]{arg});
+  }
   rsetControl.setThrowable(new SQLException("test"));
   rsetControl.replay();
   rowset=new ResultSetWrappingSqlRowSet(rset);
