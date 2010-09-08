@@ -4,7 +4,7 @@
     throw new SpelEvaluationException(getChild(0).getStartPosition(),SpelMessage.TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION,FormatHelper.formatClassNameForMessage(intendedArrayType.getClass()));
   }
   String type=(String)intendedArrayType;
-  Class<?> componentType=null;
+  Class<?> componentType;
   TypeCode arrayTypeCode=TypeCode.forName(type);
   if (arrayTypeCode == TypeCode.OBJECT) {
     componentType=state.findType(type);
@@ -13,36 +13,36 @@
     componentType=arrayTypeCode.getType();
   }
   TypeDescriptor td=TypeDescriptor.valueOf(componentType);
-  Object newArray=null;
+  Object newArray;
   if (!hasInitializer()) {
-    for (int i=0; i < dimensions.length; i++) {
-      if (dimensions[i] == null) {
+    for (    SpelNodeImpl dimension : this.dimensions) {
+      if (dimension == null) {
         throw new SpelEvaluationException(getStartPosition(),SpelMessage.MISSING_ARRAY_DIMENSION);
       }
     }
     TypeConverter typeConverter=state.getEvaluationContext().getTypeConverter();
-    if (dimensions.length == 1) {
-      TypedValue o=dimensions[0].getTypedValue(state);
+    if (this.dimensions.length == 1) {
+      TypedValue o=this.dimensions[0].getTypedValue(state);
       int arraySize=ExpressionUtils.toInt(typeConverter,o);
       newArray=Array.newInstance(componentType,arraySize);
     }
  else {
-      int[] dims=new int[dimensions.length];
-      for (int d=0; d < dimensions.length; d++) {
-        TypedValue o=dimensions[d].getTypedValue(state);
+      int[] dims=new int[this.dimensions.length];
+      for (int d=0; d < this.dimensions.length; d++) {
+        TypedValue o=this.dimensions[d].getTypedValue(state);
         dims[d]=ExpressionUtils.toInt(typeConverter,o);
       }
       newArray=Array.newInstance(componentType,dims);
     }
   }
  else {
-    if (dimensions.length > 1) {
+    if (this.dimensions.length > 1) {
       throw new SpelEvaluationException(getStartPosition(),SpelMessage.MULTIDIM_ARRAY_INITIALIZER_NOT_SUPPORTED);
     }
     TypeConverter typeConverter=state.getEvaluationContext().getTypeConverter();
     InlineList initializer=(InlineList)getChild(1);
-    if (dimensions[0] != null) {
-      TypedValue dValue=dimensions[0].getTypedValue(state);
+    if (this.dimensions[0] != null) {
+      TypedValue dValue=this.dimensions[0].getTypedValue(state);
       int i=ExpressionUtils.toInt(typeConverter,dValue);
       if (i != initializer.getChildCount()) {
         throw new SpelEvaluationException(getStartPosition(),SpelMessage.INITIALIZER_LENGTH_INCORRECT);

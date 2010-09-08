@@ -1,11 +1,11 @@
 {
   Object[] arguments=new Object[getChildCount() - 1];
-  Class<?>[] argumentTypes=new Class[getChildCount() - 1];
+  List<TypeDescriptor> argumentTypes=new ArrayList<TypeDescriptor>(getChildCount() - 1);
   for (int i=0; i < arguments.length; i++) {
-    TypedValue childValue=children[i + 1].getValueInternal(state);
+    TypedValue childValue=this.children[i + 1].getValueInternal(state);
     Object value=childValue.getValue();
     arguments[i]=value;
-    argumentTypes[i]=(value == null ? null : value.getClass());
+    argumentTypes.add(TypeDescriptor.forObject(value));
   }
   ConstructorExecutor executorToUse=this.cachedExecutor;
   if (executorToUse != null) {
@@ -20,19 +20,18 @@
           throw (RuntimeException)rootCause;
         }
  else {
-          String typename=(String)children[0].getValueInternal(state).getValue();
+          String typename=(String)this.children[0].getValueInternal(state).getValue();
           throw new SpelEvaluationException(getStartPosition(),rootCause,SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM,typename,FormatHelper.formatMethodForMessage("",argumentTypes));
         }
       }
       this.cachedExecutor=null;
     }
   }
-  String typename=(String)children[0].getValueInternal(state).getValue();
+  String typename=(String)this.children[0].getValueInternal(state).getValue();
   executorToUse=findExecutorForConstructor(typename,argumentTypes,state);
   try {
     this.cachedExecutor=executorToUse;
-    TypedValue result=executorToUse.execute(state.getEvaluationContext(),arguments);
-    return result;
+    return executorToUse.execute(state.getEvaluationContext(),arguments);
   }
  catch (  AccessException ae) {
     throw new SpelEvaluationException(getStartPosition(),ae,SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM,typename,FormatHelper.formatMethodForMessage("",argumentTypes));

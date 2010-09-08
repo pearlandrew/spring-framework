@@ -1,0 +1,85 @@
+{
+  Assert.isTrue(expectedArgTypes != null && expectedArgTypes.size() > 0,"Expected arguments must at least include one array (the vargargs parameter)");
+  Assert.isTrue(expectedArgTypes.get(expectedArgTypes.size() - 1).isArray(),"Final expected argument should be array type (the varargs parameter)");
+  ArgsMatchKind match=ArgsMatchKind.EXACT;
+  List<Integer> argsRequiringConversion=null;
+  int argCountUpToVarargs=expectedArgTypes.size() - 1;
+  for (int i=0; i < argCountUpToVarargs && match != null; i++) {
+    TypeDescriptor suppliedArg=suppliedArgTypes.get(i);
+    TypeDescriptor expectedArg=expectedArgTypes.get(i);
+    if (suppliedArg == TypeDescriptor.NULL) {
+      if (expectedArg.isPrimitive()) {
+        match=null;
+      }
+    }
+ else {
+      if (!expectedArg.equals(suppliedArg)) {
+        if (suppliedArg.isAssignableTo(expectedArg)) {
+          if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
+            match=ArgsMatchKind.CLOSE;
+          }
+        }
+ else         if (typeConverter.canConvert(suppliedArg,expectedArg)) {
+          if (argsRequiringConversion == null) {
+            argsRequiringConversion=new ArrayList<Integer>();
+          }
+          argsRequiringConversion.add(i);
+          match=ArgsMatchKind.REQUIRES_CONVERSION;
+        }
+ else {
+          match=null;
+        }
+      }
+    }
+  }
+  if (match == null) {
+    return null;
+  }
+  if (suppliedArgTypes.size() == expectedArgTypes.size() && expectedArgTypes.get(expectedArgTypes.size() - 1).equals(suppliedArgTypes.get(suppliedArgTypes.size() - 1))) {
+  }
+ else {
+    Class varargsParameterType=expectedArgTypes.get(expectedArgTypes.size() - 1).getElementType();
+    for (int i=expectedArgTypes.size() - 1; i < suppliedArgTypes.size(); i++) {
+      TypeDescriptor suppliedArg=suppliedArgTypes.get(i);
+      if (varargsParameterType != suppliedArg.getType()) {
+        if (suppliedArg == TypeDescriptor.NULL) {
+          if (varargsParameterType.isPrimitive()) {
+            match=null;
+          }
+        }
+ else {
+          if (ClassUtils.isAssignable(varargsParameterType,suppliedArg.getType())) {
+            if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
+              match=ArgsMatchKind.CLOSE;
+            }
+          }
+ else           if (typeConverter.canConvert(suppliedArg,TypeDescriptor.valueOf(varargsParameterType))) {
+            if (argsRequiringConversion == null) {
+              argsRequiringConversion=new ArrayList<Integer>();
+            }
+            argsRequiringConversion.add(i);
+            match=ArgsMatchKind.REQUIRES_CONVERSION;
+          }
+ else {
+            match=null;
+          }
+        }
+      }
+    }
+  }
+  if (match == null) {
+    return null;
+  }
+ else {
+    if (match == ArgsMatchKind.REQUIRES_CONVERSION) {
+      int[] argsArray=new int[argsRequiringConversion.size()];
+      for (int i=0; i < argsRequiringConversion.size(); i++) {
+        argsArray[i]=argsRequiringConversion.get(i);
+      }
+      return new ArgumentsMatchInfo(match,argsArray);
+    }
+ else {
+      return new ArgumentsMatchInfo(match);
+    }
+  }
+}

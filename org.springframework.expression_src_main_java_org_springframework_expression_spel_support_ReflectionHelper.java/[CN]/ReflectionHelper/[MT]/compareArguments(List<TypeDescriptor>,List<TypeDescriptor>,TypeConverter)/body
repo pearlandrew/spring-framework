@@ -1,0 +1,48 @@
+{
+  Assert.isTrue(expectedArgTypes.size() == suppliedArgTypes.size(),"Expected argument types and supplied argument types should be arrays of same length");
+  ArgsMatchKind match=ArgsMatchKind.EXACT;
+  List<Integer> argsRequiringConversion=null;
+  for (int i=0; i < expectedArgTypes.size() && match != null; i++) {
+    TypeDescriptor suppliedArg=suppliedArgTypes.get(i);
+    TypeDescriptor expectedArg=expectedArgTypes.get(i);
+    if (!expectedArg.equals(suppliedArg)) {
+      if (suppliedArg == TypeDescriptor.NULL) {
+        if (expectedArg.isPrimitive()) {
+          match=null;
+        }
+      }
+ else {
+        if (suppliedArg.isAssignableTo(expectedArg)) {
+          if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
+            match=ArgsMatchKind.CLOSE;
+          }
+        }
+ else         if (typeConverter.canConvert(suppliedArg,expectedArg)) {
+          if (argsRequiringConversion == null) {
+            argsRequiringConversion=new ArrayList<Integer>();
+          }
+          argsRequiringConversion.add(i);
+          match=ArgsMatchKind.REQUIRES_CONVERSION;
+        }
+ else {
+          match=null;
+        }
+      }
+    }
+  }
+  if (match == null) {
+    return null;
+  }
+ else {
+    if (match == ArgsMatchKind.REQUIRES_CONVERSION) {
+      int[] argsArray=new int[argsRequiringConversion.size()];
+      for (int i=0; i < argsRequiringConversion.size(); i++) {
+        argsArray[i]=argsRequiringConversion.get(i);
+      }
+      return new ArgumentsMatchInfo(match,argsArray);
+    }
+ else {
+      return new ArgumentsMatchInfo(match);
+    }
+  }
+}
