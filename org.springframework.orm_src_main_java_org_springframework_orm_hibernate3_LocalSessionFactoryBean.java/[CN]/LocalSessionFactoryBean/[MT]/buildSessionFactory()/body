@@ -113,7 +113,8 @@
         String className=(String)classNames.nextElement();
         String[] strategyAndRegion=StringUtils.commaDelimitedListToStringArray(this.entityCacheStrategies.getProperty(className));
         if (strategyAndRegion.length > 1) {
-          config.setCacheConcurrencyStrategy(className,strategyAndRegion[0],strategyAndRegion[1]);
+          Method setCacheConcurrencyStrategy=Configuration.class.getMethod("setCacheConcurrencyStrategy",String.class,String.class,String.class);
+          ReflectionUtils.invokeMethod(setCacheConcurrencyStrategy,config,className,strategyAndRegion[0],strategyAndRegion[1]);
         }
  else         if (strategyAndRegion.length > 0) {
           config.setCacheConcurrencyStrategy(className,strategyAndRegion[0]);
