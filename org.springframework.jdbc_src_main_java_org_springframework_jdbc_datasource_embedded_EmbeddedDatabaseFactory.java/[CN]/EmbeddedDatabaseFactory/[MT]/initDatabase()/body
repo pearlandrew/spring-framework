@@ -8,6 +8,12 @@
   this.databaseConfigurer.configureConnectionProperties(this.dataSourceFactory.getConnectionProperties(),this.databaseName);
   this.dataSource=this.dataSourceFactory.getDataSource();
   if (this.databasePopulator != null) {
-    populateDatabase();
+    try {
+      populateDatabase();
+    }
+ catch (    RuntimeException ex) {
+      shutdownDatabase();
+      throw ex;
+    }
   }
 }
