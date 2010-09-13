@@ -1,0 +1,9 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  bf.registerBeanDefinition("testBean",rootBeanDefinition(TestBean.class).addPropertyValue("name","${my.name}").getBeanDefinition());
+  PropertyPlaceholderConfigurer ppc=new PropertyPlaceholderConfigurer();
+  ppc.setLocation(new ByteArrayResource("my.name=Inigo Montoya".getBytes()));
+  ppc.postProcessBeanFactory(bf);
+  TestBean testBean=bf.getBean(TestBean.class);
+  assertThat(testBean.getName(),equalTo("Inigo Montoya"));
+}
