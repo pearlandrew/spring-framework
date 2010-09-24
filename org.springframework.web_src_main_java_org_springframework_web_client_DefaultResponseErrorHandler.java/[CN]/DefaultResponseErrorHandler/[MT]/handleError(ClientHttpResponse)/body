@@ -1,10 +1,13 @@
 {
   HttpStatus statusCode=response.getStatusCode();
+  MediaType contentType=response.getHeaders().getContentType();
+  Charset charset=contentType != null ? contentType.getCharSet() : null;
+  byte[] body=FileCopyUtils.copyToByteArray(response.getBody());
 switch (statusCode.series()) {
 case CLIENT_ERROR:
-    throw new HttpClientErrorException(statusCode,response.getStatusText());
+    throw new HttpClientErrorException(statusCode,response.getStatusText(),body,charset);
 case SERVER_ERROR:
-  throw new HttpServerErrorException(statusCode,response.getStatusText());
+  throw new HttpServerErrorException(statusCode,response.getStatusText(),body,charset);
 default :
 throw new RestClientException("Unknown status code [" + statusCode + "]");
 }
