@@ -7,14 +7,25 @@
  else {
       URLConnection con=url.openConnection();
       con.setUseCaches(false);
-      if (con instanceof HttpURLConnection) {
-        ((HttpURLConnection)con).setRequestMethod("HEAD");
+      HttpURLConnection httpCon=(con instanceof HttpURLConnection ? (HttpURLConnection)con : null);
+      if (httpCon != null) {
+        httpCon.setRequestMethod("HEAD");
+        if (httpCon.getResponseCode() == HttpURLConnection.HTTP_OK) {
+          return true;
+        }
       }
-      boolean doesExist=(con.getContentLength() >= 0);
-      if (!doesExist && con instanceof HttpURLConnection) {
-        ((HttpURLConnection)con).disconnect();
+      if (con.getContentLength() >= 0) {
+        return true;
       }
-      return doesExist;
+      if (httpCon != null) {
+        httpCon.disconnect();
+        return false;
+      }
+ else {
+        InputStream is=getInputStream();
+        is.close();
+        return true;
+      }
     }
   }
  catch (  IOException ex) {
