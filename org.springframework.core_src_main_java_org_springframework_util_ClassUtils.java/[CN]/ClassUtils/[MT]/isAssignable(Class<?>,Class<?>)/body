@@ -1,5 +1,20 @@
 {
   Assert.notNull(lhsType,"Left-hand side type must not be null");
   Assert.notNull(rhsType,"Right-hand side type must not be null");
-  return (lhsType.isAssignableFrom(rhsType) || lhsType.equals(primitiveWrapperTypeMap.get(rhsType)));
+  if (lhsType.isAssignableFrom(rhsType)) {
+    return true;
+  }
+  if (lhsType.isPrimitive()) {
+    Class resolvedPrimitive=primitiveWrapperTypeMap.get(rhsType);
+    if (resolvedPrimitive != null && lhsType.equals(resolvedPrimitive)) {
+      return true;
+    }
+  }
+ else {
+    Class resolvedWrapper=primitiveTypeToWrapperMap.get(rhsType);
+    if (resolvedWrapper != null && lhsType.isAssignableFrom(resolvedWrapper)) {
+      return true;
+    }
+  }
+  return false;
 }
