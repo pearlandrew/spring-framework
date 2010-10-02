@@ -64,7 +64,9 @@
         logger.trace("Consumer [" + consumerToUse + "] of "+ (transactional ? "transactional " : "")+ "session ["+ sessionToUse+ "] did not receive a message");
       }
       noMessageReceived(invoker,sessionToUse);
-      commitIfNecessary(sessionToUse,message);
+      if (shouldCommitAfterNoMessageReceived(sessionToUse)) {
+        commitIfNecessary(sessionToUse,message);
+      }
       return false;
     }
   }
