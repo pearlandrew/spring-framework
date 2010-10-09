@@ -28,14 +28,14 @@
         }
       }
  catch (      SQLException ex) {
-        boolean dropStatement=statement.trim().toLowerCase().startsWith("drop");
+        boolean dropStatement=StringUtils.startsWithIgnoreCase(statement.trim(),"drop");
         if (continueOnError || (dropStatement && ignoreFailedDrops)) {
           if (logger.isDebugEnabled()) {
-            logger.debug("Line " + lineNumber + " statement failed: "+ statement,ex);
+            logger.debug("Failed to execute SQL script statement at line " + lineNumber + " of resource "+ resource+ ": "+ statement,ex);
           }
         }
  else {
-          throw ex;
+          throw new ScriptStatementFailedException(statement,lineNumber,resource,ex);
         }
       }
     }
