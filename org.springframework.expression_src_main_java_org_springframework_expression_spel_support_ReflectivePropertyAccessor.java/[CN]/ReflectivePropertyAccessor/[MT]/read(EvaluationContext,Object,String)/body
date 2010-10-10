@@ -9,13 +9,10 @@
     }
     return new TypedValue(Array.getLength(target),TypeDescriptor.valueOf(Integer.TYPE));
   }
-  if (this.readerCache == null) {
-    this.readerCache=new ConcurrentHashMap<CacheKey,InvokerPair>();
-  }
   CacheKey cacheKey=new CacheKey(type,name);
   InvokerPair invoker=this.readerCache.get(cacheKey);
   if (invoker == null || invoker.member instanceof Method) {
-    Method method=(Method)(invoker == null ? null : invoker.member);
+    Method method=(Method)(invoker != null ? invoker.member : null);
     if (method == null) {
       method=findGetterForProperty(name,type,target instanceof Class);
       if (method != null) {
