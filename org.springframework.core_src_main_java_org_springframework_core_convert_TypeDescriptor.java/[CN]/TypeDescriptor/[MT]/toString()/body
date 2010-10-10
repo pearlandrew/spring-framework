@@ -1,27 +1,21 @@
 {
   if (this == TypeDescriptor.NULL) {
-    return "[TypeDescriptor.NULL]";
+    return "null";
   }
  else {
     StringBuilder builder=new StringBuilder();
-    builder.append("[TypeDescriptor ");
     Annotation[] anns=getAnnotations();
     for (    Annotation ann : anns) {
       builder.append("@").append(ann.annotationType().getName()).append(' ');
     }
     builder.append(ClassUtils.getQualifiedName(getType()));
     if (isMap()) {
-      Class<?> mapKeyType=getMapKeyType();
-      Class<?> valueKeyType=getMapValueType();
-      builder.append("<").append(mapKeyType != null ? ClassUtils.getQualifiedName(mapKeyType) : "?");
-      builder.append(", ").append(valueKeyType != null ? ClassUtils.getQualifiedName(valueKeyType) : "?");
-      builder.append(">");
+      builder.append("<").append(getMapKeyTypeDescriptor());
+      builder.append(", ").append(getMapValueTypeDescriptor()).append(">");
     }
  else     if (isCollection()) {
-      Class<?> elementType=getElementType();
-      builder.append("<").append(elementType != null ? ClassUtils.getQualifiedName(elementType) : "?").append(">");
+      builder.append("<").append(getElementTypeDescriptor()).append(">");
     }
-    builder.append("]");
     return builder.toString();
   }
 }
