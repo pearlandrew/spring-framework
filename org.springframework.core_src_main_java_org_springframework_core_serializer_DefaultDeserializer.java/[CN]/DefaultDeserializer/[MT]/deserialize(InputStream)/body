@@ -1,13 +1,9 @@
 {
-  ObjectInputStream objectInputStream=null;
+  ObjectInputStream objectInputStream=new ObjectInputStream(inputStream);
   try {
-    objectInputStream=new ObjectInputStream(inputStream);
     return objectInputStream.readObject();
   }
- catch (  ClassNotFoundException e) {
-    if (objectInputStream != null) {
-      objectInputStream.close();
-    }
-    throw new IOException(e.getMessage());
+ catch (  ClassNotFoundException ex) {
+    throw new NestedIOException("Failed to deserialize object type",ex);
   }
 }
