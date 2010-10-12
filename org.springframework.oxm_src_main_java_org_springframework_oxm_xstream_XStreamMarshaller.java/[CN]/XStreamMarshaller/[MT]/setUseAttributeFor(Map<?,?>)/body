@@ -1,13 +1,32 @@
 {
   for (  Map.Entry<?,?> entry : attributes.entrySet()) {
-    if (entry.getKey() instanceof String && entry.getValue() instanceof Class) {
-      this.getXStream().useAttributeFor((String)entry.getKey(),(Class)entry.getValue());
+    if (entry.getKey() instanceof String) {
+      if (entry.getValue() instanceof Class) {
+        this.getXStream().useAttributeFor((String)entry.getKey(),(Class)entry.getValue());
+      }
+ else {
+        throw new IllegalArgumentException("Invalid argument 'attributes'. 'useAttributesFor' property takes map of <String, Class>," + " when using a map key of type String");
+      }
     }
- else     if (entry.getKey() instanceof Class && entry.getValue() instanceof String) {
-      this.getXStream().useAttributeFor((Class)entry.getKey(),(String)entry.getValue());
+ else     if (entry.getKey() instanceof Class) {
+      Class<?> key=(Class<?>)entry.getKey();
+      if (entry.getValue() instanceof String) {
+        this.getXStream().useAttributeFor(key,(String)entry.getValue());
+      }
+ else       if (entry.getValue() instanceof List) {
+        List list=(List)entry.getValue();
+        for (        Object o : list) {
+          if (o instanceof String) {
+            this.getXStream().useAttributeFor(key,(String)o);
+          }
+        }
+      }
+ else {
+        throw new IllegalArgumentException("Invalid argument 'attributes'. " + "'useAttributesFor' property takes either <Class, String> or <Class, List<String>> map," + " when using a map key of type Class");
+      }
     }
  else {
-      throw new IllegalArgumentException("Invalid attribute key and value pair. " + "'useAttributesFor' property takes either a <String, Class> map or a <Class, String> map");
+      throw new IllegalArgumentException("Invalid argument 'attributes. " + "'useAttributesFor' property takes either a map key of type String or Class");
     }
   }
 }
