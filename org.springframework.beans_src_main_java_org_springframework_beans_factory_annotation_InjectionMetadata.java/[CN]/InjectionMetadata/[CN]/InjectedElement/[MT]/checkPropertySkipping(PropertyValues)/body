@@ -1,11 +1,19 @@
 {
-  if (this.pd != null && pvs != null) {
-    if (pvs.getPropertyValue(this.pd.getName()) != null) {
-      return true;
-    }
- else     if (pvs instanceof MutablePropertyValues) {
-      ((MutablePropertyValues)pvs).registerProcessedProperty(this.pd.getName());
+  if (this.skip == null) {
+synchronized (pvs) {
+      if (this.skip == null) {
+        if (this.pd != null && pvs != null) {
+          if (pvs.contains(this.pd.getName())) {
+            this.skip=true;
+            return true;
+          }
+ else           if (pvs instanceof MutablePropertyValues) {
+            ((MutablePropertyValues)pvs).registerProcessedProperty(this.pd.getName());
+          }
+        }
+        this.skip=false;
+      }
     }
   }
-  return false;
+  return this.skip;
 }
