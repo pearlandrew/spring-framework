@@ -4,17 +4,20 @@
   }
   RequestMapping mapping=AnnotationUtils.findAnnotation(method,RequestMapping.class);
   if (mapping != null) {
-    RequestMappingInfo mappingInfo=new RequestMappingInfo();
-    mappingInfo.patterns=mapping.value();
+    String[] patterns=mapping.value();
+    RequestMethod[] methods=new RequestMethod[0];
+    String[] params=new String[0];
+    String[] headers=new String[0];
     if (!hasTypeLevelMapping() || !Arrays.equals(mapping.method(),getTypeLevelMapping().method())) {
-      mappingInfo.methods=mapping.method();
+      methods=mapping.method();
     }
     if (!hasTypeLevelMapping() || !Arrays.equals(mapping.params(),getTypeLevelMapping().params())) {
-      mappingInfo.params=mapping.params();
+      params=mapping.params();
     }
     if (!hasTypeLevelMapping() || !Arrays.equals(mapping.headers(),getTypeLevelMapping().headers())) {
-      mappingInfo.headers=mapping.headers();
+      headers=mapping.headers();
     }
+    RequestMappingInfo mappingInfo=new RequestMappingInfo(patterns,methods,params,headers);
     this.mappings.put(method,mappingInfo);
     return true;
   }

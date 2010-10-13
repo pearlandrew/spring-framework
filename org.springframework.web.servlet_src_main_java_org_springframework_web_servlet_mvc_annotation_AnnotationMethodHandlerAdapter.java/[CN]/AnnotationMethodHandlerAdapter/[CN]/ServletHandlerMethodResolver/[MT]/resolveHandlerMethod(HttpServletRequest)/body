@@ -1,15 +1,14 @@
 {
   String lookupPath=urlPathHelper.getLookupPathForRequest(request);
   Comparator<String> pathComparator=pathMatcher.getPatternComparator(lookupPath);
-  Map<RequestMappingInfo,Method> targetHandlerMethods=new LinkedHashMap<RequestMappingInfo,Method>();
+  Map<RequestSpecificMappingInfo,Method> targetHandlerMethods=new LinkedHashMap<RequestSpecificMappingInfo,Method>();
   Set<String> allowedMethods=new LinkedHashSet<String>(7);
   String resolvedMethodName=null;
   for (  Method handlerMethod : getHandlerMethods()) {
-    RequestMappingInfo mappingInfo=this.mappings.get(handlerMethod);
+    RequestSpecificMappingInfo mappingInfo=new RequestSpecificMappingInfo(this.mappings.get(handlerMethod));
     boolean match=false;
     if (mappingInfo.hasPatterns()) {
-      List<String> matchingPatterns=new ArrayList<String>(mappingInfo.patterns.length);
-      for (      String pattern : mappingInfo.patterns) {
+      for (      String pattern : mappingInfo.getPatterns()) {
         if (!hasTypeLevelMapping() && !pattern.startsWith("/")) {
           pattern="/" + pattern;
         }
@@ -17,7 +16,7 @@
         if (combinedPattern != null) {
           if (mappingInfo.matches(request)) {
             match=true;
-            matchingPatterns.add(combinedPattern);
+            mappingInfo.addMatchedPattern(combinedPattern);
           }
  else {
             if (!mappingInfo.matchesRequestMethod(request)) {
@@ -27,12 +26,11 @@
           }
         }
       }
-      Collections.sort(matchingPatterns,pathComparator);
-      mappingInfo.matchedPatterns=matchingPatterns;
+      mappingInfo.sortMatchedPatterns(pathComparator);
     }
  else {
       match=mappingInfo.matches(request);
-      if (match && mappingInfo.methods.length == 0 && mappingInfo.params.length == 0 && resolvedMethodName != null && !resolvedMethodName.equals(handlerMethod.getName())) {
+      if (match && mappingInfo.getMethodCount() == 0 && mappingInfo.getParamCount() == 0 && resolvedMethodName != null && !resolvedMethodName.equals(handlerMethod.getName())) {
         match=false;
       }
  else {
@@ -44,7 +42,7 @@
     if (match) {
       Method oldMappedMethod=targetHandlerMethods.put(mappingInfo,handlerMethod);
       if (oldMappedMethod != null && oldMappedMethod != handlerMethod) {
-        if (methodNameResolver != null && mappingInfo.patterns.length == 0) {
+        if (methodNameResolver != null && !mappingInfo.hasPatterns()) {
           if (!oldMappedMethod.getName().equals(handlerMethod.getName())) {
             if (resolvedMethodName == null) {
               resolvedMethodName=methodNameResolver.getHandlerMethodName(request);
@@ -70,10 +68,10 @@
     }
   }
   if (!targetHandlerMethods.isEmpty()) {
-    List<RequestMappingInfo> matches=new ArrayList<RequestMappingInfo>(targetHandlerMethods.keySet());
-    RequestMappingInfoComparator requestMappingInfoComparator=new RequestMappingInfoComparator(pathComparator,request);
+    List<RequestSpecificMappingInfo> matches=new ArrayList<RequestSpecificMappingInfo>(targetHandlerMethods.keySet());
+    RequestSpecificMappingInfoComparator requestMappingInfoComparator=new RequestSpecificMappingInfoComparator(pathComparator,request);
     Collections.sort(matches,requestMappingInfoComparator);
-    RequestMappingInfo bestMappingMatch=matches.get(0);
+    RequestSpecificMappingInfo bestMappingMatch=matches.get(0);
     String bestMatchedPath=bestMappingMatch.bestMatchedPattern();
     if (bestMatchedPath != null) {
       extractHandlerMethodUriTemplates(bestMatchedPath,lookupPath,request);
