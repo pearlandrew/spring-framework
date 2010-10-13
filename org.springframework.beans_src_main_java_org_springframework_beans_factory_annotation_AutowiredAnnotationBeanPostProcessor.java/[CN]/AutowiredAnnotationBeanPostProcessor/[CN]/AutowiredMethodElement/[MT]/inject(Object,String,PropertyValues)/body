@@ -9,25 +9,28 @@
       arguments=resolveCachedArguments(beanName);
     }
  else {
-synchronized (pvs) {
+      Class[] paramTypes=method.getParameterTypes();
+      arguments=new Object[paramTypes.length];
+      DependencyDescriptor[] descriptors=new DependencyDescriptor[paramTypes.length];
+      Set<String> autowiredBeanNames=new LinkedHashSet<String>(paramTypes.length);
+      TypeConverter typeConverter=beanFactory.getTypeConverter();
+      for (int i=0; i < arguments.length; i++) {
+        MethodParameter methodParam=new MethodParameter(method,i);
+        GenericTypeResolver.resolveParameterType(methodParam,bean.getClass());
+        descriptors[i]=new DependencyDescriptor(methodParam,this.required);
+        arguments[i]=beanFactory.resolveDependency(descriptors[i],beanName,autowiredBeanNames,typeConverter);
+        if (arguments[i] == null) {
+          arguments=null;
+          break;
+        }
+      }
+synchronized (this) {
         if (!this.cached) {
-          Class[] paramTypes=method.getParameterTypes();
-          arguments=new Object[paramTypes.length];
-          Set<String> autowiredBeanNames=new LinkedHashSet<String>(arguments.length);
-          TypeConverter typeConverter=beanFactory.getTypeConverter();
-          this.cachedMethodArguments=new Object[arguments.length];
-          for (int i=0; i < arguments.length; i++) {
-            MethodParameter methodParam=new MethodParameter(method,i);
-            GenericTypeResolver.resolveParameterType(methodParam,bean.getClass());
-            DependencyDescriptor descriptor=new DependencyDescriptor(methodParam,this.required);
-            this.cachedMethodArguments[i]=descriptor;
-            arguments[i]=beanFactory.resolveDependency(descriptor,beanName,autowiredBeanNames,typeConverter);
-            if (arguments[i] == null) {
-              arguments=null;
-              break;
-            }
-          }
           if (arguments != null) {
+            this.cachedMethodArguments=new Object[arguments.length];
+            for (int i=0; i < arguments.length; i++) {
+              this.cachedMethodArguments[i]=descriptors[i];
+            }
             registerDependentBeans(beanName,autowiredBeanNames);
             if (autowiredBeanNames.size() == paramTypes.length) {
               Iterator<String> it=autowiredBeanNames.iterator();
@@ -48,9 +51,6 @@ synchronized (pvs) {
             this.cachedMethodArguments=null;
           }
           this.cached=true;
-        }
- else {
-          arguments=resolveCachedArguments(beanName);
         }
       }
     }

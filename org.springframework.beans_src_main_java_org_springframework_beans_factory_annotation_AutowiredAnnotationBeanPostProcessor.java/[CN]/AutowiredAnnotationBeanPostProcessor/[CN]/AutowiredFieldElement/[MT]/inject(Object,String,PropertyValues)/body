@@ -6,14 +6,14 @@
       value=resolvedCachedArgument(beanName,this.cachedFieldValue);
     }
  else {
-synchronized (pvs) {
+      DependencyDescriptor descriptor=new DependencyDescriptor(field,this.required);
+      Set<String> autowiredBeanNames=new LinkedHashSet<String>(1);
+      TypeConverter typeConverter=beanFactory.getTypeConverter();
+      value=beanFactory.resolveDependency(descriptor,beanName,autowiredBeanNames,typeConverter);
+synchronized (this) {
         if (!this.cached) {
-          Set<String> autowiredBeanNames=new LinkedHashSet<String>(1);
-          TypeConverter typeConverter=beanFactory.getTypeConverter();
-          DependencyDescriptor descriptor=new DependencyDescriptor(field,this.required);
-          this.cachedFieldValue=descriptor;
-          value=beanFactory.resolveDependency(descriptor,beanName,autowiredBeanNames,typeConverter);
           if (value != null) {
+            this.cachedFieldValue=descriptor;
             registerDependentBeans(beanName,autowiredBeanNames);
             if (autowiredBeanNames.size() == 1) {
               String autowiredBeanName=autowiredBeanNames.iterator().next();
@@ -28,9 +28,6 @@ synchronized (pvs) {
             this.cachedFieldValue=null;
           }
           this.cached=true;
-        }
- else {
-          value=resolvedCachedArgument(beanName,this.cachedFieldValue);
         }
       }
     }
