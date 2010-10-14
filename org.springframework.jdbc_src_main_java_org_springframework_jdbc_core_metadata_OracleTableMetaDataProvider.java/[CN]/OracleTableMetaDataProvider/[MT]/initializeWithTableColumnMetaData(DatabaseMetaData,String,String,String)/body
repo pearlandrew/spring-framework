@@ -1,56 +1,49 @@
 {
-  Connection con=null;
-  if (nativeJdbcExtractor == null) {
-    con=databaseMetaData.getConnection();
-    if (logger.isDebugEnabled()) {
-      logger.debug("Using meta data JDBC connection: " + con.getClass().getName());
-    }
+  if (!this.includeSynonyms) {
+    logger.debug("Defaulting to no synonyms in table metadata lookup");
+    super.initializeWithTableColumnMetaData(databaseMetaData,catalogName,schemaName,tableName);
+    return;
   }
- else {
-    con=nativeJdbcExtractor.getNativeConnection(databaseMetaData.getConnection());
-    if (logger.isDebugEnabled()) {
-      logger.debug("Using native JDBC connection: " + con.getClass().getName());
-    }
+  Connection con=databaseMetaData.getConnection();
+  NativeJdbcExtractor nativeJdbcExtractor=getNativeJdbcExtractor();
+  if (nativeJdbcExtractor != null) {
+    con=nativeJdbcExtractor.getNativeConnection(con);
   }
-  Method methodToInvoke=null;
-  Boolean origValueForIncludeSynonyms=null;
-  if (includeSynonyms) {
-    if (con.getClass().getName().startsWith("oracle")) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("Including synonyms in table metadata lookup.");
-      }
-    }
- else {
-      logger.warn("Unable to include synonyms in table metadata lookup. Connection used for " + "DatabaseMetaData is not recognized as an Oracle connection; " + "class is "+ con.getClass().getName());
-    }
+  boolean isOracleCon;
+  try {
+    Class oracleConClass=getClass().getClassLoader().loadClass("oracle.jdbc.OracleConnection");
+    isOracleCon=oracleConClass.isInstance(con);
   }
- else {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Defaulting to no synonyms in table metadata lookup.");
+ catch (  ClassNotFoundException ex) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Couldn't find Oracle JDBC API: " + ex);
     }
+    isOracleCon=false;
   }
-  if (includeSynonyms && con.getClass().getName().startsWith("oracle")) {
-    try {
-      methodToInvoke=con.getClass().getMethod("getIncludeSynonyms",(Class[])null);
-      methodToInvoke.setAccessible(true);
-      origValueForIncludeSynonyms=(Boolean)methodToInvoke.invoke(con);
-      methodToInvoke=con.getClass().getMethod("setIncludeSynonyms",new Class[]{boolean.class});
-      methodToInvoke.setAccessible(true);
-      methodToInvoke.invoke(con,Boolean.TRUE);
-    }
- catch (    Exception ex) {
-      throw new InvalidDataAccessApiUsageException("Couldn't initialize Oracle Connection.",ex);
-    }
+  if (!isOracleCon) {
+    logger.warn("Unable to include synonyms in table metadata lookup. Connection used for " + "DatabaseMetaData is not recognized as an Oracle connection: " + con);
+    super.initializeWithTableColumnMetaData(databaseMetaData,catalogName,schemaName,tableName);
+    return;
+  }
+  logger.debug("Including synonyms in table metadata lookup");
+  Method setIncludeSynonyms;
+  Boolean originalValueForIncludeSynonyms;
+  try {
+    Method getIncludeSynonyms=con.getClass().getMethod("getIncludeSynonyms",(Class[])null);
+    ReflectionUtils.makeAccessible(getIncludeSynonyms);
+    originalValueForIncludeSynonyms=(Boolean)getIncludeSynonyms.invoke(con);
+    setIncludeSynonyms=con.getClass().getMethod("setIncludeSynonyms",new Class[]{boolean.class});
+    ReflectionUtils.makeAccessible(setIncludeSynonyms);
+    setIncludeSynonyms.invoke(con,Boolean.TRUE);
+  }
+ catch (  Exception ex) {
+    throw new InvalidDataAccessApiUsageException("Couldn't prepare Oracle Connection",ex);
   }
   super.initializeWithTableColumnMetaData(databaseMetaData,catalogName,schemaName,tableName);
-  if (includeSynonyms && con.getClass().getName().startsWith("oracle")) {
-    try {
-      methodToInvoke=con.getClass().getMethod("setIncludeSynonyms",new Class[]{boolean.class});
-      methodToInvoke.setAccessible(true);
-      methodToInvoke.invoke(con,origValueForIncludeSynonyms);
-    }
- catch (    Exception ex) {
-      throw new InvalidDataAccessApiUsageException("Couldn't restore Oracle Connection.",ex);
-    }
+  try {
+    setIncludeSynonyms.invoke(con,originalValueForIncludeSynonyms);
+  }
+ catch (  Exception ex) {
+    throw new InvalidDataAccessApiUsageException("Couldn't reset Oracle Connection",ex);
   }
 }

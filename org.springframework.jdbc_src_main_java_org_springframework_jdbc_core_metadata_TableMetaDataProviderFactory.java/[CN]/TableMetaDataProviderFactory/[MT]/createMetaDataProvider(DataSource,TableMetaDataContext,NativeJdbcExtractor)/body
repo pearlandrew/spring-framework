@@ -1,7 +1,7 @@
 {
   try {
     return (TableMetaDataProvider)JdbcUtils.extractDatabaseMetaData(dataSource,new DatabaseMetaDataCallback(){
-      public Object processMetaData(      DatabaseMetaData databaseMetaData) throws SQLException, MetaDataAccessException {
+      public Object processMetaData(      DatabaseMetaData databaseMetaData) throws SQLException {
         String databaseProductName=JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());
         boolean accessTableColumnMetaData=context.isAccessTableColumnMetaData();
         TableMetaDataProvider provider;
@@ -24,7 +24,7 @@
           provider.setNativeJdbcExtractor(nativeJdbcExtractor);
         }
         if (logger.isDebugEnabled()) {
-          logger.debug("Using " + provider.getClass().getName());
+          logger.debug("Using " + provider.getClass().getSimpleName());
         }
         provider.initializeWithMetaData(databaseMetaData);
         if (accessTableColumnMetaData) {
@@ -35,7 +35,7 @@
     }
 );
   }
- catch (  MetaDataAccessException e) {
-    throw new DataAccessResourceFailureException("Error retreiving database metadata",e);
+ catch (  MetaDataAccessException ex) {
+    throw new DataAccessResourceFailureException("Error retrieving database metadata",ex);
   }
 }
