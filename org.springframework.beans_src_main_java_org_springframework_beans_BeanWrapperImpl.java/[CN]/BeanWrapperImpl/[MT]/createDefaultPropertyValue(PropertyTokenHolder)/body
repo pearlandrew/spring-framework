@@ -1,5 +1,8 @@
 {
-  PropertyDescriptor pd=getCachedIntrospectionResults().getPropertyDescriptor(tokens.actualName);
-  Object defaultValue=newValue(pd.getPropertyType(),tokens.canonicalName);
+  Class type=getPropertyType(tokens.canonicalName);
+  if (type == null) {
+    throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + tokens.canonicalName,"Could not determine property type for auto-growing a default value");
+  }
+  Object defaultValue=newValue(type,tokens.canonicalName);
   return new PropertyValue(tokens.canonicalName,defaultValue);
 }
