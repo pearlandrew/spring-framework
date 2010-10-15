@@ -3,17 +3,26 @@
   CompositeComponentDefinition compDefinition=new CompositeComponentDefinition(element.getTagName(),source);
   parserContext.pushContainingComponent(compDefinition);
   BeanDefinitionRegistry registry=parserContext.getRegistry();
-  if (registry.containsBeanDefinition(ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME)) {
-    parserContext.getReaderContext().error("Only one AsyncAnnotationBeanPostProcessor may exist within the context.",source);
+  String mode=element.getAttribute("mode");
+  if ("aspectj".equals(mode)) {
+    registerAsyncExecutionAspect(element,parserContext);
   }
  else {
-    BeanDefinitionBuilder builder=BeanDefinitionBuilder.genericBeanDefinition("org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor");
-    builder.getRawBeanDefinition().setSource(source);
-    String executor=element.getAttribute("executor");
-    if (StringUtils.hasText(executor)) {
-      builder.addPropertyReference("executor",executor);
+    if (registry.containsBeanDefinition(ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+      parserContext.getReaderContext().error("Only one AsyncAnnotationBeanPostProcessor may exist within the context.",source);
     }
-    registerPostProcessor(parserContext,builder,ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME);
+ else {
+      BeanDefinitionBuilder builder=BeanDefinitionBuilder.genericBeanDefinition("org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor");
+      builder.getRawBeanDefinition().setSource(source);
+      String executor=element.getAttribute("executor");
+      if (StringUtils.hasText(executor)) {
+        builder.addPropertyReference("executor",executor);
+      }
+      if (Boolean.valueOf(element.getAttribute(AopNamespaceUtils.PROXY_TARGET_CLASS_ATTRIBUTE))) {
+        builder.addPropertyValue("proxyTargetClass",true);
+      }
+      registerPostProcessor(parserContext,builder,ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME);
+    }
   }
   if (registry.containsBeanDefinition(SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
     parserContext.getReaderContext().error("Only one ScheduledAnnotationBeanPostProcessor may exist within the context.",source);

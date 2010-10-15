@@ -1,0 +1,11 @@
+{
+  GenericXmlApplicationContext context=new GenericXmlApplicationContext();
+  context.load(new ClassPathResource("taskNamespaceTests.xml",getClass()));
+  context.refresh();
+  ITestBean testBean=(ITestBean)context.getBean("target");
+  testBean.test();
+  testBean.await(3000);
+  Thread asyncThread=testBean.getThread();
+  assertTrue(asyncThread.getName().startsWith("testExecutor"));
+  context.close();
+}
