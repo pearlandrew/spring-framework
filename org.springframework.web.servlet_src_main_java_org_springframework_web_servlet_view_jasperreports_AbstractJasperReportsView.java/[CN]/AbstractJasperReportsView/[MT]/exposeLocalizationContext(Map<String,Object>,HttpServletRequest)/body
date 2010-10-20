@@ -1,8 +1,10 @@
 {
   RequestContext rc=new RequestContext(request,getServletContext());
-  model.put(JRParameter.REPORT_LOCALE,rc.getLocale());
+  if (!model.containsKey(JRParameter.REPORT_LOCALE)) {
+    model.put(JRParameter.REPORT_LOCALE,rc.getLocale());
+  }
   JasperReport report=getReport();
-  if (report == null || report.getResourceBundle() == null) {
+  if ((report == null || report.getResourceBundle() == null) && !model.containsKey(JRParameter.REPORT_RESOURCE_BUNDLE)) {
     model.put(JRParameter.REPORT_RESOURCE_BUNDLE,new MessageSourceResourceBundle(rc.getMessageSource(),rc.getLocale()));
   }
 }
