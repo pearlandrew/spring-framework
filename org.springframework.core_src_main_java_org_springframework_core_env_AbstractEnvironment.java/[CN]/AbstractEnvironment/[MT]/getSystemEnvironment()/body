@@ -1,0 +1,23 @@
+{
+  Map<String,String> systemEnvironment;
+  try {
+    systemEnvironment=System.getenv();
+  }
+ catch (  AccessControlException ex) {
+    systemEnvironment=new ReadOnlySystemAttributesMap(){
+      @Override protected String getSystemAttribute(      String variableName){
+        try {
+          return System.getenv(variableName);
+        }
+ catch (        AccessControlException ex) {
+          if (logger.isInfoEnabled()) {
+            logger.info(format("Caught AccessControlException when accessing system environment variable " + "[%s]; its value will be returned [null]. Reason: %s",variableName,ex.getMessage()));
+          }
+          return null;
+        }
+      }
+    }
+;
+  }
+  return systemEnvironment;
+}

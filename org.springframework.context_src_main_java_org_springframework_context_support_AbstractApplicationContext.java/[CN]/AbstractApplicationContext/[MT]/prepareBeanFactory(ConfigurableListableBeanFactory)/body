@@ -1,12 +1,13 @@
 {
   beanFactory.setBeanClassLoader(getClassLoader());
   beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver());
-  beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this));
+  beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this,this.getEnvironment()));
   beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
   beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
   beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
   beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
   beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
+  beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
   beanFactory.registerResolvableDependency(BeanFactory.class,beanFactory);
   beanFactory.registerResolvableDependency(ResourceLoader.class,this);
   beanFactory.registerResolvableDependency(ApplicationEventPublisher.class,this);
@@ -15,50 +16,13 @@
     beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
     beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
   }
+  if (!beanFactory.containsBean(ENVIRONMENT_BEAN_NAME)) {
+    beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME,getEnvironment());
+  }
   if (!beanFactory.containsBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
-    Map systemProperties;
-    try {
-      systemProperties=System.getProperties();
-    }
- catch (    AccessControlException ex) {
-      systemProperties=new ReadOnlySystemAttributesMap(){
-        @Override protected String getSystemAttribute(        String propertyName){
-          try {
-            return System.getProperty(propertyName);
-          }
- catch (          AccessControlException ex) {
-            if (logger.isInfoEnabled()) {
-              logger.info("Not allowed to obtain system property [" + propertyName + "]: "+ ex.getMessage());
-            }
-            return null;
-          }
-        }
-      }
-;
-    }
-    beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME,systemProperties);
+    beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME,getEnvironment().getSystemProperties());
   }
   if (!beanFactory.containsBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
-    Map<String,String> systemEnvironment;
-    try {
-      systemEnvironment=System.getenv();
-    }
- catch (    AccessControlException ex) {
-      systemEnvironment=new ReadOnlySystemAttributesMap(){
-        @Override protected String getSystemAttribute(        String variableName){
-          try {
-            return System.getenv(variableName);
-          }
- catch (          AccessControlException ex) {
-            if (logger.isInfoEnabled()) {
-              logger.info("Not allowed to obtain system environment variable [" + variableName + "]: "+ ex.getMessage());
-            }
-            return null;
-          }
-        }
-      }
-;
-    }
-    beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME,systemEnvironment);
+    beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME,getEnvironment().getSystemEnvironment());
   }
 }

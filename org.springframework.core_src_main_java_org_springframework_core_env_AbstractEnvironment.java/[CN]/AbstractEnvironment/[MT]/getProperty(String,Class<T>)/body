@@ -1,0 +1,29 @@
+{
+  boolean debugEnabled=logger.isDebugEnabled();
+  if (logger.isTraceEnabled()) {
+    logger.trace(format("getProperty(\"%s\", %s)",key,targetValueType.getSimpleName()));
+  }
+  for (  PropertySource<?> propertySource : propertySources) {
+    if (debugEnabled) {
+      logger.debug(format("Searching for key '%s' in [%s]",key,propertySource.getName()));
+    }
+    if (propertySource.containsProperty(key)) {
+      Object value=propertySource.getProperty(key);
+      Class<?> valueType=value == null ? null : value.getClass();
+      if (debugEnabled) {
+        logger.debug(format("Found key '%s' in [%s] with type [%s] and value '%s'",key,propertySource.getName(),valueType == null ? "" : valueType.getSimpleName(),value));
+      }
+      if (value == null) {
+        return null;
+      }
+      if (!conversionService.canConvert(valueType,targetValueType)) {
+        throw new IllegalArgumentException(format("Cannot convert value [%s] from source type [%s] to target type [%s]",value,valueType.getSimpleName(),targetValueType.getSimpleName()));
+      }
+      return conversionService.convert(value,targetValueType);
+    }
+  }
+  if (debugEnabled) {
+    logger.debug(format("Could not find key '%s' in any property source. Returning [null]",key));
+  }
+  return null;
+}

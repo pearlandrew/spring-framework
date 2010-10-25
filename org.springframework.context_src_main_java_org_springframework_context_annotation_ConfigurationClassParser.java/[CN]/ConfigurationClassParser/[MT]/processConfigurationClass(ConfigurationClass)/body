@@ -1,4 +1,24 @@
 {
+  boolean hasEligibleProfile=false;
+  if (this.environment == null) {
+    hasEligibleProfile=true;
+  }
+ else {
+    if (!configClass.getMetadata().hasAnnotation(Profile.class.getName())) {
+      hasEligibleProfile=true;
+    }
+ else {
+      for (      String profile : (String[])configClass.getMetadata().getAnnotationAttributes(Profile.class.getName()).get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME)) {
+        if (this.environment.getActiveProfiles().contains(profile)) {
+          hasEligibleProfile=true;
+          break;
+        }
+      }
+    }
+  }
+  if (!hasEligibleProfile) {
+    return;
+  }
   AnnotationMetadata metadata=configClass.getMetadata();
   while (metadata != null) {
     doProcessConfigurationClass(configClass,metadata);

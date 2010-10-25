@@ -1,0 +1,25 @@
+{
+  String profileSpec=root.getAttribute(PROFILE_ATTRIBUTE);
+  boolean isCandidate=false;
+  if (profileSpec == null || profileSpec.equals("")) {
+    isCandidate=true;
+  }
+ else {
+    String[] profiles=commaDelimitedListToStringArray(trimAllWhitespace(profileSpec));
+    for (    String profile : profiles) {
+      if (this.environment.getActiveProfiles().contains(profile)) {
+        isCandidate=true;
+        break;
+      }
+    }
+  }
+  if (!isCandidate) {
+    return;
+  }
+  BeanDefinitionParserDelegate parent=this.delegate;
+  this.delegate=createHelper(readerContext,root,parent);
+  preProcessXml(root);
+  parseBeanDefinitions(root,this.delegate);
+  postProcessXml(root);
+  this.delegate=parent;
+}

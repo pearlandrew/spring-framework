@@ -1,0 +1,18 @@
+{
+  Class<?>[] classes=Collections.class.getDeclaredClasses();
+  Map<String,String> env=System.getenv();
+  for (  Class<?> cl : classes) {
+    if ("java.util.Collections$UnmodifiableMap".equals(cl.getName())) {
+      try {
+        Field field=cl.getDeclaredField("m");
+        field.setAccessible(true);
+        Object obj=field.get(env);
+        return (Map<String,String>)obj;
+      }
+ catch (      Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+  }
+  throw new IllegalStateException();
+}

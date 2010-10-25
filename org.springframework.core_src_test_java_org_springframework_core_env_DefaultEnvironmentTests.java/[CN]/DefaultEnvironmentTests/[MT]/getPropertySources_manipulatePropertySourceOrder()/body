@@ -1,0 +1,22 @@
+{
+  AbstractEnvironment env=new AbstractEnvironment(){
+  }
+;
+  env.addPropertySource("system",new HashMap(){
+{
+      put("foo","systemValue");
+    }
+  }
+);
+  env.addPropertySource("local",new HashMap(){
+{
+      put("foo","localValue");
+    }
+  }
+);
+  assertThat(env.getProperty("foo"),equalTo("localValue"));
+  LinkedList<PropertySource<?>> propertySources=env.getPropertySources();
+  propertySources.push(propertySources.remove(propertySources.indexOf(PropertySource.named("system"))));
+  assertThat(env.getProperty("foo"),equalTo("systemValue"));
+  assertThat(propertySources.size(),is(2));
+}

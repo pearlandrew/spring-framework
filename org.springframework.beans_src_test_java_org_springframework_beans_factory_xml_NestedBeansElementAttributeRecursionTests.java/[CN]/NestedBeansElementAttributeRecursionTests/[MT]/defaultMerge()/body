@@ -1,0 +1,11 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("NestedBeansElementAttributeRecursionTests-merge-context.xml",this.getClass()));
+  TestBean topLevel=bf.getBean("topLevelConcreteTestBean",TestBean.class);
+  assertThat(topLevel.getSomeList(),hasItems("charlie","delta"));
+  assertThat(topLevel.getSomeList(),not(hasItems("alpha","bravo")));
+  TestBean firstLevel=bf.getBean("firstLevelNestedTestBean",TestBean.class);
+  assertThat(firstLevel.getSomeList(),hasItems("charlie","delta","echo","foxtrot"));
+  TestBean secondLevel=bf.getBean("secondLevelNestedTestBean",TestBean.class);
+  assertThat(secondLevel.getSomeList(),hasItems("charlie","delta","echo","foxtrot","golf","hotel"));
+}

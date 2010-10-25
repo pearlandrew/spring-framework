@@ -1,9 +1,10 @@
 {
   GenericApplicationContext context=new GenericApplicationContext();
   ClassPathBeanDefinitionScanner scanner=new ClassPathBeanDefinitionScanner(context);
-  int beanCount=scanner.scan(BASE_PACKAGE);
-  assertEquals(10,beanCount);
-  assertEquals(beanCount,context.getBeanDefinitionCount());
+  int initialBeanCount=context.getBeanDefinitionCount();
+  int scannedBeanCount=scanner.scan(BASE_PACKAGE);
+  assertEquals(10,scannedBeanCount);
+  assertEquals(scannedBeanCount,context.getBeanDefinitionCount() - initialBeanCount);
   int addedBeanCount=scanner.scan("org.springframework.aop.aspectj.annotation");
-  assertEquals(beanCount + addedBeanCount,context.getBeanDefinitionCount());
+  assertEquals(initialBeanCount + scannedBeanCount + addedBeanCount,context.getBeanDefinitionCount());
 }

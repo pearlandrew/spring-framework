@@ -1,0 +1,21 @@
+{
+  String key="x";
+  String localPropsValue="local";
+  String sysPropsValue="sys";
+  String envVarsValue="env";
+  Map<String,String> systemEnvironment=getModifiableSystemEnvironment();
+  Properties systemProperties=System.getProperties();
+  Properties localProperties=new Properties();
+  DefaultEnvironment env=new DefaultEnvironment();
+  env.addPropertySource("localProperties",localProperties);
+  systemEnvironment.put(key,envVarsValue);
+  systemProperties.setProperty(key,sysPropsValue);
+  localProperties.setProperty(key,localPropsValue);
+  assertThat(env.getProperty(key),equalTo(localPropsValue));
+  localProperties.remove(key);
+  assertThat(env.getProperty(key),equalTo(sysPropsValue));
+  systemProperties.remove(key);
+  assertThat(env.getProperty(key),equalTo(envVarsValue));
+  systemEnvironment.remove(key);
+  assertThat(env.getProperty(key),equalTo(null));
+}
