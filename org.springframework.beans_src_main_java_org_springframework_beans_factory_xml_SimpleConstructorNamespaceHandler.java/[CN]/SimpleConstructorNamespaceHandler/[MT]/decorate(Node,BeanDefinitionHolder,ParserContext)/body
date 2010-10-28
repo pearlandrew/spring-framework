@@ -1,0 +1,46 @@
+{
+  if (node instanceof Attr) {
+    Attr attr=(Attr)node;
+    String argName=StringUtils.trimWhitespace(parserContext.getDelegate().getLocalName(attr));
+    String argValue=StringUtils.trimWhitespace(attr.getValue());
+    ConstructorArgumentValues cvs=definition.getBeanDefinition().getConstructorArgumentValues();
+    boolean ref=false;
+    if (argName.endsWith(REF_SUFFIX)) {
+      ref=true;
+      argName=argName.substring(0,argName.length() - REF_SUFFIX.length());
+    }
+    ValueHolder valueHolder=new ValueHolder(ref ? new RuntimeBeanReference(argValue) : argValue);
+    valueHolder.setSource(parserContext.getReaderContext().extractSource(attr));
+    if (argName.startsWith(DELIMITER_PREFIX)) {
+      String arg=argName.substring(1).trim();
+      if (!StringUtils.hasText(arg)) {
+        cvs.addGenericArgumentValue(valueHolder);
+      }
+ else {
+        int index=-1;
+        try {
+          index=Integer.parseInt(arg);
+        }
+ catch (        NumberFormatException ex) {
+          parserContext.getReaderContext().error("Constructor argument '" + argName + "' specifies an invalid integer",attr);
+        }
+        if (index < 0) {
+          parserContext.getReaderContext().error("Constructor argument '" + argName + "' specifies a negative index",attr);
+        }
+        if (cvs.hasIndexedArgumentValue(index)) {
+          parserContext.getReaderContext().error("Constructor argument '" + argName + "' with index "+ index+ " already defined using <constructor-arg>."+ " Only one approach may be used per argument.",attr);
+        }
+        cvs.addIndexedArgumentValue(index,valueHolder);
+      }
+    }
+ else {
+      String name=Conventions.attributeNameToPropertyName(argName);
+      if (containsArgWithName(name,cvs)) {
+        parserContext.getReaderContext().error("Constructor argument '" + argName + "' already defined using <constructor-arg>."+ " Only one approach may be used per argument.",attr);
+      }
+      valueHolder.setName(Conventions.attributeNameToPropertyName(argName));
+      cvs.addGenericArgumentValue(valueHolder);
+    }
+  }
+  return definition;
+}
