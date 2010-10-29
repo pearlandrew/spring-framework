@@ -1,0 +1,22 @@
+{
+  if (ObjectUtils.isEmpty(args)) {
+    return;
+  }
+  Method targetMethod=methodCache.get(method);
+  if (targetMethod == null) {
+    targetMethod=AopUtils.getMostSpecificMethod(method,targetClass);
+    if (targetMethod == null) {
+      targetMethod=method;
+    }
+    methodCache.put(method,targetMethod);
+  }
+  for (int i=0; i < args.length; i++) {
+    super.setVariable("p" + i,args[i]);
+  }
+  String[] parameterNames=paramDiscoverer.getParameterNames(targetMethod);
+  if (parameterNames != null) {
+    for (int i=0; i < parameterNames.length; i++) {
+      super.setVariable(parameterNames[i],args[i]);
+    }
+  }
+}

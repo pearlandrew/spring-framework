@@ -1,0 +1,30 @@
+{
+  AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext,element);
+  if (!parserContext.getRegistry().containsBeanDefinition(CACHE_ADVISOR_BEAN_NAME)) {
+    Object eleSource=parserContext.extractSource(element);
+    RootBeanDefinition sourceDef=new RootBeanDefinition(AnnotationCacheDefinitionSource.class);
+    sourceDef.setSource(eleSource);
+    sourceDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    String sourceName=parserContext.getReaderContext().registerWithGeneratedName(sourceDef);
+    RootBeanDefinition interceptorDef=new RootBeanDefinition(CacheInterceptor.class);
+    interceptorDef.setSource(eleSource);
+    interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    registerCacheManagerProperty(element,interceptorDef);
+    interceptorDef.getPropertyValues().add("cacheDefinitionSources",new RuntimeBeanReference(sourceName));
+    String interceptorName=parserContext.getReaderContext().registerWithGeneratedName(interceptorDef);
+    RootBeanDefinition advisorDef=new RootBeanDefinition(BeanFactoryCacheDefinitionSourceAdvisor.class);
+    advisorDef.setSource(eleSource);
+    advisorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    advisorDef.getPropertyValues().add("cacheDefinitionSource",new RuntimeBeanReference(sourceName));
+    advisorDef.getPropertyValues().add("adviceBeanName",interceptorName);
+    if (element.hasAttribute("order")) {
+      advisorDef.getPropertyValues().add("order",element.getAttribute("order"));
+    }
+    parserContext.getRegistry().registerBeanDefinition(CACHE_ADVISOR_BEAN_NAME,advisorDef);
+    CompositeComponentDefinition compositeDef=new CompositeComponentDefinition(element.getTagName(),eleSource);
+    compositeDef.addNestedComponent(new BeanComponentDefinition(sourceDef,sourceName));
+    compositeDef.addNestedComponent(new BeanComponentDefinition(interceptorDef,interceptorName));
+    compositeDef.addNestedComponent(new BeanComponentDefinition(advisorDef,CACHE_ADVISOR_BEAN_NAME));
+    parserContext.registerComponent(compositeDef);
+  }
+}
