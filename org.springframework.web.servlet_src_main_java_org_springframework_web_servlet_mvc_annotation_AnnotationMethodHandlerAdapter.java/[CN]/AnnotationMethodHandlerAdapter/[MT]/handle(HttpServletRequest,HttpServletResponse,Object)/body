@@ -1,5 +1,11 @@
 {
-  if (AnnotationUtils.findAnnotation(handler.getClass(),SessionAttributes.class) != null) {
+  Class<?> clazz=ClassUtils.getUserClass(handler);
+  Boolean annotated=sessionAnnotatedClassesCache.get(clazz);
+  if (annotated == null) {
+    annotated=Boolean.valueOf(AnnotationUtils.findAnnotation(handler.getClass(),SessionAttributes.class) != null);
+    sessionAnnotatedClassesCache.put(clazz,annotated);
+  }
+  if (annotated) {
     checkAndPrepare(request,response,this.cacheSecondsForSessionAttributeHandlers,true);
   }
  else {
