@@ -28,6 +28,27 @@
       }
       mappingInfo.sortMatchedPatterns(pathComparator);
     }
+ else     if (useTypeLevelMapping(request)) {
+      String[] typeLevelPatterns=getTypeLevelMapping().value();
+      for (      String typeLevelPattern : typeLevelPatterns) {
+        if (!typeLevelPattern.startsWith("/")) {
+          typeLevelPattern="/" + typeLevelPattern;
+        }
+        if (isPathMatchInternal(typeLevelPattern,lookupPath)) {
+          if (mappingInfo.matches(request)) {
+            match=true;
+            mappingInfo.addMatchedPattern(typeLevelPattern);
+          }
+ else {
+            if (!mappingInfo.matchesRequestMethod(request)) {
+              allowedMethods.addAll(mappingInfo.methodNames());
+            }
+            break;
+          }
+        }
+      }
+      mappingInfo.sortMatchedPatterns(pathComparator);
+    }
  else {
       match=mappingInfo.matches(request);
       if (match && mappingInfo.getMethodCount() == 0 && mappingInfo.getParamCount() == 0 && resolvedMethodName != null && !resolvedMethodName.equals(handlerMethod.getName())) {
