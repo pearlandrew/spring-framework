@@ -1,7 +1,11 @@
 {
   AnnotatedGenericBeanDefinition abd=new AnnotatedGenericBeanDefinition(annotatedClass);
-  if (!hasEligibleProfile(abd.getMetadata())) {
-    return;
+  AnnotationMetadata metadata=abd.getMetadata();
+  if (metadata.hasAnnotation(Profile.class.getName())) {
+    String[] specifiedProfiles=(String[])metadata.getAnnotationAttributes(Profile.class.getName()).get(Profile.CANDIDATE_PROFILES_ATTRIB_NAME);
+    if (!this.environment.acceptsProfiles(specifiedProfiles)) {
+      return;
+    }
   }
   ScopeMetadata scopeMetadata=this.scopeMetadataResolver.resolveScopeMetadata(abd);
   abd.setScope(scopeMetadata.getScopeName());

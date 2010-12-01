@@ -1,0 +1,24 @@
+{
+  Class<?> beanClass=DefaultAndDevProfileAnnotatedComponent.class;
+  String beanName=DefaultAndDevProfileAnnotatedComponent.BEAN_NAME;
+{
+    AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+    ctx.register(beanClass);
+    ctx.refresh();
+    assertThat(ctx.containsBean(beanName),is(true));
+  }
+{
+    AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+    ctx.getEnvironment().setActiveProfiles("dev");
+    ctx.register(beanClass);
+    ctx.refresh();
+    assertThat(ctx.containsBean(beanName),is(true));
+  }
+{
+    AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+    ctx.getEnvironment().setActiveProfiles("other");
+    ctx.register(beanClass);
+    ctx.refresh();
+    assertThat(ctx.containsBean(beanName),is(false));
+  }
+}
