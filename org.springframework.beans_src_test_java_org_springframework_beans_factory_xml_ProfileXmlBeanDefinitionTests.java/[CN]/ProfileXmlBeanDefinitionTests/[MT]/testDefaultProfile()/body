@@ -1,7 +1,20 @@
 {
-  assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML,NONE_ACTIVE),containsTargetBean());
-  assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML,"other"),not(containsTargetBean()));
-  assertThat(beanFactoryFor(DEFAULT_AND_DEV_ELIGIBLE_XML,DEV_ACTIVE),containsTargetBean());
-  assertThat(beanFactoryFor(DEFAULT_AND_DEV_ELIGIBLE_XML,NONE_ACTIVE),containsTargetBean());
-  assertThat(beanFactoryFor(DEFAULT_AND_DEV_ELIGIBLE_XML,PROD_ACTIVE),not(containsTargetBean()));
+{
+    DefaultListableBeanFactory beanFactory=new DefaultListableBeanFactory();
+    XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(beanFactory);
+    ConfigurableEnvironment env=new DefaultEnvironment();
+    env.setDefaultProfiles("custom-default");
+    reader.setEnvironment(env);
+    reader.loadBeanDefinitions(new ClassPathResource(DEFAULT_ELIGIBLE_XML,getClass()));
+    assertThat(beanFactory,not(containsTargetBean()));
+  }
+{
+    DefaultListableBeanFactory beanFactory=new DefaultListableBeanFactory();
+    XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(beanFactory);
+    ConfigurableEnvironment env=new DefaultEnvironment();
+    env.setDefaultProfiles("custom-default");
+    reader.setEnvironment(env);
+    reader.loadBeanDefinitions(new ClassPathResource(CUSTOM_DEFAULT_ELIGIBLE_XML,getClass()));
+    assertThat(beanFactory,containsTargetBean());
+  }
 }
