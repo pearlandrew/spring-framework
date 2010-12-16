@@ -7,25 +7,29 @@
   Object retVal=null;
   if (cacheDef != null) {
     CacheOperationContext context=getOperationContext(cacheDef,method,args,targetClass);
-    Cache<Object,Object> cache=(Cache<Object,Object>)context.getCache();
+    Collection<Cache<?,?>> caches=context.getCaches();
     if (context.hasConditionPassed()) {
       if (cacheDef instanceof CacheUpdateDefinition) {
-        Object key=context.generateKey();
-        retVal=cache.get(key);
-        if (retVal == null) {
-          retVal=invocation.call();
-          cache.put(key,(retVal == null ? NULL_RETURN : retVal));
+        for (        Cache cache : caches) {
+          Object key=context.generateKey();
+          retVal=cache.get(key);
+          if (retVal == null) {
+            retVal=invocation.call();
+            cache.put(key,(retVal == null ? NULL_RETURN : retVal));
+          }
         }
       }
       if (cacheDef instanceof CacheInvalidateDefinition) {
         CacheInvalidateDefinition invalidateDef=(CacheInvalidateDefinition)cacheDef;
         retVal=invocation.call();
-        if (invalidateDef.isCacheWide()) {
-          cache.clear();
-        }
+        for (        Cache cache : caches) {
+          if (invalidateDef.isCacheWide()) {
+            cache.clear();
+          }
  else {
-          Object key=context.generateKey();
-          cache.remove(key);
+            Object key=context.generateKey();
+            cache.remove(key);
+          }
         }
       }
       return retVal;
