@@ -1,0 +1,12 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  bf.registerBeanDefinition("testBean",genericBeanDefinition(TestBean.class).addPropertyValue("name","${my.name}").getBeanDefinition());
+  MutablePropertySources propertySources=new MutablePropertySources();
+  propertySources.addLast(new MockPropertySource());
+  PropertySourcesPlaceholderConfigurer pc=new PropertySourcesPlaceholderConfigurer();
+  pc.setPropertySources(propertySources);
+  pc.setEnvironment(new MockEnvironment().withProperty("my.name","env"));
+  pc.setIgnoreUnresolvablePlaceholders(true);
+  pc.postProcessBeanFactory(bf);
+  assertThat(bf.getBean(TestBean.class).getName(),equalTo("${my.name}"));
+}

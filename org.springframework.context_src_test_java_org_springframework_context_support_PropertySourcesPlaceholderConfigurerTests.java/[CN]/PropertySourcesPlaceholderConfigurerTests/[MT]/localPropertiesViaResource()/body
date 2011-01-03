@@ -1,0 +1,9 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  bf.registerBeanDefinition("testBean",genericBeanDefinition(TestBean.class).addPropertyValue("name","${my.name}").getBeanDefinition());
+  PropertySourcesPlaceholderConfigurer pc=new PropertySourcesPlaceholderConfigurer();
+  Resource resource=new ClassPathResource("PropertySourcesPlaceholderConfigurerTests.properties",this.getClass());
+  pc.setLocation(resource);
+  pc.postProcessBeanFactory(bf);
+  assertThat(bf.getBean(TestBean.class).getName(),equalTo("foo"));
+}

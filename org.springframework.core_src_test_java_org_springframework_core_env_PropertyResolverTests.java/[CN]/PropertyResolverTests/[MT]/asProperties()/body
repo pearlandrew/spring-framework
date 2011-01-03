@@ -1,0 +1,14 @@
+{
+  propertySources=new MutablePropertySources();
+  propertyResolver=new PropertySourcesPropertyResolver(propertySources);
+  assertThat(propertyResolver.asProperties(),notNullValue());
+  propertySources.addLast(new MockPropertySource("highestPrecedence").withProperty("common","highCommon").withProperty("highKey","highVal"));
+  propertySources.addLast(new MockPropertySource("middlePrecedence").withProperty("common","midCommon").withProperty("midKey","midVal"));
+  propertySources.addLast(new MockPropertySource("lowestPrecedence").withProperty("common","lowCommon").withProperty("lowKey","lowVal"));
+  Properties props=propertyResolver.asProperties();
+  assertThat(props.getProperty("common"),is("highCommon"));
+  assertThat(props.getProperty("lowKey"),is("lowVal"));
+  assertThat(props.getProperty("midKey"),is("midVal"));
+  assertThat(props.getProperty("highKey"),is("highVal"));
+  assertThat(props.size(),is(4));
+}

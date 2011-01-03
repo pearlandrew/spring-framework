@@ -1,0 +1,22 @@
+{
+  if (this.propertySources == null) {
+    this.propertySources=new MutablePropertySources();
+    if (this.environment != null) {
+      this.propertySources.addAll(this.environment.getPropertySources());
+    }
+    try {
+      PropertySource<?> localPropertySource=new PropertiesPropertySource(LOCAL_PROPERTIES_PROPERTY_SOURCE_NAME,this.mergeProperties());
+      if (this.localOverride) {
+        this.propertySources.addFirst(localPropertySource);
+      }
+ else {
+        this.propertySources.addLast(localPropertySource);
+      }
+    }
+ catch (    IOException ex) {
+      throw new BeanInitializationException("Could not load properties",ex);
+    }
+  }
+  this.propertyResolver=new PropertySourcesPropertyResolver(this.propertySources);
+  this.processProperties(beanFactory,this.propertyResolver.asProperties());
+}
