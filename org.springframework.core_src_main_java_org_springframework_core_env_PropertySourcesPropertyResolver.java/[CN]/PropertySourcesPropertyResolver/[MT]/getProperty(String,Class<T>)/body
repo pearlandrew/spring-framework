@@ -7,14 +7,11 @@
     if (debugEnabled) {
       logger.debug(format("Searching for key '%s' in [%s]",key,propertySource.getName()));
     }
-    if (propertySource.containsProperty(key)) {
-      Object value=propertySource.getProperty(key);
-      Class<?> valueType=value == null ? null : value.getClass();
+    Object value;
+    if ((value=propertySource.getProperty(key)) != null) {
+      Class<?> valueType=value.getClass();
       if (debugEnabled) {
-        logger.debug(format("Found key '%s' in [%s] with type [%s] and value '%s'",key,propertySource.getName(),valueType == null ? "" : valueType.getSimpleName(),value));
-      }
-      if (value == null) {
-        return null;
+        logger.debug(format("Found key '%s' in [%s] with type [%s] and value '%s'",key,propertySource.getName(),valueType.getSimpleName(),value));
       }
       if (!this.conversionService.canConvert(valueType,targetValueType)) {
         throw new IllegalArgumentException(format("Cannot convert value [%s] from source type [%s] to target type [%s]",value,valueType.getSimpleName(),targetValueType.getSimpleName()));

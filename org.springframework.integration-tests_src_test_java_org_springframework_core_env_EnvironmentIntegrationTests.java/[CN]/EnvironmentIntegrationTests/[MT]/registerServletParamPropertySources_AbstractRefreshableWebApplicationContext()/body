@@ -12,18 +12,17 @@
   ConfigurableEnvironment environment=ctx.getEnvironment();
   assertThat(environment,instanceOf(DefaultWebEnvironment.class));
   MutablePropertySources propertySources=environment.getPropertySources();
-  PropertyResolver propertyResolver=environment.getPropertyResolver();
   assertThat(propertySources.contains(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME),is(true));
   assertThat(propertySources.contains(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME),is(true));
-  assertThat(propertyResolver.getProperty("pCommon"),is("pCommonConfigValue"));
+  assertThat(environment.getProperty("pCommon"),is("pCommonConfigValue"));
   assertThat(propertySources.asList().indexOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)),lessThan(propertySources.asList().indexOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME))));
-  assertThat(propertyResolver.getProperty("pContext1"),is("pContext1Value"));
-  assertThat(propertyResolver.getProperty("pConfig1"),is("pConfig1Value"));
+  assertThat(environment.getProperty("pContext1"),is("pContext1Value"));
+  assertThat(environment.getProperty("pConfig1"),is("pConfig1Value"));
   assertThat(propertySources.asList().indexOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)),lessThan(propertySources.asList().indexOf(PropertySource.named(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))));
   MockPropertySource mockSystemProperties=new MockPropertySource(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
   mockSystemProperties.setProperty("pCommon","pCommonSysPropsValue");
   mockSystemProperties.setProperty("pSysProps1","pSysProps1Value");
   propertySources.replace(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,mockSystemProperties);
-  assertThat(propertyResolver.getProperty("pCommon"),is("pCommonConfigValue"));
-  assertThat(propertyResolver.getProperty("pSysProps1"),is("pSysProps1Value"));
+  assertThat(environment.getProperty("pCommon"),is("pCommonConfigValue"));
+  assertThat(environment.getProperty("pSysProps1"),is("pSysProps1Value"));
 }
