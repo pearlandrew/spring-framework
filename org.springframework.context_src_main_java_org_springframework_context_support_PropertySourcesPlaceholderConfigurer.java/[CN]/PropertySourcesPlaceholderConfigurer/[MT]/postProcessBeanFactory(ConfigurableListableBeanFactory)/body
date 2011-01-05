@@ -2,7 +2,12 @@
   if (this.propertySources == null) {
     this.propertySources=new MutablePropertySources();
     if (this.environment != null) {
-      this.propertySources.addAll(((ConfigurableEnvironment)this.environment).getPropertySources());
+      this.propertySources.addLast(new PropertySource<Environment>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME,this.environment){
+        @Override public String getProperty(        String key){
+          return this.source.getProperty(key);
+        }
+      }
+);
     }
     try {
       PropertySource<?> localPropertySource=new PropertiesPropertySource(LOCAL_PROPERTIES_PROPERTY_SOURCE_NAME,this.mergeProperties());
@@ -17,6 +22,5 @@
       throw new BeanInitializationException("Could not load properties",ex);
     }
   }
-  this.propertyResolver=new PropertySourcesPropertyResolver(this.propertySources);
-  this.processProperties(beanFactory,asProperties(this.propertySources));
+  this.processProperties(beanFactory,new PropertySourcesPropertyResolver(this.propertySources));
 }
