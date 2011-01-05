@@ -27,7 +27,9 @@
         if (isExtractOldValueForEditor()) {
           oldValue=Array.get(propValue,arrayIndex);
         }
-        Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType,new PropertyTypeDescriptor(requiredType,new MethodParameter(pd.getReadMethod(),-1),pd));
+        MethodParameter methodParameter=new MethodParameter(pd.getReadMethod(),-1);
+        methodParameter.increaseNestingLevel();
+        Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType,new PropertyTypeDescriptor(requiredType,methodParameter,pd));
         Array.set(propValue,arrayIndex,convertedValue);
       }
  catch (      IndexOutOfBoundsException ex) {
@@ -43,7 +45,9 @@
       if (isExtractOldValueForEditor() && index < list.size()) {
         oldValue=list.get(index);
       }
-      Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType,new PropertyTypeDescriptor(requiredType,new MethodParameter(pd.getReadMethod(),-1),pd));
+      MethodParameter methodParameter=new MethodParameter(pd.getReadMethod(),-1);
+      methodParameter.increaseNestingLevel();
+      Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType,new PropertyTypeDescriptor(requiredType,methodParameter,pd));
       if (index < list.size()) {
         list.set(index,convertedValue);
       }
@@ -64,12 +68,15 @@
       Class mapKeyType=GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(),tokens.keys.length);
       Class mapValueType=GenericCollectionTypeResolver.getMapValueReturnType(pd.getReadMethod(),tokens.keys.length);
       Map map=(Map)propValue;
-      Object convertedMapKey=convertIfNecessary(null,null,key,mapKeyType,new PropertyTypeDescriptor(mapKeyType,new MethodParameter(pd.getReadMethod(),-1),pd));
+      TypeDescriptor typeDescriptor=mapKeyType != null ? TypeDescriptor.valueOf(mapKeyType) : TypeDescriptor.valueOf(Object.class);
+      Object convertedMapKey=convertIfNecessary(null,null,key,mapKeyType,typeDescriptor);
       Object oldValue=null;
       if (isExtractOldValueForEditor()) {
         oldValue=map.get(convertedMapKey);
       }
-      Object convertedMapValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),mapValueType,new TypeDescriptor(new MethodParameter(pd.getReadMethod(),-1,tokens.keys.length + 1)));
+      MethodParameter methodParameter=new MethodParameter(pd.getReadMethod(),-1);
+      methodParameter.increaseNestingLevel();
+      Object convertedMapValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),mapValueType,new PropertyTypeDescriptor(mapValueType,methodParameter,pd));
       map.put(convertedMapKey,convertedMapValue);
     }
  else {
