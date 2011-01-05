@@ -1,0 +1,38 @@
+{
+  Map<Class<?>,Annotation> annMap=new LinkedHashMap<Class<?>,Annotation>();
+  String name=this.propertyDescriptor.getName();
+  if (StringUtils.hasLength(name)) {
+    Class<?> clazz=getMethodParameter().getMethod().getDeclaringClass();
+    Field field=ReflectionUtils.findField(clazz,name);
+    if (field == null) {
+      field=ReflectionUtils.findField(clazz,name.substring(0,1).toLowerCase() + name.substring(1));
+      if (field == null) {
+        field=ReflectionUtils.findField(clazz,name.substring(0,1).toUpperCase() + name.substring(1));
+      }
+    }
+    if (field != null) {
+      for (      Annotation ann : field.getAnnotations()) {
+        annMap.put(ann.annotationType(),ann);
+      }
+    }
+  }
+  Method writeMethod=this.propertyDescriptor.getWriteMethod();
+  Method readMethod=this.propertyDescriptor.getReadMethod();
+  if (writeMethod != null && writeMethod != getMethodParameter().getMethod()) {
+    for (    Annotation ann : writeMethod.getAnnotations()) {
+      annMap.put(ann.annotationType(),ann);
+    }
+  }
+  if (readMethod != null && readMethod != getMethodParameter().getMethod()) {
+    for (    Annotation ann : readMethod.getAnnotations()) {
+      annMap.put(ann.annotationType(),ann);
+    }
+  }
+  for (  Annotation ann : getMethodParameter().getMethodAnnotations()) {
+    annMap.put(ann.annotationType(),ann);
+  }
+  for (  Annotation ann : getMethodParameter().getParameterAnnotations()) {
+    annMap.put(ann.annotationType(),ann);
+  }
+  return annMap.values().toArray(new Annotation[annMap.size()]);
+}

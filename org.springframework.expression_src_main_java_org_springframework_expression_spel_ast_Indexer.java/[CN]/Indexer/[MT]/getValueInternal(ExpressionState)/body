@@ -20,20 +20,10 @@
     }
   }
   if (targetObject instanceof Map) {
-    if (targetObject == null) {
-      throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
-    }
     Object possiblyConvertedKey=index;
-    if (targetObjectTypeDescriptor.isMapEntryTypeKnown()) {
-      possiblyConvertedKey=state.convertValue(index,TypeDescriptor.valueOf(targetObjectTypeDescriptor.getMapKeyType()));
-    }
+    possiblyConvertedKey=state.convertValue(index,targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
     Object o=((Map<?,?>)targetObject).get(possiblyConvertedKey);
-    if (targetObjectTypeDescriptor.isMapEntryTypeKnown()) {
-      return new TypedValue(o,targetObjectTypeDescriptor.getMapValueTypeDescriptor());
-    }
- else {
-      return new TypedValue(o);
-    }
+    return new TypedValue(o,targetObjectTypeDescriptor.getMapValueTypeDescriptor().applyType(o));
   }
   if (targetObject == null) {
     throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
@@ -53,7 +43,7 @@
       int pos=0;
       for (      Object o : c) {
         if (pos == idx) {
-          return new TypedValue(o,targetObjectTypeDescriptor.getElementTypeDescriptor());
+          return new TypedValue(o,targetObjectTypeDescriptor.getElementTypeDescriptor().applyType(o));
         }
         pos++;
       }
