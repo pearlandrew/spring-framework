@@ -1,20 +1,16 @@
 {
   logger.info("Initializing EHCache CacheManager");
-  if (this.shared) {
-    if (this.configLocation != null) {
-      this.cacheManager=CacheManager.create(this.configLocation.getInputStream());
+  if (this.configLocation != null) {
+    InputStream is=this.configLocation.getInputStream();
+    try {
+      this.cacheManager=(this.shared ? CacheManager.create(is) : new CacheManager(is));
     }
- else {
-      this.cacheManager=CacheManager.create();
+  finally {
+      is.close();
     }
   }
  else {
-    if (this.configLocation != null) {
-      this.cacheManager=new CacheManager(this.configLocation.getInputStream());
-    }
- else {
-      this.cacheManager=new CacheManager();
-    }
+    this.cacheManager=(this.shared ? CacheManager.create() : new CacheManager());
   }
   if (this.cacheManagerName != null) {
     this.cacheManager.setName(this.cacheManagerName);
