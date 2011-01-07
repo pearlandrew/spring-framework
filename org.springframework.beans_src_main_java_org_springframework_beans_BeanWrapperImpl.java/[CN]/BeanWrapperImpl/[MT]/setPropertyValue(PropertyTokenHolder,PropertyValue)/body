@@ -16,9 +16,16 @@
     }
     String key=tokens.keys[tokens.keys.length - 1];
     if (propValue == null) {
-      throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + propertyName,"Cannot access indexed value in property referenced " + "in indexed property path '" + propertyName + "': returned null");
+      if (this.autoGrowNestedPaths) {
+        int lastKeyIndex=tokens.canonicalName.lastIndexOf('[');
+        getterTokens.canonicalName=tokens.canonicalName.substring(0,lastKeyIndex);
+        propValue=setDefaultValue(getterTokens);
+      }
+ else {
+        throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + propertyName,"Cannot access indexed value in property referenced " + "in indexed property path '" + propertyName + "': returned null");
+      }
     }
- else     if (propValue.getClass().isArray()) {
+    if (propValue.getClass().isArray()) {
       PropertyDescriptor pd=getCachedIntrospectionResults().getPropertyDescriptor(actualName);
       Class requiredType=propValue.getClass().getComponentType();
       int arrayIndex=Integer.parseInt(key);
