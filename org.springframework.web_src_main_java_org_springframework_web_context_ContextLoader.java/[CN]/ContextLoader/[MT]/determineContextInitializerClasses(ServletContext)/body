@@ -1,0 +1,17 @@
+{
+  String classNames=servletContext.getInitParameter(CONTEXT_INITIALIZER_CLASSES_PARAM);
+  List<Class<ApplicationContextInitializer<ConfigurableApplicationContext>>> classes=new ArrayList<Class<ApplicationContextInitializer<ConfigurableApplicationContext>>>();
+  if (classNames != null) {
+    for (    String className : StringUtils.tokenizeToStringArray(classNames,",")) {
+      try {
+        Class<?> clazz=ClassUtils.forName(className,ClassUtils.getDefaultClassLoader());
+        Assert.isAssignable(ApplicationContextInitializer.class,clazz,"class [" + className + "] must implement ApplicationContextInitializer");
+        classes.add((Class<ApplicationContextInitializer<ConfigurableApplicationContext>>)clazz);
+      }
+ catch (      ClassNotFoundException ex) {
+        throw new ApplicationContextException("Failed to load context configurer class [" + className + "]",ex);
+      }
+    }
+  }
+  return classes;
+}
