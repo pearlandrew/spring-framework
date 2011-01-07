@@ -24,11 +24,16 @@
       int arrayIndex=Integer.parseInt(key);
       Object oldValue=null;
       try {
-        if (isExtractOldValueForEditor()) {
+        if (isExtractOldValueForEditor() && arrayIndex < Array.getLength(propValue)) {
           oldValue=Array.get(propValue,arrayIndex);
         }
         Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType,PropertyTypeDescriptor.forNestedType(requiredType,new MethodParameter(pd.getReadMethod(),-1,tokens.keys.length),pd));
+        propValue=growArrayIfNecessary(propValue,arrayIndex,actualName);
         Array.set(propValue,arrayIndex,convertedValue);
+        PropertyValue newValue=new PropertyValue(actualName,propValue);
+        newValue.resolvedDescriptor=pd;
+        newValue.conversionNecessary=false;
+        setPropertyValue(newValue);
       }
  catch (      IndexOutOfBoundsException ex) {
         throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Invalid array index in property path '" + propertyName + "'",ex);
