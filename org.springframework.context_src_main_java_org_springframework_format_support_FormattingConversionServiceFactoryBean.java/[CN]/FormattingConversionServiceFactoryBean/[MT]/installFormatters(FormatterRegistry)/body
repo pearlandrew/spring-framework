@@ -6,4 +6,17 @@
  else {
     registry.addFormatterForFieldAnnotation(new NoJodaDateTimeFormatAnnotationFormatterFactory());
   }
+  if (this.formatters != null) {
+    for (    Object formatter : this.formatters) {
+      if (formatter instanceof Formatter<?>) {
+        this.conversionService.addFormatter((Formatter<?>)formatter);
+      }
+ else       if (formatter instanceof AnnotationFormatterFactory<?>) {
+        this.conversionService.addFormatterForFieldAnnotation((AnnotationFormatterFactory<?>)formatter);
+      }
+ else {
+        throw new IllegalArgumentException("Custom formatters must be implementations of Formatter or AnnotationFormatterFactory");
+      }
+    }
+  }
 }

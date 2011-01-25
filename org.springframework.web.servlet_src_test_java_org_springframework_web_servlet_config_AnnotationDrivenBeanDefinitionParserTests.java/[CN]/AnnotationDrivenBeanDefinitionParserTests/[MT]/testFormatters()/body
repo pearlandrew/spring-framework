@@ -1,0 +1,12 @@
+{
+  FormattingConversionService conversionService=appContext.getBean(FormattingConversionService.class);
+  assertNotNull(conversionService);
+  TestBean testBean=conversionService.convert("5",TestBean.class);
+  assertEquals(TestBeanFormatter.class.getSimpleName() + " should have been used.",5,testBean.getField());
+  assertEquals("5",conversionService.convert(testBean,String.class));
+  TypeDescriptor intTypeDescriptor=new TypeDescriptor(TestBean.class.getDeclaredField("anotherField"));
+  Object actual=conversionService.convert(">>5<<",TypeDescriptor.valueOf(String.class),intTypeDescriptor);
+  assertEquals(TestBeanAnnotationFormatterFactory.class.getSimpleName() + " should have been used",5,actual);
+  actual=conversionService.convert(5,intTypeDescriptor,TypeDescriptor.valueOf(String.class));
+  assertEquals(">>5<<",actual);
+}
