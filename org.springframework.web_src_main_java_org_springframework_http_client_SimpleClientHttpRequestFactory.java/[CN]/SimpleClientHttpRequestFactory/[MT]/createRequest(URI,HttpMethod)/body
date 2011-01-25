@@ -1,5 +1,10 @@
 {
   HttpURLConnection connection=openConnection(uri.toURL(),proxy);
   prepareConnection(connection,httpMethod.name());
-  return new SimpleClientHttpRequest(connection);
+  if (bufferRequestBody) {
+    return new BufferingSimpleClientHttpRequest(connection);
+  }
+ else {
+    return new StreamingSimpleClientHttpRequest(connection,chunkSize);
+  }
 }

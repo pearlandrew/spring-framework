@@ -1,0 +1,20 @@
+{
+  if (body == null) {
+    int contentLength=(int)headers.getContentLength();
+    if (contentLength >= 0) {
+      this.connection.setFixedLengthStreamingMode(contentLength);
+    }
+ else {
+      this.connection.setChunkedStreamingMode(chunkSize);
+    }
+    for (    Map.Entry<String,List<String>> entry : headers.entrySet()) {
+      String headerName=entry.getKey();
+      for (      String headerValue : entry.getValue()) {
+        this.connection.addRequestProperty(headerName,headerValue);
+      }
+    }
+    this.connection.connect();
+    this.body=this.connection.getOutputStream();
+  }
+  return new NonClosingOutputStream(body);
+}
