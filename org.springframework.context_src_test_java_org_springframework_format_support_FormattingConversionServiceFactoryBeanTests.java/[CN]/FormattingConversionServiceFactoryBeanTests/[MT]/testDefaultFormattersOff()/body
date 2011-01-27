@@ -1,0 +1,14 @@
+{
+  FormattingConversionServiceFactoryBean factory=new FormattingConversionServiceFactoryBean();
+  factory.setRegisterDefaultFormatters(false);
+  factory.afterPropertiesSet();
+  FormattingConversionService fcs=factory.getObject();
+  TypeDescriptor descriptor=new TypeDescriptor(TestBean.class.getDeclaredField("percent"));
+  try {
+    fcs.convert("5%",TypeDescriptor.valueOf(String.class),descriptor);
+    fail("This format should not be parseable");
+  }
+ catch (  ConversionFailedException e) {
+    assertTrue(e.getCause() instanceof NumberFormatException);
+  }
+}
