@@ -1,0 +1,14 @@
+{
+  if (iterator.hasNext()) {
+    ClientHttpRequestInterceptor nextInterceptor=iterator.next();
+    return nextInterceptor.intercept(request,body,this);
+  }
+ else {
+    ClientHttpRequest delegate=requestFactory.createRequest(request.getURI(),request.getMethod());
+    delegate.getHeaders().putAll(request.getHeaders());
+    if (body.length > 0) {
+      FileCopyUtils.copy(body,delegate.getBody());
+    }
+    return delegate.execute();
+  }
+}

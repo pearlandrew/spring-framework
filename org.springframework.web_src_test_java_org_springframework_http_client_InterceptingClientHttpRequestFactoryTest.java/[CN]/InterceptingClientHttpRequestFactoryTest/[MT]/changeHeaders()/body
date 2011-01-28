@@ -1,0 +1,27 @@
+{
+  final String headerName="Foo";
+  final String headerValue="Bar";
+  ClientHttpRequestInterceptor interceptor=new ClientHttpRequestInterceptor(){
+    public ClientHttpResponse intercept(    HttpRequest request,    byte[] body,    ClientHttpRequestExecution execution) throws IOException {
+      return execution.execute(new HttpRequestWrapper(request){
+        @Override public HttpHeaders getHeaders(){
+          HttpHeaders headers=new HttpHeaders();
+          headers.set(headerName,headerValue);
+          return headers;
+        }
+      }
+,body);
+    }
+  }
+;
+  requestMock=new RequestMock(){
+    @Override public ClientHttpResponse execute() throws IOException {
+      assertEquals(headerValue,getHeaders().getFirst(headerName));
+      return super.execute();
+    }
+  }
+;
+  requestFactory=new InterceptingClientHttpRequestFactory(requestFactoryMock,new ClientHttpRequestInterceptor[]{interceptor});
+  ClientHttpRequest request=requestFactory.createRequest(new URI("http://example.com"),HttpMethod.GET);
+  request.execute();
+}
