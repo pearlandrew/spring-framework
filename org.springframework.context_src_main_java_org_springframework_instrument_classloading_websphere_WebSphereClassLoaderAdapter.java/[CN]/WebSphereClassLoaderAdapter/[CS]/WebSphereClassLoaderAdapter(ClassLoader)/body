@@ -1,0 +1,17 @@
+{
+  Class<?> wsCompoundClassLoaderClass=null;
+  try {
+    wsCompoundClassLoaderClass=classLoader.loadClass(COMPOUND_CLASS_LOADER_NAME);
+    cloneConstructor=classLoader.getClass().getDeclaredConstructor(wsCompoundClassLoaderClass);
+    cloneConstructor.setAccessible(true);
+    wsPreProcessorClass=classLoader.loadClass(CLASS_PRE_PROCESSOR_NAME);
+    addPreDefinePlugin=classLoader.getClass().getMethod("addPreDefinePlugin",wsPreProcessorClass);
+    transformerList=wsCompoundClassLoaderClass.getDeclaredField(PLUGINS_FIELD);
+    transformerList.setAccessible(true);
+  }
+ catch (  Exception ex) {
+    throw new IllegalStateException("Could not initialize WebSphere LoadTimeWeaver because WebSphere 7 API classes are not available",ex);
+  }
+  Assert.isInstanceOf(wsCompoundClassLoaderClass,classLoader,"ClassLoader must be instance of [" + COMPOUND_CLASS_LOADER_NAME + "]");
+  this.classLoader=classLoader;
+}
