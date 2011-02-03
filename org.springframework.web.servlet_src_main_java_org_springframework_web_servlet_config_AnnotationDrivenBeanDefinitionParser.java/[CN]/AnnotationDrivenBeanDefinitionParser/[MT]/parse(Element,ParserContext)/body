@@ -17,11 +17,15 @@
   bindingDef.getPropertyValues().add("validator",validator);
   bindingDef.getPropertyValues().add("messageCodesResolver",messageCodesResolver);
   ManagedList<?> messageConverters=getMessageConverters(element,source,parserContext);
+  ManagedList<?> argumentResolvers=getArgumentResolvers(element,source,parserContext);
   RootBeanDefinition annAdapterDef=new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
   annAdapterDef.setSource(source);
   annAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
   annAdapterDef.getPropertyValues().add("webBindingInitializer",bindingDef);
   annAdapterDef.getPropertyValues().add("messageConverters",messageConverters);
+  if (argumentResolvers != null) {
+    annAdapterDef.getPropertyValues().add("customArgumentResolvers",argumentResolvers);
+  }
   String annAdapterName=parserContext.getReaderContext().registerWithGeneratedName(annAdapterDef);
   RootBeanDefinition csInterceptorDef=new RootBeanDefinition(ConversionServiceExposingInterceptor.class);
   csInterceptorDef.setSource(source);
