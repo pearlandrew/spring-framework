@@ -1,0 +1,10 @@
+{
+  AnnotationConverterKey converterKey=new AnnotationConverterKey(sourceType.getAnnotation(annotationType),sourceType.getObjectType());
+  GenericConverter converter=cachedPrinters.get(converterKey);
+  if (converter == null) {
+    Printer<?> printer=annotationFormatterFactory.getPrinter(converterKey.getAnnotation(),converterKey.getFieldType());
+    converter=new PrinterConverter(fieldType,printer,FormattingConversionService.this);
+    cachedPrinters.put(converterKey,converter);
+  }
+  return converter.convert(source,sourceType,targetType);
+}
