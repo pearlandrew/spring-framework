@@ -1,0 +1,11 @@
+{
+  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+  ctx.register(FeatureConfig.class,Config.class);
+  ctx.refresh();
+  TestBean registeredBean=ctx.getBean("testBean",TestBean.class);
+  TestBean proxiedBean=ctx.getBean(FeatureConfig.class).testBean;
+  assertThat(registeredBean,not(instanceOf(EarlyBeanReferenceProxy.class)));
+  assertThat(proxiedBean,notNullValue());
+  assertThat(proxiedBean,instanceOf(EarlyBeanReferenceProxy.class));
+  assertThat(proxiedBean.getSpouse(),is(registeredBean.getSpouse()));
+}

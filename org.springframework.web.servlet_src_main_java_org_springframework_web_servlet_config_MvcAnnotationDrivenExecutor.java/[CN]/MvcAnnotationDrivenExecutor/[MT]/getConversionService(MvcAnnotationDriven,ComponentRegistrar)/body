@@ -1,0 +1,13 @@
+{
+  if (spec.conversionService() != null) {
+    return getBeanOrReference(spec.conversionService());
+  }
+ else {
+    RootBeanDefinition conversionDef=new RootBeanDefinition(FormattingConversionServiceFactoryBean.class);
+    conversionDef.setSource(spec.source());
+    conversionDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    String conversionName=registrar.registerWithGeneratedName(conversionDef);
+    registrar.registerComponent(new BeanComponentDefinition(conversionDef,conversionName));
+    return new RuntimeBeanReference(conversionName);
+  }
+}

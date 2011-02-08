@@ -1,10 +1,6 @@
 {
-  String beanName=method.getName();
-  Bean bean=AnnotationUtils.findAnnotation(method,Bean.class);
-  if (bean != null && bean.name().length > 0) {
-    beanName=bean.name()[0];
-  }
-  Scope scope=AnnotationUtils.findAnnotation(method,Scope.class);
+  String beanName=BeanAnnotationHelper.determineBeanNameFor(beanMethod);
+  Scope scope=AnnotationUtils.findAnnotation(beanMethod,Scope.class);
   if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
     String scopedBeanName=ScopedProxyCreator.getTargetBeanName(beanName);
     if (this.beanFactory.isCurrentlyInCreation(scopedBeanName)) {
@@ -22,5 +18,5 @@
   if (factoryContainsBean(beanName)) {
     return this.beanFactory.getBean(beanName);
   }
-  return proxy.invokeSuper(obj,args);
+  return cglibMethodProxy.invokeSuper(enhancedConfigInstance,beanMethodArgs);
 }

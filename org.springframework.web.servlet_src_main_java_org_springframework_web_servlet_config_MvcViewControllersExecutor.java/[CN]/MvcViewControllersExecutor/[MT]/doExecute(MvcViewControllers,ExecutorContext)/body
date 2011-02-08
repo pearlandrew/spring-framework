@@ -1,0 +1,37 @@
+{
+  BeanDefinitionRegistry registry=executorContext.getRegistry();
+  ComponentRegistrar registrar=executorContext.getRegistrar();
+  Object source=spec.source();
+  if (!registry.containsBeanDefinition(HANDLER_ADAPTER_BEAN_NAME)) {
+    RootBeanDefinition handlerAdapterDef=new RootBeanDefinition(SimpleControllerHandlerAdapter.class);
+    handlerAdapterDef.setSource(source);
+    handlerAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    registry.registerBeanDefinition(HANDLER_ADAPTER_BEAN_NAME,handlerAdapterDef);
+    registrar.registerComponent(new BeanComponentDefinition(handlerAdapterDef,HANDLER_ADAPTER_BEAN_NAME));
+  }
+  BeanDefinition handlerMappingBeanDef=null;
+  if (!registry.containsBeanDefinition(HANDLER_MAPPING_BEAN_NAME)) {
+    RootBeanDefinition beanDef=new RootBeanDefinition(SimpleUrlHandlerMapping.class);
+    beanDef.setSource(source);
+    beanDef.getPropertyValues().add("order","1");
+    beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    registry.registerBeanDefinition(HANDLER_MAPPING_BEAN_NAME,beanDef);
+    registrar.registerComponent(new BeanComponentDefinition(beanDef,HANDLER_MAPPING_BEAN_NAME));
+    handlerMappingBeanDef=beanDef;
+  }
+ else {
+    handlerMappingBeanDef=registry.getBeanDefinition(HANDLER_MAPPING_BEAN_NAME);
+  }
+  for (  Map.Entry<String,String> entry : spec.mappings().entrySet()) {
+    RootBeanDefinition viewControllerDef=new RootBeanDefinition(ParameterizableViewController.class);
+    viewControllerDef.setSource(source);
+    if (entry.getValue() != null) {
+      viewControllerDef.getPropertyValues().add("viewName",entry.getValue());
+    }
+    if (!handlerMappingBeanDef.getPropertyValues().contains("urlMap")) {
+      handlerMappingBeanDef.getPropertyValues().add("urlMap",new ManagedMap<String,BeanDefinition>());
+    }
+    @SuppressWarnings("unchecked") Map<String,BeanDefinition> urlMap=(Map<String,BeanDefinition>)handlerMappingBeanDef.getPropertyValues().getPropertyValue("urlMap").getValue();
+    urlMap.put(entry.getKey(),viewControllerDef);
+  }
+}

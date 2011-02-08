@@ -1,11 +1,11 @@
 {
-  builder.addPropertyReference("transactionManager",TxNamespaceHandler.getTransactionManagerName(element));
-  List txAttributes=DomUtils.getChildElementsByTagName(element,ATTRIBUTES);
+  builder.addPropertyReference("transactionManager",element.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE));
+  List<Element> txAttributes=DomUtils.getChildElementsByTagName(element,ATTRIBUTES_ELEMENT);
   if (txAttributes.size() > 1) {
     parserContext.getReaderContext().error("Element <attributes> is allowed at most once inside element <advice>",element);
   }
  else   if (txAttributes.size() == 1) {
-    Element attributeSourceElement=(Element)txAttributes.get(0);
+    Element attributeSourceElement=txAttributes.get(0);
     RootBeanDefinition attributeSourceDefinition=parseAttributeSource(attributeSourceElement,parserContext);
     builder.addPropertyValue("transactionAttributeSource",attributeSourceDefinition);
   }

@@ -1,0 +1,18 @@
+{
+  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+  ctx.register(MvcViewControllersFeature.class);
+  ctx.refresh();
+  SimpleControllerHandlerAdapter adapter=ctx.getBean(SimpleControllerHandlerAdapter.class);
+  assertNotNull(adapter);
+  SimpleUrlHandlerMapping handler=ctx.getBean(SimpleUrlHandlerMapping.class);
+  assertNotNull(handler);
+  Map<String,?> urlMap=handler.getUrlMap();
+  assertNotNull(urlMap);
+  assertEquals(2,urlMap.size());
+  ParameterizableViewController controller=(ParameterizableViewController)urlMap.get("/");
+  assertNotNull(controller);
+  assertEquals("home",controller.getViewName());
+  controller=(ParameterizableViewController)urlMap.get("/account");
+  assertNotNull(controller);
+  assertNull(controller.getViewName());
+}

@@ -1,0 +1,30 @@
+{
+  Object source=txSpec.source();
+  AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(registry,registrar,source,txSpec.proxyTargetClass());
+  if (!registry.containsBeanDefinition(TRANSACTION_ADVISOR_BEAN_NAME)) {
+    RootBeanDefinition sourceDef=new RootBeanDefinition(AnnotationTransactionAttributeSource.class);
+    sourceDef.setSource(source);
+    sourceDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    String sourceName=registrar.registerWithGeneratedName(sourceDef);
+    RootBeanDefinition interceptorDef=new RootBeanDefinition(TransactionInterceptor.class);
+    interceptorDef.setSource(source);
+    interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    registerTransactionManager(txSpec,interceptorDef);
+    interceptorDef.getPropertyValues().add("transactionAttributeSource",new RuntimeBeanReference(sourceName));
+    String interceptorName=registrar.registerWithGeneratedName(interceptorDef);
+    RootBeanDefinition advisorDef=new RootBeanDefinition(BeanFactoryTransactionAttributeSourceAdvisor.class);
+    advisorDef.setSource(source);
+    advisorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    advisorDef.getPropertyValues().add("transactionAttributeSource",new RuntimeBeanReference(sourceName));
+    advisorDef.getPropertyValues().add("adviceBeanName",interceptorName);
+    if (txSpec.order() != null) {
+      advisorDef.getPropertyValues().add("order",txSpec.order());
+    }
+    registry.registerBeanDefinition(TRANSACTION_ADVISOR_BEAN_NAME,advisorDef);
+    CompositeComponentDefinition compositeDef=new CompositeComponentDefinition(txSpec.sourceName(),source);
+    compositeDef.addNestedComponent(new BeanComponentDefinition(sourceDef,sourceName));
+    compositeDef.addNestedComponent(new BeanComponentDefinition(interceptorDef,interceptorName));
+    compositeDef.addNestedComponent(new BeanComponentDefinition(advisorDef,TRANSACTION_ADVISOR_BEAN_NAME));
+    registrar.registerComponent(compositeDef);
+  }
+}

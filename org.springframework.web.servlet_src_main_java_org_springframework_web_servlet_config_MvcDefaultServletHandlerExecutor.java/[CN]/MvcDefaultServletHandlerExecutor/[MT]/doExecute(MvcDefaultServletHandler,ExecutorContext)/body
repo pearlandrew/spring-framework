@@ -1,0 +1,30 @@
+{
+  BeanDefinitionRegistry registry=executorContext.getRegistry();
+  ComponentRegistrar registrar=executorContext.getRegistrar();
+  Object source=spec.source();
+  if (!registry.containsBeanDefinition(HANDLER_ADAPTER_BEAN_NAME)) {
+    RootBeanDefinition handlerAdapterDef=new RootBeanDefinition(HttpRequestHandlerAdapter.class);
+    handlerAdapterDef.setSource(source);
+    handlerAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    registry.registerBeanDefinition(HANDLER_ADAPTER_BEAN_NAME,handlerAdapterDef);
+    registrar.registerComponent(new BeanComponentDefinition(handlerAdapterDef,HANDLER_ADAPTER_BEAN_NAME));
+  }
+  RootBeanDefinition defaultServletHandlerDef=new RootBeanDefinition(DefaultServletHttpRequestHandler.class);
+  defaultServletHandlerDef.setSource(source);
+  defaultServletHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  if (StringUtils.hasText(spec.defaultServletName())) {
+    defaultServletHandlerDef.getPropertyValues().add("defaultServletName",spec.defaultServletName());
+  }
+  String defaultServletHandlerName=registrar.registerWithGeneratedName(defaultServletHandlerDef);
+  registry.registerBeanDefinition(defaultServletHandlerName,defaultServletHandlerDef);
+  registrar.registerComponent(new BeanComponentDefinition(defaultServletHandlerDef,defaultServletHandlerName));
+  Map<String,String> urlMap=new ManagedMap<String,String>();
+  urlMap.put("/**",defaultServletHandlerName);
+  RootBeanDefinition handlerMappingDef=new RootBeanDefinition(SimpleUrlHandlerMapping.class);
+  handlerMappingDef.setSource(source);
+  handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  handlerMappingDef.getPropertyValues().add("urlMap",urlMap);
+  String handlerMappingBeanName=registrar.registerWithGeneratedName(handlerMappingDef);
+  registry.registerBeanDefinition(handlerMappingBeanName,handlerMappingDef);
+  registrar.registerComponent(new BeanComponentDefinition(handlerMappingDef,handlerMappingBeanName));
+}

@@ -1,0 +1,16 @@
+{
+  if (spec.validator() != null) {
+    return getBeanOrReference(spec.validator());
+  }
+ else   if (jsr303Present) {
+    RootBeanDefinition validatorDef=new RootBeanDefinition(LocalValidatorFactoryBean.class);
+    validatorDef.setSource(spec.source());
+    validatorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    String validatorName=registrar.registerWithGeneratedName(validatorDef);
+    registrar.registerComponent(new BeanComponentDefinition(validatorDef,validatorName));
+    return new RuntimeBeanReference(validatorName);
+  }
+ else {
+    return null;
+  }
+}

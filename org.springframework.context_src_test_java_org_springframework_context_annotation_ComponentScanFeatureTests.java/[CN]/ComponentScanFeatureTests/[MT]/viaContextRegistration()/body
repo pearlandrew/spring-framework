@@ -1,0 +1,10 @@
+{
+  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+  ctx.register(ComponentScanFeatureConfig.class);
+  ctx.register(ComponentScanFeatureConfig.Features.class);
+  ctx.refresh();
+  ctx.getBean(ComponentScanFeatureConfig.class);
+  ctx.getBean(TestBean.class);
+  assertThat("config class bean not found",ctx.containsBeanDefinition("componentScanFeatureConfig"),is(true));
+  assertThat("@ComponentScan annotated @Configuration class registered directly against " + "AnnotationConfigApplicationContext did not trigger component scanning as expected",ctx.containsBean("fooServiceImpl"),is(true));
+}

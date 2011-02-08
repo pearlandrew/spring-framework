@@ -1,0 +1,30 @@
+{
+  Enhancer enhancer=new Enhancer();
+  Class<?> targetBeanType=targetBeanDereferencingInterceptor.getTargetBeanType();
+  if (targetBeanType.isInterface()) {
+    enhancer.setSuperclass(Object.class);
+    enhancer.setInterfaces(new Class<?>[]{targetBeanType,EarlyBeanReferenceProxy.class});
+  }
+ else {
+    assertClassIsProxyCapable(targetBeanType);
+    enhancer.setSuperclass(targetBeanType);
+    enhancer.setInterfaces(new Class<?>[]{EarlyBeanReferenceProxy.class});
+  }
+  enhancer.setCallbacks(new Callback[]{new BeanMethodInterceptor(),new ObjectMethodsInterceptor(),targetBeanDereferencingInterceptor,new TargetBeanDelegatingMethodInterceptor()});
+  enhancer.setCallbackFilter(new CallbackFilter(){
+    public int accept(    Method method){
+      if (BeanAnnotationHelper.isBeanAnnotated(method)) {
+        return 0;
+      }
+      if (ReflectionUtils.isObjectMethod(method)) {
+        return 1;
+      }
+      if (method.getName().equals("dereferenceTargetBean")) {
+        return 2;
+      }
+      return 3;
+    }
+  }
+);
+  return enhancer.create();
+}

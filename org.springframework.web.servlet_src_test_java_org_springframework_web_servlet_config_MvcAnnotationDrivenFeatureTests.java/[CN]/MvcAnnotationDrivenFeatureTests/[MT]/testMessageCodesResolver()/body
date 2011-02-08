@@ -1,0 +1,22 @@
+{
+  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+  ctx.register(MvcFeature.class,MvcBeans.class);
+  ctx.refresh();
+  AnnotationMethodHandlerAdapter adapter=ctx.getBean(AnnotationMethodHandlerAdapter.class);
+  assertNotNull(adapter);
+  Object initializer=new DirectFieldAccessor(adapter).getPropertyValue("webBindingInitializer");
+  assertNotNull(initializer);
+  MessageCodesResolver resolver=((ConfigurableWebBindingInitializer)initializer).getMessageCodesResolver();
+  assertNotNull(resolver);
+  assertEquals("test.foo.bar",resolver.resolveMessageCodes("foo","bar")[0]);
+  Object argResolvers=new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
+  assertNotNull(argResolvers);
+  WebArgumentResolver[] argResolversArray=(WebArgumentResolver[])argResolvers;
+  assertEquals(1,argResolversArray.length);
+  assertTrue(argResolversArray[0] instanceof TestWebArgumentResolver);
+  Object converters=new DirectFieldAccessor(adapter).getPropertyValue("messageConverters");
+  assertNotNull(converters);
+  HttpMessageConverter<?>[] convertersArray=(HttpMessageConverter<?>[])converters;
+  assertTrue("Default converters are registered in addition to the custom one",convertersArray.length > 1);
+  assertTrue(convertersArray[0] instanceof StringHttpMessageConverter);
+}

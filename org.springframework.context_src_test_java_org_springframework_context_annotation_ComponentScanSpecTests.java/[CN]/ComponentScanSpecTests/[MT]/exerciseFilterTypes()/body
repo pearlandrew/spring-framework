@@ -1,0 +1,13 @@
+{
+  ComponentScanSpec spec=new ComponentScanSpec("org.p1");
+  spec.addIncludeFilter("aspectj","*..Bogus",classLoader);
+  assertThat(spec.validate(problemReporter),is(true));
+  spec.addIncludeFilter("regex",".*Foo",classLoader);
+  assertThat(spec.validate(problemReporter),is(true));
+  spec.addIncludeFilter("custom",StubTypeFilter.class.getName(),classLoader);
+  assertThat(spec.validate(problemReporter),is(true));
+  spec.addIncludeFilter("custom","org.NonExistentTypeFilter",classLoader);
+  assertThat(spec.validate(problemReporter),is(false));
+  spec.addIncludeFilter("custom",NonNoArgResolver.class.getName(),classLoader);
+  assertThat(spec.validate(problemReporter),is(false));
+}

@@ -1,0 +1,12 @@
+{
+  bf.registerBeanDefinition("componentWithInterfaceBeanMethod",new RootBeanDefinition(ComponentWithInterfaceBeanMethod.class));
+  EarlyBeanReferenceProxyCreator pc=new EarlyBeanReferenceProxyCreator(bf);
+  ComponentWithInterfaceBeanMethod proxy=(ComponentWithInterfaceBeanMethod)pc.createProxy(descriptorFor(ComponentWithInterfaceBeanMethod.class));
+  ITestBean bean=proxy.aBeanMethod();
+  assertThat(bean,instanceOf(EarlyBeanReferenceProxy.class));
+  assertThat(bf.containsBeanDefinition("componentWithInterfaceBeanMethod"),is(true));
+  assertThat("calling a @Bean method on an EarlyBeanReferenceProxy object " + "should not cause its instantation/registration",bf.containsSingleton("componentWithInterfaceBeanMethod"),is(false));
+  Object obj=proxy.normalInstanceMethod();
+  assertThat(bf.containsSingleton("componentWithInterfaceBeanMethod"),is(true));
+  assertThat(obj,not(instanceOf(EarlyBeanReferenceProxy.class)));
+}

@@ -1,0 +1,32 @@
+{
+  Map<String,Object> attribs=metadata.getAnnotationAttributes(ComponentScan.class.getName(),true);
+  Assert.notNull(attribs,String.format("@ComponentScan annotation not found " + "while parsing metadata for class [%s].",metadata.getClassName()));
+  ClassLoader classLoader=ClassUtils.getDefaultClassLoader();
+  ComponentScanSpec spec=new ComponentScanSpec();
+  for (  String pkg : (String[])attribs.get("value")) {
+    spec.addBasePackage(pkg);
+  }
+  for (  String pkg : (String[])attribs.get("basePackages")) {
+    spec.addBasePackage(pkg);
+  }
+  for (  String className : (String[])attribs.get("basePackageClasses")) {
+    spec.addBasePackage(className.substring(0,className.lastIndexOf('.')));
+  }
+  String resolverAttribute="scopeResolver";
+  if (!((String)attribs.get(resolverAttribute)).equals(((Class<?>)AnnotationUtils.getDefaultValue(ComponentScan.class,resolverAttribute)).getName())) {
+    spec.scopeMetadataResolver((String)attribs.get(resolverAttribute),classLoader);
+  }
+  String scopedProxyAttribute="scopedProxy";
+  ScopedProxyMode scopedProxyMode=(ScopedProxyMode)attribs.get(scopedProxyAttribute);
+  if (scopedProxyMode != ((ScopedProxyMode)AnnotationUtils.getDefaultValue(ComponentScan.class,scopedProxyAttribute))) {
+    spec.scopedProxyMode(scopedProxyMode);
+  }
+  for (  Filter filter : (Filter[])attribs.get("includeFilters")) {
+    spec.addIncludeFilter(filter.type().toString(),filter.value().getName(),classLoader);
+  }
+  for (  Filter filter : (Filter[])attribs.get("excludeFilters")) {
+    spec.addExcludeFilter(filter.type().toString(),filter.value().getName(),classLoader);
+  }
+  spec.resourcePattern((String)attribs.get("resourcePattern")).useDefaultFilters((Boolean)attribs.get("useDefaultFilters")).beanNameGenerator((String)attribs.get("nameGenerator"),classLoader).source(metadata.getClassName()).sourceName(metadata.getClassName());
+  return spec;
+}

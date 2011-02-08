@@ -1,0 +1,33 @@
+{
+  try {
+    if ("annotation".equalsIgnoreCase(this.filterType)) {
+      return new AnnotationTypeFilter((Class<Annotation>)this.classLoader.loadClass(this.expression));
+    }
+ else     if ("assignable".equalsIgnoreCase(this.filterType) || "assignable_type".equalsIgnoreCase(this.filterType)) {
+      return new AssignableTypeFilter(this.classLoader.loadClass(this.expression));
+    }
+ else     if ("aspectj".equalsIgnoreCase(this.filterType)) {
+      return new AspectJTypeFilter(this.expression,this.classLoader);
+    }
+ else     if ("regex".equalsIgnoreCase(this.filterType)) {
+      return new RegexPatternTypeFilter(Pattern.compile(this.expression));
+    }
+ else     if ("custom".equalsIgnoreCase(this.filterType)) {
+      Class<?> filterClass=this.classLoader.loadClass(this.expression);
+      if (!TypeFilter.class.isAssignableFrom(filterClass)) {
+        problems.error(String.format("custom type filter class [%s] must be assignable to %s",this.expression,TypeFilter.class));
+      }
+      return (TypeFilter)BeanUtils.instantiateClass(filterClass);
+    }
+ else {
+      problems.error(String.format("Unsupported filter type [%s]; supported types are: " + "'annotation', 'assignable[_type]', 'aspectj', 'regex', 'custom'",this.filterType));
+    }
+  }
+ catch (  ClassNotFoundException ex) {
+    problems.error("Type filter class not found: " + this.expression,ex);
+  }
+catch (  Exception ex) {
+    problems.error(ex.getMessage(),ex.getCause());
+  }
+  return new PlaceholderTypeFilter();
+}

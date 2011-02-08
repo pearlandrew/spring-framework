@@ -1,20 +1,6 @@
 {
-  Object source=parserContext.extractSource(element);
-  registerHanderAdapter(parserContext,source);
-  BeanDefinition handlerMappingDef=registerHandlerMapping(parserContext,source);
-  RootBeanDefinition viewControllerDef=new RootBeanDefinition(ParameterizableViewController.class);
-  viewControllerDef.setSource(source);
-  if (element.hasAttribute("view-name")) {
-    viewControllerDef.getPropertyValues().add("viewName",element.getAttribute("view-name"));
-  }
-  Map<String,BeanDefinition> urlMap;
-  if (handlerMappingDef.getPropertyValues().contains("urlMap")) {
-    urlMap=(Map<String,BeanDefinition>)handlerMappingDef.getPropertyValues().getPropertyValue("urlMap").getValue();
-  }
- else {
-    urlMap=new ManagedMap<String,BeanDefinition>();
-    handlerMappingDef.getPropertyValues().add("urlMap",urlMap);
-  }
-  urlMap.put(element.getAttribute("path"),viewControllerDef);
+  String path=element.getAttribute("path");
+  String viewName=element.getAttribute("view-name");
+  new MvcViewControllers(path,viewName.isEmpty() ? null : viewName).source(parserContext.extractSource(element)).sourceName(element.getTagName()).execute(createExecutorContext(parserContext));
   return null;
 }

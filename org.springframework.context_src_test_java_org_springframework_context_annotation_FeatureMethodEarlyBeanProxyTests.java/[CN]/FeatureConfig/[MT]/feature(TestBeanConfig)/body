@@ -1,0 +1,22 @@
+{
+  assertThat("The @Configuration class instance itself should be an early-ref proxy",beans,instanceOf(EarlyBeanReferenceProxy.class));
+  ITestBean lazyHelperBean=beans.lazyHelperBean();
+  ITestBean eagerHelperBean=beans.eagerHelperBean();
+  ITestBean lazyPassthroughBean=beans.lazyPassthroughBean();
+  ITestBean eagerPassthroughBean=beans.eagerPassthroughBean();
+  assertThat(lazyHelperBean,instanceOf(EarlyBeanReferenceProxy.class));
+  assertThat(eagerHelperBean,instanceOf(EarlyBeanReferenceProxy.class));
+  assertThat(lazyPassthroughBean,instanceOf(EarlyBeanReferenceProxy.class));
+  assertThat(eagerPassthroughBean,instanceOf(EarlyBeanReferenceProxy.class));
+  assertThat(this.beanFactory.containsSingleton("lazyHelperBean"),is(false));
+  assertThat(this.beanFactory.containsSingleton("eagerHelperBean"),is(false));
+  assertThat(this.beanFactory.containsSingleton("lazyPassthroughBean"),is(false));
+  assertThat(this.beanFactory.containsSingleton("eagerPassthroughBean"),is(false));
+  assertThat(lazyHelperBean.getName(),equalTo("lazyHelper"));
+  assertThat(eagerHelperBean.getName(),equalTo("eagerHelper"));
+  assertThat(this.beanFactory.containsSingleton("lazyHelperBean"),is(true));
+  assertThat(this.beanFactory.containsSingleton("eagerHelperBean"),is(true));
+  assertThat(this.beanFactory.containsSingleton("lazyPassthroughBean"),is(false));
+  assertThat(this.beanFactory.containsSingleton("eagerPassthroughBean"),is(false));
+  return new StubSpecification();
+}

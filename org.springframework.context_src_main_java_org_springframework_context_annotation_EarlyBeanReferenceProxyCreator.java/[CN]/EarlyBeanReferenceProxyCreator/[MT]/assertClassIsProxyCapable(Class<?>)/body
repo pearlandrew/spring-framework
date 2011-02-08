@@ -1,0 +1,15 @@
+{
+  Assert.isTrue(!clazz.isInterface(),"class parameter must be a concrete type");
+  if ((clazz.getModifiers() & Modifier.FINAL) != 0) {
+    throw new ProxyCreationException(String.format(FINAL_CLASS_ERROR_MESSAGE,clazz.getName()));
+  }
+  try {
+    Constructor<?> noArgCtor=clazz.getDeclaredConstructor();
+    if ((noArgCtor.getModifiers() & Modifier.PRIVATE) != 0) {
+      throw new ProxyCreationException(String.format(PRIVATE_NO_ARG_CONSTRUCTOR_ERROR_MESSAGE,clazz.getName()));
+    }
+  }
+ catch (  NoSuchMethodException ex) {
+    throw new ProxyCreationException(String.format(MISSING_NO_ARG_CONSTRUCTOR_ERROR_MESSAGE,clazz.getName()));
+  }
+}

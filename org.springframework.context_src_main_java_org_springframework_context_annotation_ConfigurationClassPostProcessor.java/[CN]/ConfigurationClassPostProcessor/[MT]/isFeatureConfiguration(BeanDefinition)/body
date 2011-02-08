@@ -1,0 +1,27 @@
+{
+  if (!(candidate instanceof AbstractBeanDefinition) || (candidate.getBeanClassName() == null)) {
+    return false;
+  }
+  AbstractBeanDefinition beanDef=(AbstractBeanDefinition)candidate;
+  if (beanDef.hasBeanClass()) {
+    Class<?> beanClass=beanDef.getBeanClass();
+    if (AnnotationUtils.findAnnotation(beanClass,FeatureConfiguration.class) != null) {
+      return true;
+    }
+  }
+ else {
+    String className=null;
+    try {
+      className=beanDef.getBeanClassName();
+      MetadataReader metadataReader=new SimpleMetadataReaderFactory().getMetadataReader(className);
+      AnnotationMetadata annotationMetadata=metadataReader.getAnnotationMetadata();
+      if (annotationMetadata.isAnnotated(FeatureConfiguration.class.getName())) {
+        return true;
+      }
+    }
+ catch (    IOException ex) {
+      throw new IllegalStateException("Could not create MetadataReader for class " + className,ex);
+    }
+  }
+  return false;
+}
