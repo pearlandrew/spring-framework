@@ -10,11 +10,11 @@
     throw new IllegalStateException("CGLIB is required to process @FeatureConfiguration classes. " + "Either add CGLIB to the classpath or remove the following @FeatureConfiguration bean definitions: " + featureConfigBeans.keySet());
   }
   final EarlyBeanReferenceProxyCreator proxyCreator=new EarlyBeanReferenceProxyCreator(beanFactory);
-  final ExecutorContext executorContext=createExecutorContext(beanFactory);
+  final SpecificationContext specificationContext=createSpecificationContext(beanFactory);
   for (  final Object featureConfigBean : featureConfigBeans.values()) {
     ReflectionUtils.doWithMethods(featureConfigBean.getClass(),new ReflectionUtils.MethodCallback(){
       public void doWith(      Method featureMethod) throws IllegalArgumentException, IllegalAccessException {
-        processFeatureMethod(featureMethod,featureConfigBean,executorContext,proxyCreator);
+        processFeatureMethod(featureMethod,featureConfigBean,specificationContext,proxyCreator);
       }
     }
 ,new ReflectionUtils.MethodFilter(){
