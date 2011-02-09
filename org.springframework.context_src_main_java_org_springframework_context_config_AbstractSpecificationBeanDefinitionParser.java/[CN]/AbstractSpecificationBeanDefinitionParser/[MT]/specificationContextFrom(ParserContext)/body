@@ -1,0 +1,17 @@
+{
+  SpecificationContext specContext=new SpecificationContext();
+  specContext.setRegistry(parserContext.getRegistry());
+  specContext.setRegistrar(new ComponentRegistrarAdapter(parserContext));
+  specContext.setResourceLoader(parserContext.getReaderContext().getResourceLoader());
+  specContext.setEnvironment(parserContext.getDelegate().getEnvironment());
+  try {
+    Field field=ReaderContext.class.getDeclaredField("problemReporter");
+    field.setAccessible(true);
+    ProblemReporter problemReporter=(ProblemReporter)field.get(parserContext.getReaderContext());
+    specContext.setProblemReporter(problemReporter);
+  }
+ catch (  Exception ex) {
+    throw new IllegalStateException("Could not access field 'ReaderContext#problemReporter' on object " + parserContext.getReaderContext(),ex);
+  }
+  return specContext;
+}

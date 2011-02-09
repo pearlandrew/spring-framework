@@ -1,0 +1,20 @@
+{
+  ClassLoader classLoader=parserContext.getReaderContext().getResourceLoader().getClassLoader();
+  ComponentScanSpec spec=ComponentScanSpec.forDelimitedPackages(element.getAttribute("base-package")).includeAnnotationConfig(element.getAttribute("annotation-config")).useDefaultFilters(element.getAttribute("use-default-filters")).resourcePattern(element.getAttribute("resource-pattern")).beanNameGenerator(element.getAttribute("name-generator"),classLoader).scopeMetadataResolver(element.getAttribute("scope-resolver"),classLoader).scopedProxyMode(element.getAttribute("scoped-proxy")).beanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults()).autowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());
+  NodeList nodeList=element.getChildNodes();
+  for (int i=0; i < nodeList.getLength(); i++) {
+    Node node=nodeList.item(i);
+    if (node.getNodeType() == Node.ELEMENT_NODE) {
+      String localName=parserContext.getDelegate().getLocalName(node);
+      String filterType=((Element)node).getAttribute("type");
+      String expression=((Element)node).getAttribute("expression");
+      if ("include-filter".equals(localName)) {
+        spec.addIncludeFilter(filterType,expression,classLoader);
+      }
+ else       if ("exclude-filter".equals(localName)) {
+        spec.addExcludeFilter(filterType,expression,classLoader);
+      }
+    }
+  }
+  return spec;
+}
