@@ -1,0 +1,11 @@
+{
+  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+  ctx.register(FeatureConfigWithBeanMethod.class);
+  try {
+    ctx.refresh();
+    fail("expected exception");
+  }
+ catch (  FeatureMethodExecutionException ex) {
+    assertThat(ex.getMessage(),equalTo("@FeatureConfiguration classes must not contain @Bean-annotated methods. " + "FeatureConfigWithBeanMethod.testBean() is annotated with @Bean and must " + "be removed in order to proceed. Consider moving this method into a dedicated "+ "@Configuration class and injecting the bean as a parameter into any @Feature "+ "method(s) that need it."));
+  }
+}
