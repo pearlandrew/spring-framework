@@ -6,16 +6,7 @@
       if (annotation != null) {
         Assert.isTrue(void.class.equals(method.getReturnType()),"Only void-returning methods may be annotated with @Scheduled.");
         Assert.isTrue(method.getParameterTypes().length == 0,"Only no-arg methods may be annotated with @Scheduled.");
-        MethodInvokingRunnable runnable=new MethodInvokingRunnable();
-        runnable.setTargetObject(bean);
-        runnable.setTargetMethod(method.getName());
-        runnable.setArguments(new Object[0]);
-        try {
-          runnable.prepare();
-        }
- catch (        Exception ex) {
-          throw new IllegalStateException("failed to prepare task",ex);
-        }
+        Runnable runnable=new ScheduledMethodRunnable(bean,method);
         boolean processedSchedule=false;
         String errorMessage="Exactly one of 'cron', 'fixedDelay', or 'fixedRate' is required.";
         String cron=annotation.cron();
