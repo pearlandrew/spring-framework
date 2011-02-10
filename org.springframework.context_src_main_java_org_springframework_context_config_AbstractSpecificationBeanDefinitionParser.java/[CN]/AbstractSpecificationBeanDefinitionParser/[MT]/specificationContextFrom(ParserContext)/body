@@ -3,7 +3,12 @@
   specContext.setRegistry(parserContext.getRegistry());
   specContext.setRegistrar(new ComponentRegistrarAdapter(parserContext));
   specContext.setResourceLoader(parserContext.getReaderContext().getResourceLoader());
-  specContext.setEnvironment(parserContext.getDelegate().getEnvironment());
+  try {
+    specContext.setEnvironment(parserContext.getDelegate().getEnvironment());
+  }
+ catch (  NoSuchMethodError ex) {
+    specContext.setEnvironment(new DefaultEnvironment());
+  }
   try {
     Field field=ReaderContext.class.getDeclaredField("problemReporter");
     field.setAccessible(true);
