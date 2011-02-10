@@ -1,0 +1,14 @@
+{
+  Foo root=new Foo("bar");
+  StandardEvaluationContext context=new StandardEvaluationContext(root);
+  Collection<String> foos=Collections.singletonList("baz");
+  Expression expression=parser.parseExpression("foos");
+  expression.setValue(context,foos);
+  Foo baz=root.getFoos().iterator().next();
+  assertEquals("baz",baz.value);
+  expression=parser.parseExpression("setFoos(#foos)");
+  context.setVariable("foos",foos);
+  expression.getValue(context);
+  baz=root.getFoos().iterator().next();
+  assertEquals("baz",baz.value);
+}
