@@ -1,0 +1,15 @@
+{
+  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+  ctx.register(MvcInterceptorsFeature.class);
+  ctx.refresh();
+  Iterator<MappedInterceptor> itr=ctx.getBeansOfType(MappedInterceptor.class).values().iterator();
+  MappedInterceptor interceptor=itr.next();
+  assertTrue(interceptor.getInterceptor() instanceof UserRoleAuthorizationInterceptor);
+  assertNull(interceptor.getPathPatterns());
+  interceptor=itr.next();
+  assertTrue(interceptor.getInterceptor() instanceof LocaleChangeInterceptor);
+  assertArrayEquals(new String[]{"/locale","/locale/**"},interceptor.getPathPatterns());
+  interceptor=itr.next();
+  assertTrue(interceptor.getInterceptor() instanceof ThemeChangeInterceptor);
+  assertArrayEquals(new String[]{"/theme","/theme/**"},interceptor.getPathPatterns());
+}

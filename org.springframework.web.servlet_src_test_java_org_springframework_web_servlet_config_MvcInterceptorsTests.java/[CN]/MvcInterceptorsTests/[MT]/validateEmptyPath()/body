@@ -1,0 +1,11 @@
+{
+  ProblemReporter reporter=createMock(ProblemReporter.class);
+  Capture<Problem> captured=new Capture<Problem>();
+  reporter.error(capture(captured));
+  replay(reporter);
+  HandlerInterceptor[] interceptors=new HandlerInterceptor[]{new LocaleChangeInterceptor()};
+  String[] patterns=new String[]{""};
+  boolean result=new MvcInterceptors().mappedInterceptors(patterns,interceptors).validate(reporter);
+  assertFalse(result);
+  assertTrue(captured.getValue().getMessage().startsWith("Empty path pattern specified for "));
+}
