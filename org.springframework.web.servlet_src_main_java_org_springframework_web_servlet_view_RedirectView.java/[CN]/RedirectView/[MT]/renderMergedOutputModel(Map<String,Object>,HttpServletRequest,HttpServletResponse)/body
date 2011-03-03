@@ -4,14 +4,19 @@
     targetUrl.append(request.getContextPath());
   }
   targetUrl.append(getUrl());
+  String enc=this.encodingScheme;
+  if (enc == null) {
+    enc=request.getCharacterEncoding();
+  }
+  if (enc == null) {
+    enc=WebUtils.DEFAULT_CHARACTER_ENCODING;
+  }
+  UriTemplate uriTemplate=createUriTemplate(targetUrl,enc);
+  if (uriTemplate.getVariableNames().size() > 0) {
+    targetUrl=new StringBuilder(uriTemplate.expand(model).toString());
+    model=removeKeys(model,uriTemplate.getVariableNames());
+  }
   if (this.exposeModelAttributes) {
-    String enc=this.encodingScheme;
-    if (enc == null) {
-      enc=request.getCharacterEncoding();
-    }
-    if (enc == null) {
-      enc=WebUtils.DEFAULT_CHARACTER_ENCODING;
-    }
     appendQueryProperties(targetUrl,model,enc);
   }
   sendRedirect(request,response,targetUrl.toString(),this.http10Compatible);
