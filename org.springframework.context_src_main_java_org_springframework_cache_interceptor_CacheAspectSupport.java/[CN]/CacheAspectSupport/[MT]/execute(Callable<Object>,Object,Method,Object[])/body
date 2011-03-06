@@ -16,8 +16,9 @@
         }
         if (caches.size() == 1) {
           Cache cache=caches.iterator().next();
+          retVal=cache.get(key);
           if (cache.containsKey(key)) {
-            retVal=cache.get(key);
+            return retVal;
           }
  else {
             retVal=invocation.call();
@@ -25,12 +26,21 @@
           }
         }
  else {
+          boolean eagerGet=caches.size() <= 3;
           boolean cacheHit=false;
           for (Iterator<Cache<?,?>> iterator=caches.iterator(); iterator.hasNext() && !cacheHit; ) {
             Cache cache=iterator.next();
-            if (cache.containsKey(key)) {
+            if (eagerGet) {
               retVal=cache.get(key);
-              cacheHit=true;
+            }
+            if (cache.containsKey(key)) {
+              if (eagerGet) {
+                cacheHit=true;
+              }
+ else {
+                retVal=cache.get(key);
+                cacheHit=cache.containsKey(key);
+              }
             }
           }
           if (!cacheHit) {
