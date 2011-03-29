@@ -1,0 +1,24 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Creating an AnnotationConfigApplicationContext for " + ObjectUtils.nullSafeToString(locations));
+  }
+  AnnotationConfigApplicationContext context=new AnnotationConfigApplicationContext();
+  prepareContext(context);
+  customizeBeanFactory(context.getDefaultListableBeanFactory());
+  List<Class<?>> configClasses=new ArrayList<Class<?>>();
+  for (  String location : locations) {
+    final Class<?> clazz=getClass().getClassLoader().loadClass(location);
+    configClasses.add(clazz);
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Loading AnnotationConfigApplicationContext from config classes: " + configClasses);
+  }
+  for (  Class<?> configClass : configClasses) {
+    context.register(configClass);
+  }
+  AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+  customizeContext(context);
+  context.refresh();
+  context.registerShutdownHook();
+  return context;
+}
