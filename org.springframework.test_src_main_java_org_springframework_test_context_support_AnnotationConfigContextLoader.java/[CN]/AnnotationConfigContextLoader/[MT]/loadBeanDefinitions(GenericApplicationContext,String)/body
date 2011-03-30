@@ -1,0 +1,20 @@
+{
+  Assert.isInstanceOf(AnnotationConfigApplicationContext.class,context,"context must be an instance of AnnotationConfigApplicationContext");
+  AnnotationConfigApplicationContext annotationConfigApplicationContext=(AnnotationConfigApplicationContext)context;
+  List<Class<?>> configClasses=new ArrayList<Class<?>>();
+  for (  String location : locations) {
+    try {
+      Class<?> clazz=getClass().getClassLoader().loadClass(location);
+      configClasses.add(clazz);
+    }
+ catch (    ClassNotFoundException e) {
+      throw new IllegalArgumentException(String.format("The supplied resource location [%s] does not represent a class.",location),e);
+    }
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Registering configuration classes: " + configClasses);
+  }
+  for (  Class<?> configClass : configClasses) {
+    annotationConfigApplicationContext.register(configClass);
+  }
+}
