@@ -1,0 +1,13 @@
+{
+  logger.info("Dropping database schema for Hibernate SessionFactory");
+  HibernateTemplate hibernateTemplate=new HibernateTemplate(getSessionFactory());
+  hibernateTemplate.execute(new HibernateCallback<Object>(){
+    @SuppressWarnings("deprecation") public Void doInHibernate(    Session session) throws HibernateException, SQLException {
+      Dialect dialect=((SessionFactoryImplementor)session.getSessionFactory()).getDialect();
+      String[] sql=configuration.generateDropSchemaScript(dialect);
+      executeSchemaScript(session.connection(),sql);
+      return null;
+    }
+  }
+);
+}

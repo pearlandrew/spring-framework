@@ -2,7 +2,7 @@
   final DriverManagerDataSource ds=new DriverManagerDataSource();
   final List invocations=new ArrayList();
   LocalSessionFactoryBean sfb=new LocalSessionFactoryBean(){
-    protected Configuration newConfiguration(){
+    @Override protected Configuration newConfiguration(){
       return new Configuration(){
         public Configuration addInputStream(        InputStream is){
           try {
@@ -16,9 +16,9 @@
       }
 ;
     }
-    protected SessionFactory newSessionFactory(    Configuration config){
-      assertEquals(TransactionAwareDataSourceConnectionProvider.class.getName(),config.getProperty(Environment.CONNECTION_PROVIDER));
-      assertEquals(ds,LocalSessionFactoryBean.getConfigTimeDataSource());
+    @Override protected SessionFactory newSessionFactory(){
+      assertEquals(TransactionAwareDataSourceConnectionProvider.class.getName(),this.getConfiguration().getProperty(Environment.CONNECTION_PROVIDER));
+      assertEquals(ds,SessionFactoryBuilderSupport.getConfigTimeDataSource());
       invocations.add("newSessionFactory");
       return null;
     }

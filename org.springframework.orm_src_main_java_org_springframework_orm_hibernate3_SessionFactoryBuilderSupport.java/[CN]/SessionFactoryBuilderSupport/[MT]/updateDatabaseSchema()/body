@@ -1,0 +1,26 @@
+{
+  logger.info("Updating database schema for Hibernate SessionFactory");
+  if (this.dataSource != null) {
+    configTimeDataSourceHolder.set(this.dataSource);
+  }
+  try {
+    HibernateTemplate hibernateTemplate=new HibernateTemplate(getSessionFactory());
+    hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
+    hibernateTemplate.execute(new HibernateCallback<Void>(){
+      public Void doInHibernate(      Session session) throws HibernateException, SQLException {
+        @SuppressWarnings("deprecation") Connection conn=session.connection();
+        Dialect dialect=((SessionFactoryImplementor)session.getSessionFactory()).getDialect();
+        DatabaseMetadata metadata=new DatabaseMetadata(conn,dialect);
+        String[] sql=configuration.generateSchemaUpdateScript(dialect,metadata);
+        executeSchemaScript(conn,sql);
+        return null;
+      }
+    }
+);
+  }
+  finally {
+    if (dataSource != null) {
+      configTimeDataSourceHolder.remove();
+    }
+  }
+}
