@@ -1,0 +1,58 @@
+{
+  for (  PropertyDescriptor existingPD : this.propertyDescriptors) {
+    if (existingPD.getName().equals(propertyName)) {
+      if (existingPD.getReadMethod() != null) {
+        if (readMethod != null && existingPD.getReadMethod().getReturnType() != readMethod.getReturnType() || writeMethod != null && existingPD.getReadMethod().getReturnType() != writeMethod.getParameterTypes()[0]) {
+          break;
+        }
+      }
+      if (readMethod != null) {
+        try {
+          existingPD.setReadMethod(readMethod);
+        }
+ catch (        IntrospectionException ex) {
+          existingPD.setWriteMethod(null);
+          existingPD.setReadMethod(readMethod);
+        }
+      }
+      if (existingPD.getWriteMethod() != null) {
+        if (readMethod != null && existingPD.getWriteMethod().getParameterTypes()[0] != readMethod.getReturnType() || writeMethod != null && existingPD.getWriteMethod().getParameterTypes()[0] != writeMethod.getParameterTypes()[0]) {
+          break;
+        }
+      }
+      if (writeMethod != null) {
+        existingPD.setWriteMethod(writeMethod);
+      }
+      if (existingPD instanceof IndexedPropertyDescriptor) {
+        IndexedPropertyDescriptor existingIPD=(IndexedPropertyDescriptor)existingPD;
+        if (existingIPD.getIndexedReadMethod() != null) {
+          if (indexedReadMethod != null && existingIPD.getIndexedReadMethod().getReturnType() != indexedReadMethod.getReturnType() || indexedWriteMethod != null && existingIPD.getIndexedReadMethod().getReturnType() != indexedWriteMethod.getParameterTypes()[1]) {
+            break;
+          }
+        }
+        try {
+          existingIPD.setIndexedReadMethod(indexedReadMethod);
+        }
+ catch (        IntrospectionException ex) {
+          existingIPD.setIndexedWriteMethod(null);
+          existingIPD.setIndexedReadMethod(indexedReadMethod);
+        }
+        if (existingIPD.getIndexedWriteMethod() != null) {
+          if (indexedReadMethod != null && existingIPD.getIndexedWriteMethod().getParameterTypes()[1] != indexedReadMethod.getReturnType() || indexedWriteMethod != null && existingIPD.getIndexedWriteMethod().getParameterTypes()[1] != indexedWriteMethod.getParameterTypes()[1]) {
+            break;
+          }
+        }
+        if (indexedWriteMethod != null) {
+          existingIPD.setIndexedWriteMethod(indexedWriteMethod);
+        }
+      }
+      return;
+    }
+  }
+  if (indexedReadMethod == null && indexedWriteMethod == null) {
+    this.propertyDescriptors.add(new PropertyDescriptor(propertyName,readMethod,writeMethod));
+  }
+ else {
+    this.propertyDescriptors.add(new IndexedPropertyDescriptor(propertyName,readMethod,writeMethod,indexedReadMethod,indexedWriteMethod));
+  }
+}
