@@ -1,24 +1,20 @@
 {
   Assert.notNull(testClass,"Test class must not be null");
   Assert.notNull(contextCache,"ContextCache must not be null");
-  if (!StringUtils.hasText(defaultContextLoaderClassName)) {
-    defaultContextLoaderClassName=STANDARD_DEFAULT_CONTEXT_LOADER_CLASS_NAME;
-  }
   ContextConfiguration contextConfiguration=testClass.getAnnotation(ContextConfiguration.class);
-  String[] locations=null;
   ContextLoader contextLoader=null;
+  String[] locations=null;
   if (contextConfiguration == null) {
     if (logger.isInfoEnabled()) {
-      logger.info("@ContextConfiguration not found for class [" + testClass + "]");
+      logger.info(String.format("@ContextConfiguration not found for class [%s]",testClass));
     }
   }
  else {
     if (logger.isTraceEnabled()) {
-      logger.trace("Retrieved @ContextConfiguration [" + contextConfiguration + "] for class ["+ testClass+ "]");
+      logger.trace(String.format("Retrieved @ContextConfiguration [%s] for class [%s]",contextConfiguration,testClass));
     }
-    Class<? extends ContextLoader> contextLoaderClass=retrieveContextLoaderClass(testClass,defaultContextLoaderClassName);
-    contextLoader=(ContextLoader)BeanUtils.instantiateClass(contextLoaderClass);
-    locations=retrieveContextLocations(contextLoader,testClass);
+    contextLoader=ContextLoaderUtils.resolveContextLoader(testClass,defaultContextLoaderClassName);
+    locations=ContextLoaderUtils.resolveContextLocations(contextLoader,testClass);
   }
   this.testClass=testClass;
   this.contextCache=contextCache;
