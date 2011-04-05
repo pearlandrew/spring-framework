@@ -2,10 +2,13 @@
   if (!MultiValueMap.class.isAssignableFrom(clazz)) {
     return false;
   }
-  if (mediaType != null) {
-    return MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType);
-  }
- else {
+  if (mediaType == null) {
     return true;
   }
+  for (  MediaType supportedMediaType : getSupportedMediaTypes()) {
+    if (!supportedMediaType.equals(MediaType.MULTIPART_FORM_DATA) && supportedMediaType.includes(mediaType)) {
+      return true;
+    }
+  }
+  return false;
 }
