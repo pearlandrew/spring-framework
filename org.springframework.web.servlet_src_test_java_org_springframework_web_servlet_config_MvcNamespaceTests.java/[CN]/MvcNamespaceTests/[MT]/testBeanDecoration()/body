@@ -3,17 +3,17 @@
   reader.loadBeanDefinitions(new ClassPathResource("mvc-config-bean-decoration.xml",getClass()));
   assertEquals(10,appContext.getBeanDefinitionCount());
   appContext.refresh();
-  DefaultAnnotationHandlerMapping mapping=appContext.getBean(DefaultAnnotationHandlerMapping.class);
+  RequestMappingHandlerMethodMapping mapping=appContext.getBean(RequestMappingHandlerMethodMapping.class);
   assertNotNull(mapping);
-  mapping.setDefaultHandler(new TestController());
-  MockHttpServletRequest request=new MockHttpServletRequest();
+  mapping.setDefaultHandler(handlerMethod);
+  MockHttpServletRequest request=new MockHttpServletRequest("GET","/");
   HandlerExecutionChain chain=mapping.getHandler(request);
-  assertEquals(4,chain.getInterceptors().length);
-  assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
-  assertTrue(chain.getInterceptors()[2] instanceof LocaleChangeInterceptor);
-  assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
-  LocaleChangeInterceptor interceptor=(LocaleChangeInterceptor)chain.getInterceptors()[2];
+  assertEquals(3,chain.getInterceptors().length);
+  assertTrue(chain.getInterceptors()[0] instanceof ConversionServiceExposingInterceptor);
+  assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
+  assertTrue(chain.getInterceptors()[2] instanceof ThemeChangeInterceptor);
+  LocaleChangeInterceptor interceptor=(LocaleChangeInterceptor)chain.getInterceptors()[1];
   assertEquals("lang",interceptor.getParamName());
-  ThemeChangeInterceptor interceptor2=(ThemeChangeInterceptor)chain.getInterceptors()[3];
+  ThemeChangeInterceptor interceptor2=(ThemeChangeInterceptor)chain.getInterceptors()[2];
   assertEquals("style",interceptor2.getParamName());
 }

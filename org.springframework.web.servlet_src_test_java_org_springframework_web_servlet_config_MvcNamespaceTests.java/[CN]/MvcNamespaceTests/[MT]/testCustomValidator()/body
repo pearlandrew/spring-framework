@@ -3,13 +3,12 @@
   reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-validator.xml",getClass()));
   assertEquals(8,appContext.getBeanDefinitionCount());
   appContext.refresh();
-  AnnotationMethodHandlerAdapter adapter=appContext.getBean(AnnotationMethodHandlerAdapter.class);
+  RequestMappingHandlerMethodAdapter adapter=appContext.getBean(RequestMappingHandlerMethodAdapter.class);
   assertNotNull(adapter);
-  TestController handler=new TestController();
   MockHttpServletRequest request=new MockHttpServletRequest();
   request.addParameter("date","2009-10-31");
   MockHttpServletResponse response=new MockHttpServletResponse();
-  adapter.handle(request,response,handler);
+  adapter.handle(request,response,handlerMethod);
   assertTrue(appContext.getBean(TestValidator.class).validatorInvoked);
   assertFalse(handler.recordedValidationError);
 }

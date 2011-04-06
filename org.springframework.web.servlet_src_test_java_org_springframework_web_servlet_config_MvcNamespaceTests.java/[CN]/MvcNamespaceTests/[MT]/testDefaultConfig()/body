@@ -3,12 +3,11 @@
   reader.loadBeanDefinitions(new ClassPathResource("mvc-config.xml",getClass()));
   assertEquals(8,appContext.getBeanDefinitionCount());
   appContext.refresh();
-  DefaultAnnotationHandlerMapping mapping=appContext.getBean(DefaultAnnotationHandlerMapping.class);
+  RequestMappingHandlerMethodMapping mapping=appContext.getBean(RequestMappingHandlerMethodMapping.class);
   assertNotNull(mapping);
   assertEquals(0,mapping.getOrder());
-  TestController handler=new TestController();
-  mapping.setDefaultHandler(handler);
-  AnnotationMethodHandlerAdapter adapter=appContext.getBean(AnnotationMethodHandlerAdapter.class);
+  mapping.setDefaultHandler(handlerMethod);
+  RequestMappingHandlerMethodAdapter adapter=appContext.getBean(RequestMappingHandlerMethodAdapter.class);
   assertNotNull(adapter);
   HttpMessageConverter<?>[] messageConverters=adapter.getMessageConverters();
   assertTrue(messageConverters.length > 0);
@@ -16,15 +15,15 @@
   assertNotNull(appContext.getBean(ConversionService.class));
   assertNotNull(appContext.getBean(LocalValidatorFactoryBean.class));
   assertNotNull(appContext.getBean(Validator.class));
-  MockHttpServletRequest request=new MockHttpServletRequest();
+  MockHttpServletRequest request=new MockHttpServletRequest("GET","/");
   request.addParameter("date","2009-10-31");
   MockHttpServletResponse response=new MockHttpServletResponse();
   HandlerExecutionChain chain=mapping.getHandler(request);
-  assertEquals(2,chain.getInterceptors().length);
-  assertTrue(chain.getInterceptors()[1] instanceof ConversionServiceExposingInterceptor);
-  ConversionServiceExposingInterceptor interceptor=(ConversionServiceExposingInterceptor)chain.getInterceptors()[1];
-  interceptor.preHandle(request,response,handler);
+  assertEquals(1,chain.getInterceptors().length);
+  assertTrue(chain.getInterceptors()[0] instanceof ConversionServiceExposingInterceptor);
+  ConversionServiceExposingInterceptor interceptor=(ConversionServiceExposingInterceptor)chain.getInterceptors()[0];
+  interceptor.preHandle(request,response,handlerMethod);
   assertSame(appContext.getBean(ConversionService.class),request.getAttribute(ConversionService.class.getName()));
-  adapter.handle(request,response,handler);
+  adapter.handle(request,response,handlerMethod);
   assertTrue(handler.recordedValidationError);
 }

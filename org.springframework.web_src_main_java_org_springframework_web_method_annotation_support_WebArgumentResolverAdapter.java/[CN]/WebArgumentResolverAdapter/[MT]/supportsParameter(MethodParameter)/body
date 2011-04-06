@@ -1,13 +1,7 @@
 {
   try {
-    RequestAttributes requestAttributes=RequestContextHolder.getRequestAttributes();
-    Object result;
-    if (requestAttributes instanceof NativeWebRequest) {
-      result=adaptee.resolveArgument(parameter,(NativeWebRequest)requestAttributes);
-    }
- else {
-      result=adaptee.resolveArgument(parameter,null);
-    }
+    NativeWebRequest webRequest=getWebRequest();
+    Object result=adaptee.resolveArgument(parameter,webRequest);
     if (result == WebArgumentResolver.UNRESOLVED) {
       return false;
     }
@@ -16,6 +10,7 @@
     }
   }
  catch (  Exception ex) {
+    logger.trace("Error in checking support for parameter [" + parameter + "], message: "+ ex.getMessage());
     return false;
   }
 }
