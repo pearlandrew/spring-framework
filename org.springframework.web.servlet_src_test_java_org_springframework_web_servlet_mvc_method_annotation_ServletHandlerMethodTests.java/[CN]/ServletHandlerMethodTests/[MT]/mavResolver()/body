@@ -1,0 +1,14 @@
+{
+  initDispatcherServlet(ModelAndViewResolverController.class,new BeanDefinitionRegistrar(){
+    public void register(    GenericWebApplicationContext wac){
+      RootBeanDefinition adapterDef=new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+      adapterDef.getPropertyValues().add("customModelAndViewResolver",new MyModelAndViewResolver());
+      wac.registerBeanDefinition("handlerAdapter",adapterDef);
+    }
+  }
+);
+  MockHttpServletRequest request=new MockHttpServletRequest("GET","/");
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  servlet.service(request,response);
+  assertEquals("myValue",response.getContentAsString());
+}

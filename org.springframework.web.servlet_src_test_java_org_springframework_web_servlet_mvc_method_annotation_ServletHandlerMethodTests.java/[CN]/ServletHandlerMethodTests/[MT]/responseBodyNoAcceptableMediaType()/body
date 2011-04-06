@@ -1,0 +1,22 @@
+{
+  initDispatcherServlet(RequestResponseBodyController.class,new BeanDefinitionRegistrar(){
+    public void register(    GenericWebApplicationContext wac){
+      RootBeanDefinition converterDef=new RootBeanDefinition(StringHttpMessageConverter.class);
+      converterDef.getPropertyValues().add("supportedMediaTypes",new MediaType("text","plain"));
+      RootBeanDefinition adapterDef=new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+      StringHttpMessageConverter converter=new StringHttpMessageConverter();
+      converter.setSupportedMediaTypes(Collections.singletonList(new MediaType("text","plain")));
+      adapterDef.getPropertyValues().add("messageConverters",converter);
+      wac.registerBeanDefinition("handlerAdapter",adapterDef);
+    }
+  }
+);
+  MockHttpServletRequest request=new MockHttpServletRequest("PUT","/something");
+  String requestBody="Hello World";
+  request.setContent(requestBody.getBytes("UTF-8"));
+  request.addHeader("Content-Type","text/plain; charset=utf-8");
+  request.addHeader("Accept","application/pdf, application/msword");
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  servlet.service(request,response);
+  assertEquals(406,response.getStatus());
+}

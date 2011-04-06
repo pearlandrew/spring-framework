@@ -1,0 +1,16 @@
+{
+  initDispatcherServlet(EmptyParameterListHandlerMethodController.class,new BeanDefinitionRegistrar(){
+    public void register(    GenericWebApplicationContext context){
+      RootBeanDefinition vrDef=new RootBeanDefinition(InternalResourceViewResolver.class);
+      vrDef.getPropertyValues().add("suffix",".jsp");
+      context.registerBeanDefinition("viewResolver",vrDef);
+    }
+  }
+);
+  MockHttpServletRequest request=new MockHttpServletRequest("GET","/emptyParameterListHandler");
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  EmptyParameterListHandlerMethodController.called=false;
+  servlet.service(request,response);
+  assertTrue(EmptyParameterListHandlerMethodController.called);
+  assertEquals("",response.getContentAsString());
+}

@@ -1,0 +1,19 @@
+{
+  initDispatcherServlet(NestedSetController.class,new BeanDefinitionRegistrar(){
+    public void register(    GenericWebApplicationContext context){
+      RootBeanDefinition csDef=new RootBeanDefinition(FormattingConversionServiceFactoryBean.class);
+      csDef.getPropertyValues().add("converters",new TestBeanConverter());
+      RootBeanDefinition wbiDef=new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
+      wbiDef.getPropertyValues().add("conversionService",csDef);
+      RootBeanDefinition adapterDef=new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+      adapterDef.getPropertyValues().add("webBindingInitializer",wbiDef);
+      context.registerBeanDefinition("handlerAdapter",adapterDef);
+    }
+  }
+);
+  MockHttpServletRequest request=new MockHttpServletRequest("GET","/myPath.do");
+  request.addParameter("testBeanSet",new String[]{"1","2"});
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  servlet.service(request,response);
+  assertEquals("[1, 2]-org.springframework.beans.TestBean",response.getContentAsString());
+}
