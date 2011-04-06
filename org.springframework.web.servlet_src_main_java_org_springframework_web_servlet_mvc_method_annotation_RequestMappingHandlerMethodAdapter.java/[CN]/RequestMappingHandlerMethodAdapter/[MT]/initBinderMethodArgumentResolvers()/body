@@ -1,0 +1,18 @@
+{
+  if (initBinderArgumentResolvers != null) {
+    return;
+  }
+  initBinderArgumentResolvers=new HandlerMethodArgumentResolverComposite();
+  initBinderArgumentResolvers.registerArgumentResolver(new RequestParamMethodArgumentResolver(beanFactory,false));
+  initBinderArgumentResolvers.registerArgumentResolver(new RequestParamMapMethodArgumentResolver());
+  initBinderArgumentResolvers.registerArgumentResolver(new PathVariableMethodArgumentResolver(beanFactory));
+  initBinderArgumentResolvers.registerArgumentResolver(new ExpressionValueMethodArgumentResolver(beanFactory));
+  if (customArgumentResolvers != null) {
+    for (    WebArgumentResolver customResolver : customArgumentResolvers) {
+      initBinderArgumentResolvers.registerArgumentResolver(new WebArgumentResolverAdapter(customResolver));
+    }
+  }
+  initBinderArgumentResolvers.registerArgumentResolver(new ServletRequestMethodArgumentResolver());
+  initBinderArgumentResolvers.registerArgumentResolver(new ServletResponseMethodArgumentResolver());
+  initBinderArgumentResolvers.registerArgumentResolver(new RequestParamMethodArgumentResolver(beanFactory,true));
+}
