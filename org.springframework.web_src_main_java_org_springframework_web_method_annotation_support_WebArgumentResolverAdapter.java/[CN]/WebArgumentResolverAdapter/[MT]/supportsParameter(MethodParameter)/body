@@ -1,0 +1,21 @@
+{
+  try {
+    RequestAttributes requestAttributes=RequestContextHolder.getRequestAttributes();
+    Object result;
+    if (requestAttributes instanceof NativeWebRequest) {
+      result=adaptee.resolveArgument(parameter,(NativeWebRequest)requestAttributes);
+    }
+ else {
+      result=adaptee.resolveArgument(parameter,null);
+    }
+    if (result == WebArgumentResolver.UNRESOLVED) {
+      return false;
+    }
+ else {
+      return ClassUtils.isAssignableValue(parameter.getParameterType(),result);
+    }
+  }
+ catch (  Exception ex) {
+    return false;
+  }
+}

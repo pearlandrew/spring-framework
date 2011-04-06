@@ -1,0 +1,11 @@
+{
+  MediaType accepted=MediaType.TEXT_PLAIN;
+  String s="Foo";
+  ResponseEntity<String> returnValue=new ResponseEntity<String>(s,HttpStatus.OK);
+  servletRequest.addHeader("Accept",accepted.toString());
+  expect(messageConverter.canWrite(String.class,accepted)).andReturn(true);
+  messageConverter.write(eq(s),eq(accepted),isA(HttpOutputMessage.class));
+  replay(messageConverter);
+  processor.handleReturnValue(returnValue,responseEntityReturnValue,null,request);
+  verify(messageConverter);
+}

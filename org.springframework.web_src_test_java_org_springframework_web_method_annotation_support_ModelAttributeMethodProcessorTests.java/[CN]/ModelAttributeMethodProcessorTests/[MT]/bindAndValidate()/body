@@ -1,0 +1,11 @@
+{
+  Object target=new TestBean();
+  model.addAttribute("attrName",target);
+  StubRequestDataBinder dataBinder=new StubRequestDataBinder(target);
+  WebDataBinderFactory binderFactory=createMock(WebDataBinderFactory.class);
+  expect(binderFactory.createBinder(webRequest,target,"attrName")).andReturn(dataBinder);
+  replay(binderFactory);
+  processor.resolveArgument(annotatedParam,model,webRequest,binderFactory);
+  assertTrue(dataBinder.isBindInvoked());
+  assertTrue(dataBinder.isValidateInvoked());
+}

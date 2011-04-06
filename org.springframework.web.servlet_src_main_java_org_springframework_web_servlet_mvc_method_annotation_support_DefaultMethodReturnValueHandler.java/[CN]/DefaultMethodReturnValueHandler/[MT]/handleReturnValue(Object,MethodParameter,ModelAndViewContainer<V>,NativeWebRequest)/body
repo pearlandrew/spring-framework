@@ -1,0 +1,22 @@
+{
+  for (  ModelAndViewResolver resolver : this.customModelAndViewResolvers) {
+    Class<?> handlerType=returnType.getDeclaringClass();
+    Method method=returnType.getMethod();
+    ExtendedModelMap extModel=(ExtendedModelMap)mavContainer.getModel();
+    ModelAndView mav=resolver.resolveModelAndView(method,handlerType,returnValue,extModel,webRequest);
+    if (mav != ModelAndViewResolver.UNRESOLVED) {
+      mavContainer.setView((V)mav.getView());
+      mavContainer.setViewName(mav.getViewName());
+      mavContainer.addModelAttributes(mav.getModel());
+      return;
+    }
+  }
+  if (returnValue == null) {
+    return;
+  }
+ else   if (!BeanUtils.isSimpleProperty(returnValue.getClass())) {
+    String name=ModelFactory.getNameForReturnValue(returnValue,returnType);
+    mavContainer.addModelAttribute(name,returnValue);
+  }
+  throw new UnsupportedOperationException();
+}

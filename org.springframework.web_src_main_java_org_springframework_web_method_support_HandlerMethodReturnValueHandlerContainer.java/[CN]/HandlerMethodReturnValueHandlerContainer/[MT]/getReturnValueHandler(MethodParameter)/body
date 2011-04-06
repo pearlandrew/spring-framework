@@ -1,0 +1,19 @@
+{
+  if (this.returnValueHandlers == null) {
+    return null;
+  }
+  HandlerMethodReturnValueHandler result=this.returnValueHandlerCache.get(returnType);
+  if (result == null) {
+    for (    HandlerMethodReturnValueHandler methodReturnValueHandler : returnValueHandlers) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Testing if return value handler [" + methodReturnValueHandler + "] supports ["+ returnType.getGenericParameterType()+ "]");
+      }
+      if (methodReturnValueHandler.supportsReturnType(returnType)) {
+        result=methodReturnValueHandler;
+        this.returnValueHandlerCache.put(returnType,methodReturnValueHandler);
+        break;
+      }
+    }
+  }
+  return result;
+}

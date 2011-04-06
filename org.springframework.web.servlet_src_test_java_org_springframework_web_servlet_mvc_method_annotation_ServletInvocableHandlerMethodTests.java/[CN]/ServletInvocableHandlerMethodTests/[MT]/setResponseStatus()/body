@@ -1,0 +1,10 @@
+{
+  HandlerMethodReturnValueHandlerContainer handlers=new HandlerMethodReturnValueHandlerContainer();
+  handlers.registerReturnValueHandler(new StubReturnValueHandler(void.class,false));
+  Method method=Handler.class.getDeclaredMethod("responseStatus");
+  ServletInvocableHandlerMethod handlerMethod=new ServletInvocableHandlerMethod(new Handler(),method);
+  handlerMethod.setReturnValueHandlers(handlers);
+  handlerMethod.invokeAndHandle(webRequest,null);
+  assertEquals(HttpStatus.BAD_REQUEST.value(),response.getStatus());
+  assertEquals("400 Bad Request",response.getErrorMessage());
+}

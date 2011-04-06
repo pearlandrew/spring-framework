@@ -1,0 +1,10 @@
+{
+  if (!returnValueHandlers.supportsReturnType(getReturnType())) {
+    throw new IllegalStateException("No suitable HandlerMethodReturnValueHandler for method " + toString());
+  }
+  Object returnValue=invokeForRequest(request,model,providedArgs);
+  setResponseStatus((ServletWebRequest)request);
+  ModelAndViewContainer<View> mavContainer=new ModelAndViewContainer<View>(model);
+  returnValueHandlers.handleReturnValue(returnValue,getReturnType(),mavContainer,request);
+  return getModelAndView(request,mavContainer,returnValue);
+}

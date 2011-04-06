@@ -1,0 +1,15 @@
+{
+  ConfigurableWebBindingInitializer bindingInitializer=new ConfigurableWebBindingInitializer();
+  bindingInitializer.setValidator(new StubValidator());
+  this.handlerAdapter=new RequestMappingHandlerAdapter();
+  this.handlerAdapter.setWebBindingInitializer(bindingInitializer);
+  this.handlerAdapter.setCustomArgumentResolvers(new WebArgumentResolver[]{new ColorArgumentResolver()});
+  GenericWebApplicationContext context=new GenericWebApplicationContext();
+  context.refresh();
+  this.handlerAdapter.setApplicationContext(context);
+  this.handlerAdapter.setBeanFactory(context.getBeanFactory());
+  this.handlerAdapter.afterPropertiesSet();
+  this.request=new MockHttpServletRequest();
+  this.response=new MockHttpServletResponse();
+  RequestContextHolder.setRequestAttributes(new ServletWebRequest(request));
+}

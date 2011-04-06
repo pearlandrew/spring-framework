@@ -1,0 +1,16 @@
+{
+  Object target1=new Object();
+  WebDataBinder binder1=new WebDataBinder(target1,"attr1");
+  BindingResult bindingResult1=binder1.getBindingResult();
+  Object target2=new Object();
+  WebDataBinder binder2=new WebDataBinder(target1,"attr2");
+  BindingResult bindingResult2=binder2.getBindingResult();
+  ModelMap model=new ExtendedModelMap();
+  model.addAttribute("attr1",target1);
+  model.addAttribute("attr2",target2);
+  model.addAttribute("filler","fillerValue");
+  model.addAllAttributes(bindingResult1.getModel());
+  model.addAllAttributes(bindingResult2.getModel());
+  Object actual=resolver.resolveArgument(errorsParam,model,webRequest,null);
+  assertSame("Should resolve to the latest BindingResult added",actual,bindingResult2);
+}

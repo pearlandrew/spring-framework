@@ -1,0 +1,39 @@
+{
+  if (handlerMethods.containsKey(lookupKey)) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Found direct match for [" + lookupKey + "]");
+    }
+    handleMatch(lookupKey,request);
+    return handlerMethods.get(lookupKey);
+  }
+ else {
+    List<Match> matches=new ArrayList<Match>();
+    for (    Map.Entry<T,HandlerMethod> entry : handlerMethods.entrySet()) {
+      T match=getMatchingKey(entry.getKey(),request);
+      if (match != null) {
+        matches.add(new Match(match,entry.getValue()));
+      }
+    }
+    if (!matches.isEmpty()) {
+      Comparator<Match> comparator=getMatchComparator(request);
+      Collections.sort(matches,comparator);
+      if (logger.isTraceEnabled()) {
+        logger.trace("Found " + matches.size() + " matching key(s) for ["+ lookupKey+ "] : "+ matches);
+      }
+      Match bestMatch=matches.get(0);
+      if (matches.size() > 1) {
+        Match secondBestMatch=matches.get(1);
+        if (comparator.compare(bestMatch,secondBestMatch) == 0) {
+          Method m1=bestMatch.handlerMethod.getMethod();
+          Method m2=secondBestMatch.handlerMethod.getMethod();
+          throw new IllegalStateException("Ambiguous handler methods mapped for HTTP path '" + request.getRequestURL() + "': {"+ m1+ ", "+ m2+ "}");
+        }
+      }
+      handleMatch(bestMatch.key,request);
+      return bestMatch.handlerMethod;
+    }
+ else {
+      return handleNoMatch(handlerMethods.keySet(),request);
+    }
+  }
+}

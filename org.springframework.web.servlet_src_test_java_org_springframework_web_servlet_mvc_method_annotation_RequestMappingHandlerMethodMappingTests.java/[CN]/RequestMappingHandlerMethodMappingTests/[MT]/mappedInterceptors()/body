@@ -1,0 +1,14 @@
+{
+  String path="/handle";
+  HandlerInterceptor interceptor=new HandlerInterceptorAdapter(){
+  }
+;
+  MappedInterceptor mappedInterceptor=new MappedInterceptor(new String[]{path},interceptor);
+  MyRequestMappingHandlerMethodMapping mapping=new MyRequestMappingHandlerMethodMapping();
+  mapping.setMappedInterceptors(new MappedInterceptor[]{mappedInterceptor});
+  HandlerExecutionChain chain=mapping.getHandlerExecutionChain(handler,new MockHttpServletRequest("GET",path));
+  assertNotNull(chain.getInterceptors());
+  assertSame(interceptor,chain.getInterceptors()[0]);
+  chain=mapping.getHandlerExecutionChain(handler,new MockHttpServletRequest("GET","/invalid"));
+  assertNull(chain.getInterceptors());
+}

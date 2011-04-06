@@ -1,0 +1,21 @@
+{
+  Class<?> paramType=parameter.getParameterType();
+  NamedValueInfo namedValueInfo=getNamedValueInfo(parameter);
+  Object arg=resolveNamedValueArgument(webRequest,parameter,namedValueInfo.name);
+  if (arg == null) {
+    if (namedValueInfo.defaultValue != null) {
+      arg=resolveDefaultValue(namedValueInfo.defaultValue);
+    }
+ else     if (namedValueInfo.required) {
+      handleMissingValue(namedValueInfo.name,parameter);
+    }
+    arg=checkForNull(namedValueInfo.name,arg,paramType);
+  }
+  if (binderFactory != null) {
+    WebDataBinder binder=binderFactory.createBinder(webRequest,null,namedValueInfo.name);
+    return binder.convertIfNecessary(arg,paramType,parameter);
+  }
+ else {
+    return arg;
+  }
+}

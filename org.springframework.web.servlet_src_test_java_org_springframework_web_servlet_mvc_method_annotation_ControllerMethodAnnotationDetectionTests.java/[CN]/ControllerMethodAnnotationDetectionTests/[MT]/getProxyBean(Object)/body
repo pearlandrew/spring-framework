@@ -1,0 +1,10 @@
+{
+  GenericWebApplicationContext wac=new GenericWebApplicationContext();
+  wac.registerBeanDefinition("controller",new RootBeanDefinition(handler.getClass()));
+  DefaultAdvisorAutoProxyCreator autoProxyCreator=new DefaultAdvisorAutoProxyCreator();
+  autoProxyCreator.setBeanFactory(wac.getBeanFactory());
+  wac.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
+  wac.getBeanFactory().registerSingleton("advsr",new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+  wac.refresh();
+  return wac.getBean("controller");
+}

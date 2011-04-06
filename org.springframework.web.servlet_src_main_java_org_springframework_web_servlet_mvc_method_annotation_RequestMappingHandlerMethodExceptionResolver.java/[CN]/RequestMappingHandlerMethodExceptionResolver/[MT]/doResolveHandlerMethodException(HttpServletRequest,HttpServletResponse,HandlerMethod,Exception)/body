@@ -1,0 +1,25 @@
+{
+  if (handlerMethod != null) {
+    ExceptionMethodMapping mapping=getExceptionMethodMapping(handlerMethod);
+    Method method=mapping.getMethod(ex);
+    if (method != null) {
+      Object handler=handlerMethod.getBean();
+      ServletInvocableHandlerMethod exceptionHandler=new ServletInvocableHandlerMethod(handler,method);
+      exceptionHandler.setArgumentResolverContainer(argumentResolvers);
+      exceptionHandler.setReturnValueHandlers(returnValueHandlers);
+      ServletWebRequest webRequest=new ServletWebRequest(request,response);
+      ModelMap model=new ExtendedModelMap();
+      try {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Invoking exception-handling method: " + exceptionHandler);
+        }
+        ModelAndView mav=exceptionHandler.invokeAndHandle(webRequest,model,ex);
+        return (mav != null) ? mav : new ModelAndView();
+      }
+ catch (      Exception invocationEx) {
+        logger.error("Invoking exception-handling method resulted in exception : " + exceptionHandler,invocationEx);
+      }
+    }
+  }
+  return null;
+}

@@ -1,0 +1,18 @@
+{
+  if (useAutoProxy) {
+    handler=getProxyBean(handler);
+  }
+  HandlerMethodArgumentResolverContainer argResolvers=new HandlerMethodArgumentResolverContainer();
+  argResolvers.registerArgumentResolver(new ModelAttributeMethodProcessor(false));
+  HandlerMethodReturnValueHandlerContainer handlers=new HandlerMethodReturnValueHandlerContainer();
+  handlers.registerReturnValueHandler(new ModelAttributeMethodProcessor(false));
+  handlers.registerReturnValueHandler(new DefaultMethodReturnValueHandler(null));
+  Class<?> handlerType=ClassUtils.getUserClass(handler.getClass());
+  Set<Method> methods=HandlerMethodSelector.selectMethods(handlerType,REQUEST_MAPPING_METHODS);
+  Method method=methods.iterator().next();
+  ServletInvocableHandlerMethod attrMethod=new ServletInvocableHandlerMethod(handler,method);
+  attrMethod.setArgumentResolverContainer(argResolvers);
+  attrMethod.setReturnValueHandlers(handlers);
+  attrMethod.setDataBinderFactory(new DefaultDataBinderFactory(null));
+  return attrMethod;
+}

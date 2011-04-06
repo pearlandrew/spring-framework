@@ -1,0 +1,13 @@
+{
+  ServletInvocableHandlerMethod requestMappingMethod=createRequestMappingMethod(handler,useAutoProxy);
+  ModelAttribute annot=requestMappingMethod.getMethodAnnotation(ModelAttribute.class);
+  assertEquals("Failed to detect method annotation","attrName",annot.value());
+  MockHttpServletRequest servletRequest=new MockHttpServletRequest();
+  NativeWebRequest webRequest=new ServletWebRequest(servletRequest,new MockHttpServletResponse());
+  servletRequest.setParameter("name","Chad");
+  ModelMap model=new ExtendedModelMap();
+  ModelAndView mav=requestMappingMethod.invokeAndHandle(webRequest,model);
+  Object modelAttr=mav.getModelMap().get("attrName");
+  assertEquals(TestBean.class,modelAttr.getClass());
+  assertEquals("Chad",((TestBean)modelAttr).getName());
+}

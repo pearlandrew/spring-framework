@@ -1,0 +1,17 @@
+{
+  for (  MethodParameter parameter : requestMethod.getMethodParameters()) {
+    if (!parameter.hasParameterAnnotation(ModelAttribute.class)) {
+      continue;
+    }
+    String attrName=getNameForParameter(parameter);
+    if (!model.containsKey(attrName)) {
+      if (sessionHandler.isHandlerSessionAttribute(attrName,parameter.getParameterType())) {
+        Object attrValue=sessionHandler.retrieveAttribute(request,attrName);
+        if (attrValue == null) {
+          new HttpSessionRequiredException("Session attribute '" + attrName + "' not found in session");
+        }
+        model.addAttribute(attrName,attrValue);
+      }
+    }
+  }
+}

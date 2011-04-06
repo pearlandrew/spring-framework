@@ -1,0 +1,16 @@
+{
+  Class<?> paramType=parameter.getParameterType();
+  RequestParam requestParamAnnot=parameter.getParameterAnnotation(RequestParam.class);
+  if (requestParamAnnot != null) {
+    if (Map.class.isAssignableFrom(paramType)) {
+      return StringUtils.hasText(requestParamAnnot.value());
+    }
+    return true;
+  }
+ else   if (this.resolveParamsWithoutAnnotations && !parameter.hasParameterAnnotations()) {
+    return BeanUtils.isSimpleProperty(paramType);
+  }
+ else {
+    return false;
+  }
+}

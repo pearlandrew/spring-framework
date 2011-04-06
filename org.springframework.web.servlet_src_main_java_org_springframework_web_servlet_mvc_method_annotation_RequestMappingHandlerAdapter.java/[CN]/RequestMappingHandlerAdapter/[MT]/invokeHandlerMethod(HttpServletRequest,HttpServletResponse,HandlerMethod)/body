@@ -1,0 +1,12 @@
+{
+  WebDataBinderFactory binderFactory=createDataBinderFactory(handlerMethod);
+  ModelFactory modelFactory=createModelFactory(handlerMethod,binderFactory);
+  ServletInvocableHandlerMethod requestMethod=createRequestMappingMethod(handlerMethod,binderFactory);
+  ServletWebRequest webRequest=new ServletWebRequest(request,response);
+  SessionStatus sessionStatus=new SimpleSessionStatus();
+  ModelMap implicitModel=modelFactory.createModel(webRequest,requestMethod);
+  ModelAndView mav=requestMethod.invokeAndHandle(webRequest,implicitModel,sessionStatus);
+  ModelMap actualModel=(mav != null) ? mav.getModelMap() : null;
+  modelFactory.updateAttributes(webRequest,sessionStatus,actualModel,implicitModel);
+  return mav;
+}

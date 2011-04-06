@@ -1,0 +1,22 @@
+{
+  if (returnValue == null) {
+    return;
+  }
+  Assert.isInstanceOf(HttpEntity.class,returnValue);
+  HttpEntity<?> responseEntity=(HttpEntity<?>)returnValue;
+  HttpOutputMessage outputMessage=createOutputMessage(webRequest);
+  if (responseEntity instanceof ResponseEntity) {
+    ((ServerHttpResponse)outputMessage).setStatusCode(((ResponseEntity<?>)responseEntity).getStatusCode());
+  }
+  HttpHeaders entityHeaders=responseEntity.getHeaders();
+  if (!entityHeaders.isEmpty()) {
+    outputMessage.getHeaders().putAll(entityHeaders);
+  }
+  Object body=responseEntity.getBody();
+  if (body != null) {
+    writeWithMessageConverters(body,createInputMessage(webRequest),outputMessage);
+  }
+ else {
+    outputMessage.getBody();
+  }
+}

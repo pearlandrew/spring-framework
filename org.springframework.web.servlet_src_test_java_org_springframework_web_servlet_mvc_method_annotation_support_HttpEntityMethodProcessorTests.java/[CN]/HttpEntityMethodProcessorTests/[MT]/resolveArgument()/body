@@ -1,0 +1,12 @@
+{
+  MediaType contentType=MediaType.TEXT_PLAIN;
+  String expected="Foo";
+  servletRequest.addHeader("Content-Type",contentType.toString());
+  expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(contentType));
+  expect(messageConverter.canRead(String.class,contentType)).andReturn(true);
+  expect(messageConverter.read(eq(String.class),isA(HttpInputMessage.class))).andReturn(expected);
+  replay(messageConverter);
+  HttpEntity<?> result=(HttpEntity<String>)processor.resolveArgument(httpEntityParam,null,request,null);
+  assertEquals("Invalid argument",expected,result.getBody());
+  verify(messageConverter);
+}

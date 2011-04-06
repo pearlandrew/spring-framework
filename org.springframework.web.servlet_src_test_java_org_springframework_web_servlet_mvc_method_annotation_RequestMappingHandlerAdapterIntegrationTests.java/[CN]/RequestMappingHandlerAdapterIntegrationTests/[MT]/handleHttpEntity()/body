@@ -1,0 +1,11 @@
+{
+  Class<?>[] paramTypes=new Class<?>[]{HttpEntity.class};
+  request.addHeader("Content-Type","text/plain; charset=utf-8");
+  request.setContent("Hello Server".getBytes("UTF-8"));
+  HandlerMethod handlerMethod=handlerMethod(new RequestMappingHandler(),"handleHttpEntity",paramTypes);
+  ModelAndView mav=handlerAdapter.handle(request,response,handlerMethod);
+  assertNull(mav);
+  assertEquals(HttpStatus.ACCEPTED.value(),response.getStatus());
+  assertEquals("Handled requestBody=[Hello Server]",new String(response.getContentAsByteArray(),"UTF-8"));
+  assertEquals("headerValue",response.getHeader("header"));
+}

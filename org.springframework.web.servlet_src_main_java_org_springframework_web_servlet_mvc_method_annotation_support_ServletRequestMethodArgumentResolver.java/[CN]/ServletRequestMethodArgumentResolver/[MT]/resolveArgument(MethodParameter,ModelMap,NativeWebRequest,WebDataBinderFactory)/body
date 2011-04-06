@@ -1,0 +1,27 @@
+{
+  HttpServletRequest request=webRequest.getNativeRequest(HttpServletRequest.class);
+  Class<?> parameterType=parameter.getParameterType();
+  if (ServletRequest.class.isAssignableFrom(parameterType) || MultipartRequest.class.isAssignableFrom(parameterType)) {
+    Object nativeRequest=webRequest.getNativeRequest(parameterType);
+    if (nativeRequest == null) {
+      throw new IllegalStateException("Current request is not of type [" + parameterType.getName() + "]: "+ request);
+    }
+    return nativeRequest;
+  }
+ else   if (HttpSession.class.isAssignableFrom(parameterType)) {
+    return request.getSession();
+  }
+ else   if (Principal.class.isAssignableFrom(parameterType)) {
+    return request.getUserPrincipal();
+  }
+ else   if (Locale.class.equals(parameterType)) {
+    return RequestContextUtils.getLocale(request);
+  }
+ else   if (InputStream.class.isAssignableFrom(parameterType)) {
+    return request.getInputStream();
+  }
+ else   if (Reader.class.isAssignableFrom(parameterType)) {
+    return request.getReader();
+  }
+  throw new UnsupportedOperationException();
+}
