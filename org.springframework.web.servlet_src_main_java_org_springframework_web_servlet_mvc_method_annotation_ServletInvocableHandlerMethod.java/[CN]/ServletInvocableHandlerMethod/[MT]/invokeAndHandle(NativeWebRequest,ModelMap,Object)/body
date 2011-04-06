@@ -4,7 +4,10 @@
   }
   Object returnValue=invokeForRequest(request,model,providedArgs);
   setResponseStatus((ServletWebRequest)request);
-  ModelAndViewContainer<View> mavContainer=new ModelAndViewContainer<View>(model);
+  if (returnValue == null && (isRequestNotModified(request) || usesResponseArgument())) {
+    return null;
+  }
+  ModelAndViewContainer mavContainer=new ModelAndViewContainer(model);
   returnValueHandlers.handleReturnValue(returnValue,getReturnType(),mavContainer,request);
   return getModelAndView(request,mavContainer,returnValue);
 }
