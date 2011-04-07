@@ -4,16 +4,15 @@
   SessionAttributesHandler sessionAttributeStore=new SessionAttributesHandler(handler.getClass(),store);
   String attrName="attr1";
   Object attrValue=new Object();
-  ModelMap actualModel=new ExtendedModelMap();
-  actualModel.addAttribute(attrName,attrValue);
+  mavContainer.addAttribute(attrName,attrValue);
   WebDataBinder dataBinder=new WebDataBinder(attrValue,attrName);
   WebDataBinderFactory binderFactory=createMock(WebDataBinderFactory.class);
   expect(binderFactory.createBinder(webRequest,attrValue,attrName)).andReturn(dataBinder);
   replay(binderFactory);
   ModelFactory modelFactory=new ModelFactory(null,binderFactory,sessionAttributeStore);
-  modelFactory.updateAttributes(webRequest,new SimpleSessionStatus(),actualModel,null);
-  assertEquals(attrValue,actualModel.remove(attrName));
-  assertSame(dataBinder.getBindingResult(),actualModel.remove(bindingResultKey(attrName)));
-  assertEquals(0,actualModel.size());
+  modelFactory.updateModel(webRequest,mavContainer,new SimpleSessionStatus());
+  assertEquals(attrValue,mavContainer.getModel().remove(attrName));
+  assertSame(dataBinder.getBindingResult(),mavContainer.getModel().remove(bindingResultKey(attrName)));
+  assertEquals(0,mavContainer.getModel().size());
   verify(binderFactory);
 }

@@ -1,0 +1,21 @@
+{
+  HttpServletResponse response=webRequest.getNativeResponse(HttpServletResponse.class);
+  Class<?> parameterType=parameter.getParameterType();
+  mavContainer.setResolveView(false);
+  if (ServletResponse.class.isAssignableFrom(parameterType)) {
+    Object nativeResponse=webRequest.getNativeResponse(parameterType);
+    if (nativeResponse == null) {
+      throw new IllegalStateException("Current response is not of type [" + parameterType.getName() + "]: "+ response);
+    }
+    return nativeResponse;
+  }
+ else   if (OutputStream.class.isAssignableFrom(parameterType)) {
+    return response.getOutputStream();
+  }
+ else   if (Writer.class.isAssignableFrom(parameterType)) {
+    return response.getWriter();
+  }
+ else {
+    throw new UnsupportedOperationException();
+  }
+}

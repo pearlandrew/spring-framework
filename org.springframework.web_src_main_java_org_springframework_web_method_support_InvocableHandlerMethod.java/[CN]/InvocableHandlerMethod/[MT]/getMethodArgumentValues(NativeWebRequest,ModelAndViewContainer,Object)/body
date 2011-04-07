@@ -1,0 +1,20 @@
+{
+  MethodParameter[] parameters=getMethodParameters();
+  Object[] args=new Object[parameters.length];
+  for (int i=0; i < parameters.length; i++) {
+    MethodParameter parameter=parameters[i];
+    parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
+    GenericTypeResolver.resolveParameterType(parameter,getBean().getClass());
+    args[i]=resolveProvidedArgument(parameter,providedArgs);
+    if (args[i] != null) {
+      continue;
+    }
+    if (this.argumentResolvers.supportsParameter(parameter)) {
+      args[i]=this.argumentResolvers.resolveArgument(parameter,mavContainer,request,dataBinderFactory);
+    }
+ else {
+      throw new IllegalStateException("Cannot resolve argument index=" + parameter.getParameterIndex() + ""+ ", name="+ parameter.getParameterName()+ ", type="+ parameter.getParameterType()+ " in method "+ toString());
+    }
+  }
+  return args;
+}

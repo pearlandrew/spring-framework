@@ -8,13 +8,23 @@
       exceptionHandler.setHandlerMethodArgumentResolvers(argumentResolvers);
       exceptionHandler.setHandlerMethodReturnValueHandlers(returnValueHandlers);
       ServletWebRequest webRequest=new ServletWebRequest(request,response);
-      ModelMap model=new ExtendedModelMap();
       try {
         if (logger.isDebugEnabled()) {
           logger.debug("Invoking exception-handling method: " + exceptionHandler);
         }
-        ModelAndView mav=exceptionHandler.invokeAndHandle(webRequest,model,ex);
-        return (mav != null) ? mav : new ModelAndView();
+        ModelAndViewContainer mavContainer=new ModelAndViewContainer();
+        exceptionHandler.invokeAndHandle(webRequest,mavContainer,ex);
+        if (!mavContainer.isResolveView()) {
+          return new ModelAndView();
+        }
+ else {
+          ModelAndView mav=new ModelAndView().addAllObjects(mavContainer.getModel());
+          mav.setViewName(mavContainer.getViewName());
+          if (mavContainer.getView() != null) {
+            mav.setView((View)mavContainer.getView());
+          }
+          return mav;
+        }
       }
  catch (      Exception invocationEx) {
         logger.error("Invoking exception-handling method resulted in exception : " + exceptionHandler,invocationEx);

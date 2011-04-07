@@ -1,0 +1,14 @@
+{
+  WebDataBinder binder=createDataBinder(parameter,mavContainer,webRequest,binderFactory);
+  if (binder.getTarget() != null) {
+    doBind(binder,webRequest);
+    if (shouldValidate(parameter)) {
+      binder.validate();
+    }
+    if (failOnError(parameter) && binder.getBindingResult().hasErrors()) {
+      throw new BindException(binder.getBindingResult());
+    }
+  }
+  mavContainer.addAllAttributes(binder.getBindingResult().getModel());
+  return binder.getTarget();
+}

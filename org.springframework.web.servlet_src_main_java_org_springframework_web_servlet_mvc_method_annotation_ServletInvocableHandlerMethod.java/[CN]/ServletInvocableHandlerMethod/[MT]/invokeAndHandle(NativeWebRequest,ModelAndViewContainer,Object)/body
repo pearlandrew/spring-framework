@@ -1,0 +1,15 @@
+{
+  if (!returnValueHandlers.supportsReturnType(getReturnType())) {
+    throw new IllegalStateException("No suitable HandlerMethodReturnValueHandler for method " + toString());
+  }
+  Object returnValue=invokeForRequest(request,mavContainer,providedArgs);
+  setResponseStatus((ServletWebRequest)request);
+  if (returnValue == null) {
+    if (isRequestNotModified(request) || hasResponseStatus() || !mavContainer.isResolveView()) {
+      mavContainer.setResolveView(false);
+      return;
+    }
+  }
+  mavContainer.setResolveView(true);
+  returnValueHandlers.handleReturnValue(returnValue,getReturnType(),mavContainer,request);
+}

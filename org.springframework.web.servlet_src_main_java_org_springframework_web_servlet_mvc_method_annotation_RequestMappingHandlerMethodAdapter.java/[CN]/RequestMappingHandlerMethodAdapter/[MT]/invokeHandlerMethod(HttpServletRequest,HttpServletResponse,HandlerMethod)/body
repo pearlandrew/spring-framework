@@ -4,9 +4,19 @@
   ServletInvocableHandlerMethod requestMethod=createRequestMappingMethod(handlerMethod,binderFactory);
   ServletWebRequest webRequest=new ServletWebRequest(request,response);
   SessionStatus sessionStatus=new SimpleSessionStatus();
-  ModelMap implicitModel=modelFactory.createModel(webRequest,requestMethod);
-  ModelAndView mav=requestMethod.invokeAndHandle(webRequest,implicitModel,sessionStatus);
-  ModelMap actualModel=(mav != null) ? mav.getModelMap() : null;
-  modelFactory.updateAttributes(webRequest,sessionStatus,actualModel,implicitModel);
-  return mav;
+  ModelAndViewContainer mavContainer=new ModelAndViewContainer();
+  modelFactory.initModel(webRequest,mavContainer,requestMethod);
+  requestMethod.invokeAndHandle(webRequest,mavContainer,sessionStatus);
+  modelFactory.updateModel(webRequest,mavContainer,sessionStatus);
+  if (!mavContainer.isResolveView()) {
+    return null;
+  }
+ else {
+    ModelAndView mav=new ModelAndView().addAllObjects(mavContainer.getModel());
+    mav.setViewName(mavContainer.getViewName());
+    if (mavContainer.getView() != null) {
+      mav.setView((View)mavContainer.getView());
+    }
+    return mav;
+  }
 }
