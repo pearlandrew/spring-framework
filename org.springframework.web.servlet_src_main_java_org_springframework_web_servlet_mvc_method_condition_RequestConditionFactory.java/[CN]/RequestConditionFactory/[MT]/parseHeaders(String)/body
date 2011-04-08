@@ -5,7 +5,11 @@
   RequestCondition[] result=new RequestCondition[headers.length];
   for (int i=0; i < headers.length; i++) {
     HeaderRequestCondition header=new HeaderRequestCondition(headers[i]);
-    if (isMediaTypeHeader(header.name)) {
+    if ("Content-Type".equalsIgnoreCase(header.name) && StringUtils.hasLength(header.value)) {
+      RequestCondition consumesCondition=new ConsumesRequestCondition(header.value);
+      result[i]=header.isNegated ? not(consumesCondition) : consumesCondition;
+    }
+ else     if (isMediaTypeHeader(header.name)) {
       result[i]=new MediaTypeHeaderRequestCondition(headers[i]);
     }
  else {
