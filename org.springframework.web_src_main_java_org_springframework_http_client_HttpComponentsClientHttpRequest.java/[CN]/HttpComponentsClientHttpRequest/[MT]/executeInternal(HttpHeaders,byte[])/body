@@ -1,0 +1,17 @@
+{
+  for (  Map.Entry<String,List<String>> entry : headers.entrySet()) {
+    String headerName=entry.getKey();
+    if (!headerName.equalsIgnoreCase(HTTP.CONTENT_LEN) && !headerName.equalsIgnoreCase(HTTP.TRANSFER_ENCODING)) {
+      for (      String headerValue : entry.getValue()) {
+        httpRequest.addHeader(headerName,headerValue);
+      }
+    }
+  }
+  if (httpRequest instanceof HttpEntityEnclosingRequest) {
+    HttpEntityEnclosingRequest entityEnclosingRequest=(HttpEntityEnclosingRequest)httpRequest;
+    HttpEntity requestEntity=new ByteArrayEntity(bufferedOutput);
+    entityEnclosingRequest.setEntity(requestEntity);
+  }
+  HttpResponse httpResponse=httpClient.execute(httpRequest);
+  return new HttpComponentsClientHttpResponse(httpResponse);
+}
