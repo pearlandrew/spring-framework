@@ -1,9 +1,11 @@
 {
   ConfigurableWebBindingInitializer bindingInitializer=new ConfigurableWebBindingInitializer();
   bindingInitializer.setValidator(new StubValidator());
+  List<HandlerMethodArgumentResolver> customResolvers=new ArrayList<HandlerMethodArgumentResolver>();
+  customResolvers.add(new ServletWebArgumentResolverAdapter(new ColorArgumentResolver()));
   this.handlerAdapter=new RequestMappingHandlerMethodAdapter();
   this.handlerAdapter.setWebBindingInitializer(bindingInitializer);
-  this.handlerAdapter.setCustomArgumentResolvers(new WebArgumentResolver[]{new ColorArgumentResolver()});
+  this.handlerAdapter.setCustomArgumentResolvers(customResolvers);
   GenericWebApplicationContext context=new GenericWebApplicationContext();
   context.refresh();
   this.handlerAdapter.setApplicationContext(context);

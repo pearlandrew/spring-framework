@@ -9,14 +9,15 @@
   MessageCodesResolver resolver=((ConfigurableWebBindingInitializer)initializer).getMessageCodesResolver();
   assertNotNull(resolver);
   assertEquals("test.foo.bar",resolver.resolveMessageCodes("foo","bar")[0]);
-  Object argResolvers=new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
-  assertNotNull(argResolvers);
-  WebArgumentResolver[] argResolversArray=(WebArgumentResolver[])argResolvers;
-  assertEquals(1,argResolversArray.length);
-  assertTrue(argResolversArray[0] instanceof TestWebArgumentResolver);
+  Object value=new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
+  assertNotNull(value);
+  List<HandlerMethodArgumentResolver> resolvers=(List<HandlerMethodArgumentResolver>)value;
+  assertEquals(2,resolvers.size());
+  assertTrue(resolvers.get(0) instanceof ServletWebArgumentResolverAdapter);
+  assertTrue(resolvers.get(1) instanceof TestHandlerMethodArgumentResolver);
   Object converters=new DirectFieldAccessor(adapter).getPropertyValue("messageConverters");
   assertNotNull(converters);
-  HttpMessageConverter<?>[] convertersArray=(HttpMessageConverter<?>[])converters;
-  assertTrue("Default converters are registered in addition to the custom one",convertersArray.length > 1);
-  assertTrue(convertersArray[0] instanceof StringHttpMessageConverter);
+  List<HttpMessageConverter<?>> convertersArray=(List<HttpMessageConverter<?>>)converters;
+  assertTrue("Default converters are registered in addition to the custom one",convertersArray.size() > 1);
+  assertTrue(convertersArray.get(0) instanceof StringHttpMessageConverter);
 }

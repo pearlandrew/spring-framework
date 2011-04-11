@@ -2,10 +2,11 @@
   loadBeanDefinitions("mvc-config-argument-resolvers.xml");
   RequestMappingHandlerMethodAdapter adapter=appContext.getBean(RequestMappingHandlerMethodAdapter.class);
   assertNotNull(adapter);
-  Object resolvers=new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
-  assertNotNull(resolvers);
-  assertTrue(resolvers instanceof WebArgumentResolver[]);
-  assertEquals(2,((WebArgumentResolver[])resolvers).length);
-  assertTrue(((WebArgumentResolver[])resolvers)[0] instanceof TestWebArgumentResolver);
-  assertTrue(((WebArgumentResolver[])resolvers)[1] instanceof TestWebArgumentResolver);
+  Object value=new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
+  assertNotNull(value);
+  assertTrue(value instanceof List);
+  List<HandlerMethodArgumentResolver> resolvers=(List<HandlerMethodArgumentResolver>)value;
+  assertEquals(2,resolvers.size());
+  assertTrue(resolvers.get(0) instanceof ServletWebArgumentResolverAdapter);
+  assertTrue(resolvers.get(1) instanceof TestHandlerMethodArgumentResolver);
 }

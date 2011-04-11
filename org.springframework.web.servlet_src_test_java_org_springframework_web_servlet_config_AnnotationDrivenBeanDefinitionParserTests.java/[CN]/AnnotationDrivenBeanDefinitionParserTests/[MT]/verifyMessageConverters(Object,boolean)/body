@@ -1,14 +1,15 @@
 {
   assertNotNull(bean);
-  Object converters=new DirectFieldAccessor(bean).getPropertyValue("messageConverters");
-  assertNotNull(converters);
-  assertTrue(converters instanceof HttpMessageConverter<?>[]);
+  Object value=new DirectFieldAccessor(bean).getPropertyValue("messageConverters");
+  assertNotNull(value);
+  assertTrue(value instanceof List);
+  List<HttpMessageConverter<?>> converters=(List<HttpMessageConverter<?>>)value;
   if (hasDefaultRegistrations) {
-    assertTrue("Default converters are registered in addition to custom ones",((HttpMessageConverter<?>[])converters).length > 2);
+    assertTrue("Default converters are registered in addition to custom ones",converters.size() > 2);
   }
  else {
-    assertTrue("Default converters should not be registered",((HttpMessageConverter<?>[])converters).length == 2);
+    assertTrue("Default converters should not be registered",converters.size() == 2);
   }
-  assertTrue(((HttpMessageConverter<?>[])converters)[0] instanceof StringHttpMessageConverter);
-  assertTrue(((HttpMessageConverter<?>[])converters)[1] instanceof ResourceHttpMessageConverter);
+  assertTrue(converters.get(0) instanceof StringHttpMessageConverter);
+  assertTrue(converters.get(1) instanceof ResourceHttpMessageConverter);
 }

@@ -1,0 +1,18 @@
+{
+  if (argumentResolvers == null) {
+    return;
+  }
+  List<HandlerMethodArgumentResolver> adaptedResolvers=new ArrayList<HandlerMethodArgumentResolver>();
+  for (  Object resolver : argumentResolvers) {
+    if (resolver instanceof WebArgumentResolver) {
+      adaptedResolvers.add(new ServletWebArgumentResolverAdapter((WebArgumentResolver)resolver));
+    }
+ else     if (resolver instanceof HandlerMethodArgumentResolver) {
+      adaptedResolvers.add((HandlerMethodArgumentResolver)resolver);
+    }
+ else {
+      throw new IllegalArgumentException("An argument resolver must be a HandlerMethodArgumentResolver or a WebArgumentResolver");
+    }
+  }
+  this.customArgumentResolvers.addAll(adaptedResolvers);
+}
