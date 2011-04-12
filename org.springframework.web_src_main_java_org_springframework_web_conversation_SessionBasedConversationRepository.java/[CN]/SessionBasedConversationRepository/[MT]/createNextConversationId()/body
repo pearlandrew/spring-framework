@@ -1,0 +1,22 @@
+{
+  int nextAvailableConversationId=1;
+  RequestAttributes attributes=RequestContextHolder.currentRequestAttributes();
+synchronized (attributes.getSessionMutex()) {
+    String[] attributeNames=attributes.getAttributeNames(RequestAttributes.SCOPE_GLOBAL_SESSION);
+    for (    String attributeName : attributeNames) {
+      if (attributeName.startsWith(CONVERSATION_STORE_ATTR_NAME)) {
+        MutableConversation conversation=(MutableConversation)attributes.getAttribute(attributeName,RequestAttributes.SCOPE_GLOBAL_SESSION);
+        if (conversation.isExpired()) {
+          conversation.clear();
+          attributes.removeAttribute(attributeName,RequestAttributes.SCOPE_GLOBAL_SESSION);
+        }
+        String conversationId=conversation.getId();
+        int currentConversationId=Integer.parseInt(conversationId);
+        if (currentConversationId > nextAvailableConversationId) {
+          nextAvailableConversationId=currentConversationId;
+        }
+      }
+    }
+  }
+  return Integer.toString(nextAvailableConversationId);
+}
