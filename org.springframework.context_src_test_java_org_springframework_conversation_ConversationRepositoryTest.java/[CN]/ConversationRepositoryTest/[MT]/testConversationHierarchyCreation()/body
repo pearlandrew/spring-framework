@@ -1,0 +1,23 @@
+{
+  ConversationRepository repository=createRepository();
+  MutableConversation conversation=repository.createNewConversation();
+  repository.storeConversation(conversation);
+  String rootConversationId=conversation.getId();
+  MutableConversation childConversation=repository.createNewChildConversation(conversation,false);
+  assertNotNull("child conversation must not be null",childConversation);
+  assertNotNull("parent conversation must be available",childConversation.getParent());
+  assertSame("parent conversation and root conversation must be the same",conversation,childConversation.getParent());
+  assertFalse("nested conversation must not be isolated",childConversation.isIsolated());
+  List<? extends Conversation> children=conversation.getChildren();
+  assertNotNull("children list must never be null",children);
+  assertEquals("children size must be one",1,children.size());
+  assertSame("child conversation must be available through the children list of the root conversation",childConversation,children.get(0));
+  repository.storeConversation(childConversation);
+  String childConversationId=childConversation.getId();
+  assertNotNull("child conversation id must be set after storage",childConversationId);
+  assertNotSame("root and child conversation id must be different",rootConversationId,childConversationId);
+  assertNotNull("root conversation must be retrievable through repository",repository.getConversation(rootConversationId));
+  assertNotNull("child conversation must be retrievable through repository",repository.getConversation(childConversationId));
+  assertSame("root conversation must be the same, if getRoot is invoked",conversation,conversation.getRoot());
+  assertSame("root conversation must be the same, if getRoot is invoked",conversation,childConversation.getRoot());
+}

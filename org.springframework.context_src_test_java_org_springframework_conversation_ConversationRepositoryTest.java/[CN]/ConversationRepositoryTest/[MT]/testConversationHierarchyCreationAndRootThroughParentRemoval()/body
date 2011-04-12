@@ -1,0 +1,14 @@
+{
+  ConversationRepository repository=createRepository();
+  MutableConversation conversation=repository.createNewConversation();
+  repository.storeConversation(conversation);
+  String rootConversationId=conversation.getId();
+  MutableConversation childConversation=repository.createNewChildConversation(conversation,false);
+  repository.storeConversation(childConversation);
+  String childConversationId=childConversation.getId();
+  repository.removeConversation(rootConversationId,false);
+  assertNull("parent must not be available after removal",childConversation.getParent());
+  assertEquals("list of children must be empty after removal",0,conversation.getChildren().size());
+  assertNull("child conversation must not be available through the repository after removal",repository.getConversation(childConversationId));
+  assertNull("root conversation must not be available after root removal",repository.getConversation(rootConversationId));
+}
