@@ -1,18 +1,9 @@
 {
-  NamedValueInfo result=namedValueInfoCache.get(parameter);
-  if (result == null) {
-    NamedValueInfo info=createNamedValueInfo(parameter);
-    String name=info.name;
-    if (name.length() == 0) {
-      name=parameter.getParameterName();
-      if (name == null) {
-        throw new IllegalStateException("No parameter name specified for argument of type [" + parameter.getParameterType().getName() + "], and no parameter name information found in class file either.");
-      }
-    }
-    boolean required=info.required;
-    String defaultValue=(ValueConstants.DEFAULT_NONE.equals(info.defaultValue) ? null : info.defaultValue);
-    result=new NamedValueInfo(name,required,defaultValue);
-    namedValueInfoCache.put(parameter,result);
+  NamedValueInfo namedValueInfo=namedValueInfoCache.get(parameter);
+  if (namedValueInfo == null) {
+    namedValueInfo=createNamedValueInfo(parameter);
+    namedValueInfo=updateNamedValueInfo(parameter,namedValueInfo);
+    namedValueInfoCache.put(parameter,namedValueInfo);
   }
-  return result;
+  return namedValueInfo;
 }

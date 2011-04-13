@@ -2,7 +2,9 @@
   MockHttpSession session=new MockHttpSession();
   servletRequest.setSession(session);
   MethodParameter sessionParameter=new MethodParameter(supportedParams,2);
-  assertTrue("Session not supported",resolver.supportsParameter(sessionParameter));
-  Object result=resolver.resolveArgument(sessionParameter,null,webRequest,null);
+  boolean isSupported=resolver.supportsParameter(sessionParameter);
+  Object result=resolver.resolveArgument(sessionParameter,mavContainer,webRequest,null);
+  assertTrue("Session not supported",isSupported);
   assertSame("Invalid result",session,result);
+  assertTrue("The ResolveView flag shouldn't change",mavContainer.isResolveView());
 }
