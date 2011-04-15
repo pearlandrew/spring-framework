@@ -1,7 +1,4 @@
 {
-  Object handler=new ModelHandler();
-  SessionAttributeStore store=new DefaultSessionAttributeStore();
-  SessionAttributesHandler sessionAttributeStore=new SessionAttributesHandler(handler.getClass(),store);
   String attrName="attr1";
   Object attrValue=new Object();
   mavContainer.addAttribute(attrName,attrValue);
@@ -9,7 +6,7 @@
   WebDataBinderFactory binderFactory=createMock(WebDataBinderFactory.class);
   expect(binderFactory.createBinder(webRequest,attrValue,attrName)).andReturn(dataBinder);
   replay(binderFactory);
-  ModelFactory modelFactory=new ModelFactory(null,binderFactory,sessionAttributeStore);
+  ModelFactory modelFactory=new ModelFactory(null,binderFactory,handlerSessionAttributeStore);
   modelFactory.updateModel(webRequest,mavContainer,new SimpleSessionStatus());
   assertEquals(attrValue,mavContainer.getModel().remove(attrName));
   assertSame(dataBinder.getBindingResult(),mavContainer.getModel().remove(bindingResultKey(attrName)));

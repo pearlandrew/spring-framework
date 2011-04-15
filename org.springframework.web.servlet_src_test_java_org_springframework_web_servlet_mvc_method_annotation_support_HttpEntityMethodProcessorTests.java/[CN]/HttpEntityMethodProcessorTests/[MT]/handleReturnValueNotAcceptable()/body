@@ -1,12 +1,11 @@
 {
+  String body="Foo";
+  ResponseEntity<String> returnValue=new ResponseEntity<String>(body,HttpStatus.OK);
   MediaType accepted=MediaType.TEXT_PLAIN;
-  String s="Foo";
-  ResponseEntity<String> returnValue=new ResponseEntity<String>(s,HttpStatus.OK);
   servletRequest.addHeader("Accept",accepted.toString());
   expect(messageConverter.canWrite(String.class,accepted)).andReturn(false);
   expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
   replay(messageConverter);
-  processor.handleReturnValue(returnValue,responseEntityReturnValue,mavContainer,request);
-  assertFalse(mavContainer.isResolveView());
-  verify(messageConverter);
+  processor.handleReturnValue(returnValue,returnTypeResponseEntity,mavContainer,webRequest);
+  fail("Expected exception");
 }

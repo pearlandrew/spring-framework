@@ -1,10 +1,7 @@
 {
-  HandlerMethodReturnValueHandlerComposite handlers=new HandlerMethodReturnValueHandlerComposite();
-  handlers.registerReturnValueHandler(new DefaultMethodReturnValueHandler(null));
-  Method method=Handler.class.getDeclaredMethod("responseStatus");
-  ServletInvocableHandlerMethod handlerMethod=new ServletInvocableHandlerMethod(new Handler(),method);
-  handlerMethod.setHandlerMethodReturnValueHandlers(handlers);
-  handlerMethod.invokeAndHandle(webRequest,new ModelAndViewContainer());
+  returnValueHandlers.addHandler(new ExceptionThrowingReturnValueHandler());
+  handlerMethod("responseStatus").invokeAndHandle(webRequest,mavContainer);
+  assertFalse("Null return value with an @ResponseStatus should result in 'no view resolution'",mavContainer.isResolveView());
   assertEquals(HttpStatus.BAD_REQUEST.value(),response.getStatus());
   assertEquals("400 Bad Request",response.getErrorMessage());
 }

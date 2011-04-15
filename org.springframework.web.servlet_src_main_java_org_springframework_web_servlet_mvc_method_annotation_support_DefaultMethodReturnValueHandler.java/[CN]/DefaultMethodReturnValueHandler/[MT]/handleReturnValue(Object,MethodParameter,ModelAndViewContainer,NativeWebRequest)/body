@@ -1,14 +1,16 @@
 {
-  for (  ModelAndViewResolver resolver : modelAndViewResolvers) {
-    Class<?> handlerType=returnType.getDeclaringClass();
-    Method method=returnType.getMethod();
-    ExtendedModelMap extModel=(ExtendedModelMap)mavContainer.getModel();
-    ModelAndView mav=resolver.resolveModelAndView(method,handlerType,returnValue,extModel,webRequest);
-    if (mav != ModelAndViewResolver.UNRESOLVED) {
-      mavContainer.setView(mav.getView());
-      mavContainer.setViewName(mav.getViewName());
-      mavContainer.addAllAttributes(mav.getModel());
-      return;
+  if (mavResolvers != null) {
+    for (    ModelAndViewResolver resolver : mavResolvers) {
+      Class<?> handlerType=returnType.getDeclaringClass();
+      Method method=returnType.getMethod();
+      ExtendedModelMap model=(ExtendedModelMap)mavContainer.getModel();
+      ModelAndView mav=resolver.resolveModelAndView(method,handlerType,returnValue,model,request);
+      if (mav != ModelAndViewResolver.UNRESOLVED) {
+        mavContainer.setView(mav.getView());
+        mavContainer.setViewName(mav.getViewName());
+        mavContainer.addAllAttributes(mav.getModel());
+        return;
+      }
     }
   }
   if (returnValue == null) {

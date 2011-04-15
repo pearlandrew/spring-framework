@@ -1,9 +1,7 @@
 {
-  request.setParameter("requestParam","22");
-  HandlerMethodArgumentResolverComposite argResolvers=new HandlerMethodArgumentResolverComposite();
-  argResolvers.registerArgumentResolver(new RequestParamMethodArgumentResolver(null,false));
-  String methodName="initBinderTypeConversion";
-  WebDataBinderFactory factory=createFactory(argResolvers,methodName,WebDataBinder.class,int.class);
+  webRequest.getNativeRequest(MockHttpServletRequest.class).setParameter("requestParam","22");
+  argumentResolvers.addResolver(new RequestParamMethodArgumentResolver(null,false));
+  WebDataBinderFactory factory=createBinderFactory("initBinderTypeConversion",WebDataBinder.class,int.class);
   WebDataBinder dataBinder=factory.createBinder(webRequest,null,"foo");
   assertNotNull(dataBinder.getDisallowedFields());
   assertEquals("requestParam-22",dataBinder.getDisallowedFields()[0]);

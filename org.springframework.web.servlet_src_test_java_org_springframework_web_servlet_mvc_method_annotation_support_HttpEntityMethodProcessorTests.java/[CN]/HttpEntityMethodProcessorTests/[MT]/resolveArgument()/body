@@ -1,13 +1,14 @@
 {
   MediaType contentType=MediaType.TEXT_PLAIN;
-  String expected="Foo";
   servletRequest.addHeader("Content-Type",contentType.toString());
+  String body="Foo";
   expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(contentType));
   expect(messageConverter.canRead(String.class,contentType)).andReturn(true);
-  expect(messageConverter.read(eq(String.class),isA(HttpInputMessage.class))).andReturn(expected);
+  expect(messageConverter.read(eq(String.class),isA(HttpInputMessage.class))).andReturn(body);
   replay(messageConverter);
-  HttpEntity<?> result=(HttpEntity<String>)processor.resolveArgument(httpEntityParam,mavContainer,request,null);
+  Object result=processor.resolveArgument(paramHttpEntity,mavContainer,webRequest,null);
+  assertTrue(result instanceof HttpEntity);
   assertTrue("The ResolveView flag shouldn't change",mavContainer.isResolveView());
-  assertEquals("Invalid argument",expected,result.getBody());
+  assertEquals("Invalid argument",body,((HttpEntity<?>)result).getBody());
   verify(messageConverter);
 }
