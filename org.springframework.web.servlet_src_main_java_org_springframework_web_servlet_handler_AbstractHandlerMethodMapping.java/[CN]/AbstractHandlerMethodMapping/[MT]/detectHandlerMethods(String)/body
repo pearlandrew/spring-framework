@@ -2,13 +2,14 @@
   Class<?> handlerType=getApplicationContext().getType(beanName);
   Set<Method> methods=HandlerMethodSelector.selectMethods(handlerType,new MethodFilter(){
     public boolean matches(    Method method){
-      return getKeyForMethod(beanName,method) != null;
+      return getMappingKeyForMethod(beanName,method) != null;
     }
   }
 );
   for (  Method method : methods) {
-    T key=getKeyForMethod(beanName,method);
     HandlerMethod handlerMethod=new HandlerMethod(beanName,getApplicationContext(),method);
-    registerHandlerMethod(key,handlerMethod);
+    T mapping=getMappingKeyForMethod(beanName,method);
+    Set<String> paths=getMappingPaths(mapping);
+    registerHandlerMethod(paths,mapping,handlerMethod);
   }
 }

@@ -1,10 +1,11 @@
 {
   request.setRequestURI("/foo.html");
-  RequestKey key1=new RequestKey(asList("/foo","*.jpeg"),null);
-  RequestKey key2=new RequestKey(asList("/foo","*.html"),null);
-  RequestKey match1=handlerMapping.getMatchingKey(key1,request);
-  RequestKey match2=handlerMapping.getMatchingKey(key2,request);
-  List<RequestKey> matches=asList(match1,match2);
-  Collections.sort(matches,handlerMapping.getKeyComparator(request));
+  String lookupPath=new UrlPathHelper().getLookupPathForRequest(request);
+  RequestMappingKey key1=new RequestMappingKey(asList("/foo","*.jpeg"),null);
+  RequestMappingKey key2=new RequestMappingKey(asList("/foo","*.html"),null);
+  RequestMappingKey match1=handlerMapping.getMatchingMappingKey(key1,lookupPath,request);
+  RequestMappingKey match2=handlerMapping.getMatchingMappingKey(key2,lookupPath,request);
+  List<RequestMappingKey> matches=asList(match1,match2);
+  Collections.sort(matches,handlerMapping.getMappingKeyComparator(lookupPath,request));
   assertSame(match2.getPatterns(),matches.get(0).getPatterns());
 }

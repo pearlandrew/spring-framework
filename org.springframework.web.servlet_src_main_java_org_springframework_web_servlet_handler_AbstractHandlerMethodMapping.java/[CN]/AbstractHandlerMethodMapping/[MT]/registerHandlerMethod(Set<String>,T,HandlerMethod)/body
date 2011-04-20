@@ -1,0 +1,15 @@
+{
+  Assert.notNull(mappingKey,"'mapping' must not be null");
+  Assert.notNull(handlerMethod,"'handlerMethod' must not be null");
+  HandlerMethod mappedHandlerMethod=handlerMethods.get(mappingKey);
+  if (mappedHandlerMethod != null && !mappedHandlerMethod.equals(handlerMethod)) {
+    throw new IllegalStateException("Ambiguous mapping found. Cannot map '" + handlerMethod.getBean() + "' bean method \n"+ handlerMethod+ "\nto "+ mappingKey+ ": There is already '"+ mappedHandlerMethod.getBean()+ "' bean method\n"+ mappedHandlerMethod+ " mapped.");
+  }
+  handlerMethods.put(mappingKey,handlerMethod);
+  if (logger.isInfoEnabled()) {
+    logger.info("Mapped \"" + mappingKey + "\" onto "+ handlerMethod);
+  }
+  for (  String path : paths) {
+    urlMap.add(path,mappingKey);
+  }
+}

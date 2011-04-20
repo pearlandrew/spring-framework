@@ -1,9 +1,9 @@
 {
-  RequestKey html=new RequestKey(null,null,null,RequestConditionFactory.parseHeaders("accept=text/html"),null);
-  RequestKey xml=new RequestKey(null,null,null,RequestConditionFactory.parseHeaders("accept=application/xml"),null);
-  RequestKey none=new RequestKey(null,null);
+  RequestMappingKey html=new RequestMappingKey(null,null,null,RequestConditionFactory.parseHeaders("accept=text/html"),null);
+  RequestMappingKey xml=new RequestMappingKey(null,null,null,RequestConditionFactory.parseHeaders("accept=application/xml"),null);
+  RequestMappingKey none=new RequestMappingKey(null,null);
   request.addHeader("Accept","application/xml, text/html");
-  Comparator<RequestKey> comparator=handlerMapping.getKeyComparator(request);
+  Comparator<RequestMappingKey> comparator=handlerMapping.getMappingKeyComparator("",request);
   assertTrue(comparator.compare(html,xml) > 0);
   assertTrue(comparator.compare(xml,html) < 0);
   assertTrue(comparator.compare(xml,none) < 0);
@@ -12,17 +12,17 @@
   assertTrue(comparator.compare(none,html) > 0);
   request=new MockHttpServletRequest();
   request.addHeader("Accept","application/xml, text/*");
-  comparator=handlerMapping.getKeyComparator(request);
+  comparator=handlerMapping.getMappingKeyComparator("",request);
   assertTrue(comparator.compare(html,xml) > 0);
   assertTrue(comparator.compare(xml,html) < 0);
   request=new MockHttpServletRequest();
   request.addHeader("Accept","application/pdf");
-  comparator=handlerMapping.getKeyComparator(request);
+  comparator=handlerMapping.getMappingKeyComparator("",request);
   assertTrue(comparator.compare(html,xml) == 0);
   assertTrue(comparator.compare(xml,html) == 0);
   request=new MockHttpServletRequest();
   request.addHeader("Accept","text/html;q=0.9,application/xml");
-  comparator=handlerMapping.getKeyComparator(request);
+  comparator=handlerMapping.getMappingKeyComparator("",request);
   assertTrue(comparator.compare(html,xml) > 0);
   assertTrue(comparator.compare(xml,html) < 0);
 }

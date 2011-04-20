@@ -1,13 +1,13 @@
 {
-  UrlPathHelper urlPathHelper=new UrlPathHelper();
   PathMatcher pathMatcher=new AntPathMatcher();
   MockHttpServletRequest request=new MockHttpServletRequest("GET","/foo");
-  RequestKey key=new RequestKey(asList("/foo*","/bar"),asList(GET,POST));
-  RequestKey match=key.getMatchingKey(request,pathMatcher,urlPathHelper);
-  RequestKey expected=new RequestKey(singleton("/foo*"),singleton(GET));
+  String lookupPath=new UrlPathHelper().getLookupPathForRequest(request);
+  RequestMappingKey key=new RequestMappingKey(asList("/foo*","/bar"),asList(GET,POST));
+  RequestMappingKey match=key.getMatchingKey(lookupPath,request,pathMatcher);
+  RequestMappingKey expected=new RequestMappingKey(singleton("/foo*"),singleton(GET));
   assertEquals("Matching RequestKey contains matched patterns and methods only",expected,match);
-  key=new RequestKey(asList("/**","/foo*","/foo"),null);
-  match=key.getMatchingKey(request,pathMatcher,urlPathHelper);
-  expected=new RequestKey(asList("/foo","/foo*","/**"),null);
+  key=new RequestMappingKey(asList("/**","/foo*","/foo"),null);
+  match=key.getMatchingKey(lookupPath,request,pathMatcher);
+  expected=new RequestMappingKey(asList("/foo","/foo*","/**"),null);
   assertEquals("Matched patterns are sorted with best match at the top",expected,match);
 }
