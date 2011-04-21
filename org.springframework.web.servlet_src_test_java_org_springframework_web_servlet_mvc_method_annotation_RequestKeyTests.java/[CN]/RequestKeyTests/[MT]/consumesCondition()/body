@@ -1,12 +1,12 @@
 {
   PathMatcher pathMatcher=new AntPathMatcher();
   MockHttpServletRequest request=new MockHttpServletRequest("GET","/foo");
-  request.addHeader("foo","bar");
+  request.setContentType("text/plain");
   String lookupPath=new UrlPathHelper().getLookupPathForRequest(request);
-  RequestMappingInfo key=new RequestMappingInfo(singleton("/foo"),null,null,RequestConditionFactory.parseHeaders("foo=bar"),null);
+  RequestMappingInfo key=new RequestMappingInfo(singleton("/foo"),null,null,null,RequestConditionFactory.parseConsumes("text/plain"));
   RequestMappingInfo match=key.getMatchingRequestMapping(lookupPath,request,pathMatcher);
   assertNotNull(match);
-  key=new RequestMappingInfo(singleton("/foo"),null,null,RequestConditionFactory.parseHeaders("foo!=bar"),null);
+  key=new RequestMappingInfo(singleton("/foo"),null,null,null,RequestConditionFactory.parseConsumes("application/xml"));
   match=key.getMatchingRequestMapping(lookupPath,request,pathMatcher);
   assertNull(match);
 }
