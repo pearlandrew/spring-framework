@@ -1,17 +1,17 @@
 {
-  List<T> keys=urlMap.get(lookupPath);
-  if (keys == null) {
-    keys=new ArrayList<T>(handlerMethods.keySet());
+  List<T> mappings=urlMap.get(lookupPath);
+  if (mappings == null) {
+    mappings=new ArrayList<T>(handlerMethods.keySet());
   }
   List<Match> matches=new ArrayList<Match>();
-  for (  T key : keys) {
-    T match=getMatchingMappingKey(key,lookupPath,request);
+  for (  T mapping : mappings) {
+    T match=getMatchingMapping(mapping,lookupPath,request);
     if (match != null) {
-      matches.add(new Match(match,handlerMethods.get(key)));
+      matches.add(new Match(match,handlerMethods.get(mapping)));
     }
   }
   if (!matches.isEmpty()) {
-    Comparator<Match> comparator=new MatchComparator(getMappingKeyComparator(lookupPath,request));
+    Comparator<Match> comparator=new MatchComparator(getMappingComparator(lookupPath,request));
     Collections.sort(matches,comparator);
     if (logger.isTraceEnabled()) {
       logger.trace("Found " + matches.size() + " matching mapping(s) for ["+ lookupPath+ "] : "+ matches);
@@ -25,7 +25,7 @@
         throw new IllegalStateException("Ambiguous handler methods mapped for HTTP path '" + request.getRequestURL() + "': {"+ m1+ ", "+ m2+ "}");
       }
     }
-    handleMatch(bestMatch.mappingKey,lookupPath,request);
+    handleMatch(bestMatch.mapping,lookupPath,request);
     return bestMatch.handlerMethod;
   }
  else {

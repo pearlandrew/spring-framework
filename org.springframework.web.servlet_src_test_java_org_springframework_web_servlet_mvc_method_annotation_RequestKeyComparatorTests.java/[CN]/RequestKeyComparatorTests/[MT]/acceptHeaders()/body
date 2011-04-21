@@ -1,9 +1,9 @@
 {
-  RequestMappingKey html=new RequestMappingKey(null,null,null,RequestConditionFactory.parseHeaders("accept=text/html"),null);
-  RequestMappingKey xml=new RequestMappingKey(null,null,null,RequestConditionFactory.parseHeaders("accept=application/xml"),null);
-  RequestMappingKey none=new RequestMappingKey(null,null);
+  RequestMappingInfo html=new RequestMappingInfo(null,null,null,RequestConditionFactory.parseHeaders("accept=text/html"));
+  RequestMappingInfo xml=new RequestMappingInfo(null,null,null,RequestConditionFactory.parseHeaders("accept=application/xml"));
+  RequestMappingInfo none=new RequestMappingInfo(null,null);
   request.addHeader("Accept","application/xml, text/html");
-  Comparator<RequestMappingKey> comparator=handlerMapping.getMappingKeyComparator("",request);
+  Comparator<RequestMappingInfo> comparator=handlerMapping.getMappingComparator("",request);
   assertTrue(comparator.compare(html,xml) > 0);
   assertTrue(comparator.compare(xml,html) < 0);
   assertTrue(comparator.compare(xml,none) < 0);
@@ -12,17 +12,17 @@
   assertTrue(comparator.compare(none,html) > 0);
   request=new MockHttpServletRequest();
   request.addHeader("Accept","application/xml, text/*");
-  comparator=handlerMapping.getMappingKeyComparator("",request);
+  comparator=handlerMapping.getMappingComparator("",request);
   assertTrue(comparator.compare(html,xml) > 0);
   assertTrue(comparator.compare(xml,html) < 0);
   request=new MockHttpServletRequest();
   request.addHeader("Accept","application/pdf");
-  comparator=handlerMapping.getMappingKeyComparator("",request);
+  comparator=handlerMapping.getMappingComparator("",request);
   assertTrue(comparator.compare(html,xml) == 0);
   assertTrue(comparator.compare(xml,html) == 0);
   request=new MockHttpServletRequest();
   request.addHeader("Accept","text/html;q=0.9,application/xml");
-  comparator=handlerMapping.getMappingKeyComparator("",request);
+  comparator=handlerMapping.getMappingComparator("",request);
   assertTrue(comparator.compare(html,xml) > 0);
   assertTrue(comparator.compare(xml,html) < 0);
 }

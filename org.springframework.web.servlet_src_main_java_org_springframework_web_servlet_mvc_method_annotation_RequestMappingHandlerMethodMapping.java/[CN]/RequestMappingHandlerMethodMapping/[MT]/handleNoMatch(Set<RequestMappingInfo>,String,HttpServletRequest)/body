@@ -1,0 +1,18 @@
+{
+  Set<String> allowedMethods=new HashSet<String>(6);
+  for (  RequestMappingInfo info : requestMappingInfos) {
+    for (    String pattern : info.getPatterns()) {
+      if (pathMatcher.match(pattern,lookupPath)) {
+        for (        RequestMethod method : info.getMethods()) {
+          allowedMethods.add(method.name());
+        }
+      }
+    }
+  }
+  if (!allowedMethods.isEmpty()) {
+    throw new HttpRequestMethodNotSupportedException(request.getMethod(),allowedMethods.toArray(new String[allowedMethods.size()]));
+  }
+ else {
+    return null;
+  }
+}
