@@ -1,4 +1,22 @@
 {
-  String defaultServletHandler=element.getAttribute("default-servlet-handler");
-  return StringUtils.hasText(defaultServletHandler) ? new MvcDefaultServletHandler(defaultServletHandler) : new MvcDefaultServletHandler();
+  Object source=parserContext.extractSource(element);
+  String defaultServletName=element.getAttribute("default-servlet-name");
+  RootBeanDefinition defaultServletHandlerDef=new RootBeanDefinition(DefaultServletHttpRequestHandler.class);
+  defaultServletHandlerDef.setSource(source);
+  defaultServletHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  if (StringUtils.hasText(defaultServletName)) {
+    defaultServletHandlerDef.getPropertyValues().add("defaultServletName",defaultServletName);
+  }
+  String defaultServletHandlerName=parserContext.getReaderContext().generateBeanName(defaultServletHandlerDef);
+  parserContext.getRegistry().registerBeanDefinition(defaultServletHandlerName,defaultServletHandlerDef);
+  parserContext.registerComponent(new BeanComponentDefinition(defaultServletHandlerDef,defaultServletHandlerName));
+  Map<String,String> urlMap=new ManagedMap<String,String>();
+  urlMap.put("/**",defaultServletHandlerName);
+  RootBeanDefinition handlerMappingDef=new RootBeanDefinition(SimpleUrlHandlerMapping.class);
+  handlerMappingDef.setSource(source);
+  handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  handlerMappingDef.getPropertyValues().add("urlMap",urlMap);
+  String handlerMappingBeanName=parserContext.getReaderContext().generateBeanName(handlerMappingDef);
+  parserContext.getRegistry().registerBeanDefinition(handlerMappingBeanName,handlerMappingDef);
+  parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef,handlerMappingBeanName));
 }

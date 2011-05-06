@@ -1,0 +1,28 @@
+{
+  XmlReaderContext readerContext=parserContext.getReaderContext();
+  boolean useDefaultFilters=true;
+  if (element.hasAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE)) {
+    useDefaultFilters=Boolean.valueOf(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));
+  }
+  ClassPathBeanDefinitionScanner scanner=createScanner(readerContext,useDefaultFilters);
+  scanner.setResourceLoader(readerContext.getResourceLoader());
+  scanner.setBeanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults());
+  scanner.setAutowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());
+  if (element.hasAttribute(RESOURCE_PATTERN_ATTRIBUTE)) {
+    scanner.setResourcePattern(element.getAttribute(RESOURCE_PATTERN_ATTRIBUTE));
+  }
+  try {
+    parseBeanNameGenerator(element,scanner);
+  }
+ catch (  Exception ex) {
+    readerContext.error(ex.getMessage(),readerContext.extractSource(element),ex.getCause());
+  }
+  try {
+    parseScope(element,scanner);
+  }
+ catch (  Exception ex) {
+    readerContext.error(ex.getMessage(),readerContext.extractSource(element),ex.getCause());
+  }
+  parseTypeFilters(element,scanner,readerContext,parserContext);
+  return scanner;
+}
