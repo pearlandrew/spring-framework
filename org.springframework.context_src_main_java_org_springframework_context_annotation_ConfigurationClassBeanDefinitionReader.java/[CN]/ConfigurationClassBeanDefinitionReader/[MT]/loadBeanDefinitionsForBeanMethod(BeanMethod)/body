@@ -8,6 +8,11 @@
   beanDef.setUniqueFactoryMethodName(metadata.getMethodName());
   beanDef.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
   beanDef.setAttribute(RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE,Boolean.TRUE);
+  Map<String,Object> roleAttributes=metadata.getAnnotationAttributes(Role.class.getName());
+  if (roleAttributes != null) {
+    int role=(Integer)roleAttributes.get("value");
+    beanDef.setRole(role);
+  }
   Map<String,Object> beanAttributes=metadata.getAnnotationAttributes(Bean.class.getName());
   List<String> names=new ArrayList<String>(Arrays.asList((String[])beanAttributes.get("name")));
   String beanName=(names.size() > 0 ? names.remove(0) : beanMethod.getMetadata().getMethodName());
