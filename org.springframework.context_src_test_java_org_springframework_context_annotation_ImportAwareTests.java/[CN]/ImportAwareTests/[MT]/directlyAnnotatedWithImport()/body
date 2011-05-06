@@ -1,0 +1,13 @@
+{
+  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+  ctx.register(ImportingConfig.class);
+  ctx.refresh();
+  ctx.getBean("importedConfigBean");
+  ImportedConfig importAwareConfig=ctx.getBean(ImportedConfig.class);
+  AnnotationMetadata importMetadata=importAwareConfig.importMetadata;
+  assertThat("import metadata was not injected",importMetadata,notNullValue());
+  assertThat(importMetadata.getClassName(),is(ImportingConfig.class.getName()));
+  Map<String,Object> importAttribs=importMetadata.getAnnotationAttributes(Import.class.getName());
+  Class<?>[] importedClasses=(Class<?>[])importAttribs.get("value");
+  assertThat(importedClasses[0].getName(),is(ImportedConfig.class.getName()));
+}
