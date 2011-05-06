@@ -1,0 +1,17 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  Class<?> cglibLeaf=new ConfigurationClassEnhancer(bf).enhance(Leaf.class);
+  int m1MethodCount=0;
+  Method[] methods=ReflectionUtils.getUniqueDeclaredMethods(cglibLeaf);
+  for (  Method method : methods) {
+    if (method.getName().equals("m1")) {
+      m1MethodCount++;
+    }
+  }
+  assertThat(m1MethodCount,is(1));
+  for (  Method method : methods) {
+    if (method.getName().contains("m1")) {
+      assertEquals(method.getReturnType(),Integer.class);
+    }
+  }
+}
