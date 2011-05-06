@@ -1,0 +1,10 @@
+{
+  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+  ctx.register(CustomExecutorAsyncConfig.class);
+  ctx.refresh();
+  AsyncBean asyncBean=ctx.getBean(AsyncBean.class);
+  asyncBean.work();
+  Thread.sleep(500);
+  ctx.close();
+  assertThat(asyncBean.getThreadOfExecution().getName(),startsWith("Custom-"));
+}

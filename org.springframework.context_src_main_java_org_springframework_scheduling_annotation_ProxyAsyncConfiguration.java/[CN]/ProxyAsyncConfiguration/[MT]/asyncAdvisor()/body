@@ -1,0 +1,14 @@
+{
+  Assert.notNull(enableAsync,"@EnableAsync annotation metadata was not injected");
+  AsyncAnnotationBeanPostProcessor bpp=new AsyncAnnotationBeanPostProcessor();
+  @SuppressWarnings("unchecked") Class<? extends Annotation> customAsyncAnnotation=(Class<? extends Annotation>)enableAsync.get("annotation");
+  if (customAsyncAnnotation != AnnotationUtils.getDefaultValue(EnableAsync.class,"annotation")) {
+    bpp.setAsyncAnnotationType(customAsyncAnnotation);
+  }
+  if (this.executor != null) {
+    bpp.setExecutor(this.executor);
+  }
+  bpp.setProxyTargetClass((Boolean)enableAsync.get("proxyTargetClass"));
+  bpp.setOrder(((Integer)enableAsync.get("order")));
+  return bpp;
+}
