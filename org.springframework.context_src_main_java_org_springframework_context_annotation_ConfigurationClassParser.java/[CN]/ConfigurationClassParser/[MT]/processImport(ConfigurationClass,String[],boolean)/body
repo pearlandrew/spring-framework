@@ -1,0 +1,26 @@
+{
+  if (checkForCircularImports && this.importStack.contains(configClass)) {
+    this.problemReporter.error(new CircularImportProblem(configClass,this.importStack,configClass.getMetadata()));
+  }
+ else {
+    this.importStack.push(configClass);
+    AnnotationMetadata importingClassMetadata=configClass.getMetadata();
+    for (    String candidate : classesToImport) {
+      MetadataReader reader=this.metadataReaderFactory.getMetadataReader(candidate);
+      if (new AssignableTypeFilter(ImportSelector.class).match(reader,metadataReaderFactory)) {
+        try {
+          ImportSelector selector=BeanUtils.instantiateClass(Class.forName(candidate),ImportSelector.class);
+          processImport(configClass,selector.selectImports(importingClassMetadata),false);
+        }
+ catch (        ClassNotFoundException ex) {
+          throw new IllegalStateException(ex);
+        }
+      }
+ else {
+        this.importStack.registerImport(importingClassMetadata.getClassName(),candidate);
+        processConfigurationClass(new ConfigurationClass(reader,null));
+      }
+    }
+    this.importStack.pop();
+  }
+}
