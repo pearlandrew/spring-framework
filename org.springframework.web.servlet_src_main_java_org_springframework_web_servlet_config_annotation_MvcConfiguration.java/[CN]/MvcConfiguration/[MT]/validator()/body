@@ -1,0 +1,30 @@
+{
+  Validator validator=configurers.getValidator();
+  if (validator != null) {
+    return validator;
+  }
+ else   if (ClassUtils.isPresent("javax.validation.Validator",getClass().getClassLoader())) {
+    Class<?> clazz;
+    try {
+      String className="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
+      clazz=ClassUtils.forName(className,MvcConfiguration.class.getClassLoader());
+    }
+ catch (    ClassNotFoundException e) {
+      throw new BeanInitializationException("Could not find default validator");
+    }
+catch (    LinkageError e) {
+      throw new BeanInitializationException("Could not find default validator");
+    }
+    return (Validator)BeanUtils.instantiate(clazz);
+  }
+ else {
+    return new Validator(){
+      public void validate(      Object target,      Errors errors){
+      }
+      public boolean supports(      Class<?> clazz){
+        return false;
+      }
+    }
+;
+  }
+}

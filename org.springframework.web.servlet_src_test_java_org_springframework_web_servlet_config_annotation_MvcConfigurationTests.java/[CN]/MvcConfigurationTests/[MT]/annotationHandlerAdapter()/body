@@ -1,0 +1,21 @@
+{
+  Capture<FormattingConversionService> conversionService=new Capture<FormattingConversionService>();
+  Capture<List<HandlerMethodArgumentResolver>> resolvers=new Capture<List<HandlerMethodArgumentResolver>>();
+  Capture<List<HandlerMethodReturnValueHandler>> handlers=new Capture<List<HandlerMethodReturnValueHandler>>();
+  Capture<List<HttpMessageConverter<?>>> converters=new Capture<List<HttpMessageConverter<?>>>();
+  expect(configurer.getValidator()).andReturn(null);
+  configurer.registerFormatters(capture(conversionService));
+  configurer.addCustomArgumentResolvers(capture(resolvers));
+  configurer.addCustomReturnValueHandlers(capture(handlers));
+  configurer.configureMessageConverters(capture(converters));
+  replay(configurer);
+  RequestMappingHandlerMethodAdapter adapter=mvcConfiguration.requestMappingHandlerAdapter();
+  ConfigurableWebBindingInitializer initializer=(ConfigurableWebBindingInitializer)adapter.getWebBindingInitializer();
+  assertSame(conversionService.getValue(),initializer.getConversionService());
+  assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
+  assertEquals(0,resolvers.getValue().size());
+  assertEquals(0,handlers.getValue().size());
+  assertTrue(converters.getValue().size() > 0);
+  assertEquals(converters.getValue(),adapter.getMessageConverters());
+  verify(configurer);
+}
