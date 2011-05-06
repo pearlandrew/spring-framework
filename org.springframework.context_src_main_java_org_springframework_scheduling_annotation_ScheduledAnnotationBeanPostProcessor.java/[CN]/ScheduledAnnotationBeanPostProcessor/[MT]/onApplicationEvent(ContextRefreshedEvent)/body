@@ -1,11 +1,33 @@
 {
-  if (event.getApplicationContext() == this.applicationContext) {
-    if (this.scheduler != null) {
-      this.registrar.setScheduler(this.scheduler);
-    }
-    this.registrar.setCronTasks(this.cronTasks);
-    this.registrar.setFixedDelayTasks(this.fixedDelayTasks);
-    this.registrar.setFixedRateTasks(this.fixedRateTasks);
-    this.registrar.afterPropertiesSet();
+  if (event.getApplicationContext() != this.applicationContext) {
+    return;
   }
+  Map<String,SchedulingConfigurer> configurers=applicationContext.getBeansOfType(SchedulingConfigurer.class);
+  if (this.cronTasks.isEmpty() && this.fixedDelayTasks.isEmpty() && this.fixedRateTasks.isEmpty()&& configurers.isEmpty()) {
+    return;
+  }
+  this.registrar=new ScheduledTaskRegistrar();
+  this.registrar.setCronTasks(this.cronTasks);
+  this.registrar.setFixedDelayTasks(this.fixedDelayTasks);
+  this.registrar.setFixedRateTasks(this.fixedRateTasks);
+  if (this.scheduler != null) {
+    this.registrar.setScheduler(this.scheduler);
+  }
+  for (  SchedulingConfigurer configurer : configurers.values()) {
+    configurer.configureTasks(this.registrar);
+  }
+  if (registrar.getScheduler() == null) {
+    Map<String,? super Object> schedulers=new HashMap<String,Object>();
+    schedulers.putAll(applicationContext.getBeansOfType(TaskScheduler.class));
+    schedulers.putAll(applicationContext.getBeansOfType(ScheduledExecutorService.class));
+    if (schedulers.size() == 0) {
+    }
+ else     if (schedulers.size() == 1) {
+      this.registrar.setScheduler(schedulers.values().iterator().next());
+    }
+ else     if (schedulers.size() >= 2) {
+      throw new IllegalStateException("More than one TaskScheduler and/or ScheduledExecutorService  " + "exist within the context. Remove all but one of the beans; or implement the " + "SchedulingConfigurer interface and call ScheduledTaskRegistrar#setScheduler "+ "explicitly within the configureTasks() callback. Found the following beans: "+ schedulers.keySet());
+    }
+  }
+  this.registrar.afterPropertiesSet();
 }

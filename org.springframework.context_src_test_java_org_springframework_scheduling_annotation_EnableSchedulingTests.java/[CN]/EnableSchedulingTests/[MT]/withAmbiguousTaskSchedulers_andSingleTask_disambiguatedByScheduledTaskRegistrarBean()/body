@@ -1,0 +1,9 @@
+{
+  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+  ctx.register(SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask_disambiguatedByScheduledTaskRegistrar.class);
+  ctx.refresh();
+  Thread.sleep(20);
+  ThreadAwareWorker worker=ctx.getBean(ThreadAwareWorker.class);
+  ctx.close();
+  assertThat(worker.executedByThread,startsWith("explicitScheduler2-"));
+}
