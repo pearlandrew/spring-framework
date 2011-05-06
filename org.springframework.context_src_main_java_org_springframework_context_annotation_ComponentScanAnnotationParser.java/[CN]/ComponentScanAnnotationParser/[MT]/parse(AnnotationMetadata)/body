@@ -1,0 +1,44 @@
+{
+  Map<String,Object> attribs=annotationMetadata.getAnnotationAttributes(ComponentScan.class.getName());
+  if (attribs == null) {
+    return;
+  }
+  ClassPathBeanDefinitionScanner scanner=new ClassPathBeanDefinitionScanner(registry,(Boolean)attribs.get("useDefaultFilters"));
+  Assert.notNull(this.environment,"Environment must not be null");
+  scanner.setEnvironment(this.environment);
+  Assert.notNull(this.resourceLoader,"ResourceLoader must not be null");
+  scanner.setResourceLoader(this.resourceLoader);
+  scanner.setBeanNameGenerator(BeanUtils.instantiateClass((Class<?>)attribs.get("nameGenerator"),BeanNameGenerator.class));
+  ScopedProxyMode scopedProxyMode=(ScopedProxyMode)attribs.get("scopedProxy");
+  if (scopedProxyMode != ScopedProxyMode.DEFAULT) {
+    scanner.setScopedProxyMode(scopedProxyMode);
+  }
+ else {
+    scanner.setScopeMetadataResolver(BeanUtils.instantiateClass((Class<?>)attribs.get("scopeResolver"),ScopeMetadataResolver.class));
+  }
+  scanner.setResourcePattern((String)attribs.get("resourcePattern"));
+  for (  Filter filter : (Filter[])attribs.get("includeFilters")) {
+    scanner.addIncludeFilter(createTypeFilter(filter));
+  }
+  for (  Filter filter : (Filter[])attribs.get("excludeFilters")) {
+    scanner.addExcludeFilter(createTypeFilter(filter));
+  }
+  List<String> basePackages=new ArrayList<String>();
+  for (  String pkg : (String[])attribs.get("value")) {
+    if (StringUtils.hasText(pkg)) {
+      basePackages.add(pkg);
+    }
+  }
+  for (  String pkg : (String[])attribs.get("basePackages")) {
+    if (StringUtils.hasText(pkg)) {
+      basePackages.add(pkg);
+    }
+  }
+  for (  Class<?> clazz : (Class<?>[])attribs.get("basePackageClasses")) {
+    basePackages.add(clazz.getPackage().getName());
+  }
+  if (basePackages.isEmpty()) {
+    throw new IllegalStateException("At least one base package must be specified");
+  }
+  scanner.scan(basePackages.toArray(new String[]{}));
+}
