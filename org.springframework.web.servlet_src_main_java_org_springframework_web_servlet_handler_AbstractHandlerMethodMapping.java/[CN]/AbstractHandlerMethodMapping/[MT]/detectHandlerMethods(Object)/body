@@ -1,0 +1,13 @@
+{
+  final Class<?> handlerType=(handler instanceof String) ? getApplicationContext().getType((String)handler) : handler.getClass();
+  Set<Method> methods=HandlerMethodSelector.selectMethods(handlerType,new MethodFilter(){
+    public boolean matches(    Method method){
+      return getMappingForMethod(method,handlerType) != null;
+    }
+  }
+);
+  for (  Method method : methods) {
+    T mapping=getMappingForMethod(method,handlerType);
+    registerHandlerMethod(handler,method,mapping);
+  }
+}

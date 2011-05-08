@@ -1,0 +1,22 @@
+{
+  HandlerMethod handlerMethod;
+  if (handler instanceof String) {
+    String beanName=(String)handler;
+    handlerMethod=new HandlerMethod(beanName,getApplicationContext(),method);
+  }
+ else {
+    handlerMethod=new HandlerMethod(handler,method);
+  }
+  HandlerMethod oldHandlerMethod=handlerMethods.get(mapping);
+  if (oldHandlerMethod != null && !oldHandlerMethod.equals(handlerMethod)) {
+    throw new IllegalStateException("Ambiguous mapping found. Cannot map '" + handlerMethod.getBean() + "' bean method \n"+ handlerMethod+ "\nto "+ mapping+ ": There is already '"+ oldHandlerMethod.getBean()+ "' bean method\n"+ oldHandlerMethod+ " mapped.");
+  }
+  handlerMethods.put(mapping,handlerMethod);
+  if (logger.isInfoEnabled()) {
+    logger.info("Mapped \"" + mapping + "\" onto "+ handlerMethod);
+  }
+  Set<String> paths=getMappingPaths(mapping);
+  for (  String path : paths) {
+    urlMap.add(path,mapping);
+  }
+}
