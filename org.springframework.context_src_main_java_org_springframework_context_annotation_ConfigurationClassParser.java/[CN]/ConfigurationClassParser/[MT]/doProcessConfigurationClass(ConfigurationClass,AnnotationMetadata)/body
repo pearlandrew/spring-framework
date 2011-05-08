@@ -1,4 +1,18 @@
 {
+  Map<String,Object> componentScanAttributes=metadata.getAnnotationAttributes(ComponentScan.class.getName());
+  if (componentScanAttributes != null) {
+    Set<BeanDefinitionHolder> scannedBeanDefinitions=this.componentScanParser.parse(componentScanAttributes);
+    for (    BeanDefinitionHolder holder : scannedBeanDefinitions) {
+      if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(),metadataReaderFactory)) {
+        try {
+          this.parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
+        }
+ catch (        ConflictingBeanDefinitionException ex) {
+          throw new CircularComponentScanException("A conflicting bean definition was detected while processing @ComponentScan annotations. " + "This usually indicates a circle between scanned packages.",ex);
+        }
+      }
+    }
+  }
   List<Map<String,Object>> allImportAttribs=AnnotationUtils.findAllAnnotationAttributes(Import.class,metadata.getClassName(),true);
   for (  Map<String,Object> importAttribs : allImportAttribs) {
     processImport(configClass,(String[])importAttribs.get("value"),true);
