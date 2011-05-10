@@ -1,20 +1,11 @@
 {
-  if (ObjectUtils.isEmpty(headers)) {
-    return trueCondition();
-  }
-  RequestCondition[] result=new RequestCondition[headers.length];
-  for (int i=0; i < headers.length; i++) {
-    HeaderRequestCondition header=new HeaderRequestCondition(headers[i]);
-    if ("Content-Type".equalsIgnoreCase(header.name) && StringUtils.hasLength(header.value)) {
-      RequestCondition consumesCondition=new ConsumesRequestCondition(header.value);
-      result[i]=header.isNegated ? not(consumesCondition) : consumesCondition;
-    }
- else     if (isMediaTypeHeader(header.name)) {
-      result[i]=new MediaTypeHeaderRequestCondition(headers[i]);
-    }
- else {
-      result[i]=header;
+  HeadersRequestCondition headersCondition=new HeadersRequestCondition(headers);
+  Set<HeadersRequestCondition.HeaderRequestCondition> filteredConditions=new LinkedHashSet<HeadersRequestCondition.HeaderRequestCondition>(headersCondition.getConditions());
+  for (Iterator<HeadersRequestCondition.HeaderRequestCondition> iterator=filteredConditions.iterator(); iterator.hasNext(); ) {
+    HeadersRequestCondition.HeaderRequestCondition headerCondition=iterator.next();
+    if (ACCEPT_HEADER.equalsIgnoreCase(headerCondition.name) || CONTENT_TYPE_HEADER.equalsIgnoreCase(headerCondition.name)) {
+      iterator.remove();
     }
   }
-  return and(result);
+  return new HeadersRequestCondition(filteredConditions);
 }

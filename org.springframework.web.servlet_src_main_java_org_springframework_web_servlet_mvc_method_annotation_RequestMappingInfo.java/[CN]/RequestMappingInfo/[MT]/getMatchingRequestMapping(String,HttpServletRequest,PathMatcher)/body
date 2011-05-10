@@ -1,12 +1,15 @@
 {
-  if (!checkMethod(request) || !paramsCondition.match(request) || !headersCondition.match(request)|| !consumesCondition.match(request)) {
+  ParamsRequestCondition matchingParamsCondition=paramsCondition.getMatchingCondition(request);
+  HeadersRequestCondition matchingHeadersCondition=headersCondition.getMatchingCondition(request);
+  ConsumesRequestCondition matchingConsumesCondition=consumesCondition.getMatchingCondition(request);
+  if (!checkMethod(request) || matchingParamsCondition == null || matchingHeadersCondition == null || matchingConsumesCondition == null) {
     return null;
   }
  else {
     List<String> matchingPatterns=getMatchingPatterns(lookupPath,request,pathMatcher);
     if (!matchingPatterns.isEmpty()) {
       Set<RequestMethod> matchingMethods=getMatchingMethod(request);
-      return new RequestMappingInfo(matchingPatterns,matchingMethods,this.paramsCondition,this.headersCondition,this.consumesCondition);
+      return new RequestMappingInfo(matchingPatterns,matchingMethods,matchingParamsCondition,matchingHeadersCondition,matchingConsumesCondition);
     }
  else {
       return null;
