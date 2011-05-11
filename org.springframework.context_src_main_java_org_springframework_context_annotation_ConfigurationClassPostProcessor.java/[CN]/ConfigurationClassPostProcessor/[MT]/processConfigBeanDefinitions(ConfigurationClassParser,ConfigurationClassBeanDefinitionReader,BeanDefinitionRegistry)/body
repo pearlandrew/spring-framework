@@ -24,6 +24,16 @@
     }
   }
   parser.validate();
+  if (!(this.environment instanceof ConfigurableEnvironment)) {
+    logger.warn("Ignoring @PropertySource annotations. " + "Reason: Environment must implement ConfigurableEnvironment");
+  }
+ else {
+    MutablePropertySources envPropertySources=((ConfigurableEnvironment)this.environment).getPropertySources();
+    Stack<PropertySource<?>> parsedPropertySources=parser.getPropertySources();
+    while (!parsedPropertySources.isEmpty()) {
+      envPropertySources.addLast(parsedPropertySources.pop());
+    }
+  }
   reader.loadBeanDefinitions(parser.getConfigurationClasses());
   if (registry instanceof SingletonBeanRegistry) {
     if (!((SingletonBeanRegistry)registry).containsSingleton("importRegistry")) {
