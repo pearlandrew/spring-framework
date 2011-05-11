@@ -26,6 +26,7 @@
     }
 );
     Method closeMatch=null;
+    int closeMatchDistance=Integer.MAX_VALUE;
     int[] argsToConvert=null;
     Method matchRequiringConversion=null;
     boolean multipleOptions=false;
@@ -51,7 +52,16 @@
             return new ReflectiveMethodExecutor(method,null);
           }
  else           if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE) {
-            closeMatch=method;
+            if (!useDistance) {
+              closeMatch=method;
+            }
+ else {
+              int matchDistance=ReflectionHelper.getTypeDifferenceWeight(paramDescriptors,argumentTypes);
+              if (matchDistance < closeMatchDistance) {
+                closeMatchDistance=matchDistance;
+                closeMatch=method;
+              }
+            }
           }
  else           if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.REQUIRES_CONVERSION) {
             if (matchRequiringConversion != null) {
