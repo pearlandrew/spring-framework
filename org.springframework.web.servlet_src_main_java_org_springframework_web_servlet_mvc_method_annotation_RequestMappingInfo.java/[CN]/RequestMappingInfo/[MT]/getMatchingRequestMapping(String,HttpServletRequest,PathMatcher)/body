@@ -1,15 +1,15 @@
 {
+  RequestMethodsRequestCondition matchingMethodCondition=methodsCondition.getMatchingCondition(request);
   ParamsRequestCondition matchingParamsCondition=paramsCondition.getMatchingCondition(request);
   HeadersRequestCondition matchingHeadersCondition=headersCondition.getMatchingCondition(request);
   ConsumesRequestCondition matchingConsumesCondition=consumesCondition.getMatchingCondition(request);
-  if (!checkMethod(request) || matchingParamsCondition == null || matchingHeadersCondition == null || matchingConsumesCondition == null) {
+  if (matchingMethodCondition == null || matchingParamsCondition == null || matchingHeadersCondition == null || matchingConsumesCondition == null) {
     return null;
   }
  else {
-    List<String> matchingPatterns=getMatchingPatterns(lookupPath,request,pathMatcher);
+    List<String> matchingPatterns=getMatchingPatterns(lookupPath,pathMatcher);
     if (!matchingPatterns.isEmpty()) {
-      Set<RequestMethod> matchingMethods=getMatchingMethod(request);
-      return new RequestMappingInfo(matchingPatterns,matchingMethods,matchingParamsCondition,matchingHeadersCondition,matchingConsumesCondition);
+      return new RequestMappingInfo(matchingPatterns,matchingMethodCondition,matchingParamsCondition,matchingHeadersCondition,matchingConsumesCondition);
     }
  else {
       return null;
