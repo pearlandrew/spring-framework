@@ -15,11 +15,26 @@
       return enhanceFactoryBean(factoryBean.getClass(),beanName);
     }
   }
-  if (factoryContainsBean(beanName)) {
-    return this.beanFactory.getBean(beanName);
+  boolean factoryIsCaller=beanMethod.equals(SimpleInstantiationStrategy.getCurrentlyInvokedFactoryMethod());
+  boolean factoryAlreadyContainsSingleton=this.beanFactory.containsSingleton(beanName);
+  if (factoryIsCaller && !factoryAlreadyContainsSingleton) {
+    if (BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
+      logger.warn(String.format("@Bean method %s.%s is non-static and returns an object " + "assignable to Spring's BeanFactoryPostProcessor interface. This will " + "result in a failure to process annotations such as @Autowired, "+ "@Resource and @PostConstruct within the method's declaring "+ "@Configuration class. Add the 'static' modifier to this method to avoid "+ "these container lifecycle issues; see @Bean Javadoc for complete details",beanMethod.getDeclaringClass().getSimpleName(),beanMethod.getName()));
+    }
+    return cglibMethodProxy.invokeSuper(enhancedConfigInstance,beanMethodArgs);
   }
-  if (BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
-    logger.warn(String.format("@Bean method %s.%s is non-static and returns an object " + "assignable to Spring's BeanFactoryPostProcessor interface. This will " + "result in a failure to process annotations such as @Autowired, "+ "@Resource and @PostConstruct within the method's declaring "+ "@Configuration class. Add the 'static' modifier to this method to avoid"+ "these container lifecycle issues; see @Bean Javadoc for complete details",beanMethod.getDeclaringClass().getSimpleName(),beanMethod.getName()));
+ else {
+    boolean alreadyInCreation=this.beanFactory.isCurrentlyInCreation(beanName);
+    try {
+      if (alreadyInCreation) {
+        this.beanFactory.setCurrentlyInCreation(beanName,false);
+      }
+      return this.beanFactory.getBean(beanName);
+    }
+  finally {
+      if (alreadyInCreation) {
+        this.beanFactory.setCurrentlyInCreation(beanName,true);
+      }
+    }
   }
-  return cglibMethodProxy.invokeSuper(enhancedConfigInstance,beanMethodArgs);
 }

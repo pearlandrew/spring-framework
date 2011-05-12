@@ -12,7 +12,19 @@
  else {
       ReflectionUtils.makeAccessible(factoryMethod);
     }
-    return factoryMethod.invoke(factoryBean,args);
+    Method priorInvokedFactoryMethod=currentlyInvokedFactoryMethod.get();
+    try {
+      currentlyInvokedFactoryMethod.set(factoryMethod);
+      return factoryMethod.invoke(factoryBean,args);
+    }
+  finally {
+      if (priorInvokedFactoryMethod != null) {
+        currentlyInvokedFactoryMethod.set(priorInvokedFactoryMethod);
+      }
+ else {
+        currentlyInvokedFactoryMethod.remove();
+      }
+    }
   }
  catch (  IllegalArgumentException ex) {
     throw new BeanDefinitionStoreException("Illegal arguments to factory method [" + factoryMethod + "]; "+ "args: "+ StringUtils.arrayToCommaDelimitedString(args));
