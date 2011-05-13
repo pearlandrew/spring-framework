@@ -1,11 +1,11 @@
 {
-  XmlBeanDefinitionReader reader=new XmlBeanDefinitionReader(appContext);
-  reader.loadBeanDefinitions(new ClassPathResource("mvc-config-view-controllers.xml",getClass()));
-  assertEquals(12,appContext.getBeanDefinitionCount());
-  appContext.refresh();
+  loadBeanDefinitions("mvc-config-view-controllers.xml",14);
   RequestMappingHandlerMapping mapping=appContext.getBean(RequestMappingHandlerMapping.class);
   assertNotNull(mapping);
   mapping.setDefaultHandler(handlerMethod);
+  BeanNameUrlHandlerMapping beanNameMapping=appContext.getBean(BeanNameUrlHandlerMapping.class);
+  assertNotNull(beanNameMapping);
+  assertEquals(2,beanNameMapping.getOrder());
   MockHttpServletRequest request=new MockHttpServletRequest();
   request.setMethod("GET");
   HandlerExecutionChain chain=mapping.getHandler(request);

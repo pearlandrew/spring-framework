@@ -1,13 +1,14 @@
 {
+  Object source=parserContext.extractSource(element);
   String resourceHandlerName=registerResourceHandler(parserContext,element,source);
   if (resourceHandlerName == null) {
-    return;
+    return null;
   }
   Map<String,String> urlMap=new ManagedMap<String,String>();
   String resourceRequestPath=element.getAttribute("mapping");
   if (!StringUtils.hasText(resourceRequestPath)) {
     parserContext.getReaderContext().error("The 'mapping' attribute is required.",parserContext.extractSource(element));
-    return;
+    return null;
   }
   urlMap.put(resourceRequestPath,resourceHandlerName);
   RootBeanDefinition handlerMappingDef=new RootBeanDefinition(SimpleUrlHandlerMapping.class);
@@ -19,4 +20,7 @@
   String beanName=parserContext.getReaderContext().generateBeanName(handlerMappingDef);
   parserContext.getRegistry().registerBeanDefinition(beanName,handlerMappingDef);
   parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef,beanName));
+  MvcNamespaceUtils.registerBeanNameUrlHandlerMapping(parserContext,source);
+  MvcNamespaceUtils.registerDefaultHandlerAdapters(parserContext,source);
+  return null;
 }
