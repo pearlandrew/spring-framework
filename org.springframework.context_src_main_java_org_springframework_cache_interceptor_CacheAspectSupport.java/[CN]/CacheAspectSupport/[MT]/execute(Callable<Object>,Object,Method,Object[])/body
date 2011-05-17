@@ -21,10 +21,10 @@
         boolean cacheHit=false;
         for (Iterator<Cache<?,?>> iterator=caches.iterator(); iterator.hasNext() && !cacheHit; ) {
           Cache cache=iterator.next();
-          Cache.ValueWrapper<Object> value=cache.get(key);
-          if (value != null) {
+          Cache.ValueWrapper<Object> wrapper=cache.get(key);
+          if (wrapper != null) {
             cacheHit=true;
-            retVal=value.get();
+            retVal=wrapper.get();
           }
         }
         if (!cacheHit) {
@@ -32,14 +32,14 @@
             logger.trace("Key " + key + " NOT found in cache(s), invoking cached target method  "+ method);
           }
           retVal=invocation.call();
+          for (          Cache cache : caches) {
+            cache.put(key,retVal);
+          }
         }
  else {
           if (log) {
             logger.trace("Key " + key + " found in cache, returning value "+ retVal);
           }
-        }
-        for (        Cache cache : caches) {
-          cache.put(key,retVal);
         }
       }
       if (cacheOp instanceof CacheEvictOperation) {
