@@ -4,80 +4,53 @@
     targetClass=target.getClass();
   }
   boolean log=logger.isTraceEnabled();
-  final CacheDefinition cacheDef=getCacheDefinitionSource().getCacheDefinition(method,targetClass);
+  final CacheOperation cacheOp=getCacheDefinitionSource().getCacheOperation(method,targetClass);
   Object retVal=null;
-  if (cacheDef != null) {
-    CacheOperationContext context=getOperationContext(cacheDef,method,args,target,targetClass);
+  if (cacheOp != null) {
+    CacheOperationContext context=getOperationContext(cacheOp,method,args,target,targetClass);
     Collection<Cache<?,?>> caches=context.getCaches();
     if (context.hasConditionPassed()) {
-      if (cacheDef instanceof CacheUpdateDefinition) {
+      if (cacheOp instanceof CacheUpdateOperation) {
         Object key=context.generateKey();
         if (log) {
-          logger.trace("Computed cache key " + key + " for definition "+ cacheDef);
+          logger.trace("Computed cache key " + key + " for definition "+ cacheOp);
         }
         if (key == null) {
-          throw new IllegalArgumentException("Null key returned for cache definition (maybe you are using named params on classes without debug info?) " + cacheDef);
+          throw new IllegalArgumentException("Null key returned for cache definition (maybe you are using named params on classes without debug info?) " + cacheOp);
         }
-        if (caches.size() == 1) {
-          Cache cache=caches.iterator().next();
-          retVal=cache.get(key);
-          if (cache.containsKey(key)) {
-            if (log) {
-              logger.trace("Key " + key + " found in cache, returning value "+ retVal);
-            }
-            return retVal;
-          }
- else {
-            if (log) {
-              logger.trace("Key " + key + " NOT found in cache, invoking target method for caching "+ method);
-            }
-            retVal=invocation.call();
-            cache.put(key,retVal);
+        boolean cacheHit=false;
+        for (Iterator<Cache<?,?>> iterator=caches.iterator(); iterator.hasNext() && !cacheHit; ) {
+          Cache cache=iterator.next();
+          Cache.ValueWrapper<Object> value=cache.get(key);
+          if (value != null) {
+            cacheHit=true;
+            retVal=value.get();
           }
         }
+        if (!cacheHit) {
+          if (log) {
+            logger.trace("Key " + key + " NOT found in cache(s), invoking cached target method  "+ method);
+          }
+          retVal=invocation.call();
+        }
  else {
-          boolean eagerGet=caches.size() <= 3;
-          boolean cacheHit=false;
-          for (Iterator<Cache<?,?>> iterator=caches.iterator(); iterator.hasNext() && !cacheHit; ) {
-            Cache cache=iterator.next();
-            if (eagerGet) {
-              retVal=cache.get(key);
-            }
-            if (cache.containsKey(key)) {
-              if (eagerGet) {
-                cacheHit=true;
-              }
- else {
-                retVal=cache.get(key);
-                cacheHit=cache.containsKey(key);
-              }
-            }
+          if (log) {
+            logger.trace("Key " + key + " found in cache, returning value "+ retVal);
           }
-          if (!cacheHit) {
-            if (log) {
-              logger.trace("Key " + key + " NOT found in cache(s), invoking cached target method  "+ method);
-            }
-            retVal=invocation.call();
-          }
- else {
-            if (log) {
-              logger.trace("Key " + key + " found in cache, returning value "+ retVal);
-            }
-          }
-          for (          Cache cache : caches) {
-            cache.putIfAbsent(key,retVal);
-          }
+        }
+        for (        Cache cache : caches) {
+          cache.put(key,retVal);
         }
       }
-      if (cacheDef instanceof CacheInvalidateDefinition) {
-        CacheInvalidateDefinition invalidateDef=(CacheInvalidateDefinition)cacheDef;
+      if (cacheOp instanceof CacheEvictOperation) {
+        CacheEvictOperation evictOp=(CacheEvictOperation)cacheOp;
         retVal=invocation.call();
         Object key=null;
         for (        Cache cache : caches) {
-          if (invalidateDef.isCacheWide()) {
+          if (evictOp.isCacheWide()) {
             cache.clear();
             if (log) {
-              logger.trace("Invalidating entire cache for definition " + cacheDef + " on method "+ method);
+              logger.trace("Invalidating entire cache for definition " + cacheOp + " on method "+ method);
             }
           }
  else {
@@ -85,9 +58,9 @@
               key=context.generateKey();
             }
             if (log) {
-              logger.trace("Invalidating cache key " + key + " for definition "+ cacheDef+ " on method "+ method);
+              logger.trace("Invalidating cache key " + key + " for definition "+ cacheOp+ " on method "+ method);
             }
-            cache.remove(key);
+            cache.evict(key);
           }
         }
       }
@@ -95,7 +68,7 @@
     }
  else {
       if (log) {
-        logger.trace("Cache condition failed on method " + method + " for definition "+ cacheDef);
+        logger.trace("Cache condition failed on method " + method + " for definition "+ cacheOp);
       }
     }
   }
