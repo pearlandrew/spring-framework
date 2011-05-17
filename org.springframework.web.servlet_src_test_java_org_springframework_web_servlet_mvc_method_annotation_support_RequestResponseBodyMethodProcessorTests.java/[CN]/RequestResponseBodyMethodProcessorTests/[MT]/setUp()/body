@@ -1,14 +1,17 @@
 {
   messageConverter=createMock(HttpMessageConverter.class);
-  List<HttpMessageConverter<?>> messageConverters=new ArrayList<HttpMessageConverter<?>>();
-  messageConverters.add(messageConverter);
-  processor=new RequestResponseBodyMethodProcessor(messageConverters);
+  expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+  replay(messageConverter);
+  processor=new RequestResponseBodyMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
+  reset(messageConverter);
   Method handle=getClass().getMethod("handle1",String.class,Integer.TYPE);
   paramRequestBodyString=new MethodParameter(handle,0);
   paramInt=new MethodParameter(handle,1);
   returnTypeString=new MethodParameter(handle,-1);
   returnTypeInt=new MethodParameter(getClass().getMethod("handle2"),-1);
+  returnTypeStringProduces=new MethodParameter(getClass().getMethod("handle3"),-1);
   mavContainer=new ModelAndViewContainer();
   servletRequest=new MockHttpServletRequest();
-  webRequest=new ServletWebRequest(servletRequest,new MockHttpServletResponse());
+  servletResponse=new MockHttpServletResponse();
+  webRequest=new ServletWebRequest(servletRequest,servletResponse);
 }

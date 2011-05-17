@@ -1,16 +1,32 @@
 {
   Set<String> allowedMethods=new HashSet<String>(6);
+  Set<MediaType> consumableMediaTypes=new HashSet<MediaType>();
+  Set<MediaType> producibleMediaTypes=new HashSet<MediaType>();
   for (  RequestMappingInfo info : requestMappingInfos) {
-    for (    String pattern : info.getPatterns()) {
-      if (pathMatcher.match(pattern,lookupPath)) {
-        for (        RequestMethod method : info.getMethods().getMethods()) {
-          allowedMethods.add(method.name());
-        }
+    if (!info.getMethods().match(request)) {
+      for (      RequestMethod method : info.getMethods().getMethods()) {
+        allowedMethods.add(method.name());
       }
+    }
+    if (!info.getConsumes().match(request)) {
+      consumableMediaTypes.addAll(info.getConsumes().getMediaTypes());
+    }
+    if (!info.getProduces().match(request)) {
+      producibleMediaTypes.addAll(info.getProduces().getMediaTypes());
     }
   }
   if (!allowedMethods.isEmpty()) {
-    throw new HttpRequestMethodNotSupportedException(request.getMethod(),allowedMethods.toArray(new String[allowedMethods.size()]));
+    throw new HttpRequestMethodNotSupportedException(request.getMethod(),allowedMethods);
+  }
+ else   if (!consumableMediaTypes.isEmpty()) {
+    MediaType contentType=null;
+    if (StringUtils.hasLength(request.getContentType())) {
+      contentType=MediaType.parseMediaType(request.getContentType());
+    }
+    throw new HttpMediaTypeNotSupportedException(contentType,new ArrayList<MediaType>(consumableMediaTypes));
+  }
+ else   if (!producibleMediaTypes.isEmpty()) {
+    throw new HttpMediaTypeNotAcceptableException(new ArrayList<MediaType>(producibleMediaTypes));
   }
  else {
     return null;

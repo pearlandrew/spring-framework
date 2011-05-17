@@ -3,8 +3,10 @@
   responseHeaders.set("header","headerValue");
   ResponseEntity<String> returnValue=new ResponseEntity<String>("body",responseHeaders,HttpStatus.ACCEPTED);
   Capture<HttpOutputMessage> outputMessage=new Capture<HttpOutputMessage>();
-  expect(messageConverter.canWrite(String.class,MediaType.ALL)).andReturn(true);
-  messageConverter.write(eq("body"),eq(MediaType.ALL),capture(outputMessage));
+  expect(messageConverter.canWrite(String.class,null)).andReturn(true);
+  expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(MediaType.TEXT_PLAIN));
+  expect(messageConverter.canWrite(String.class,MediaType.TEXT_PLAIN)).andReturn(true);
+  messageConverter.write(eq("body"),eq(MediaType.TEXT_PLAIN),capture(outputMessage));
   replay(messageConverter);
   processor.handleReturnValue(returnValue,returnTypeResponseEntity,mavContainer,webRequest);
   assertFalse(mavContainer.isResolveView());

@@ -2,24 +2,14 @@
   HttpInputMessage inputMessage=createInputMessage(webRequest);
   MediaType contentType=inputMessage.getHeaders().getContentType();
   if (contentType == null) {
-    StringBuilder builder=new StringBuilder(ClassUtils.getShortName(methodParam.getParameterType()));
-    String paramName=methodParam.getParameterName();
-    if (paramName != null) {
-      builder.append(' ');
-      builder.append(paramName);
-    }
-    throw new HttpMediaTypeNotSupportedException("Cannot read parameter (" + builder.toString() + ") using HttpMessageConverters: no Content-Type found in HTTP request");
+    contentType=MediaType.APPLICATION_OCTET_STREAM;
   }
-  List<MediaType> allSupportedMediaTypes=new ArrayList<MediaType>();
-  if (this.messageConverters != null) {
-    for (    HttpMessageConverter<?> messageConverter : this.messageConverters) {
-      allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
-      if (messageConverter.canRead(paramType,contentType)) {
-        if (logger.isDebugEnabled()) {
-          logger.debug("Reading [" + paramType.getName() + "] as \""+ contentType+ "\" using ["+ messageConverter+ "]");
-        }
-        return ((HttpMessageConverter<T>)messageConverter).read(paramType,inputMessage);
+  for (  HttpMessageConverter<?> messageConverter : this.messageConverters) {
+    if (messageConverter.canRead(paramType,contentType)) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Reading [" + paramType.getName() + "] as \""+ contentType+ "\" using ["+ messageConverter+ "]");
       }
+      return ((HttpMessageConverter<T>)messageConverter).read(paramType,inputMessage);
     }
   }
   throw new HttpMediaTypeNotSupportedException(contentType,allSupportedMediaTypes);

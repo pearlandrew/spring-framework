@@ -1,0 +1,23 @@
+{
+  RequestMapping requestMappingAnn=handlerMethod.getAnnotation(RequestMapping.class);
+  if (requestMappingAnn == null) {
+    requestMappingAnn=handlerMethod.getClass().getAnnotation(RequestMapping.class);
+  }
+  Set<MediaType> result=new HashSet<MediaType>();
+  if (requestMappingAnn != null) {
+    for (    String produce : requestMappingAnn.produces()) {
+      result.add(MediaType.parseMediaType(produce));
+    }
+  }
+ else {
+    for (    HttpMessageConverter<?> messageConverter : messageConverters) {
+      if (messageConverter.canWrite(returnValueClass,null)) {
+        result.addAll(messageConverter.getSupportedMediaTypes());
+      }
+    }
+  }
+  if (result.isEmpty()) {
+    result.add(MediaType.ALL);
+  }
+  return result;
+}
