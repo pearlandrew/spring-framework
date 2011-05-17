@@ -1,6 +1,10 @@
 {
-  super.handleMatch(mapping,lookupPath,request);
-  String pattern=mapping.getPatterns().iterator().next();
+  super.handleMatch(info,lookupPath,request);
+  String pattern=info.getPatterns().iterator().next();
   Map<String,String> uriTemplateVariables=pathMatcher.extractUriTemplateVariables(pattern,lookupPath);
   request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE,uriTemplateVariables);
+  Set<MediaType> mediaTypes=info.getProduces().getMediaTypes();
+  if (mediaTypes.size() > 1 || !MediaType.ALL.equals(mediaTypes.iterator().next())) {
+    request.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE,mediaTypes);
+  }
 }
