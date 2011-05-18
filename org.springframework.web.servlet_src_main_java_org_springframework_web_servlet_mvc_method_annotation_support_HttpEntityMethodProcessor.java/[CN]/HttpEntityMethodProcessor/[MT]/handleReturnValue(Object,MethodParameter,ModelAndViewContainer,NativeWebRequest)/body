@@ -3,11 +3,12 @@
   if (returnValue == null) {
     return;
   }
-  HttpOutputMessage outputMessage=createOutputMessage(webRequest);
+  ServletServerHttpRequest inputMessage=createInputMessage(webRequest);
+  ServletServerHttpResponse outputMessage=createOutputMessage(webRequest);
   Assert.isInstanceOf(HttpEntity.class,returnValue);
   HttpEntity<?> responseEntity=(HttpEntity<?>)returnValue;
   if (responseEntity instanceof ResponseEntity) {
-    ((ServerHttpResponse)outputMessage).setStatusCode(((ResponseEntity<?>)responseEntity).getStatusCode());
+    outputMessage.setStatusCode(((ResponseEntity<?>)responseEntity).getStatusCode());
   }
   HttpHeaders entityHeaders=responseEntity.getHeaders();
   if (!entityHeaders.isEmpty()) {
@@ -15,8 +16,7 @@
   }
   Object body=responseEntity.getBody();
   if (body != null) {
-    Set<MediaType> mediaTypes=getProducibleMediaTypes(webRequest);
-    writeWithMessageConverters(body,returnType,createInputMessage(webRequest),outputMessage,mediaTypes);
+    writeWithMessageConverters(body,returnType,inputMessage,outputMessage);
   }
  else {
     outputMessage.getBody();
