@@ -8,7 +8,7 @@
   Object retVal=null;
   if (cacheOp != null) {
     CacheOperationContext context=getOperationContext(cacheOp,method,args,target,targetClass);
-    Collection<Cache<?,?>> caches=context.getCaches();
+    Collection<Cache> caches=context.getCaches();
     if (context.hasConditionPassed()) {
       if (cacheOp instanceof CacheUpdateOperation) {
         Object key=context.generateKey();
@@ -19,9 +19,9 @@
           throw new IllegalArgumentException("Null key returned for cache definition (maybe you are using named params on classes without debug info?) " + cacheOp);
         }
         boolean cacheHit=false;
-        for (Iterator<Cache<?,?>> iterator=caches.iterator(); iterator.hasNext() && !cacheHit; ) {
+        for (Iterator<Cache> iterator=caches.iterator(); iterator.hasNext() && !cacheHit; ) {
           Cache cache=iterator.next();
-          Cache.ValueWrapper<Object> wrapper=cache.get(key);
+          Cache.ValueWrapper wrapper=cache.get(key);
           if (wrapper != null) {
             cacheHit=true;
             retVal=wrapper.get();
