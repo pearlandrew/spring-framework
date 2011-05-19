@@ -1,13 +1,13 @@
 {
+  Capture<List<HttpMessageConverter<?>>> converters=new Capture<List<HttpMessageConverter<?>>>();
   Capture<FormattingConversionService> conversionService=new Capture<FormattingConversionService>();
   Capture<List<HandlerMethodArgumentResolver>> resolvers=new Capture<List<HandlerMethodArgumentResolver>>();
   Capture<List<HandlerMethodReturnValueHandler>> handlers=new Capture<List<HandlerMethodReturnValueHandler>>();
-  Capture<List<HttpMessageConverter<?>>> converters=new Capture<List<HttpMessageConverter<?>>>();
+  configurer.configureMessageConverters(capture(converters));
   expect(configurer.getValidator()).andReturn(null);
   configurer.addFormatters(capture(conversionService));
   configurer.addArgumentResolvers(capture(resolvers));
   configurer.addReturnValueHandlers(capture(handlers));
-  configurer.configureMessageConverters(capture(converters));
   replay(configurer);
   mvcConfiguration.setConfigurers(Arrays.asList(configurer));
   RequestMappingHandlerAdapter adapter=mvcConfiguration.requestMappingHandlerAdapter();

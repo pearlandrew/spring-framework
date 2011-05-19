@@ -1,10 +1,11 @@
 {
-  if (handler instanceof HandlerExecutionChain) {
-    HandlerExecutionChain chain=(HandlerExecutionChain)handler;
-    chain.addInterceptors(getAdaptedInterceptors());
-    return chain;
+  HandlerExecutionChain chain=(handler instanceof HandlerExecutionChain) ? (HandlerExecutionChain)handler : new HandlerExecutionChain(handler);
+  chain.addInterceptors(getAdaptedInterceptors());
+  String lookupPath=urlPathHelper.getLookupPathForRequest(request);
+  for (  MappedInterceptor mappedInterceptor : mappedInterceptors) {
+    if (mappedInterceptor.matches(lookupPath,pathMatcher)) {
+      chain.addInterceptor(mappedInterceptor.getInterceptor());
+    }
   }
- else {
-    return new HandlerExecutionChain(handler,getAdaptedInterceptors());
-  }
+  return chain;
 }

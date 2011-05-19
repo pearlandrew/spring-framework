@@ -1,4 +1,10 @@
 {
-  MappedInterceptors mappedInterceptors=new MappedInterceptors(configurer.getInterceptors());
-  return mappedInterceptors.getInterceptors(lookupPath,new AntPathMatcher());
+  PathMatcher pathMatcher=new AntPathMatcher();
+  List<HandlerInterceptor> result=new ArrayList<HandlerInterceptor>();
+  for (  MappedInterceptor interceptor : configurer.getInterceptors()) {
+    if (interceptor.matches(lookupPath,pathMatcher)) {
+      result.add(interceptor.getInterceptor());
+    }
+  }
+  return result;
 }

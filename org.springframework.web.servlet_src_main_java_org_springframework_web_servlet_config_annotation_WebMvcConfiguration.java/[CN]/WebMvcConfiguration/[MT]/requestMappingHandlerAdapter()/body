@@ -1,5 +1,6 @@
 {
   RequestMappingHandlerAdapter adapter=new RequestMappingHandlerAdapter();
+  adapter.setMessageConverters(getMessageConverters());
   ConfigurableWebBindingInitializer bindingInitializer=new ConfigurableWebBindingInitializer();
   bindingInitializer.setConversionService(conversionService());
   bindingInitializer.setValidator(validator());
@@ -10,11 +11,5 @@
   List<HandlerMethodReturnValueHandler> returnValueHandlers=new ArrayList<HandlerMethodReturnValueHandler>();
   configurers.addReturnValueHandlers(returnValueHandlers);
   adapter.setCustomReturnValueHandlers(returnValueHandlers);
-  List<HttpMessageConverter<?>> converters=new ArrayList<HttpMessageConverter<?>>();
-  configurers.configureMessageConverters(converters);
-  if (converters.size() == 0) {
-    addDefaultHttpMessageConverters(converters);
-  }
-  adapter.setMessageConverters(converters);
   return adapter;
 }
