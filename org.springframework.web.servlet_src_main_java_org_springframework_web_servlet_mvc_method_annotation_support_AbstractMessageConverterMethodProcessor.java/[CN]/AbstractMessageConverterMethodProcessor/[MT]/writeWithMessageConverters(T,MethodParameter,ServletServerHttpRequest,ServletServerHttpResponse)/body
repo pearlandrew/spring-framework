@@ -1,17 +1,18 @@
 {
-  Set<MediaType> acceptableMediaTypes=getAcceptableMediaTypes(inputMessage);
-  Set<MediaType> producibleMediaTypes=getProducibleMediaTypes(inputMessage.getServletRequest());
-  List<MediaType> mediaTypes=new ArrayList<MediaType>();
-  for (  MediaType acceptableMediaType : acceptableMediaTypes) {
-    for (    MediaType producibleMediaType : producibleMediaTypes) {
-      if (acceptableMediaType.isCompatibleWith(producibleMediaType)) {
-        mediaTypes.add(getMostSpecificMediaType(acceptableMediaType,producibleMediaType));
+  List<MediaType> acceptableMediaTypes=getAcceptableMediaTypes(inputMessage);
+  List<MediaType> producibleMediaTypes=getProducibleMediaTypes(inputMessage.getServletRequest());
+  Set<MediaType> compatibleMediaTypes=new LinkedHashSet<MediaType>();
+  for (  MediaType a : acceptableMediaTypes) {
+    for (    MediaType p : producibleMediaTypes) {
+      if (a.isCompatibleWith(p)) {
+        compatibleMediaTypes.add(getMostSpecificMediaType(a,p));
       }
     }
   }
-  if (mediaTypes.isEmpty()) {
+  if (compatibleMediaTypes.isEmpty()) {
     throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
   }
+  List<MediaType> mediaTypes=new ArrayList<MediaType>(compatibleMediaTypes);
   MediaType.sortBySpecificity(mediaTypes);
   MediaType selectedMediaType=null;
   for (  MediaType mediaType : mediaTypes) {

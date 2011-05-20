@@ -25,10 +25,20 @@
   if (!this.ignoreAcceptHeader) {
     String acceptHeader=request.getHeader(ACCEPT_HEADER);
     if (StringUtils.hasText(acceptHeader)) {
-      List<MediaType> mediaTypes=MediaType.parseMediaTypes(acceptHeader);
+      List<MediaType> acceptableMediaTypes=MediaType.parseMediaTypes(acceptHeader);
+      List<MediaType> producibleMediaTypes=getProducibleMediaTypes(request);
+      Set<MediaType> compatibleMediaTypes=new LinkedHashSet<MediaType>();
+      for (      MediaType a : acceptableMediaTypes) {
+        for (        MediaType p : producibleMediaTypes) {
+          if (a.isCompatibleWith(p)) {
+            compatibleMediaTypes.add(getMostSpecificMediaType(a,p));
+          }
+        }
+      }
+      List<MediaType> mediaTypes=new ArrayList<MediaType>(compatibleMediaTypes);
       MediaType.sortByQualityValue(mediaTypes);
       if (logger.isDebugEnabled()) {
-        logger.debug("Requested media types are " + mediaTypes + " (based on Accept header)");
+        logger.debug("Requested media types are " + mediaTypes + " based on Accept header types "+ "and producible media types "+ producibleMediaTypes+ ")");
       }
       return mediaTypes;
     }
