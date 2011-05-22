@@ -2,13 +2,25 @@
   if (object == null) {
     return this;
   }
-  if (object instanceof Collection<?>) {
-    return new TypeDescriptor(object.getClass(),CollectionUtils.findCommonElementType((Collection<?>)object));
+  if (isCollection() && Object.class.equals(getElementType())) {
+    Collection<?> collection=(Collection<?>)object;
+    if (collection.size() > 0) {
+      return new TypeDescriptor(object.getClass(),CollectionUtils.findCommonElementType((Collection<?>)object),methodParameter,field,fieldNestingLevel,annotations);
+    }
+ else {
+      return this;
+    }
   }
- else   if (object instanceof Map<?,?>) {
-    return new TypeDescriptor(object.getClass(),CollectionUtils.findCommonElementType(((Map<?,?>)object).keySet()),CollectionUtils.findCommonElementType(((Map<?,?>)object).values()));
+ else   if (isMap() && Object.class.equals(getMapKeyType()) && Object.class.equals(getMapValueType())) {
+    Map<?,?> map=(Map<?,?>)object;
+    if (map.size() > 0) {
+      return new TypeDescriptor(object.getClass(),CollectionUtils.findCommonElementType(((Map<?,?>)object).keySet()),CollectionUtils.findCommonElementType(((Map<?,?>)object).values()),methodParameter,field,fieldNestingLevel,annotations);
+    }
+ else {
+      return this;
+    }
   }
  else {
-    return valueOf(object.getClass());
+    return this;
   }
 }
