@@ -1,0 +1,18 @@
+{
+  LinkedList<Class<?>> classQueue=new LinkedList<Class<?>>();
+  classQueue.addFirst(commonType);
+  while (!classQueue.isEmpty()) {
+    Class<?> currentClass=classQueue.removeLast();
+    if (currentClass.isAssignableFrom(valueClass)) {
+      return currentClass;
+    }
+    Class<?>[] interfaces=currentClass.getInterfaces();
+    for (    Class<?> ifc : interfaces) {
+      addInterfaceHierarchy(ifc,classQueue);
+    }
+    if (currentClass.getSuperclass() != null) {
+      classQueue.addFirst(currentClass.getSuperclass());
+    }
+  }
+  throw new IllegalStateException("Should never be invoked");
+}

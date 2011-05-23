@@ -1,14 +1,19 @@
 {
+  Class<?> commonType=null;
   Object candidate=null;
   for (  Object value : values) {
     if (value != null) {
       if (candidate == null) {
+        commonType=value.getClass();
         candidate=value;
       }
- else       if (candidate.getClass() != value.getClass()) {
-        return null;
+ else {
+        commonType=commonType(commonType,value.getClass());
+        if (commonType == Object.class) {
+          return null;
+        }
       }
     }
   }
-  return candidate;
+  return new CommonElement(commonType,candidate);
 }
