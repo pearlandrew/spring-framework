@@ -1,0 +1,14 @@
+{
+  List<String> list=new ArrayList<String>();
+  list.add("9");
+  list.add("37");
+  TypeDescriptor sourceType=TypeDescriptor.forObject(list);
+  TypeDescriptor targetType=new TypeDescriptor(getClass().getField("scalarListTarget"));
+  assertFalse(conversionService.canConvert(sourceType,targetType));
+  conversionService.addConverterFactory(new StringToNumberConverterFactory());
+  assertTrue(conversionService.canConvert(sourceType,targetType));
+  @SuppressWarnings("unchecked") List<String> result=(List<String>)conversionService.convert(list,sourceType,targetType);
+  assertFalse(list.equals(result));
+  assertEquals((Integer)9,result.get(0));
+  assertEquals((Integer)37,result.get(1));
+}
