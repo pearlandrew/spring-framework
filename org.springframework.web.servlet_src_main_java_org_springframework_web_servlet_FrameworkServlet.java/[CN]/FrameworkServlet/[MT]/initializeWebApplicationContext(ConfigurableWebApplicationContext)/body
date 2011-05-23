@@ -1,0 +1,16 @@
+{
+  if (this.contextInitializerClasses != null) {
+    String[] initializerClassNames=StringUtils.tokenizeToStringArray(this.contextInitializerClasses,INIT_PARAM_DELIMITERS);
+    for (    String initializerClassName : initializerClassNames) {
+      ApplicationContextInitializer<ConfigurableApplicationContext> initializer=null;
+      try {
+        Class<?> initializerClass=ClassUtils.forName(initializerClassName,wac.getClassLoader());
+        initializer=BeanUtils.instantiateClass(initializerClass,ApplicationContextInitializer.class);
+      }
+ catch (      Exception ex) {
+        throw new IllegalArgumentException(String.format("Could not instantiate class [%s] specified via " + "'contextInitializerClasses' init-param",initializerClassName),ex);
+      }
+      initializer.initialize(wac);
+    }
+  }
+}
