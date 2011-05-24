@@ -1,6 +1,7 @@
 {
+  Class<?> returnValueClass=returnValue.getClass();
   List<MediaType> acceptableMediaTypes=getAcceptableMediaTypes(inputMessage);
-  List<MediaType> producibleMediaTypes=getProducibleMediaTypes(inputMessage.getServletRequest());
+  List<MediaType> producibleMediaTypes=getProducibleMediaTypes(inputMessage.getServletRequest(),returnValueClass);
   Set<MediaType> compatibleMediaTypes=new LinkedHashSet<MediaType>();
   for (  MediaType a : acceptableMediaTypes) {
     for (    MediaType p : producibleMediaTypes) {
@@ -27,7 +28,7 @@
   }
   if (selectedMediaType != null) {
     for (    HttpMessageConverter<?> messageConverter : messageConverters) {
-      if (messageConverter.canWrite(returnValue.getClass(),selectedMediaType)) {
+      if (messageConverter.canWrite(returnValueClass,selectedMediaType)) {
         ((HttpMessageConverter<T>)messageConverter).write(returnValue,selectedMediaType,outputMessage);
         if (logger.isDebugEnabled()) {
           logger.debug("Written [" + returnValue + "] as \""+ selectedMediaType+ "\" using ["+ messageConverter+ "]");

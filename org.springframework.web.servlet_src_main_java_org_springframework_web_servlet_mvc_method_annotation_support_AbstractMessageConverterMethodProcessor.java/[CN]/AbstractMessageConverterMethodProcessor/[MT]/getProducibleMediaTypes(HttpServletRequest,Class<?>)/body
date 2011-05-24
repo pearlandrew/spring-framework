@@ -4,7 +4,13 @@
     return new ArrayList<MediaType>(mediaTypes);
   }
  else   if (!allSupportedMediaTypes.isEmpty()) {
-    return allSupportedMediaTypes;
+    List<MediaType> result=new ArrayList<MediaType>();
+    for (    HttpMessageConverter<?> converter : messageConverters) {
+      if (converter.canWrite(returnValueClass,null)) {
+        result.addAll(converter.getSupportedMediaTypes());
+      }
+    }
+    return result;
   }
  else {
     return Collections.singletonList(MediaType.ALL);
