@@ -6,7 +6,7 @@
     while (!classQueue.isEmpty()) {
       Class<?> currentClass=classQueue.removeLast();
       if (logger.isTraceEnabled()) {
-        logger.trace("and indexed by targetType [" + currentClass.getName() + "]");
+        logger.trace("and indexed by target class [" + currentClass.getName() + "]");
       }
       MatchableConverters matchable=converters.get(currentClass);
       GenericConverter converter=matchConverter(matchable,sourceType,targetType);
@@ -23,39 +23,64 @@
     }
     return matchConverter(converters.get(Object.class),sourceType,targetType);
   }
- else {
+ else   if (targetObjectType.isArray()) {
     LinkedList<Class<?>> classQueue=new LinkedList<Class<?>>();
     classQueue.addFirst(targetObjectType);
-    LinkedList<Class<?>> attemptedInterfaces=new LinkedList<Class<?>>();
     while (!classQueue.isEmpty()) {
       Class<?> currentClass=classQueue.removeLast();
       if (logger.isTraceEnabled()) {
-        logger.trace("and indexed by targetType [" + currentClass.getName() + "]");
+        logger.trace("and indexed by target array type [" + currentClass.getName() + "]");
       }
       MatchableConverters matchable=converters.get(currentClass);
       GenericConverter converter=matchConverter(matchable,sourceType,targetType);
       if (converter != null) {
         return converter;
       }
-      if (currentClass.isArray()) {
-        Class<?> componentType=ClassUtils.resolvePrimitiveIfNecessary(currentClass.getComponentType());
-        if (componentType.getSuperclass() != null) {
-          classQueue.addFirst(Array.newInstance(componentType.getSuperclass(),0).getClass());
-        }
- else         if (componentType.isInterface()) {
-          classQueue.addFirst(Object[].class);
-        }
+      Class<?> componentType=ClassUtils.resolvePrimitiveIfNecessary(currentClass.getComponentType());
+      if (componentType.getSuperclass() != null) {
+        classQueue.addFirst(Array.newInstance(componentType.getSuperclass(),0).getClass());
       }
- else {
-        Class<?>[] interfaces=currentClass.getInterfaces();
-        for (        Class<?> ifc : interfaces) {
-          addInterfaceHierarchy(ifc,classQueue,attemptedInterfaces);
-        }
-        if (currentClass.getSuperclass() != null) {
-          classQueue.addFirst(currentClass.getSuperclass());
-        }
+ else       if (componentType.isInterface()) {
+        classQueue.addFirst(Object[].class);
       }
     }
     return null;
+  }
+ else {
+    Set<Class<?>> interfaces=new LinkedHashSet<Class<?>>();
+    LinkedList<Class<?>> classQueue=new LinkedList<Class<?>>();
+    classQueue.addFirst(targetObjectType);
+    while (!classQueue.isEmpty()) {
+      Class<?> currentClass=classQueue.removeLast();
+      if (logger.isTraceEnabled()) {
+        logger.trace("and indexed by target class [" + currentClass.getName() + "]");
+      }
+      MatchableConverters matchable=converters.get(currentClass);
+      GenericConverter converter=matchConverter(matchable,sourceType,targetType);
+      if (converter != null) {
+        return converter;
+      }
+      Class<?> superClass=currentClass.getSuperclass();
+      if (superClass != null && superClass != Object.class) {
+        classQueue.addFirst(superClass);
+      }
+      for (      Class<?> interfaceType : currentClass.getInterfaces()) {
+        addInterfaceHierarchy(interfaceType,interfaces);
+      }
+    }
+    for (    Class<?> interfaceType : interfaces) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("and indexed by target interface [" + interfaceType.getName() + "]");
+      }
+      MatchableConverters matchable=converters.get(interfaceType);
+      GenericConverter converter=matchConverter(matchable,sourceType,targetType);
+      if (converter != null) {
+        return converter;
+      }
+    }
+    if (logger.isTraceEnabled()) {
+      logger.trace("and indexed by [java.lang.Object]");
+    }
+    return matchConverter(converters.get(Object.class),sourceType,targetType);
   }
 }

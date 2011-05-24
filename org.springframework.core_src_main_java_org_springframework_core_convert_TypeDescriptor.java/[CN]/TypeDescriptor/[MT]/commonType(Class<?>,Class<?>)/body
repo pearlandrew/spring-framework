@@ -1,4 +1,5 @@
 {
+  Set<Class<?>> interfaces=new LinkedHashSet<Class<?>>();
   LinkedList<Class<?>> classQueue=new LinkedList<Class<?>>();
   classQueue.addFirst(commonType);
   while (!classQueue.isEmpty()) {
@@ -6,13 +7,18 @@
     if (currentClass.isAssignableFrom(valueClass)) {
       return currentClass;
     }
-    Class<?>[] interfaces=currentClass.getInterfaces();
-    for (    Class<?> ifc : interfaces) {
-      addInterfaceHierarchy(ifc,classQueue);
-    }
-    if (currentClass.getSuperclass() != null) {
+    Class<?> superClass=currentClass.getSuperclass();
+    if (superClass != null && superClass != Object.class) {
       classQueue.addFirst(currentClass.getSuperclass());
     }
+    for (    Class<?> interfaceType : currentClass.getInterfaces()) {
+      addInterfaceHierarchy(interfaceType,interfaces);
+    }
   }
-  throw new IllegalStateException("Should never be invoked");
+  for (  Class<?> interfaceType : interfaces) {
+    if (interfaceType.isAssignableFrom(valueClass)) {
+      return interfaceType;
+    }
+  }
+  return Object.class;
 }
