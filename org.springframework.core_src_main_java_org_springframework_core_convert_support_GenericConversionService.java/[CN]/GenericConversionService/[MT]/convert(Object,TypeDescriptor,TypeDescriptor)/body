@@ -6,6 +6,9 @@
   if (sourceType == TypeDescriptor.NULL) {
     Assert.isTrue(source == null,"The value must be null if sourceType == TypeDescriptor.NULL");
     Object result=convertNullSource(sourceType,targetType);
+    if (result == null) {
+      assertNotPrimitiveTargetType(sourceType,targetType);
+    }
     if (logger.isDebugEnabled()) {
       logger.debug("Converted to " + StylerUtils.style(result));
     }
@@ -18,15 +21,12 @@
   Assert.isTrue(source == null || sourceType.getObjectType().isInstance(source));
   GenericConverter converter=getConverter(sourceType,targetType);
   if (converter == null) {
-    if (source == null || sourceType.isAssignableTo(targetType)) {
-      logger.debug("No converter found - returning assignable source object as-is");
-      return source;
-    }
- else {
-      throw new ConverterNotFoundException(sourceType,targetType);
-    }
+    return handleConverterNotFound(source,sourceType,targetType);
   }
   Object result=ConversionUtils.invokeConverter(converter,source,sourceType,targetType);
+  if (result == null) {
+    assertNotPrimitiveTargetType(sourceType,targetType);
+  }
   if (logger.isDebugEnabled()) {
     logger.debug("Converted to " + StylerUtils.style(result));
   }
