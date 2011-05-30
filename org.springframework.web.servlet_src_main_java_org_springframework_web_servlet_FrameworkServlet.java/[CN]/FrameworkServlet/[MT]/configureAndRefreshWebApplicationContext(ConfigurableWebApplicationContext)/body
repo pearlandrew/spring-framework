@@ -1,0 +1,24 @@
+{
+  if (ObjectUtils.identityToString(wac).equals(wac.getId())) {
+    ServletContext sc=getServletContext();
+    if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+      String servletContextName=sc.getServletContextName();
+      if (servletContextName != null) {
+        wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName + "."+ getServletName());
+      }
+ else {
+        wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + getServletName());
+      }
+    }
+ else {
+      wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + sc.getContextPath() + "/"+ getServletName());
+    }
+  }
+  wac.setServletContext(getServletContext());
+  wac.setServletConfig(getServletConfig());
+  wac.setNamespace(getNamespace());
+  wac.addApplicationListener(new SourceFilteringListener(wac,new ContextRefreshListener()));
+  postProcessWebApplicationContext(wac);
+  applyInitializers(wac);
+  wac.refresh();
+}

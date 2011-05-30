@@ -1,8 +1,23 @@
 {
-  WebApplicationContext wac=findWebApplicationContext();
+  WebApplicationContext rootContext=WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+  WebApplicationContext wac=null;
+  if (this.webApplicationContext != null) {
+    wac=this.webApplicationContext;
+    if (wac instanceof ConfigurableWebApplicationContext) {
+      ConfigurableWebApplicationContext cwac=(ConfigurableWebApplicationContext)wac;
+      if (!cwac.isActive()) {
+        if (cwac.getParent() == null) {
+          cwac.setParent(rootContext);
+        }
+        configureAndRefreshWebApplicationContext(cwac);
+      }
+    }
+  }
   if (wac == null) {
-    WebApplicationContext parent=WebApplicationContextUtils.getWebApplicationContext(getServletContext());
-    wac=createWebApplicationContext(parent);
+    wac=findWebApplicationContext();
+  }
+  if (wac == null) {
+    wac=createWebApplicationContext(rootContext);
   }
   if (!this.refreshEventReceived) {
     onRefresh(wac);
