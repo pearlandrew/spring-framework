@@ -1,0 +1,17 @@
+{
+  Set<WebApplicationInitializer> initializers=new TreeSet<WebApplicationInitializer>(new AnnotationAwareOrderComparator());
+  for (  Class<?> waiClass : webAppInitializerClasses) {
+    if (Modifier.isAbstract(waiClass.getModifiers())) {
+      continue;
+    }
+    initializers.add(instantiateClass(waiClass,WebApplicationInitializer.class));
+  }
+  if (initializers.isEmpty()) {
+    logger.info("Detected no WebApplicationInitializer types on the classpath: exiting.");
+    return;
+  }
+  logger.info("Delegating ServletContext to the following " + "WebApplicationInitializer instances: " + initializers);
+  for (  WebApplicationInitializer initializer : initializers) {
+    initializer.onStartup(servletContext);
+  }
+}
