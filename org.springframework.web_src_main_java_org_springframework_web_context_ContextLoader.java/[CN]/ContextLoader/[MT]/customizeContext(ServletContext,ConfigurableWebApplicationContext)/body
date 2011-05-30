@@ -1,12 +1,12 @@
 {
-  List<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances=new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
+  ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances=new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
   for (  Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass : determineContextInitializerClasses(servletContext)) {
     Class<?> contextClass=applicationContext.getClass();
     Class<?> initializerContextClass=GenericTypeResolver.resolveTypeArgument(initializerClass,ApplicationContextInitializer.class);
     Assert.isAssignable(initializerContextClass,contextClass,String.format("Could not add context initializer [%s] as its generic parameter [%s] " + "is not assignable from the type of application context used by this " + "context loader [%s]",initializerClass.getName(),initializerContextClass,contextClass));
     initializerInstances.add(BeanUtils.instantiateClass(initializerClass));
   }
-  OrderComparator.sort(initializerInstances);
+  Collections.sort(initializerInstances,new AnnotationAwareOrderComparator());
   for (  ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {
     initializer.initialize(applicationContext);
   }
