@@ -1,26 +1,3 @@
 {
-  Class<?> contextClass=determineContextClass(sc);
-  if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
-    throw new ApplicationContextException("Custom context class [" + contextClass.getName() + "] is not of type ["+ ConfigurableWebApplicationContext.class.getName()+ "]");
-  }
-  ConfigurableWebApplicationContext wac=(ConfigurableWebApplicationContext)BeanUtils.instantiateClass(contextClass);
-  if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
-    String servletContextName=sc.getServletContextName();
-    wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + ObjectUtils.getDisplayString(servletContextName));
-  }
- else {
-    try {
-      String contextPath=(String)ServletContext.class.getMethod("getContextPath").invoke(sc);
-      wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + ObjectUtils.getDisplayString(contextPath));
-    }
- catch (    Exception ex) {
-      throw new IllegalStateException("Failed to invoke Servlet 2.5 getContextPath method",ex);
-    }
-  }
-  wac.setParent(parent);
-  wac.setServletContext(sc);
-  wac.setConfigLocation(sc.getInitParameter(CONFIG_LOCATION_PARAM));
-  customizeContext(sc,wac);
-  wac.refresh();
-  return wac;
+  return createWebApplicationContext(sc);
 }

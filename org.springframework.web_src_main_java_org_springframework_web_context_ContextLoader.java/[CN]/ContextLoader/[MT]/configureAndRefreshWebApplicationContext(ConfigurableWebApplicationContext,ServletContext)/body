@@ -1,0 +1,23 @@
+{
+  if (ObjectUtils.identityToString(wac).equals(wac.getId())) {
+    if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+      String servletContextName=sc.getServletContextName();
+      wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + ObjectUtils.getDisplayString(servletContextName));
+    }
+ else {
+      try {
+        String contextPath=(String)ServletContext.class.getMethod("getContextPath").invoke(sc);
+        wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + ObjectUtils.getDisplayString(contextPath));
+      }
+ catch (      Exception ex) {
+        throw new IllegalStateException("Failed to invoke Servlet 2.5 getContextPath method",ex);
+      }
+    }
+  }
+  ApplicationContext parent=loadParentContext(sc);
+  wac.setParent(parent);
+  wac.setServletContext(sc);
+  wac.setConfigLocation(sc.getInitParameter(CONFIG_LOCATION_PARAM));
+  customizeContext(sc,wac);
+  wac.refresh();
+}

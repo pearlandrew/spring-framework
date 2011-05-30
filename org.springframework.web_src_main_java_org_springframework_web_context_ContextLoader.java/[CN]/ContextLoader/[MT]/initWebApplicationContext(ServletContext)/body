@@ -9,8 +9,12 @@
   }
   long startTime=System.currentTimeMillis();
   try {
-    ApplicationContext parent=loadParentContext(servletContext);
-    this.context=createWebApplicationContext(servletContext,parent);
+    if (this.context == null) {
+      this.context=createWebApplicationContext(servletContext);
+    }
+    if (this.context instanceof ConfigurableWebApplicationContext) {
+      configureAndRefreshWebApplicationContext((ConfigurableWebApplicationContext)this.context,servletContext);
+    }
     servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,this.context);
     ClassLoader ccl=Thread.currentThread().getContextClassLoader();
     if (ccl == ContextLoader.class.getClassLoader()) {
