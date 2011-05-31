@@ -1,15 +1,15 @@
 {
-  Set<WebApplicationInitializer> initializers=new TreeSet<WebApplicationInitializer>(new AnnotationAwareOrderComparator());
+  ArrayList<WebApplicationInitializer> initializers=new ArrayList<WebApplicationInitializer>();
   for (  Class<?> waiClass : webAppInitializerClasses) {
-    if (Modifier.isAbstract(waiClass.getModifiers())) {
-      continue;
+    if (!Modifier.isAbstract(waiClass.getModifiers())) {
+      initializers.add(instantiateClass(waiClass,WebApplicationInitializer.class));
     }
-    initializers.add(instantiateClass(waiClass,WebApplicationInitializer.class));
   }
   if (initializers.isEmpty()) {
     logger.info("Detected no WebApplicationInitializer types on the classpath: exiting.");
     return;
   }
+  Collections.sort(initializers,new AnnotationAwareOrderComparator());
   logger.info("Delegating ServletContext to the following " + "WebApplicationInitializer instances: " + initializers);
   for (  WebApplicationInitializer initializer : initializers) {
     initializer.onStartup(servletContext);
