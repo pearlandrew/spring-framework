@@ -5,7 +5,7 @@
   if (declaringClass == null && logger.isDebugEnabled()) {
     logger.debug(String.format("Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",annotationType,clazz));
   }
-  List<String> profilesList=new ArrayList<String>();
+  final Set<String> activeProfiles=new LinkedHashSet<String>();
   while (declaringClass != null) {
     ActivateProfiles activateProfiles=declaringClass.getAnnotation(annotationType);
     if (logger.isTraceEnabled()) {
@@ -21,15 +21,12 @@
  else     if (!ObjectUtils.isEmpty(valueProfiles)) {
       profiles=valueProfiles;
     }
-    if (!ObjectUtils.isEmpty(profiles)) {
-      Collections.reverse(Arrays.<String>asList(profiles));
-      for (      String profile : profiles) {
-        if (StringUtils.hasText(profile)) {
-          profilesList.add(0,profile);
-        }
+    for (    String profile : profiles) {
+      if (StringUtils.hasText(profile)) {
+        activeProfiles.add(profile);
       }
     }
     declaringClass=activateProfiles.inheritProfiles() ? AnnotationUtils.findAnnotationDeclaringClass(annotationType,declaringClass.getSuperclass()) : null;
   }
-  return profilesList.toArray(new String[profilesList.size()]);
+  return StringUtils.toStringArray(activeProfiles);
 }
