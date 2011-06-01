@@ -1,20 +1,20 @@
 {
   Assert.notNull(clazz,"Class must not be null");
-  Class<ActivateProfiles> annotationType=ActivateProfiles.class;
+  Class<ActiveProfiles> annotationType=ActiveProfiles.class;
   Class<?> declaringClass=AnnotationUtils.findAnnotationDeclaringClass(annotationType,clazz);
   if (declaringClass == null && logger.isDebugEnabled()) {
     logger.debug(String.format("Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",annotationType,clazz));
   }
   final Set<String> activeProfiles=new LinkedHashSet<String>();
   while (declaringClass != null) {
-    ActivateProfiles activateProfiles=declaringClass.getAnnotation(annotationType);
+    ActiveProfiles annotation=declaringClass.getAnnotation(annotationType);
     if (logger.isTraceEnabled()) {
-      logger.trace(String.format("Retrieved @ActivateProfiles [%s] for declaring class [%s].",activateProfiles,declaringClass));
+      logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].",activeProfiles,declaringClass));
     }
-    String[] profiles=activateProfiles.profiles();
-    String[] valueProfiles=activateProfiles.value();
+    String[] profiles=annotation.profiles();
+    String[] valueProfiles=annotation.value();
     if (!ObjectUtils.isEmpty(valueProfiles) && !ObjectUtils.isEmpty(profiles)) {
-      String msg=String.format("Test class [%s] has been configured with @ActivateProfiles' 'value' [%s] " + "and 'profiles' [%s] attributes. Only one declaration of bean " + "definition profiles is permitted per @ActivateProfiles annotation.",declaringClass,ObjectUtils.nullSafeToString(valueProfiles),ObjectUtils.nullSafeToString(profiles));
+      String msg=String.format("Test class [%s] has been configured with @ActiveProfiles' 'value' [%s] " + "and 'profiles' [%s] attributes. Only one declaration of active bean " + "definition profiles is permitted per @ActiveProfiles annotation.",declaringClass,ObjectUtils.nullSafeToString(valueProfiles),ObjectUtils.nullSafeToString(profiles));
       logger.error(msg);
       throw new IllegalStateException(msg);
     }
@@ -26,7 +26,7 @@
         activeProfiles.add(profile);
       }
     }
-    declaringClass=activateProfiles.inheritProfiles() ? AnnotationUtils.findAnnotationDeclaringClass(annotationType,declaringClass.getSuperclass()) : null;
+    declaringClass=annotation.inheritProfiles() ? AnnotationUtils.findAnnotationDeclaringClass(annotationType,declaringClass.getSuperclass()) : null;
   }
   return StringUtils.toStringArray(activeProfiles);
 }
