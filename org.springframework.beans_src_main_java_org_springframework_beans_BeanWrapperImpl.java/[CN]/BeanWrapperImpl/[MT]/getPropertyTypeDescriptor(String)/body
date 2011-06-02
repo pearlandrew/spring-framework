@@ -6,23 +6,13 @@
     PropertyDescriptor pd=nestedBw.getCachedIntrospectionResults().getPropertyDescriptor(tokens.actualName);
     if (pd != null) {
       if (tokens.keys != null) {
-        if (pd.getReadMethod() != null) {
-          return PropertyTypeDescriptor.forNestedType(new MethodParameter(pd.getReadMethod(),-1,tokens.keys.length),pd);
-        }
- else         if (pd.getWriteMethod() != null) {
-          MethodParameter methodParameter=new MethodParameter(BeanUtils.getWriteMethodParameter(pd));
-          for (int i=0; i < tokens.keys.length; i++) {
-            methodParameter.increaseNestingLevel();
-          }
-          return PropertyTypeDescriptor.forNestedType(methodParameter,pd);
+        if (pd.getReadMethod() != null || pd.getWriteMethod() != null) {
+          return TypeDescriptor.nested(nestedBw.getWrappedClass(),pd,tokens.keys.length);
         }
       }
  else {
-        if (pd.getReadMethod() != null) {
-          return new PropertyTypeDescriptor(new MethodParameter(pd.getReadMethod(),-1),pd);
-        }
- else         if (pd.getWriteMethod() != null) {
-          return new PropertyTypeDescriptor(BeanUtils.getWriteMethodParameter(pd),pd);
+        if (pd.getReadMethod() != null || pd.getWriteMethod() != null) {
+          return new TypeDescriptor(nestedBw.getWrappedClass(),pd);
         }
       }
     }

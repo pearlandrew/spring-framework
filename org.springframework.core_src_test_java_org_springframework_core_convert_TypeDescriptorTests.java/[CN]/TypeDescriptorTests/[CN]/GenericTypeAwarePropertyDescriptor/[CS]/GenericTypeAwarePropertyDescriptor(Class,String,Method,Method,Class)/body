@@ -1,0 +1,23 @@
+{
+  super(propertyName,null,null);
+  this.beanClass=beanClass;
+  this.propertyEditorClass=propertyEditorClass;
+  Method readMethodToUse=BridgeMethodResolver.findBridgedMethod(readMethod);
+  Method writeMethodToUse=BridgeMethodResolver.findBridgedMethod(writeMethod);
+  if (writeMethodToUse == null && readMethodToUse != null) {
+    writeMethodToUse=ClassUtils.getMethodIfAvailable(this.beanClass,"set" + StringUtils.capitalize(getName()),readMethodToUse.getReturnType());
+  }
+  this.readMethod=readMethodToUse;
+  this.writeMethod=writeMethodToUse;
+  if (this.writeMethod != null && this.readMethod == null) {
+    Set<Method> ambiguousCandidates=new HashSet<Method>();
+    for (    Method method : beanClass.getMethods()) {
+      if (method.getName().equals(writeMethodToUse.getName()) && !method.equals(writeMethodToUse) && !method.isBridge()) {
+        ambiguousCandidates.add(method);
+      }
+    }
+    if (!ambiguousCandidates.isEmpty()) {
+      this.ambiguousWriteMethods=ambiguousCandidates;
+    }
+  }
+}
