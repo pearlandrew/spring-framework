@@ -1,0 +1,14 @@
+{
+  databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
+  databasePopulator.addScript(resourceLoader.getResource("db-test-data-endings.sql"));
+  databasePopulator.setSeparator("@@");
+  Connection connection=db.getConnection();
+  try {
+    databasePopulator.populate(connection);
+  }
+  finally {
+    connection.close();
+  }
+  assertEquals(1,jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
+  assertEquals(1,jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
+}

@@ -1,14 +1,21 @@
 {
-  BeanDefinitionBuilder builder=BeanDefinitionBuilder.genericBeanDefinition(ResourceDatabasePopulator.class);
-  builder.addPropertyValue("ignoreFailedDrops",element.getAttribute("ignore-failures").equals("DROPS"));
-  builder.addPropertyValue("continueOnError",element.getAttribute("ignore-failures").equals("ALL"));
-  List<String> locations=new ArrayList<String>();
+  BeanDefinitionBuilder builder=BeanDefinitionBuilder.genericBeanDefinition(CompositeDatabasePopulator.class);
+  boolean ignoreFailedDrops=element.getAttribute("ignore-failures").equals("DROPS");
+  boolean continueOnError=element.getAttribute("ignore-failures").equals("ALL");
+  ManagedList<BeanMetadataElement> delegates=new ManagedList<BeanMetadataElement>();
   for (  Element scriptElement : scripts) {
-    String location=scriptElement.getAttribute("location");
-    locations.add(location);
+    BeanDefinitionBuilder delegate=BeanDefinitionBuilder.genericBeanDefinition(ResourceDatabasePopulator.class);
+    delegate.addPropertyValue("ignoreFailedDrops",ignoreFailedDrops);
+    delegate.addPropertyValue("continueOnError",continueOnError);
+    List<String> locations=Arrays.asList(scriptElement.getAttribute("location"));
+    BeanDefinitionBuilder resourcesFactory=BeanDefinitionBuilder.genericBeanDefinition(SortedResourcesFactoryBean.class);
+    resourcesFactory.addConstructorArgValue(locations);
+    delegate.addPropertyValue("scripts",resourcesFactory.getBeanDefinition());
+    if (StringUtils.hasLength(scriptElement.getAttribute("separator"))) {
+      delegate.addPropertyValue("separator",scriptElement.getAttribute("separator"));
+    }
+    delegates.add(delegate.getBeanDefinition());
   }
-  BeanDefinitionBuilder resourcesFactory=BeanDefinitionBuilder.genericBeanDefinition(SortedResourcesFactoryBean.class);
-  resourcesFactory.addConstructorArgValue(locations);
-  builder.addPropertyValue("scripts",resourcesFactory.getBeanDefinition());
+  builder.addPropertyValue("populators",delegates);
   return builder.getBeanDefinition();
 }
