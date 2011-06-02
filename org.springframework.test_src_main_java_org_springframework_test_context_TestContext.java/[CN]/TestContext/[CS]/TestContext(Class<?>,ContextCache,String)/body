@@ -1,23 +1,22 @@
 {
   Assert.notNull(testClass,"Test class must not be null");
   Assert.notNull(contextCache,"ContextCache must not be null");
+  MergedContextConfiguration mergedContextConfiguration;
   ContextConfiguration contextConfiguration=testClass.getAnnotation(ContextConfiguration.class);
-  ContextLoader contextLoader=null;
-  String[] locations=null;
   if (contextConfiguration == null) {
     if (logger.isInfoEnabled()) {
       logger.info(String.format("@ContextConfiguration not found for class [%s]",testClass));
     }
+    mergedContextConfiguration=new MergedContextConfiguration(testClass,null,null,null,null);
   }
  else {
     if (logger.isTraceEnabled()) {
       logger.trace(String.format("Retrieved @ContextConfiguration [%s] for class [%s]",contextConfiguration,testClass));
     }
-    contextLoader=ContextLoaderUtils.resolveContextLoader(testClass,defaultContextLoaderClassName);
-    locations=ContextLoaderUtils.resolveContextLocations(contextLoader,testClass);
+    mergedContextConfiguration=ContextLoaderUtils.buildMergedContextConfiguration(testClass,defaultContextLoaderClassName);
   }
-  this.testClass=testClass;
   this.contextCache=contextCache;
-  this.contextLoader=contextLoader;
-  this.locations=locations;
+  this.contextKey=generateContextKey(mergedContextConfiguration);
+  this.mergedContextConfiguration=mergedContextConfiguration;
+  this.testClass=testClass;
 }

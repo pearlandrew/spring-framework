@@ -1,0 +1,17 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug(String.format("Loading ApplicationContext for merged context configuration [%s].",mergedContextConfiguration));
+  }
+  String[] locations=mergedContextConfiguration.getLocations();
+  Assert.notNull(locations,"Can not load an ApplicationContext with a NULL 'locations' array. " + "Consider annotating your test class with @ContextConfiguration.");
+  GenericApplicationContext context=new GenericApplicationContext();
+  context.getEnvironment().setActiveProfiles(mergedContextConfiguration.getActiveProfiles());
+  prepareContext(context);
+  customizeBeanFactory(context.getDefaultListableBeanFactory());
+  loadBeanDefinitions(context,locations);
+  AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+  customizeContext(context);
+  context.refresh();
+  context.registerShutdownHook();
+  return context;
+}
