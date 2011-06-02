@@ -1,0 +1,20 @@
+{
+  Assert.notNull(clazz,"Class must not be null");
+  final List<ContextConfigurationAttributes> attributesList=new ArrayList<ContextConfigurationAttributes>();
+  Class<ContextConfiguration> annotationType=ContextConfiguration.class;
+  Class<?> declaringClass=AnnotationUtils.findAnnotationDeclaringClass(annotationType,clazz);
+  Assert.notNull(declaringClass,String.format("Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",annotationType,clazz));
+  while (declaringClass != null) {
+    ContextConfiguration contextConfiguration=declaringClass.getAnnotation(annotationType);
+    if (logger.isTraceEnabled()) {
+      logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",contextConfiguration,declaringClass));
+    }
+    ContextConfigurationAttributes attributes=new ContextConfigurationAttributes(declaringClass,contextConfiguration);
+    if (logger.isTraceEnabled()) {
+      logger.trace("Resolved context configuration attributes: " + attributes);
+    }
+    attributesList.add(0,attributes);
+    declaringClass=contextConfiguration.inheritLocations() ? AnnotationUtils.findAnnotationDeclaringClass(annotationType,declaringClass.getSuperclass()) : null;
+  }
+  return attributesList;
+}
