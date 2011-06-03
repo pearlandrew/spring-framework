@@ -1,0 +1,16 @@
+{
+  for (  MethodParameter parameter : requestMethod.getMethodParameters()) {
+    if (parameter.hasParameterAnnotation(ModelAttribute.class)) {
+      String name=getNameForParameter(parameter);
+      if (!mavContainer.containsAttribute(name)) {
+        if (sessionHandler.isHandlerSessionAttribute(name,parameter.getParameterType())) {
+          Object attrValue=sessionHandler.retrieveAttribute(request,name);
+          if (attrValue == null) {
+            throw new HttpSessionRequiredException("Session attribute '" + name + "' not found in session");
+          }
+          mavContainer.addAttribute(name,attrValue);
+        }
+      }
+    }
+  }
+}

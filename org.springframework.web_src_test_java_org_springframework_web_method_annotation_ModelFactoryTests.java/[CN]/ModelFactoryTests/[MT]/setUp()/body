@@ -1,7 +1,10 @@
 {
-  handleMethod=new InvocableHandlerMethod(handler,handler.getClass().getDeclaredMethod("handle"));
+  Class<?> handlerType=handler.getClass();
+  handleMethod=new InvocableHandlerMethod(handler,handlerType.getDeclaredMethod("handle"));
+  Method method=handlerType.getDeclaredMethod("handleSessionAttr",String.class);
+  handleSessionAttrMethod=new InvocableHandlerMethod(handler,method);
   sessionAttributeStore=new DefaultSessionAttributeStore();
-  handlerSessionAttributeStore=new SessionAttributesHandler(handler.getClass(),sessionAttributeStore);
+  handlerSessionAttributeStore=new SessionAttributesHandler(handlerType,sessionAttributeStore);
   mavContainer=new ModelAndViewContainer();
   webRequest=new ServletWebRequest(new MockHttpServletRequest());
 }
