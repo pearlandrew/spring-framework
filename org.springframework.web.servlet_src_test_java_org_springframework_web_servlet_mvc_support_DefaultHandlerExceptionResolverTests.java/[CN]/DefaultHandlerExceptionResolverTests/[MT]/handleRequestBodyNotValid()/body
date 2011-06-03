@@ -1,0 +1,11 @@
+{
+  BeanPropertyBindingResult errors=new BeanPropertyBindingResult(new TestBean(),"testBean");
+  errors.rejectValue("name","invalid");
+  RequestBodyNotValidException ex=new RequestBodyNotValidException(errors);
+  ModelAndView mav=exceptionResolver.resolveException(request,response,null,ex);
+  assertNotNull("No ModelAndView returned",mav);
+  assertTrue("No Empty ModelAndView returned",mav.isEmpty());
+  assertEquals("Invalid status code",400,response.getStatus());
+  assertTrue(response.getErrorMessage().startsWith("Request body content validation failed"));
+  assertTrue(response.getErrorMessage().contains("Field error in object 'testBean' on field 'name'"));
+}
