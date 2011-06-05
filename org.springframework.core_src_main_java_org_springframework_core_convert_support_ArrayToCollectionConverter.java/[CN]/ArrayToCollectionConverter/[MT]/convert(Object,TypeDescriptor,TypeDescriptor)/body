@@ -4,9 +4,7 @@
   }
   int length=Array.getLength(source);
   Collection<Object> target=CollectionFactory.createCollection(targetType.getType(),length);
-  TypeDescriptor sourceElementType=sourceType.getElementTypeDescriptor();
-  TypeDescriptor targetElementType=targetType.getElementTypeDescriptor();
-  if (Object.class.equals(targetElementType.getType())) {
+  if (targetType.getElementType() == null) {
     for (int i=0; i < length; i++) {
       Object sourceElement=Array.get(source,i);
       target.add(sourceElement);
@@ -15,7 +13,7 @@
  else {
     for (int i=0; i < length; i++) {
       Object sourceElement=Array.get(source,i);
-      Object targetElement=this.conversionService.convert(sourceElement,sourceElementType,targetElementType);
+      Object targetElement=this.conversionService.convert(sourceElement,sourceType.elementType(sourceElement),targetType.getElementType());
       target.add(targetElement);
     }
   }

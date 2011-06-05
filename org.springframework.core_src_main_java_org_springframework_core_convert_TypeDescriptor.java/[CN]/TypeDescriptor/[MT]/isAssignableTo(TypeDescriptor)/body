@@ -1,14 +1,16 @@
 {
-  if (this == TypeDescriptor.NULL || targetType == TypeDescriptor.NULL) {
-    return true;
+  boolean typesAssignable=targetType.getObjectType().isAssignableFrom(getObjectType());
+  if (!typesAssignable) {
+    return false;
   }
-  if (isCollection() && targetType.isCollection() || isArray() && targetType.isArray()) {
-    return targetType.getType().isAssignableFrom(getType()) && getElementTypeDescriptor().isAssignableTo(targetType.getElementTypeDescriptor());
+  if (isArray() && targetType.isArray()) {
+    return getElementType().isAssignableTo(targetType.getElementType());
+  }
+  if (isCollection() && targetType.isCollection()) {
+    return collectionElementsAssignable(targetType.getElementType());
   }
  else   if (isMap() && targetType.isMap()) {
-    return targetType.getType().isAssignableFrom(getType()) && getMapKeyTypeDescriptor().isAssignableTo(targetType.getMapKeyTypeDescriptor()) && getMapValueTypeDescriptor().isAssignableTo(targetType.getMapValueTypeDescriptor());
+    return mapKeysAssignable(targetType.getMapKeyType()) && mapValuesAssignable(targetType.getMapValueType());
   }
- else {
-    return targetType.getObjectType().isAssignableFrom(getObjectType());
-  }
+  return true;
 }

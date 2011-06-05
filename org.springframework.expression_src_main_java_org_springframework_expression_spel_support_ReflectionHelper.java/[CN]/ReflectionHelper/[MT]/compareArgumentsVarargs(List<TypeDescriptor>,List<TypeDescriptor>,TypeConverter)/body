@@ -7,7 +7,7 @@
   for (int i=0; i < argCountUpToVarargs && match != null; i++) {
     TypeDescriptor suppliedArg=suppliedArgTypes.get(i);
     TypeDescriptor expectedArg=expectedArgTypes.get(i);
-    if (suppliedArg == TypeDescriptor.NULL) {
+    if (suppliedArg == null) {
       if (expectedArg.isPrimitive()) {
         match=null;
       }
@@ -38,11 +38,11 @@
   if (suppliedArgTypes.size() == expectedArgTypes.size() && expectedArgTypes.get(expectedArgTypes.size() - 1).equals(suppliedArgTypes.get(suppliedArgTypes.size() - 1))) {
   }
  else {
-    Class varargsParameterType=expectedArgTypes.get(expectedArgTypes.size() - 1).getElementType();
+    Class varargsParameterType=expectedArgTypes.get(expectedArgTypes.size() - 1).getElementType().getType();
     for (int i=expectedArgTypes.size() - 1; i < suppliedArgTypes.size(); i++) {
       TypeDescriptor suppliedArg=suppliedArgTypes.get(i);
-      if (varargsParameterType != suppliedArg.getType()) {
-        if (suppliedArg == TypeDescriptor.NULL) {
+      if (!ObjectUtils.nullSafeEquals(varargsParameterType,suppliedArg)) {
+        if (suppliedArg == null) {
           if (varargsParameterType.isPrimitive()) {
             match=null;
           }

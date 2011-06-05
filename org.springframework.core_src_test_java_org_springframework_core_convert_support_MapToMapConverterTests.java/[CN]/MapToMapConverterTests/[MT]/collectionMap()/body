@@ -4,7 +4,13 @@
   map.put("2",Arrays.asList("37","23"));
   TypeDescriptor sourceType=TypeDescriptor.forObject(map);
   TypeDescriptor targetType=new TypeDescriptor(getClass().getField("collectionMapTarget"));
-  assertFalse(conversionService.canConvert(sourceType,targetType));
+  assertTrue(conversionService.canConvert(sourceType,targetType));
+  try {
+    conversionService.convert(map,sourceType,targetType);
+  }
+ catch (  ConversionFailedException e) {
+    assertTrue(e.getCause() instanceof ConverterNotFoundException);
+  }
   conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
   conversionService.addConverterFactory(new StringToNumberConverterFactory());
   assertTrue(conversionService.canConvert(sourceType,targetType));

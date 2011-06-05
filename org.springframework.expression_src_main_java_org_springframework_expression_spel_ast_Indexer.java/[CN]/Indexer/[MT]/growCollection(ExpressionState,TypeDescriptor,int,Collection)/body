@@ -1,0 +1,23 @@
+{
+  if (state.getConfiguration().isAutoGrowCollections()) {
+    if (targetType.getElementType() == null) {
+      throw new SpelEvaluationException(getStartPosition(),SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);
+    }
+    TypeDescriptor elementType=targetType.getElementType();
+    Object newCollectionElement=null;
+    try {
+      int newElements=index - collection.size();
+      while (newElements > 0) {
+        collection.add(elementType.getType().newInstance());
+        newElements--;
+      }
+      newCollectionElement=elementType.getType().newInstance();
+    }
+ catch (    Exception ex) {
+      throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_GROW_COLLECTION);
+    }
+    collection.add(newCollectionElement);
+    return true;
+  }
+  return false;
+}

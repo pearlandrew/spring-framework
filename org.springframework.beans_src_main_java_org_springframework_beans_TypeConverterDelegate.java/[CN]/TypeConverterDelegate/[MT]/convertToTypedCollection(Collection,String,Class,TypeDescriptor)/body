@@ -3,8 +3,8 @@
   if (!originalAllowed && !Collection.class.isAssignableFrom(requiredType)) {
     return original;
   }
-  Class elementType=typeDescriptor.getElementType();
-  if (elementType == Object.class && originalAllowed && !this.propertyEditorRegistry.hasCustomEditorForElement(null,propertyName)) {
+  TypeDescriptor elementType=typeDescriptor.getElementType();
+  if (elementType == null && originalAllowed && !this.propertyEditorRegistry.hasCustomEditorForElement(null,propertyName)) {
     return original;
   }
   Iterator it;
@@ -42,7 +42,7 @@
   for (; it.hasNext(); i++) {
     Object element=it.next();
     String indexedPropertyName=buildIndexedPropertyName(propertyName,i);
-    Object convertedElement=convertIfNecessary(indexedPropertyName,null,element,elementType,typeDescriptor.getElementTypeDescriptor());
+    Object convertedElement=convertIfNecessary(indexedPropertyName,null,element,elementType != null ? elementType.getType() : null,typeDescriptor.getElementType());
     try {
       convertedCopy.add(convertedElement);
     }

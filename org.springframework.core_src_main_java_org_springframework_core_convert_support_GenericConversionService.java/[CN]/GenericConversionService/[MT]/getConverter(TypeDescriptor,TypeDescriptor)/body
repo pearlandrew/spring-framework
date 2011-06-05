@@ -5,29 +5,26 @@
     if (logger.isTraceEnabled()) {
       logger.trace("Matched cached converter " + converter);
     }
-    return (converter != NO_MATCH ? converter : null);
+    return converter != NO_MATCH ? converter : null;
   }
  else {
     converter=findConverterForClassPair(sourceType,targetType);
+    if (converter == null) {
+      converter=getDefaultConverter(sourceType,targetType);
+    }
     if (converter != null) {
       if (logger.isTraceEnabled()) {
-        logger.trace("Caching under " + key);
+        logger.trace("Caching matched Converter under key " + key);
       }
       this.converterCache.put(key,converter);
       return converter;
     }
-    converter=getDefaultConverter(sourceType,targetType);
-    if (converter != null) {
+ else {
       if (logger.isTraceEnabled()) {
-        logger.trace("Caching under " + key);
+        logger.trace("Caching Converter [NO_MATCH] result under key " + key);
       }
-      this.converterCache.put(key,converter);
-      return converter;
+      this.converterCache.put(key,NO_MATCH);
+      return null;
     }
-    if (logger.isTraceEnabled()) {
-      logger.trace("Caching NO_MATCH under " + key);
-    }
-    this.converterCache.put(key,NO_MATCH);
-    return null;
   }
 }

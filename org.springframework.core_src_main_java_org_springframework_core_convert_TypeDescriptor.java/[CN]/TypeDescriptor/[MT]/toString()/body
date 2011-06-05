@@ -1,21 +1,16 @@
 {
-  if (this == TypeDescriptor.NULL) {
-    return "null";
+  StringBuilder builder=new StringBuilder();
+  Annotation[] anns=getAnnotations();
+  for (  Annotation ann : anns) {
+    builder.append("@").append(ann.annotationType().getName()).append(' ');
   }
- else {
-    StringBuilder builder=new StringBuilder();
-    Annotation[] anns=getAnnotations();
-    for (    Annotation ann : anns) {
-      builder.append("@").append(ann.annotationType().getName()).append(' ');
-    }
-    builder.append(ClassUtils.getQualifiedName(getType()));
-    if (isMap()) {
-      builder.append("<").append(getMapKeyTypeDescriptor());
-      builder.append(", ").append(getMapValueTypeDescriptor()).append(">");
-    }
- else     if (isCollection()) {
-      builder.append("<").append(getElementTypeDescriptor()).append(">");
-    }
-    return builder.toString();
+  builder.append(ClassUtils.getQualifiedName(getType()));
+  if (isMap()) {
+    builder.append("<").append(wildcard(getMapKeyType()));
+    builder.append(", ").append(wildcard(getMapValueType())).append(">");
   }
+ else   if (isCollection()) {
+    builder.append("<").append(wildcard(getElementType())).append(">");
+  }
+  return builder.toString();
 }

@@ -4,7 +4,13 @@
   map.put("2","37");
   TypeDescriptor sourceType=TypeDescriptor.forObject(map);
   TypeDescriptor targetType=new TypeDescriptor(getClass().getField("scalarMapTarget"));
-  assertFalse(conversionService.canConvert(sourceType,targetType));
+  assertTrue(conversionService.canConvert(sourceType,targetType));
+  try {
+    conversionService.convert(map,sourceType,targetType);
+  }
+ catch (  ConversionFailedException e) {
+    assertTrue(e.getCause() instanceof ConverterNotFoundException);
+  }
   conversionService.addConverterFactory(new StringToNumberConverterFactory());
   assertTrue(conversionService.canConvert(sourceType,targetType));
   @SuppressWarnings("unchecked") Map<Integer,Integer> result=(Map<Integer,Integer>)conversionService.convert(map,sourceType,targetType);

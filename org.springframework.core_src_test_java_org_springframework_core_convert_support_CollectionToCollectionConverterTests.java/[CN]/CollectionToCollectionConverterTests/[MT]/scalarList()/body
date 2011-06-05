@@ -4,7 +4,13 @@
   list.add("37");
   TypeDescriptor sourceType=TypeDescriptor.forObject(list);
   TypeDescriptor targetType=new TypeDescriptor(getClass().getField("scalarListTarget"));
-  assertFalse(conversionService.canConvert(sourceType,targetType));
+  assertTrue(conversionService.canConvert(sourceType,targetType));
+  try {
+    conversionService.convert(list,sourceType,targetType);
+  }
+ catch (  ConversionFailedException e) {
+    assertTrue(e.getCause() instanceof ConverterNotFoundException);
+  }
   conversionService.addConverterFactory(new StringToNumberConverterFactory());
   assertTrue(conversionService.canConvert(sourceType,targetType));
   @SuppressWarnings("unchecked") List<String> result=(List<String>)conversionService.convert(list,sourceType,targetType);
