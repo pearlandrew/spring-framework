@@ -30,7 +30,8 @@
     if (method != null) {
       try {
         ReflectionUtils.makeAccessible(method);
-        return new TypedValue(method.invoke(target),invoker.typeDescriptor);
+        Object value=method.invoke(target);
+        return new TypedValue(value,invoker.typeDescriptor.narrow(value));
       }
  catch (      Exception ex) {
         throw new AccessException("Unable to access property '" + name + "' through getter",ex);
@@ -49,7 +50,8 @@
     if (field != null) {
       try {
         ReflectionUtils.makeAccessible(field);
-        return new TypedValue(field.get(target),invoker.typeDescriptor);
+        Object value=field.get(target);
+        return new TypedValue(value,invoker.typeDescriptor.narrow(value));
       }
  catch (      Exception ex) {
         throw new AccessException("Unable to access field: " + name,ex);
