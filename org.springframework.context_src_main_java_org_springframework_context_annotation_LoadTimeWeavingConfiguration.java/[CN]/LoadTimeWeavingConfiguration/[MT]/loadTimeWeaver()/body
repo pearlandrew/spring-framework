@@ -1,0 +1,20 @@
+{
+  LoadTimeWeaver loadTimeWeaver=null;
+  if (ltwConfigurer != null) {
+    loadTimeWeaver=ltwConfigurer.getLoadTimeWeaver();
+  }
+  if (loadTimeWeaver == null) {
+    loadTimeWeaver=new DefaultContextLoadTimeWeaver(this.beanClassLoader);
+  }
+switch ((AspectJWeaving)this.enableLTW.get("aspectjWeaving")) {
+case DISABLED:
+    break;
+case AUTODETECT:
+  if (this.beanClassLoader.getResource(ASPECTJ_AOP_XML_RESOURCE) != null) {
+    break;
+  }
+case ENABLED:
+AspectJWeavingEnabler.enableAspectJWeaving(loadTimeWeaver,this.beanClassLoader);
+}
+return loadTimeWeaver;
+}
