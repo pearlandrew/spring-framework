@@ -1,4 +1,9 @@
 {
   PersistenceUnitReader reader=new PersistenceUnitReader(this.resourcePatternResolver,this.dataSourceLookup);
-  return reader.readPersistenceUnitInfos(this.persistenceXmlLocations);
+  List<SpringPersistenceUnitInfo> infos=new LinkedList<SpringPersistenceUnitInfo>();
+  infos.addAll(Arrays.asList(reader.readPersistenceUnitInfos(this.persistenceXmlLocations)));
+  if (this.packagesToScan != null) {
+    infos.add(scanPackages());
+  }
+  return infos;
 }

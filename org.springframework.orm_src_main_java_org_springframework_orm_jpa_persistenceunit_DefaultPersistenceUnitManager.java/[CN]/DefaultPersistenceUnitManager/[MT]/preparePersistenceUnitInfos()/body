@@ -1,7 +1,7 @@
 {
   this.persistenceUnitInfoNames.clear();
   this.persistenceUnitInfos.clear();
-  SpringPersistenceUnitInfo[] puis=readPersistenceUnitInfos();
+  List<SpringPersistenceUnitInfo> puis=readPersistenceUnitInfos();
   for (  SpringPersistenceUnitInfo pui : puis) {
     if (pui.getPersistenceUnitRootUrl() == null) {
       pui.setPersistenceUnitRootUrl(determineDefaultPersistenceUnitRootUrl());
@@ -17,7 +17,13 @@
     }
     postProcessPersistenceUnitInfo(pui);
     String name=pui.getPersistenceUnitName();
-    this.persistenceUnitInfoNames.add(name);
+    if (!this.persistenceUnitInfoNames.add(name)) {
+      StringBuilder msg=new StringBuilder();
+      msg.append("Conflicting persistence unit definitions for name '").append(name).append("': ");
+      msg.append(pui.getPersistenceUnitRootUrl()).append(", ");
+      msg.append(this.persistenceUnitInfos.get(name).getPersistenceUnitRootUrl());
+      throw new IllegalStateException(msg.toString());
+    }
     PersistenceUnitInfo puiToStore=pui;
     if (jpa2ApiPresent) {
       puiToStore=(PersistenceUnitInfo)Proxy.newProxyInstance(SmartPersistenceUnitInfo.class.getClassLoader(),new Class[]{SmartPersistenceUnitInfo.class},new Jpa2PersistenceUnitInfoDecorator(pui));
