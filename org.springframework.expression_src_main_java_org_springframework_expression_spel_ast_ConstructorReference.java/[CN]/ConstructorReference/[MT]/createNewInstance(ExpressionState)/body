@@ -13,9 +13,8 @@
       return executorToUse.execute(state.getEvaluationContext(),arguments);
     }
  catch (    AccessException ae) {
-      Throwable causeOfAccessException=ae.getCause();
-      Throwable rootCause=(causeOfAccessException == null ? null : causeOfAccessException.getCause());
-      if (rootCause != null) {
+      if (ae.getCause() instanceof InvocationTargetException) {
+        Throwable rootCause=ae.getCause().getCause();
         if (rootCause instanceof RuntimeException) {
           throw (RuntimeException)rootCause;
         }

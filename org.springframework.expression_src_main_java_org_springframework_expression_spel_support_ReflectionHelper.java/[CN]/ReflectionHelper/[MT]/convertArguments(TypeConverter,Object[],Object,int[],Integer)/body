@@ -1,14 +1,29 @@
 {
-  for (  int argPosition : argumentsRequiringConversion) {
-    TypeDescriptor targetType;
-    if (varargsPosition != null && argPosition >= varargsPosition) {
-      MethodParameter methodParam=MethodParameter.forMethodOrConstructor(methodOrCtor,varargsPosition);
-      targetType=TypeDescriptor.nested(methodParam,1);
+  if (varargsPosition == null) {
+    for (int i=0; i < arguments.length; i++) {
+      TypeDescriptor targetType=new TypeDescriptor(MethodParameter.forMethodOrConstructor(methodOrCtor,i));
+      Object argument=arguments[i];
+      arguments[i]=converter.convertValue(argument,TypeDescriptor.forObject(argument),targetType);
+    }
+  }
+ else {
+    for (int i=0; i < varargsPosition; i++) {
+      TypeDescriptor targetType=new TypeDescriptor(MethodParameter.forMethodOrConstructor(methodOrCtor,i));
+      Object argument=arguments[i];
+      arguments[i]=converter.convertValue(argument,TypeDescriptor.forObject(argument),targetType);
+    }
+    MethodParameter methodParam=MethodParameter.forMethodOrConstructor(methodOrCtor,varargsPosition);
+    if (varargsPosition == arguments.length - 1) {
+      TypeDescriptor targetType=new TypeDescriptor(methodParam);
+      Object argument=arguments[varargsPosition];
+      arguments[varargsPosition]=converter.convertValue(argument,TypeDescriptor.forObject(argument),targetType);
     }
  else {
-      targetType=new TypeDescriptor(MethodParameter.forMethodOrConstructor(methodOrCtor,argPosition));
+      TypeDescriptor targetType=TypeDescriptor.nested(methodParam,1);
+      for (int i=varargsPosition; i < arguments.length; i++) {
+        Object argument=arguments[i];
+        arguments[i]=converter.convertValue(argument,TypeDescriptor.forObject(argument),targetType);
+      }
     }
-    Object argument=arguments[argPosition];
-    arguments[argPosition]=converter.convertValue(argument,TypeDescriptor.forObject(argument),targetType);
   }
 }
