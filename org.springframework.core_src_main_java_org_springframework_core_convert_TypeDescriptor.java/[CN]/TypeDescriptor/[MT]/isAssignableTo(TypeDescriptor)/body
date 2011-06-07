@@ -1,3 +1,18 @@
 {
-  return typeDescriptor.getObjectType().isAssignableFrom(getObjectType());
+  boolean typesAssignable=typeDescriptor.getObjectType().isAssignableFrom(getObjectType());
+  if (!typesAssignable) {
+    return false;
+  }
+  if (isArray()) {
+    return getElementTypeDescriptor().isAssignableTo(typeDescriptor.getElementTypeDescriptor());
+  }
+ else   if (isCollection()) {
+    return isNestedAssignable(getElementTypeDescriptor(),typeDescriptor.getElementTypeDescriptor());
+  }
+ else   if (isMap()) {
+    return isNestedAssignable(getMapKeyTypeDescriptor(),typeDescriptor.getMapKeyTypeDescriptor()) && isNestedAssignable(getMapValueTypeDescriptor(),typeDescriptor.getMapValueTypeDescriptor());
+  }
+ else {
+    return true;
+  }
 }
