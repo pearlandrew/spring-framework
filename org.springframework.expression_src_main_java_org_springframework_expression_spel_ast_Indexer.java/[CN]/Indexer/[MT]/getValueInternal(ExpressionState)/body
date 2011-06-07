@@ -21,11 +21,11 @@
   }
   if (targetObject instanceof Map) {
     Object key=index;
-    if (targetObjectTypeDescriptor.getMapKeyType() != null) {
-      key=state.convertValue(key,targetObjectTypeDescriptor.getMapKeyType());
+    if (targetObjectTypeDescriptor.getMapKeyTypeDescriptor() != null) {
+      key=state.convertValue(key,targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
     }
     Object value=((Map<?,?>)targetObject).get(key);
-    return new TypedValue(value,targetObjectTypeDescriptor.mapValueType(value));
+    return new TypedValue(value,targetObjectTypeDescriptor.mapValueTypeDescriptor(value));
   }
   if (targetObject == null) {
     throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
@@ -34,7 +34,7 @@
     int idx=(Integer)state.convertValue(index,TypeDescriptor.valueOf(Integer.class));
     if (targetObject.getClass().isArray()) {
       Object arrayElement=accessArrayElement(targetObject,idx);
-      return new TypedValue(arrayElement,targetObjectTypeDescriptor.elementType(arrayElement));
+      return new TypedValue(arrayElement,targetObjectTypeDescriptor.elementTypeDescriptor(arrayElement));
     }
  else     if (targetObject instanceof Collection) {
       Collection c=(Collection)targetObject;
@@ -46,7 +46,7 @@
       int pos=0;
       for (      Object o : c) {
         if (pos == idx) {
-          return new TypedValue(o,targetObjectTypeDescriptor.elementType(o));
+          return new TypedValue(o,targetObjectTypeDescriptor.elementTypeDescriptor(o));
         }
         pos++;
       }
