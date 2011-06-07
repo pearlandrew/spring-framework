@@ -6,15 +6,15 @@
   Type[] paramTypes=ptype.getActualTypeArguments();
   if (nestingLevel - currentLevel > 0) {
     int nextLevel=currentLevel + 1;
-    Integer currentTypeIndex=(methodParam != null ? methodParam.getTypeIndexForLevel(nextLevel) : null);
+    Integer currentTypeIndex=(typeIndexesPerLevel != null ? typeIndexesPerLevel.get(nextLevel) : null);
     int indexToUse=(currentTypeIndex != null ? currentTypeIndex : paramTypes.length - 1);
     Type paramType=paramTypes[indexToUse];
-    return extractType(methodParam,paramType,source,typeIndex,nestingLevel,nextLevel);
+    return extractType(paramType,source,typeIndex,typeVariableMap,typeIndexesPerLevel,nestingLevel,nextLevel);
   }
   if (source != null && !source.isAssignableFrom(rawType)) {
     return null;
   }
-  Class fromSuperclassOrInterface=extractTypeFromClass(methodParam,rawType,source,typeIndex,nestingLevel,currentLevel);
+  Class fromSuperclassOrInterface=extractTypeFromClass(rawType,source,typeIndex,typeVariableMap,typeIndexesPerLevel,nestingLevel,currentLevel);
   if (fromSuperclassOrInterface != null) {
     return fromSuperclassOrInterface;
   }
@@ -22,8 +22,8 @@
     return null;
   }
   Type paramType=paramTypes[typeIndex];
-  if (paramType instanceof TypeVariable && methodParam != null && methodParam.typeVariableMap != null) {
-    Type mappedType=methodParam.typeVariableMap.get((TypeVariable)paramType);
+  if (paramType instanceof TypeVariable && typeVariableMap != null) {
+    Type mappedType=typeVariableMap.get((TypeVariable)paramType);
     if (mappedType != null) {
       paramType=mappedType;
     }

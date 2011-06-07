@@ -1,0 +1,22 @@
+{
+  Type resolvedType=type;
+  if (type instanceof TypeVariable && typeVariableMap != null) {
+    Type mappedType=typeVariableMap.get((TypeVariable)type);
+    if (mappedType != null) {
+      resolvedType=mappedType;
+    }
+  }
+  if (resolvedType instanceof ParameterizedType) {
+    return extractTypeFromParameterizedType((ParameterizedType)resolvedType,source,typeIndex,typeVariableMap,typeIndexesPerLevel,nestingLevel,currentLevel);
+  }
+ else   if (resolvedType instanceof Class) {
+    return extractTypeFromClass((Class)resolvedType,source,typeIndex,typeVariableMap,typeIndexesPerLevel,nestingLevel,currentLevel);
+  }
+ else   if (resolvedType instanceof GenericArrayType) {
+    Type compType=((GenericArrayType)resolvedType).getGenericComponentType();
+    return extractType(compType,source,typeIndex,typeVariableMap,typeIndexesPerLevel,nestingLevel,currentLevel + 1);
+  }
+ else {
+    return null;
+  }
+}
