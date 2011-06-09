@@ -1,11 +1,9 @@
 {
-  ExceptionHandlerExceptionResolver exceptionHandlerExceptionResolver=new ExceptionHandlerExceptionResolver();
-  exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
-  exceptionHandlerExceptionResolver.afterPropertiesSet();
   List<HandlerExceptionResolver> exceptionResolvers=new ArrayList<HandlerExceptionResolver>();
-  exceptionResolvers.add(exceptionHandlerExceptionResolver);
-  exceptionResolvers.add(new ResponseStatusExceptionResolver());
-  exceptionResolvers.add(new DefaultHandlerExceptionResolver());
+  configureHandlerExceptionResolvers(exceptionResolvers);
+  if (exceptionResolvers.isEmpty()) {
+    addDefaultHandlerExceptionResolvers(exceptionResolvers);
+  }
   HandlerExceptionResolverComposite composite=new HandlerExceptionResolverComposite();
   composite.setOrder(0);
   composite.setExceptionResolvers(exceptionResolvers);
