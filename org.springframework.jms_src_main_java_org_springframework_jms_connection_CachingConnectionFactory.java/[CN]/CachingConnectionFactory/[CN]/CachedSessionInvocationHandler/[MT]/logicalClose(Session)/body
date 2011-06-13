@@ -10,10 +10,14 @@
       it.remove();
     }
   }
-  if (!this.sessionList.contains(proxy)) {
-    if (logger.isTraceEnabled()) {
-      logger.trace("Returning cached Session: " + this.target);
+  boolean returned=false;
+synchronized (this.sessionList) {
+    if (!this.sessionList.contains(proxy)) {
+      this.sessionList.addLast(proxy);
+      returned=true;
     }
-    this.sessionList.addLast(proxy);
+  }
+  if (returned && logger.isTraceEnabled()) {
+    logger.trace("Returned cached Session: " + this.target);
   }
 }
