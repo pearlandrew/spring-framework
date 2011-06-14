@@ -11,5 +11,15 @@
     this.plusOperations=getJpaDialect().getEntityManagerFactoryPlusOperations(emf);
     ifcs.add(EntityManagerFactoryPlusOperations.class);
   }
-  return (EntityManagerFactory)Proxy.newProxyInstance(this.beanClassLoader,ifcs.toArray(new Class[ifcs.size()]),new ManagedEntityManagerFactoryInvocationHandler(this));
+  try {
+    return (EntityManagerFactory)Proxy.newProxyInstance(this.beanClassLoader,ifcs.toArray(new Class[ifcs.size()]),new ManagedEntityManagerFactoryInvocationHandler(this));
+  }
+ catch (  IllegalArgumentException ex) {
+    if (this.entityManagerFactoryInterface != null) {
+      throw new IllegalStateException("EntityManagerFactory interface [" + this.entityManagerFactoryInterface + "] seems to conflict with Spring's EntityManagerFactoryInfo mixin - consider resetting the "+ "'entityManagerFactoryInterface' property to plain [javax.persistence.EntityManagerFactory]",ex);
+    }
+ else {
+      throw new IllegalStateException("Conflicting EntityManagerFactory interfaces - " + "consider specifying the 'jpaVendorAdapter' or 'entityManagerFactoryInterface' property " + "to select a specific EntityManagerFactory interface to proceed with",ex);
+    }
+  }
 }
