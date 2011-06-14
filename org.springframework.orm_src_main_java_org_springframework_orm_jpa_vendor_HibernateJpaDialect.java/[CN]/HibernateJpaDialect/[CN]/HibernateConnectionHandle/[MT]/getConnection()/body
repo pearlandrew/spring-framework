@@ -1,3 +1,11 @@
 {
-  return this.session.connection();
+  try {
+    if (connectionMethod == null) {
+      connectionMethod=this.session.getClass().getMethod("connection");
+    }
+    return (Connection)ReflectionUtils.invokeMethod(connectionMethod,this.session);
+  }
+ catch (  NoSuchMethodException ex) {
+    throw new IllegalStateException("Cannot find connection() method on Hibernate session",ex);
+  }
 }
