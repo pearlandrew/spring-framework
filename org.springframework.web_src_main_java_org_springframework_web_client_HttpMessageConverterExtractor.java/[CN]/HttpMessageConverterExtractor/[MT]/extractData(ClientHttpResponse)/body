@@ -1,7 +1,13 @@
 {
+  if (!hasMessageBody(response)) {
+    return null;
+  }
   MediaType contentType=response.getHeaders().getContentType();
   if (contentType == null) {
-    throw new RestClientException("Cannot extract response: no Content-Type found");
+    if (logger.isTraceEnabled()) {
+      logger.trace("No Content-Type header found, defaulting to application/octet-stream");
+    }
+    contentType=MediaType.APPLICATION_OCTET_STREAM;
   }
   for (  HttpMessageConverter messageConverter : messageConverters) {
     if (messageConverter.canRead(responseType,contentType)) {
