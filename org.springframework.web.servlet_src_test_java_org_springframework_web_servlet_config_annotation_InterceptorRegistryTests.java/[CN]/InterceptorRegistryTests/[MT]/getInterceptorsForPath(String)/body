@@ -1,0 +1,19 @@
+{
+  PathMatcher pathMatcher=new AntPathMatcher();
+  List<HandlerInterceptor> result=new ArrayList<HandlerInterceptor>();
+  for (  Object i : registry.getInterceptors()) {
+    if (i instanceof MappedInterceptor) {
+      MappedInterceptor mappedInterceptor=(MappedInterceptor)i;
+      if (mappedInterceptor.matches(lookupPath,pathMatcher)) {
+        result.add(mappedInterceptor.getInterceptor());
+      }
+    }
+ else     if (i instanceof HandlerInterceptor) {
+      result.add((HandlerInterceptor)i);
+    }
+ else {
+      fail("Unexpected interceptor type: " + i.getClass().getName());
+    }
+  }
+  return result;
+}

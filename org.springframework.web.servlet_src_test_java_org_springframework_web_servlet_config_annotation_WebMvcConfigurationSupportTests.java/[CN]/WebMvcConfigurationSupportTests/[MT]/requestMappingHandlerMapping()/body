@@ -1,0 +1,10 @@
+{
+  StaticWebApplicationContext cxt=new StaticWebApplicationContext();
+  cxt.registerSingleton("controller",TestController.class);
+  RequestMappingHandlerMapping handlerMapping=mvcConfiguration.requestMappingHandlerMapping();
+  assertEquals(0,handlerMapping.getOrder());
+  handlerMapping.setApplicationContext(cxt);
+  HandlerExecutionChain chain=handlerMapping.getHandler(new MockHttpServletRequest("GET","/"));
+  assertNotNull(chain.getInterceptors());
+  assertEquals(ConversionServiceExposingInterceptor.class,chain.getInterceptors()[0].getClass());
+}

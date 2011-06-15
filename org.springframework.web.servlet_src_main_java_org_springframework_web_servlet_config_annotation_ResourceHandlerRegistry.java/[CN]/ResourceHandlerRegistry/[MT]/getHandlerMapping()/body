@@ -1,0 +1,18 @@
+{
+  if (registrations.isEmpty()) {
+    return null;
+  }
+  Map<String,HttpRequestHandler> urlMap=new LinkedHashMap<String,HttpRequestHandler>();
+  for (  ResourceHandlerRegistration registration : registrations) {
+    for (    String pathPattern : registration.getPathPatterns()) {
+      ResourceHttpRequestHandler requestHandler=registration.getRequestHandler();
+      requestHandler.setServletContext(servletContext);
+      requestHandler.setApplicationContext(applicationContext);
+      urlMap.put(pathPattern,requestHandler);
+    }
+  }
+  SimpleUrlHandlerMapping handlerMapping=new SimpleUrlHandlerMapping();
+  handlerMapping.setOrder(order);
+  handlerMapping.setUrlMap(urlMap);
+  return handlerMapping;
+}
