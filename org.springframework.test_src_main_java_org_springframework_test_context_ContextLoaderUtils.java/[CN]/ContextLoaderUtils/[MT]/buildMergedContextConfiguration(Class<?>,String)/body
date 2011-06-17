@@ -1,7 +1,25 @@
 {
-  ContextLoader contextLoader=resolveContextLoader(testClass,defaultContextLoaderClassName);
-  String[] locations=resolveContextLocations(contextLoader,testClass);
-  Class<?>[] classes={};
+  List<ContextConfigurationAttributes> configAttributesList=resolveContextConfigurationAttributes(testClass);
+  ContextLoader contextLoader=resolveContextLoader(testClass,configAttributesList,defaultContextLoaderClassName);
+  final List<String> locationsList=new ArrayList<String>();
+  final List<Class<?>> classesList=new ArrayList<Class<?>>();
+  for (  ContextConfigurationAttributes configAttributes : configAttributesList) {
+    if (logger.isTraceEnabled()) {
+      logger.trace(String.format("Processing locations and classes for context configuration attributes [%s]",configAttributes));
+    }
+    if (contextLoader instanceof SmartContextLoader) {
+      SmartContextLoader smartContextLoader=(SmartContextLoader)contextLoader;
+      smartContextLoader.processContextConfigurationAttributes(configAttributes);
+      locationsList.addAll(Arrays.asList(configAttributes.getLocations()));
+      classesList.addAll(Arrays.asList(configAttributes.getClasses()));
+    }
+ else {
+      String[] processedLocations=contextLoader.processLocations(configAttributes.getDeclaringClass(),configAttributes.getLocations());
+      locationsList.addAll(Arrays.asList(processedLocations));
+    }
+  }
+  String[] locations=StringUtils.toStringArray(locationsList);
+  Class<?>[] classes=ClassUtils.toClassArray(classesList);
   String[] activeProfiles=resolveActiveProfiles(testClass);
   return new MergedContextConfiguration(testClass,locations,classes,activeProfiles,contextLoader);
 }

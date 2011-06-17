@@ -1,0 +1,14 @@
+{
+  Assert.notNull(declaringClass,"Declaring class must not be null");
+  String suffix=getConfigurationClassNameSuffix();
+  Assert.hasText(suffix,"Configuration class name suffix must not be empty");
+  String className=declaringClass.getName() + suffix;
+  List<Class<?>> configClasses=new ArrayList<Class<?>>();
+  try {
+    configClasses.add((Class<?>)getClass().getClassLoader().loadClass(className));
+  }
+ catch (  ClassNotFoundException e) {
+    logger.warn(String.format("Cannot load @Configuration class with generated class name [%s].",className),e);
+  }
+  return configClasses.toArray(new Class<?>[configClasses.size()]);
+}
