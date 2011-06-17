@@ -1,17 +1,15 @@
 {
-  RequestMapping annotation=AnnotationUtils.findAnnotation(method,RequestMapping.class);
-  if (annotation != null) {
-    RequestMappingInfo methodMapping=createFromRequestMapping(annotation);
-    RequestMapping typeAnnot=AnnotationUtils.findAnnotation(handlerType,RequestMapping.class);
-    if (typeAnnot != null) {
-      RequestMappingInfo typeMapping=createFromRequestMapping(typeAnnot);
-      return typeMapping.combine(methodMapping);
-    }
- else {
-      return methodMapping;
-    }
+  RequestMapping methodAnnotation=AnnotationUtils.findAnnotation(method,RequestMapping.class);
+  if (methodAnnotation == null) {
+    return null;
+  }
+  RequestMappingInfo methodInfo=createFromRequestMapping(methodAnnotation);
+  RequestMapping typeAnnotation=AnnotationUtils.findAnnotation(handlerType,RequestMapping.class);
+  if (typeAnnotation != null) {
+    RequestMappingInfo typeInfo=createFromRequestMapping(typeAnnotation);
+    return typeInfo.combine(methodInfo);
   }
  else {
-    return null;
+    return methodInfo;
   }
 }

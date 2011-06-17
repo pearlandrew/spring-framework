@@ -3,19 +3,17 @@
   Set<MediaType> consumableMediaTypes=new HashSet<MediaType>();
   Set<MediaType> producibleMediaTypes=new HashSet<MediaType>();
   for (  RequestMappingInfo info : requestMappingInfos) {
-    for (    String pattern : info.getPatternsCondition().getPatterns()) {
-      if (getPathMatcher().match(pattern,lookupPath)) {
-        if (info.getMethodsCondition().getMatchingCondition(request) == null) {
-          for (          RequestMethod method : info.getMethodsCondition().getMethods()) {
-            allowedMethods.add(method.name());
-          }
+    if (info.getPatternsCondition().getMatchingCondition(request) != null) {
+      if (info.getMethodsCondition().getMatchingCondition(request) == null) {
+        for (        RequestMethod method : info.getMethodsCondition().getMethods()) {
+          allowedMethods.add(method.name());
         }
-        if (info.getConsumesCondition().getMatchingCondition(request) == null) {
-          consumableMediaTypes.addAll(info.getConsumesCondition().getMediaTypes());
-        }
-        if (info.getProducesCondition().getMatchingCondition(request) == null) {
-          producibleMediaTypes.addAll(info.getProducesCondition().getMediaTypes());
-        }
+      }
+      if (info.getConsumesCondition().getMatchingCondition(request) == null) {
+        consumableMediaTypes.addAll(info.getConsumesCondition().getMediaTypes());
+      }
+      if (info.getProducesCondition().getMatchingCondition(request) == null) {
+        producibleMediaTypes.addAll(info.getProducesCondition().getMediaTypes());
       }
     }
   }
