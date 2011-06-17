@@ -1,12 +1,17 @@
 {
   ProxyFactory proxyFactory=new ProxyFactory();
   proxyFactory.setTargetSource(ts);
+  ClassLoader classLoader=this.beanClassLoader;
   if (interfaces == null) {
     interfaces=ClassUtils.getAllInterfacesForClass(ts.getTargetClass(),this.beanClassLoader);
   }
   proxyFactory.setInterfaces(interfaces);
+  if (proxyTargetClass) {
+    classLoader=null;
+    proxyFactory.setProxyTargetClass(proxyTargetClass);
+  }
   DelegatingIntroductionInterceptor introduction=new DelegatingIntroductionInterceptor(ts);
   introduction.suppressInterface(TargetSource.class);
   proxyFactory.addAdvice(introduction);
-  return proxyFactory.getProxy(this.beanClassLoader);
+  return proxyFactory.getProxy(classLoader);
 }

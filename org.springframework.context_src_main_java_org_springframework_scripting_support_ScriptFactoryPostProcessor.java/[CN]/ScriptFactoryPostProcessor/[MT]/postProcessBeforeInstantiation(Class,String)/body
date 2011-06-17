@@ -22,8 +22,13 @@
   if (refreshCheckDelay >= 0) {
     Class[] interfaces=scriptFactory.getScriptInterfaces();
     RefreshableScriptTargetSource ts=new RefreshableScriptTargetSource(this.scriptBeanFactory,scriptedObjectBeanName,scriptFactory,scriptSource,isFactoryBean);
+    boolean proxyTargetClass=resolveProxyTargetClass(bd);
+    String language=(String)bd.getAttribute(LANGUAGE_ATTRIBUTE);
+    if (proxyTargetClass && (language == null || !language.equals("groovy"))) {
+      throw new BeanDefinitionValidationException("Cannot use proxyTargetClass=true with script beans where language is not groovy (found " + language + ")");
+    }
     ts.setRefreshCheckDelay(refreshCheckDelay);
-    return createRefreshableProxy(ts,interfaces);
+    return createRefreshableProxy(ts,interfaces,proxyTargetClass);
   }
   if (isFactoryBean) {
     scriptedObjectBeanName=BeanFactory.FACTORY_BEAN_PREFIX + scriptedObjectBeanName;

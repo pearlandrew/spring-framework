@@ -7,6 +7,7 @@
   GenericBeanDefinition bd=new GenericBeanDefinition();
   bd.setBeanClassName(this.scriptFactoryClassName);
   bd.setSource(parserContext.extractSource(element));
+  bd.setAttribute(ScriptFactoryPostProcessor.LANGUAGE_ATTRIBUTE,element.getLocalName());
   String scope=element.getAttribute(SCOPE_ATTRIBUTE);
   if (StringUtils.hasLength(scope)) {
     bd.setScope(scope);
@@ -40,6 +41,11 @@
   String refreshCheckDelay=element.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
   if (StringUtils.hasText(refreshCheckDelay)) {
     bd.setAttribute(ScriptFactoryPostProcessor.REFRESH_CHECK_DELAY_ATTRIBUTE,new Long(refreshCheckDelay));
+  }
+  String proxyTargetClass=element.getAttribute(PROXY_TARGET_CLASS_ATTRIBUTE);
+  if (StringUtils.hasText(proxyTargetClass)) {
+    Boolean flag=new Boolean(proxyTargetClass);
+    bd.setAttribute(ScriptFactoryPostProcessor.PROXY_TARGET_CLASS_ATTRIBUTE,flag);
   }
   ConstructorArgumentValues cav=bd.getConstructorArgumentValues();
   int constructorArgNum=0;
