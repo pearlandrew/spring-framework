@@ -1,13 +1,10 @@
 {
-  MockControl mock=MockControl.createControl(ScriptSource.class);
-  ScriptSource scriptSource=(ScriptSource)mock.getMock();
-  scriptSource.getScriptAsString();
-  mock.setReturnValue("class Bar {}");
-  scriptSource.suggestedClassName();
-  mock.setReturnValue("someName");
-  mock.replay();
+  ScriptSource script=EasyMock.createMock(ScriptSource.class);
+  EasyMock.expect(script.getScriptAsString()).andReturn("class Bar {}");
+  EasyMock.expect(script.suggestedClassName()).andReturn("someName");
+  EasyMock.replay(script);
   GroovyScriptFactory factory=new GroovyScriptFactory("a script source locator (doesn't matter here)");
-  Object scriptedObject=factory.getScriptedObject(scriptSource,null);
+  Object scriptedObject=factory.getScriptedObject(script,null);
   assertNotNull(scriptedObject);
-  mock.verify();
+  EasyMock.verify(script);
 }
