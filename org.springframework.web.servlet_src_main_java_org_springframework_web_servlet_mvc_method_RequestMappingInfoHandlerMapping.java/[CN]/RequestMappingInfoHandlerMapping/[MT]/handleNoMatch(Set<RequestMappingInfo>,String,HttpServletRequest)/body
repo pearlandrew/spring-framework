@@ -3,18 +3,18 @@
   Set<MediaType> consumableMediaTypes=new HashSet<MediaType>();
   Set<MediaType> producibleMediaTypes=new HashSet<MediaType>();
   for (  RequestMappingInfo info : requestMappingInfos) {
-    for (    String pattern : info.getPatterns()) {
+    for (    String pattern : info.getPatternsCondition().getPatterns()) {
       if (getPathMatcher().match(pattern,lookupPath)) {
-        if (!info.getMethods().match(request)) {
-          for (          RequestMethod method : info.getMethods().getMethods()) {
+        if (info.getMethodsCondition().getMatchingCondition(request) == null) {
+          for (          RequestMethod method : info.getMethodsCondition().getMethods()) {
             allowedMethods.add(method.name());
           }
         }
-        if (!info.getConsumes().match(request)) {
-          consumableMediaTypes.addAll(info.getConsumes().getMediaTypes());
+        if (info.getConsumesCondition().getMatchingCondition(request) == null) {
+          consumableMediaTypes.addAll(info.getConsumesCondition().getMediaTypes());
         }
-        if (!info.getProduces().match(request)) {
-          producibleMediaTypes.addAll(info.getProduces().getMediaTypes());
+        if (info.getProducesCondition().getMatchingCondition(request) == null) {
+          producibleMediaTypes.addAll(info.getProducesCondition().getMediaTypes());
         }
       }
     }

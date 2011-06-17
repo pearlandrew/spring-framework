@@ -1,0 +1,21 @@
+{
+  String acceptHeader=request.getHeader("Accept");
+  List<MediaType> acceptedMediaTypes=MediaType.parseMediaTypes(acceptHeader);
+  MediaType.sortByQualityValue(acceptedMediaTypes);
+  for (  MediaType acceptedMediaType : acceptedMediaTypes) {
+    int thisIndex=this.indexOfMediaType(acceptedMediaType);
+    int otherIndex=other.indexOfMediaType(acceptedMediaType);
+    if (thisIndex != otherIndex) {
+      return otherIndex - thisIndex;
+    }
+ else     if (thisIndex != -1 && otherIndex != -1) {
+      ProduceMediaTypeExpression thisExpr=this.expressions.get(thisIndex);
+      ProduceMediaTypeExpression otherExpr=other.expressions.get(otherIndex);
+      int result=thisExpr.compareTo(otherExpr);
+      if (result != 0) {
+        return result;
+      }
+    }
+  }
+  return 0;
+}

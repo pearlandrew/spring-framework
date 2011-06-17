@@ -2,17 +2,12 @@
   if (isEmpty()) {
     return this;
   }
-  Set<ConsumeRequestCondition> matchingConditions=new LinkedHashSet<ConsumeRequestCondition>(getConditions());
-  for (Iterator<ConsumeRequestCondition> iterator=matchingConditions.iterator(); iterator.hasNext(); ) {
-    ConsumeRequestCondition condition=iterator.next();
-    if (!condition.match(request)) {
+  Set<ConsumeMediaTypeExpression> result=new LinkedHashSet<ConsumeMediaTypeExpression>(expressions);
+  for (Iterator<ConsumeMediaTypeExpression> iterator=result.iterator(); iterator.hasNext(); ) {
+    ConsumeMediaTypeExpression expression=iterator.next();
+    if (!expression.match(request)) {
       iterator.remove();
     }
   }
-  if (matchingConditions.isEmpty()) {
-    return null;
-  }
- else {
-    return new ConsumesRequestCondition(matchingConditions);
-  }
+  return (result.isEmpty()) ? null : new ConsumesRequestCondition(result);
 }

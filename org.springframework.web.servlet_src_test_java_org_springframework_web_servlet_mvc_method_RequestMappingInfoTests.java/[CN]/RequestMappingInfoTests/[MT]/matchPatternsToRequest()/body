@@ -1,30 +1,22 @@
 {
-  UrlPathHelper pathHelper=new UrlPathHelper();
-  PathMatcher pathMatcher=new AntPathMatcher();
   MockHttpServletRequest request=new MockHttpServletRequest("GET","/foo");
-  RequestMappingInfo key=new RequestMappingInfo(singleton("/foo"),null);
-  RequestMappingInfo match=key.getMatchingRequestMapping(pathHelper.getLookupPathForRequest(request),request,pathMatcher);
+  RequestMappingInfo match=createFromPatterns("/foo").getMatchingRequestMapping(request);
   assertNotNull(match);
   request=new MockHttpServletRequest("GET","/foo/bar");
-  key=new RequestMappingInfo(singleton("/foo/*"),null);
-  match=key.getMatchingRequestMapping(pathHelper.getLookupPathForRequest(request),request,pathMatcher);
+  match=createFromPatterns("/foo/*").getMatchingRequestMapping(request);
   assertNotNull("Pattern match",match);
   request=new MockHttpServletRequest("GET","/foo.html");
-  key=new RequestMappingInfo(singleton("/foo"),null);
-  match=key.getMatchingRequestMapping(pathHelper.getLookupPathForRequest(request),request,pathMatcher);
+  match=createFromPatterns("/foo").getMatchingRequestMapping(request);
   assertNotNull("Implicit match by extension",match);
-  assertEquals("Contains matched pattern","/foo.*",match.getPatterns().iterator().next());
+  assertEquals("Contains matched pattern","/foo.*",match.getPatternsCondition().getPatterns().iterator().next());
   request=new MockHttpServletRequest("GET","/foo/");
-  key=new RequestMappingInfo(singleton("/foo"),null);
-  match=key.getMatchingRequestMapping(pathHelper.getLookupPathForRequest(request),request,pathMatcher);
+  match=createFromPatterns("/foo").getMatchingRequestMapping(request);
   assertNotNull("Implicit match by trailing slash",match);
-  assertEquals("Contains matched pattern","/foo/",match.getPatterns().iterator().next());
+  assertEquals("Contains matched pattern","/foo/",match.getPatternsCondition().getPatterns().iterator().next());
   request=new MockHttpServletRequest("GET","/foo.html");
-  key=new RequestMappingInfo(singleton("/foo.jpg"),null);
-  match=key.getMatchingRequestMapping(pathHelper.getLookupPathForRequest(request),request,pathMatcher);
+  match=createFromPatterns("/foo.jpg").getMatchingRequestMapping(request);
   assertNull("Implicit match ignored if pattern has extension",match);
   request=new MockHttpServletRequest("GET","/foo.html");
-  key=new RequestMappingInfo(singleton("/foo.jpg"),null);
-  match=key.getMatchingRequestMapping(pathHelper.getLookupPathForRequest(request),request,pathMatcher);
+  match=createFromPatterns("/foo.jpg").getMatchingRequestMapping(request);
   assertNull("Implicit match ignored on pattern with trailing slash",match);
 }

@@ -1,0 +1,15 @@
+{
+  if (patterns.isEmpty()) {
+    return this;
+  }
+  String lookupPath=urlPathHelper.getLookupPathForRequest(request);
+  List<String> matches=new ArrayList<String>();
+  for (  String pattern : patterns) {
+    String match=getMatchingPattern(pattern,lookupPath);
+    if (match != null) {
+      matches.add(match);
+    }
+  }
+  Collections.sort(matches,pathMatcher.getPatternComparator(lookupPath));
+  return matches.isEmpty() ? null : new PatternsRequestCondition(matches,urlPathHelper,pathMatcher);
+}

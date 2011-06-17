@@ -1,14 +1,12 @@
 {
-  PathMatcher pathMatcher=new AntPathMatcher();
   MockHttpServletRequest request=new MockHttpServletRequest("GET","/foo");
-  String lookupPath=new UrlPathHelper().getLookupPathForRequest(request);
-  RequestMappingInfo key=new RequestMappingInfo(singleton("/foo"),null);
-  RequestMappingInfo match=key.getMatchingRequestMapping(lookupPath,request,pathMatcher);
+  RequestMappingInfo key=createFromPatterns("/foo");
+  RequestMappingInfo match=createFromPatterns("/foo").getMatchingRequestMapping(request);
   assertNotNull("No method matches any method",match);
-  key=new RequestMappingInfo(singleton("/foo"),methods(GET));
-  match=key.getMatchingRequestMapping(lookupPath,request,pathMatcher);
+  key=new RequestMappingInfo(new String[]{"/foo"},GET);
+  match=key.getMatchingRequestMapping(request);
   assertNotNull("Exact match",match);
-  key=new RequestMappingInfo(singleton("/foo"),methods(POST));
-  match=key.getMatchingRequestMapping(lookupPath,request,pathMatcher);
+  key=new RequestMappingInfo(new String[]{"/foo"},POST);
+  match=key.getMatchingRequestMapping(request);
   assertNull("No match",match);
 }
