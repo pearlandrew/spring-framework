@@ -5,10 +5,16 @@
   String className=declaringClass.getName() + suffix;
   List<Class<?>> configClasses=new ArrayList<Class<?>>();
   try {
-    configClasses.add((Class<?>)getClass().getClassLoader().loadClass(className));
+    Class<?> configClass=(Class<?>)getClass().getClassLoader().loadClass(className);
+    if (configClass.isAnnotationPresent(Configuration.class)) {
+      configClasses.add(configClass);
+    }
+ else {
+      logger.warn(String.format("Found candidate configuration class [%s], but it is not annotated with @Configuration.",className));
+    }
   }
  catch (  ClassNotFoundException e) {
-    logger.warn(String.format("Cannot load @Configuration class with generated class name [%s].",className),e);
+    logger.warn(String.format("Cannot load @Configuration class with generated class name [%s]: class not found",className));
   }
   return configClasses.toArray(new Class<?>[configClasses.size()]);
 }
