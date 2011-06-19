@@ -1,20 +1,18 @@
 {
   Assert.notNull(declaringClass,"Declaring class must not be null");
-  String suffix=getConfigurationClassNameSuffix();
-  Assert.hasText(suffix,"Configuration class name suffix must not be empty");
-  String className=declaringClass.getName() + suffix;
   List<Class<?>> configClasses=new ArrayList<Class<?>>();
-  try {
-    Class<?> configClass=(Class<?>)getClass().getClassLoader().loadClass(className);
-    if (configClass.isAnnotationPresent(Configuration.class)) {
+  for (  Class<?> configClass : declaringClass.getDeclaredClasses()) {
+    if (isDefaultConfigurationClassCandidate(configClass)) {
       configClasses.add(configClass);
     }
  else {
-      logger.warn(String.format("Found candidate configuration class [%s], but it is not annotated with @Configuration.",className));
+      if (logger.isDebugEnabled()) {
+        logger.debug(String.format("Ignoring class [%s]; it must be static, non-private, non-final, and annotated " + "with @Configuration to be considered a default configuration class.",configClass.getName()));
+      }
     }
   }
- catch (  ClassNotFoundException e) {
-    logger.warn(String.format("Cannot load @Configuration class with generated class name [%s]: class not found",className));
+  if (configClasses.isEmpty()) {
+    logger.warn(String.format("Test class [%s] does not declare any static, non-private, non-final, inner classes annotated " + "with @Configuration that can be used as a default configuration class.",declaringClass));
   }
   return configClasses.toArray(new Class<?>[configClasses.size()]);
 }
