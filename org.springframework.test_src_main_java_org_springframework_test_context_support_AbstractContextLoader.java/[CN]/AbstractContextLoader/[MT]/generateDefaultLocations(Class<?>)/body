@@ -2,5 +2,10 @@
   Assert.notNull(clazz,"Class must not be null");
   String suffix=getResourceSuffix();
   Assert.hasText(suffix,"Resource suffix must not be empty");
-  return new String[]{ResourceUtils.CLASSPATH_URL_PREFIX + SLASH + ClassUtils.convertClassNameToResourcePath(clazz.getName())+ suffix};
+  String resourcePath=SLASH + ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix;
+  if (!new ClassPathResource(resourcePath,clazz).exists()) {
+    logger.warn(String.format("Cannot generate default resource location for test class [%s]: classpath resource [%s] does not exist.",clazz.getName(),resourcePath));
+    return EMPTY_STRING_ARRAY;
+  }
+  return new String[]{ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath};
 }
