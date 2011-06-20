@@ -1,17 +1,19 @@
 {
+  String datePattern="MM:dd:yyyy";
+  SimpleDateFormat dateFormat=new SimpleDateFormat(datePattern);
+  String dateA="11:01:2011";
+  String dateB="11:02:2011";
   MockHttpServletRequest request=new MockHttpServletRequest("POST","/path1/path2");
-  request.setParameter("datePattern","MM:dd:yyyy");
-  request.addHeader("dateA","11:01:2011");
-  request.addHeader("dateB","11:02:2011");
-  request.addHeader("Accept","application/json");
+  request.setParameter("datePattern",datePattern);
+  request.addHeader("header1",dateA);
+  request.addHeader("header2",dateB);
   HandlerExecutionChain chain=handlerMapping.getHandler(request);
   assertNotNull(chain);
+  ModelAndView mav=handlerAdapter.handle(request,new MockHttpServletResponse(),chain.getHandler());
+  assertEquals(mav.getModel().get("attr1"),dateFormat.parse(dateA));
+  assertEquals(mav.getModel().get("attr2"),dateFormat.parse(dateB));
   MockHttpServletResponse response=new MockHttpServletResponse();
-  handlerAdapter.handle(request,response,chain.getHandler());
-  assertEquals("application/json",response.getHeader("Content-Type"));
-  assertEquals("{\"dateA\":1320105600000,\"dateB\":1320192000000}",response.getContentAsString());
-  response=new MockHttpServletResponse();
   exceptionResolver.resolveException(request,response,chain.getHandler(),new Exception("failure"));
-  assertEquals("application/json",response.getHeader("Content-Type"));
-  assertEquals("\"failure\"",response.getContentAsString());
+  assertEquals("text/plain;charset=ISO-8859-1",response.getHeader("Content-Type"));
+  assertEquals("failure",response.getContentAsString());
 }

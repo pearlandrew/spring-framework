@@ -5,14 +5,10 @@
     DefaultAdvisorAutoProxyCreator autoProxyCreator=new DefaultAdvisorAutoProxyCreator();
     autoProxyCreator.setBeanFactory(context.getBeanFactory());
     context.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
-    context.getBeanFactory().registerSingleton("advsr",new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+    context.getBeanFactory().registerSingleton("advisor",new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
   }
   context.refresh();
   handlerMapping.setApplicationContext(context);
-  List<HttpMessageConverter<?>> messageConverters=new ArrayList<HttpMessageConverter<?>>();
-  messageConverters.add(new MappingJacksonHttpMessageConverter());
-  handlerAdapter.setMessageConverters(messageConverters);
   handlerAdapter.afterPropertiesSet();
-  exceptionResolver.setMessageConverters(messageConverters);
   exceptionResolver.afterPropertiesSet();
 }
