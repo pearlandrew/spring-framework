@@ -1,0 +1,12 @@
+{
+  MockHttpServletRequest request=new MockHttpServletRequest("GET","/foo/");
+  PatternsRequestCondition condition=new PatternsRequestCondition("/foo");
+  PatternsRequestCondition match=condition.getMatchingCondition(request);
+  assertNotNull(match);
+  assertEquals("/foo/",match.getPatterns().iterator().next());
+  boolean useSuffixPatternMatch=false;
+  condition=new PatternsRequestCondition(new String[]{"/foo"},null,null,useSuffixPatternMatch);
+  match=condition.getMatchingCondition(request);
+  assertNotNull(match);
+  assertEquals("Trailing slash should be insensitive to useSuffixPatternMatch settings (SPR-6164, SPR-5636)","/foo/",match.getPatterns().iterator().next());
+}
