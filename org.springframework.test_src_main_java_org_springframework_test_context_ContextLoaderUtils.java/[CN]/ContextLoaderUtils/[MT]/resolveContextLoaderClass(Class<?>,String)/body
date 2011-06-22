@@ -2,7 +2,7 @@
   Assert.notNull(testClass,"Class must not be null");
   Assert.hasText(defaultContextLoaderClassName,"Default ContextLoader class name must not be null or empty");
   Class<ContextConfiguration> annotationType=ContextConfiguration.class;
-  Class<?> declaringClass=AnnotationUtils.findAnnotationDeclaringClass(annotationType,testClass);
+  Class<?> declaringClass=findAnnotationDeclaringClass(annotationType,testClass);
   Assert.notNull(declaringClass,String.format("Could not find an 'annotation declaring class' for annotation type [%s] and test class [%s]",annotationType,testClass));
   while (declaringClass != null) {
     ContextConfiguration contextConfiguration=declaringClass.getAnnotation(annotationType);
@@ -16,7 +16,7 @@
       }
       return contextLoaderClass;
     }
-    declaringClass=AnnotationUtils.findAnnotationDeclaringClass(annotationType,declaringClass.getSuperclass());
+    declaringClass=findAnnotationDeclaringClass(annotationType,declaringClass.getSuperclass());
   }
   try {
     if (logger.isTraceEnabled()) {
