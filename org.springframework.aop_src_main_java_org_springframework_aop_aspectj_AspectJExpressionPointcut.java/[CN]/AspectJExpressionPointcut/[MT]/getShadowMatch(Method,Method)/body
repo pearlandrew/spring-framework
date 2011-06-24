@@ -2,23 +2,41 @@
   ShadowMatch shadowMatch=this.shadowMatchCache.get(targetMethod);
   if (shadowMatch == null) {
 synchronized (this.shadowMatchCache) {
-      shadowMatch=this.shadowMatchCache.get(targetMethod);
+      Method methodToMatch=targetMethod;
+      PointcutExpression fallbackPointcutExpression=null;
+      shadowMatch=this.shadowMatchCache.get(methodToMatch);
       if (shadowMatch == null) {
         try {
           shadowMatch=this.pointcutExpression.matchesMethodExecution(targetMethod);
         }
  catch (        ReflectionWorld.ReflectionWorldException ex) {
-          if (targetMethod == originalMethod) {
-            shadowMatch=new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO,null,null,null);
+          try {
+            fallbackPointcutExpression=getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
+            shadowMatch=fallbackPointcutExpression.matchesMethodExecution(methodToMatch);
           }
- else {
-            try {
-              shadowMatch=this.pointcutExpression.matchesMethodExecution(originalMethod);
-            }
- catch (            ReflectionWorld.ReflectionWorldException ex2) {
+ catch (          ReflectionWorld.ReflectionWorldException e) {
+            if (targetMethod == originalMethod) {
               shadowMatch=new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO,null,null,null);
             }
+ else {
+              try {
+                shadowMatch=this.pointcutExpression.matchesMethodExecution(originalMethod);
+              }
+ catch (              ReflectionWorld.ReflectionWorldException ex2) {
+                methodToMatch=originalMethod;
+                fallbackPointcutExpression=getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
+                try {
+                  shadowMatch=fallbackPointcutExpression.matchesMethodExecution(methodToMatch);
+                }
+ catch (                ReflectionWorld.ReflectionWorldException e2) {
+                  shadowMatch=new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO,null,null,null);
+                }
+              }
+            }
           }
+        }
+        if (shadowMatch.maybeMatches() && fallbackPointcutExpression != null) {
+          shadowMatch=new DefensiveShadowMatch(shadowMatch,fallbackPointcutExpression.matchesMethodExecution(methodToMatch));
         }
         this.shadowMatchCache.put(targetMethod,shadowMatch);
       }

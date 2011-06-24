@@ -3,7 +3,17 @@
   try {
     return this.pointcutExpression.couldMatchJoinPointsInType(targetClass);
   }
- catch (  BCException ex) {
+ catch (  ReflectionWorldException e) {
+    logger.debug("PointcutExpression matching rejected target class",e);
+    try {
+      return getFallbackPointcutExpression(targetClass).couldMatchJoinPointsInType(targetClass);
+    }
+ catch (    BCException ex) {
+      logger.debug("Fallback PointcutExpression matching rejected target class",ex);
+      return false;
+    }
+  }
+catch (  BCException ex) {
     logger.debug("PointcutExpression matching rejected target class",ex);
     return false;
   }
