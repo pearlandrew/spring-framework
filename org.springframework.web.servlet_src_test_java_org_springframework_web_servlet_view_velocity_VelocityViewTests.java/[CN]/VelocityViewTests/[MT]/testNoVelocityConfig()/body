@@ -1,12 +1,11 @@
 {
   VelocityView vv=new VelocityView();
-  MockControl wmc=MockControl.createControl(WebApplicationContext.class);
-  WebApplicationContext wac=(WebApplicationContext)wmc.getMock();
+  WebApplicationContext wac=createMock(WebApplicationContext.class);
   wac.getBeansOfType(VelocityConfig.class,true,false);
-  wmc.setReturnValue(new HashMap());
+  expectLastCall().andReturn(new HashMap<String,Object>());
   wac.getParentBeanFactory();
-  wmc.setReturnValue(null);
-  wmc.replay();
+  expectLastCall().andReturn(null);
+  replay(wac);
   vv.setUrl("anythingButNull");
   try {
     vv.setApplicationContext(wac);
@@ -15,5 +14,5 @@
  catch (  ApplicationContextException ex) {
     assertTrue(ex.getMessage().contains("VelocityConfig"));
   }
-  wmc.verify();
+  verify(wac);
 }

@@ -1,0 +1,23 @@
+{
+  WebApplicationContext wac=createMock(WebApplicationContext.class);
+  wac.getServletContext();
+  expectLastCall().andReturn(new MockServletContext());
+  replay(wac);
+  TestView tv=new TestView(wac);
+  tv.setApplicationContext(wac);
+  MockHttpServletRequest request=new MockHttpServletRequest();
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  Map<String,Object> pathVars=new HashMap<String,Object>();
+  pathVars.put("one","bar");
+  pathVars.put("something","else");
+  request.setAttribute(View.PATH_VARIABLES,pathVars);
+  Map<String,Object> model=new HashMap<String,Object>();
+  model.put("one",new HashMap<Object,Object>());
+  model.put("two",new Object());
+  tv.render(model,request,response);
+  checkContainsAll(model,tv.model);
+  assertEquals(3,tv.model.size());
+  assertTrue(tv.model.get("something").equals("else"));
+  assertTrue(tv.inited);
+  verify(wac);
+}

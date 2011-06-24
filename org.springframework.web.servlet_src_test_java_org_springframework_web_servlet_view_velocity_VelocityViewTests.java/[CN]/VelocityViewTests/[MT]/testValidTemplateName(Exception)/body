@@ -1,9 +1,8 @@
 {
-  Map model=new HashMap();
+  Map<String,Object> model=new HashMap<String,Object>();
   model.put("foo","bar");
   final String templateName="test.vm";
-  MockControl wmc=MockControl.createControl(WebApplicationContext.class);
-  WebApplicationContext wac=(WebApplicationContext)wmc.getMock();
+  WebApplicationContext wac=createMock(WebApplicationContext.class);
   MockServletContext sc=new MockServletContext();
   sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,wac);
   final Template expectedTemplate=new Template();
@@ -14,14 +13,14 @@
   }
 ;
   wac.getBeansOfType(VelocityConfig.class,true,false);
-  Map configurers=new HashMap();
+  Map<String,Object> configurers=new HashMap<String,Object>();
   configurers.put("velocityConfigurer",vc);
-  wmc.setReturnValue(configurers);
+  expectLastCall().andReturn(configurers);
   wac.getParentBeanFactory();
-  wmc.setReturnValue(null);
+  expectLastCall().andReturn(null);
   wac.getServletContext();
-  wmc.setReturnValue(sc,3);
-  wmc.replay();
+  expectLastCall().andReturn(sc).times(3);
+  replay(wac);
   HttpServletRequest request=new MockHttpServletRequest();
   final HttpServletResponse expectedResponse=new MockHttpServletResponse();
   VelocityView vv=new VelocityView(){
@@ -48,5 +47,5 @@
     assertNotNull(mergeTemplateFailureException);
     assertEquals(ex,mergeTemplateFailureException);
   }
-  wmc.verify();
+  verify(wac);
 }
