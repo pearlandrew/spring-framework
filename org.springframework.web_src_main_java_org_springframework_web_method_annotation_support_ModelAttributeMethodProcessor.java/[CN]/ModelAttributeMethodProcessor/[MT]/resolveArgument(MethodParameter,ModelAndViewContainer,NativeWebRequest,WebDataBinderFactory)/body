@@ -1,12 +1,16 @@
 {
-  WebDataBinder binder=createDataBinder(parameter,mavContainer,webRequest,binderFactory);
+  String name=ModelFactory.getNameForParameter(parameter);
+  Object target=(mavContainer.containsAttribute(name)) ? mavContainer.getAttribute(name) : createAttribute(name,parameter,binderFactory,request);
+  WebDataBinder binder=binderFactory.createBinder(request,target,name);
   if (binder.getTarget() != null) {
-    doBind(binder,webRequest);
-    if (shouldValidate(binder,parameter)) {
+    bindRequestParameters(binder,request);
+    if (isValidationApplicable(binder,parameter)) {
       binder.validate();
     }
-    if (failOnError(binder,parameter) && binder.getBindingResult().hasErrors()) {
-      throw new BindException(binder.getBindingResult());
+    if (binder.getBindingResult().hasErrors()) {
+      if (isBindExceptionRequired(binder,parameter)) {
+        throw new BindException(binder.getBindingResult());
+      }
     }
   }
   mavContainer.addAllAttributes(binder.getBindingResult().getModel());
