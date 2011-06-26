@@ -1,8 +1,18 @@
 {
+  final String[] originalLocations=configAttributes.getLocations();
+  final Class<?>[] originalClasses=configAttributes.getClasses();
+  final boolean emptyResources=ObjectUtils.isEmpty(originalLocations) && ObjectUtils.isEmpty(originalClasses);
   for (  SmartContextLoader loader : candidates) {
     if (logger.isDebugEnabled()) {
       logger.debug(String.format("Delegating to loader [%s] to process context configuration [%s].",loader.getClass().getName(),configAttributes));
     }
-    loader.processContextConfiguration(configAttributes);
+    if (!emptyResources) {
+      loader.processContextConfiguration(configAttributes);
+    }
+ else {
+      if (loader.generatesDefaults()) {
+        loader.processContextConfiguration(configAttributes);
+      }
+    }
   }
 }

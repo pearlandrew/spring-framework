@@ -3,6 +3,9 @@
     if (logger.isDebugEnabled()) {
       logger.debug(String.format("Delegating to loader [%s] to load context from [%s].",loader.getClass().getName(),mergedConfig));
     }
+    if (loader.supports(mergedConfig)) {
+      return loader.loadContext(mergedConfig);
+    }
   }
-  return candidates.get(0).loadContext(mergedConfig);
+  throw new IllegalStateException(String.format("None of the candidate SmartContextLoaders [%s] " + "was able to load an ApplicationContext from [%s].",candidates,mergedConfig));
 }
