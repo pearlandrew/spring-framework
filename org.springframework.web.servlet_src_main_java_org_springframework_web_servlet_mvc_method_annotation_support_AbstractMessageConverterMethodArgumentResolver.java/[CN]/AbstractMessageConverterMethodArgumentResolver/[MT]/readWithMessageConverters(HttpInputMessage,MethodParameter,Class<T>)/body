@@ -1,0 +1,15 @@
+{
+  MediaType contentType=inputMessage.getHeaders().getContentType();
+  if (contentType == null) {
+    contentType=MediaType.APPLICATION_OCTET_STREAM;
+  }
+  for (  HttpMessageConverter<?> messageConverter : this.messageConverters) {
+    if (messageConverter.canRead(paramType,contentType)) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Reading [" + paramType.getName() + "] as \""+ contentType+ "\" using ["+ messageConverter+ "]");
+      }
+      return ((HttpMessageConverter<T>)messageConverter).read(paramType,inputMessage);
+    }
+  }
+  throw new HttpMediaTypeNotSupportedException(contentType,allSupportedMediaTypes);
+}

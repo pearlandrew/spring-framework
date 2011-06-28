@@ -1,0 +1,18 @@
+{
+  Method handle=getClass().getMethod("handle",SimpleBean.class,SimpleBean.class,SimpleBean.class,Integer.TYPE);
+  paramRequestPart=new MethodParameter(handle,0);
+  paramRequestPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+  paramNamedRequestPart=new MethodParameter(handle,1);
+  paramValidRequestPart=new MethodParameter(handle,2);
+  paramInt=new MethodParameter(handle,3);
+  messageConverter=createMock(HttpMessageConverter.class);
+  expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+  replay(messageConverter);
+  resolver=new RequestPartMethodArgumentResolver(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
+  reset(messageConverter);
+  multipartFile=new MockMultipartFile("requestPart","","text/plain",(byte[])null);
+  servletRequest=new MockMultipartHttpServletRequest();
+  servletRequest.addFile(multipartFile);
+  servletResponse=new MockHttpServletResponse();
+  webRequest=new ServletWebRequest(servletRequest,servletResponse);
+}

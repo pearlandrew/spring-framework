@@ -1,0 +1,12 @@
+{
+  MediaType contentType=MediaType.TEXT_PLAIN;
+  servletRequest.addHeader("Content-Type",contentType.toString());
+  @SuppressWarnings("unchecked") HttpMessageConverter<SimpleBean> beanConverter=createMock(HttpMessageConverter.class);
+  expect(beanConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+  expect(beanConverter.canRead(SimpleBean.class,contentType)).andReturn(true);
+  expect(beanConverter.read(eq(SimpleBean.class),isA(HttpInputMessage.class))).andReturn(simpleBean);
+  replay(beanConverter);
+  processor=new RequestResponseBodyMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(beanConverter));
+  processor.resolveArgument(paramValidBean,mavContainer,webRequest,new ValidatingBinderFactory());
+  verify(beanConverter);
+}

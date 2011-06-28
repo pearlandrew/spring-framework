@@ -1,18 +1,10 @@
 {
-  MediaType contentType=MediaType.TEXT_PLAIN;
-  servletRequest.addHeader("Content-Type",contentType.toString());
-  HttpMessageConverter<ValidBean> beanConverter=createMock(HttpMessageConverter.class);
-  expect(beanConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-  expect(beanConverter.canRead(ValidBean.class,contentType)).andReturn(true);
-  expect(beanConverter.read(eq(ValidBean.class),isA(HttpInputMessage.class))).andReturn(new ValidBean(null));
-  replay(beanConverter);
-  processor=new RequestResponseBodyMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(beanConverter));
   try {
-    processor.resolveArgument(paramValidBean,mavContainer,webRequest,new ValidatingBinderFactory());
+    testResolveArgumentWithValidation(new SimpleBean(null));
     fail("Expected exception");
   }
  catch (  RequestBodyNotValidException e) {
-    assertEquals("validBean",e.getErrors().getObjectName());
+    assertEquals("simpleBean",e.getErrors().getObjectName());
     assertEquals(1,e.getErrors().getErrorCount());
     assertNotNull(e.getErrors().getFieldError("name"));
   }
