@@ -1,14 +1,14 @@
 {
-  ServletRequest servletRequest=webRequest.getNativeRequest(ServletRequest.class);
-  MultipartHttpServletRequest multipartServletRequest=WebUtils.getNativeRequest(servletRequest,MultipartHttpServletRequest.class);
-  if (multipartServletRequest == null) {
-    throw new IllegalStateException("Current request is not of type " + MultipartRequest.class.getName());
+  ServletRequest servletRequest=request.getNativeRequest(ServletRequest.class);
+  MultipartHttpServletRequest multipartRequest=WebUtils.getNativeRequest(servletRequest,MultipartHttpServletRequest.class);
+  if (multipartRequest == null) {
+    throw new IllegalStateException("Current request is not of type [" + MultipartRequest.class.getName() + "]: "+ request);
   }
   String partName=getPartName(parameter);
-  HttpInputMessage inputMessage=new RequestPartServletServerHttpRequest(multipartServletRequest,partName);
+  HttpInputMessage inputMessage=new RequestPartServletServerHttpRequest(multipartRequest,partName);
   Object arg=readWithMessageConverters(inputMessage,parameter,parameter.getParameterType());
   if (isValidationApplicable(arg,parameter)) {
-    WebDataBinder binder=binderFactory.createBinder(webRequest,arg,partName);
+    WebDataBinder binder=binderFactory.createBinder(request,arg,partName);
     binder.validate();
     Errors errors=binder.getBindingResult();
     if (errors.hasErrors()) {

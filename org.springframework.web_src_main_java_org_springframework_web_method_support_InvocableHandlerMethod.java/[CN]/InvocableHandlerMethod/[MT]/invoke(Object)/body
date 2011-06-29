@@ -3,12 +3,24 @@
   try {
     return getBridgedMethod().invoke(getBean(),args);
   }
- catch (  IllegalArgumentException ex) {
-    handleIllegalArgumentException(ex,args);
-    throw ex;
+ catch (  IllegalArgumentException e) {
+    String msg=getInvocationErrorMessage(e.getMessage(),args);
+    throw new IllegalArgumentException(msg,e);
   }
-catch (  InvocationTargetException ex) {
-    handleInvocationTargetException(ex);
-    throw new IllegalStateException("Unexpected exception thrown by method - " + ex.getTargetException().getClass().getName() + ": "+ ex.getTargetException().getMessage());
+catch (  InvocationTargetException e) {
+    Throwable targetException=e.getTargetException();
+    if (targetException instanceof RuntimeException) {
+      throw (RuntimeException)targetException;
+    }
+ else     if (targetException instanceof Error) {
+      throw (Error)targetException;
+    }
+ else     if (targetException instanceof Exception) {
+      throw (Exception)targetException;
+    }
+ else {
+      String msg=getInvocationErrorMessage("Failed to invoke controller method",args);
+      throw new IllegalStateException(msg,targetException);
+    }
   }
 }
