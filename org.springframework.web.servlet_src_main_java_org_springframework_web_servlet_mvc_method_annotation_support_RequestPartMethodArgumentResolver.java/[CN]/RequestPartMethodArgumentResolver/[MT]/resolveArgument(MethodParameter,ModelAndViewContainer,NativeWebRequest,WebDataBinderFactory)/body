@@ -5,6 +5,9 @@
     throw new IllegalStateException("Current request is not of type [" + MultipartRequest.class.getName() + "]: "+ request);
   }
   String partName=getPartName(parameter);
+  if (MultipartFile.class.isAssignableFrom(parameter.getParameterType())) {
+    return multipartRequest.getFile(partName);
+  }
   HttpInputMessage inputMessage=new RequestPartServletServerHttpRequest(multipartRequest,partName);
   Object arg=readWithMessageConverters(inputMessage,parameter,parameter.getParameterType());
   if (isValidationApplicable(arg,parameter)) {
