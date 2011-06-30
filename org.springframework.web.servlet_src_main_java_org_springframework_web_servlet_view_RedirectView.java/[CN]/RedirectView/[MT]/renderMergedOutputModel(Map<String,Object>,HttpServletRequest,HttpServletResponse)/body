@@ -1,27 +1,4 @@
 {
-  StringBuilder targetUrl=new StringBuilder();
-  if (this.contextRelative && getUrl().startsWith("/")) {
-    targetUrl.append(request.getContextPath());
-  }
-  targetUrl.append(getUrl());
-  String enc=this.encodingScheme;
-  if (enc == null) {
-    enc=request.getCharacterEncoding();
-  }
-  if (enc == null) {
-    enc=WebUtils.DEFAULT_CHARACTER_ENCODING;
-  }
-  UriTemplate redirectUri=createUriTemplate(targetUrl,enc);
-  if (redirectUri.getVariableNames().size() > 0) {
-    targetUrl=new StringBuilder(redirectUri.expand(model).toString());
-    model=removeKeys(model,redirectUri.getVariableNames());
-  }
-  if (this.exposeModelAttributes) {
-    List<String> pathVarNames=getPathVarNames(request);
-    if (!pathVarNames.isEmpty()) {
-      model=removeKeys(model,pathVarNames);
-    }
-    appendQueryProperties(targetUrl,model,enc);
-  }
+  String targetUrl=createTargetUrl(model,request);
   sendRedirect(request,response,targetUrl.toString(),this.http10Compatible);
 }
