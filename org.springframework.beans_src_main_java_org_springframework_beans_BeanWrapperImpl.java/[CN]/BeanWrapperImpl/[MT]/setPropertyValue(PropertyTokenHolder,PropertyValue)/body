@@ -35,7 +35,6 @@
           oldValue=Array.get(propValue,arrayIndex);
         }
         Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType,TypeDescriptor.nested(property(pd),tokens.keys.length));
-        propValue=growArrayIfNecessary(propValue,arrayIndex,actualName);
         Array.set(propValue,arrayIndex,convertedValue);
       }
  catch (      IndexOutOfBoundsException ex) {
@@ -47,21 +46,22 @@
       Class requiredType=GenericCollectionTypeResolver.getCollectionReturnType(pd.getReadMethod(),tokens.keys.length);
       List list=(List)propValue;
       int index=Integer.parseInt(key);
+      int size=list.size();
       Object oldValue=null;
-      if (isExtractOldValueForEditor() && index < list.size()) {
+      if (isExtractOldValueForEditor() && index < size) {
         oldValue=list.get(index);
       }
       Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType,TypeDescriptor.nested(property(pd),tokens.keys.length));
-      if (index < list.size()) {
+      if (index < size) {
         list.set(index,convertedValue);
       }
- else       if (index >= list.size()) {
-        for (int i=list.size(); i < index; i++) {
+ else       if (index >= size && index < this.autoGrowCollectionLimit) {
+        for (int i=size; i < index; i++) {
           try {
             list.add(null);
           }
  catch (          NullPointerException ex) {
-            throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Cannot set element with index " + index + " in List of size "+ list.size()+ ", accessed using property path '"+ propertyName+ "': List does not support filling up gaps with null elements");
+            throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"Cannot set element with index " + index + " in List of size "+ size+ ", accessed using property path '"+ propertyName+ "': List does not support filling up gaps with null elements");
           }
         }
         list.add(convertedValue);
