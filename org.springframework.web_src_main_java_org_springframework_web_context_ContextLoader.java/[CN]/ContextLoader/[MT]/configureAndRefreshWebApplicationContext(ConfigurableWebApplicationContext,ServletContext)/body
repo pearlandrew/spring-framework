@@ -1,16 +1,15 @@
 {
   if (ObjectUtils.identityToString(wac).equals(wac.getId())) {
-    if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
-      String servletContextName=sc.getServletContextName();
-      wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + ObjectUtils.getDisplayString(servletContextName));
+    String idParam=sc.getInitParameter(CONTEXT_ID_PARAM);
+    if (idParam != null) {
+      wac.setId(idParam);
     }
  else {
-      try {
-        String contextPath=(String)ServletContext.class.getMethod("getContextPath").invoke(sc);
-        wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + ObjectUtils.getDisplayString(contextPath));
+      if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+        wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + ObjectUtils.getDisplayString(sc.getServletContextName()));
       }
- catch (      Exception ex) {
-        throw new IllegalStateException("Failed to invoke Servlet 2.5 getContextPath method",ex);
+ else {
+        wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + ObjectUtils.getDisplayString(sc.getContextPath()));
       }
     }
   }
