@@ -1,8 +1,15 @@
 {
-  boolean originalAllowed=requiredType.isInstance(original);
-  if (!originalAllowed && !Map.class.isAssignableFrom(requiredType)) {
+  if (!Map.class.isAssignableFrom(requiredType)) {
     return original;
   }
+  boolean approximable=CollectionFactory.isApproximableMapType(requiredType);
+  if (!approximable && !canCreateCopy(requiredType)) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Custom Map type [" + original.getClass().getName() + "] does not allow for creating a copy - injecting original Map as-is");
+    }
+    return original;
+  }
+  boolean originalAllowed=requiredType.isInstance(original);
   typeDescriptor=typeDescriptor.narrow(original);
   TypeDescriptor keyType=typeDescriptor.getMapKeyTypeDescriptor();
   TypeDescriptor valueType=typeDescriptor.getMapValueTypeDescriptor();
@@ -21,13 +28,13 @@
   }
  catch (  Throwable ex) {
     if (logger.isDebugEnabled()) {
-      logger.debug("Cannot access Map of type [" + original.getClass().getName() + "] - injecting original Map as-is",ex);
+      logger.debug("Cannot access Map of type [" + original.getClass().getName() + "] - injecting original Map as-is: "+ ex);
     }
     return original;
   }
   Map convertedCopy;
   try {
-    if (CollectionFactory.isApproximableMapType(requiredType)) {
+    if (approximable) {
       convertedCopy=CollectionFactory.createApproximateMap(original,original.size());
     }
  else {
@@ -36,7 +43,7 @@
   }
  catch (  Throwable ex) {
     if (logger.isDebugEnabled()) {
-      logger.debug("Cannot create copy of Map type [" + original.getClass().getName() + "] - injecting original Map as-is",ex);
+      logger.debug("Cannot create copy of Map type [" + original.getClass().getName() + "] - injecting original Map as-is: "+ ex);
     }
     return original;
   }
@@ -45,14 +52,14 @@
     Object key=entry.getKey();
     Object value=entry.getValue();
     String keyedPropertyName=buildKeyedPropertyName(propertyName,key);
-    Object convertedKey=convertIfNecessary(keyedPropertyName,null,key,keyType != null ? keyType.getType() : null,typeDescriptor.getMapKeyTypeDescriptor());
-    Object convertedValue=convertIfNecessary(keyedPropertyName,null,value,valueType != null ? valueType.getType() : null,typeDescriptor.getMapValueTypeDescriptor());
+    Object convertedKey=convertIfNecessary(keyedPropertyName,null,key,(keyType != null ? keyType.getType() : null),typeDescriptor.getMapKeyTypeDescriptor());
+    Object convertedValue=convertIfNecessary(keyedPropertyName,null,value,(valueType != null ? valueType.getType() : null),typeDescriptor.getMapValueTypeDescriptor());
     try {
       convertedCopy.put(convertedKey,convertedValue);
     }
  catch (    Throwable ex) {
       if (logger.isDebugEnabled()) {
-        logger.debug("Map type [" + original.getClass().getName() + "] seems to be read-only - injecting original Map as-is",ex);
+        logger.debug("Map type [" + original.getClass().getName() + "] seems to be read-only - injecting original Map as-is: "+ ex);
       }
       return original;
     }
