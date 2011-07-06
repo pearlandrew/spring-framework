@@ -1,7 +1,24 @@
 {
-  FactoryBean fb=(mbd.isSingleton() ? getSingletonFactoryBeanForTypeCheck(beanName,mbd) : getNonSingletonFactoryBeanForTypeCheck(beanName,mbd));
+  Class<?> objectType=null;
+  String factoryBeanName=mbd.getFactoryBeanName();
+  String factoryMethodName=mbd.getFactoryMethodName();
+  if (factoryBeanName != null && factoryMethodName != null) {
+    BeanDefinition fbDef=getBeanDefinition(factoryBeanName);
+    if (fbDef instanceof AbstractBeanDefinition) {
+      Class<?> fbClass=((AbstractBeanDefinition)fbDef).getBeanClass();
+      if (ClassUtils.isCglibProxyClass(fbClass)) {
+        fbClass=fbClass.getSuperclass();
+      }
+      Method m=ReflectionUtils.findMethod(fbClass,factoryMethodName);
+      objectType=GenericTypeResolver.resolveReturnTypeArgument(m,FactoryBean.class);
+      if (objectType != null) {
+        return objectType;
+      }
+    }
+  }
+  FactoryBean<?> fb=(mbd.isSingleton() ? getSingletonFactoryBeanForTypeCheck(beanName,mbd) : getNonSingletonFactoryBeanForTypeCheck(beanName,mbd));
   if (fb != null) {
-    Class objectType=getTypeForFactoryBean(fb);
+    objectType=getTypeForFactoryBean(fb);
     if (objectType != null) {
       return objectType;
     }
