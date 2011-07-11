@@ -1,0 +1,18 @@
+{
+  AnnotationMetadata importingClassMetadata=context.getImportingClassMetadata();
+  BeanDefinitionRegistry registry=context.getBeanDefinitionRegistry();
+  Map<String,Object> enableTx=importingClassMetadata.getAnnotationAttributes(EnableTransactionManagement.class.getName());
+  Assert.notNull(enableTx,"@EnableTransactionManagement is not present on importing class " + importingClassMetadata.getClassName());
+switch ((AdviceMode)enableTx.get("mode")) {
+case PROXY:
+    AopConfigUtils.registerAutoProxyCreatorIfNecessary(registry);
+  if ((Boolean)enableTx.get("proxyTargetClass")) {
+    AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
+  }
+return new String[]{ProxyTransactionManagementConfiguration.class.getName()};
+case ASPECTJ:
+return new String[]{"org.springframework.transaction.aspectj.AspectJTransactionManagementConfiguration"};
+default :
+throw new IllegalArgumentException("Unknown AdviceMode " + enableTx.get("mode"));
+}
+}
