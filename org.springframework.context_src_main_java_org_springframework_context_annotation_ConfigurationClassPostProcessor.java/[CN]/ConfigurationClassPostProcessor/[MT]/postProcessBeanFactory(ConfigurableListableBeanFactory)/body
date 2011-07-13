@@ -1,9 +1,10 @@
 {
-  if (this.postProcessBeanFactoryCalled) {
-    throw new IllegalStateException("postProcessBeanFactory already called for this post-processor");
+  int factoryID=System.identityHashCode(beanFactory);
+  if (this.factoriesPostProcessed.contains(factoryID)) {
+    throw new IllegalStateException("postProcessBeanFactory already called for this post-processor against " + beanFactory);
   }
-  this.postProcessBeanFactoryCalled=true;
-  if (!this.postProcessBeanDefinitionRegistryCalled) {
+  this.factoriesPostProcessed.add(factoryID);
+  if (!this.registriesPostProcessed.contains(factoryID)) {
     processConfigurationClasses((BeanDefinitionRegistry)beanFactory);
   }
 }

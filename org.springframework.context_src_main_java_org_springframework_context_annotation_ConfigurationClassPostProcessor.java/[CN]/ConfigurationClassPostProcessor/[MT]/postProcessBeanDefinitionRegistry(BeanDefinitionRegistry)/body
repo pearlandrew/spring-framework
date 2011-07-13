@@ -1,11 +1,12 @@
 {
   BeanDefinitionReaderUtils.registerWithGeneratedName(new RootBeanDefinition(ImportAwareBeanPostProcessor.class),registry);
-  if (this.postProcessBeanDefinitionRegistryCalled) {
-    throw new IllegalStateException("postProcessBeanDefinitionRegistry already called for this post-processor");
+  int registryID=System.identityHashCode(registry);
+  if (this.registriesPostProcessed.contains(registryID)) {
+    throw new IllegalStateException("postProcessBeanDefinitionRegistry already called for this post-processor against " + registry);
   }
-  if (this.postProcessBeanFactoryCalled) {
-    throw new IllegalStateException("postProcessBeanFactory already called for this post-processor");
+  if (this.factoriesPostProcessed.contains(registryID)) {
+    throw new IllegalStateException("postProcessBeanFactory already called for this post-processor against " + registry);
   }
-  this.postProcessBeanDefinitionRegistryCalled=true;
+  this.registriesPostProcessed.add(registryID);
   processConfigurationClasses(registry);
 }
