@@ -1,7 +1,5 @@
 {
-  final String[] originalLocations=configAttributes.getLocations();
-  final Class<?>[] originalClasses=configAttributes.getClasses();
-  final boolean emptyResources=ObjectUtils.isEmpty(originalLocations) && ObjectUtils.isEmpty(originalClasses);
+  final boolean emptyResources=emptyResources(configAttributes);
   for (  SmartContextLoader loader : candidates) {
     if (logger.isDebugEnabled()) {
       logger.debug(String.format("Delegating to %s to process context configuration [%s].",loader.getClass().getName(),configAttributes));
@@ -9,10 +7,14 @@
     if (!emptyResources) {
       loader.processContextConfiguration(configAttributes);
     }
- else {
-      if (loader.generatesDefaults()) {
-        loader.processContextConfiguration(configAttributes);
+ else     if (loader.generatesDefaults()) {
+      loader.processContextConfiguration(configAttributes);
+      if (!emptyResources(configAttributes) && logger.isInfoEnabled()) {
+        logger.info(String.format("SmartContextLoader candidate %s " + "generated defaults for context configuration [%s].",loader,configAttributes));
       }
     }
+  }
+  if (generatesDefaults() && emptyResources(configAttributes)) {
+    throw new IllegalStateException(String.format("None of the SmartContextLoader candidates %s " + "was able to generate defaults for context configuration [%s].",candidates,configAttributes));
   }
 }
