@@ -1,10 +1,10 @@
 {
-  final boolean hasResources=configAttributes.hasResources();
+  final boolean originallyHadResources=configAttributes.hasResources();
   for (  SmartContextLoader loader : candidates) {
     if (logger.isDebugEnabled()) {
       logger.debug(String.format("Potentially delegating to %s to process context configuration [%s].",loader.getClass().getName(),configAttributes));
     }
-    if (hasResources) {
+    if (originallyHadResources) {
       loader.processContextConfiguration(configAttributes);
     }
  else     if (loader.generatesDefaults()) {
@@ -14,7 +14,7 @@
       }
     }
   }
-  if (generatesDefaults() && !configAttributes.hasResources()) {
+  if (originallyHadResources && generatesDefaults() && !configAttributes.hasResources()) {
     throw new IllegalStateException(String.format("None of the SmartContextLoader candidates %s " + "was able to generate defaults for context configuration [%s].",candidates,configAttributes));
   }
 }
