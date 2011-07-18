@@ -1,22 +1,31 @@
 {
-  ServletRequest servletRequest=request.getNativeRequest(ServletRequest.class);
-  MultipartHttpServletRequest multipartRequest=WebUtils.getNativeRequest(servletRequest,MultipartHttpServletRequest.class);
-  if (multipartRequest == null) {
-    throw new IllegalStateException("Current request is not of type [" + MultipartRequest.class.getName() + "]: "+ request);
-  }
   String partName=getPartName(parameter);
-  if (MultipartFile.class.isAssignableFrom(parameter.getParameterType())) {
-    return multipartRequest.getFile(partName);
+  Object arg;
+  HttpServletRequest servletRequest=request.getNativeRequest(HttpServletRequest.class);
+  MultipartHttpServletRequest multipartRequest=WebUtils.getNativeRequest(servletRequest,MultipartHttpServletRequest.class);
+  if (MultipartFile.class.equals(parameter.getParameterType())) {
+    assertMultipartRequest(multipartRequest,request);
+    arg=multipartRequest.getFile(partName);
   }
-  HttpInputMessage inputMessage=new RequestPartServletServerHttpRequest(multipartRequest,partName);
-  Object arg=readWithMessageConverters(inputMessage,parameter,parameter.getParameterType());
-  if (isValidationApplicable(arg,parameter)) {
-    WebDataBinder binder=binderFactory.createBinder(request,arg,partName);
-    binder.validate();
-    Errors errors=binder.getBindingResult();
-    if (errors.hasErrors()) {
-      throw new RequestPartNotValidException(errors);
+ else   if (isMultipartFileCollection(parameter)) {
+    assertMultipartRequest(multipartRequest,request);
+    arg=multipartRequest.getFiles(partName);
+  }
+ else   if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
+    arg=servletRequest.getPart(partName);
+  }
+ else {
+    HttpInputMessage inputMessage=new RequestPartServletServerHttpRequest(multipartRequest,partName);
+    arg=readWithMessageConverters(inputMessage,parameter,parameter.getParameterType());
+    if (isValidationApplicable(arg,parameter)) {
+      WebDataBinder binder=binderFactory.createBinder(request,arg,partName);
+      binder.validate();
+      Errors errors=binder.getBindingResult();
+      if (errors.hasErrors()) {
+        throw new RequestPartNotValidException(errors);
+      }
     }
   }
+  checkMissingRequiredValue(arg,partName,parameter);
   return arg;
 }

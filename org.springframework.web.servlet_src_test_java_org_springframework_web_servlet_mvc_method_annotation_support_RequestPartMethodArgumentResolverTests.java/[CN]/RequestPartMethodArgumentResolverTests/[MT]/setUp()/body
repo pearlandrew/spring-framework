@@ -1,19 +1,26 @@
 {
-  Method handle=getClass().getMethod("handle",SimpleBean.class,SimpleBean.class,SimpleBean.class,MultipartFile.class,Integer.TYPE);
-  paramRequestPart=new MethodParameter(handle,0);
+  Method method=getClass().getMethod("handle",SimpleBean.class,SimpleBean.class,SimpleBean.class,MultipartFile.class,List.class,Integer.TYPE,MultipartFile.class,Part.class);
+  paramRequestPart=new MethodParameter(method,0);
   paramRequestPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-  paramNamedRequestPart=new MethodParameter(handle,1);
-  paramValidRequestPart=new MethodParameter(handle,2);
-  paramMultipartFile=new MethodParameter(handle,3);
-  paramInt=new MethodParameter(handle,4);
+  paramNamedRequestPart=new MethodParameter(method,1);
+  paramValidRequestPart=new MethodParameter(method,2);
+  paramMultipartFile=new MethodParameter(method,3);
+  paramMultipartFileList=new MethodParameter(method,4);
+  paramInt=new MethodParameter(method,5);
+  paramMultipartFileNotAnnot=new MethodParameter(method,6);
+  paramMultipartFileNotAnnot.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+  paramServlet30Part=new MethodParameter(method,7);
+  paramServlet30Part.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
   messageConverter=createMock(HttpMessageConverter.class);
   expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
   replay(messageConverter);
   resolver=new RequestPartMethodArgumentResolver(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
   reset(messageConverter);
-  multipartFile=new MockMultipartFile("requestPart","","text/plain",(byte[])null);
-  servletRequest=new MockMultipartHttpServletRequest();
-  servletRequest.addFile(multipartFile);
+  multipartFile1=new MockMultipartFile("requestPart","","text/plain",(byte[])null);
+  multipartFile2=new MockMultipartFile("requestPart","","text/plain",(byte[])null);
+  multipartRequest=new MockMultipartHttpServletRequest();
+  multipartRequest.addFile(multipartFile1);
+  multipartRequest.addFile(multipartFile2);
   servletResponse=new MockHttpServletResponse();
-  webRequest=new ServletWebRequest(servletRequest,servletResponse);
+  webRequest=new ServletWebRequest(multipartRequest,servletResponse);
 }

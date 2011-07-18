@@ -1,10 +1,14 @@
 {
-  MultipartRequest multipartRequest=webRequest.getNativeRequest(MultipartRequest.class);
+  HttpServletRequest servletRequest=webRequest.getNativeRequest(HttpServletRequest.class);
+  MultipartHttpServletRequest multipartRequest=WebUtils.getNativeRequest(servletRequest,MultipartHttpServletRequest.class);
   if (multipartRequest != null) {
     List<MultipartFile> files=multipartRequest.getFiles(name);
     if (!files.isEmpty()) {
       return (files.size() == 1 ? files.get(0) : files);
     }
+  }
+  if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
+    return servletRequest.getPart(name);
   }
   String[] paramValues=webRequest.getParameterValues(name);
   if (paramValues != null) {
