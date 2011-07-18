@@ -1,20 +1,32 @@
 {
+  Object arg;
   HttpServletRequest servletRequest=webRequest.getNativeRequest(HttpServletRequest.class);
   MultipartHttpServletRequest multipartRequest=WebUtils.getNativeRequest(servletRequest,MultipartHttpServletRequest.class);
-  if (multipartRequest != null) {
-    List<MultipartFile> files=multipartRequest.getFiles(name);
-    if (!files.isEmpty()) {
-      return (files.size() == 1 ? files.get(0) : files);
-    }
+  if (MultipartFile.class.equals(parameter.getParameterType())) {
+    assertMultipartRequest(multipartRequest,webRequest);
+    arg=multipartRequest.getFile(name);
   }
-  if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
-    return servletRequest.getPart(name);
+ else   if (isMultipartFileCollection(parameter)) {
+    assertMultipartRequest(multipartRequest,webRequest);
+    arg=multipartRequest.getFiles(name);
   }
-  String[] paramValues=webRequest.getParameterValues(name);
-  if (paramValues != null) {
-    return paramValues.length == 1 ? paramValues[0] : paramValues;
+ else   if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
+    arg=servletRequest.getPart(name);
   }
  else {
-    return null;
+    arg=null;
+    if (multipartRequest != null) {
+      List<MultipartFile> files=multipartRequest.getFiles(name);
+      if (!files.isEmpty()) {
+        arg=(files.size() == 1 ? files.get(0) : files);
+      }
+    }
+    if (arg == null) {
+      String[] paramValues=webRequest.getParameterValues(name);
+      if (paramValues != null) {
+        arg=paramValues.length == 1 ? paramValues[0] : paramValues;
+      }
+    }
   }
+  return arg;
 }
