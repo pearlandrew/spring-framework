@@ -1,4 +1,13 @@
 {
   Assert.notNull(classLoader,"ClassLoader must not be null");
-  this.classLoader=new JBossClassLoaderAdapter(classLoader);
+  String loaderClassName=classLoader.getClass().getName();
+  if (loaderClassName.startsWith("org.jboss.classloader")) {
+    this.adapter=new JBossMCAdapter(classLoader);
+  }
+ else   if (loaderClassName.startsWith("org.jboss.modules")) {
+    this.adapter=new JBossModulesAdapter(classLoader);
+  }
+ else {
+    throw new IllegalArgumentException("Unexpected classloader type: " + loaderClassName);
+  }
 }

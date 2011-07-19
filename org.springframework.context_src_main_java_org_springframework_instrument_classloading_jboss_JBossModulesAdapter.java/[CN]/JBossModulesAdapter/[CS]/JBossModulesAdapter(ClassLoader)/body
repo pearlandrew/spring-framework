@@ -1,0 +1,14 @@
+{
+  this.classLoader=loader;
+  try {
+    Field transformers=ReflectionUtils.findField(classLoader.getClass(),TRANSFORMER_FIELD_NAME);
+    transformers.setAccessible(true);
+    delegatingTransformer=transformers.get(classLoader);
+    Assert.state(delegatingTransformer.getClass().getName().equals(DELEGATING_TRANSFORMER_CLASS_NAME),"Transformer not of the expected type: " + delegatingTransformer.getClass().getName());
+    addTransformer=ReflectionUtils.findMethod(delegatingTransformer.getClass(),TRANSFORMER_ADD_METHOD_NAME,ClassFileTransformer.class);
+    addTransformer.setAccessible(true);
+  }
+ catch (  Exception ex) {
+    throw new IllegalStateException("Could not initialize JBoss 7 LoadTimeWeaver",ex);
+  }
+}
