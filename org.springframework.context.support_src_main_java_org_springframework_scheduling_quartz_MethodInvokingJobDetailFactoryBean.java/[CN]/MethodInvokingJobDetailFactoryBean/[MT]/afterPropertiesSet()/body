@@ -2,12 +2,26 @@
   prepare();
   String name=(this.name != null ? this.name : this.beanName);
   Class jobClass=(this.concurrent ? MethodInvokingJob.class : StatefulMethodInvokingJob.class);
-  this.jobDetail=new JobDetail(name,this.group,jobClass);
-  this.jobDetail.getJobDataMap().put("methodInvoker",this);
-  this.jobDetail.setVolatility(true);
-  this.jobDetail.setDurability(true);
+  if (jobDetailImplClass != null) {
+    Object jobDetail=BeanUtils.instantiate(jobDetailImplClass);
+    BeanWrapper bw=PropertyAccessorFactory.forBeanPropertyAccess(jobDetail);
+    bw.setPropertyValue("name",name);
+    bw.setPropertyValue("group",this.group);
+    bw.setPropertyValue("jobClass",jobClass);
+    bw.setPropertyValue("durability",true);
+    ((JobDataMap)bw.getPropertyValue("jobDataMap")).put("methodInvoker",this);
+  }
+ else {
+    this.jobDetail=new JobDetail(name,this.group,jobClass);
+    this.jobDetail.setVolatility(true);
+    this.jobDetail.setDurability(true);
+    this.jobDetail.getJobDataMap().put("methodInvoker",this);
+  }
   if (this.jobListenerNames != null) {
     for (    String jobListenerName : this.jobListenerNames) {
+      if (jobDetailImplClass != null) {
+        throw new IllegalStateException("Non-global JobListeners not supported on Quartz 2 - " + "manually register a Matcher against the Quartz ListenerManager instead");
+      }
       this.jobDetail.addJobListener(jobListenerName);
     }
   }

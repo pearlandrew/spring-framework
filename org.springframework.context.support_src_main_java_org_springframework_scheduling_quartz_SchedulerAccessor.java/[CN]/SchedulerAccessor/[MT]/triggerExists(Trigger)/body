@@ -1,0 +1,15 @@
+{
+  if (triggerKeyClass != null) {
+    try {
+      Method getTrigger=Scheduler.class.getMethod("getTrigger",triggerKeyClass);
+      Object key=ReflectionUtils.invokeMethod(Trigger.class.getMethod("getKey"),trigger);
+      return (ReflectionUtils.invokeMethod(getTrigger,getScheduler(),key) != null);
+    }
+ catch (    NoSuchMethodException ex) {
+      throw new IllegalStateException("Inconsistent Quartz 2.0 API: " + ex);
+    }
+  }
+ else {
+    return (getScheduler().getTrigger(trigger.getName(),trigger.getGroup()) != null);
+  }
+}

@@ -1,0 +1,15 @@
+{
+  if (triggerKeyClass != null) {
+    try {
+      Method rescheduleJob=Scheduler.class.getMethod("rescheduleJob",triggerKeyClass,Trigger.class);
+      Object key=ReflectionUtils.invokeMethod(Trigger.class.getMethod("getKey"),trigger);
+      ReflectionUtils.invokeMethod(rescheduleJob,getScheduler(),key,trigger);
+    }
+ catch (    NoSuchMethodException ex) {
+      throw new IllegalStateException("Inconsistent Quartz 2.0 API: " + ex);
+    }
+  }
+ else {
+    getScheduler().rescheduleJob(trigger.getName(),trigger.getGroup(),trigger);
+  }
+}

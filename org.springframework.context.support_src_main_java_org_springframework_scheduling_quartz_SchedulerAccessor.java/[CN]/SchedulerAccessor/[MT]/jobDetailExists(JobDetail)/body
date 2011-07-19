@@ -1,0 +1,15 @@
+{
+  if (jobKeyClass != null) {
+    try {
+      Method getJobDetail=Scheduler.class.getMethod("getJobDetail",jobKeyClass);
+      Object key=ReflectionUtils.invokeMethod(JobDetail.class.getMethod("getKey"),jobDetail);
+      return (ReflectionUtils.invokeMethod(getJobDetail,getScheduler(),key) != null);
+    }
+ catch (    NoSuchMethodException ex) {
+      throw new IllegalStateException("Inconsistent Quartz 2.0 API: " + ex);
+    }
+  }
+ else {
+    return (getScheduler().getJobDetail(jobDetail.getName(),jobDetail.getGroup()) != null);
+  }
+}

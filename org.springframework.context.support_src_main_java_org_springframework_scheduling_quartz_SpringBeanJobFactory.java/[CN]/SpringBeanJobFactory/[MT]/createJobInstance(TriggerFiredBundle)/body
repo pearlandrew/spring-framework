@@ -1,13 +1,13 @@
 {
-  Object job=bundle.getJobDetail().getJobClass().newInstance();
+  Object job=super.createJobInstance(bundle);
   BeanWrapper bw=PropertyAccessorFactory.forBeanPropertyAccess(job);
   if (isEligibleForPropertyPopulation(bw.getWrappedInstance())) {
     MutablePropertyValues pvs=new MutablePropertyValues();
     if (this.schedulerContext != null) {
       pvs.addPropertyValues(this.schedulerContext);
     }
-    pvs.addPropertyValues(bundle.getJobDetail().getJobDataMap());
-    pvs.addPropertyValues(bundle.getTrigger().getJobDataMap());
+    pvs.addPropertyValues(getJobDetailDataMap(bundle));
+    pvs.addPropertyValues(getTriggerDataMap(bundle));
     if (this.ignoredUnknownProperties != null) {
       for (      String propName : this.ignoredUnknownProperties) {
         if (pvs.contains(propName) && !bw.isWritableProperty(propName)) {
