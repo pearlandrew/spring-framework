@@ -1,6 +1,7 @@
 {
   MultiValueMap<String,MultipartFile> multipartFiles=new LinkedMultiValueMap<String,MultipartFile>();
   Map<String,String[]> multipartParameters=new HashMap<String,String[]>();
+  Map<String,String> multipartParameterContentTypes=new HashMap<String,String>();
   for (  FileItem fileItem : fileItems) {
     if (fileItem.isFormField()) {
       String value;
@@ -27,6 +28,7 @@
         String[] newParam=StringUtils.addStringToArray(curParam,value);
         multipartParameters.put(fileItem.getFieldName(),newParam);
       }
+      multipartParameterContentTypes.put(fileItem.getFieldName(),fileItem.getContentType());
     }
  else {
       CommonsMultipartFile file=new CommonsMultipartFile(fileItem);
@@ -36,5 +38,5 @@
       }
     }
   }
-  return new MultipartParsingResult(multipartFiles,multipartParameters);
+  return new MultipartParsingResult(multipartFiles,multipartParameters,multipartParameterContentTypes);
 }

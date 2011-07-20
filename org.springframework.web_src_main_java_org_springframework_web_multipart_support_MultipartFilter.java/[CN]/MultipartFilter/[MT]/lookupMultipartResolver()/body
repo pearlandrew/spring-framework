@@ -1,7 +1,13 @@
 {
-  if (logger.isDebugEnabled()) {
-    logger.debug("Using MultipartResolver '" + getMultipartResolverBeanName() + "' for MultipartFilter");
+  WebApplicationContext wac=WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+  String beanName=getMultipartResolverBeanName();
+  if (wac != null && wac.containsBean(beanName)) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Using MultipartResolver '" + beanName + "' for MultipartFilter");
+    }
+    return wac.getBean(beanName,MultipartResolver.class);
   }
-  WebApplicationContext wac=WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-  return wac.getBean(getMultipartResolverBeanName(),MultipartResolver.class);
+ else {
+    return this.defaultMultipartResolver;
+  }
 }
