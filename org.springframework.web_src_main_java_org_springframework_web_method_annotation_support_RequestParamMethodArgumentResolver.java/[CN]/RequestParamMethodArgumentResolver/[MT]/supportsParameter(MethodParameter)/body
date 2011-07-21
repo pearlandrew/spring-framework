@@ -1,22 +1,26 @@
 {
   Class<?> paramType=parameter.getParameterType();
-  RequestParam requestParamAnnot=parameter.getParameterAnnotation(RequestParam.class);
-  if (requestParamAnnot != null) {
+  if (parameter.hasParameterAnnotation(RequestParam.class)) {
     if (Map.class.isAssignableFrom(paramType)) {
-      return StringUtils.hasText(requestParamAnnot.value());
+      String paramName=parameter.getParameterAnnotation(RequestParam.class).value();
+      return StringUtils.hasText(paramName);
     }
-    return true;
-  }
- else   if (MultipartFile.class.equals(paramType)) {
-    return true;
-  }
- else   if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
-    return true;
-  }
- else   if (this.useDefaultResolution) {
-    return BeanUtils.isSimpleProperty(paramType);
+ else {
+      return true;
+    }
   }
  else {
-    return false;
+    if (parameter.hasParameterAnnotation(RequestPart.class)) {
+      return false;
+    }
+ else     if (MultipartFile.class.equals(paramType) || "javax.servlet.http.Part".equals(paramType.getName())) {
+      return true;
+    }
+ else     if (this.useDefaultResolution) {
+      return BeanUtils.isSimpleProperty(paramType);
+    }
+ else {
+      return false;
+    }
   }
 }
