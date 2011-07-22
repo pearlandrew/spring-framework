@@ -1,22 +1,22 @@
 {
-  if (ObjectUtils.isEmpty(args)) {
+  if (ObjectUtils.isEmpty(this.args)) {
     return;
   }
-  Method targetMethod=methodCache.get(method);
+  Method targetMethod=this.methodCache.get(this.method);
   if (targetMethod == null) {
-    targetMethod=AopUtils.getMostSpecificMethod(method,targetClass);
+    targetMethod=AopUtils.getMostSpecificMethod(this.method,this.targetClass);
     if (targetMethod == null) {
-      targetMethod=method;
+      targetMethod=this.method;
     }
-    methodCache.put(method,targetMethod);
+    this.methodCache.put(this.method,targetMethod);
   }
-  for (int i=0; i < args.length; i++) {
-    super.setVariable("p" + i,args[i]);
+  for (int i=0; i < this.args.length; i++) {
+    setVariable("p" + i,this.args[i]);
   }
-  String[] parameterNames=paramDiscoverer.getParameterNames(targetMethod);
+  String[] parameterNames=this.paramDiscoverer.getParameterNames(targetMethod);
   if (parameterNames != null) {
     for (int i=0; i < parameterNames.length; i++) {
-      super.setVariable(parameterNames[i],args[i]);
+      setVariable(parameterNames[i],this.args[i]);
     }
   }
 }
