@@ -1,18 +1,23 @@
 {
-  ArrayList<WebApplicationInitializer> initializers=new ArrayList<WebApplicationInitializer>();
+  List<WebApplicationInitializer> initializers=new LinkedList<WebApplicationInitializer>();
   if (webAppInitializerClasses != null) {
     for (    Class<?> waiClass : webAppInitializerClasses) {
-      if (!Modifier.isAbstract(waiClass.getModifiers())) {
-        initializers.add(instantiateClass(waiClass,WebApplicationInitializer.class));
+      if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) && WebApplicationInitializer.class.isAssignableFrom(waiClass)) {
+        try {
+          initializers.add((WebApplicationInitializer)waiClass.newInstance());
+        }
+ catch (        Throwable ex) {
+          throw new ServletException("Failed to instantiate WebApplicationInitializer class",ex);
+        }
       }
     }
   }
   if (initializers.isEmpty()) {
-    logger.info("Detected no WebApplicationInitializer types on the classpath: exiting.");
+    servletContext.log("No Spring WebApplicationInitializer types detected on classpath");
     return;
   }
   Collections.sort(initializers,new AnnotationAwareOrderComparator());
-  logger.info("Delegating ServletContext to the following " + "WebApplicationInitializer instances: " + initializers);
+  servletContext.log("Spring WebApplicationInitializers detected on classpath: " + initializers);
   for (  WebApplicationInitializer initializer : initializers) {
     initializer.onStartup(servletContext);
   }
