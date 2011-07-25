@@ -1,7 +1,14 @@
 {
-  if (logger.isDebugEnabled()) {
-    logger.debug("Using EntityManagerFactory '" + getEntityManagerFactoryBeanName() + "' for OpenEntityManagerInViewFilter");
-  }
   WebApplicationContext wac=WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-  return wac.getBean(getEntityManagerFactoryBeanName(),EntityManagerFactory.class);
+  String emfBeanName=getEntityManagerFactoryBeanName();
+  String puName=getPersistenceUnitName();
+  if (StringUtils.hasLength(emfBeanName)) {
+    return wac.getBean(emfBeanName,EntityManagerFactory.class);
+  }
+ else   if (!StringUtils.hasLength(puName) && wac.containsBean(DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME)) {
+    return wac.getBean(DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME,EntityManagerFactory.class);
+  }
+ else {
+    return EntityManagerFactoryUtils.findEntityManagerFactory(wac,puName);
+  }
 }
