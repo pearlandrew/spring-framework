@@ -24,10 +24,9 @@
   MockFilterConfig filterConfig=new MockFilterConfig(wac.getServletContext(),"filter");
   MockFilterConfig filterConfig2=new MockFilterConfig(wac.getServletContext(),"filter2");
   filterConfig2.addInitParameter("sessionFactoryBeanName","mySessionFactory");
-  OpenSessionInViewInterceptor rawInterceptor=new OpenSessionInViewInterceptor();
-  rawInterceptor.setSessionFactory(sf);
-  HandlerInterceptor interceptor=new WebRequestHandlerInterceptorAdapter(rawInterceptor);
-  interceptor.preHandle(request,response,"handler");
+  OpenSessionInViewInterceptor interceptor=new OpenSessionInViewInterceptor();
+  interceptor.setSessionFactory(sf);
+  interceptor.preHandle(new ServletWebRequest(request));
   final OpenSessionInViewFilter filter=new OpenSessionInViewFilter();
   filter.init(filterConfig);
   final FilterChain filterChain=new FilterChain(){
@@ -41,8 +40,8 @@
   filter.doFilter(request,response,filterChain);
   assertTrue(TransactionSynchronizationManager.hasResource(sf));
   assertNotNull(request.getAttribute("invoked"));
-  interceptor.postHandle(request,response,"handler",null);
-  interceptor.afterCompletion(request,response,"handler",null);
+  interceptor.postHandle(new ServletWebRequest(request),null);
+  interceptor.afterCompletion(new ServletWebRequest(request),null);
   sfControl.verify();
   sessionControl.verify();
   wac.close();

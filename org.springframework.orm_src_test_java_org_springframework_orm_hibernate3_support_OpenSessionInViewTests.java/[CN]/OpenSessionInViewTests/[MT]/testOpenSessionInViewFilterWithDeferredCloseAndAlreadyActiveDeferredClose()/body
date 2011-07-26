@@ -26,11 +26,10 @@
   filterConfig.addInitParameter("singleSession","false");
   filterConfig2.addInitParameter("singleSession","false");
   filterConfig2.addInitParameter("sessionFactoryBeanName","mySessionFactory");
-  OpenSessionInViewInterceptor rawInterceptor=new OpenSessionInViewInterceptor();
-  rawInterceptor.setSessionFactory(sf);
-  rawInterceptor.setSingleSession(false);
-  HandlerInterceptor interceptor=new WebRequestHandlerInterceptorAdapter(rawInterceptor);
-  interceptor.preHandle(request,response,"handler");
+  OpenSessionInViewInterceptor interceptor=new OpenSessionInViewInterceptor();
+  interceptor.setSessionFactory(sf);
+  interceptor.setSingleSession(false);
+  interceptor.preHandle(new ServletWebRequest(request));
   final OpenSessionInViewFilter filter=new OpenSessionInViewFilter();
   filter.init(filterConfig);
   final OpenSessionInViewFilter filter2=new OpenSessionInViewFilter();
@@ -63,8 +62,8 @@
 ;
   filter.doFilter(request,response,filterChain2);
   assertNotNull(request.getAttribute("invoked"));
-  interceptor.postHandle(request,response,"handler",null);
-  interceptor.afterCompletion(request,response,"handler",null);
+  interceptor.postHandle(new ServletWebRequest(request),null);
+  interceptor.afterCompletion(new ServletWebRequest(request),null);
   sfControl.verify();
   sessionControl.verify();
   wac.close();
