@@ -1,0 +1,18 @@
+{
+  String attrName="sessionAttr";
+  String attrValue="sessionAttrValue";
+  mavContainer.addAttribute(attrName,attrValue);
+  sessionAttributeStore.storeAttribute(webRequest,attrName,attrValue);
+  assertTrue(sessionAttrsHandler.isHandlerSessionAttribute(attrName,null));
+  WebDataBinder dataBinder=new WebDataBinder(attrValue,attrName);
+  WebDataBinderFactory binderFactory=createMock(WebDataBinderFactory.class);
+  expect(binderFactory.createBinder(webRequest,attrValue,attrName)).andReturn(dataBinder);
+  replay(binderFactory);
+  SimpleSessionStatus status=new SimpleSessionStatus();
+  status.setComplete();
+  ModelFactory modelFactory=new ModelFactory(null,binderFactory,sessionAttrsHandler,flashAttrsHandler);
+  modelFactory.updateModel(webRequest,mavContainer,status,new SimpleFlashStatus());
+  assertEquals(attrValue,mavContainer.getAttribute(attrName));
+  assertNull(sessionAttributeStore.retrieveAttribute(webRequest,attrName));
+  verify(binderFactory);
+}

@@ -1,0 +1,19 @@
+{
+  initServletWithModelExposingViewResolver(MessageController.class);
+  MockHttpServletRequest req=new MockHttpServletRequest("GET","/message");
+  MockHttpServletResponse res=new MockHttpServletResponse();
+  getServlet().service(req,res);
+  assertEquals(200,res.getStatus());
+  assertNull(getModelAttribute(req,MESSAGE_KEY));
+  assertNull(getFlashAttribute(req,MESSAGE_KEY));
+  req.setMethod("POST");
+  getServlet().service(req,res);
+  assertEquals(200,res.getStatus());
+  assertEquals("Yay!",((Message)getModelAttribute(req,MESSAGE_KEY)).getText());
+  assertEquals("Yay!",((Message)getFlashAttribute(req,MESSAGE_KEY)).getText());
+  req.setMethod("GET");
+  getServlet().service(req,res);
+  assertEquals(200,res.getStatus());
+  assertEquals("Yay!",((Message)getModelAttribute(req,MESSAGE_KEY)).getText());
+  assertNull(getFlashAttribute(req,MESSAGE_KEY));
+}

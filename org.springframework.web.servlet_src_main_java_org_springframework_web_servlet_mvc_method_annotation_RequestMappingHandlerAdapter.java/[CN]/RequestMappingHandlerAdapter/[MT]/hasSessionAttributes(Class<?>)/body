@@ -1,11 +1,19 @@
 {
-  SessionAttributesHandler handler=null;
+  SessionAttributesHandler sessionAttrsHandler=null;
 synchronized (this.sessionAttributesHandlerCache) {
-    handler=this.sessionAttributesHandlerCache.get(handlerType);
-    if (handler == null) {
-      handler=new SessionAttributesHandler(handlerType,sessionAttributeStore);
-      this.sessionAttributesHandlerCache.put(handlerType,handler);
+    sessionAttrsHandler=this.sessionAttributesHandlerCache.get(handlerType);
+    if (sessionAttrsHandler == null) {
+      sessionAttrsHandler=new SessionAttributesHandler(handlerType,sessionAttributeStore);
+      this.sessionAttributesHandlerCache.put(handlerType,sessionAttrsHandler);
     }
   }
-  return handler.hasSessionAttributes();
+  FlashAttributesHandler flashAttrsHandler=null;
+synchronized (this.flashAttributesHandlerCache) {
+    flashAttrsHandler=this.flashAttributesHandlerCache.get(handlerType);
+    if (flashAttrsHandler == null) {
+      flashAttrsHandler=new FlashAttributesHandler(handlerType);
+      this.flashAttributesHandlerCache.put(handlerType,flashAttrsHandler);
+    }
+  }
+  return sessionAttrsHandler.hasSessionAttributes() || flashAttrsHandler.hasFlashAttributes();
 }
