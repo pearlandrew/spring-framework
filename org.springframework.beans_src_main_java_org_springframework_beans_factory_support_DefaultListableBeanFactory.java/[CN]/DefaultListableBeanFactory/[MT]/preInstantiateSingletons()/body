@@ -3,7 +3,8 @@
     this.logger.info("Pre-instantiating singletons in " + this);
   }
 synchronized (this.beanDefinitionMap) {
-    for (    String beanName : this.beanDefinitionNames) {
+    List<String> beanNames=new ArrayList<String>(this.beanDefinitionNames);
+    for (    String beanName : beanNames) {
       RootBeanDefinition bd=getMergedLocalBeanDefinition(beanName);
       if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
         if (isFactoryBean(beanName)) {
@@ -18,7 +19,7 @@ synchronized (this.beanDefinitionMap) {
 ,getAccessControlContext());
           }
  else {
-            isEagerInit=factory instanceof SmartFactoryBean && ((SmartFactoryBean)factory).isEagerInit();
+            isEagerInit=(factory instanceof SmartFactoryBean && ((SmartFactoryBean)factory).isEagerInit());
           }
           if (isEagerInit) {
             getBean(beanName);
