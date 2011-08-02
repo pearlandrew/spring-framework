@@ -11,16 +11,15 @@
   if (enc == null) {
     enc=WebUtils.DEFAULT_CHARACTER_ENCODING;
   }
-  UriTemplate redirectUri=createUriTemplate(targetUrl,enc);
-  if (redirectUri.getVariableNames().size() > 0) {
-    targetUrl=new StringBuilder(redirectUri.expand(model).toString());
-    model=removeKeys(model,redirectUri.getVariableNames());
+  UriTemplate uriTemplate=createUriTemplate(targetUrl,enc);
+  if (uriTemplate.getVariableNames().size() > 0) {
+    Map<String,Object> vars=new HashMap<String,Object>();
+    vars.putAll(getCurrentUriVars(request));
+    vars.putAll(model);
+    targetUrl=new StringBuilder(uriTemplate.expand(vars).toString());
+    model=removeKeys(model,uriTemplate.getVariableNames());
   }
   if (this.exposeModelAttributes) {
-    List<String> pathVarNames=getPathVarNames(request);
-    if (!pathVarNames.isEmpty()) {
-      model=removeKeys(model,pathVarNames);
-    }
     appendQueryProperties(targetUrl,model,enc);
   }
   return targetUrl.toString();
