@@ -2,23 +2,23 @@
   RequestAttributes attrs=RequestContextHolder.getRequestAttributes();
   Assert.isInstanceOf(ServletRequestAttributes.class,attrs);
   List<MediaType> requestedMediaTypes=getMediaTypes(((ServletRequestAttributes)attrs).getRequest());
-  List<View> candidateViews=getCandidateViews(viewName,locale,requestedMediaTypes);
-  View bestView=getBestView(candidateViews,requestedMediaTypes);
-  if (bestView != null) {
-    return bestView;
+  if (requestedMediaTypes != null) {
+    List<View> candidateViews=getCandidateViews(viewName,locale,requestedMediaTypes);
+    View bestView=getBestView(candidateViews,requestedMediaTypes);
+    if (bestView != null) {
+      return bestView;
+    }
+  }
+  if (this.useNotAcceptableStatusCode) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("No acceptable view found; returning 406 (Not Acceptable) status code");
+    }
+    return NOT_ACCEPTABLE_VIEW;
   }
  else {
-    if (this.useNotAcceptableStatusCode) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("No acceptable view found; returning 406 (Not Acceptable) status code");
-      }
-      return NOT_ACCEPTABLE_VIEW;
+    if (logger.isDebugEnabled()) {
+      logger.debug("No acceptable view found; returning null");
     }
- else {
-      if (logger.isDebugEnabled()) {
-        logger.debug("No acceptable view found; returning null");
-      }
-      return null;
-    }
+    return null;
   }
 }

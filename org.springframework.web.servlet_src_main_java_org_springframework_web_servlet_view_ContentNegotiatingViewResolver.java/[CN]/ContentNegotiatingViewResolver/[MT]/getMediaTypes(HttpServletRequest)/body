@@ -25,22 +25,28 @@
   if (!this.ignoreAcceptHeader) {
     String acceptHeader=request.getHeader(ACCEPT_HEADER);
     if (StringUtils.hasText(acceptHeader)) {
-      List<MediaType> acceptableMediaTypes=MediaType.parseMediaTypes(acceptHeader);
-      List<MediaType> producibleMediaTypes=getProducibleMediaTypes(request);
-      Set<MediaType> compatibleMediaTypes=new LinkedHashSet<MediaType>();
-      for (      MediaType a : acceptableMediaTypes) {
-        for (        MediaType p : producibleMediaTypes) {
-          if (a.isCompatibleWith(p)) {
-            compatibleMediaTypes.add(getMostSpecificMediaType(a,p));
+      try {
+        List<MediaType> acceptableMediaTypes=MediaType.parseMediaTypes(acceptHeader);
+        List<MediaType> producibleMediaTypes=getProducibleMediaTypes(request);
+        Set<MediaType> compatibleMediaTypes=new LinkedHashSet<MediaType>();
+        for (        MediaType acceptable : acceptableMediaTypes) {
+          for (          MediaType producible : producibleMediaTypes) {
+            if (acceptable.isCompatibleWith(producible)) {
+              compatibleMediaTypes.add(getMostSpecificMediaType(acceptable,producible));
+            }
           }
         }
+        List<MediaType> mediaTypes=new ArrayList<MediaType>(compatibleMediaTypes);
+        MediaType.sortByQualityValue(mediaTypes);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Requested media types are " + mediaTypes + " based on Accept header types "+ "and producible media types "+ producibleMediaTypes+ ")");
+        }
+        return mediaTypes;
       }
-      List<MediaType> mediaTypes=new ArrayList<MediaType>(compatibleMediaTypes);
-      MediaType.sortByQualityValue(mediaTypes);
-      if (logger.isDebugEnabled()) {
-        logger.debug("Requested media types are " + mediaTypes + " based on Accept header types "+ "and producible media types "+ producibleMediaTypes+ ")");
+ catch (      IllegalArgumentException ex) {
+        logger.debug("Could not parse accept header [" + acceptHeader + "]: "+ ex.getMessage());
+        return null;
       }
-      return mediaTypes;
     }
   }
   if (this.defaultContentType != null) {
