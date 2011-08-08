@@ -1,6 +1,7 @@
 {
   String attrName="sessionAttr";
   String attrValue="sessionAttrValue";
+  ModelAndViewContainer mavContainer=new ModelAndViewContainer();
   mavContainer.addAttribute(attrName,attrValue);
   sessionAttributeStore.storeAttribute(webRequest,attrName,attrValue);
   assertTrue(sessionAttrsHandler.isHandlerSessionAttribute(attrName,null));
@@ -8,11 +9,11 @@
   WebDataBinderFactory binderFactory=createMock(WebDataBinderFactory.class);
   expect(binderFactory.createBinder(webRequest,attrValue,attrName)).andReturn(dataBinder);
   replay(binderFactory);
-  SimpleSessionStatus status=new SimpleSessionStatus();
-  status.setComplete();
-  ModelFactory modelFactory=new ModelFactory(null,binderFactory,sessionAttrsHandler,flashAttrsHandler);
-  modelFactory.updateModel(webRequest,mavContainer,status,new SimpleFlashStatus());
-  assertEquals(attrValue,mavContainer.getAttribute(attrName));
+  SessionStatus sessionStatus=new SimpleSessionStatus();
+  sessionStatus.setComplete();
+  ModelFactory modelFactory=new ModelFactory(null,binderFactory,sessionAttrsHandler);
+  modelFactory.updateModel(webRequest,mavContainer,sessionStatus);
+  assertEquals(attrValue,mavContainer.getModel().get(attrName));
   assertNull(sessionAttributeStore.retrieveAttribute(webRequest,attrName));
   verify(binderFactory);
 }

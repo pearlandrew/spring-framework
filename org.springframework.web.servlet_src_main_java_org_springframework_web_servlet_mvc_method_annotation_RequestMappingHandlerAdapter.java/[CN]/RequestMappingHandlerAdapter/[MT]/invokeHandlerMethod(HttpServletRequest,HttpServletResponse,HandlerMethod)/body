@@ -1,21 +1,22 @@
 {
-  WebDataBinderFactory binderFactory=createDataBinderFactory(handlerMethod);
-  ModelFactory modelFactory=createModelFactory(handlerMethod,binderFactory);
-  ServletInvocableHandlerMethod requestMethod=createRequestMappingMethod(handlerMethod,binderFactory);
   ServletWebRequest webRequest=new ServletWebRequest(request,response);
-  SessionStatus sessionStatus=new SimpleSessionStatus();
-  FlashStatus flashStatus=new SimpleFlashStatus();
+  ServletInvocableHandlerMethod requestMappingMethod=createRequestMappingMethod(handlerMethod);
+  ModelFactory modelFactory=getModelFactory(handlerMethod);
+  FlashMap flashMap=(FlashMap)request.getAttribute(FlashMapManager.PREVIOUS_FLASH_MAP_ATTRIBUTE);
   ModelAndViewContainer mavContainer=new ModelAndViewContainer();
-  modelFactory.initModel(webRequest,mavContainer,requestMethod);
-  requestMethod.invokeAndHandle(webRequest,mavContainer,sessionStatus,flashStatus);
-  modelFactory.updateModel(webRequest,mavContainer,sessionStatus,flashStatus);
+  mavContainer.addAllAttributes(flashMap);
+  modelFactory.initModel(webRequest,mavContainer,requestMappingMethod);
+  SessionStatus sessionStatus=new SimpleSessionStatus();
+  ResponseContext responseContext=new ResponseContext(webRequest,mavContainer);
+  requestMappingMethod.invokeAndHandle(webRequest,mavContainer,sessionStatus,responseContext);
+  modelFactory.updateModel(webRequest,mavContainer,sessionStatus);
   if (!mavContainer.isResolveView()) {
     return null;
   }
  else {
     ModelAndView mav=new ModelAndView().addAllObjects(mavContainer.getModel());
     mav.setViewName(mavContainer.getViewName());
-    if (mavContainer.getView() != null) {
+    if (!mavContainer.isViewReference()) {
       mav.setView((View)mavContainer.getView());
     }
     return mav;

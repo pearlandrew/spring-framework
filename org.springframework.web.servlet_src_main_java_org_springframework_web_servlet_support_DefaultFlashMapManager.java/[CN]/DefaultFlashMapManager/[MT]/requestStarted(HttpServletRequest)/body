@@ -1,0 +1,26 @@
+{
+  if (request.getAttribute(CURRENT_FLASH_MAP_ATTRIBUTE) != null) {
+    return false;
+  }
+  FlashMap currentFlashMap=this.useUniqueFlashKey ? new FlashMap(createFlashKey(request),this.flashKeyParameterName) : new FlashMap();
+  request.setAttribute(CURRENT_FLASH_MAP_ATTRIBUTE,currentFlashMap);
+  FlashMap previousFlashMap=lookupPreviousFlashMap(request);
+  if (previousFlashMap != null) {
+    for (    String name : previousFlashMap.keySet()) {
+      if (request.getAttribute(name) == null) {
+        request.setAttribute(name,previousFlashMap.get(name));
+      }
+    }
+    request.setAttribute(PREVIOUS_FLASH_MAP_ATTRIBUTE,previousFlashMap);
+  }
+  Map<String,FlashMap> allFlashMaps=retrieveAllFlashMaps(request,false);
+  if (allFlashMaps != null && !allFlashMaps.isEmpty()) {
+    Iterator<FlashMap> iterator=allFlashMaps.values().iterator();
+    while (iterator.hasNext()) {
+      if (iterator.next().isExpired()) {
+        iterator.remove();
+      }
+    }
+  }
+  return true;
+}

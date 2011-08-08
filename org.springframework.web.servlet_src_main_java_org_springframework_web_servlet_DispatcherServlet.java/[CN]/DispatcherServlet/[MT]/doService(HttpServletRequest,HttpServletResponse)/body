@@ -15,6 +15,7 @@
       }
     }
   }
+  boolean flashInitialized=this.flashMapManager.requestStarted(request);
   request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE,getWebApplicationContext());
   request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE,this.localeResolver);
   request.setAttribute(THEME_RESOLVER_ATTRIBUTE,this.themeResolver);
@@ -23,6 +24,9 @@
     doDispatch(request,response);
   }
   finally {
+    if (flashInitialized) {
+      this.flashMapManager.requestCompleted(request);
+    }
     if (attributesSnapshot != null) {
       restoreAttributesAfterInclude(request,attributesSnapshot);
     }

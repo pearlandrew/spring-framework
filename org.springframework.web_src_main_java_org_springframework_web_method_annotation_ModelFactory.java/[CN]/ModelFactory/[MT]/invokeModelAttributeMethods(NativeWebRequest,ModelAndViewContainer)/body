@@ -1,0 +1,15 @@
+{
+  for (  InvocableHandlerMethod attrMethod : this.attributeMethods) {
+    String modelName=attrMethod.getMethodAnnotation(ModelAttribute.class).value();
+    if (mavContainer.containsAttribute(modelName)) {
+      continue;
+    }
+    Object returnValue=attrMethod.invokeForRequest(request,mavContainer);
+    if (!attrMethod.isVoid()) {
+      String returnValueName=getNameForReturnValue(returnValue,attrMethod.getReturnType());
+      if (!mavContainer.containsAttribute(returnValueName)) {
+        mavContainer.addAttribute(returnValueName,returnValue);
+      }
+    }
+  }
+}

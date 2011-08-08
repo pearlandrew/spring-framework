@@ -1,0 +1,27 @@
+{
+  initServletWithControllers(MessageController.class);
+  MockHttpServletRequest request=new MockHttpServletRequest("POST","/messages");
+  HttpSession session=request.getSession();
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  getServlet().service(request,response);
+  getServlet().service(request,response);
+  assertEquals(200,response.getStatus());
+  assertEquals("messages/new",response.getForwardedUrl());
+  assertTrue(RequestContextUtils.getFlashMap(request).isEmpty());
+  request=new MockHttpServletRequest("POST","/messages");
+  request.setSession(session);
+  request.addParameter("name","Jeff");
+  response=new MockHttpServletResponse();
+  getServlet().service(request,response);
+  FlashMap flashMap=RequestContextUtils.getFlashMap(request);
+  assertNotNull(flashMap);
+  assertEquals(200,response.getStatus());
+  assertEquals("/messages/1?name=value&_flashKey=" + flashMap.getKey(),response.getRedirectedUrl());
+  request=new MockHttpServletRequest("GET","/messages/1");
+  request.setSession(session);
+  request.setParameter("_flashKey",String.valueOf(flashMap.getKey()));
+  response=new MockHttpServletResponse();
+  getServlet().service(request,response);
+  assertEquals(200,response.getStatus());
+  assertEquals("Got: yay!",response.getContentAsString());
+}

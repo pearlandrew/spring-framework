@@ -1,0 +1,17 @@
+{
+  Class<?> handlerType=handlerMethod.getBeanType();
+  WebDataBinderFactory binderFactory=this.dataBinderFactoryCache.get(handlerType);
+  if (binderFactory == null) {
+    List<InvocableHandlerMethod> binderMethods=new ArrayList<InvocableHandlerMethod>();
+    for (    Method method : HandlerMethodSelector.selectMethods(handlerType,INIT_BINDER_METHODS)) {
+      InvocableHandlerMethod binderMethod=new InvocableHandlerMethod(handlerMethod.getBean(),method);
+      binderMethod.setHandlerMethodArgumentResolvers(this.initBinderArgumentResolvers);
+      binderMethod.setDataBinderFactory(new DefaultDataBinderFactory(this.webBindingInitializer));
+      binderMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+      binderMethods.add(binderMethod);
+    }
+    binderFactory=new ServletRequestDataBinderFactory(binderMethods,this.webBindingInitializer);
+    this.dataBinderFactoryCache.put(handlerType,binderFactory);
+  }
+  return binderFactory;
+}

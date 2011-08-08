@@ -13,14 +13,15 @@
           logger.debug("Invoking exception-handling method: " + exceptionHandler);
         }
         ModelAndViewContainer mavContainer=new ModelAndViewContainer();
-        exceptionHandler.invokeAndHandle(webRequest,mavContainer,ex);
+        ResponseContext responseContext=new ResponseContext(webRequest,mavContainer);
+        exceptionHandler.invokeAndHandle(webRequest,mavContainer,ex,responseContext);
         if (!mavContainer.isResolveView()) {
           return new ModelAndView();
         }
  else {
           ModelAndView mav=new ModelAndView().addAllObjects(mavContainer.getModel());
           mav.setViewName(mavContainer.getViewName());
-          if (mavContainer.getView() != null) {
+          if (!mavContainer.isViewReference()) {
             mav.setView((View)mavContainer.getView());
           }
           return mav;

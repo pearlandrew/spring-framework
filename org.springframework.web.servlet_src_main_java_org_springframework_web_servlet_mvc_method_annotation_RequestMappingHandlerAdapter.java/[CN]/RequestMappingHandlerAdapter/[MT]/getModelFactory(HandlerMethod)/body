@@ -1,0 +1,19 @@
+{
+  SessionAttributesHandler sessionAttrHandler=getSessionAttributesHandler(handlerMethod);
+  WebDataBinderFactory binderFactory=getDataBinderFactory(handlerMethod);
+  Class<?> handlerType=handlerMethod.getBeanType();
+  ModelFactory modelFactory=this.modelFactoryCache.get(handlerType);
+  if (modelFactory == null) {
+    List<InvocableHandlerMethod> attrMethods=new ArrayList<InvocableHandlerMethod>();
+    for (    Method method : HandlerMethodSelector.selectMethods(handlerType,MODEL_ATTRIBUTE_METHODS)) {
+      InvocableHandlerMethod attrMethod=new InvocableHandlerMethod(handlerMethod.getBean(),method);
+      attrMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+      attrMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+      attrMethod.setDataBinderFactory(binderFactory);
+      attrMethods.add(attrMethod);
+    }
+    modelFactory=new ModelFactory(attrMethods,binderFactory,sessionAttrHandler);
+    this.modelFactoryCache.put(handlerType,modelFactory);
+  }
+  return modelFactory;
+}

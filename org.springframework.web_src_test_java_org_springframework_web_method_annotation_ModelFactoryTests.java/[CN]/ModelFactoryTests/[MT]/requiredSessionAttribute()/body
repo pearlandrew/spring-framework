@@ -1,12 +1,13 @@
 {
-  ModelFactory modelFactory=new ModelFactory(null,null,sessionAttrsHandler,flashAttrsHandler);
+  ModelFactory modelFactory=new ModelFactory(null,null,sessionAttrsHandler);
   try {
-    modelFactory.initModel(webRequest,mavContainer,handleSessionAttrMethod);
+    modelFactory.initModel(webRequest,new ModelAndViewContainer(),handleSessionAttrMethod);
     fail("Expected HttpSessionRequiredException");
   }
  catch (  HttpSessionRequiredException e) {
   }
   sessionAttributeStore.storeAttribute(webRequest,"sessionAttr","sessionAttrValue");
+  ModelAndViewContainer mavContainer=new ModelAndViewContainer();
   modelFactory.initModel(webRequest,mavContainer,handleSessionAttrMethod);
-  assertEquals("sessionAttrValue",mavContainer.getAttribute("sessionAttr"));
+  assertEquals("sessionAttrValue",mavContainer.getModel().get("sessionAttr"));
 }

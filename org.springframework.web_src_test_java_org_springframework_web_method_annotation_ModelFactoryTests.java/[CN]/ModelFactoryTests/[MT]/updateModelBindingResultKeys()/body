@@ -1,13 +1,14 @@
 {
   String attrName="attr1";
   Object attrValue=new Object();
+  ModelAndViewContainer mavContainer=new ModelAndViewContainer();
   mavContainer.addAttribute(attrName,attrValue);
   WebDataBinder dataBinder=new WebDataBinder(attrValue,attrName);
   WebDataBinderFactory binderFactory=createMock(WebDataBinderFactory.class);
   expect(binderFactory.createBinder(webRequest,attrValue,attrName)).andReturn(dataBinder);
   replay(binderFactory);
-  ModelFactory modelFactory=new ModelFactory(null,binderFactory,sessionAttrsHandler,flashAttrsHandler);
-  modelFactory.updateModel(webRequest,mavContainer,new SimpleSessionStatus(),new SimpleFlashStatus());
+  ModelFactory modelFactory=new ModelFactory(null,binderFactory,sessionAttrsHandler);
+  modelFactory.updateModel(webRequest,mavContainer,new SimpleSessionStatus());
   assertEquals(attrValue,mavContainer.getModel().remove(attrName));
   assertSame(dataBinder.getBindingResult(),mavContainer.getModel().remove(bindingResultKey(attrName)));
   assertEquals(0,mavContainer.getModel().size());
