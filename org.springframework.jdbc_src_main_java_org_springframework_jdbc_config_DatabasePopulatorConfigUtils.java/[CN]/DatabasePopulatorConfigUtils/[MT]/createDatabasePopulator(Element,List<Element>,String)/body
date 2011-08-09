@@ -14,15 +14,14 @@
     BeanDefinitionBuilder delegate=BeanDefinitionBuilder.genericBeanDefinition(ResourceDatabasePopulator.class);
     delegate.addPropertyValue("ignoreFailedDrops",ignoreFailedDrops);
     delegate.addPropertyValue("continueOnError",continueOnError);
-    List<String> locations=Arrays.asList(scriptElement.getAttribute("location"));
     BeanDefinitionBuilder resourcesFactory=BeanDefinitionBuilder.genericBeanDefinition(SortedResourcesFactoryBean.class);
-    resourcesFactory.addConstructorArgValue(locations);
+    resourcesFactory.addConstructorArgValue(new TypedStringValue(scriptElement.getAttribute("location")));
     delegate.addPropertyValue("scripts",resourcesFactory.getBeanDefinition());
     if (StringUtils.hasLength(scriptElement.getAttribute("encoding"))) {
-      delegate.addPropertyValue("sqlScriptEncoding",scriptElement.getAttribute("encoding"));
+      delegate.addPropertyValue("sqlScriptEncoding",new TypedStringValue(scriptElement.getAttribute("encoding")));
     }
     if (StringUtils.hasLength(scriptElement.getAttribute("separator"))) {
-      delegate.addPropertyValue("separator",scriptElement.getAttribute("separator"));
+      delegate.addPropertyValue("separator",new TypedStringValue(scriptElement.getAttribute("separator")));
     }
     delegates.add(delegate.getBeanDefinition());
   }
