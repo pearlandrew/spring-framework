@@ -1,0 +1,17 @@
+{
+  HttpSession session=request.getSession(allowCreate);
+  if (session == null) {
+    return null;
+  }
+  List<FlashMap> allMaps=(List<FlashMap>)session.getAttribute(FLASH_MAPS_SESSION_ATTRIBUTE);
+  if (allMaps == null && allowCreate) {
+synchronized (DefaultFlashMapManager.class) {
+      allMaps=(List<FlashMap>)session.getAttribute(FLASH_MAPS_SESSION_ATTRIBUTE);
+      if (allMaps == null) {
+        allMaps=new CopyOnWriteArrayList<FlashMap>();
+        session.setAttribute(FLASH_MAPS_SESSION_ATTRIBUTE,allMaps);
+      }
+    }
+  }
+  return allMaps;
+}

@@ -1,16 +1,23 @@
 {
-  Map<String,FlashMap> flashMaps=retrieveAllFlashMaps(request,false);
-  if (flashMaps != null && !flashMaps.isEmpty()) {
-    if (this.useUniqueFlashKey) {
-      String key=request.getParameter(this.flashKeyParameterName);
-      if (key != null) {
-        return flashMaps.remove(key);
+  List<FlashMap> allMaps=retrieveFlashMaps(request,false);
+  if (CollectionUtils.isEmpty(allMaps)) {
+    return null;
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Looking up previous FlashMap among available FlashMaps: " + allMaps);
+  }
+  List<FlashMap> matches=new ArrayList<FlashMap>();
+  for (  FlashMap flashMap : allMaps) {
+    if (flashMap.matches(request)) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Matched " + flashMap);
       }
+      matches.add(flashMap);
     }
- else {
-      String key=flashMaps.keySet().iterator().next();
-      return flashMaps.remove(key);
-    }
+  }
+  if (!matches.isEmpty()) {
+    Collections.sort(matches);
+    return matches.remove(0);
   }
   return null;
 }

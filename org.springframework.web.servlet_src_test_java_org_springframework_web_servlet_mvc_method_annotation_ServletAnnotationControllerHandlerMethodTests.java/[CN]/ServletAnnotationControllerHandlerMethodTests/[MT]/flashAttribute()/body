@@ -13,15 +13,15 @@
   request.addParameter("name","Jeff");
   response=new MockHttpServletResponse();
   getServlet().service(request,response);
-  FlashMap flashMap=RequestContextUtils.getFlashMap(request);
-  assertNotNull(flashMap);
   assertEquals(200,response.getStatus());
-  assertEquals("/messages/1?name=value&_flashKey=" + flashMap.getKey(),response.getRedirectedUrl());
+  assertEquals("/messages/1?name=value",response.getRedirectedUrl());
+  assertEquals("yay!",RequestContextUtils.getFlashMap(request).get("successMessage"));
   request=new MockHttpServletRequest("GET","/messages/1");
+  request.addParameter("name","value");
   request.setSession(session);
-  request.setParameter("_flashKey",String.valueOf(flashMap.getKey()));
   response=new MockHttpServletResponse();
   getServlet().service(request,response);
   assertEquals(200,response.getStatus());
   assertEquals("Got: yay!",response.getContentAsString());
+  assertTrue(RequestContextUtils.getFlashMap(request).isEmpty());
 }

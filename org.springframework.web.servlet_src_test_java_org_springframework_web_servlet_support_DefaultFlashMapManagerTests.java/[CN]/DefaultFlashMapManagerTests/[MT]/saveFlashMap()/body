@@ -1,12 +1,12 @@
 {
-  FlashMap flashMap=new FlashMap("key","_flashKey");
+  FlashMap flashMap=new FlashMap();
   flashMap.put("name","value");
   request.setAttribute(DefaultFlashMapManager.CURRENT_FLASH_MAP_ATTRIBUTE,flashMap);
   this.flashMapManager.setFlashMapTimeout(0);
   this.flashMapManager.requestCompleted(this.request);
-  Thread.currentThread().sleep(1);
-  String sessionKey=DefaultFlashMapManager.FLASH_MAPS_SESSION_ATTRIBUTE;
-  Map<String,FlashMap> allFlashMaps=(Map<String,FlashMap>)this.request.getSession().getAttribute(sessionKey);
-  assertSame(flashMap,allFlashMaps.get("key"));
+  Thread.sleep(1);
+  List<FlashMap> allMaps=getFlashMapsSessionAttribute();
+  assertNotNull(allMaps);
+  assertSame(flashMap,allMaps.get(0));
   assertTrue(flashMap.isExpired());
 }

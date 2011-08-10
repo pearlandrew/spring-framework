@@ -1,12 +1,14 @@
 {
   FlashMap flashMap=(FlashMap)request.getAttribute(CURRENT_FLASH_MAP_ATTRIBUTE);
   if (flashMap == null) {
-    throw new IllegalStateException("Did not find current FlashMap exposed as request attribute " + CURRENT_FLASH_MAP_ATTRIBUTE);
+    throw new IllegalStateException("Did not find a FlashMap exposed as the request attribute " + CURRENT_FLASH_MAP_ATTRIBUTE);
   }
   if (!flashMap.isEmpty()) {
-    Map<String,FlashMap> allFlashMaps=retrieveAllFlashMaps(request,true);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Saving FlashMap=" + flashMap);
+    }
+    List<FlashMap> allFlashMaps=retrieveFlashMaps(request,true);
     flashMap.startExpirationPeriod(this.flashTimeout);
-    String key=this.useUniqueFlashKey ? flashMap.getKey() : "flashMap";
-    allFlashMaps.put(key,flashMap);
+    allFlashMaps.add(flashMap);
   }
 }
