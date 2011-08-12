@@ -1,0 +1,26 @@
+{
+  emfMc.replay();
+  MockControl<EntityManagerFactory> emfMc2=MockControl.createControl(EntityManagerFactory.class);
+  EntityManagerFactory mockEmf2=emfMc2.getMock();
+  MockControl<EntityManager> emMc2=MockControl.createControl(EntityManager.class);
+  EntityManager mockEm2=emMc2.getMock();
+  mockEm2.getTransaction();
+  emMc2.setReturnValue(null,1);
+  mockEm2.flush();
+  emMc2.setVoidCallable(1);
+  emMc2.replay();
+  mockEmf2.createEntityManager();
+  emfMc2.setReturnValue(mockEm2,1);
+  emfMc2.replay();
+  GenericApplicationContext gac=new GenericApplicationContext();
+  gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory",mockEmf);
+  gac.getDefaultListableBeanFactory().registerSingleton("unit2",mockEmf2);
+  gac.registerBeanDefinition("annotationProcessor",new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
+  gac.registerBeanDefinition(SpecificPublicPersistenceContextSetter.class.getName(),new RootBeanDefinition(SpecificPublicPersistenceContextSetter.class));
+  gac.refresh();
+  SpecificPublicPersistenceContextSetter bean=(SpecificPublicPersistenceContextSetter)gac.getBean(SpecificPublicPersistenceContextSetter.class.getName());
+  assertNotNull(bean.getEntityManager());
+  bean.getEntityManager().flush();
+  emfMc.verify();
+  emfMc2.verify();
+}
