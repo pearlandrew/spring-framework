@@ -1,30 +1,40 @@
 {
-  final boolean originallyHadResources=configAttributes.hasResources();
-  if (originallyHadResources) {
-    for (    SmartContextLoader loader : candidates) {
-      if (logger.isDebugEnabled()) {
-        logger.debug(String.format("Delegating to %s to process context configuration [%s].",loader.getClass().getName(),configAttributes));
-      }
-      loader.processContextConfiguration(configAttributes);
-    }
+  if (configAttributes.hasLocations() && configAttributes.hasClasses()) {
+    throw new IllegalStateException(String.format("Cannot process locations AND configuration classes for context " + "configuration [%s]; configure one or the other, but not both.",configAttributes));
   }
- else   if (generatesDefaults()) {
-    for (    SmartContextLoader loader : candidates) {
-      boolean defaultResourcesAlreadyGenerated=configAttributes.hasResources();
-      if (!defaultResourcesAlreadyGenerated && loader.generatesDefaults()) {
-        if (logger.isDebugEnabled()) {
-          logger.debug(String.format("Delegating to %s to detect defaults for context configuration [%s].",loader.getClass().getName(),configAttributes));
-        }
-        loader.processContextConfiguration(configAttributes);
-        if (configAttributes.hasResources()) {
-          if (logger.isInfoEnabled()) {
-            logger.info(String.format("SmartContextLoader candidate %s " + "detected defaults for context configuration [%s].",loader,configAttributes));
-          }
-        }
+  if (configAttributes.hasLocations()) {
+    delegateProcessing(xmlLoader,configAttributes);
+  }
+ else   if (configAttributes.hasClasses()) {
+    delegateProcessing(annotationLoader,configAttributes);
+  }
+ else {
+    delegateProcessing(xmlLoader,configAttributes);
+    boolean xmlLoaderDetectedDefaults=configAttributes.hasLocations();
+    if (xmlLoaderDetectedDefaults) {
+      if (logger.isInfoEnabled()) {
+        logger.info(String.format("%s detected default locations for context configuration [%s].",name(xmlLoader),configAttributes));
       }
+    }
+    if (configAttributes.hasClasses()) {
+      throw new IllegalStateException(String.format("%s should NOT have detected default configuration classes for context configuration [%s].",name(xmlLoader),configAttributes));
+    }
+    delegateProcessing(annotationLoader,configAttributes);
+    if (configAttributes.hasClasses()) {
+      if (logger.isInfoEnabled()) {
+        logger.info(String.format("%s detected default configuration classes for context configuration [%s].",name(annotationLoader),configAttributes));
+      }
+    }
+    if (!xmlLoaderDetectedDefaults && configAttributes.hasLocations()) {
+      throw new IllegalStateException(String.format("%s should NOT have detected default locations for context configuration [%s].",name(annotationLoader),configAttributes));
     }
     if (!configAttributes.hasResources()) {
-      throw new IllegalStateException(String.format("None of the SmartContextLoader candidates %s " + "was able to detect defaults for context configuration [%s].",candidates,configAttributes));
+      throw new IllegalStateException(String.format("Neither %s nor %s was able to detect defaults for context configuration [%s].",name(xmlLoader),name(annotationLoader),configAttributes));
+    }
+    if (configAttributes.hasLocations() && configAttributes.hasClasses()) {
+      String message=String.format("Configuration error: both default locations AND default configuration classes " + "were detected for context configuration [%s]; configure one or the other, but not both.",configAttributes);
+      logger.error(message);
+      throw new IllegalStateException(message);
     }
   }
 }

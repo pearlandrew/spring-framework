@@ -1,12 +1,13 @@
 {
   Assert.notNull(mergedConfig,"mergedConfig must not be null");
+  List<SmartContextLoader> candidates=Arrays.asList(xmlLoader,annotationLoader);
   for (  SmartContextLoader loader : candidates) {
-    if (loader.supports(mergedConfig)) {
+    if (supports(loader,mergedConfig)) {
       if (logger.isDebugEnabled()) {
-        logger.debug(String.format("Delegating to %s to load context from [%s].",loader.getClass().getName(),mergedConfig));
+        logger.debug(String.format("Delegating to %s to load context from [%s].",name(loader),mergedConfig));
       }
       return loader.loadContext(mergedConfig);
     }
   }
-  throw new IllegalStateException(String.format("None of the SmartContextLoader candidates %s " + "was able to load an ApplicationContext from [%s].",candidates,mergedConfig));
+  throw new IllegalStateException(String.format("Neither %s nor %s was able to load an ApplicationContext from [%s].",name(xmlLoader),name(annotationLoader),mergedConfig));
 }
