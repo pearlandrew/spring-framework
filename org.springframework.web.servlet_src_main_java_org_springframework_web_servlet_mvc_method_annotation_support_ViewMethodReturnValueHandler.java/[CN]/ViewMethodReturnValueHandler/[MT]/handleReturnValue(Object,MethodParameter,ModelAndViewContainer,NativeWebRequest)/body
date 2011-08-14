@@ -3,14 +3,20 @@
     return;
   }
   if (returnValue instanceof String) {
-    mavContainer.setViewName((String)returnValue);
+    String viewName=(String)returnValue;
+    mavContainer.setViewName(viewName);
+    if (isRedirectViewName(viewName)) {
+      mavContainer.useRedirectModel();
+    }
   }
  else   if (returnValue instanceof View) {
-    mavContainer.setView(returnValue);
+    View view=(View)returnValue;
+    mavContainer.setView(view);
+    if (isRedirectView(view)) {
+      mavContainer.useRedirectModel();
+    }
   }
  else {
-    Method method=returnType.getMethod();
-    String returnTypeName=returnType.getParameterType().getName();
-    throw new UnsupportedOperationException("Unknown return type: " + returnTypeName + " in method: "+ method);
+    throw new UnsupportedOperationException("Unknown return type: " + returnType.getParameterType().getName() + " in method: "+ returnType.getMethod());
   }
 }

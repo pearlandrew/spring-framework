@@ -1,7 +1,7 @@
 {
   if (handlerMethod != null) {
     ExceptionMethodMapping mapping=getExceptionMethodMapping(handlerMethod);
-    Method method=mapping.getMethod(ex);
+    Method method=mapping.getMethod(exception);
     if (method != null) {
       Object handler=handlerMethod.getBean();
       ServletInvocableHandlerMethod exceptionHandler=new ServletInvocableHandlerMethod(handler,method);
@@ -13,8 +13,7 @@
           logger.debug("Invoking exception-handling method: " + exceptionHandler);
         }
         ModelAndViewContainer mavContainer=new ModelAndViewContainer();
-        ResponseContext responseContext=new ResponseContext(webRequest,mavContainer);
-        exceptionHandler.invokeAndHandle(webRequest,mavContainer,ex,responseContext);
+        exceptionHandler.invokeAndHandle(webRequest,mavContainer,exception);
         if (!mavContainer.isResolveView()) {
           return new ModelAndView();
         }
