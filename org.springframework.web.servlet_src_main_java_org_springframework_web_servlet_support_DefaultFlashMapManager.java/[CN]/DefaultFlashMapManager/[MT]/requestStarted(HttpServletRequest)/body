@@ -1,26 +1,13 @@
 {
-  if (request.getAttribute(CURRENT_FLASH_MAP_ATTRIBUTE) != null) {
+  if (request.getAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE) != null) {
     return false;
   }
-  FlashMap currentFlashMap=new FlashMap();
-  request.setAttribute(CURRENT_FLASH_MAP_ATTRIBUTE,currentFlashMap);
-  FlashMap previousFlashMap=lookupPreviousFlashMap(request);
-  if (previousFlashMap != null) {
-    WebUtils.exposeRequestAttributes(request,previousFlashMap);
-    request.setAttribute(PREVIOUS_FLASH_MAP_ATTRIBUTE,previousFlashMap);
+  FlashMap outputFlashMap=new FlashMap();
+  request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE,outputFlashMap);
+  Map<String,?> inputFlashMap=getFlashMap(request);
+  if (inputFlashMap != null) {
+    request.setAttribute(INPUT_FLASH_MAP_ATTRIBUTE,inputFlashMap);
   }
-  List<FlashMap> allMaps=retrieveFlashMaps(request,false);
-  if (allMaps != null && !allMaps.isEmpty()) {
-    List<FlashMap> expiredMaps=new ArrayList<FlashMap>();
-    for (    FlashMap flashMap : allMaps) {
-      if (flashMap.isExpired()) {
-        if (logger.isDebugEnabled()) {
-          logger.debug("Removing expired FlashMap: " + flashMap);
-        }
-        expiredMaps.add(flashMap);
-      }
-    }
-    allMaps.removeAll(expiredMaps);
-  }
+  removeExpiredFlashMaps(request);
   return true;
 }
