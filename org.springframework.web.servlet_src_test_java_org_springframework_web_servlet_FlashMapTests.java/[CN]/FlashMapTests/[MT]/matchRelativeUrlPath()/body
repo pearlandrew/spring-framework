@@ -1,13 +1,15 @@
 {
   FlashMap flashMap=new FlashMap();
-  flashMap.setExpectedUrl(new MockHttpServletRequest("GET","/oh/no"),"yes");
+  flashMap.setExpectedRequestUri(new MockHttpServletRequest("GET","/oh/no"),"yes");
   assertTrue(flashMap.matches(new MockHttpServletRequest("GET","/oh/yes")));
-  flashMap.setExpectedUrl(new MockHttpServletRequest("GET","/oh/not/again"),"../ok");
+  flashMap.setExpectedRequestUri(new MockHttpServletRequest("GET","/oh/not/again"),"../ok");
   assertTrue(flashMap.matches(new MockHttpServletRequest("GET","/oh/ok")));
-  flashMap.setExpectedUrl(new MockHttpServletRequest("GET","/yes/it/is"),"..");
+  flashMap.setExpectedRequestUri(new MockHttpServletRequest("GET","/yes/it/is"),"..");
   assertTrue(flashMap.matches(new MockHttpServletRequest("GET","/yes")));
-  flashMap.setExpectedUrl(new MockHttpServletRequest("GET","/yes/it/is"),"../");
+  flashMap.setExpectedRequestUri(new MockHttpServletRequest("GET","/yes/it/is"),"../");
   assertTrue(flashMap.matches(new MockHttpServletRequest("GET","/yes")));
-  flashMap.setExpectedUrl(new MockHttpServletRequest("GET","/thats it/really"),"./");
+  flashMap.setExpectedRequestUri(new MockHttpServletRequest("GET","/thats it/really"),"./");
   assertTrue(flashMap.matches(new MockHttpServletRequest("GET","/thats%20it")));
+  flashMap.setExpectedRequestUri(new MockHttpServletRequest("GET","/yes/it/is"),"..?url=http://example.com");
+  assertTrue(flashMap.matches(new MockHttpServletRequest("GET","/yes")));
 }
