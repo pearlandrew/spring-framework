@@ -1,10 +1,17 @@
 {
+  String encodedRedirectURL=response.encodeRedirectURL(targetUrl);
   if (http10Compatible) {
-    response.sendRedirect(response.encodeRedirectURL(targetUrl));
+    if (this.statusCode != null) {
+      response.setStatus(this.statusCode.value());
+      response.setHeader("Location",encodedRedirectURL);
+    }
+ else {
+      response.sendRedirect(encodedRedirectURL);
+    }
   }
  else {
     HttpStatus statusCode=getHttp11StatusCode(request,response,targetUrl);
     response.setStatus(statusCode.value());
-    response.setHeader("Location",response.encodeRedirectURL(targetUrl));
+    response.setHeader("Location",encodedRedirectURL);
   }
 }
