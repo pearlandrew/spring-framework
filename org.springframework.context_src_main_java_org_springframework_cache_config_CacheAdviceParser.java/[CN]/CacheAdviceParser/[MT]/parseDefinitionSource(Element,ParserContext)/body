@@ -1,0 +1,25 @@
+{
+  Props prop=new Props(definition);
+  ManagedMap<TypedStringValue,CacheOperation> cacheOpeMap=new ManagedMap<TypedStringValue,CacheOperation>();
+  cacheOpeMap.setSource(parserContext.extractSource(definition));
+  List<Element> updateCacheMethods=DomUtils.getChildElementsByTagName(definition,CACHEABLE_ELEMENT);
+  for (  Element opElement : updateCacheMethods) {
+    String name=opElement.getAttribute(METHOD_ATTRIBUTE);
+    TypedStringValue nameHolder=new TypedStringValue(name);
+    nameHolder.setSource(parserContext.extractSource(opElement));
+    CacheOperation op=prop.merge(opElement,parserContext.getReaderContext(),new CacheUpdateOperation());
+    cacheOpeMap.put(nameHolder,op);
+  }
+  List<Element> evictCacheMethods=DomUtils.getChildElementsByTagName(definition,CACHE_EVICT_ELEMENT);
+  for (  Element opElement : evictCacheMethods) {
+    String name=opElement.getAttribute(METHOD_ATTRIBUTE);
+    TypedStringValue nameHolder=new TypedStringValue(name);
+    nameHolder.setSource(parserContext.extractSource(opElement));
+    CacheOperation op=prop.merge(opElement,parserContext.getReaderContext(),new CacheEvictOperation());
+    cacheOpeMap.put(nameHolder,op);
+  }
+  RootBeanDefinition attributeSourceDefinition=new RootBeanDefinition(NameMatchCacheOperationSource.class);
+  attributeSourceDefinition.setSource(parserContext.extractSource(definition));
+  attributeSourceDefinition.getPropertyValues().add("nameMap",cacheOpeMap);
+  return attributeSourceDefinition;
+}

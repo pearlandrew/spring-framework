@@ -1,0 +1,29 @@
+{
+  if (StringUtils.hasLength(text)) {
+    String[] tokens=StringUtils.commaDelimitedListToStringArray(text);
+    if (tokens.length < 2) {
+      throw new IllegalArgumentException("too little arguments found, at least the cache action and cache name are required");
+    }
+    CacheOperation op;
+    if ("cacheable".contains(tokens[0])) {
+      op=new CacheUpdateOperation();
+    }
+ else     if ("evict".contains(tokens[0])) {
+      op=new CacheEvictOperation();
+    }
+ else {
+      throw new IllegalArgumentException("Invalid cache action specified " + tokens[0]);
+    }
+    op.setCacheNames(StringUtils.delimitedListToStringArray(tokens[1],";"));
+    if (tokens.length > 2) {
+      op.setKey(tokens[2]);
+    }
+    if (tokens.length > 3) {
+      op.setCondition(tokens[3]);
+    }
+    setValue(op);
+  }
+ else {
+    setValue(null);
+  }
+}
