@@ -1,12 +1,11 @@
 {
-  if (configAttributes.hasLocations() && configAttributes.hasClasses()) {
-    throw new IllegalStateException(String.format("Cannot process locations AND configuration classes for context " + "configuration %s; configure one or the other, but not both.",configAttributes));
-  }
+  Assert.notNull(configAttributes,"configAttributes must not be null");
+  Assert.isTrue(configAttributes.hasLocations() && configAttributes.hasClasses(),String.format("Cannot process locations AND configuration classes for context " + "configuration %s; configure one or the other, but not both.",configAttributes));
   if (configAttributes.hasLocations()) {
     delegateProcessing(xmlLoader,configAttributes);
   }
  else   if (configAttributes.hasClasses()) {
-    delegateProcessing(annotationLoader,configAttributes);
+    delegateProcessing(annotationConfigLoader,configAttributes);
   }
  else {
     delegateProcessing(xmlLoader,configAttributes);
@@ -19,17 +18,17 @@
     if (configAttributes.hasClasses()) {
       throw new IllegalStateException(String.format("%s should NOT have detected default configuration classes for context configuration %s.",name(xmlLoader),configAttributes));
     }
-    delegateProcessing(annotationLoader,configAttributes);
+    delegateProcessing(annotationConfigLoader,configAttributes);
     if (configAttributes.hasClasses()) {
       if (logger.isInfoEnabled()) {
-        logger.info(String.format("%s detected default configuration classes for context configuration %s.",name(annotationLoader),configAttributes));
+        logger.info(String.format("%s detected default configuration classes for context configuration %s.",name(annotationConfigLoader),configAttributes));
       }
     }
     if (!xmlLoaderDetectedDefaults && configAttributes.hasLocations()) {
-      throw new IllegalStateException(String.format("%s should NOT have detected default locations for context configuration %s.",name(annotationLoader),configAttributes));
+      throw new IllegalStateException(String.format("%s should NOT have detected default locations for context configuration %s.",name(annotationConfigLoader),configAttributes));
     }
     if (!configAttributes.hasResources()) {
-      throw new IllegalStateException(String.format("Neither %s nor %s was able to detect defaults for context configuration %s.",name(xmlLoader),name(annotationLoader),configAttributes));
+      throw new IllegalStateException(String.format("Neither %s nor %s was able to detect defaults for context configuration %s.",name(xmlLoader),name(annotationConfigLoader),configAttributes));
     }
     if (configAttributes.hasLocations() && configAttributes.hasClasses()) {
       String message=String.format("Configuration error: both default locations AND default configuration classes " + "were detected for context configuration %s; configure one or the other, but not both.",configAttributes);
