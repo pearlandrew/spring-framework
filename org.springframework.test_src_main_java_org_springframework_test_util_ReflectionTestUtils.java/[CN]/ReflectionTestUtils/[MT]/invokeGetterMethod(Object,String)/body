@@ -1,6 +1,6 @@
 {
   Assert.notNull(target,"Target object must not be null");
-  Assert.notNull(name,"Method name must not be empty");
+  Assert.hasText(name,"Method name must not be empty");
   String getterMethodName=name;
   if (!name.startsWith(GETTER_PREFIX)) {
     getterMethodName=GETTER_PREFIX + StringUtils.capitalize(name);
@@ -10,9 +10,7 @@
     getterMethodName=name;
     method=ReflectionUtils.findMethod(target.getClass(),getterMethodName);
   }
-  if (method == null) {
-    throw new IllegalArgumentException("Could not find getter method [" + getterMethodName + "] on target ["+ target+ "]");
-  }
+  Assert.notNull(method,"Could not find getter method [" + getterMethodName + "] on target ["+ target+ "]");
   if (logger.isDebugEnabled()) {
     logger.debug("Invoking getter method [" + getterMethodName + "] on target ["+ target+ "]");
   }

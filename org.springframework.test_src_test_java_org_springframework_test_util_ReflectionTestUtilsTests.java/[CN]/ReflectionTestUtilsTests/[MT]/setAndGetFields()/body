@@ -1,0 +1,44 @@
+{
+  setField(person,"id",new Long(99),long.class);
+  setField(person,"name","Tom");
+  setField(person,"age",new Integer(42));
+  setField(person,"eyeColor","blue",String.class);
+  setField(person,"likesPets",Boolean.TRUE);
+  setField(person,"favoriteNumber",PI,Number.class);
+  assertEquals("ID (private field in a superclass)",99,person.getId());
+  assertEquals("name (protected field)","Tom",person.getName());
+  assertEquals("age (private field)",42,person.getAge());
+  assertEquals("eye color (package private field)","blue",person.getEyeColor());
+  assertEquals("'likes pets' flag (package private boolean field)",true,person.likesPets());
+  assertEquals("'favorite number' (package field)",PI,person.getFavoriteNumber());
+  assertEquals(new Long(99),getField(person,"id"));
+  assertEquals("Tom",getField(person,"name"));
+  assertEquals(new Integer(42),getField(person,"age"));
+  assertEquals("blue",getField(person,"eyeColor"));
+  assertEquals(Boolean.TRUE,getField(person,"likesPets"));
+  assertEquals(PI,getField(person,"favoriteNumber"));
+  setField(person,"name",null,String.class);
+  setField(person,"eyeColor",null,String.class);
+  setField(person,"favoriteNumber",null,Number.class);
+  assertNull("name (protected field)",person.getName());
+  assertNull("eye color (package private field)",person.getEyeColor());
+  assertNull("'favorite number' (package field)",person.getFavoriteNumber());
+  new AssertThrows(IllegalArgumentException.class,"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException."){
+    public void test() throws Exception {
+      setField(person,"id",null,long.class);
+    }
+  }
+.runTest();
+  new AssertThrows(IllegalArgumentException.class,"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException."){
+    public void test() throws Exception {
+      setField(person,"age",null,int.class);
+    }
+  }
+.runTest();
+  new AssertThrows(IllegalArgumentException.class,"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException."){
+    public void test() throws Exception {
+      setField(person,"likesPets",null,boolean.class);
+    }
+  }
+.runTest();
+}
