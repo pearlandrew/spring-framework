@@ -13,15 +13,13 @@
   }
  else {
     ModelMap model=mavContainer.getModel();
-    ModelAndView mav=new ModelAndView().addAllObjects(model);
-    mav.setViewName(mavContainer.getViewName());
+    ModelAndView mav=new ModelAndView(mavContainer.getViewName(),model);
     if (!mavContainer.isViewReference()) {
       mav.setView((View)mavContainer.getView());
     }
-    if (model instanceof RedirectModel) {
-      RedirectModel redirectModel=(RedirectModel)model;
-      FlashMap flashMap=RequestContextUtils.getOutputFlashMap(request);
-      flashMap.putAll(redirectModel.getFlashAttributes());
+    if (model instanceof RedirectAttributes) {
+      Map<String,?> flashAttributes=((RedirectAttributes)model).getFlashAttributes();
+      RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);
     }
     return mav;
   }
