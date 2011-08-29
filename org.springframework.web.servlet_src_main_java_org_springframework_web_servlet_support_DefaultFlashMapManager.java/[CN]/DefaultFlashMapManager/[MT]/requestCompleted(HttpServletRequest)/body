@@ -3,12 +3,12 @@
   if (flashMap == null) {
     throw new IllegalStateException("Did not find a FlashMap exposed as the request attribute " + OUTPUT_FLASH_MAP_ATTRIBUTE);
   }
-  if (!flashMap.isEmpty()) {
+  if (!flashMap.isEmpty() && flashMap.isCreatedBy(this.hashCode())) {
     if (logger.isDebugEnabled()) {
       logger.debug("Saving FlashMap=" + flashMap);
     }
-    List<FlashMap> allFlashMaps=retrieveFlashMaps(request,true);
+    decodeAndNormalizeTargetPath(flashMap,request);
     flashMap.startExpirationPeriod(this.flashTimeout);
-    allFlashMaps.add(flashMap);
+    retrieveFlashMaps(request,true).add(flashMap);
   }
 }

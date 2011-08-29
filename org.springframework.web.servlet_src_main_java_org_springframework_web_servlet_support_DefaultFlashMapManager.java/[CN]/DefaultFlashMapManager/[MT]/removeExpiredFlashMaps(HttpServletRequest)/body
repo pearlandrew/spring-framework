@@ -1,15 +1,16 @@
 {
   List<FlashMap> allMaps=retrieveFlashMaps(request,false);
-  if (allMaps != null && !allMaps.isEmpty()) {
-    List<FlashMap> expiredMaps=new ArrayList<FlashMap>();
-    for (    FlashMap flashMap : allMaps) {
-      if (flashMap.isExpired()) {
-        if (logger.isDebugEnabled()) {
-          logger.debug("Removing expired FlashMap: " + flashMap);
-        }
-        expiredMaps.add(flashMap);
-      }
-    }
-    allMaps.removeAll(expiredMaps);
+  if (CollectionUtils.isEmpty(allMaps)) {
+    return;
   }
+  List<FlashMap> expiredMaps=new ArrayList<FlashMap>();
+  for (  FlashMap flashMap : allMaps) {
+    if (flashMap.isExpired()) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Removing expired FlashMap: " + flashMap);
+      }
+      expiredMaps.add(flashMap);
+    }
+  }
+  allMaps.removeAll(expiredMaps);
 }

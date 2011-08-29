@@ -1,0 +1,21 @@
+{
+  FlashMap flashMap=new FlashMap();
+  flashMap.put("key","value");
+  flashMap.addTargetRequestParam("number","one");
+  List<FlashMap> allMaps=createFlashMaps();
+  allMaps.add(flashMap);
+  this.request.setParameter("number",(String)null);
+  this.flashMapManager.requestStarted(this.request);
+  assertNull(RequestContextUtils.getInputFlashMap(this.request));
+  assertEquals("FlashMap should have been removed",1,getFlashMaps().size());
+  clearRequestAttributes();
+  this.request.setParameter("number","two");
+  this.flashMapManager.requestStarted(this.request);
+  assertNull(RequestContextUtils.getInputFlashMap(this.request));
+  assertEquals("FlashMap should have been removed",1,getFlashMaps().size());
+  clearRequestAttributes();
+  this.request.setParameter("number","one");
+  this.flashMapManager.requestStarted(this.request);
+  assertEquals(flashMap,RequestContextUtils.getInputFlashMap(this.request));
+  assertEquals("Input FlashMap should have been removed",0,getFlashMaps().size());
+}
