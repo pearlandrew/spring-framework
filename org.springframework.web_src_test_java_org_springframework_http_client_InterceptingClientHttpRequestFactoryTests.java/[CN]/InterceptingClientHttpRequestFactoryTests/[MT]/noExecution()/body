@@ -1,15 +1,16 @@
 {
-  ClientHttpRequestInterceptor interceptor1=new ClientHttpRequestInterceptor(){
+  List<ClientHttpRequestInterceptor> interceptors=new ArrayList<ClientHttpRequestInterceptor>();
+  interceptors.add(new ClientHttpRequestInterceptor(){
     public ClientHttpResponse intercept(    HttpRequest request,    byte[] body,    ClientHttpRequestExecution execution) throws IOException {
       return responseMock;
     }
   }
-;
-  NoOpInterceptor interceptor2=new NoOpInterceptor();
-  requestFactory=new InterceptingClientHttpRequestFactory(requestFactoryMock,new ClientHttpRequestInterceptor[]{interceptor1,interceptor2});
+);
+  interceptors.add(new NoOpInterceptor());
+  requestFactory=new InterceptingClientHttpRequestFactory(requestFactoryMock,interceptors);
   ClientHttpRequest request=requestFactory.createRequest(new URI("http://example.com"),HttpMethod.GET);
   ClientHttpResponse response=request.execute();
-  assertFalse(interceptor2.invoked);
+  assertFalse(((NoOpInterceptor)interceptors.get(1)).invoked);
   assertFalse(requestMock.executed);
   assertSame(responseMock,response);
 }

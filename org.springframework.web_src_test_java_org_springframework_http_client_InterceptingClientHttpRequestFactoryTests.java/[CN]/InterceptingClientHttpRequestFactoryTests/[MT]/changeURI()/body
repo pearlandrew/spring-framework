@@ -1,10 +1,10 @@
 {
-  final HttpMethod changedMethod=HttpMethod.POST;
+  final URI changedUri=new URI("http://example.com/2");
   ClientHttpRequestInterceptor interceptor=new ClientHttpRequestInterceptor(){
     public ClientHttpResponse intercept(    HttpRequest request,    byte[] body,    ClientHttpRequestExecution execution) throws IOException {
       return execution.execute(new HttpRequestWrapper(request){
-        @Override public HttpMethod getMethod(){
-          return changedMethod;
+        @Override public URI getURI(){
+          return changedUri;
         }
       }
 ,body);
@@ -13,12 +13,12 @@
 ;
   requestFactoryMock=new RequestFactoryMock(){
     @Override public ClientHttpRequest createRequest(    URI uri,    HttpMethod httpMethod) throws IOException {
-      assertEquals(changedMethod,httpMethod);
+      assertEquals(changedUri,uri);
       return super.createRequest(uri,httpMethod);
     }
   }
 ;
-  requestFactory=new InterceptingClientHttpRequestFactory(requestFactoryMock,new ClientHttpRequestInterceptor[]{interceptor});
+  requestFactory=new InterceptingClientHttpRequestFactory(requestFactoryMock,Collections.singletonList(interceptor));
   ClientHttpRequest request=requestFactory.createRequest(new URI("http://example.com"),HttpMethod.GET);
   request.execute();
 }
