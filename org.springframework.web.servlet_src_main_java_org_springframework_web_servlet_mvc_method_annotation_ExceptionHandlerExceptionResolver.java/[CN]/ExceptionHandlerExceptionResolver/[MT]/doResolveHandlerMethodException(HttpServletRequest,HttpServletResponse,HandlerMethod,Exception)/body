@@ -1,35 +1,34 @@
 {
-  if (handlerMethod != null) {
-    ExceptionMethodMapping mapping=getExceptionMethodMapping(handlerMethod);
-    Method method=mapping.getMethod(exception);
-    if (method != null) {
-      Object handler=handlerMethod.getBean();
-      ServletInvocableHandlerMethod exceptionHandler=new ServletInvocableHandlerMethod(handler,method);
-      exceptionHandler.setHandlerMethodArgumentResolvers(argumentResolvers);
-      exceptionHandler.setHandlerMethodReturnValueHandlers(returnValueHandlers);
-      ServletWebRequest webRequest=new ServletWebRequest(request,response);
-      try {
-        if (logger.isDebugEnabled()) {
-          logger.debug("Invoking exception-handling method: " + exceptionHandler);
-        }
-        ModelAndViewContainer mavContainer=new ModelAndViewContainer();
-        exceptionHandler.invokeAndHandle(webRequest,mavContainer,exception);
-        if (!mavContainer.isResolveView()) {
-          return new ModelAndView();
-        }
- else {
-          ModelAndView mav=new ModelAndView().addAllObjects(mavContainer.getModel());
-          mav.setViewName(mavContainer.getViewName());
-          if (!mavContainer.isViewReference()) {
-            mav.setView((View)mavContainer.getView());
-          }
-          return mav;
-        }
-      }
- catch (      Exception invocationEx) {
-        logger.error("Invoking exception-handling method resulted in exception : " + exceptionHandler,invocationEx);
-      }
-    }
+  if (handlerMethod == null) {
+    return null;
   }
-  return null;
+  ServletInvocableHandlerMethod exceptionHandlerMethod=getExceptionHandlerMethod(handlerMethod,exception);
+  if (exceptionHandlerMethod == null) {
+    return null;
+  }
+  exceptionHandlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+  exceptionHandlerMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+  ServletWebRequest webRequest=new ServletWebRequest(request,response);
+  ModelAndViewContainer mavContainer=new ModelAndViewContainer();
+  try {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Invoking @ExceptionHandler method: " + exceptionHandlerMethod);
+    }
+    exceptionHandlerMethod.invokeAndHandle(webRequest,mavContainer,exception);
+  }
+ catch (  Exception invocationEx) {
+    logger.error("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod,invocationEx);
+    return null;
+  }
+  if (!mavContainer.isResolveView()) {
+    return new ModelAndView();
+  }
+ else {
+    ModelAndView mav=new ModelAndView().addAllObjects(mavContainer.getModel());
+    mav.setViewName(mavContainer.getViewName());
+    if (!mavContainer.isViewReference()) {
+      mav.setView((View)mavContainer.getView());
+    }
+    return mav;
+  }
 }

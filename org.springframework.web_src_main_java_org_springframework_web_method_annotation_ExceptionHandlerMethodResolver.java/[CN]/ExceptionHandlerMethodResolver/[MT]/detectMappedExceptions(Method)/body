@@ -1,0 +1,16 @@
+{
+  List<Class<? extends Throwable>> result=new ArrayList<Class<? extends Throwable>>();
+  ExceptionHandler annotation=AnnotationUtils.findAnnotation(method,ExceptionHandler.class);
+  if (annotation != null) {
+    result.addAll(Arrays.asList(annotation.value()));
+  }
+  if (result.isEmpty()) {
+    for (    Class<?> paramType : method.getParameterTypes()) {
+      if (Throwable.class.isAssignableFrom(paramType)) {
+        result.add((Class<? extends Throwable>)paramType);
+      }
+    }
+  }
+  Assert.notEmpty(result,"No exception types mapped to {" + method + "}");
+  return result;
+}
