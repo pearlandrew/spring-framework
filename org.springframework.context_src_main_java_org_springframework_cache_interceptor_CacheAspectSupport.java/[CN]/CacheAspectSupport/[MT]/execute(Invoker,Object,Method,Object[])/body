@@ -1,6 +1,6 @@
 {
   if (!this.initialized) {
-    return invocation.call();
+    return invoker.invoke();
   }
   boolean log=logger.isTraceEnabled();
   Class<?> targetClass=AopProxyUtils.ultimateTargetClass(target);
@@ -34,7 +34,7 @@
           if (log) {
             logger.trace("Key " + key + " NOT found in cache(s), invoking cached target method  "+ method);
           }
-          retVal=invocation.call();
+          retVal=invoker.invoke();
           for (          Cache cache : caches) {
             cache.put(key,retVal);
           }
@@ -47,7 +47,6 @@
       }
       if (cacheOp instanceof CacheEvictOperation) {
         CacheEvictOperation evictOp=(CacheEvictOperation)cacheOp;
-        retVal=invocation.call();
         Object key=null;
         for (        Cache cache : caches) {
           if (evictOp.isCacheWide()) {
@@ -66,6 +65,7 @@
             cache.evict(key);
           }
         }
+        retVal=invoker.invoke();
       }
       return retVal;
     }
@@ -75,5 +75,5 @@
       }
     }
   }
-  return invocation.call();
+  return invoker.invoke();
 }

@@ -1,16 +1,20 @@
 {
   Method method=invocation.getMethod();
-  Callable<Object> aopAllianceInvocation=new Callable<Object>(){
-    public Object call() throws Exception {
+  Invoker aopAllianceInvoker=new Invoker(){
+    public Object invoke(){
       try {
         return invocation.proceed();
       }
  catch (      Throwable ex) {
-        ReflectionUtils.rethrowException(ex);
-        return null;
+        throw new ThrowableWrapper(ex);
       }
     }
   }
 ;
-  return execute(aopAllianceInvocation,invocation.getThis(),method,invocation.getArguments());
+  try {
+    return execute(aopAllianceInvoker,invocation.getThis(),method,invocation.getArguments());
+  }
+ catch (  ThrowableWrapper th) {
+    throw th.original;
+  }
 }
