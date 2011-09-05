@@ -1,4 +1,12 @@
 {
   String targetUrl=createTargetUrl(model,request);
+  FlashMap flashMap=RequestContextUtils.getOutputFlashMap(request);
+  if (!CollectionUtils.isEmpty(flashMap)) {
+    String targetPath=WebUtils.extractUrlPath(targetUrl.toString());
+    flashMap.setTargetRequestPath(targetPath);
+    if (this.exposeModelAttributes) {
+      flashMap.addTargetRequestParams(model);
+    }
+  }
   sendRedirect(request,response,targetUrl.toString(),this.http10Compatible);
 }
