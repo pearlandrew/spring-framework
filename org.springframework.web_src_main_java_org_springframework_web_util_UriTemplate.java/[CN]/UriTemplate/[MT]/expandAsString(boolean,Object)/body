@@ -1,0 +1,20 @@
+{
+  Assert.notNull(uriVariableValues,"'uriVariableValues' must not be null");
+  if (uriVariableValues.length < this.variableNames.size()) {
+    throw new IllegalArgumentException("Not enough of variables values in [" + this.uriTemplate + "]: expected at least "+ this.variableNames.size()+ "; got "+ uriVariableValues.length);
+  }
+  Matcher matcher=NAMES_PATTERN.matcher(this.uriTemplate);
+  StringBuffer uriBuffer=new StringBuffer();
+  int i=0;
+  while (matcher.find()) {
+    Object uriVariable=uriVariableValues[i++];
+    String uriVariableString=uriVariable != null ? uriVariable.toString() : "";
+    if (encodeVariableValues && uriComponent != null) {
+      uriVariableString=UriUtils.encode(uriVariableString,uriComponent,false);
+    }
+    String replacement=Matcher.quoteReplacement(uriVariableString);
+    matcher.appendReplacement(uriBuffer,replacement);
+  }
+  matcher.appendTail(uriBuffer);
+  return uriBuffer.toString();
+}

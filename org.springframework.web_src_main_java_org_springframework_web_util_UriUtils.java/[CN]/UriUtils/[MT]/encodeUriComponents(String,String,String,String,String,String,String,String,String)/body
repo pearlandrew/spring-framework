@@ -5,7 +5,7 @@
     sb.append(encodeScheme(scheme,encoding));
     sb.append(':');
   }
-  if (authority != null) {
+  if (userinfo != null || host != null || port != null) {
     sb.append("//");
     if (userinfo != null) {
       sb.append(encodeUserInfo(userinfo,encoding));
@@ -19,7 +19,13 @@
       sb.append(encodePort(port,encoding));
     }
   }
-  sb.append(encodePath(path,encoding));
+ else   if (authority != null) {
+    sb.append("//");
+    sb.append(encodeAuthority(authority,encoding));
+  }
+  if (path != null) {
+    sb.append(encodePath(path,encoding));
+  }
   if (query != null) {
     sb.append('?');
     sb.append(encodeQuery(query,encoding));
