@@ -1,38 +1,28 @@
 {
   Assert.hasLength(encoding,"'encoding' must not be empty");
-  StringBuilder sb=new StringBuilder();
   if (scheme != null) {
-    sb.append(encodeScheme(scheme,encoding));
-    sb.append(':');
+    scheme=encodeScheme(scheme,encoding);
   }
-  if (userinfo != null || host != null || port != null) {
-    sb.append("//");
-    if (userinfo != null) {
-      sb.append(encodeUserInfo(userinfo,encoding));
-      sb.append('@');
-    }
-    if (host != null) {
-      sb.append(encodeHost(host,encoding));
-    }
-    if (port != null) {
-      sb.append(':');
-      sb.append(encodePort(port,encoding));
-    }
+  if (authority != null) {
+    authority=encodeAuthority(authority,encoding);
   }
- else   if (authority != null) {
-    sb.append("//");
-    sb.append(encodeAuthority(authority,encoding));
+  if (userInfo != null) {
+    userInfo=encodeUserInfo(userInfo,encoding);
+  }
+  if (host != null) {
+    host=encodeHost(host,encoding);
+  }
+  if (port != null) {
+    port=encodePort(port,encoding);
   }
   if (path != null) {
-    sb.append(encodePath(path,encoding));
+    path=encodePath(path,encoding);
   }
   if (query != null) {
-    sb.append('?');
-    sb.append(encodeQuery(query,encoding));
+    query=encodeQuery(query,encoding);
   }
   if (fragment != null) {
-    sb.append('#');
-    sb.append(encodeFragment(fragment,encoding));
+    fragment=encodeFragment(fragment,encoding);
   }
-  return sb.toString();
+  return buildUri(scheme,authority,userInfo,host,port,path,query,fragment);
 }
