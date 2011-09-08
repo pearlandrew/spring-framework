@@ -1,45 +1,23 @@
 {
-  StringBuilder uriBuilder=new StringBuilder();
-  if (scheme != null) {
-    uriBuilder.append(scheme);
-    uriBuilder.append(':');
-  }
-  if (userInfo != null || host != null || port != -1) {
-    uriBuilder.append("//");
-    if (StringUtils.hasLength(userInfo)) {
-      uriBuilder.append(userInfo);
-      uriBuilder.append('@');
-    }
-    if (host != null) {
-      uriBuilder.append(host);
-    }
-    if (port != -1) {
-      uriBuilder.append(':');
-      uriBuilder.append(port);
-    }
-  }
+  String port=portAsString();
+  String path=null;
   if (!pathSegments.isEmpty()) {
+    StringBuilder pathBuilder=new StringBuilder();
     for (    String pathSegment : pathSegments) {
       boolean startsWithSlash=pathSegment.charAt(0) == '/';
-      boolean endsWithSlash=uriBuilder.length() > 0 && uriBuilder.charAt(uriBuilder.length() - 1) == '/';
+      boolean endsWithSlash=pathBuilder.length() > 0 && pathBuilder.charAt(pathBuilder.length() - 1) == '/';
       if (!endsWithSlash && !startsWithSlash) {
-        uriBuilder.append('/');
+        pathBuilder.append('/');
       }
  else       if (endsWithSlash && startsWithSlash) {
         pathSegment=pathSegment.substring(1);
       }
-      uriBuilder.append(pathSegment);
+      pathBuilder.append(pathSegment);
     }
+    path=pathBuilder.toString();
   }
-  if (queryBuilder.length() > 0) {
-    uriBuilder.append('?');
-    uriBuilder.append(queryBuilder);
-  }
-  if (StringUtils.hasLength(fragment)) {
-    uriBuilder.append('#');
-    uriBuilder.append(fragment);
-  }
-  String uri=uriBuilder.toString();
+  String query=queryAsString();
+  String uri=UriUtils.buildUri(scheme,null,userInfo,host,port,path,query,fragment);
   uri=StringUtils.replace(uri,"{","%7B");
   uri=StringUtils.replace(uri,"}","%7D");
   return URI.create(uri);

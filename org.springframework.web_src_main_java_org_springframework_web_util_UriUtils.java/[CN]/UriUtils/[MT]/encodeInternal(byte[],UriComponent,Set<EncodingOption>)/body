@@ -1,6 +1,9 @@
 {
   Assert.notNull(source,"'source' must not be null");
   Assert.notNull(uriComponent,"'uriComponent' must not be null");
+  if (encodingOptions == null) {
+    encodingOptions=Collections.emptySet();
+  }
   ByteArrayOutputStream bos=new ByteArrayOutputStream(source.length);
   for (int i=0; i < source.length; i++) {
     int b=source[i];
@@ -10,7 +13,7 @@
     if (uriComponent.isAllowed(b)) {
       bos.write(b);
     }
- else     if (allowTemplateVars && (b == '{' || b == '}')) {
+ else     if (encodingOptions.contains(EncodingOption.ALLOW_TEMPLATE_VARS) && (b == '{' || b == '}')) {
       bos.write(b);
     }
  else {

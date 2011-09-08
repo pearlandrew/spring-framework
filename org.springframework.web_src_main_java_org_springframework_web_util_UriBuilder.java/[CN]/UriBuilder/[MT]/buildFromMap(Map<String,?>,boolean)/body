@@ -1,0 +1,30 @@
+{
+  if (CollectionUtils.isEmpty(uriVariables)) {
+    return build();
+  }
+  String scheme=expand(this.scheme,UriComponent.SCHEME,uriVariables,encodeUriVariableValues);
+  String userInfo=expand(this.userInfo,UriComponent.USER_INFO,uriVariables,encodeUriVariableValues);
+  String host=expand(this.host,UriComponent.HOST,uriVariables,encodeUriVariableValues);
+  String port=expand(this.portAsString(),UriComponent.PORT,uriVariables,encodeUriVariableValues);
+  String path=null;
+  if (!this.pathSegments.isEmpty()) {
+    StringBuilder pathBuilder=new StringBuilder();
+    for (    String pathSegment : this.pathSegments) {
+      boolean startsWithSlash=pathSegment.charAt(0) == '/';
+      boolean endsWithSlash=pathBuilder.length() > 0 && pathBuilder.charAt(pathBuilder.length() - 1) == '/';
+      if (!endsWithSlash && !startsWithSlash) {
+        pathBuilder.append('/');
+      }
+ else       if (endsWithSlash && startsWithSlash) {
+        pathSegment=pathSegment.substring(1);
+      }
+      pathSegment=expand(pathSegment,UriComponent.PATH_SEGMENT,uriVariables,encodeUriVariableValues);
+      pathBuilder.append(pathSegment);
+    }
+    path=pathBuilder.toString();
+  }
+  String query=expand(this.queryAsString(),UriComponent.QUERY,uriVariables,encodeUriVariableValues);
+  String fragment=expand(this.fragment,UriComponent.FRAGMENT,uriVariables,encodeUriVariableValues);
+  String uri=UriUtils.buildUri(scheme,null,userInfo,host,port,path,query,fragment);
+  return URI.create(uri);
+}
