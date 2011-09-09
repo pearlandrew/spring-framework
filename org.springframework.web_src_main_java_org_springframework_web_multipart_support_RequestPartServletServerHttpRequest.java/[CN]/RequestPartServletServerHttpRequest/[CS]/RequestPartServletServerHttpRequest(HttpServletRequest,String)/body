@@ -1,9 +1,14 @@
 {
   super(request);
-  this.multipartRequest=(request instanceof MultipartHttpServletRequest ? (MultipartHttpServletRequest)request : new StandardMultipartHttpServletRequest(request));
+  this.multipartRequest=asMultipartRequest(request);
   this.partName=partName;
   this.headers=this.multipartRequest.getMultipartHeaders(this.partName);
   if (this.headers == null) {
-    throw new IllegalArgumentException("No request part found for name '" + this.partName + "'");
+    if (request instanceof MultipartHttpServletRequest) {
+      throw new MissingServletRequestPartException(partName);
+    }
+ else {
+      throw new IllegalArgumentException("Failed to obtain request part: " + partName + ". "+ "The part is missing or multipart processing is not configured. "+ "Check for a MultipartResolver bean or if Servlet 3.0 multipart processing is enabled.");
+    }
   }
 }

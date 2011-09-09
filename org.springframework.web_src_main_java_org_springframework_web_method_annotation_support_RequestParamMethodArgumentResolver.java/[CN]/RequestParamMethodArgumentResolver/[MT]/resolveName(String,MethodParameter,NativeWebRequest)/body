@@ -3,14 +3,17 @@
   HttpServletRequest servletRequest=webRequest.getNativeRequest(HttpServletRequest.class);
   MultipartHttpServletRequest multipartRequest=WebUtils.getNativeRequest(servletRequest,MultipartHttpServletRequest.class);
   if (MultipartFile.class.equals(parameter.getParameterType())) {
-    assertMultipartRequest(multipartRequest,webRequest);
+    assertIsMultipartRequest(servletRequest);
+    Assert.notNull(multipartRequest,"Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
     arg=multipartRequest.getFile(name);
   }
  else   if (isMultipartFileCollection(parameter)) {
-    assertMultipartRequest(multipartRequest,webRequest);
+    assertIsMultipartRequest(servletRequest);
+    Assert.notNull(multipartRequest,"Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
     arg=multipartRequest.getFiles(name);
   }
  else   if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
+    assertIsMultipartRequest(servletRequest);
     arg=servletRequest.getPart(name);
   }
  else {

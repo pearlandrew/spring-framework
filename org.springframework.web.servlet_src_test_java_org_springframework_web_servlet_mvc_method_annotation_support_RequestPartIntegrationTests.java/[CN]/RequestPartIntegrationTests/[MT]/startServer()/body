@@ -3,9 +3,15 @@
   baseUrl="http://localhost:" + port;
   server=new Server(port);
   Context context=new Context(server,"/");
+  Class<?> config=CommonsMultipartResolverTestConfig.class;
   ServletHolder commonsResolverServlet=new ServletHolder(DispatcherServlet.class);
-  commonsResolverServlet.setInitParameter("contextConfigLocation",CommonsMultipartResolverTestConfig.class.getName());
+  commonsResolverServlet.setInitParameter("contextConfigLocation",config.getName());
   commonsResolverServlet.setInitParameter("contextClass",AnnotationConfigWebApplicationContext.class.getName());
-  context.addServlet(commonsResolverServlet,"/commons/*");
+  context.addServlet(commonsResolverServlet,"/commons-resolver/*");
+  config=StandardMultipartResolverTestConfig.class;
+  ServletHolder standardResolverServlet=new ServletHolder(DispatcherServlet.class);
+  standardResolverServlet.setInitParameter("contextConfigLocation",config.getName());
+  standardResolverServlet.setInitParameter("contextClass",AnnotationConfigWebApplicationContext.class.getName());
+  context.addServlet(standardResolverServlet,"/standard-resolver/*");
   server.start();
 }
