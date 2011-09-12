@@ -1,20 +1,24 @@
 {
-  for (Iterator<LifecycleElement> it=this.initMethods.iterator(); it.hasNext(); ) {
-    String methodIdentifier=it.next().getIdentifier();
-    if (!beanDefinition.isExternallyManagedInitMethod(methodIdentifier)) {
-      beanDefinition.registerExternallyManagedInitMethod(methodIdentifier);
-    }
+synchronized (this.initMethods) {
+    for (Iterator<LifecycleElement> it=this.initMethods.iterator(); it.hasNext(); ) {
+      String methodIdentifier=it.next().getIdentifier();
+      if (!beanDefinition.isExternallyManagedInitMethod(methodIdentifier)) {
+        beanDefinition.registerExternallyManagedInitMethod(methodIdentifier);
+      }
  else {
-      it.remove();
+        it.remove();
+      }
     }
   }
-  for (Iterator<LifecycleElement> it=this.destroyMethods.iterator(); it.hasNext(); ) {
-    String methodIdentifier=it.next().getIdentifier();
-    if (!beanDefinition.isExternallyManagedDestroyMethod(methodIdentifier)) {
-      beanDefinition.registerExternallyManagedDestroyMethod(methodIdentifier);
-    }
+synchronized (this.destroyMethods) {
+    for (Iterator<LifecycleElement> it=this.destroyMethods.iterator(); it.hasNext(); ) {
+      String methodIdentifier=it.next().getIdentifier();
+      if (!beanDefinition.isExternallyManagedDestroyMethod(methodIdentifier)) {
+        beanDefinition.registerExternallyManagedDestroyMethod(methodIdentifier);
+      }
  else {
-      it.remove();
+        it.remove();
+      }
     }
   }
 }
