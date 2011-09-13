@@ -1,0 +1,20 @@
+{
+  Assert.notNull(httpUrl,"'httpUrl' must not be null");
+  Matcher m=HTTP_URL_PATTERN.matcher(httpUrl);
+  if (m.matches()) {
+    UriComponentsBuilder builder=new UriComponentsBuilder();
+    builder.scheme(m.group(1));
+    builder.userInfo(m.group(4));
+    builder.host(m.group(5));
+    String port=m.group(7);
+    if (StringUtils.hasLength(port)) {
+      builder.port(Integer.parseInt(port));
+    }
+    builder.path(m.group(8));
+    builder.query(m.group(10));
+    return builder;
+  }
+ else {
+    throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
+  }
+}

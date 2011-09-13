@@ -1,0 +1,20 @@
+{
+  if (source == null) {
+    return null;
+  }
+  if (source.indexOf('{') == -1) {
+    return source;
+  }
+  Matcher matcher=NAMES_PATTERN.matcher(source);
+  StringBuffer sb=new StringBuffer();
+  while (matcher.find()) {
+    String match=matcher.group(1);
+    String variableName=getVariableName(match);
+    Object variableValue=uriVariables.get(variableName);
+    String uriVariableValueString=getVariableValueAsString(variableValue);
+    String replacement=Matcher.quoteReplacement(uriVariableValueString);
+    matcher.appendReplacement(sb,replacement);
+  }
+  matcher.appendTail(sb);
+  return sb.toString();
+}

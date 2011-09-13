@@ -1,0 +1,23 @@
+{
+  Assert.notNull(uriVariables,"'uriVariables' must not be null");
+  String expandedScheme=expandUriComponent(this.scheme,uriVariables);
+  String expandedUserInfo=expandUriComponent(this.userInfo,uriVariables);
+  String expandedHost=expandUriComponent(this.host,uriVariables);
+  List<String> expandedPathSegments=new ArrayList<String>(this.pathSegments.size());
+  for (  String pathSegment : this.pathSegments) {
+    String expandedPathSegment=expandUriComponent(pathSegment,uriVariables);
+    expandedPathSegments.add(expandedPathSegment);
+  }
+  MultiValueMap<String,String> expandedQueryParams=new LinkedMultiValueMap<String,String>(this.queryParams.size());
+  for (  Map.Entry<String,List<String>> entry : this.queryParams.entrySet()) {
+    String expandedName=expandUriComponent(entry.getKey(),uriVariables);
+    List<String> expandedValues=new ArrayList<String>(entry.getValue().size());
+    for (    String value : entry.getValue()) {
+      String expandedValue=expandUriComponent(value,uriVariables);
+      expandedValues.add(expandedValue);
+    }
+    expandedQueryParams.put(expandedName,expandedValues);
+  }
+  String expandedFragment=expandUriComponent(this.fragment,uriVariables);
+  return new UriComponents(expandedScheme,expandedUserInfo,expandedHost,this.port,expandedPathSegments,expandedQueryParams,expandedFragment,false);
+}
