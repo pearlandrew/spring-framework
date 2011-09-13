@@ -1,10 +1,15 @@
 {
   ServletWebRequest webRequest=new ServletWebRequest(request,response);
-  ServletInvocableHandlerMethod requestMappingMethod=createRequestMappingMethod(handlerMethod);
-  ModelFactory modelFactory=getModelFactory(handlerMethod);
+  WebDataBinderFactory binderFactory=getDataBinderFactory(handlerMethod);
+  ServletInvocableHandlerMethod requestMappingMethod=createRequestMappingMethod(handlerMethod,binderFactory);
+  ModelFactory modelFactory=getModelFactory(handlerMethod,binderFactory);
   ModelAndViewContainer mavContainer=new ModelAndViewContainer();
   mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
   modelFactory.initModel(webRequest,mavContainer,requestMappingMethod);
+  if (this.alwaysUseRedirectAttributes) {
+    DataBinder dataBinder=binderFactory.createBinder(webRequest,null,null);
+    mavContainer.setRedirectModel(new RedirectAttributesModelMap(dataBinder));
+  }
   SessionStatus sessionStatus=new SimpleSessionStatus();
   requestMappingMethod.invokeAndHandle(webRequest,mavContainer,sessionStatus);
   modelFactory.updateModel(webRequest,mavContainer,sessionStatus);
