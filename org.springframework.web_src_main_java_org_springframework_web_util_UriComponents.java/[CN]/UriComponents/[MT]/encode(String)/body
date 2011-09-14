@@ -6,11 +6,7 @@
   String encodedScheme=encodeUriComponent(this.scheme,encoding,Type.SCHEME);
   String encodedUserInfo=encodeUriComponent(this.userInfo,encoding,Type.USER_INFO);
   String encodedHost=encodeUriComponent(this.host,encoding,Type.HOST);
-  List<String> encodedPathSegments=new ArrayList<String>(this.pathSegments.size());
-  for (  String pathSegment : this.pathSegments) {
-    String encodedPathSegment=encodeUriComponent(pathSegment,encoding,Type.PATH_SEGMENT);
-    encodedPathSegments.add(encodedPathSegment);
-  }
+  PathComponent encodedPath=path.encode(encoding);
   MultiValueMap<String,String> encodedQueryParams=new LinkedMultiValueMap<String,String>(this.queryParams.size());
   for (  Map.Entry<String,List<String>> entry : this.queryParams.entrySet()) {
     String encodedName=encodeUriComponent(entry.getKey(),encoding,Type.QUERY_PARAM);
@@ -22,5 +18,5 @@
     encodedQueryParams.put(encodedName,encodedValues);
   }
   String encodedFragment=encodeUriComponent(this.fragment,encoding,Type.FRAGMENT);
-  return new UriComponents(encodedScheme,encodedUserInfo,encodedHost,this.port,encodedPathSegments,encodedQueryParams,encodedFragment,true);
+  return new UriComponents(encodedScheme,encodedUserInfo,encodedHost,this.port,encodedPath,encodedQueryParams,encodedFragment,true);
 }
