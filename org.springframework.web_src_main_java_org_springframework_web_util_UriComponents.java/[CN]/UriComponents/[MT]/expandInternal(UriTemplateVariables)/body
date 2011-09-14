@@ -1,0 +1,18 @@
+{
+  String expandedScheme=expandUriComponent(this.scheme,uriVariables);
+  String expandedUserInfo=expandUriComponent(this.userInfo,uriVariables);
+  String expandedHost=expandUriComponent(this.host,uriVariables);
+  PathComponent expandedPath=path.expand(uriVariables);
+  MultiValueMap<String,String> expandedQueryParams=new LinkedMultiValueMap<String,String>(this.queryParams.size());
+  for (  Map.Entry<String,List<String>> entry : this.queryParams.entrySet()) {
+    String expandedName=expandUriComponent(entry.getKey(),uriVariables);
+    List<String> expandedValues=new ArrayList<String>(entry.getValue().size());
+    for (    String value : entry.getValue()) {
+      String expandedValue=expandUriComponent(value,uriVariables);
+      expandedValues.add(expandedValue);
+    }
+    expandedQueryParams.put(expandedName,expandedValues);
+  }
+  String expandedFragment=expandUriComponent(this.fragment,uriVariables);
+  return new UriComponents(expandedScheme,expandedUserInfo,expandedHost,this.port,expandedPath,expandedQueryParams,expandedFragment,false);
+}
