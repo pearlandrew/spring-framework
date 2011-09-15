@@ -6,14 +6,11 @@
   ModelAndViewContainer mavContainer=new ModelAndViewContainer();
   mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
   modelFactory.initModel(webRequest,mavContainer,requestMappingMethod);
-  if (this.alwaysUseRedirectAttributes) {
-    DataBinder dataBinder=binderFactory.createBinder(webRequest,null,null);
-    mavContainer.setRedirectModel(new RedirectAttributesModelMap(dataBinder));
-  }
+  mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
   SessionStatus sessionStatus=new SimpleSessionStatus();
   requestMappingMethod.invokeAndHandle(webRequest,mavContainer,sessionStatus);
   modelFactory.updateModel(webRequest,mavContainer,sessionStatus);
-  if (!mavContainer.isResolveView()) {
+  if (mavContainer.isRequestHandled()) {
     return null;
   }
  else {
