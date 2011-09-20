@@ -4,15 +4,14 @@
   }
 ;
   MappedInterceptor mappedInterceptor=new MappedInterceptor(new String[]{path},interceptor);
-  StaticApplicationContext context=new StaticApplicationContext();
-  context.registerSingleton("handler",handler.getClass());
-  mapping=new TestRequestMappingInfoHandlerMapping();
-  mapping.setInterceptors(new Object[]{mappedInterceptor});
-  mapping.setApplicationContext(context);
-  HandlerExecutionChain chain=mapping.getHandler(new MockHttpServletRequest("GET",path));
+  TestRequestMappingInfoHandlerMapping hm=new TestRequestMappingInfoHandlerMapping();
+  hm.registerHandler(this.handler);
+  hm.setInterceptors(new Object[]{mappedInterceptor});
+  hm.setApplicationContext(new StaticWebApplicationContext());
+  HandlerExecutionChain chain=hm.getHandler(new MockHttpServletRequest("GET",path));
   assertNotNull(chain);
   assertNotNull(chain.getInterceptors());
   assertSame(interceptor,chain.getInterceptors()[0]);
-  chain=mapping.getHandler(new MockHttpServletRequest("GET","/invalid"));
+  chain=hm.getHandler(new MockHttpServletRequest("GET","/invalid"));
   assertNull(chain);
 }
