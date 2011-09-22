@@ -2,21 +2,16 @@
   if (returnValue == null) {
     return;
   }
-  if (returnValue instanceof String) {
-    String viewName=(String)returnValue;
-    mavContainer.setViewName(viewName);
-    if (isRedirectViewName(viewName)) {
-      mavContainer.setUseRedirectModel(true);
-    }
-  }
  else   if (returnValue instanceof View) {
     View view=(View)returnValue;
     mavContainer.setView(view);
-    if (isRedirectView(view)) {
-      mavContainer.setUseRedirectModel(true);
+    if (view instanceof SmartView) {
+      if (((SmartView)view).isRedirectView()) {
+        mavContainer.setRedirectModelScenario(true);
+      }
     }
   }
  else {
-    throw new UnsupportedOperationException("Unknown return type: " + returnType.getParameterType().getName() + " in method: "+ returnType.getMethod());
+    throw new UnsupportedOperationException("Unexpected return type: " + returnType.getParameterType().getName() + " in method: "+ returnType.getMethod());
   }
 }

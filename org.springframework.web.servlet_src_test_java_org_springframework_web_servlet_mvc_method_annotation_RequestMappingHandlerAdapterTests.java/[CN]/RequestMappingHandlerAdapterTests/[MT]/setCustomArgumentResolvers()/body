@@ -1,11 +1,7 @@
 {
-  HandlerMethodArgumentResolver resolver=new TestHanderMethodArgumentResolver();
-  handlerAdapter.setCustomArgumentResolvers(Arrays.asList(resolver));
-  handlerAdapter.afterPropertiesSet();
-  HandlerMethodArgumentResolverComposite composite=(HandlerMethodArgumentResolverComposite)new DirectFieldAccessor(handlerAdapter).getPropertyValue("argumentResolvers");
-  List<HandlerMethodArgumentResolver> actual=(List<HandlerMethodArgumentResolver>)new DirectFieldAccessor(composite).getPropertyValue("argumentResolvers");
-  assertTrue(actual.contains(resolver));
-  composite=(HandlerMethodArgumentResolverComposite)new DirectFieldAccessor(handlerAdapter).getPropertyValue("initBinderArgumentResolvers");
-  actual=(List<HandlerMethodArgumentResolver>)new DirectFieldAccessor(composite).getPropertyValue("argumentResolvers");
-  assertTrue(actual.contains(resolver));
+  HandlerMethodArgumentResolver resolver=new ServletRequestMethodArgumentResolver();
+  this.handlerAdapter.setCustomArgumentResolvers(Arrays.asList(resolver));
+  this.handlerAdapter.afterPropertiesSet();
+  assertTrue(this.handlerAdapter.getArgumentResolvers().getResolvers().contains(resolver));
+  assertMethodProcessorCount(RESOLVER_COUNT + 1,INIT_BINDER_RESOLVER_COUNT + 1,HANDLER_COUNT);
 }

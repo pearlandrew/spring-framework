@@ -3,16 +3,15 @@
   String attrValue="sessionAttrValue";
   ModelAndViewContainer mavContainer=new ModelAndViewContainer();
   mavContainer.addAttribute(attrName,attrValue);
+  mavContainer.getSessionStatus().setComplete();
   sessionAttributeStore.storeAttribute(webRequest,attrName,attrValue);
   assertTrue(sessionAttrsHandler.isHandlerSessionAttribute(attrName,null));
   WebDataBinder dataBinder=new WebDataBinder(attrValue,attrName);
   WebDataBinderFactory binderFactory=createMock(WebDataBinderFactory.class);
   expect(binderFactory.createBinder(webRequest,attrValue,attrName)).andReturn(dataBinder);
   replay(binderFactory);
-  SessionStatus sessionStatus=new SimpleSessionStatus();
-  sessionStatus.setComplete();
   ModelFactory modelFactory=new ModelFactory(null,binderFactory,sessionAttrsHandler);
-  modelFactory.updateModel(webRequest,mavContainer,sessionStatus);
+  modelFactory.updateModel(webRequest,mavContainer);
   assertEquals(attrValue,mavContainer.getModel().get(attrName));
   assertNull(sessionAttributeStore.retrieveAttribute(webRequest,attrName));
   verify(binderFactory);

@@ -1,13 +1,13 @@
 {
   HandlerMethodArgumentResolver redirectAttributesResolver=new RedirectAttributesMethodArgumentResolver();
   HandlerMethodArgumentResolver modelResolver=new ModelMethodProcessor();
-  HandlerMethodReturnValueHandler viewHandler=new ViewMethodReturnValueHandler();
+  HandlerMethodReturnValueHandler viewHandler=new ViewNameMethodReturnValueHandler();
   handlerAdapter.setArgumentResolvers(Arrays.asList(redirectAttributesResolver,modelResolver));
   handlerAdapter.setReturnValueHandlers(Arrays.asList(viewHandler));
   handlerAdapter.setIgnoreDefaultModelOnRedirect(true);
   handlerAdapter.afterPropertiesSet();
   request.setAttribute(FlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE,new FlashMap());
-  HandlerMethod handlerMethod=handlerMethod(new RedirectAttributeHandler(),"handle",Model.class);
+  HandlerMethod handlerMethod=handlerMethod(new RedirectAttributeController(),"handle",Model.class);
   ModelAndView mav=handlerAdapter.handle(request,response,handlerMethod);
   assertTrue("Without RedirectAttributes arg, model should be empty",mav.getModel().isEmpty());
 }
