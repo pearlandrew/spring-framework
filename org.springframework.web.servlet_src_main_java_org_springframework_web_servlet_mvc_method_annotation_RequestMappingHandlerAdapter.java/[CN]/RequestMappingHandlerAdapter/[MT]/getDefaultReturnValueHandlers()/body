@@ -11,6 +11,11 @@
   if (getCustomReturnValueHandlers() != null) {
     handlers.addAll(getCustomReturnValueHandlers());
   }
-  handlers.add(new DefaultMethodReturnValueHandler(getModelAndViewResolvers()));
+  if (!CollectionUtils.isEmpty(getModelAndViewResolvers())) {
+    handlers.add(new ModelAndViewResolverMethodReturnValueHandler(getModelAndViewResolvers()));
+  }
+ else {
+    handlers.add(new ModelAttributeMethodProcessor(true));
+  }
   return handlers;
 }

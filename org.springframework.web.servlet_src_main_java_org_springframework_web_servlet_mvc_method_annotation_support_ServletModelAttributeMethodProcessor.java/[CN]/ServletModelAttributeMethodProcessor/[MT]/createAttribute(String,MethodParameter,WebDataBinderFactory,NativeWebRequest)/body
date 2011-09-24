@@ -1,13 +1,12 @@
 {
-  Map<String,String> uriTemplateVars=(Map<String,String>)request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE,RequestAttributes.SCOPE_REQUEST);
-  if (uriTemplateVars != null && uriTemplateVars.containsKey(attributeName)) {
+  Map<String,String> uriVariables=getUriTemplateVariables(request);
+  if (uriVariables.containsKey(attributeName)) {
     try {
-      String var=uriTemplateVars.get(attributeName);
       DataBinder binder=binderFactory.createBinder(request,null,attributeName);
-      return binder.convertIfNecessary(var,parameter.getParameterType());
+      return binder.convertIfNecessary(uriVariables.get(attributeName),parameter.getParameterType());
     }
  catch (    Exception exception) {
-      logger.info("Model attribute '" + attributeName + "' matches to a URI template variable name. "+ "The URI template variable however couldn't converted to a model attribute instance: "+ exception.getMessage());
+      logger.info("Model attribute name '" + attributeName + "' matches to a URI template variable name "+ "but the variable String value could not be converted into an attribute instance: "+ exception.getMessage());
     }
   }
   return super.createAttribute(attributeName,parameter,binderFactory,request);
