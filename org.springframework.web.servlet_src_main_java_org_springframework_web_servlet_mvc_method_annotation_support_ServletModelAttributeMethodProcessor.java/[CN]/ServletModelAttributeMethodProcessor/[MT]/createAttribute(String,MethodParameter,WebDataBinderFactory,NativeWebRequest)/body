@@ -1,8 +1,10 @@
 {
-  Map<String,String> uriVariables=getUriTemplateVariables(request);
-  if (uriVariables.containsKey(attributeName)) {
-    DataBinder binder=binderFactory.createBinder(request,null,attributeName);
-    return binder.convertIfNecessary(uriVariables.get(attributeName),parameter.getParameterType());
+  String value=getRequestValueForAttribute(attributeName,request);
+  if (value != null) {
+    Object attribute=createAttributeFromRequestValue(value,attributeName,parameter,binderFactory,request);
+    if (attribute != null) {
+      return attribute;
+    }
   }
   return super.createAttribute(attributeName,parameter,binderFactory,request);
 }
