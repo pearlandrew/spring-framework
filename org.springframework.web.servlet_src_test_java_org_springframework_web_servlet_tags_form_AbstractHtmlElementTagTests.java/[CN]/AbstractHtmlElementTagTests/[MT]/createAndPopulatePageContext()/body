@@ -1,9 +1,11 @@
 {
   MockPageContext pageContext=createPageContext();
   MockHttpServletRequest request=(MockHttpServletRequest)pageContext.getRequest();
-  RequestContext requestContext=new JspAwareRequestContext(pageContext);
-  pageContext.setAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE,requestContext);
+  StaticWebApplicationContext wac=(StaticWebApplicationContext)RequestContextUtils.getWebApplicationContext(request);
+  wac.registerSingleton("requestDataValueProcessor",DelegatingRequestDataValueProcessor.class);
   extendRequest(request);
   extendPageContext(pageContext);
+  RequestContext requestContext=new JspAwareRequestContext(pageContext);
+  pageContext.setAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE,requestContext);
   return pageContext;
 }

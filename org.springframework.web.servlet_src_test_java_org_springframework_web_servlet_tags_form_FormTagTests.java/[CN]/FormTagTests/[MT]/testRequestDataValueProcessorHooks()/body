@@ -1,0 +1,15 @@
+{
+  String action="/my/form?foo=bar";
+  RequestDataValueProcessor processor=getMockRequestDataValueProcessor();
+  expect(processor.processAction(this.request,action)).andReturn(action);
+  expect(processor.getExtraHiddenFields(this.request)).andReturn(Collections.singletonMap("key","value"));
+  replay(processor);
+  this.tag.doStartTag();
+  this.tag.doEndTag();
+  this.tag.doFinally();
+  String output=getOutput();
+  assertEquals("<input type=\"hidden\" name=\"key\" value=\"value\"></input>",getInputTag(output));
+  assertFormTagOpened(output);
+  assertFormTagClosed(output);
+  verify(processor);
+}
