@@ -1,0 +1,18 @@
+{
+  try {
+    CallableStatement cstmt=null;
+    try {
+      cstmt=databaseMetaData.getConnection().prepareCall("{? = call sys_context('USERENV', 'CURRENT_SCHEMA')}");
+      cstmt.registerOutParameter(1,Types.VARCHAR);
+      cstmt.execute();
+      this.defaultSchema=cstmt.getString(1);
+    }
+  finally {
+      if (cstmt != null) {
+        cstmt.close();
+      }
+    }
+  }
+ catch (  Exception ignore) {
+  }
+}

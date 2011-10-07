@@ -36,15 +36,18 @@
  else {
     TableMetaData tmd;
     if (schemaName == null) {
-      tmd=tableMeta.get(userName.toUpperCase());
+      tmd=tableMeta.get(getDefaultSchema());
+      if (tmd == null) {
+        tmd=tableMeta.get(userName.toUpperCase());
+      }
       if (tmd == null) {
         tmd=tableMeta.get("PUBLIC");
-        if (tmd == null) {
-          tmd=tableMeta.get("DBO");
-        }
-        if (tmd == null) {
-          throw new DataAccessResourceFailureException("Unable to locate table meta data for '" + tableName + "' in the default schema");
-        }
+      }
+      if (tmd == null) {
+        tmd=tableMeta.get("DBO");
+      }
+      if (tmd == null) {
+        throw new DataAccessResourceFailureException("Unable to locate table meta data for '" + tableName + "' in the default schema");
       }
     }
  else {
