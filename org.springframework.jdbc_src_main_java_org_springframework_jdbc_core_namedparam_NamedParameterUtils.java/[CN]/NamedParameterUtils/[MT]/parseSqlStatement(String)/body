@@ -2,10 +2,7 @@
   Assert.notNull(sql,"SQL must not be null");
   Set<String> namedParameters=new HashSet<String>();
   String sqlToUse=sql;
-  if (sql.contains("\\:")) {
-    sqlToUse=sql.replace("\\:",":");
-  }
-  ParsedSql parsedSql=new ParsedSql(sqlToUse);
+  List<ParameterHolder> parameterList=new ArrayList<ParameterHolder>();
   char[] statement=sql.toCharArray();
   int namedParameterCount=0;
   int unnamedParameterCount=0;
@@ -35,7 +32,7 @@
         if (j - i > 3) {
           parameter=sql.substring(i + 2,j);
           namedParameterCount=addNewNamedParameter(namedParameters,namedParameterCount,parameter);
-          totalParameterCount=addNamedParameter(parsedSql,totalParameterCount,escapes,i,j + 1,parameter);
+          totalParameterCount=addNamedParameter(parameterList,totalParameterCount,escapes,i,j + 1,parameter);
         }
         j++;
       }
@@ -46,7 +43,7 @@
         if (j - i > 1) {
           parameter=sql.substring(i + 1,j);
           namedParameterCount=addNewNamedParameter(namedParameters,namedParameterCount,parameter);
-          totalParameterCount=addNamedParameter(parsedSql,totalParameterCount,escapes,i,j,parameter);
+          totalParameterCount=addNamedParameter(parameterList,totalParameterCount,escapes,i,j,parameter);
         }
       }
       i=j - 1;
@@ -55,6 +52,7 @@
       if (c == '\\') {
         int j=i + 1;
         if (j < statement.length && statement[j] == ':') {
+          sqlToUse=sqlToUse.substring(0,i - escapes) + sqlToUse.substring(i - escapes + 1);
           escapes++;
           i=i + 2;
           continue;
@@ -66,6 +64,10 @@
       }
     }
     i++;
+  }
+  ParsedSql parsedSql=new ParsedSql(sqlToUse);
+  for (  ParameterHolder ph : parameterList) {
+    parsedSql.addNamedParameter(ph.getParameterName(),ph.getStartIndex(),ph.getEndIndex());
   }
   parsedSql.setNamedParameterCount(namedParameterCount);
   parsedSql.setUnnamedParameterCount(unnamedParameterCount);
