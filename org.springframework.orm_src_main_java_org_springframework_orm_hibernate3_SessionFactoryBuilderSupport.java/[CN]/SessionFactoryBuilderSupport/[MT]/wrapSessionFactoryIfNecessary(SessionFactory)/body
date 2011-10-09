@@ -1,11 +1,8 @@
 {
-  return (SessionFactory)Proxy.newProxyInstance(this.beanClassLoader,new Class<?>[]{SessionFactory.class,SessionFactoryImplementor.class,InfrastructureProxy.class,DisposableBean.class},new InvocationHandler(){
+  return (SessionFactory)Proxy.newProxyInstance(this.beanClassLoader,new Class<?>[]{SessionFactory.class,SessionFactoryImplementor.class,DisposableBean.class},new InvocationHandler(){
     public Object invoke(    Object proxy,    Method method,    Object[] args) throws Throwable {
       if (ReflectionUtils.isToStringMethod(method)) {
         return String.format("DisposableBean proxy for SessionFactory [%s]",rawSf.toString());
-      }
-      if (method.equals(InfrastructureProxy.class.getMethod("getWrappedObject"))) {
-        return rawSf;
       }
       if (method.equals(DisposableBean.class.getMethod("destroy"))) {
         closeHibernateSessionFactory(SessionFactoryBuilderSupport.this,rawSf);
