@@ -1,8 +1,8 @@
 {
   final CacheProvider cacheProvider=new NoCacheProvider();
-  final List<String> invocations=new ArrayList<String>();
+  final List invocations=new ArrayList();
   LocalSessionFactoryBean sfb=new LocalSessionFactoryBean(){
-    @Override protected Configuration newConfiguration(){
+    protected Configuration newConfiguration(){
       return new Configuration(){
         public Configuration addInputStream(        InputStream is){
           try {
@@ -16,9 +16,9 @@
       }
 ;
     }
-    @Override protected SessionFactory newSessionFactory(){
-      assertEquals(LocalCacheProviderProxy.class.getName(),this.getConfiguration().getProperty(Environment.CACHE_PROVIDER));
-      assertSame(cacheProvider,SessionFactoryBeanDelegate.getConfigTimeCacheProvider());
+    protected SessionFactory newSessionFactory(    Configuration config){
+      assertEquals(LocalCacheProviderProxy.class.getName(),config.getProperty(Environment.CACHE_PROVIDER));
+      assertSame(cacheProvider,LocalSessionFactoryBean.getConfigTimeCacheProvider());
       invocations.add("newSessionFactory");
       return null;
     }

@@ -1,0 +1,25 @@
+{
+  logger.info("Creating database schema for Hibernate SessionFactory");
+  DataSource dataSource=getDataSource();
+  if (dataSource != null) {
+    configTimeDataSourceHolder.set(dataSource);
+  }
+  try {
+    HibernateTemplate hibernateTemplate=new HibernateTemplate(getSessionFactory());
+    hibernateTemplate.execute(new HibernateCallback<Object>(){
+      public Object doInHibernate(      Session session) throws HibernateException, SQLException {
+        Connection con=session.connection();
+        Dialect dialect=Dialect.getDialect(getConfiguration().getProperties());
+        String[] sql=getConfiguration().generateSchemaCreationScript(dialect);
+        executeSchemaScript(con,sql);
+        return null;
+      }
+    }
+);
+  }
+  finally {
+    if (dataSource != null) {
+      configTimeDataSourceHolder.remove();
+    }
+  }
+}

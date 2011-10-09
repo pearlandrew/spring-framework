@@ -2,7 +2,7 @@
   final RegionFactory regionFactory=new NoCachingRegionFactory(null);
   final List invocations=new ArrayList();
   LocalSessionFactoryBean sfb=new LocalSessionFactoryBean(){
-    @Override protected Configuration newConfiguration(){
+    protected Configuration newConfiguration(){
       return new Configuration(){
         public Configuration addInputStream(        InputStream is){
           try {
@@ -16,9 +16,9 @@
       }
 ;
     }
-    @Override protected SessionFactory newSessionFactory(){
-      assertEquals(LocalRegionFactoryProxy.class.getName(),this.getConfiguration().getProperty(Environment.CACHE_REGION_FACTORY));
-      assertSame(regionFactory,SessionFactoryBuilderSupport.getConfigTimeRegionFactory());
+    protected SessionFactory newSessionFactory(    Configuration config){
+      assertEquals(LocalRegionFactoryProxy.class.getName(),config.getProperty(Environment.CACHE_REGION_FACTORY));
+      assertSame(regionFactory,LocalSessionFactoryBean.getConfigTimeRegionFactory());
       invocations.add("newSessionFactory");
       return null;
     }
