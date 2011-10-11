@@ -12,10 +12,12 @@
       previousFlushMode=flushMode;
     }
   }
-  EntityManagerFactory emf=entityManager.getEntityManagerFactory();
-  if (emf instanceof HibernateEntityManagerFactory) {
-    SessionFactory sf=((HibernateEntityManagerFactory)emf).getSessionFactory();
-    TransactionSynchronizationManager.bindResource(sf,session);
+  if (getEntityManagerFactoryMethod != null) {
+    EntityManagerFactory emf=(EntityManagerFactory)ReflectionUtils.invokeMethod(getEntityManagerFactoryMethod,entityManager);
+    if (emf instanceof HibernateEntityManagerFactory) {
+      SessionFactory sf=((HibernateEntityManagerFactory)emf).getSessionFactory();
+      TransactionSynchronizationManager.bindResource(sf,session);
+    }
   }
   return new SessionTransactionData(session,previousFlushMode);
 }
