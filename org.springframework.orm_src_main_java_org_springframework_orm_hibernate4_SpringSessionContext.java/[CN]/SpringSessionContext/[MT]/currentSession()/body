@@ -1,0 +1,30 @@
+{
+  Object value=TransactionSynchronizationManager.getResource(this.sessionFactory);
+  if (value instanceof Session) {
+    return (Session)value;
+  }
+ else   if (value instanceof SessionHolder) {
+    SessionHolder sessionHolder=(SessionHolder)value;
+    Session session=sessionHolder.getSession();
+    if (TransactionSynchronizationManager.isSynchronizationActive() && !sessionHolder.isSynchronizedWithTransaction()) {
+      TransactionSynchronizationManager.registerSynchronization(new SpringSessionSynchronization(sessionHolder,this.sessionFactory));
+      sessionHolder.setSynchronizedWithTransaction(true);
+      FlushMode flushMode=session.getFlushMode();
+      if (FlushMode.isManualFlushMode(flushMode) && !TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+        session.setFlushMode(FlushMode.AUTO);
+        sessionHolder.setPreviousFlushMode(flushMode);
+      }
+    }
+    return session;
+  }
+ else   if (this.jtaSessionContext != null) {
+    Session session=this.jtaSessionContext.currentSession();
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      TransactionSynchronizationManager.registerSynchronization(new SpringFlushSynchronization(session));
+    }
+    return session;
+  }
+ else {
+    throw new HibernateException("No Session found for current thread");
+  }
+}

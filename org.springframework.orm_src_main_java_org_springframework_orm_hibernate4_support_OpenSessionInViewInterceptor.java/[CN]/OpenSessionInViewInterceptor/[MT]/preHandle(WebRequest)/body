@@ -1,0 +1,13 @@
+{
+  if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
+    String participateAttributeName=getParticipateAttributeName();
+    Integer count=(Integer)request.getAttribute(participateAttributeName,WebRequest.SCOPE_REQUEST);
+    int newCount=(count != null ? count + 1 : 1);
+    request.setAttribute(getParticipateAttributeName(),newCount,WebRequest.SCOPE_REQUEST);
+  }
+ else {
+    logger.debug("Opening Hibernate Session in OpenSessionInViewInterceptor");
+    Session session=openSession();
+    TransactionSynchronizationManager.bindResource(getSessionFactory(),new SessionHolder(session));
+  }
+}

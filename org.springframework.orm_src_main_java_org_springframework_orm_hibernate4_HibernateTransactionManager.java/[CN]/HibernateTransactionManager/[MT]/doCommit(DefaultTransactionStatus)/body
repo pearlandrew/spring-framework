@@ -1,0 +1,15 @@
+{
+  HibernateTransactionObject txObject=(HibernateTransactionObject)status.getTransaction();
+  if (status.isDebug()) {
+    logger.debug("Committing Hibernate transaction on Session [" + txObject.getSessionHolder().getSession() + "]");
+  }
+  try {
+    txObject.getSessionHolder().getTransaction().commit();
+  }
+ catch (  org.hibernate.TransactionException ex) {
+    throw new TransactionSystemException("Could not commit Hibernate transaction",ex);
+  }
+catch (  HibernateException ex) {
+    throw convertHibernateAccessException(ex);
+  }
+}

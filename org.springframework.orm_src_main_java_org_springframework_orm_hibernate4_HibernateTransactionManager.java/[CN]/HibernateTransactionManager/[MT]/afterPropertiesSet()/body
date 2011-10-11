@@ -1,0 +1,14 @@
+{
+  if (getSessionFactory() == null) {
+    throw new IllegalArgumentException("Property 'sessionFactory' is required");
+  }
+  if (this.autodetectDataSource && getDataSource() == null) {
+    DataSource sfds=SessionFactoryUtils.getDataSource(getSessionFactory());
+    if (sfds != null) {
+      if (logger.isInfoEnabled()) {
+        logger.info("Using DataSource [" + sfds + "] of Hibernate SessionFactory for HibernateTransactionManager");
+      }
+      setDataSource(sfds);
+    }
+  }
+}
