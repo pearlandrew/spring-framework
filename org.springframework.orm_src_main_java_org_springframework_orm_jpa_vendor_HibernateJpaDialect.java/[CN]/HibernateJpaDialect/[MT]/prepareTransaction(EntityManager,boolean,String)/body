@@ -12,5 +12,10 @@
       previousFlushMode=flushMode;
     }
   }
+  EntityManagerFactory emf=entityManager.getEntityManagerFactory();
+  if (emf instanceof HibernateEntityManagerFactory) {
+    SessionFactory sf=((HibernateEntityManagerFactory)emf).getSessionFactory();
+    TransactionSynchronizationManager.bindResource(sf,session);
+  }
   return new SessionTransactionData(session,previousFlushMode);
 }
