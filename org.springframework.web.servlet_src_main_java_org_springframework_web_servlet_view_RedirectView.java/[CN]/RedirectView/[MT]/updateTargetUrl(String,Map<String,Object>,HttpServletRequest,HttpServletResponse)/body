@@ -1,0 +1,19 @@
+{
+  RequestContext requestContext=null;
+  if (getWebApplicationContext() != null) {
+    requestContext=createRequestContext(request,response,model);
+  }
+ else {
+    WebApplicationContext wac=ContextLoader.getCurrentWebApplicationContext();
+    if (wac != null && wac.getServletContext() != null) {
+      requestContext=new RequestContext(request,response,wac.getServletContext(),model);
+    }
+  }
+  if (requestContext != null) {
+    RequestDataValueProcessor processor=requestContext.getRequestDataValueProcessor();
+    if (processor != null) {
+      targetUrl=processor.processUrl(request,targetUrl);
+    }
+  }
+  return targetUrl;
+}

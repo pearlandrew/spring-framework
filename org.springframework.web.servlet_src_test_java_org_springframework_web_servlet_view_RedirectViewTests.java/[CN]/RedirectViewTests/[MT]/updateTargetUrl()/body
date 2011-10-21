@@ -1,0 +1,18 @@
+{
+  StaticWebApplicationContext wac=new StaticWebApplicationContext();
+  wac.registerSingleton("requestDataValueProcessor",RequestDataValueProcessorWrapper.class);
+  wac.setServletContext(new MockServletContext());
+  wac.refresh();
+  RequestDataValueProcessor mockProcessor=createMock(RequestDataValueProcessor.class);
+  wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);
+  RedirectView rv=new RedirectView();
+  rv.setApplicationContext(wac);
+  rv.setUrl("/path");
+  HttpServletRequest request=new MockHttpServletRequest();
+  request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE,wac);
+  HttpServletResponse response=new MockHttpServletResponse();
+  EasyMock.expect(mockProcessor.processUrl(request,"/path")).andReturn("/path?key=123");
+  EasyMock.replay(mockProcessor);
+  rv.render(new ModelMap(),request,response);
+  EasyMock.verify(mockProcessor);
+}
