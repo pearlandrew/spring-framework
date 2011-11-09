@@ -1,0 +1,14 @@
+{
+  String methodName="multiCacheAndEvict";
+  Cache primary=cm.getCache("primary");
+  Cache secondary=cm.getCache("secondary");
+  Object key=Integer.valueOf(1);
+  secondary.put(key,key);
+  assertNull(secondary.get(methodName));
+  assertSame(key,secondary.get(key).get());
+  Object r1=service.multiCacheAndEvict(key);
+  assertSame(r1,service.multiCacheAndEvict(key));
+  assertSame(r1,primary.get(methodName).get());
+  assertNull(secondary.get(methodName));
+  assertNull(secondary.get(key));
+}

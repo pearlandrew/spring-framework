@@ -1,0 +1,25 @@
+{
+  Collection<CacheOperation> ops=null;
+  Cacheable[] cacheables=ann.cacheable();
+  if (!ObjectUtils.isEmpty(cacheables)) {
+    ops=lazyInit(ops);
+    for (    Cacheable cacheable : cacheables) {
+      ops.add(parseCacheableAnnotation(ae,cacheable));
+    }
+  }
+  CacheEvict[] evicts=ann.evict();
+  if (!ObjectUtils.isEmpty(evicts)) {
+    ops=lazyInit(ops);
+    for (    CacheEvict evict : evicts) {
+      ops.add(parseEvictAnnotation(ae,evict));
+    }
+  }
+  CachePut[] updates=ann.put();
+  if (!ObjectUtils.isEmpty(updates)) {
+    ops=lazyInit(ops);
+    for (    CachePut update : updates) {
+      ops.add(parseUpdateAnnotation(ae,update));
+    }
+  }
+  return ops;
+}
