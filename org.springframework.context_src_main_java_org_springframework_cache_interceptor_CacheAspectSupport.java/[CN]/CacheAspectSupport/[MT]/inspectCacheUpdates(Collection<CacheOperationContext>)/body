@@ -1,0 +1,24 @@
+{
+  Map<CacheOperationContext,Object> cUpdates=new LinkedHashMap<CacheOperationContext,Object>(updates.size());
+  if (!updates.isEmpty()) {
+    boolean log=logger.isTraceEnabled();
+    for (    CacheOperationContext context : updates) {
+      if (context.isConditionPassing()) {
+        Object key=context.generateKey();
+        if (log) {
+          logger.trace("Computed cache key " + key + " for definition "+ context.operation);
+        }
+        if (key == null) {
+          throw new IllegalArgumentException("Null key returned for cache definition (maybe you are using named params on classes without debug info?) " + context.operation);
+        }
+        cUpdates.put(context,key);
+      }
+ else {
+        if (log) {
+          logger.trace("Cache condition failed on method " + context.method + " for definition "+ context.operation);
+        }
+      }
+    }
+  }
+  return cUpdates;
+}

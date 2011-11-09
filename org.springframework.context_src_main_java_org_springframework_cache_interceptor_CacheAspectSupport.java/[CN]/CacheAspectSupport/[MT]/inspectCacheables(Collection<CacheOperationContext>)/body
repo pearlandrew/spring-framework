@@ -1,0 +1,45 @@
+{
+  Map<CacheOperationContext,Object> cUpdates=new LinkedHashMap<CacheOperationContext,Object>(cacheables.size());
+  boolean updateRequire=false;
+  Object retVal=null;
+  if (!cacheables.isEmpty()) {
+    boolean log=logger.isTraceEnabled();
+    boolean atLeastOnePassed=false;
+    for (    CacheOperationContext context : cacheables) {
+      if (context.isConditionPassing()) {
+        atLeastOnePassed=true;
+        Object key=context.generateKey();
+        if (log) {
+          logger.trace("Computed cache key " + key + " for definition "+ context.operation);
+        }
+        if (key == null) {
+          throw new IllegalArgumentException("Null key returned for cache definition (maybe you are using named params on classes without debug info?) " + context.operation);
+        }
+        cUpdates.put(context,key);
+        boolean localCacheHit=false;
+        if (!updateRequire) {
+          for (          Cache cache : context.getCaches()) {
+            Cache.ValueWrapper wrapper=cache.get(key);
+            if (wrapper != null) {
+              retVal=wrapper.get();
+              localCacheHit=true;
+              break;
+            }
+          }
+        }
+        if (!localCacheHit) {
+          updateRequire=true;
+        }
+      }
+ else {
+        if (log) {
+          logger.trace("Cache condition failed on method " + context.method + " for definition "+ context.operation);
+        }
+      }
+    }
+    if (atLeastOnePassed) {
+      return new CacheStatus(cUpdates,updateRequire,retVal);
+    }
+  }
+  return null;
+}

@@ -1,0 +1,22 @@
+{
+  Map<String,Collection<CacheOperationContext>> map=new LinkedHashMap<String,Collection<CacheOperationContext>>(3);
+  Collection<CacheOperationContext> cacheables=new ArrayList<CacheOperationContext>();
+  Collection<CacheOperationContext> evicts=new ArrayList<CacheOperationContext>();
+  Collection<CacheOperationContext> updates=new ArrayList<CacheOperationContext>();
+  for (  CacheOperation cacheOperation : cacheOp) {
+    CacheOperationContext opContext=getOperationContext(cacheOperation,method,args,target,targetClass);
+    if (cacheOperation instanceof CacheableOperation) {
+      cacheables.add(opContext);
+    }
+    if (cacheOperation instanceof CacheEvictOperation) {
+      evicts.add(opContext);
+    }
+    if (cacheOperation instanceof CacheUpdateOperation) {
+      updates.add(opContext);
+    }
+  }
+  map.put(CACHEABLE,cacheables);
+  map.put(EVICT,evicts);
+  map.put(UPDATE,updates);
+  return map;
+}

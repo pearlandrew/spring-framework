@@ -1,0 +1,24 @@
+{
+  Collection<CacheOperation> ops=null;
+  Cacheable cache=AnnotationUtils.getAnnotation(ae,Cacheable.class);
+  if (cache != null) {
+    ops=lazyInit(ops);
+    ops.add(parseCacheableAnnotation(ae,cache));
+  }
+  CacheEvict evict=AnnotationUtils.getAnnotation(ae,CacheEvict.class);
+  if (evict != null) {
+    ops=lazyInit(ops);
+    ops.add(parseEvictAnnotation(ae,evict));
+  }
+  CacheUpdate update=AnnotationUtils.getAnnotation(ae,CacheUpdate.class);
+  if (update != null) {
+    ops=lazyInit(ops);
+    ops.add(parseUpdateAnnotation(ae,update));
+  }
+  CacheDefinition definition=AnnotationUtils.getAnnotation(ae,CacheDefinition.class);
+  if (definition != null) {
+    ops=lazyInit(ops);
+    ops.addAll(parseDefinitionAnnotation(ae,definition));
+  }
+  return ops;
+}
