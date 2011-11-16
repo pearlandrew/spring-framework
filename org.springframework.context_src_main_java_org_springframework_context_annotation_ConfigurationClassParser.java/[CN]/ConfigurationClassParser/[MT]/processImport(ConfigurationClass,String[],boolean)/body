@@ -10,8 +10,16 @@
       if (new AssignableTypeFilter(ImportSelector.class).match(reader,metadataReaderFactory)) {
         try {
           ImportSelector selector=BeanUtils.instantiateClass(Class.forName(candidate),ImportSelector.class);
-          ImportSelectorContext context=new ImportSelectorContext(importingClassMetadata,this.registry);
-          processImport(configClass,selector.selectImports(context),false);
+          processImport(configClass,selector.selectImports(importingClassMetadata),false);
+        }
+ catch (        ClassNotFoundException ex) {
+          throw new IllegalStateException(ex);
+        }
+      }
+ else       if (new AssignableTypeFilter(ImportBeanDefinitionRegistrar.class).match(reader,metadataReaderFactory)) {
+        try {
+          ImportBeanDefinitionRegistrar registrar=BeanUtils.instantiateClass(Class.forName(candidate),ImportBeanDefinitionRegistrar.class);
+          registrar.registerBeanDefinitions(importingClassMetadata,registry);
         }
  catch (        ClassNotFoundException ex) {
           throw new IllegalStateException(ex);
