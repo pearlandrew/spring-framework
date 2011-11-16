@@ -1,0 +1,13 @@
+{
+  Class<?> annoType=GenericTypeResolver.resolveTypeArgument(getClass(),AdviceModeImportSelector.class);
+  Map<String,Object> attributes=importingClassMetadata.getAnnotationAttributes(annoType.getName());
+  Assert.notNull(attributes,String.format("@%s is not present on importing class '%s' as expected",annoType.getSimpleName(),importingClassMetadata.getClassName()));
+  String modeAttrName=getAdviceModeAttributeName();
+  Assert.hasText(modeAttrName);
+  Object adviceMode=attributes.get(modeAttrName);
+  Assert.notNull(adviceMode,String.format("Advice mode attribute @%s#%s() does not exist",annoType.getSimpleName(),modeAttrName));
+  Assert.isInstanceOf(AdviceMode.class,adviceMode,String.format("Incorrect type for advice mode attribute '@%s#%s()': ",annoType.getSimpleName(),modeAttrName));
+  String[] imports=selectImports((AdviceMode)adviceMode);
+  Assert.notNull(imports,String.format("Unknown AdviceMode: '%s'",adviceMode));
+  return imports;
+}
