@@ -1,3 +1,14 @@
 {
   this.contentType=contentType;
+  if (contentType != null) {
+    int charsetIndex=contentType.toLowerCase().indexOf(CHARSET_PREFIX);
+    if (charsetIndex != -1) {
+      String encoding=contentType.substring(charsetIndex + CHARSET_PREFIX.length());
+      this.characterEncoding=encoding;
+    }
+ else     if (this.characterEncoding != null) {
+      this.contentType+=";" + CHARSET_PREFIX + this.characterEncoding;
+    }
+    doAddHeaderValue(CONTENT_TYPE_HEADER,this.contentType,true);
+  }
 }
