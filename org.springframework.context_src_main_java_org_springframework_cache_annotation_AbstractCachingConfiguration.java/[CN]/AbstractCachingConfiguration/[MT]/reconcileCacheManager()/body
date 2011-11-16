@@ -1,0 +1,22 @@
+{
+  if (!CollectionUtils.isEmpty(cachingConfigurers)) {
+    int nConfigurers=cachingConfigurers.size();
+    if (nConfigurers > 1) {
+      throw new IllegalStateException(nConfigurers + " implementations of " + "CachingConfigurer were found when only 1 was expected. "+ "Refactor the configuration such that CachingConfigurer is "+ "implemented only once or not at all.");
+    }
+    CachingConfigurer cachingConfigurer=cachingConfigurers.iterator().next();
+    this.cacheManager=cachingConfigurer.cacheManager();
+    this.keyGenerator=cachingConfigurer.keyGenerator();
+  }
+ else   if (!CollectionUtils.isEmpty(cacheManagerBeans)) {
+    int nManagers=cacheManagerBeans.size();
+    if (nManagers > 1) {
+      throw new IllegalStateException(nManagers + " beans of type CacheManager " + "were found when only 1 was expected. Remove all but one of the "+ "CacheManager bean definitions, or implement CachingConfigurer "+ "to make explicit which CacheManager should be used for "+ "annotation-driven cache management.");
+    }
+    CacheManager cacheManager=cacheManagerBeans.iterator().next();
+    this.cacheManager=cacheManager;
+  }
+ else {
+    throw new IllegalStateException("No bean of type CacheManager could be found. " + "Register a CacheManager bean or remove the @EnableCaching annotation " + "from your configuration.");
+  }
+}
