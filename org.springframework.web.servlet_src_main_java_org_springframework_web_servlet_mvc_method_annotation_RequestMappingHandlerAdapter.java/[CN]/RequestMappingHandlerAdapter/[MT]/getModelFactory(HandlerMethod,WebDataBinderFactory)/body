@@ -1,18 +1,18 @@
 {
   SessionAttributesHandler sessionAttrHandler=getSessionAttributesHandler(handlerMethod);
   Class<?> handlerType=handlerMethod.getBeanType();
-  ModelFactory modelFactory=this.modelFactoryCache.get(handlerType);
-  if (modelFactory == null) {
-    List<InvocableHandlerMethod> attrMethods=new ArrayList<InvocableHandlerMethod>();
-    for (    Method method : HandlerMethodSelector.selectMethods(handlerType,MODEL_ATTRIBUTE_METHODS)) {
-      InvocableHandlerMethod attrMethod=new InvocableHandlerMethod(handlerMethod.getBean(),method);
-      attrMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-      attrMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-      attrMethod.setDataBinderFactory(binderFactory);
-      attrMethods.add(attrMethod);
-    }
-    modelFactory=new ModelFactory(attrMethods,binderFactory,sessionAttrHandler);
-    this.modelFactoryCache.put(handlerType,modelFactory);
+  Set<Method> methods=this.modelFactoryCache.get(handlerType);
+  if (methods == null) {
+    methods=HandlerMethodSelector.selectMethods(handlerType,MODEL_ATTRIBUTE_METHODS);
+    this.modelFactoryCache.put(handlerType,methods);
   }
-  return modelFactory;
+  List<InvocableHandlerMethod> attrMethods=new ArrayList<InvocableHandlerMethod>();
+  for (  Method method : methods) {
+    InvocableHandlerMethod attrMethod=new InvocableHandlerMethod(handlerMethod.getBean(),method);
+    attrMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+    attrMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+    attrMethod.setDataBinderFactory(binderFactory);
+    attrMethods.add(attrMethod);
+  }
+  return new ModelFactory(attrMethods,binderFactory,sessionAttrHandler);
 }

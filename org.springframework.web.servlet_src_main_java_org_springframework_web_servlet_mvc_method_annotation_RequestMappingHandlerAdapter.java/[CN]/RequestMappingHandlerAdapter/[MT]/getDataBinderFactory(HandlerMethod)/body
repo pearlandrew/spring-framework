@@ -1,17 +1,17 @@
 {
   Class<?> handlerType=handlerMethod.getBeanType();
-  WebDataBinderFactory binderFactory=this.dataBinderFactoryCache.get(handlerType);
-  if (binderFactory == null) {
-    List<InvocableHandlerMethod> binderMethods=new ArrayList<InvocableHandlerMethod>();
-    for (    Method method : HandlerMethodSelector.selectMethods(handlerType,INIT_BINDER_METHODS)) {
-      InvocableHandlerMethod binderMethod=new InvocableHandlerMethod(handlerMethod.getBean(),method);
-      binderMethod.setHandlerMethodArgumentResolvers(this.initBinderArgumentResolvers);
-      binderMethod.setDataBinderFactory(new DefaultDataBinderFactory(this.webBindingInitializer));
-      binderMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-      binderMethods.add(binderMethod);
-    }
-    binderFactory=createDataBinderFactory(binderMethods);
-    this.dataBinderFactoryCache.put(handlerType,binderFactory);
+  Set<Method> methods=this.dataBinderFactoryCache.get(handlerType);
+  if (methods == null) {
+    methods=HandlerMethodSelector.selectMethods(handlerType,INIT_BINDER_METHODS);
+    this.dataBinderFactoryCache.put(handlerType,methods);
   }
-  return binderFactory;
+  List<InvocableHandlerMethod> binderMethods=new ArrayList<InvocableHandlerMethod>();
+  for (  Method method : methods) {
+    InvocableHandlerMethod binderMethod=new InvocableHandlerMethod(handlerMethod.getBean(),method);
+    binderMethod.setHandlerMethodArgumentResolvers(this.initBinderArgumentResolvers);
+    binderMethod.setDataBinderFactory(new DefaultDataBinderFactory(this.webBindingInitializer));
+    binderMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+    binderMethods.add(binderMethod);
+  }
+  return createDataBinderFactory(binderMethods);
 }

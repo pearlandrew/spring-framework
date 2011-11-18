@@ -1,0 +1,18 @@
+{
+  initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>(){
+    public void initialize(    GenericWebApplicationContext context){
+      RootBeanDefinition beanDef=new RootBeanDefinition(PrototypeController.class);
+      beanDef.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+      context.registerBeanDefinition("controller",beanDef);
+    }
+  }
+);
+  MockHttpServletRequest request=new MockHttpServletRequest("GET","/");
+  request.addParameter("param","1");
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  getServlet().service(request,response);
+  assertEquals("count:3",response.getContentAsString());
+  response=new MockHttpServletResponse();
+  getServlet().service(request,response);
+  assertEquals("count:3",response.getContentAsString());
+}
