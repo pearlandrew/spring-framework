@@ -1,4 +1,6 @@
 {
+  Assert.notNull(propertyName,"propertyName may not be null");
+  propertyName=pd == null ? propertyName : pd.getName();
   for (  PropertyDescriptor existingPD : this.propertyDescriptors) {
     if (existingPD.getName().equals(propertyName)) {
       if (existingPD.getReadMethod() != null) {
@@ -51,10 +53,28 @@
       return;
     }
   }
-  if (indexedReadMethod == null && indexedWriteMethod == null) {
-    this.propertyDescriptors.add(new PropertyDescriptor(propertyName,readMethod,writeMethod));
+  if (pd == null) {
+    try {
+      if (indexedReadMethod == null && indexedWriteMethod == null) {
+        pd=new PropertyDescriptor(propertyName,readMethod,writeMethod);
+      }
+ else {
+        pd=new IndexedPropertyDescriptor(propertyName,readMethod,writeMethod,indexedReadMethod,indexedWriteMethod);
+      }
+      this.propertyDescriptors.add(pd);
+    }
+ catch (    IntrospectionException ex) {
+      logger.warn(format("Could not create new PropertyDescriptor for readMethod [%s] writeMethod [%s] " + "indexedReadMethod [%s] indexedWriteMethod [%s] for property [%s]. Reason: %s",readMethod,writeMethod,indexedReadMethod,indexedWriteMethod,propertyName,ex.getMessage()));
+    }
   }
  else {
-    this.propertyDescriptors.add(new IndexedPropertyDescriptor(propertyName,readMethod,writeMethod,indexedReadMethod,indexedWriteMethod));
+    pd.setReadMethod(readMethod);
+    try {
+      pd.setWriteMethod(writeMethod);
+    }
+ catch (    IntrospectionException ex) {
+      logger.warn(format("Could not add write method [%s] for property [%s]. Reason: %s",writeMethod,propertyName,ex.getMessage()));
+    }
+    this.propertyDescriptors.add(pd);
   }
 }

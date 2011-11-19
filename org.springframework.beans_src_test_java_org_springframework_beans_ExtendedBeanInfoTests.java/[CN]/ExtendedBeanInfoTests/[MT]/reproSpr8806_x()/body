@@ -1,0 +1,21 @@
+{
+  BeanInfo info=Introspector.getBeanInfo(LawLibrary.class);
+  for (  PropertyDescriptor d : info.getPropertyDescriptors()) {
+    if (d.getName().equals("book")) {
+      Method readMethod=d.getReadMethod();
+      Method writeMethod=d.getWriteMethod();
+      System.out.println(format("READ : %s.%s (bridge:%s)",readMethod.getDeclaringClass().getSimpleName(),readMethod.getName(),readMethod.isBridge()));
+      System.out.println(format("WRITE: %s.%s (bridge:%s)",writeMethod.getDeclaringClass().getSimpleName(),writeMethod.getName(),writeMethod.isBridge()));
+      new PropertyDescriptor("book",readMethod,writeMethod);
+    }
+  }
+  Method readMethod=LawLibrary.class.getMethod("getBook");
+  Method writeMethod=LawLibrary.class.getMethod("setBook",Book.class);
+  System.out.println(format("read : %s.%s (bridge:%s)",readMethod.getDeclaringClass().getSimpleName(),readMethod.getName(),readMethod.isBridge()));
+  System.out.println(format("write: %s.%s (bridge:%s)",writeMethod.getDeclaringClass().getSimpleName(),writeMethod.getName(),writeMethod.isBridge()));
+  System.out.println("--------");
+  for (  Method m : LawLibrary.class.getMethods()) {
+    if (m.getDeclaringClass() == Object.class)     continue;
+    System.out.println(format("%s %s.%s(%s) [bridge:%s]",m.getReturnType().getSimpleName(),m.getDeclaringClass().getSimpleName(),m.getName(),m.getParameterTypes().length == 1 ? m.getParameterTypes()[0].getSimpleName() : "",m.isBridge()));
+  }
+}
