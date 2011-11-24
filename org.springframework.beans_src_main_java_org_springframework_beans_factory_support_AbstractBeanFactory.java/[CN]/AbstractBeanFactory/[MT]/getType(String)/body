@@ -3,7 +3,7 @@
   Object beanInstance=getSingleton(beanName,false);
   if (beanInstance != null) {
     if (beanInstance instanceof FactoryBean && !BeanFactoryUtils.isFactoryDereference(name)) {
-      return getTypeForFactoryBean((FactoryBean)beanInstance);
+      return getTypeForFactoryBean((FactoryBean<?>)beanInstance);
     }
  else {
       return beanInstance.getClass();
@@ -21,12 +21,12 @@
     BeanDefinitionHolder dbd=mbd.getDecoratedDefinition();
     if (dbd != null && !BeanFactoryUtils.isFactoryDereference(name)) {
       RootBeanDefinition tbd=getMergedBeanDefinition(dbd.getBeanName(),dbd.getBeanDefinition(),mbd);
-      Class targetClass=predictBeanType(dbd.getBeanName(),tbd);
+      Class<?> targetClass=predictBeanType(dbd.getBeanName(),tbd);
       if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
         return targetClass;
       }
     }
-    Class beanClass=predictBeanType(beanName,mbd);
+    Class<?> beanClass=predictBeanType(beanName,mbd);
     if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass)) {
       if (!BeanFactoryUtils.isFactoryDereference(name)) {
         return getTypeForFactoryBean(beanName,mbd);
