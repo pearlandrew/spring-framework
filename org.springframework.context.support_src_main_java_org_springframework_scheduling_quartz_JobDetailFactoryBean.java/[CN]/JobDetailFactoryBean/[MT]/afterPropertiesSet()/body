@@ -1,0 +1,29 @@
+{
+  if (this.name == null) {
+    this.name=this.beanName;
+  }
+  if (this.group == null) {
+    this.group=Scheduler.DEFAULT_GROUP;
+  }
+  if (this.applicationContextJobDataKey != null) {
+    if (this.applicationContext == null) {
+      throw new IllegalStateException("JobDetailBean needs to be set up in an ApplicationContext " + "to be able to handle an 'applicationContextJobDataKey'");
+    }
+    getJobDataMap().put(this.applicationContextJobDataKey,this.applicationContext);
+  }
+  Class jobDetailClass;
+  try {
+    jobDetailClass=getClass().getClassLoader().loadClass("org.quartz.impl.JobDetailImpl");
+  }
+ catch (  ClassNotFoundException ex) {
+    jobDetailClass=JobDetail.class;
+  }
+  BeanWrapper bw=new BeanWrapperImpl(jobDetailClass);
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  pvs.add("name",this.name);
+  pvs.add("group",this.group);
+  pvs.add("jobClass",this.jobClass);
+  pvs.add("jobDataMap",this.jobDataMap);
+  bw.setPropertyValues(pvs);
+  this.jobDetail=(JobDetail)bw.getWrappedInstance();
+}

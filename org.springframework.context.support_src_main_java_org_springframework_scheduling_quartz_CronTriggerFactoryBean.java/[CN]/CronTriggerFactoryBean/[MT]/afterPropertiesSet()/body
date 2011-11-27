@@ -1,0 +1,52 @@
+{
+  if (this.name == null) {
+    this.name=this.beanName;
+  }
+  if (this.group == null) {
+    this.group=Scheduler.DEFAULT_GROUP;
+  }
+  if (this.jobDetail != null) {
+    this.jobDataMap.put(JobDetailAwareTrigger.JOB_DETAIL_KEY,this.jobDetail);
+  }
+  if (this.startDelay > 0) {
+    this.startTime=new Date(System.currentTimeMillis() + this.startDelay);
+  }
+ else   if (this.startTime == null) {
+    this.startTime=new Date();
+  }
+  if (this.timeZone == null) {
+    this.timeZone=TimeZone.getDefault();
+  }
+  Class cronTriggerClass;
+  Method jobKeyMethod;
+  try {
+    cronTriggerClass=getClass().getClassLoader().loadClass("org.quartz.impl.triggers.CronTriggerImpl");
+    jobKeyMethod=JobDetail.class.getMethod("getKey");
+  }
+ catch (  ClassNotFoundException ex) {
+    cronTriggerClass=CronTrigger.class;
+    jobKeyMethod=null;
+  }
+catch (  NoSuchMethodException ex) {
+    throw new IllegalStateException("Incompatible Quartz version");
+  }
+  BeanWrapper bw=new BeanWrapperImpl(cronTriggerClass);
+  MutablePropertyValues pvs=new MutablePropertyValues();
+  pvs.add("name",this.name);
+  pvs.add("group",this.group);
+  if (jobKeyMethod != null) {
+    pvs.add("jobKey",ReflectionUtils.invokeMethod(jobKeyMethod,this.jobDetail));
+  }
+ else {
+    pvs.add("jobName",this.jobDetail.getName());
+    pvs.add("jobGroup",this.jobDetail.getGroup());
+  }
+  pvs.add("jobDataMap",this.jobDataMap);
+  pvs.add("startTime",this.startTime);
+  pvs.add("cronExpression",this.cronExpression);
+  pvs.add("timeZone",this.timeZone);
+  pvs.add("priority",this.priority);
+  pvs.add("misfireInstruction",this.misfireInstruction);
+  bw.setPropertyValues(pvs);
+  this.cronTrigger=(CronTrigger)bw.getWrappedInstance();
+}
