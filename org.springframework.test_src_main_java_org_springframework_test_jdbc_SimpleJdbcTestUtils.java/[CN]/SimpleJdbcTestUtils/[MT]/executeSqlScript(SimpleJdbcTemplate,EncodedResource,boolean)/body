@@ -4,9 +4,10 @@
   }
   long startTime=System.currentTimeMillis();
   List<String> statements=new LinkedList<String>();
+  LineNumberReader reader=null;
   try {
-    LineNumberReader lnr=new LineNumberReader(resource.getReader());
-    String script=JdbcTestUtils.readScript(lnr);
+    reader=new LineNumberReader(resource.getReader());
+    String script=JdbcTestUtils.readScript(reader);
     char delimiter=';';
     if (!JdbcTestUtils.containsSqlScriptDelimiters(script,delimiter)) {
       delimiter='\n';
@@ -37,5 +38,14 @@
   }
  catch (  IOException ex) {
     throw new DataAccessResourceFailureException("Failed to open SQL script from " + resource,ex);
+  }
+ finally {
+    try {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+ catch (    IOException ex) {
+    }
   }
 }
