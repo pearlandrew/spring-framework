@@ -6,8 +6,12 @@
     map=new HashMap<Object,Object>();
     resources.set(map);
   }
-  if (map.put(actualKey,value) != null) {
-    throw new IllegalStateException("Already value [" + map.get(actualKey) + "] for key ["+ actualKey+ "] bound to thread ["+ Thread.currentThread().getName()+ "]");
+  Object oldValue=map.put(actualKey,value);
+  if (oldValue instanceof ResourceHolder && ((ResourceHolder)oldValue).isVoid()) {
+    oldValue=null;
+  }
+  if (oldValue != null) {
+    throw new IllegalStateException("Already value [" + oldValue + "] for key ["+ actualKey+ "] bound to thread ["+ Thread.currentThread().getName()+ "]");
   }
   if (logger.isTraceEnabled()) {
     logger.trace("Bound value [" + value + "] for key ["+ actualKey+ "] to thread ["+ Thread.currentThread().getName()+ "]");
