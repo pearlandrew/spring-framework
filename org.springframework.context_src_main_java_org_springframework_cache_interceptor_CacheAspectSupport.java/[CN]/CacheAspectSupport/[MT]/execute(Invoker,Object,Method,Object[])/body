@@ -9,7 +9,7 @@
   final Collection<CacheOperation> cacheOp=getCacheOperationSource().getCacheOperations(method,targetClass);
   if (!CollectionUtils.isEmpty(cacheOp)) {
     Map<String,Collection<CacheOperationContext>> ops=createOperationContext(cacheOp,method,args,target,targetClass);
-    inspectCacheEvicts(ops.get(EVICT));
+    inspectBeforeCacheEvicts(ops.get(EVICT));
     CacheStatus status=inspectCacheables(ops.get(CACHEABLE));
     Object retVal=null;
     Map<CacheOperationContext,Object> updates=inspectCacheUpdates(ops.get(UPDATE));
@@ -22,6 +22,7 @@
       }
     }
     retVal=invoker.invoke();
+    inspectAfterCacheEvicts(ops.get(EVICT));
     if (!updates.isEmpty()) {
       update(updates,retVal);
     }
