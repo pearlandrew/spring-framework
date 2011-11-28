@@ -6,12 +6,13 @@
     Object cacheKey=getCacheKey(viewName,locale);
 synchronized (this.viewCache) {
       View view=this.viewCache.get(cacheKey);
-      boolean isCached=this.cacheUnresolved && this.viewCache.containsKey(cacheKey);
-      if (view == null && !isCached) {
+      if (view == null && (!this.cacheUnresolved || !this.viewCache.containsKey(cacheKey))) {
         view=createView(viewName,locale);
-        this.viewCache.put(cacheKey,view);
-        if (logger.isTraceEnabled()) {
-          logger.trace("Cached view [" + cacheKey + "]");
+        if (view != null || this.cacheUnresolved) {
+          this.viewCache.put(cacheKey,view);
+          if (logger.isTraceEnabled()) {
+            logger.trace("Cached view [" + cacheKey + "]");
+          }
         }
       }
       return view;
