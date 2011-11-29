@@ -2,7 +2,7 @@
   for (  String memberClassName : metadata.getMemberClassNames()) {
     MetadataReader reader=this.metadataReaderFactory.getMetadataReader(memberClassName);
     AnnotationMetadata memberClassMetadata=reader.getAnnotationMetadata();
-    if (isConfigurationCandidate(memberClassMetadata)) {
+    if (ConfigurationClassUtils.isConfigurationCandidate(memberClassMetadata)) {
       processConfigurationClass(new ConfigurationClass(reader,null));
     }
   }
@@ -26,7 +26,7 @@
       }
     }
   }
-  List<Map<String,Object>> allImportAttribs=AnnotationUtils.findAllAnnotationAttributes(Import.class,metadata.getClassName(),true,metadataReaderFactory);
+  List<Map<String,Object>> allImportAttribs=findAllAnnotationAttributes(Import.class,metadata.getClassName(),true);
   for (  Map<String,Object> importAttribs : allImportAttribs) {
     processImport(configClass,(String[])importAttribs.get("value"),true);
   }
