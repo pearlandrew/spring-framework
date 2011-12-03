@@ -14,6 +14,7 @@
     boolean required=false;
     String defaultValue=null;
     boolean validate=false;
+    Object[] validationHints=null;
     int annotationsFound=0;
     Annotation[] paramAnns=methodParam.getParameterAnnotations();
     for (    Annotation paramAnn : paramAnns) {
@@ -57,6 +58,8 @@
       }
  else       if ("Valid".equals(paramAnn.annotationType().getSimpleName())) {
         validate=true;
+        Object value=AnnotationUtils.getValue(paramAnn);
+        validationHints=(value instanceof Object[] ? (Object[])value : new Object[]{value});
       }
     }
     if (annotationsFound > 1) {
@@ -114,7 +117,7 @@
       WebDataBinder binder=resolveModelAttribute(attrName,methodParam,implicitModel,webRequest,handler);
       boolean assignBindingResult=(args.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
       if (binder.getTarget() != null) {
-        doBind(binder,webRequest,validate,!assignBindingResult);
+        doBind(binder,webRequest,validate,validationHints,!assignBindingResult);
       }
       args[i]=binder.getTarget();
       if (assignBindingResult) {

@@ -1,0 +1,31 @@
+{
+  for (  ConstraintViolation<Object> violation : violations) {
+    String field=violation.getPropertyPath().toString();
+    FieldError fieldError=errors.getFieldError(field);
+    if (fieldError == null || !fieldError.isBindingFailure()) {
+      try {
+        String errorCode=violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName();
+        Object[] errorArgs=getArgumentsForConstraint(errors.getObjectName(),field,violation.getConstraintDescriptor());
+        if (errors instanceof BindingResult) {
+          BindingResult bindingResult=(BindingResult)errors;
+          String[] errorCodes=bindingResult.resolveMessageCodes(errorCode,field);
+          String nestedField=bindingResult.getNestedPath() + field;
+          ObjectError error;
+          if ("".equals(nestedField)) {
+            error=new ObjectError(errors.getObjectName(),errorCodes,errorArgs,violation.getMessage());
+          }
+ else {
+            error=new FieldError(errors.getObjectName(),nestedField,violation.getInvalidValue(),false,errorCodes,errorArgs,violation.getMessage());
+          }
+          bindingResult.addError(error);
+        }
+ else {
+          errors.rejectValue(field,errorCode,errorArgs,violation.getMessage());
+        }
+      }
+ catch (      NotReadablePropertyException ex) {
+        throw new IllegalStateException("JSR-303 validated property '" + field + "' does not have a corresponding accessor for Spring data binding - "+ "check your DataBinder's configuration (bean property versus direct field access)",ex);
+      }
+    }
+  }
+}

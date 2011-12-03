@@ -1,12 +1,16 @@
 {
   Object arg=readWithMessageConverters(webRequest,parameter,parameter.getParameterType());
-  if (isValidationApplicable(arg,parameter)) {
-    String name=Conventions.getVariableNameForParameter(parameter);
-    WebDataBinder binder=binderFactory.createBinder(webRequest,arg,name);
-    binder.validate();
-    BindingResult bindingResult=binder.getBindingResult();
-    if (bindingResult.hasErrors()) {
-      throw new MethodArgumentNotValidException(parameter,bindingResult);
+  Annotation[] annotations=parameter.getParameterAnnotations();
+  for (  Annotation annot : annotations) {
+    if ("Valid".equals(annot.annotationType().getSimpleName())) {
+      String name=Conventions.getVariableNameForParameter(parameter);
+      WebDataBinder binder=binderFactory.createBinder(webRequest,arg,name);
+      Object hints=AnnotationUtils.getValue(annot);
+      binder.validate(hints instanceof Object[] ? (Object[])hints : new Object[]{hints});
+      BindingResult bindingResult=binder.getBindingResult();
+      if (bindingResult.hasErrors()) {
+        throw new MethodArgumentNotValidException(parameter,bindingResult);
+      }
     }
   }
   return arg;
