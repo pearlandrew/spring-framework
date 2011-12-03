@@ -1,6 +1,7 @@
 {
   Object convertedValue=newValue;
   PropertyEditor editor=this.propertyEditorRegistry.findCustomEditor(requiredType,propertyName);
+  ConversionFailedException firstAttemptEx=null;
   ConversionService conversionService=this.propertyEditorRegistry.getConversionService();
   if (editor == null && conversionService != null && convertedValue != null && typeDescriptor != null) {
     TypeDescriptor sourceTypeDesc=TypeDescriptor.forObject(newValue);
@@ -9,7 +10,8 @@
       try {
         return (T)conversionService.convert(convertedValue,sourceTypeDesc,targetTypeDesc);
       }
- catch (      ConversionFailedException e) {
+ catch (      ConversionFailedException ex) {
+        firstAttemptEx=ex;
       }
     }
   }
@@ -70,6 +72,9 @@ catch (          Exception ex) {
       }
     }
     if (!ClassUtils.isAssignableValue(requiredType,convertedValue)) {
+      if (firstAttemptEx != null) {
+        throw firstAttemptEx;
+      }
       StringBuilder msg=new StringBuilder();
       msg.append("Cannot convert value of type [").append(ClassUtils.getDescriptiveType(newValue));
       msg.append("] to required type [").append(ClassUtils.getQualifiedName(requiredType)).append("]");
@@ -85,6 +90,9 @@ catch (          Exception ex) {
         throw new IllegalStateException(msg.toString());
       }
     }
+  }
+  if (firstAttemptEx != null) {
+    logger.debug("Original ConversionService attempt failed - ignored since " + "PropertyEditor based conversion eventually succeeded",firstAttemptEx);
   }
   return (T)convertedValue;
 }
