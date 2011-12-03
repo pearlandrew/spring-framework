@@ -21,20 +21,22 @@
     try {
       HttpInputMessage inputMessage=new RequestPartServletServerHttpRequest(servletRequest,partName);
       arg=readWithMessageConverters(inputMessage,parameter,parameter.getParameterType());
-      Annotation[] annotations=parameter.getParameterAnnotations();
-      for (      Annotation annot : annotations) {
-        if ("Valid".equals(annot.annotationType().getSimpleName())) {
-          WebDataBinder binder=binderFactory.createBinder(request,arg,partName);
-          Object hints=AnnotationUtils.getValue(annot);
-          binder.validate(hints instanceof Object[] ? (Object[])hints : new Object[]{hints});
-          BindingResult bindingResult=binder.getBindingResult();
-          if (bindingResult.hasErrors()) {
-            throw new MethodArgumentNotValidException(parameter,bindingResult);
+      if (arg != null) {
+        Annotation[] annotations=parameter.getParameterAnnotations();
+        for (        Annotation annot : annotations) {
+          if ("Valid".equals(annot.annotationType().getSimpleName())) {
+            WebDataBinder binder=binderFactory.createBinder(request,arg,partName);
+            Object hints=AnnotationUtils.getValue(annot);
+            binder.validate(hints instanceof Object[] ? (Object[])hints : new Object[]{hints});
+            BindingResult bindingResult=binder.getBindingResult();
+            if (bindingResult.hasErrors()) {
+              throw new MethodArgumentNotValidException(parameter,bindingResult);
+            }
           }
         }
       }
     }
- catch (    MissingServletRequestPartException e) {
+ catch (    MissingServletRequestPartException ex) {
       arg=null;
     }
   }
