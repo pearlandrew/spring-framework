@@ -15,7 +15,11 @@
             error=new ObjectError(errors.getObjectName(),errorCodes,errorArgs,violation.getMessage());
           }
  else {
-            error=new FieldError(errors.getObjectName(),nestedField,violation.getInvalidValue(),false,errorCodes,errorArgs,violation.getMessage());
+            Object invalidValue=violation.getInvalidValue();
+            if (!"".equals(field) && invalidValue == violation.getLeafBean()) {
+              invalidValue=bindingResult.getRawFieldValue(field);
+            }
+            error=new FieldError(errors.getObjectName(),nestedField,invalidValue,false,errorCodes,errorArgs,violation.getMessage());
           }
           bindingResult.addError(error);
         }
