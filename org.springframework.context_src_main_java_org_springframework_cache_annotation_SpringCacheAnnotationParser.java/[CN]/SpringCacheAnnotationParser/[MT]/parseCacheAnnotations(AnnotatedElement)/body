@@ -1,24 +1,32 @@
 {
   Collection<CacheOperation> ops=null;
-  Cacheable cache=AnnotationUtils.getAnnotation(ae,Cacheable.class);
-  if (cache != null) {
+  Collection<Cacheable> cacheables=getAnnotations(ae,Cacheable.class);
+  if (cacheables != null) {
     ops=lazyInit(ops);
-    ops.add(parseCacheableAnnotation(ae,cache));
+    for (    Cacheable cacheable : cacheables) {
+      ops.add(parseCacheableAnnotation(ae,cacheable));
+    }
   }
-  CacheEvict evict=AnnotationUtils.getAnnotation(ae,CacheEvict.class);
-  if (evict != null) {
+  Collection<CacheEvict> evicts=getAnnotations(ae,CacheEvict.class);
+  if (evicts != null) {
     ops=lazyInit(ops);
-    ops.add(parseEvictAnnotation(ae,evict));
+    for (    CacheEvict e : evicts) {
+      ops.add(parseEvictAnnotation(ae,e));
+    }
   }
-  CachePut update=AnnotationUtils.getAnnotation(ae,CachePut.class);
-  if (update != null) {
+  Collection<CachePut> updates=getAnnotations(ae,CachePut.class);
+  if (updates != null) {
     ops=lazyInit(ops);
-    ops.add(parseUpdateAnnotation(ae,update));
+    for (    CachePut p : updates) {
+      ops.add(parseUpdateAnnotation(ae,p));
+    }
   }
-  Caching caching=AnnotationUtils.getAnnotation(ae,Caching.class);
+  Collection<Caching> caching=getAnnotations(ae,Caching.class);
   if (caching != null) {
     ops=lazyInit(ops);
-    ops.addAll(parseCachingAnnotation(ae,caching));
+    for (    Caching c : caching) {
+      ops.addAll(parseCachingAnnotation(ae,c));
+    }
   }
   return ops;
 }
