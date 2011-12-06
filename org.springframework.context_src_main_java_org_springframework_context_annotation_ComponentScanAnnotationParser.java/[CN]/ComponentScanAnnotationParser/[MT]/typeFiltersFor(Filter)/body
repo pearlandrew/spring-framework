@@ -1,0 +1,22 @@
+{
+  List<TypeFilter> typeFilters=new ArrayList<TypeFilter>();
+  for (  Class<?> filterClass : (Class<?>[])filterAnno.value()) {
+switch (filterAnno.type()) {
+case ANNOTATION:
+      Assert.isAssignable(Annotation.class,filterClass,"An error occured when processing a @ComponentScan " + "ANNOTATION type filter: ");
+    @SuppressWarnings("unchecked") Class<Annotation> annoClass=(Class<Annotation>)filterClass;
+  typeFilters.add(new AnnotationTypeFilter(annoClass));
+break;
+case ASSIGNABLE_TYPE:
+typeFilters.add(new AssignableTypeFilter(filterClass));
+break;
+case CUSTOM:
+Assert.isAssignable(TypeFilter.class,filterClass,"An error occured when processing a @ComponentScan " + "CUSTOM type filter: ");
+typeFilters.add(BeanUtils.instantiateClass(filterClass,TypeFilter.class));
+break;
+default :
+throw new IllegalArgumentException("unknown filter type " + filterAnno.type());
+}
+}
+return typeFilters;
+}

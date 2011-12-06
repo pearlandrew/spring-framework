@@ -13,11 +13,15 @@
     scanner.setScopeMetadataResolver(BeanUtils.instantiateClass((Class<?>)componentScanAttributes.get("scopeResolver"),ScopeMetadataResolver.class));
   }
   scanner.setResourcePattern((String)componentScanAttributes.get("resourcePattern"));
-  for (  Filter filter : (Filter[])componentScanAttributes.get("includeFilters")) {
-    scanner.addIncludeFilter(createTypeFilter(filter));
+  for (  Filter filterAnno : (Filter[])componentScanAttributes.get("includeFilters")) {
+    for (    TypeFilter typeFilter : typeFiltersFor(filterAnno)) {
+      scanner.addIncludeFilter(typeFilter);
+    }
   }
-  for (  Filter filter : (Filter[])componentScanAttributes.get("excludeFilters")) {
-    scanner.addExcludeFilter(createTypeFilter(filter));
+  for (  Filter filterAnno : (Filter[])componentScanAttributes.get("excludeFilters")) {
+    for (    TypeFilter typeFilter : typeFiltersFor(filterAnno)) {
+      scanner.addExcludeFilter(typeFilter);
+    }
   }
   List<String> basePackages=new ArrayList<String>();
   for (  String pkg : (String[])componentScanAttributes.get("value")) {
