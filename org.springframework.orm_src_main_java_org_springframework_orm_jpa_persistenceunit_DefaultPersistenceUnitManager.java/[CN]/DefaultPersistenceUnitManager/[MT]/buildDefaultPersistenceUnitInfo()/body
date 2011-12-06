@@ -1,0 +1,32 @@
+{
+  SpringPersistenceUnitInfo scannedUnit=new SpringPersistenceUnitInfo();
+  scannedUnit.setPersistenceUnitName(this.defaultPersistenceUnitName);
+  scannedUnit.excludeUnlistedClasses();
+  if (this.packagesToScan != null) {
+    for (    String pkg : this.packagesToScan) {
+      try {
+        String pattern=ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + ClassUtils.convertClassNameToResourcePath(pkg) + ENTITY_CLASS_RESOURCE_PATTERN;
+        Resource[] resources=this.resourcePatternResolver.getResources(pattern);
+        MetadataReaderFactory readerFactory=new CachingMetadataReaderFactory(this.resourcePatternResolver);
+        for (        Resource resource : resources) {
+          if (resource.isReadable()) {
+            MetadataReader reader=readerFactory.getMetadataReader(resource);
+            String className=reader.getClassMetadata().getClassName();
+            if (matchesFilter(reader,readerFactory)) {
+              scannedUnit.addManagedClassName(className);
+            }
+          }
+        }
+      }
+ catch (      IOException ex) {
+        throw new PersistenceException("Failed to scan classpath for unlisted classes",ex);
+      }
+    }
+  }
+  if (this.mappingResources != null) {
+    for (    String mappingFileName : this.mappingResources) {
+      scannedUnit.addMappingFileName(mappingFileName);
+    }
+  }
+  return scannedUnit;
+}
