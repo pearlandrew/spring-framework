@@ -46,12 +46,12 @@
       Class requiredType=GenericCollectionTypeResolver.getCollectionReturnType(pd.getReadMethod(),tokens.keys.length);
       List list=(List)propValue;
       int index=Integer.parseInt(key);
-      int size=list.size();
       Object oldValue=null;
-      if (isExtractOldValueForEditor() && index < size) {
+      if (isExtractOldValueForEditor() && index < list.size()) {
         oldValue=list.get(index);
       }
       Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType,TypeDescriptor.nested(property(pd),tokens.keys.length));
+      int size=list.size();
       if (index >= size && index < this.autoGrowCollectionLimit) {
         for (int i=size; i < index; i++) {
           try {
@@ -77,7 +77,7 @@
       Class mapKeyType=GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(),tokens.keys.length);
       Class mapValueType=GenericCollectionTypeResolver.getMapValueReturnType(pd.getReadMethod(),tokens.keys.length);
       Map map=(Map)propValue;
-      TypeDescriptor typeDescriptor=mapKeyType != null ? TypeDescriptor.valueOf(mapKeyType) : TypeDescriptor.valueOf(Object.class);
+      TypeDescriptor typeDescriptor=(mapKeyType != null ? TypeDescriptor.valueOf(mapKeyType) : TypeDescriptor.valueOf(Object.class));
       Object convertedMapKey=convertIfNecessary(null,null,key,mapKeyType,typeDescriptor);
       Object oldValue=null;
       if (isExtractOldValueForEditor()) {
