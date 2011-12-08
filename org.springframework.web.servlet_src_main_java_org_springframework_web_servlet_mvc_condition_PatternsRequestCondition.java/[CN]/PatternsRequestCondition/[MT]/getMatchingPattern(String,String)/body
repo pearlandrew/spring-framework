@@ -2,18 +2,20 @@
   if (pattern.equals(lookupPath)) {
     return pattern;
   }
-  if (useSuffixPatternMatch) {
+  if (this.useSuffixPatternMatch) {
     boolean hasSuffix=pattern.indexOf('.') != -1;
-    if (!hasSuffix && pathMatcher.match(pattern + ".*",lookupPath)) {
+    if (!hasSuffix && this.pathMatcher.match(pattern + ".*",lookupPath)) {
       return pattern + ".*";
     }
   }
-  if (pathMatcher.match(pattern,lookupPath)) {
+  if (this.pathMatcher.match(pattern,lookupPath)) {
     return pattern;
   }
   boolean endsWithSlash=pattern.endsWith("/");
-  if (!endsWithSlash && pathMatcher.match(pattern + "/",lookupPath)) {
-    return pattern + "/";
+  if (this.useTrailingSlashMatch) {
+    if (!endsWithSlash && this.pathMatcher.match(pattern + "/",lookupPath)) {
+      return pattern + "/";
+    }
   }
   return null;
 }
