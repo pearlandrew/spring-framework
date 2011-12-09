@@ -1,0 +1,23 @@
+{
+  Message message;
+  try {
+switch (this.targetType) {
+case TEXT:
+      message=mapToTextMessage(object,session,this.jsonObjectMapper);
+    break;
+case BYTES:
+  message=mapToBytesMessage(object,session,this.jsonObjectMapper);
+break;
+default :
+message=mapToMessage(object,session,this.jsonObjectMapper,this.targetType);
+}
+}
+ catch (JsonMappingException ex) {
+throw new MessageConversionException("Could not map [" + object + "]",ex);
+}
+catch (IOException ex) {
+throw new MessageConversionException("Could not map  [" + object + "]",ex);
+}
+javaTypeMapper.fromJavaType(TypeFactory.type(object.getClass()),message);
+return message;
+}

@@ -1,0 +1,20 @@
+{
+  BytesMessage bytesMessageMock=createMock(BytesMessage.class);
+  Map<String,String> unmarshalled=Collections.singletonMap("foo","bar");
+  final byte[] bytes="{\"foo\":\"bar\"}".getBytes();
+  Capture<byte[]> captured=new Capture<byte[]>(){
+    @Override public void setValue(    byte[] value){
+      super.setValue(value);
+      System.arraycopy(bytes,0,value,0,bytes.length);
+    }
+  }
+;
+  expect(bytesMessageMock.getStringProperty(DefaultJavaTypeMapper.CLASSID_PROPERTY_NAME)).andReturn(Object.class.getName());
+  expect(bytesMessageMock.propertyExists(JsonMessageConverter.DEFAULT_ENCODING_PROPERTY_NAME)).andReturn(false);
+  expect(bytesMessageMock.getBodyLength()).andReturn(new Long(bytes.length));
+  expect(bytesMessageMock.readBytes(EasyMock.capture(captured))).andReturn(bytes.length);
+  replay(sessionMock,bytesMessageMock);
+  Object result=converter.fromMessage(bytesMessageMock);
+  assertEquals("Invalid result",result,unmarshalled);
+  verify(sessionMock,bytesMessageMock);
+}
