@@ -3,7 +3,14 @@
   MessageProducer producer=null;
   MessageConsumer consumer=null;
   try {
-    if (session instanceof QueueSession) {
+    if (jms11Available) {
+      responseQueue=session.createTemporaryQueue();
+      producer=session.createProducer(queue);
+      consumer=session.createConsumer(responseQueue);
+      requestMessage.setJMSReplyTo(responseQueue);
+      producer.send(requestMessage);
+    }
+ else {
       QueueSession queueSession=(QueueSession)session;
       responseQueue=queueSession.createTemporaryQueue();
       QueueSender sender=queueSession.createSender(queue);
@@ -11,13 +18,6 @@
       consumer=queueSession.createReceiver(responseQueue);
       requestMessage.setJMSReplyTo(responseQueue);
       sender.send(requestMessage);
-    }
- else {
-      responseQueue=session.createTemporaryQueue();
-      producer=session.createProducer(queue);
-      consumer=session.createConsumer(responseQueue);
-      requestMessage.setJMSReplyTo(responseQueue);
-      producer.send(requestMessage);
     }
     long timeout=getReceiveTimeout();
     return (timeout > 0 ? consumer.receive(timeout) : consumer.receive());
