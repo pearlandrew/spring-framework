@@ -1,7 +1,10 @@
 {
-  Class<?> objectType=null;
+class Holder {
+    Class<?> value=null;
+  }
+  final Holder objectType=new Holder();
   String factoryBeanName=mbd.getFactoryBeanName();
-  String factoryMethodName=mbd.getFactoryMethodName();
+  final String factoryMethodName=mbd.getFactoryMethodName();
   if (factoryBeanName != null && factoryMethodName != null) {
     BeanDefinition fbDef=getBeanDefinition(factoryBeanName);
     if (fbDef instanceof AbstractBeanDefinition) {
@@ -9,18 +12,24 @@
       if (ClassUtils.isCglibProxyClass(fbClass)) {
         fbClass=fbClass.getSuperclass();
       }
-      Method m=ReflectionUtils.findMethod(fbClass,factoryMethodName);
-      objectType=GenericTypeResolver.resolveReturnTypeArgument(m,FactoryBean.class);
-      if (objectType != null) {
-        return objectType;
+      ReflectionUtils.doWithMethods(fbClass,new ReflectionUtils.MethodCallback(){
+        public void doWith(        Method method) throws IllegalArgumentException, IllegalAccessException {
+          if (method.getName().equals(factoryMethodName) && FactoryBean.class.isAssignableFrom(method.getReturnType())) {
+            objectType.value=GenericTypeResolver.resolveReturnTypeArgument(method,FactoryBean.class);
+          }
+        }
+      }
+);
+      if (objectType.value != null) {
+        return objectType.value;
       }
     }
   }
   FactoryBean<?> fb=(mbd.isSingleton() ? getSingletonFactoryBeanForTypeCheck(beanName,mbd) : getNonSingletonFactoryBeanForTypeCheck(beanName,mbd));
   if (fb != null) {
-    objectType=getTypeForFactoryBean(fb);
-    if (objectType != null) {
-      return objectType;
+    objectType.value=getTypeForFactoryBean(fb);
+    if (objectType.value != null) {
+      return objectType.value;
     }
   }
   return super.getTypeForFactoryBean(beanName,mbd);
