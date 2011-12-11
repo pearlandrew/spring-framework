@@ -1,0 +1,11 @@
+{
+  TextMessage textMessageMock=createMock(TextMessage.class);
+  Map<String,String> unmarshalled=Collections.singletonMap("foo","bar");
+  String text="{\"foo\":\"bar\"}";
+  expect(textMessageMock.getStringProperty("__typeid__")).andReturn(HashMap.class.getName());
+  expect(textMessageMock.getText()).andReturn(text);
+  replay(sessionMock,textMessageMock);
+  Object result=converter.fromMessage(textMessageMock);
+  assertEquals("Invalid result",result,unmarshalled);
+  verify(sessionMock,textMessageMock);
+}
