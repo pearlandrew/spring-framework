@@ -1,13 +1,13 @@
 {
-  JsonEncoding encoding=getEncoding(outputMessage.getHeaders().getContentType());
+  JsonEncoding encoding=getJsonEncoding(outputMessage.getHeaders().getContentType());
   JsonGenerator jsonGenerator=this.objectMapper.getJsonFactory().createJsonGenerator(outputMessage.getBody(),encoding);
   try {
     if (this.prefixJson) {
       jsonGenerator.writeRaw("{} && ");
     }
-    this.objectMapper.writeValue(jsonGenerator,o);
+    this.objectMapper.writeValue(jsonGenerator,object);
   }
- catch (  JsonGenerationException ex) {
+ catch (  JsonProcessingException ex) {
     throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(),ex);
   }
 }
