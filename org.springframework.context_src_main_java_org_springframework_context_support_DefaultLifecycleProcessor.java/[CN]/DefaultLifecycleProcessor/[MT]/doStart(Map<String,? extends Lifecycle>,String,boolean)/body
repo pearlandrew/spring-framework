@@ -3,9 +3,9 @@
   if (bean != null && !this.equals(bean)) {
     String[] dependenciesForBean=this.beanFactory.getDependenciesForBean(beanName);
     for (    String dependency : dependenciesForBean) {
-      doStart(lifecycleBeans,dependency);
+      doStart(lifecycleBeans,dependency,autoStartupOnly);
     }
-    if (!bean.isRunning()) {
+    if (!bean.isRunning() && (!autoStartupOnly || !(bean instanceof SmartLifecycle) || ((SmartLifecycle)bean).isAutoStartup())) {
       if (logger.isDebugEnabled()) {
         logger.debug("Starting bean '" + beanName + "' of type ["+ bean.getClass()+ "]");
       }
