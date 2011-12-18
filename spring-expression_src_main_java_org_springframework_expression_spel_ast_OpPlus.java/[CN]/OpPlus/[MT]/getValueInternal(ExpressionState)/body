@@ -4,21 +4,20 @@
   if (rightOp == null) {
     Object operandOne=leftOp.getValueInternal(state).getValue();
     if (operandOne instanceof Number) {
-      if (operandOne instanceof Double) {
-        return new TypedValue(((Double)operandOne).doubleValue());
-      }
- else       if (operandOne instanceof Long) {
-        return new TypedValue(((Long)operandOne).longValue());
+      if (operandOne instanceof Double || operandOne instanceof Long) {
+        return new TypedValue(operandOne);
       }
  else {
-        return new TypedValue(((Integer)operandOne).intValue());
+        return new TypedValue(((Number)operandOne).intValue());
       }
     }
     return state.operate(Operation.ADD,operandOne,null);
   }
  else {
-    Object operandOne=leftOp.getValueInternal(state).getValue();
-    Object operandTwo=rightOp.getValueInternal(state).getValue();
+    final TypedValue operandOneValue=leftOp.getValueInternal(state);
+    final Object operandOne=operandOneValue.getValue();
+    final TypedValue operandTwoValue=rightOp.getValueInternal(state);
+    final Object operandTwo=operandTwoValue.getValue();
     if (operandOne instanceof Number && operandTwo instanceof Number) {
       Number op1=(Number)operandOne;
       Number op2=(Number)operandTwo;
@@ -37,11 +36,11 @@
     }
  else     if (operandOne instanceof String) {
       StringBuilder result=new StringBuilder((String)operandOne);
-      result.append((operandTwo == null ? "null" : operandTwo.toString()));
+      result.append((operandTwo == null ? "null" : convertTypedValueToString(operandTwoValue,state)));
       return new TypedValue(result.toString());
     }
  else     if (operandTwo instanceof String) {
-      StringBuilder result=new StringBuilder((operandOne == null ? "null" : operandOne.toString()));
+      StringBuilder result=new StringBuilder((operandOne == null ? "null" : convertTypedValueToString(operandOneValue,state)));
       result.append((String)operandTwo);
       return new TypedValue(result.toString());
     }
