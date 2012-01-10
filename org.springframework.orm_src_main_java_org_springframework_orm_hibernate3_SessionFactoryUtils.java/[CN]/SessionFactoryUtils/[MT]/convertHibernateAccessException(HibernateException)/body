@@ -21,6 +21,15 @@
   if (ex instanceof JDBCException) {
     return new HibernateJdbcException((JDBCException)ex);
   }
+  if (ex instanceof QueryException) {
+    return new HibernateQueryException((QueryException)ex);
+  }
+  if (ex instanceof NonUniqueResultException) {
+    return new IncorrectResultSizeDataAccessException(ex.getMessage(),1,ex);
+  }
+  if (ex instanceof NonUniqueObjectException) {
+    return new DuplicateKeyException(ex.getMessage(),ex);
+  }
   if (ex instanceof PropertyValueException) {
     return new DataIntegrityViolationException(ex.getMessage(),ex);
   }
@@ -33,17 +42,11 @@
   if (ex instanceof ObjectDeletedException) {
     return new InvalidDataAccessApiUsageException(ex.getMessage(),ex);
   }
-  if (ex instanceof QueryException) {
-    return new HibernateQueryException((QueryException)ex);
-  }
   if (ex instanceof UnresolvableObjectException) {
     return new HibernateObjectRetrievalFailureException((UnresolvableObjectException)ex);
   }
   if (ex instanceof WrongClassException) {
     return new HibernateObjectRetrievalFailureException((WrongClassException)ex);
-  }
-  if (ex instanceof NonUniqueResultException) {
-    return new IncorrectResultSizeDataAccessException(ex.getMessage(),1,ex);
   }
   if (ex instanceof StaleObjectStateException) {
     return new HibernateOptimisticLockingFailureException((StaleObjectStateException)ex);
