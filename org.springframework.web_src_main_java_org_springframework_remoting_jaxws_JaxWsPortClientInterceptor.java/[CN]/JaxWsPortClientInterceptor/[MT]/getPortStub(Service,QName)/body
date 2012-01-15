@@ -1,6 +1,11 @@
 {
   if (this.webServiceFeatures != null) {
-    return new FeaturePortProvider().getPortStub(service,portQName,this.webServiceFeatures);
+    try {
+      return new FeaturePortProvider().getPortStub(service,portQName,this.webServiceFeatures);
+    }
+ catch (    LinkageError ex) {
+      throw new IllegalStateException("Specifying the 'webServiceFeatures' property requires JAX-WS 2.1 or higher at runtime",ex);
+    }
   }
  else {
     return (portQName != null ? service.getPort(portQName,getServiceInterface()) : service.getPort(getServiceInterface()));
