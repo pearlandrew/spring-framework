@@ -1,0 +1,23 @@
+{
+  try {
+    for (    String packageToScan : packagesToScan) {
+      String pattern=ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + ClassUtils.convertClassNameToResourcePath(packageToScan) + RESOURCE_PATTERN;
+      Resource[] resources=resourcePatternResolver.getResources(pattern);
+      MetadataReaderFactory metadataReaderFactory=new CachingMetadataReaderFactory(resourcePatternResolver);
+      for (      Resource resource : resources) {
+        MetadataReader metadataReader=metadataReaderFactory.getMetadataReader(resource);
+        if (isJaxb2Class(metadataReader,metadataReaderFactory)) {
+          String className=metadataReader.getClassMetadata().getClassName();
+          Class<?> jaxb2AnnotatedClass=resourcePatternResolver.getClassLoader().loadClass(className);
+          jaxb2Classes.add(jaxb2AnnotatedClass);
+        }
+      }
+    }
+  }
+ catch (  IOException ex) {
+    throw new UncategorizedMappingException("Failed to scan classpath for unlisted classes",ex);
+  }
+catch (  ClassNotFoundException ex) {
+    throw new UncategorizedMappingException("Failed to load annotated classes from classpath",ex);
+  }
+}
