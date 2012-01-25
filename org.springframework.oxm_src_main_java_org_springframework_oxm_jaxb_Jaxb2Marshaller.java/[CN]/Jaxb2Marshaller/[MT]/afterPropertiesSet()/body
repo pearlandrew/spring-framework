@@ -1,9 +1,12 @@
 {
-  if (StringUtils.hasLength(getContextPath()) && !ObjectUtils.isEmpty(getClassesToBeBound())) {
-    throw new IllegalArgumentException("Specify either 'contextPath' or 'classesToBeBound property'; not both");
+  boolean hasContextPath=StringUtils.hasLength(getContextPath());
+  boolean hasClassesToBeBound=!ObjectUtils.isEmpty(getClassesToBeBound());
+  boolean hasPackagesToScan=!ObjectUtils.isEmpty(getPackagesToScan());
+  if (hasContextPath && (hasClassesToBeBound || hasPackagesToScan) || (hasClassesToBeBound && hasPackagesToScan)) {
+    throw new IllegalArgumentException("Specify either 'contextPath', 'classesToBeBound', " + "or 'packagesToScan'");
   }
- else   if (!StringUtils.hasLength(getContextPath()) && ObjectUtils.isEmpty(getClassesToBeBound())) {
-    throw new IllegalArgumentException("Setting either 'contextPath' or 'classesToBeBound' is required");
+  if (!hasContextPath && !hasClassesToBeBound && !hasPackagesToScan) {
+    throw new IllegalArgumentException("Setting either 'contextPath', 'classesToBeBound', " + "or 'packagesToScan' is required");
   }
   if (!this.lazyInit) {
     getJaxbContext();

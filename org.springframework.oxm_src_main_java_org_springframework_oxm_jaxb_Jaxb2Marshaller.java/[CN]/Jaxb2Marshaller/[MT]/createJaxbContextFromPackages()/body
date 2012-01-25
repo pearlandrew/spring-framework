@@ -1,0 +1,18 @@
+{
+  if (logger.isInfoEnabled()) {
+    logger.info("Creating JAXBContext by scanning packages [" + StringUtils.arrayToCommaDelimitedString(getPackagesToScan()) + "]");
+  }
+  ClassPathJaxb2TypeScanner scanner=new ClassPathJaxb2TypeScanner(getPackagesToScan());
+  scanner.setResourceLoader(this.resourceLoader);
+  scanner.scanPackages();
+  Class<?>[] jaxb2Classes=scanner.getJaxb2Classes();
+  if (logger.isDebugEnabled()) {
+    logger.debug("Found JAXB2 classes: [" + StringUtils.arrayToCommaDelimitedString(jaxb2Classes) + "]");
+  }
+  if (this.jaxbContextProperties != null) {
+    return JAXBContext.newInstance(jaxb2Classes,this.jaxbContextProperties);
+  }
+ else {
+    return JAXBContext.newInstance(jaxb2Classes);
+  }
+}
