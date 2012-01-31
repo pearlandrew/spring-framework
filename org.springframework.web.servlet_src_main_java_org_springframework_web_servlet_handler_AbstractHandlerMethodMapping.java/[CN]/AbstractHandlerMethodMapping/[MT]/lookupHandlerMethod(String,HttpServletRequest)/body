@@ -1,14 +1,11 @@
 {
-  List<T> mappings=urlMap.get(lookupPath);
-  if (mappings == null) {
-    mappings=new ArrayList<T>(handlerMethods.keySet());
-  }
   List<Match> matches=new ArrayList<Match>();
-  for (  T mapping : mappings) {
-    T match=getMatchingMapping(mapping,request);
-    if (match != null) {
-      matches.add(new Match(match,handlerMethods.get(mapping)));
-    }
+  List<T> directPathMatches=this.urlMap.get(lookupPath);
+  if (directPathMatches != null) {
+    addMatchingMappings(directPathMatches,matches,request);
+  }
+  if (matches.isEmpty()) {
+    addMatchingMappings(this.handlerMethods.keySet(),matches,request);
   }
   if (!matches.isEmpty()) {
     Comparator<Match> comparator=new MatchComparator(getMappingComparator(request));
