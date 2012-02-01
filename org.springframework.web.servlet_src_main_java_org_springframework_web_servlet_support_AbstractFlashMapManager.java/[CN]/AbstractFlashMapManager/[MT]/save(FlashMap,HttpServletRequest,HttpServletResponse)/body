@@ -1,0 +1,28 @@
+{
+  Assert.notNull(flashMap,"FlashMap must not be null");
+  List<FlashMap> flashMaps=retrieveFlashMaps(request);
+  if (flashMap.isEmpty() && (flashMaps == null)) {
+    return;
+  }
+synchronized (this) {
+    boolean update=false;
+    flashMaps=retrieveFlashMaps(request);
+    if (!CollectionUtils.isEmpty(flashMaps)) {
+      update=removeExpired(flashMaps);
+    }
+    if (!flashMap.isEmpty()) {
+      String path=decodeAndNormalizePath(flashMap.getTargetRequestPath(),request);
+      flashMap.setTargetRequestPath(path);
+      flashMap.startExpirationPeriod(this.flashMapTimeout);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Saving FlashMap=" + flashMap);
+      }
+      flashMaps=(flashMaps == null) ? new CopyOnWriteArrayList<FlashMap>() : flashMaps;
+      flashMaps.add(flashMap);
+      update=true;
+    }
+    if (update) {
+      updateFlashMaps(flashMaps,request,response);
+    }
+  }
+}
