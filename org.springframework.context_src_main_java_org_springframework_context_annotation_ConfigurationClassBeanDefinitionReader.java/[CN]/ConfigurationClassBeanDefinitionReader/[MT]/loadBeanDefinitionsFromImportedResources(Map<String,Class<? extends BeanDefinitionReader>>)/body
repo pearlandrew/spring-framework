@@ -1,11 +1,11 @@
 {
   Map<Class<?>,BeanDefinitionReader> readerInstanceCache=new HashMap<Class<?>,BeanDefinitionReader>();
-  for (  Map.Entry<String,Class<?>> entry : importedResources.entrySet()) {
+  for (  Map.Entry<String,Class<? extends BeanDefinitionReader>> entry : importedResources.entrySet()) {
     String resource=entry.getKey();
-    Class<?> readerClass=entry.getValue();
+    Class<? extends BeanDefinitionReader> readerClass=entry.getValue();
     if (!readerInstanceCache.containsKey(readerClass)) {
       try {
-        BeanDefinitionReader readerInstance=(BeanDefinitionReader)readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
+        BeanDefinitionReader readerInstance=readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
         if (readerInstance instanceof AbstractBeanDefinitionReader) {
           ((AbstractBeanDefinitionReader)readerInstance).setResourceLoader(this.resourceLoader);
         }

@@ -7,10 +7,11 @@
   for (  TypeFilter tf : this.includeFilters) {
     if (tf.match(metadataReader,this.metadataReaderFactory)) {
       AnnotationMetadata metadata=metadataReader.getAnnotationMetadata();
-      if (!ProfileHelper.isProfileAnnotationPresent(metadata)) {
+      if (!metadata.isAnnotated(Profile.class.getName())) {
         return true;
       }
-      return this.environment.acceptsProfiles(ProfileHelper.getCandidateProfiles(metadata));
+      AnnotationAttributes profile=MetadataUtils.attributesFor(metadata,Profile.class);
+      return this.environment.acceptsProfiles(profile.getStringArray("value"));
     }
   }
   return false;

@@ -1,19 +1,17 @@
 {
-  if (abd.getMetadata().isAnnotated(Primary.class.getName())) {
+  AnnotationMetadata metadata=abd.getMetadata();
+  if (metadata.isAnnotated(Primary.class.getName())) {
     abd.setPrimary(true);
   }
-  if (abd.getMetadata().isAnnotated(Lazy.class.getName())) {
-    Boolean value=(Boolean)abd.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value");
-    abd.setLazyInit(value);
+  if (metadata.isAnnotated(Lazy.class.getName())) {
+    abd.setLazyInit(attributesFor(metadata,Lazy.class).getBoolean("value"));
   }
-  if (abd.getMetadata().isAnnotated(DependsOn.class.getName())) {
-    String[] value=(String[])abd.getMetadata().getAnnotationAttributes(DependsOn.class.getName()).get("value");
-    abd.setDependsOn(value);
+  if (metadata.isAnnotated(DependsOn.class.getName())) {
+    abd.setDependsOn(attributesFor(metadata,DependsOn.class).getStringArray("value"));
   }
   if (abd instanceof AbstractBeanDefinition) {
-    if (abd.getMetadata().isAnnotated(Role.class.getName())) {
-      int value=(Integer)abd.getMetadata().getAnnotationAttributes(Role.class.getName()).get("value");
-      ((AbstractBeanDefinition)abd).setRole(value);
+    if (metadata.isAnnotated(Role.class.getName())) {
+      ((AbstractBeanDefinition)abd).setRole(attributesFor(metadata,Role.class).getInt("value"));
     }
   }
 }

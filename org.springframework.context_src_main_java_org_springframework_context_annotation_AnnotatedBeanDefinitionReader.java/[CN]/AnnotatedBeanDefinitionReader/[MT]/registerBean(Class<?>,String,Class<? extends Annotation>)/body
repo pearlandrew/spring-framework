@@ -1,8 +1,9 @@
 {
   AnnotatedGenericBeanDefinition abd=new AnnotatedGenericBeanDefinition(annotatedClass);
   AnnotationMetadata metadata=abd.getMetadata();
-  if (ProfileHelper.isProfileAnnotationPresent(metadata)) {
-    if (!this.environment.acceptsProfiles(ProfileHelper.getCandidateProfiles(metadata))) {
+  if (metadata.isAnnotated(Profile.class.getName())) {
+    AnnotationAttributes profile=MetadataUtils.attributesFor(metadata,Profile.class);
+    if (!this.environment.acceptsProfiles(profile.getStringArray("value"))) {
       return;
     }
   }
