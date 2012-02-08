@@ -6,9 +6,18 @@
     return false;
   }
   TypeDescriptor other=(TypeDescriptor)obj;
-  boolean annotatedTypeEquals=ObjectUtils.nullSafeEquals(getType(),other.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(),other.getAnnotations());
-  if (!annotatedTypeEquals) {
+  if (!ObjectUtils.nullSafeEquals(getType(),other.getType())) {
     return false;
+  }
+  Annotation[] ann=getAnnotations();
+  Annotation[] otherAnn=other.getAnnotations();
+  if (ann.length != otherAnn.length) {
+    return false;
+  }
+  for (int i=0; i < ann.length; i++) {
+    if (!ann[i].annotationType().equals(otherAnn[i].annotationType())) {
+      return false;
+    }
   }
   if (isCollection() || isArray()) {
     return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(),other.getElementTypeDescriptor());
