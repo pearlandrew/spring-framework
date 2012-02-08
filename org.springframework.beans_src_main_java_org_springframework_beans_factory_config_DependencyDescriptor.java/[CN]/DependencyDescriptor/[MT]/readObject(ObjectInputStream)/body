@@ -4,11 +4,16 @@
     if (this.fieldName != null) {
       this.field=this.declaringClass.getDeclaredField(this.fieldName);
     }
- else     if (this.methodName != null) {
-      this.methodParameter=new MethodParameter(this.declaringClass.getDeclaredMethod(this.methodName,this.parameterTypes),this.parameterIndex);
-    }
  else {
-      this.methodParameter=new MethodParameter(this.declaringClass.getDeclaredConstructor(this.parameterTypes),this.parameterIndex);
+      if (this.methodName != null) {
+        this.methodParameter=new MethodParameter(this.declaringClass.getDeclaredMethod(this.methodName,this.parameterTypes),this.parameterIndex);
+      }
+ else {
+        this.methodParameter=new MethodParameter(this.declaringClass.getDeclaredConstructor(this.parameterTypes),this.parameterIndex);
+      }
+      for (int i=1; i < this.nestingLevel; i++) {
+        this.methodParameter.increaseNestingLevel();
+      }
     }
   }
  catch (  Throwable ex) {

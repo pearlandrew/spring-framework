@@ -1,3 +1,26 @@
 {
-  return (this.field != null ? this.field.getType() : this.methodParameter.getParameterType());
+  if (this.field != null) {
+    if (this.nestingLevel > 1) {
+      Type type=this.field.getGenericType();
+      if (type instanceof ParameterizedType) {
+        Type arg=((ParameterizedType)type).getActualTypeArguments()[0];
+        if (arg instanceof Class) {
+          return (Class)arg;
+        }
+ else         if (arg instanceof ParameterizedType) {
+          arg=((ParameterizedType)arg).getRawType();
+          if (arg instanceof Class) {
+            return (Class)arg;
+          }
+        }
+      }
+      return Object.class;
+    }
+ else {
+      return this.field.getType();
+    }
+  }
+ else {
+    return this.methodParameter.getNestedParameterType();
+  }
 }
