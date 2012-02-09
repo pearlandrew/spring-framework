@@ -52,20 +52,23 @@
       continue ALL_METHODS;
     }
     for (    PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
+      String propertyName=pd.getName();
+      Method readMethod=pd.getReadMethod();
+      Method mostSpecificReadMethod=ClassUtils.getMostSpecificMethod(readMethod,method.getDeclaringClass());
       for (      PropertyDescriptor existingPD : this.propertyDescriptors) {
-        if (method.equals(pd.getReadMethod()) && existingPD.getName().equals(pd.getName())) {
+        if (method.equals(mostSpecificReadMethod) && existingPD.getName().equals(propertyName)) {
           if (existingPD.getReadMethod() == null) {
-            this.addOrUpdatePropertyDescriptor(pd,pd.getName(),method,pd.getWriteMethod());
+            this.addOrUpdatePropertyDescriptor(pd,propertyName,method,pd.getWriteMethod());
           }
           continue ALL_METHODS;
         }
       }
-      if (method.equals(pd.getReadMethod()) || (pd instanceof IndexedPropertyDescriptor && method.equals(((IndexedPropertyDescriptor)pd).getIndexedReadMethod()))) {
+      if (method.equals(mostSpecificReadMethod) || (pd instanceof IndexedPropertyDescriptor && method.equals(((IndexedPropertyDescriptor)pd).getIndexedReadMethod()))) {
         if (pd instanceof IndexedPropertyDescriptor) {
-          this.addOrUpdatePropertyDescriptor(pd,pd.getName(),pd.getReadMethod(),pd.getWriteMethod(),((IndexedPropertyDescriptor)pd).getIndexedReadMethod(),((IndexedPropertyDescriptor)pd).getIndexedWriteMethod());
+          this.addOrUpdatePropertyDescriptor(pd,propertyName,readMethod,pd.getWriteMethod(),((IndexedPropertyDescriptor)pd).getIndexedReadMethod(),((IndexedPropertyDescriptor)pd).getIndexedWriteMethod());
         }
  else {
-          this.addOrUpdatePropertyDescriptor(pd,pd.getName(),pd.getReadMethod(),pd.getWriteMethod());
+          this.addOrUpdatePropertyDescriptor(pd,propertyName,readMethod,pd.getWriteMethod());
         }
         continue ALL_METHODS;
       }
