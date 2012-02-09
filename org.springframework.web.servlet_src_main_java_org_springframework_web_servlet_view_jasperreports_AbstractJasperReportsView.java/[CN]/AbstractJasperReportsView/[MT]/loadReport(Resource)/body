@@ -1,34 +1,34 @@
 {
   try {
-    String fileName=resource.getFilename();
-    if (fileName.endsWith(".jasper")) {
-      if (logger.isInfoEnabled()) {
-        logger.info("Loading pre-compiled Jasper Report from " + resource);
-      }
-      InputStream is=resource.getInputStream();
-      try {
-        return (JasperReport)JRLoader.loadObject(is);
-      }
+    String filename=resource.getFilename();
+    if (filename != null) {
+      if (filename.endsWith(".jasper")) {
+        if (logger.isInfoEnabled()) {
+          logger.info("Loading pre-compiled Jasper Report from " + resource);
+        }
+        InputStream is=resource.getInputStream();
+        try {
+          return (JasperReport)JRLoader.loadObject(is);
+        }
   finally {
-        is.close();
+          is.close();
+        }
       }
-    }
- else     if (fileName.endsWith(".jrxml")) {
-      if (logger.isInfoEnabled()) {
-        logger.info("Compiling Jasper Report loaded from " + resource);
-      }
-      InputStream is=resource.getInputStream();
-      try {
-        JasperDesign design=JRXmlLoader.load(is);
-        return JasperCompileManager.compileReport(design);
-      }
+ else       if (filename.endsWith(".jrxml")) {
+        if (logger.isInfoEnabled()) {
+          logger.info("Compiling Jasper Report loaded from " + resource);
+        }
+        InputStream is=resource.getInputStream();
+        try {
+          JasperDesign design=JRXmlLoader.load(is);
+          return JasperCompileManager.compileReport(design);
+        }
   finally {
-        is.close();
+          is.close();
+        }
       }
     }
- else {
-      throw new IllegalArgumentException("Report filename [" + fileName + "] must end in either .jasper or .jrxml");
-    }
+    throw new IllegalArgumentException("Report filename [" + filename + "] must end in either .jasper or .jrxml");
   }
  catch (  IOException ex) {
     throw new ApplicationContextException("Could not load JasperReports report from " + resource,ex);
