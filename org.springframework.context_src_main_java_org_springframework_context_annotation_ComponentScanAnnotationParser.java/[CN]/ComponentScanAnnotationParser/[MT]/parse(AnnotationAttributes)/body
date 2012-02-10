@@ -4,13 +4,15 @@
   scanner.setEnvironment(this.environment);
   Assert.notNull(this.resourceLoader,"ResourceLoader must not be null");
   scanner.setResourceLoader(this.resourceLoader);
-  scanner.setBeanNameGenerator(BeanUtils.instantiateClass(componentScan.getClass("nameGenerator",BeanNameGenerator.class)));
-  ScopedProxyMode scopedProxyMode=componentScan.getEnum("scopedProxy",ScopedProxyMode.class);
+  Class<? extends BeanNameGenerator> generatorClass=componentScan.getClass("nameGenerator");
+  scanner.setBeanNameGenerator(BeanUtils.instantiateClass(generatorClass));
+  ScopedProxyMode scopedProxyMode=componentScan.getEnum("scopedProxy");
   if (scopedProxyMode != ScopedProxyMode.DEFAULT) {
     scanner.setScopedProxyMode(scopedProxyMode);
   }
  else {
-    scanner.setScopeMetadataResolver(BeanUtils.instantiateClass(componentScan.getClass("scopeResolver",ScopeMetadataResolver.class)));
+    Class<? extends ScopeMetadataResolver> resolverClass=componentScan.getClass("scopeResolver");
+    scanner.setScopeMetadataResolver(BeanUtils.instantiateClass(resolverClass));
   }
   scanner.setResourcePattern(componentScan.getString("resourcePattern"));
   for (  AnnotationAttributes filter : componentScan.getAnnotationArray("includeFilters")) {
