@@ -8,20 +8,19 @@
         Object[] errorArgs=getArgumentsForConstraint(errors.getObjectName(),field,violation.getConstraintDescriptor());
         if (errors instanceof BindingResult) {
           BindingResult bindingResult=(BindingResult)errors;
-          String[] errorCodes=bindingResult.resolveMessageCodes(errorCode,field);
           String nestedField=bindingResult.getNestedPath() + field;
-          ObjectError error;
           if ("".equals(nestedField)) {
-            error=new ObjectError(errors.getObjectName(),errorCodes,errorArgs,violation.getMessage());
+            String[] errorCodes=bindingResult.resolveMessageCodes(errorCode);
+            bindingResult.addError(new ObjectError(errors.getObjectName(),errorCodes,errorArgs,violation.getMessage()));
           }
  else {
             Object invalidValue=violation.getInvalidValue();
             if (!"".equals(field) && invalidValue == violation.getLeafBean()) {
               invalidValue=bindingResult.getRawFieldValue(field);
             }
-            error=new FieldError(errors.getObjectName(),nestedField,invalidValue,false,errorCodes,errorArgs,violation.getMessage());
+            String[] errorCodes=bindingResult.resolveMessageCodes(errorCode,field);
+            bindingResult.addError(new FieldError(errors.getObjectName(),nestedField,invalidValue,false,errorCodes,errorArgs,violation.getMessage()));
           }
-          bindingResult.addError(error);
         }
  else {
           errors.rejectValue(field,errorCode,errorArgs,violation.getMessage());

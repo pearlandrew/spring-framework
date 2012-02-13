@@ -14,13 +14,12 @@
   }
   beanDef.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
   beanDef.setAttribute(RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE,Boolean.TRUE);
-  Map<String,Object> roleAttributes=metadata.getAnnotationAttributes(Role.class.getName());
-  if (roleAttributes != null) {
-    int role=(Integer)roleAttributes.get("value");
-    beanDef.setRole(role);
+  AnnotationAttributes role=attributesFor(metadata,Role.class);
+  if (role != null) {
+    beanDef.setRole(role.<Integer>getNumber("value"));
   }
-  Map<String,Object> beanAttributes=metadata.getAnnotationAttributes(Bean.class.getName());
-  List<String> names=new ArrayList<String>(Arrays.asList((String[])beanAttributes.get("name")));
+  AnnotationAttributes bean=attributesFor(metadata,Bean.class);
+  List<String> names=new ArrayList<String>(Arrays.asList(bean.getStringArray("name")));
   String beanName=(names.size() > 0 ? names.remove(0) : beanMethod.getMetadata().getMethodName());
   for (  String alias : names) {
     this.registry.registerAlias(beanName,alias);
@@ -38,34 +37,37 @@
     beanDef.setPrimary(true);
   }
   if (metadata.isAnnotated(Lazy.class.getName())) {
-    beanDef.setLazyInit((Boolean)metadata.getAnnotationAttributes(Lazy.class.getName()).get("value"));
+    AnnotationAttributes lazy=attributesFor(metadata,Lazy.class);
+    beanDef.setLazyInit(lazy.getBoolean("value"));
   }
  else   if (configClass.getMetadata().isAnnotated(Lazy.class.getName())) {
-    beanDef.setLazyInit((Boolean)configClass.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value"));
+    AnnotationAttributes lazy=attributesFor(configClass.getMetadata(),Lazy.class);
+    beanDef.setLazyInit(lazy.getBoolean("value"));
   }
   if (metadata.isAnnotated(DependsOn.class.getName())) {
-    String[] dependsOn=(String[])metadata.getAnnotationAttributes(DependsOn.class.getName()).get("value");
-    if (dependsOn.length > 0) {
-      beanDef.setDependsOn(dependsOn);
+    AnnotationAttributes dependsOn=attributesFor(metadata,DependsOn.class);
+    String[] otherBeans=dependsOn.getStringArray("value");
+    if (otherBeans.length > 0) {
+      beanDef.setDependsOn(otherBeans);
     }
   }
-  Autowire autowire=(Autowire)beanAttributes.get("autowire");
+  Autowire autowire=bean.getEnum("autowire");
   if (autowire.isAutowire()) {
     beanDef.setAutowireMode(autowire.value());
   }
-  String initMethodName=(String)beanAttributes.get("initMethod");
+  String initMethodName=bean.getString("initMethod");
   if (StringUtils.hasText(initMethodName)) {
     beanDef.setInitMethodName(initMethodName);
   }
-  String destroyMethodName=(String)beanAttributes.get("destroyMethod");
+  String destroyMethodName=bean.getString("destroyMethod");
   if (StringUtils.hasText(destroyMethodName)) {
     beanDef.setDestroyMethodName(destroyMethodName);
   }
   ScopedProxyMode proxyMode=ScopedProxyMode.NO;
-  Map<String,Object> scopeAttributes=metadata.getAnnotationAttributes(Scope.class.getName());
-  if (scopeAttributes != null) {
-    beanDef.setScope((String)scopeAttributes.get("value"));
-    proxyMode=(ScopedProxyMode)scopeAttributes.get("proxyMode");
+  AnnotationAttributes scope=attributesFor(metadata,Scope.class);
+  if (scope != null) {
+    beanDef.setScope(scope.getString("value"));
+    proxyMode=scope.getEnum("proxyMode");
     if (proxyMode == ScopedProxyMode.DEFAULT) {
       proxyMode=ScopedProxyMode.NO;
     }

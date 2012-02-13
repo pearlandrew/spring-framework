@@ -1,11 +1,18 @@
 {
   MethodParameter read=resolveReadMethodParameter();
   MethodParameter write=resolveWriteMethodParameter();
-  if (read == null && write == null) {
-    throw new IllegalStateException("Property is neither readable nor writeable");
+  if (write == null) {
+    if (read == null) {
+      throw new IllegalStateException("Property is neither readable nor writeable");
+    }
+    return read;
   }
-  if (read != null && write != null && !write.getParameterType().isAssignableFrom(read.getParameterType())) {
-    throw new IllegalStateException("Write parameter is not assignable from read parameter");
+  if (read != null) {
+    Class<?> readType=read.getParameterType();
+    Class<?> writeType=write.getParameterType();
+    if (!writeType.equals(readType) && writeType.isAssignableFrom(readType)) {
+      return read;
+    }
   }
-  return read != null ? read : write;
+  return write;
 }

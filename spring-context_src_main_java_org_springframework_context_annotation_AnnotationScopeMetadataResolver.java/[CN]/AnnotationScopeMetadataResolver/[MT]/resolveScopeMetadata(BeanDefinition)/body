@@ -2,10 +2,10 @@
   ScopeMetadata metadata=new ScopeMetadata();
   if (definition instanceof AnnotatedBeanDefinition) {
     AnnotatedBeanDefinition annDef=(AnnotatedBeanDefinition)definition;
-    Map<String,Object> attributes=annDef.getMetadata().getAnnotationAttributes(this.scopeAnnotationType.getName());
+    AnnotationAttributes attributes=attributesFor(annDef.getMetadata(),this.scopeAnnotationType);
     if (attributes != null) {
-      metadata.setScopeName((String)attributes.get("value"));
-      ScopedProxyMode proxyMode=(ScopedProxyMode)attributes.get("proxyMode");
+      metadata.setScopeName(attributes.getString("value"));
+      ScopedProxyMode proxyMode=attributes.getEnum("proxyMode");
       if (proxyMode == null || proxyMode == ScopedProxyMode.DEFAULT) {
         proxyMode=this.defaultProxyMode;
       }

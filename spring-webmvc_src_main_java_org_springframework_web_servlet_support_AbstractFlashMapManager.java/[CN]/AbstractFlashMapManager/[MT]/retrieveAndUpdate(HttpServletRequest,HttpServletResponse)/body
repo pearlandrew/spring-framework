@@ -1,0 +1,25 @@
+{
+  List<FlashMap> allMaps=retrieveFlashMaps(request);
+  if (CollectionUtils.isEmpty(allMaps)) {
+    return null;
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Retrieved FlashMap(s): " + allMaps);
+  }
+  List<FlashMap> mapsToRemove=getExpiredFlashMaps(allMaps);
+  FlashMap match=getMatchingFlashMap(allMaps,request);
+  if (match != null) {
+    mapsToRemove.add(match);
+  }
+  if (!mapsToRemove.isEmpty()) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Removing FlashMap(s): " + allMaps);
+    }
+synchronized (writeLock) {
+      allMaps=retrieveFlashMaps(request);
+      allMaps.removeAll(mapsToRemove);
+      updateFlashMaps(allMaps,request,response);
+    }
+  }
+  return match;
+}

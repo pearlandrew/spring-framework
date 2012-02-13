@@ -1,5 +1,5 @@
 {
-  List<Map<String,Object>> allAttribs=new ArrayList<Map<String,Object>>();
+  List<AnnotationAttributes> allAttribs=new ArrayList<AnnotationAttributes>();
   MetadataReader reader=this.metadataReaderFactory.getMetadataReader(annotatedClassName);
   AnnotationMetadata metadata=reader.getAnnotationMetadata();
   String targetAnnotationType=targetAnnotation.getName();
@@ -7,13 +7,13 @@
     if (annotationType.equals(targetAnnotationType)) {
       continue;
     }
-    MetadataReader metaReader=this.metadataReaderFactory.getMetadataReader(annotationType);
-    Map<String,Object> targetAttribs=metaReader.getAnnotationMetadata().getAnnotationAttributes(targetAnnotationType,classValuesAsString);
+    AnnotationMetadata metaAnnotations=this.metadataReaderFactory.getMetadataReader(annotationType).getAnnotationMetadata();
+    AnnotationAttributes targetAttribs=AnnotationAttributes.fromMap(metaAnnotations.getAnnotationAttributes(targetAnnotationType,classValuesAsString));
     if (targetAttribs != null) {
       allAttribs.add(targetAttribs);
     }
   }
-  Map<String,Object> localAttribs=metadata.getAnnotationAttributes(targetAnnotationType,classValuesAsString);
+  AnnotationAttributes localAttribs=AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(targetAnnotationType,classValuesAsString));
   if (localAttribs != null) {
     allAttribs.add(localAttribs);
   }

@@ -1,12 +1,27 @@
 {
   if (this.headers == null) {
     this.headers=new HttpHeaders();
-    for (Enumeration headerNames=this.servletRequest.getHeaderNames(); headerNames.hasMoreElements(); ) {
+    for (Enumeration<?> headerNames=this.servletRequest.getHeaderNames(); headerNames.hasMoreElements(); ) {
       String headerName=(String)headerNames.nextElement();
-      for (Enumeration headerValues=this.servletRequest.getHeaders(headerName); headerValues.hasMoreElements(); ) {
+      for (Enumeration<?> headerValues=this.servletRequest.getHeaders(headerName); headerValues.hasMoreElements(); ) {
         String headerValue=(String)headerValues.nextElement();
         this.headers.add(headerName,headerValue);
       }
+    }
+    if (this.headers.getContentType() == null && this.servletRequest.getContentType() != null) {
+      MediaType contentType=MediaType.parseMediaType(this.servletRequest.getContentType());
+      this.headers.setContentType(contentType);
+    }
+    if (this.headers.getContentType() != null && this.headers.getContentType().getCharSet() == null && this.servletRequest.getCharacterEncoding() != null) {
+      MediaType oldContentType=this.headers.getContentType();
+      Charset charSet=Charset.forName(this.servletRequest.getCharacterEncoding());
+      Map<String,String> params=new HashMap<String,String>(oldContentType.getParameters());
+      params.put("charset",charSet.toString());
+      MediaType newContentType=new MediaType(oldContentType.getType(),oldContentType.getSubtype(),params);
+      this.headers.setContentType(newContentType);
+    }
+    if (this.headers.getContentLength() == -1 && this.servletRequest.getContentLength() != -1) {
+      this.headers.setContentLength(this.servletRequest.getContentLength());
     }
   }
   return this.headers;

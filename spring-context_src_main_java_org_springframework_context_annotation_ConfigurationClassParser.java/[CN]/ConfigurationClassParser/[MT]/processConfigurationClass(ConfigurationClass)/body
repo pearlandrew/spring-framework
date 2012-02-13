@@ -1,7 +1,8 @@
 {
   AnnotationMetadata metadata=configClass.getMetadata();
-  if (this.environment != null && ProfileHelper.isProfileAnnotationPresent(metadata)) {
-    if (!this.environment.acceptsProfiles(ProfileHelper.getCandidateProfiles(metadata))) {
+  if (this.environment != null && metadata.isAnnotated(Profile.class.getName())) {
+    AnnotationAttributes profile=MetadataUtils.attributesFor(metadata,Profile.class);
+    if (!this.environment.acceptsProfiles(profile.getStringArray("value"))) {
       return;
     }
   }
@@ -11,7 +12,7 @@
     if (superClassName != null && !Object.class.getName().equals(superClassName)) {
       if (metadata instanceof StandardAnnotationMetadata) {
         Class<?> clazz=((StandardAnnotationMetadata)metadata).getIntrospectedClass();
-        metadata=new StandardAnnotationMetadata(clazz.getSuperclass());
+        metadata=new StandardAnnotationMetadata(clazz.getSuperclass(),true);
       }
  else {
         MetadataReader reader=this.metadataReaderFactory.getMetadataReader(superClassName);

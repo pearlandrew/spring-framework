@@ -1,0 +1,46 @@
+{
+  ClassPathBeanDefinitionScanner scanner=new ClassPathBeanDefinitionScanner(registry,componentScan.getBoolean("useDefaultFilters"));
+  Assert.notNull(this.environment,"Environment must not be null");
+  scanner.setEnvironment(this.environment);
+  Assert.notNull(this.resourceLoader,"ResourceLoader must not be null");
+  scanner.setResourceLoader(this.resourceLoader);
+  Class<? extends BeanNameGenerator> generatorClass=componentScan.getClass("nameGenerator");
+  scanner.setBeanNameGenerator(BeanUtils.instantiateClass(generatorClass));
+  ScopedProxyMode scopedProxyMode=componentScan.getEnum("scopedProxy");
+  if (scopedProxyMode != ScopedProxyMode.DEFAULT) {
+    scanner.setScopedProxyMode(scopedProxyMode);
+  }
+ else {
+    Class<? extends ScopeMetadataResolver> resolverClass=componentScan.getClass("scopeResolver");
+    scanner.setScopeMetadataResolver(BeanUtils.instantiateClass(resolverClass));
+  }
+  scanner.setResourcePattern(componentScan.getString("resourcePattern"));
+  for (  AnnotationAttributes filter : componentScan.getAnnotationArray("includeFilters")) {
+    for (    TypeFilter typeFilter : typeFiltersFor(filter)) {
+      scanner.addIncludeFilter(typeFilter);
+    }
+  }
+  for (  AnnotationAttributes filter : componentScan.getAnnotationArray("excludeFilters")) {
+    for (    TypeFilter typeFilter : typeFiltersFor(filter)) {
+      scanner.addExcludeFilter(typeFilter);
+    }
+  }
+  List<String> basePackages=new ArrayList<String>();
+  for (  String pkg : componentScan.getStringArray("value")) {
+    if (StringUtils.hasText(pkg)) {
+      basePackages.add(pkg);
+    }
+  }
+  for (  String pkg : componentScan.getStringArray("basePackages")) {
+    if (StringUtils.hasText(pkg)) {
+      basePackages.add(pkg);
+    }
+  }
+  for (  Class<?> clazz : componentScan.getClassArray("basePackageClasses")) {
+    basePackages.add(ClassUtils.getPackageName(clazz));
+  }
+  if (basePackages.isEmpty()) {
+    throw new IllegalStateException("At least one base package must be specified");
+  }
+  return scanner.doScan(basePackages.toArray(new String[]{}));
+}

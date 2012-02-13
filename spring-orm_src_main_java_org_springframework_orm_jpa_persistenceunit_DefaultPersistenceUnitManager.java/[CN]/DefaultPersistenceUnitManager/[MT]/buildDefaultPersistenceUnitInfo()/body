@@ -14,6 +14,12 @@
             String className=reader.getClassMetadata().getClassName();
             if (matchesFilter(reader,readerFactory)) {
               scannedUnit.addManagedClassName(className);
+              if (scannedUnit.getPersistenceUnitRootUrl() == null) {
+                URL url=resource.getURL();
+                if (ResourceUtils.isJarURL(url)) {
+                  scannedUnit.setPersistenceUnitRootUrl(ResourceUtils.extractJarFileURL(url));
+                }
+              }
             }
           }
         }

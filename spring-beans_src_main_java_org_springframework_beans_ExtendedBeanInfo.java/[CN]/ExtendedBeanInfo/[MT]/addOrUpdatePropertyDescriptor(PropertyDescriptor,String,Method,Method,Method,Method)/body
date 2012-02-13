@@ -22,7 +22,7 @@
           break;
         }
       }
-      if (writeMethod != null) {
+      if (writeMethod != null && !(existingPD instanceof IndexedPropertyDescriptor && !writeMethod.getParameterTypes()[0].isArray())) {
         existingPD.setWriteMethod(writeMethod);
       }
       if (existingPD instanceof IndexedPropertyDescriptor) {
@@ -64,7 +64,7 @@
       this.propertyDescriptors.add(pd);
     }
  catch (    IntrospectionException ex) {
-      logger.warn(format("Could not create new PropertyDescriptor for readMethod [%s] writeMethod [%s] " + "indexedReadMethod [%s] indexedWriteMethod [%s] for property [%s]. Reason: %s",readMethod,writeMethod,indexedReadMethod,indexedWriteMethod,propertyName,ex.getMessage()));
+      logger.debug(format("Could not create new PropertyDescriptor for readMethod [%s] writeMethod [%s] " + "indexedReadMethod [%s] indexedWriteMethod [%s] for property [%s]. Reason: %s",readMethod,writeMethod,indexedReadMethod,indexedWriteMethod,propertyName,ex.getMessage()));
     }
   }
  else {
@@ -73,7 +73,16 @@
       pd.setWriteMethod(writeMethod);
     }
  catch (    IntrospectionException ex) {
-      logger.warn(format("Could not add write method [%s] for property [%s]. Reason: %s",writeMethod,propertyName,ex.getMessage()));
+      logger.debug(format("Could not add write method [%s] for property [%s]. Reason: %s",writeMethod,propertyName,ex.getMessage()));
+    }
+    if (pd instanceof IndexedPropertyDescriptor) {
+      ((IndexedPropertyDescriptor)pd).setIndexedReadMethod(indexedReadMethod);
+      try {
+        ((IndexedPropertyDescriptor)pd).setIndexedWriteMethod(indexedWriteMethod);
+      }
+ catch (      IntrospectionException ex) {
+        logger.debug(format("Could not add indexed write method [%s] for property [%s]. Reason: %s",indexedWriteMethod,propertyName,ex.getMessage()));
+      }
     }
     this.propertyDescriptors.add(pd);
   }
