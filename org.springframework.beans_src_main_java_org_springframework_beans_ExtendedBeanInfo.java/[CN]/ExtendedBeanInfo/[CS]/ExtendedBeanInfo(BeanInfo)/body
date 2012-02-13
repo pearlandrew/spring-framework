@@ -39,14 +39,11 @@
         Method writeMethod=ipd.getWriteMethod();
         Method indexedReadMethod=ipd.getIndexedReadMethod();
         Method indexedWriteMethod=ipd.getIndexedWriteMethod();
-        if (indexedWriteMethod != null && indexedWriteMethod.getName().equals(method.getName())) {
-          this.addOrUpdatePropertyDescriptor(pd,propertyName,readMethod,writeMethod,indexedReadMethod,indexedWriteMethod);
-          continue ALL_METHODS;
+        if (!(indexedWriteMethod != null && indexedWriteMethod.getName().equals(method.getName()))) {
+          indexedWriteMethod=method;
         }
-        if (indexedReadMethod != null && indexedReadMethod.getName().equals(getterMethodNameFor(propertyName)) && indexedReadMethod.getReturnType().equals(method.getParameterTypes()[1])) {
-          this.addOrUpdatePropertyDescriptor(pd,propertyName,readMethod,writeMethod,indexedReadMethod,method);
-          continue ALL_METHODS;
-        }
+        this.addOrUpdatePropertyDescriptor(pd,propertyName,readMethod,writeMethod,indexedReadMethod,indexedWriteMethod);
+        continue ALL_METHODS;
       }
       this.addOrUpdatePropertyDescriptor(null,propertyName,null,null,null,method);
       continue ALL_METHODS;
