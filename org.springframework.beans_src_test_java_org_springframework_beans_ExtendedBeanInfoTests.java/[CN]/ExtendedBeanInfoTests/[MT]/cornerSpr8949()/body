@@ -1,5 +1,23 @@
 {
+class A {
+    @SuppressWarnings("unused") public boolean isTargetMethod(){
+      return false;
+    }
+  }
+class B extends A {
+    @Override public boolean isTargetMethod(){
+      return false;
+    }
+  }
   BeanInfo bi=Introspector.getBeanInfo(B.class);
+  for (  PropertyDescriptor pd : bi.getPropertyDescriptors()) {
+    if ("targetMethod".equals(pd.getName())) {
+      Method readMethod=pd.getReadMethod();
+      assertTrue(readMethod.getDeclaringClass().equals(A.class));
+      Method msReadMethod=ClassUtils.getMostSpecificMethod(readMethod,B.class);
+      assertTrue(msReadMethod.getDeclaringClass().equals(B.class));
+    }
+  }
   ExtendedBeanInfo ebi=new ExtendedBeanInfo(bi);
   assertThat(hasReadMethodForProperty(bi,"targetMethod"),is(true));
   assertThat(hasWriteMethodForProperty(bi,"targetMethod"),is(false));
