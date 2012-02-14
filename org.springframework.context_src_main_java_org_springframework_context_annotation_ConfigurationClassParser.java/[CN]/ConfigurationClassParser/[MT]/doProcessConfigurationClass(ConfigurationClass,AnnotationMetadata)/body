@@ -42,4 +42,18 @@
   for (  MethodMetadata methodMetadata : beanMethods) {
     configClass.addBeanMethod(new BeanMethod(methodMetadata,configClass));
   }
+  if (metadata.hasSuperClass()) {
+    String superclass=metadata.getSuperClassName();
+    if (this.knownSuperclasses.add(superclass)) {
+      if (metadata instanceof StandardAnnotationMetadata) {
+        Class<?> clazz=((StandardAnnotationMetadata)metadata).getIntrospectedClass();
+        return new StandardAnnotationMetadata(clazz.getSuperclass(),true);
+      }
+ else {
+        MetadataReader reader=this.metadataReaderFactory.getMetadataReader(superclass);
+        return reader.getAnnotationMetadata();
+      }
+    }
+  }
+  return null;
 }
