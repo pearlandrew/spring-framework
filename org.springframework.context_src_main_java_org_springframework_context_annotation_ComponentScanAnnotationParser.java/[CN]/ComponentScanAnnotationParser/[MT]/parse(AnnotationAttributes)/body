@@ -5,7 +5,8 @@
   Assert.notNull(this.resourceLoader,"ResourceLoader must not be null");
   scanner.setResourceLoader(this.resourceLoader);
   Class<? extends BeanNameGenerator> generatorClass=componentScan.getClass("nameGenerator");
-  scanner.setBeanNameGenerator(BeanUtils.instantiateClass(generatorClass));
+  boolean useInheritedGenerator=BeanNameGenerator.class.equals(generatorClass);
+  scanner.setBeanNameGenerator(useInheritedGenerator ? this.beanNameGenerator : BeanUtils.instantiateClass(generatorClass));
   ScopedProxyMode scopedProxyMode=componentScan.getEnum("scopedProxy");
   if (scopedProxyMode != ScopedProxyMode.DEFAULT) {
     scanner.setScopedProxyMode(scopedProxyMode);
