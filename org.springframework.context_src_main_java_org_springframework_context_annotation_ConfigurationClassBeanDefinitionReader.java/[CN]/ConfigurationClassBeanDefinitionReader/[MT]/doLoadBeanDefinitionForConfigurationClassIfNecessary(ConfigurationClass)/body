@@ -2,32 +2,19 @@
   if (!configClass.isImported()) {
     return;
   }
-  BeanDefinition configBeanDef=new GenericBeanDefinition();
-  String className=configClass.getMetadata().getClassName();
+  AnnotationMetadata metadata=configClass.getMetadata();
+  BeanDefinition configBeanDef=new AnnotatedGenericBeanDefinition(metadata);
+  String className=metadata.getClassName();
   configBeanDef.setBeanClassName(className);
-  MetadataReader reader;
-  try {
-    reader=this.metadataReaderFactory.getMetadataReader(className);
-  }
- catch (  IOException ex) {
-    throw new IllegalStateException("Could not create MetadataReader for class " + className);
-  }
   if (ConfigurationClassUtils.checkConfigurationClassCandidate(configBeanDef,this.metadataReaderFactory)) {
-    Map<String,Object> configAttributes=reader.getAnnotationMetadata().getAnnotationAttributes(Configuration.class.getName());
-    String configBeanName=(String)configAttributes.get("value");
-    if (StringUtils.hasText(configBeanName)) {
-      this.registry.registerBeanDefinition(configBeanName,configBeanDef);
-    }
- else {
-      configBeanName=BeanDefinitionReaderUtils.registerWithGeneratedName((AbstractBeanDefinition)configBeanDef,this.registry);
-    }
+    String configBeanName=this.beanNameGenerator.generateBeanName(configBeanDef,this.registry);
+    this.registry.registerBeanDefinition(configBeanName,configBeanDef);
     configClass.setBeanName(configBeanName);
     if (logger.isDebugEnabled()) {
       logger.debug(String.format("Registered bean definition for imported @Configuration class %s",configBeanName));
     }
   }
  else {
-    AnnotationMetadata metadata=reader.getAnnotationMetadata();
-    this.problemReporter.error(new InvalidConfigurationImportProblem(className,reader.getResource(),metadata));
+    this.problemReporter.error(new InvalidConfigurationImportProblem(className,configClass.getResource(),metadata));
   }
 }
