@@ -3,7 +3,8 @@
   EhCacheManagerFactoryBean cacheManagerFb=null;
   try {
     EhCacheFactoryBean cacheFb=new EhCacheFactoryBean();
-    assertEquals(Ehcache.class,cacheFb.getObjectType());
+    Class<? extends Ehcache> objectType=cacheFb.getObjectType();
+    assertTrue(Ehcache.class.isAssignableFrom(objectType));
     assertTrue("Singleton property",cacheFb.isSingleton());
     if (useCacheManagerFb) {
       cacheManagerFb=new EhCacheManagerFactoryBean();
@@ -14,6 +15,8 @@
     cacheFb.setCacheName("myCache1");
     cacheFb.afterPropertiesSet();
     cache=(Cache)cacheFb.getObject();
+    Class<? extends Ehcache> objectType2=cacheFb.getObjectType();
+    assertSame(objectType,objectType2);
     CacheConfiguration config=cache.getCacheConfiguration();
     assertEquals("myCache1",cache.getName());
     if (useCacheManagerFb) {
