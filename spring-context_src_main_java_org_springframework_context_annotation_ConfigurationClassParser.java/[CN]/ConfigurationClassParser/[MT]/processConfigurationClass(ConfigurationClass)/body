@@ -6,23 +6,10 @@
       return;
     }
   }
-  while (metadata != null) {
-    doProcessConfigurationClass(configClass,metadata);
-    String superClassName=metadata.getSuperClassName();
-    if (superClassName != null && !Object.class.getName().equals(superClassName)) {
-      if (metadata instanceof StandardAnnotationMetadata) {
-        Class<?> clazz=((StandardAnnotationMetadata)metadata).getIntrospectedClass();
-        metadata=new StandardAnnotationMetadata(clazz.getSuperclass(),true);
-      }
- else {
-        MetadataReader reader=this.metadataReaderFactory.getMetadataReader(superClassName);
-        metadata=reader.getAnnotationMetadata();
-      }
-    }
- else {
-      metadata=null;
-    }
+  do {
+    metadata=doProcessConfigurationClass(configClass,metadata);
   }
+ while (metadata != null);
   if (this.configurationClasses.contains(configClass) && configClass.getBeanName() != null) {
     this.configurationClasses.remove(configClass);
   }
