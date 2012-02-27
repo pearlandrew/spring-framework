@@ -5,9 +5,14 @@
       Type typeArgument=parameterizedType.getActualTypeArguments()[0];
       if (typeArgument instanceof Class) {
         Class<?> classArgument=(Class<?>)typeArgument;
-        return (isPrimitiveWrapper(classArgument) || isStandardClass(classArgument) || supportsInternal(classArgument,false));
+        if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_17 && classArgument.isArray()) {
+          return classArgument.getComponentType().equals(Byte.TYPE);
+        }
+ else {
+          return (isPrimitiveWrapper(classArgument) || isStandardClass(classArgument) || supportsInternal(classArgument,false));
+        }
       }
- else       if (typeArgument instanceof GenericArrayType) {
+ else       if (JdkVersion.getMajorJavaVersion() <= JdkVersion.JAVA_16 && typeArgument instanceof GenericArrayType) {
         GenericArrayType arrayType=(GenericArrayType)typeArgument;
         return arrayType.getGenericComponentType().equals(Byte.TYPE);
       }
