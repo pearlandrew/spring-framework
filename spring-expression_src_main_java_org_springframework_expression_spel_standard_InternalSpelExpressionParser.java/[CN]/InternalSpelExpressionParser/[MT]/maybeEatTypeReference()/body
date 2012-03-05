@@ -7,8 +7,13 @@
     nextToken();
     eatToken(TokenKind.LPAREN);
     SpelNodeImpl node=eatPossiblyQualifiedId();
+    int dims=0;
+    while (peekToken(TokenKind.LSQUARE,true)) {
+      eatToken(TokenKind.RSQUARE);
+      dims++;
+    }
     eatToken(TokenKind.RPAREN);
-    constructedNodes.push(new TypeReference(toPos(typeName),node));
+    constructedNodes.push(new TypeReference(toPos(typeName),node,dims));
     return true;
   }
   return false;

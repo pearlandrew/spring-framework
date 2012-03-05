@@ -3,8 +3,12 @@
   if (typename.indexOf(".") == -1 && Character.isLowerCase(typename.charAt(0))) {
     TypeCode tc=TypeCode.valueOf(typename.toUpperCase());
     if (tc != TypeCode.OBJECT) {
-      return new TypedValue(tc.getType());
+      Class<?> clazz=tc.getType();
+      clazz=makeArrayIfNecessary(clazz);
+      return new TypedValue(clazz);
     }
   }
-  return new TypedValue(state.findType(typename));
+  Class<?> clazz=state.findType(typename);
+  clazz=makeArrayIfNecessary(clazz);
+  return new TypedValue(clazz);
 }
