@@ -5,12 +5,13 @@
     configTimeDataSourceHolder.set(dataSource);
   }
   try {
-    HibernateTemplate hibernateTemplate=new HibernateTemplate(getSessionFactory());
+    SessionFactory sessionFactory=getSessionFactory();
+    final Dialect dialect=((SessionFactoryImplementor)sessionFactory).getDialect();
+    HibernateTemplate hibernateTemplate=new HibernateTemplate(sessionFactory);
     hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
     hibernateTemplate.execute(new HibernateCallback<Object>(){
       public Object doInHibernate(      Session session) throws HibernateException, SQLException {
         Connection con=session.connection();
-        Dialect dialect=Dialect.getDialect(getConfiguration().getProperties());
         DatabaseMetadata metadata=new DatabaseMetadata(con,dialect);
         String[] sql=getConfiguration().generateSchemaUpdateScript(dialect,metadata);
         executeSchemaScript(con,sql);
