@@ -8,13 +8,14 @@
   Object postProcessor=context.getBean("postProcessor");
   Object target=context.getBean("target");
   ScheduledTaskRegistrar registrar=(ScheduledTaskRegistrar)new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
-  Map<Runnable,String> cronTasks=(Map<Runnable,String>)new DirectFieldAccessor(registrar).getPropertyValue("cronTasks");
+  @SuppressWarnings("unchecked") List<CronTask> cronTasks=(List<CronTask>)new DirectFieldAccessor(registrar).getPropertyValue("cronTasks");
   assertEquals(1,cronTasks.size());
-  ScheduledMethodRunnable runnable=(ScheduledMethodRunnable)cronTasks.keySet().iterator().next();
+  CronTask task=cronTasks.get(0);
+  ScheduledMethodRunnable runnable=(ScheduledMethodRunnable)task.getRunnable();
   Object targetObject=runnable.getTarget();
   Method targetMethod=runnable.getMethod();
   assertEquals(target,targetObject);
   assertEquals("cron",targetMethod.getName());
-  assertEquals("*/7 * * * * ?",cronTasks.values().iterator().next());
+  assertEquals("*/7 * * * * ?",task.getExpression());
   Thread.sleep(10000);
 }

@@ -26,19 +26,20 @@ catch (          NoSuchMethodException ex) {
           if (embeddedValueResolver != null) {
             cron=embeddedValueResolver.resolveStringValue(cron);
           }
-          cronTasks.put(runnable,cron);
+          registrar.addCronTask(new CronTask(runnable,cron));
         }
+        long initialDelay=annotation.initialDelay();
         long fixedDelay=annotation.fixedDelay();
         if (fixedDelay >= 0) {
           Assert.isTrue(!processedSchedule,errorMessage);
           processedSchedule=true;
-          fixedDelayTasks.put(runnable,fixedDelay);
+          registrar.addFixedDelayTask(new IntervalTask(runnable,fixedDelay,initialDelay));
         }
         long fixedRate=annotation.fixedRate();
         if (fixedRate >= 0) {
           Assert.isTrue(!processedSchedule,errorMessage);
           processedSchedule=true;
-          fixedRateTasks.put(runnable,fixedRate);
+          registrar.addFixedRateTask(new IntervalTask(runnable,fixedRate,initialDelay));
         }
         Assert.isTrue(processedSchedule,errorMessage);
       }
