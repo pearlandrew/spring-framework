@@ -1,4 +1,12 @@
 {
-  List<MediaType> result=inputMessage.getHeaders().getAccept();
-  return result.isEmpty() ? Collections.singletonList(MediaType.ALL) : result;
+  try {
+    List<MediaType> result=inputMessage.getHeaders().getAccept();
+    return result.isEmpty() ? Collections.singletonList(MediaType.ALL) : result;
+  }
+ catch (  IllegalArgumentException ex) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Could not parse Accept header: " + ex.getMessage());
+    }
+    return Collections.emptyList();
+  }
 }
