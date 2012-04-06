@@ -1,16 +1,11 @@
 {
-  HandlerMethodReturnValueHandler result=this.returnValueHandlerCache.get(returnType);
-  if (result == null) {
-    for (    HandlerMethodReturnValueHandler returnValueHandler : returnValueHandlers) {
-      if (logger.isTraceEnabled()) {
-        logger.trace("Testing if return value handler [" + returnValueHandler + "] supports ["+ returnType.getGenericParameterType()+ "]");
-      }
-      if (returnValueHandler.supportsReturnType(returnType)) {
-        result=returnValueHandler;
-        this.returnValueHandlerCache.put(returnType,returnValueHandler);
-        break;
-      }
+  for (  HandlerMethodReturnValueHandler returnValueHandler : returnValueHandlers) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Testing if return value handler [" + returnValueHandler + "] supports ["+ returnType.getGenericParameterType()+ "]");
+    }
+    if (returnValueHandler.supportsReturnType(returnType)) {
+      return returnValueHandler;
     }
   }
-  return result;
+  return null;
 }

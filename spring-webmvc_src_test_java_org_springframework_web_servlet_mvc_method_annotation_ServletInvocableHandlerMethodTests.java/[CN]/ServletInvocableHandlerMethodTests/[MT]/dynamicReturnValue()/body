@@ -1,0 +1,12 @@
+{
+  argumentResolvers.addResolver(new RequestParamMethodArgumentResolver(null,false));
+  returnValueHandlers.addHandler(new ViewMethodReturnValueHandler());
+  returnValueHandlers.addHandler(new ViewNameMethodReturnValueHandler());
+  ServletInvocableHandlerMethod handlerMethod=getHandlerMethod("dynamicReturnValue",String.class);
+  handlerMethod.invokeAndHandle(webRequest,mavContainer);
+  assertNotNull(mavContainer.getView());
+  assertEquals(RedirectView.class,mavContainer.getView().getClass());
+  request.setParameter("param","value");
+  handlerMethod.invokeAndHandle(webRequest,mavContainer);
+  assertEquals("view",mavContainer.getViewName());
+}
