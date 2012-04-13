@@ -2,51 +2,26 @@
   long startTime=System.currentTimeMillis();
   Throwable failureCause=null;
   LocaleContext previousLocaleContext=LocaleContextHolder.getLocaleContext();
-  LocaleContextHolder.setLocaleContext(buildLocaleContext(request),this.threadContextInheritable);
-  RequestAttributes previousRequestAttributes=RequestContextHolder.getRequestAttributes();
+  LocaleContext localeContext=buildLocaleContext(request);
+  RequestAttributes previousAttributes=RequestContextHolder.getRequestAttributes();
   ServletRequestAttributes requestAttributes=null;
-  if (previousRequestAttributes == null || previousRequestAttributes.getClass().equals(ServletRequestAttributes.class)) {
+  if (previousAttributes == null || previousAttributes.getClass().equals(ServletRequestAttributes.class)) {
     requestAttributes=new ServletRequestAttributes(request);
-    RequestContextHolder.setRequestAttributes(requestAttributes,this.threadContextInheritable);
   }
-  if (logger.isTraceEnabled()) {
-    logger.trace("Bound request context to thread: " + request);
-  }
+  initContextHolders(request,localeContext,requestAttributes);
+  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
+  chain.addDelegatingCallable(getAsyncCallable(startTime,request,response,previousLocaleContext,previousAttributes,localeContext,requestAttributes));
   try {
     doService(request,response);
   }
- catch (  ServletException ex) {
-    failureCause=ex;
-    throw ex;
-  }
-catch (  IOException ex) {
-    failureCause=ex;
-    throw ex;
-  }
-catch (  Throwable ex) {
-    failureCause=ex;
-    throw new NestedServletException("Request processing failed",ex);
+ catch (  Throwable t) {
+    failureCause=t;
   }
  finally {
-    LocaleContextHolder.setLocaleContext(previousLocaleContext,this.threadContextInheritable);
-    if (requestAttributes != null) {
-      RequestContextHolder.setRequestAttributes(previousRequestAttributes,this.threadContextInheritable);
-      requestAttributes.requestCompleted();
+    resetContextHolders(request,previousLocaleContext,previousAttributes);
+    if (chain.isAsyncStarted()) {
+      return;
     }
-    if (logger.isTraceEnabled()) {
-      logger.trace("Cleared thread-bound request context: " + request);
-    }
-    if (logger.isDebugEnabled()) {
-      if (failureCause != null) {
-        this.logger.debug("Could not complete request",failureCause);
-      }
- else {
-        this.logger.debug("Successfully completed request");
-      }
-    }
-    if (this.publishEvents) {
-      long processingTime=System.currentTimeMillis() - startTime;
-      this.webApplicationContext.publishEvent(new ServletRequestHandledEvent(this,request.getRequestURI(),request.getRemoteAddr(),request.getMethod(),getServletConfig().getServletName(),WebUtils.getSessionId(request),getUsernameForRequest(request),processingTime,failureCause));
-    }
+    finalizeProcessing(startTime,request,response,requestAttributes,failureCause);
   }
 }

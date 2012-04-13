@@ -1,0 +1,20 @@
+{
+  return new AbstractDelegatingCallable(){
+    public Object call() throws Exception {
+      initContextHolders(request,localeContext,requestAttributes);
+      Throwable unhandledFailure=null;
+      try {
+        getNextCallable().call();
+      }
+ catch (      Throwable t) {
+        unhandledFailure=t;
+      }
+ finally {
+        resetContextHolders(request,previousLocaleContext,previousAttributes);
+        finalizeProcessing(startTime,request,response,requestAttributes,unhandledFailure);
+      }
+      return null;
+    }
+  }
+;
+}

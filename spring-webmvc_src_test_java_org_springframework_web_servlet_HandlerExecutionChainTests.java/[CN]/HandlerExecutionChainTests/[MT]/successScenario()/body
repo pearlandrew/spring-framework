@@ -1,0 +1,17 @@
+{
+  ModelAndView mav=new ModelAndView();
+  expect(this.interceptor1.preHandle(this.request,this.response,this.handler)).andReturn(true);
+  expect(this.interceptor2.preHandle(this.request,this.response,this.handler)).andReturn(true);
+  expect(this.interceptor3.preHandle(this.request,this.response,this.handler)).andReturn(true);
+  this.interceptor1.postHandle(this.request,this.response,this.handler,mav);
+  this.interceptor2.postHandle(this.request,this.response,this.handler,mav);
+  this.interceptor3.postHandle(this.request,this.response,this.handler,mav);
+  this.interceptor3.afterCompletion(this.request,this.response,this.handler,null);
+  this.interceptor2.afterCompletion(this.request,this.response,this.handler,null);
+  this.interceptor1.afterCompletion(this.request,this.response,this.handler,null);
+  replay(this.interceptor1,this.interceptor2,this.interceptor3);
+  this.chain.applyPreHandle(request,response);
+  this.chain.applyPostHandle(request,response,mav);
+  this.chain.triggerAfterCompletion(this.request,this.response,null);
+  verify(this.interceptor1,this.interceptor2,this.interceptor3);
+}

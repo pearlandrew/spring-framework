@@ -1,0 +1,18 @@
+{
+  Assert.notNull(returnValue,"A Callable or a DeferredValue is required");
+  mavContainer.setRequestHandled(true);
+  Class<?> paramType=returnType.getParameterType();
+  ServletRequest servletRequest=webRequest.getNativeRequest(ServletRequest.class);
+  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(servletRequest);
+  if (Callable.class.isAssignableFrom(paramType)) {
+    chain.setCallable((Callable<Object>)returnValue);
+    chain.startCallableChainProcessing();
+  }
+ else   if (DeferredResult.class.isAssignableFrom(paramType)) {
+    chain.startDeferredResultProcessing((DeferredResult)returnValue);
+  }
+ else {
+    Method method=returnType.getMethod();
+    throw new UnsupportedOperationException("Unknown return value: " + paramType + " in method: "+ method);
+  }
+}

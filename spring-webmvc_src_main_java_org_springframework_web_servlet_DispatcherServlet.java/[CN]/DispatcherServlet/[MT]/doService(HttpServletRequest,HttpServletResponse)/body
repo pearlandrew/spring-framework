@@ -1,4 +1,5 @@
 {
+  AsyncExecutionChain asyncChain=AsyncExecutionChain.getForCurrentRequest(request);
   if (logger.isDebugEnabled()) {
     String requestUri=urlPathHelper.getRequestUri(request);
     logger.debug("DispatcherServlet with name '" + getServletName() + "' processing "+ request.getMethod()+ " request for ["+ requestUri+ "]");
@@ -25,10 +26,14 @@
   }
   request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE,new FlashMap());
   request.setAttribute(FLASH_MAP_MANAGER_ATTRIBUTE,this.flashMapManager);
+  asyncChain.addDelegatingCallable(getServiceAsyncCallable(request,attributesSnapshot));
   try {
     doDispatch(request,response);
   }
   finally {
+    if (asyncChain.isAsyncStarted()) {
+      return;
+    }
     if (attributesSnapshot != null) {
       restoreAttributesAfterInclude(request,attributesSnapshot);
     }

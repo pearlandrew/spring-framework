@@ -1,10 +1,10 @@
 {
   HttpServletRequest processedRequest=request;
   HandlerExecutionChain mappedHandler=null;
-  int interceptorIndex=-1;
+  AsyncExecutionChain asyncChain=AsyncExecutionChain.getForCurrentRequest(request);
   try {
-    ModelAndView mv;
-    boolean errorView=false;
+    ModelAndView mv=null;
+    Exception dispatchException=null;
     try {
       processedRequest=checkMultipart(request);
       mappedHandler=getHandler(processedRequest,false);
@@ -25,60 +25,33 @@
           return;
         }
       }
-      HandlerInterceptor[] interceptors=mappedHandler.getInterceptors();
-      if (interceptors != null) {
-        for (int i=0; i < interceptors.length; i++) {
-          HandlerInterceptor interceptor=interceptors[i];
-          if (!interceptor.preHandle(processedRequest,response,mappedHandler.getHandler())) {
-            triggerAfterCompletion(mappedHandler,interceptorIndex,processedRequest,response,null);
-            return;
-          }
-          interceptorIndex=i;
-        }
+      if (!mappedHandler.applyPreHandle(processedRequest,response)) {
+        return;
       }
+      asyncChain.addDelegatingCallable(getDispatchAsyncCallable(mappedHandler,request,response,processedRequest));
       mv=ha.handle(processedRequest,response,mappedHandler.getHandler());
-      if (mv != null && !mv.hasView()) {
-        mv.setViewName(getDefaultViewName(request));
+      if (asyncChain.isAsyncStarted()) {
+        logger.debug("Exiting request thread and leaving the response open");
+        return;
       }
-      if (interceptors != null) {
-        for (int i=interceptors.length - 1; i >= 0; i--) {
-          HandlerInterceptor interceptor=interceptors[i];
-          interceptor.postHandle(processedRequest,response,mappedHandler.getHandler(),mv);
-        }
-      }
+      applyDefaultViewName(request,mv);
+      mappedHandler.applyPostHandle(processedRequest,response,mv);
     }
- catch (    ModelAndViewDefiningException ex) {
-      logger.debug("ModelAndViewDefiningException encountered",ex);
-      mv=ex.getModelAndView();
+ catch (    Exception ex) {
+      dispatchException=ex;
     }
-catch (    Exception ex) {
-      Object handler=(mappedHandler != null ? mappedHandler.getHandler() : null);
-      mv=processHandlerException(processedRequest,response,handler,ex);
-      errorView=(mv != null);
-    }
-    if (mv != null && !mv.wasCleared()) {
-      render(mv,processedRequest,response);
-      if (errorView) {
-        WebUtils.clearErrorRequestAttributes(request);
-      }
-    }
- else {
-      if (logger.isDebugEnabled()) {
-        logger.debug("Null ModelAndView returned to DispatcherServlet with name '" + getServletName() + "': assuming HandlerAdapter completed request handling");
-      }
-    }
-    triggerAfterCompletion(mappedHandler,interceptorIndex,processedRequest,response,null);
+    processDispatchResult(processedRequest,response,mappedHandler,mv,dispatchException);
   }
  catch (  Exception ex) {
-    triggerAfterCompletion(mappedHandler,interceptorIndex,processedRequest,response,ex);
-    throw ex;
+    triggerAfterCompletion(processedRequest,response,mappedHandler,ex);
   }
 catch (  Error err) {
-    ServletException ex=new NestedServletException("Handler processing failed",err);
-    triggerAfterCompletion(mappedHandler,interceptorIndex,processedRequest,response,ex);
-    throw ex;
+    triggerAfterCompletionWithError(processedRequest,response,mappedHandler,err);
   }
  finally {
+    if (asyncChain.isAsyncStarted()) {
+      return;
+    }
     if (processedRequest != request) {
       cleanupMultipart(processedRequest);
     }

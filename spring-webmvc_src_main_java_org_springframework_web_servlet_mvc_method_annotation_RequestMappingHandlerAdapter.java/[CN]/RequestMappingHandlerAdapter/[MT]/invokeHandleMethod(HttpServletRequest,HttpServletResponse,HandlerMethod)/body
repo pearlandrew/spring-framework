@@ -1,0 +1,19 @@
+{
+  ServletWebRequest webRequest=new ServletWebRequest(request,response);
+  WebDataBinderFactory binderFactory=getDataBinderFactory(handlerMethod);
+  ModelFactory modelFactory=getModelFactory(handlerMethod,binderFactory);
+  ServletInvocableHandlerMethod requestMappingMethod=createRequestMappingMethod(handlerMethod,binderFactory);
+  ModelAndViewContainer mavContainer=new ModelAndViewContainer();
+  mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
+  modelFactory.initModel(webRequest,mavContainer,requestMappingMethod);
+  mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
+  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
+  chain.addDelegatingCallable(getAsyncCallable(mavContainer,modelFactory,webRequest));
+  chain.setAsyncWebRequest(createAsyncWebRequest(request,response));
+  chain.setTaskExecutor(this.taskExecutor);
+  requestMappingMethod.invokeAndHandle(webRequest,mavContainer);
+  if (chain.isAsyncStarted()) {
+    return null;
+  }
+  return getModelAndView(mavContainer,modelFactory,webRequest);
+}

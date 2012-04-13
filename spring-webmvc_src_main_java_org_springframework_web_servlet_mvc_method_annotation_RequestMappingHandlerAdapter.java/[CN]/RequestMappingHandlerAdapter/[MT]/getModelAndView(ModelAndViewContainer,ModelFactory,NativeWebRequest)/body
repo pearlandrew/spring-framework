@@ -1,0 +1,17 @@
+{
+  modelFactory.updateModel(webRequest,mavContainer);
+  if (mavContainer.isRequestHandled()) {
+    return null;
+  }
+  ModelMap model=mavContainer.getModel();
+  ModelAndView mav=new ModelAndView(mavContainer.getViewName(),model);
+  if (!mavContainer.isViewReference()) {
+    mav.setView((View)mavContainer.getView());
+  }
+  if (model instanceof RedirectAttributes) {
+    Map<String,?> flashAttributes=((RedirectAttributes)model).getFlashAttributes();
+    HttpServletRequest request=webRequest.getNativeRequest(HttpServletRequest.class);
+    RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);
+  }
+  return mav;
+}

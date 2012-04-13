@@ -1,0 +1,19 @@
+{
+  return new AbstractDelegatingCallable(){
+    public Object call() throws Exception {
+      initContextHolders(request,requestAttributes);
+      try {
+        getNextCallable().call();
+      }
+  finally {
+        resetContextHolders();
+        requestAttributes.requestCompleted();
+        if (logger.isDebugEnabled()) {
+          logger.debug("Cleared thread-bound request context: " + request);
+        }
+      }
+      return null;
+    }
+  }
+;
+}

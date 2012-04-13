@@ -1,0 +1,27 @@
+{
+  byte[] body=responseWrapper.toByteArray();
+  int statusCode=responseWrapper.getStatusCode();
+  if (isEligibleForEtag(request,responseWrapper,statusCode,body)) {
+    String responseETag=generateETagHeaderValue(body);
+    response.setHeader(HEADER_ETAG,responseETag);
+    String requestETag=request.getHeader(HEADER_IF_NONE_MATCH);
+    if (responseETag.equals(requestETag)) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("ETag [" + responseETag + "] equal to If-None-Match, sending 304");
+      }
+      response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+    }
+ else {
+      if (logger.isTraceEnabled()) {
+        logger.trace("ETag [" + responseETag + "] not equal to If-None-Match ["+ requestETag+ "], sending normal response");
+      }
+      copyBodyToResponse(body,response);
+    }
+  }
+ else {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Response with status code [" + statusCode + "] not eligible for ETag");
+    }
+    copyBodyToResponse(body,response);
+  }
+}

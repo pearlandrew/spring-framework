@@ -1,0 +1,32 @@
+{
+  return new AbstractDelegatingCallable(){
+    public Object call() throws Exception {
+      try {
+        ModelAndView mv=null;
+        Exception dispatchException=null;
+        try {
+          mv=(ModelAndView)getNextCallable().call();
+          applyDefaultViewName(processedRequest,mv);
+          mappedHandler.applyPostHandle(request,response,mv);
+        }
+ catch (        Exception ex) {
+          dispatchException=ex;
+        }
+        processDispatchResult(processedRequest,response,mappedHandler,mv,dispatchException);
+      }
+ catch (      Exception ex) {
+        triggerAfterCompletion(processedRequest,response,mappedHandler,ex);
+      }
+catch (      Error err) {
+        triggerAfterCompletionWithError(processedRequest,response,mappedHandler,err);
+      }
+ finally {
+        if (processedRequest != request) {
+          cleanupMultipart(processedRequest);
+        }
+      }
+      return null;
+    }
+  }
+;
+}

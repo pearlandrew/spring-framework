@@ -1,0 +1,17 @@
+{
+  try {
+    logger.debug("Starting async execution chain");
+    callable.call();
+  }
+ catch (  StaleAsyncWebRequestException ex) {
+    logger.trace("Could not complete async request",ex);
+  }
+catch (  Exception ex) {
+    logger.trace("Could not complete async request",ex);
+    this.asyncWebRequest.sendError(HttpStatus.INTERNAL_SERVER_ERROR,ex.getMessage());
+  }
+ finally {
+    logger.debug("Exiting async execution chain");
+    asyncWebRequest.complete();
+  }
+}

@@ -1,0 +1,15 @@
+{
+  Exception ex=new Exception("");
+  expect(this.interceptor1.preHandle(this.request,this.response,this.handler)).andReturn(true);
+  expect(this.interceptor2.preHandle(this.request,this.response,this.handler)).andThrow(ex);
+  this.interceptor1.afterCompletion(this.request,this.response,this.handler,ex);
+  replay(this.interceptor1,this.interceptor2,this.interceptor3);
+  try {
+    this.chain.applyPreHandle(request,response);
+  }
+ catch (  Exception actual) {
+    assertSame(ex,actual);
+  }
+  this.chain.triggerAfterCompletion(this.request,this.response,ex);
+  verify(this.interceptor1,this.interceptor2,this.interceptor3);
+}

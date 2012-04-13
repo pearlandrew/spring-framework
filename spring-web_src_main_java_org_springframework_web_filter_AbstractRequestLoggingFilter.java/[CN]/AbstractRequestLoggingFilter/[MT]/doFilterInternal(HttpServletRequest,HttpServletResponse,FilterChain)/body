@@ -3,10 +3,15 @@
     request=new RequestCachingRequestWrapper(request);
   }
   beforeRequest(request,getBeforeMessage(request));
+  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
+  chain.addDelegatingCallable(getAsyncCallable(request));
   try {
     filterChain.doFilter(request,response);
   }
   finally {
+    if (chain.isAsyncStarted()) {
+      return;
+    }
     afterRequest(request,getAfterMessage(request));
   }
 }

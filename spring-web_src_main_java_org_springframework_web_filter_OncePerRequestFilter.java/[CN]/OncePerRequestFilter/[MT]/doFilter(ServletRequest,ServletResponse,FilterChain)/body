@@ -9,11 +9,16 @@
     filterChain.doFilter(request,response);
   }
  else {
+    AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
+    chain.addDelegatingCallable(getAsyncCallable(request,alreadyFilteredAttributeName));
     request.setAttribute(alreadyFilteredAttributeName,Boolean.TRUE);
     try {
       doFilterInternal(httpRequest,httpResponse,filterChain);
     }
   finally {
+      if (chain.isAsyncStarted()) {
+        return;
+      }
       request.removeAttribute(alreadyFilteredAttributeName);
     }
   }
