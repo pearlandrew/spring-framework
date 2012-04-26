@@ -1,10 +1,13 @@
 {
-  Assert.isNull(this.value.get(),"Value already set");
-  this.value.set(value);
-  try {
-    this.handlers.take().handle(value);
+  if (this.timeoutLock.tryLock() && (this.result != this.timeoutResult)) {
+    try {
+      handle(result);
+    }
+  finally {
+      this.timeoutLock.unlock();
+    }
   }
- catch (  InterruptedException e) {
-    throw new IllegalStateException("Failed to process deferred return value: " + value,e);
+ else {
+    throw new StaleAsyncWebRequestException("Async request already timed out");
   }
 }

@@ -1,14 +1,22 @@
 {
-  Assert.notNull(deferredResult,"A DeferredResult is required");
+  Assert.notNull(deferredResult,"DeferredResult is required");
   startAsync();
-  deferredResult.setValueProcessor(new DeferredResultHandler(){
-    public void handle(    Object value){
+  deferredResult.init(new DeferredResultHandler(){
+    public void handle(    Object result){
       if (asyncWebRequest.isAsyncCompleted()) {
         throw new StaleAsyncWebRequestException("Async request processing already completed");
       }
-      setCallable(getSimpleCallable(value));
+      setCallable(new PassThroughCallable(result));
       new AsyncExecutionChainRunnable(asyncWebRequest,buildChain()).run();
     }
   }
 );
+  if (deferredResult.canHandleTimeout()) {
+    this.asyncWebRequest.setTimeoutHandler(new Runnable(){
+      public void run(){
+        deferredResult.handleTimeout();
+      }
+    }
+);
+  }
 }
