@@ -1,4 +1,5 @@
 {
+  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
   SessionFactory sessionFactory=lookupSessionFactory(request);
   boolean participate=false;
   if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
@@ -7,7 +8,9 @@
  else {
     logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
     Session session=openSession(sessionFactory);
-    TransactionSynchronizationManager.bindResource(sessionFactory,new SessionHolder(session));
+    SessionHolder sessionHolder=new SessionHolder(session);
+    TransactionSynchronizationManager.bindResource(sessionFactory,sessionHolder);
+    chain.addDelegatingCallable(getAsyncCallable(request,sessionFactory,sessionHolder));
   }
   try {
     filterChain.doFilter(request,response);
@@ -15,6 +18,9 @@
   finally {
     if (!participate) {
       SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.unbindResource(sessionFactory);
+      if (chain.isAsyncStarted()) {
+        return;
+      }
       logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
       SessionFactoryUtils.closeSession(sessionHolder.getSession());
     }

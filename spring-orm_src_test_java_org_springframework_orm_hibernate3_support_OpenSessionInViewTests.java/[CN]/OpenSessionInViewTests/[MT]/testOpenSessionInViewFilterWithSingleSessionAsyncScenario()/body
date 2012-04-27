@@ -4,7 +4,6 @@
   expect(sf.openSession()).andReturn(session);
   expect(session.getSessionFactory()).andReturn(sf);
   session.setFlushMode(FlushMode.MANUAL);
-  expect(session.close()).andReturn(null);
   replay(sf);
   replay(session);
   StaticWebApplicationContext wac=new StaticWebApplicationContext();
@@ -13,11 +12,6 @@
   wac.refresh();
   sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,wac);
   MockFilterConfig filterConfig=new MockFilterConfig(wac.getServletContext(),"filter");
-  MockFilterConfig filterConfig2=new MockFilterConfig(wac.getServletContext(),"filter2");
-  filterConfig2.addInitParameter("sessionFactoryBeanName","mySessionFactory");
-  OpenSessionInViewInterceptor interceptor=new OpenSessionInViewInterceptor();
-  interceptor.setSessionFactory(sf);
-  interceptor.preHandle(this.webRequest);
   final OpenSessionInViewFilter filter=new OpenSessionInViewFilter();
   filter.init(filterConfig);
   final FilterChain filterChain=new FilterChain(){
@@ -27,13 +21,41 @@
     }
   }
 ;
-  assertTrue(TransactionSynchronizationManager.hasResource(sf));
+  AsyncWebRequest asyncWebRequest=createStrictMock(AsyncWebRequest.class);
+  expect(asyncWebRequest.isAsyncStarted()).andReturn(true);
+  expect(asyncWebRequest.isAsyncStarted()).andReturn(true);
+  replay(asyncWebRequest);
+  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(this.request);
+  chain.setAsyncWebRequest(asyncWebRequest);
+  assertFalse(TransactionSynchronizationManager.hasResource(sf));
   filter.doFilter(this.request,this.response,filterChain);
-  assertTrue(TransactionSynchronizationManager.hasResource(sf));
+  assertFalse(TransactionSynchronizationManager.hasResource(sf));
   assertNotNull(this.request.getAttribute("invoked"));
-  interceptor.postHandle(this.webRequest,null);
-  interceptor.afterCompletion(this.webRequest,null);
   verify(sf);
   verify(session);
+  verify(asyncWebRequest);
+  chain.setTaskExecutor(new SyncTaskExecutor());
+  chain.setCallable(new Callable<Object>(){
+    public Object call(){
+      assertTrue(TransactionSynchronizationManager.hasResource(sf));
+      return null;
+    }
+  }
+);
+  reset(asyncWebRequest);
+  asyncWebRequest.startAsync();
+  expect(asyncWebRequest.isAsyncCompleted()).andReturn(false);
+  asyncWebRequest.complete();
+  replay(asyncWebRequest);
+  reset(sf);
+  reset(session);
+  expect(session.close()).andReturn(null);
+  replay(sf);
+  replay(session);
+  chain.startCallableChainProcessing();
+  assertFalse(TransactionSynchronizationManager.hasResource(sf));
+  verify(sf);
+  verify(session);
+  verify(asyncWebRequest);
   wac.close();
 }
