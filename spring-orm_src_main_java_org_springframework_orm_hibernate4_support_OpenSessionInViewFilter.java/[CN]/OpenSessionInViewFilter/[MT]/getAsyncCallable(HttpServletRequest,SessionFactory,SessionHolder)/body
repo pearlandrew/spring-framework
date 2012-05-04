@@ -1,0 +1,17 @@
+{
+  return new AbstractDelegatingCallable(){
+    public Object call() throws Exception {
+      TransactionSynchronizationManager.bindResource(sessionFactory,sessionHolder);
+      try {
+        getNextCallable().call();
+      }
+  finally {
+        SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.unbindResource(sessionFactory);
+        logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
+        SessionFactoryUtils.closeSession(sessionHolder.getSession());
+      }
+      return null;
+    }
+  }
+;
+}
