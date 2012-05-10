@@ -1,7 +1,7 @@
 {
   String name=ModelFactory.getNameForParameter(parameter);
-  Object target=(mavContainer.containsAttribute(name)) ? mavContainer.getModel().get(name) : createAttribute(name,parameter,binderFactory,request);
-  WebDataBinder binder=binderFactory.createBinder(request,target,name);
+  Object attribute=(mavContainer.containsAttribute(name)) ? mavContainer.getModel().get(name) : createAttribute(name,parameter,binderFactory,request);
+  WebDataBinder binder=binderFactory.createBinder(request,attribute,name);
   if (binder.getTarget() != null) {
     bindRequestParameters(binder,request);
     validateIfApplicable(binder,parameter);
@@ -11,6 +11,8 @@
       }
     }
   }
-  mavContainer.addAllAttributes(binder.getBindingResult().getModel());
+  Map<String,Object> bindingResultModel=binder.getBindingResult().getModel();
+  mavContainer.removeAttributes(bindingResultModel);
+  mavContainer.addAllAttributes(bindingResultModel);
   return binder.getTarget();
 }
