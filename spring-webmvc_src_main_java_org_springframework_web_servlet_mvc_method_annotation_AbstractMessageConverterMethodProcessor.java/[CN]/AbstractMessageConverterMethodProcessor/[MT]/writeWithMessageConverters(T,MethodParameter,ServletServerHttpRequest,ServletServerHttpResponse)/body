@@ -14,7 +14,7 @@
     throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
   }
   List<MediaType> mediaTypes=new ArrayList<MediaType>(compatibleMediaTypes);
-  MediaType.sortBySpecificity(mediaTypes);
+  MediaType.sortBySpecificityAndQuality(mediaTypes);
   MediaType selectedMediaType=null;
   for (  MediaType mediaType : mediaTypes) {
     if (mediaType.isConcrete()) {
@@ -26,6 +26,7 @@
       break;
     }
   }
+  selectedMediaType=selectedMediaType.removeQualityValue();
   if (selectedMediaType != null) {
     for (    HttpMessageConverter<?> messageConverter : messageConverters) {
       if (messageConverter.canWrite(returnValueClass,selectedMediaType)) {

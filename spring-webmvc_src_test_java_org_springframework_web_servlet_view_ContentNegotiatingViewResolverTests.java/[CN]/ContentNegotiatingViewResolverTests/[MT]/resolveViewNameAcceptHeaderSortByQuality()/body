@@ -1,0 +1,19 @@
+{
+  request.addHeader("Accept","text/plain;q=0.5, application/json");
+  ViewResolver htmlViewResolver=createMock(ViewResolver.class);
+  ViewResolver jsonViewResolver=createMock(ViewResolver.class);
+  viewResolver.setViewResolvers(Arrays.asList(htmlViewResolver,jsonViewResolver));
+  View htmlView=createMock("text_html",View.class);
+  View jsonViewMock=createMock("application_json",View.class);
+  String viewName="view";
+  Locale locale=Locale.ENGLISH;
+  expect(htmlViewResolver.resolveViewName(viewName,locale)).andReturn(htmlView);
+  expect(jsonViewResolver.resolveViewName(viewName,locale)).andReturn(jsonViewMock);
+  expect(htmlView.getContentType()).andReturn("text/html").anyTimes();
+  expect(jsonViewMock.getContentType()).andReturn("application/json").anyTimes();
+  replay(htmlViewResolver,jsonViewResolver,htmlView,jsonViewMock);
+  viewResolver.setFavorPathExtension(false);
+  View result=viewResolver.resolveViewName(viewName,locale);
+  assertSame("Invalid view",jsonViewMock,result);
+  verify(htmlViewResolver,jsonViewResolver,htmlView,jsonViewMock);
+}
