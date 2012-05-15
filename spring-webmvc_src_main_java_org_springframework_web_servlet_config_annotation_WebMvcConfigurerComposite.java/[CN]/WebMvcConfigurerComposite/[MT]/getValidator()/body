@@ -1,18 +1,10 @@
 {
-  Map<WebMvcConfigurer,Validator> validators=new HashMap<WebMvcConfigurer,Validator>();
-  for (  WebMvcConfigurer delegate : delegates) {
-    Validator validator=delegate.getValidator();
+  List<Validator> candidates=new ArrayList<Validator>();
+  for (  WebMvcConfigurer configurer : this.delegates) {
+    Validator validator=configurer.getValidator();
     if (validator != null) {
-      validators.put(delegate,validator);
+      candidates.add(validator);
     }
   }
-  if (validators.size() == 0) {
-    return null;
-  }
- else   if (validators.size() == 1) {
-    return validators.values().iterator().next();
-  }
- else {
-    throw new IllegalStateException("Multiple custom validators provided from [" + validators.keySet() + "]");
-  }
+  return selectSingleInstance(candidates,Validator.class);
 }
