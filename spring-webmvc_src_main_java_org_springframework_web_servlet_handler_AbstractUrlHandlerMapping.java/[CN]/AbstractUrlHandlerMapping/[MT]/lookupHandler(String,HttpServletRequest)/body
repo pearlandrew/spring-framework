@@ -34,7 +34,9 @@
     Map<String,String> uriTemplateVariables=new LinkedHashMap<String,String>();
     for (    String matchingPattern : matchingPatterns) {
       if (patternComparator.compare(bestPatternMatch,matchingPattern) == 0) {
-        uriTemplateVariables.putAll(getPathMatcher().extractUriTemplateVariables(matchingPattern,urlPath));
+        Map<String,String> vars=getPathMatcher().extractUriTemplateVariables(matchingPattern,urlPath);
+        Map<String,String> decodedVars=getUrlPathHelper().decodePathVariables(request,vars);
+        uriTemplateVariables.putAll(decodedVars);
       }
     }
     if (logger.isDebugEnabled()) {
