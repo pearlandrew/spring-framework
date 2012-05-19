@@ -1,0 +1,17 @@
+{
+  if (!this.executors.containsKey(method)) {
+    Executor executor=this.defaultExecutor;
+    String qualifier=getExecutorQualifier(method);
+    if (StringUtils.hasLength(qualifier)) {
+      Assert.notNull(this.beanFactory,"BeanFactory must be set on " + this.getClass().getSimpleName() + " to access qualified executor ["+ qualifier+ "]");
+      executor=BeanFactoryUtils.qualifiedBeanOfType(this.beanFactory,Executor.class,qualifier);
+    }
+    if (executor instanceof AsyncTaskExecutor) {
+      this.executors.put(method,(AsyncTaskExecutor)executor);
+    }
+ else     if (executor instanceof Executor) {
+      this.executors.put(method,new TaskExecutorAdapter(executor));
+    }
+  }
+  return this.executors.get(method);
+}
