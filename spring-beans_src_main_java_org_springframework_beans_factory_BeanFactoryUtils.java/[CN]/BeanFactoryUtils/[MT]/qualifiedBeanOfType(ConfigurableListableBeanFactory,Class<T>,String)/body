@@ -1,0 +1,18 @@
+{
+  Map<String,T> candidateBeans=BeanFactoryUtils.beansOfTypeIncludingAncestors(bf,beanType);
+  T matchingBean=null;
+  for (  String beanName : candidateBeans.keySet()) {
+    if (isQualifierMatch(qualifier,beanName,bf)) {
+      if (matchingBean != null) {
+        throw new IllegalStateException("No unique " + beanType.getSimpleName() + " bean found for qualifier '"+ qualifier+ "'");
+      }
+      matchingBean=candidateBeans.get(beanName);
+    }
+  }
+  if (matchingBean != null) {
+    return matchingBean;
+  }
+ else {
+    throw new IllegalStateException("No matching " + beanType.getSimpleName() + " bean found for qualifier '"+ qualifier+ "' - neither qualifier "+ "match nor bean name match!");
+  }
+}
