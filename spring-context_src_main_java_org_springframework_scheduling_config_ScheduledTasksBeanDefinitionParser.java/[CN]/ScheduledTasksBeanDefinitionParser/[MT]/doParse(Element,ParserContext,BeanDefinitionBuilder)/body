@@ -1,9 +1,9 @@
 {
   builder.setLazyInit(false);
-  ManagedMap<RuntimeBeanReference,String> cronTaskMap=new ManagedMap<RuntimeBeanReference,String>();
-  ManagedMap<RuntimeBeanReference,String> fixedDelayTaskMap=new ManagedMap<RuntimeBeanReference,String>();
-  ManagedMap<RuntimeBeanReference,String> fixedRateTaskMap=new ManagedMap<RuntimeBeanReference,String>();
-  ManagedMap<RuntimeBeanReference,RuntimeBeanReference> triggerTaskMap=new ManagedMap<RuntimeBeanReference,RuntimeBeanReference>();
+  ManagedList<RuntimeBeanReference> cronTaskList=new ManagedList<RuntimeBeanReference>();
+  ManagedList<RuntimeBeanReference> fixedDelayTaskList=new ManagedList<RuntimeBeanReference>();
+  ManagedList<RuntimeBeanReference> fixedRateTaskList=new ManagedList<RuntimeBeanReference>();
+  ManagedList<RuntimeBeanReference> triggerTaskList=new ManagedList<RuntimeBeanReference>();
   NodeList childNodes=element.getChildNodes();
   for (int i=0; i < childNodes.getLength(); i++) {
     Node child=childNodes.item(i);
@@ -17,38 +17,45 @@
       parserContext.getReaderContext().error("Both 'ref' and 'method' are required",taskElement);
       continue;
     }
-    RuntimeBeanReference runnableBeanRef=new RuntimeBeanReference(createRunnableBean(ref,method,taskElement,parserContext));
     String cronAttribute=taskElement.getAttribute("cron");
     String fixedDelayAttribute=taskElement.getAttribute("fixed-delay");
     String fixedRateAttribute=taskElement.getAttribute("fixed-rate");
     String triggerAttribute=taskElement.getAttribute("trigger");
+    String initialDelayAttribute=taskElement.getAttribute("initial-delay");
     boolean hasCronAttribute=StringUtils.hasText(cronAttribute);
     boolean hasFixedDelayAttribute=StringUtils.hasText(fixedDelayAttribute);
     boolean hasFixedRateAttribute=StringUtils.hasText(fixedRateAttribute);
     boolean hasTriggerAttribute=StringUtils.hasText(triggerAttribute);
-    if (!(hasCronAttribute | hasFixedDelayAttribute | hasFixedRateAttribute| hasTriggerAttribute)) {
-      parserContext.getReaderContext().error("exactly one of the 'cron', 'fixed-delay', 'fixed-rate', or 'trigger' attributes is required",taskElement);
+    boolean hasInitialDelayAttribute=StringUtils.hasText(initialDelayAttribute);
+    if (!(hasCronAttribute || hasFixedDelayAttribute || hasFixedRateAttribute|| hasTriggerAttribute)) {
+      parserContext.getReaderContext().error("one of the 'cron', 'fixed-delay', 'fixed-rate', or 'trigger' attributes is required",taskElement);
       continue;
     }
-    if (hasCronAttribute) {
-      cronTaskMap.put(runnableBeanRef,cronAttribute);
+    if (hasInitialDelayAttribute && (hasCronAttribute || hasTriggerAttribute)) {
+      parserContext.getReaderContext().error("the 'initial-delay' attribute may not be used with cron and trigger tasks",taskElement);
+      continue;
     }
+    String runnableName=runnableReference(ref,method,taskElement,parserContext).getBeanName();
     if (hasFixedDelayAttribute) {
-      fixedDelayTaskMap.put(runnableBeanRef,fixedDelayAttribute);
+      fixedDelayTaskList.add(intervalTaskReference(runnableName,initialDelayAttribute,fixedDelayAttribute,taskElement,parserContext));
     }
     if (hasFixedRateAttribute) {
-      fixedRateTaskMap.put(runnableBeanRef,fixedRateAttribute);
+      fixedRateTaskList.add(intervalTaskReference(runnableName,initialDelayAttribute,fixedRateAttribute,taskElement,parserContext));
+    }
+    if (hasCronAttribute) {
+      cronTaskList.add(cronTaskReference(runnableName,cronAttribute,taskElement,parserContext));
     }
     if (hasTriggerAttribute) {
-      triggerTaskMap.put(runnableBeanRef,new RuntimeBeanReference(triggerAttribute));
+      String triggerName=new RuntimeBeanReference(triggerAttribute).getBeanName();
+      triggerTaskList.add(triggerTaskReference(runnableName,triggerName,taskElement,parserContext));
     }
   }
   String schedulerRef=element.getAttribute("scheduler");
   if (StringUtils.hasText(schedulerRef)) {
     builder.addPropertyReference("taskScheduler",schedulerRef);
   }
-  builder.addPropertyValue("cronTasks",cronTaskMap);
-  builder.addPropertyValue("fixedDelayTasks",fixedDelayTaskMap);
-  builder.addPropertyValue("fixedRateTasks",fixedRateTaskMap);
-  builder.addPropertyValue("triggerTasks",triggerTaskMap);
+  builder.addPropertyValue("cronTasksList",cronTaskList);
+  builder.addPropertyValue("fixedDelayTasksList",fixedDelayTaskList);
+  builder.addPropertyValue("fixedRateTasksList",fixedRateTaskList);
+  builder.addPropertyValue("triggerTasksList",triggerTaskList);
 }

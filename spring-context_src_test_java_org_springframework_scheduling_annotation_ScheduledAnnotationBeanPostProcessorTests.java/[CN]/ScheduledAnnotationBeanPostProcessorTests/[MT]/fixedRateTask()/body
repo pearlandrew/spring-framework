@@ -8,12 +8,14 @@
   Object postProcessor=context.getBean("postProcessor");
   Object target=context.getBean("target");
   ScheduledTaskRegistrar registrar=(ScheduledTaskRegistrar)new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
-  Map<Runnable,Long> fixedRateTasks=(Map<Runnable,Long>)new DirectFieldAccessor(registrar).getPropertyValue("fixedRateTasks");
+  @SuppressWarnings("unchecked") List<IntervalTask> fixedRateTasks=(List<IntervalTask>)new DirectFieldAccessor(registrar).getPropertyValue("fixedRateTasks");
   assertEquals(1,fixedRateTasks.size());
-  ScheduledMethodRunnable runnable=(ScheduledMethodRunnable)fixedRateTasks.keySet().iterator().next();
+  IntervalTask task=fixedRateTasks.get(0);
+  ScheduledMethodRunnable runnable=(ScheduledMethodRunnable)task.getRunnable();
   Object targetObject=runnable.getTarget();
   Method targetMethod=runnable.getMethod();
   assertEquals(target,targetObject);
   assertEquals("fixedRate",targetMethod.getName());
-  assertEquals(new Long(3000),fixedRateTasks.values().iterator().next());
+  assertEquals(0L,task.getInitialDelay());
+  assertEquals(3000L,task.getInterval());
 }
