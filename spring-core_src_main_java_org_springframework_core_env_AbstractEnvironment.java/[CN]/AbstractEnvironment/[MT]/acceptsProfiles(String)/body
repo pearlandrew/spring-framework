@@ -1,14 +1,12 @@
 {
   Assert.notEmpty(profiles,"Must specify at least one profile");
-  boolean activeProfileFound=false;
-  Set<String> activeProfiles=this.doGetActiveProfiles();
-  Set<String> defaultProfiles=this.doGetDefaultProfiles();
   for (  String profile : profiles) {
-    this.validateProfile(profile);
-    if (activeProfiles.contains(profile) || (activeProfiles.isEmpty() && defaultProfiles.contains(profile))) {
-      activeProfileFound=true;
-      break;
+    if (profile != null && profile.length() > 0 && profile.charAt(0) == '!') {
+      return !this.isProfileActive(profile.substring(1));
+    }
+    if (this.isProfileActive(profile)) {
+      return true;
     }
   }
-  return activeProfileFound;
+  return false;
 }
