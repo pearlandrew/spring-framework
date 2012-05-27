@@ -10,7 +10,7 @@
     return converter.convertIfNecessary(value,type);
   }
   if (type.isArray()) {
-    Class componentType=type.getComponentType();
+    Class<?> componentType=type.getComponentType();
     Map<String,Object> matchingBeans=findAutowireCandidates(beanName,componentType,descriptor);
     if (matchingBeans.isEmpty()) {
       if (descriptor.isRequired()) {
@@ -25,7 +25,7 @@
     return converter.convertIfNecessary(matchingBeans.values(),type);
   }
  else   if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
-    Class elementType=descriptor.getCollectionType();
+    Class<?> elementType=descriptor.getCollectionType();
     if (elementType == null) {
       if (descriptor.isRequired()) {
         throw new FatalBeanException("No element type declared for collection [" + type.getName() + "]");
@@ -46,14 +46,14 @@
     return converter.convertIfNecessary(matchingBeans.values(),type);
   }
  else   if (Map.class.isAssignableFrom(type) && type.isInterface()) {
-    Class keyType=descriptor.getMapKeyType();
+    Class<?> keyType=descriptor.getMapKeyType();
     if (keyType == null || !String.class.isAssignableFrom(keyType)) {
       if (descriptor.isRequired()) {
         throw new FatalBeanException("Key type [" + keyType + "] of map ["+ type.getName()+ "] must be assignable to [java.lang.String]");
       }
       return null;
     }
-    Class valueType=descriptor.getMapValueType();
+    Class<?> valueType=descriptor.getMapValueType();
     if (valueType == null) {
       if (descriptor.isRequired()) {
         throw new FatalBeanException("No value type declared for map [" + type.getName() + "]");
