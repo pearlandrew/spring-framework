@@ -1,0 +1,10 @@
+{
+  Assert.notNull(this.cacheManager,"A backing CacheManager is required");
+  Status status=this.cacheManager.getStatus();
+  Assert.isTrue(Status.STARTED.equals(status),"A 'started' JCache CacheManager is required - current cache is " + status.toString());
+  Collection<Cache> caches=new LinkedHashSet<Cache>();
+  for (  javax.cache.Cache<?,?> jcache : this.cacheManager.getCaches()) {
+    caches.add(new JCacheCache(jcache,this.allowNullValues));
+  }
+  return caches;
+}
