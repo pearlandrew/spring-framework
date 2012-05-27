@@ -22,6 +22,20 @@
     rawCache=createCache();
     this.cacheManager.addCache(rawCache);
   }
+  if (this.cacheEventListeners != null) {
+    for (    CacheEventListener listener : this.cacheEventListeners) {
+      rawCache.getCacheEventNotificationService().registerListener(listener);
+    }
+  }
+  if (this.statisticsEnabled) {
+    rawCache.setStatisticsEnabled(true);
+  }
+  if (this.sampledStatisticsEnabled) {
+    rawCache.setSampledStatisticsEnabled(true);
+  }
+  if (this.disabled) {
+    rawCache.setDisabled(true);
+  }
   Ehcache decoratedCache=decorateCache(rawCache);
   if (decoratedCache != rawCache) {
     this.cacheManager.replaceCacheWithDecoratedCache(rawCache,decoratedCache);
