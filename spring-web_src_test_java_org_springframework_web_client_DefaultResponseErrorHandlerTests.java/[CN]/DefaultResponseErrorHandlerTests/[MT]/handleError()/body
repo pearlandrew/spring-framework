@@ -6,6 +6,12 @@
   expect(response.getHeaders()).andReturn(headers);
   expect(response.getBody()).andReturn(new ByteArrayInputStream("Hello World".getBytes("UTF-8")));
   replay(response);
-  handler.handleError(response);
+  try {
+    handler.handleError(response);
+    fail("expected HttpClientErrorException");
+  }
+ catch (  HttpClientErrorException e) {
+    assertSame(headers,e.getResponseHeaders());
+  }
   verify(response);
 }
