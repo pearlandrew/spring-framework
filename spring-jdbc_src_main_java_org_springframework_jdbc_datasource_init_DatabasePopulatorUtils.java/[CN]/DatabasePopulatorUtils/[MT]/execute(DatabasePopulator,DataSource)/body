@@ -2,15 +2,13 @@
   Assert.notNull(populator,"DatabasePopulator must be provided");
   Assert.notNull(dataSource,"DataSource must be provided");
   try {
-    Connection connection=dataSource.getConnection();
+    Connection connection=DataSourceUtils.getConnection(dataSource);
     try {
       populator.populate(connection);
     }
   finally {
-      try {
-        connection.close();
-      }
- catch (      SQLException ex) {
+      if (connection != null) {
+        DataSourceUtils.releaseConnection(connection,dataSource);
       }
     }
   }
