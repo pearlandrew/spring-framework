@@ -1,10 +1,12 @@
 {
   request.addHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-  viewResolver.setIgnoreAcceptHeader(true);
-  viewResolver.setDefaultContentType(new MediaType("application","xml"));
+  MediaType mediaType=new MediaType("application","xml");
+  FixedContentNegotiationStrategy fixedStrategy=new FixedContentNegotiationStrategy(mediaType);
+  viewResolver.setContentNegotiationManager(new ContentNegotiationManager(fixedStrategy));
   ViewResolver viewResolverMock1=createMock("viewResolver1",ViewResolver.class);
   ViewResolver viewResolverMock2=createMock("viewResolver2",ViewResolver.class);
   viewResolver.setViewResolvers(Arrays.asList(viewResolverMock1,viewResolverMock2));
+  viewResolver.afterPropertiesSet();
   View viewMock1=createMock("application_xml",View.class);
   View viewMock2=createMock("text_html",View.class);
   String viewName="view";

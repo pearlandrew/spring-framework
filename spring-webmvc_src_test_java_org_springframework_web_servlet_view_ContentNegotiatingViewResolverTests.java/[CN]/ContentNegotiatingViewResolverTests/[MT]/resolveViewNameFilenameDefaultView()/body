@@ -1,8 +1,8 @@
 {
   request.setRequestURI("/test.json");
-  Map<String,String> mediaTypes=new HashMap<String,String>();
-  mediaTypes.put("json","application/json");
-  viewResolver.setMediaTypes(mediaTypes);
+  Map<String,String> mapping=Collections.singletonMap("json","application/json");
+  PathExtensionContentNegotiationStrategy pathStrategy=new PathExtensionContentNegotiationStrategy(mapping);
+  viewResolver.setContentNegotiationManager(new ContentNegotiationManager(pathStrategy));
   ViewResolver viewResolverMock1=createMock(ViewResolver.class);
   ViewResolver viewResolverMock2=createMock(ViewResolver.class);
   viewResolver.setViewResolvers(Arrays.asList(viewResolverMock1,viewResolverMock2));
@@ -12,6 +12,7 @@
   List<View> defaultViews=new ArrayList<View>();
   defaultViews.add(viewMock3);
   viewResolver.setDefaultViews(defaultViews);
+  viewResolver.afterPropertiesSet();
   String viewName="view";
   Locale locale=Locale.ENGLISH;
   expect(viewResolverMock1.resolveViewName(viewName,locale)).andReturn(viewMock1);

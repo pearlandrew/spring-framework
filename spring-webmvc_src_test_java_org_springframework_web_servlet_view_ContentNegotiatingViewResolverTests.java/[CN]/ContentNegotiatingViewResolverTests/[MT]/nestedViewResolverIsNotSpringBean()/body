@@ -6,7 +6,9 @@
   nestedResolver.setApplicationContext(webAppContext);
   nestedResolver.setViewClass(InternalResourceView.class);
   viewResolver.setViewResolvers(new ArrayList<ViewResolver>(Arrays.asList(nestedResolver)));
-  viewResolver.setDefaultContentType(MediaType.TEXT_HTML);
+  FixedContentNegotiationStrategy fixedStrategy=new FixedContentNegotiationStrategy(MediaType.TEXT_HTML);
+  viewResolver.setContentNegotiationManager(new ContentNegotiationManager(fixedStrategy));
+  viewResolver.afterPropertiesSet();
   String viewName="view";
   Locale locale=Locale.ENGLISH;
   View result=viewResolver.resolveViewName(viewName,locale);

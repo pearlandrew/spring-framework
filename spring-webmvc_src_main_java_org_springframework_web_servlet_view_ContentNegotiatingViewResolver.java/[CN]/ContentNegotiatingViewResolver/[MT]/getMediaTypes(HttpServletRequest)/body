@@ -1,63 +1,24 @@
 {
-  if (this.favorPathExtension) {
-    String requestUri=urlPathHelper.getLookupPathForRequest(request);
-    String filename=WebUtils.extractFullFilenameFromUrlPath(requestUri);
-    MediaType mediaType=getMediaTypeFromFilename(filename);
-    if (mediaType != null) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("Requested media type is '" + mediaType + "' (based on filename '"+ filename+ "')");
-      }
-      return Collections.singletonList(mediaType);
-    }
-  }
-  if (this.favorParameter) {
-    if (request.getParameter(this.parameterName) != null) {
-      String parameterValue=request.getParameter(this.parameterName);
-      MediaType mediaType=getMediaTypeFromParameter(parameterValue);
-      if (mediaType != null) {
-        if (logger.isDebugEnabled()) {
-          logger.debug("Requested media type is '" + mediaType + "' (based on parameter '"+ this.parameterName+ "'='"+ parameterValue+ "')");
+  try {
+    ServletWebRequest webRequest=new ServletWebRequest(request);
+    List<MediaType> acceptableMediaTypes=this.contentNegotiationManager.resolveMediaTypes(webRequest);
+    List<MediaType> producibleMediaTypes=getProducibleMediaTypes(request);
+    Set<MediaType> compatibleMediaTypes=new LinkedHashSet<MediaType>();
+    for (    MediaType acceptable : acceptableMediaTypes) {
+      for (      MediaType producible : producibleMediaTypes) {
+        if (acceptable.isCompatibleWith(producible)) {
+          compatibleMediaTypes.add(getMostSpecificMediaType(acceptable,producible));
         }
-        return Collections.singletonList(mediaType);
       }
     }
-  }
-  if (!this.ignoreAcceptHeader) {
-    String acceptHeader=request.getHeader(ACCEPT_HEADER);
-    if (StringUtils.hasText(acceptHeader)) {
-      try {
-        List<MediaType> acceptableMediaTypes=MediaType.parseMediaTypes(acceptHeader);
-        List<MediaType> producibleMediaTypes=getProducibleMediaTypes(request);
-        Set<MediaType> compatibleMediaTypes=new LinkedHashSet<MediaType>();
-        for (        MediaType acceptable : acceptableMediaTypes) {
-          for (          MediaType producible : producibleMediaTypes) {
-            if (acceptable.isCompatibleWith(producible)) {
-              compatibleMediaTypes.add(getMostSpecificMediaType(acceptable,producible));
-            }
-          }
-        }
-        List<MediaType> selectedMediaTypes=new ArrayList<MediaType>(compatibleMediaTypes);
-        MediaType.sortBySpecificityAndQuality(selectedMediaTypes);
-        if (logger.isDebugEnabled()) {
-          logger.debug("Requested media types are " + selectedMediaTypes + " based on Accept header types "+ "and producible media types "+ producibleMediaTypes+ ")");
-        }
-        return selectedMediaTypes;
-      }
- catch (      IllegalArgumentException ex) {
-        if (logger.isDebugEnabled()) {
-          logger.debug("Could not parse accept header [" + acceptHeader + "]: "+ ex.getMessage());
-        }
-        return null;
-      }
-    }
-  }
-  if (this.defaultContentType != null) {
+    List<MediaType> selectedMediaTypes=new ArrayList<MediaType>(compatibleMediaTypes);
+    MediaType.sortBySpecificityAndQuality(selectedMediaTypes);
     if (logger.isDebugEnabled()) {
-      logger.debug("Requested media types is " + this.defaultContentType + " (based on defaultContentType property)");
+      logger.debug("Requested media types are " + selectedMediaTypes + " based on Accept header types "+ "and producible media types "+ producibleMediaTypes+ ")");
     }
-    return Collections.singletonList(this.defaultContentType);
+    return selectedMediaTypes;
   }
- else {
-    return Collections.emptyList();
+ catch (  HttpMediaTypeNotAcceptableException ex) {
+    return null;
   }
 }

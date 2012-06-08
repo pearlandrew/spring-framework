@@ -1,6 +1,10 @@
 {
   request.addHeader("Accept","application/vnd.ms-excel");
-  viewResolver.setMediaTypes(Collections.singletonMap("xls","application/vnd.ms-excel"));
+  Map<String,String> mapping=Collections.singletonMap("xls","application/vnd.ms-excel");
+  MappingMediaTypeExtensionsResolver extensionsResolver=new MappingMediaTypeExtensionsResolver(mapping);
+  ContentNegotiationManager manager=new ContentNegotiationManager(new HeaderContentNegotiationStrategy());
+  manager.addExtensionsResolver(extensionsResolver);
+  viewResolver.setContentNegotiationManager(manager);
   ViewResolver viewResolverMock=createMock(ViewResolver.class);
   viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
   View viewMock=createMock("application_xls",View.class);

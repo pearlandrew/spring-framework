@@ -1,9 +1,11 @@
 {
   request.addParameter("format","xls");
-  viewResolver.setFavorParameter(true);
-  viewResolver.setMediaTypes(Collections.singletonMap("xls","application/vnd.ms-excel"));
+  Map<String,String> mapping=Collections.singletonMap("xls","application/vnd.ms-excel");
+  ParameterContentNegotiationStrategy paramStrategy=new ParameterContentNegotiationStrategy(mapping);
+  viewResolver.setContentNegotiationManager(new ContentNegotiationManager(paramStrategy));
   ViewResolver viewResolverMock=createMock(ViewResolver.class);
   viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
+  viewResolver.afterPropertiesSet();
   View viewMock=createMock("application_xls",View.class);
   String viewName="view";
   Locale locale=Locale.ENGLISH;

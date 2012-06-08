@@ -1,4 +1,9 @@
 {
-  MediaType contentType=StringUtils.hasLength(request.getContentType()) ? MediaType.parseMediaType(request.getContentType()) : MediaType.APPLICATION_OCTET_STREAM;
-  return getMediaType().includes(contentType);
+  try {
+    MediaType contentType=StringUtils.hasLength(request.getContentType()) ? MediaType.parseMediaType(request.getContentType()) : MediaType.APPLICATION_OCTET_STREAM;
+    return getMediaType().includes(contentType);
+  }
+ catch (  IllegalArgumentException ex) {
+    throw new HttpMediaTypeNotSupportedException("Can't parse Content-Type [" + request.getContentType() + "]: "+ ex.getMessage());
+  }
 }

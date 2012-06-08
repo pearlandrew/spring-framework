@@ -1,12 +1,13 @@
 {
   Class<?> returnValueClass=returnValue.getClass();
-  List<MediaType> acceptableMediaTypes=getAcceptableMediaTypes(inputMessage);
-  List<MediaType> producibleMediaTypes=getProducibleMediaTypes(inputMessage.getServletRequest(),returnValueClass);
+  HttpServletRequest servletRequest=inputMessage.getServletRequest();
+  List<MediaType> requestedMediaTypes=getAcceptableMediaTypes(servletRequest);
+  List<MediaType> producibleMediaTypes=getProducibleMediaTypes(servletRequest,returnValueClass);
   Set<MediaType> compatibleMediaTypes=new LinkedHashSet<MediaType>();
-  for (  MediaType a : acceptableMediaTypes) {
+  for (  MediaType r : requestedMediaTypes) {
     for (    MediaType p : producibleMediaTypes) {
-      if (a.isCompatibleWith(p)) {
-        compatibleMediaTypes.add(getMostSpecificMediaType(a,p));
+      if (r.isCompatibleWith(p)) {
+        compatibleMediaTypes.add(getMostSpecificMediaType(r,p));
       }
     }
   }

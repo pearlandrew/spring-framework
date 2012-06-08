@@ -1,0 +1,17 @@
+{
+  MediaType mediaType=null;
+  HttpServletRequest servletRequest=webRequest.getNativeRequest(HttpServletRequest.class);
+  if (servletRequest != null) {
+    String mimeType=servletRequest.getServletContext().getMimeType("file." + extension);
+    if (StringUtils.hasText(mimeType)) {
+      mediaType=MediaType.parseMediaType(mimeType);
+    }
+  }
+  if ((mediaType == null || MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) && this.useJaf) {
+    MediaType jafMediaType=JafMediaTypeFactory.getMediaType("file." + extension);
+    if (jafMediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(jafMediaType)) {
+      mediaType=jafMediaType;
+    }
+  }
+  return mediaType;
+}
