@@ -2,20 +2,29 @@
   if (!hasMessageBody(response)) {
     return null;
   }
-  MediaType contentType=response.getHeaders().getContentType();
-  if (contentType == null) {
-    if (logger.isTraceEnabled()) {
-      logger.trace("No Content-Type header found, defaulting to application/octet-stream");
-    }
-    contentType=MediaType.APPLICATION_OCTET_STREAM;
+  MediaType contentType=getContentType(response);
+  Class<T> responseClass=null;
+  if (this.responseType instanceof Class) {
+    responseClass=(Class)this.responseType;
   }
-  for (  HttpMessageConverter messageConverter : messageConverters) {
-    if (messageConverter.canRead(responseType,contentType)) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("Reading [" + responseType.getName() + "] as \""+ contentType+ "\" using ["+ messageConverter+ "]");
+  for (  HttpMessageConverter messageConverter : this.messageConverters) {
+    if (responseClass != null) {
+      if (messageConverter.canRead(responseClass,contentType)) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Reading [" + responseClass.getName() + "] as \""+ contentType+ "\" using ["+ messageConverter+ "]");
+        }
+        return (T)messageConverter.read(responseClass,response);
       }
-      return (T)messageConverter.read(this.responseType,response);
+    }
+ else     if (messageConverter instanceof GenericHttpMessageConverter) {
+      GenericHttpMessageConverter genericMessageConverter=(GenericHttpMessageConverter)messageConverter;
+      if (genericMessageConverter.canRead(this.responseType,contentType)) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Reading [" + this.responseType + "] as \""+ contentType+ "\" using ["+ messageConverter+ "]");
+        }
+        return (T)genericMessageConverter.read(this.responseType,response);
+      }
     }
   }
-  throw new RestClientException("Could not extract response: no suitable HttpMessageConverter found for response type [" + this.responseType.getName() + "] and content type ["+ contentType+ "]");
+  throw new RestClientException("Could not extract response: no suitable HttpMessageConverter found for response type [" + this.responseType + "] and content type ["+ contentType+ "]");
 }

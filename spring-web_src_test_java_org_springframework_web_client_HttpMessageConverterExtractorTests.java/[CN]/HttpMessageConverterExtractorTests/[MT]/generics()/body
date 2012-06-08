@@ -1,0 +1,21 @@
+{
+  GenericHttpMessageConverter<String> converter=createMock(GenericHttpMessageConverter.class);
+  List<HttpMessageConverter<?>> converters=createConverterList(converter);
+  HttpHeaders responseHeaders=new HttpHeaders();
+  MediaType contentType=MediaType.TEXT_PLAIN;
+  responseHeaders.setContentType(contentType);
+  String expected="Foo";
+  ParameterizedTypeReference<List<String>> reference=new ParameterizedTypeReference<List<String>>(){
+  }
+;
+  Type type=reference.getType();
+  extractor=new HttpMessageConverterExtractor<List<String>>(type,converters);
+  expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+  expect(response.getHeaders()).andReturn(responseHeaders).times(2);
+  expect(converter.canRead(type,contentType)).andReturn(true);
+  expect(converter.read(type,response)).andReturn(expected);
+  replay(response,converter);
+  Object result=extractor.extractData(response);
+  assertEquals(expected,result);
+  verify(response,converter);
+}

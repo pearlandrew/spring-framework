@@ -1,0 +1,12 @@
+{
+  HttpMessageConverter<?> converter=createMock(HttpMessageConverter.class);
+  HttpHeaders responseHeaders=new HttpHeaders();
+  responseHeaders.setContentLength(0);
+  extractor=new HttpMessageConverterExtractor<String>(String.class,createConverterList(converter));
+  expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+  expect(response.getHeaders()).andReturn(responseHeaders);
+  replay(response,converter);
+  Object result=extractor.extractData(response);
+  assertNull(result);
+  verify(response,converter);
+}
