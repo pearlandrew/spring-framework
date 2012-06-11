@@ -1,0 +1,18 @@
+{
+  if (this.applicationContext == null) {
+    logger.warn("Can't detect @ExceptionResolver components if the ApplicationContext property is not set");
+  }
+ else {
+    String[] beanNames=this.applicationContext.getBeanNamesForType(Object.class);
+    for (    String name : beanNames) {
+      Class<?> type=this.applicationContext.getType(name);
+      if (AnnotationUtils.findAnnotation(type,ExceptionResolver.class) != null) {
+        Object bean=this.applicationContext.getBean(name);
+        this.globalExceptionHandlers.put(bean,new ExceptionHandlerMethodResolver(bean.getClass()));
+      }
+    }
+  }
+  if (this.globalExceptionHandlers.size() > 0) {
+    sortGlobalExceptionHandlers();
+  }
+}
