@@ -15,12 +15,20 @@
   if (factoryClass == null) {
     return null;
   }
+  List<ValueHolder> argumentValues=mbd.getConstructorArgumentValues().getGenericArgumentValues();
+  Object[] args=new Object[argumentValues.size()];
+  for (int i=0; i < args.length; i++) {
+    args[i]=argumentValues.get(i).getValue();
+  }
   int minNrOfArgs=mbd.getConstructorArgumentValues().getArgumentCount();
   Method[] candidates=ReflectionUtils.getUniqueDeclaredMethods(factoryClass);
-  Set<Class> returnTypes=new HashSet<Class>(1);
+  Set<Class<?>> returnTypes=new HashSet<Class<?>>(1);
   for (  Method factoryMethod : candidates) {
     if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic && factoryMethod.getName().equals(mbd.getFactoryMethodName()) && factoryMethod.getParameterTypes().length >= minNrOfArgs) {
-      returnTypes.add(factoryMethod.getReturnType());
+      Class<?> returnType=GenericTypeResolver.resolveParameterizedReturnType(factoryMethod,args);
+      if (returnType != null) {
+        returnTypes.add(returnType);
+      }
     }
   }
   if (returnTypes.size() == 1) {
