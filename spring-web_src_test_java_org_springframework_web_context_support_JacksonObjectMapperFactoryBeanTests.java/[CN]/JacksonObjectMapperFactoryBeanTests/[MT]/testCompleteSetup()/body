@@ -1,0 +1,25 @@
+{
+  NopAnnotationIntrospector annotationIntrospector=new NopAnnotationIntrospector();
+  ObjectMapper objectMapper=new ObjectMapper();
+  assertTrue(factory.isSingleton());
+  assertEquals(ObjectMapper.class,factory.getObjectType());
+  factory.setObjectMapper(objectMapper);
+  factory.setAnnotationIntrospector(annotationIntrospector);
+  factory.setFeaturesToEnable(new Object[]{SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,DeserializationConfig.Feature.USE_ANNOTATIONS,JsonParser.Feature.ALLOW_SINGLE_QUOTES,JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS});
+  factory.setFeaturesToDisable(new Object[]{SerializationConfig.Feature.AUTO_DETECT_GETTERS,DeserializationConfig.Feature.AUTO_DETECT_FIELDS,JsonParser.Feature.AUTO_CLOSE_SOURCE,JsonGenerator.Feature.QUOTE_FIELD_NAMES});
+  factory.afterPropertiesSet();
+  assertTrue(objectMapper == factory.getObject());
+  SerializationConfig serializeConfig=objectMapper.getSerializationConfig();
+  DeserializationConfig deserializeConfig=objectMapper.getDeserializationConfig();
+  JsonFactory jsonFactory=objectMapper.getJsonFactory();
+  assertTrue(annotationIntrospector == serializeConfig.getAnnotationIntrospector());
+  assertTrue(annotationIntrospector == deserializeConfig.getAnnotationIntrospector());
+  assertTrue(serializeConfig.isEnabled(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS));
+  assertTrue(deserializeConfig.isEnabled(DeserializationConfig.Feature.USE_ANNOTATIONS));
+  assertTrue(jsonFactory.isEnabled(JsonParser.Feature.ALLOW_SINGLE_QUOTES));
+  assertTrue(jsonFactory.isEnabled(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS));
+  assertFalse(serializeConfig.isEnabled(SerializationConfig.Feature.AUTO_DETECT_GETTERS));
+  assertFalse(deserializeConfig.isEnabled(DeserializationConfig.Feature.AUTO_DETECT_FIELDS));
+  assertFalse(jsonFactory.isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE));
+  assertFalse(jsonFactory.isEnabled(JsonGenerator.Feature.QUOTE_FIELD_NAMES));
+}
