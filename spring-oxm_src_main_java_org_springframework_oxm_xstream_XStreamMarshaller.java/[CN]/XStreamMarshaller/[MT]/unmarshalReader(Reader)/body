@@ -1,8 +1,15 @@
 {
-  if (streamDriver != null) {
-    return unmarshal(streamDriver.createReader(reader));
-  }
+  try {
+    HierarchicalStreamReader streamReader;
+    if (streamDriver != null) {
+      streamReader=streamDriver.createReader(reader);
+    }
  else {
-    return unmarshal(new XppReader(reader));
+      streamReader=new XppReader(reader);
+    }
+    return getXStream().unmarshal(streamReader);
+  }
+ catch (  Exception ex) {
+    throw convertXStreamException(ex,false);
   }
 }
