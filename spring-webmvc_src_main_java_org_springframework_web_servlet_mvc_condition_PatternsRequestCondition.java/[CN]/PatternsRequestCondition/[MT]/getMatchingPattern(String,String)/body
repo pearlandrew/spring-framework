@@ -3,9 +3,18 @@
     return pattern;
   }
   if (this.useSuffixPatternMatch) {
-    boolean hasSuffix=pattern.indexOf('.') != -1;
-    if (!hasSuffix && this.pathMatcher.match(pattern + ".*",lookupPath)) {
-      return pattern + ".*";
+    if (useSmartSuffixPatternMatch(pattern,lookupPath)) {
+      for (      String extension : this.fileExtensions) {
+        if (this.pathMatcher.match(pattern + extension,lookupPath)) {
+          return pattern + extension;
+        }
+      }
+    }
+ else {
+      boolean hasSuffix=pattern.indexOf('.') != -1;
+      if (!hasSuffix && this.pathMatcher.match(pattern + ".*",lookupPath)) {
+        return pattern + ".*";
+      }
     }
   }
   if (this.pathMatcher.match(pattern,lookupPath)) {
