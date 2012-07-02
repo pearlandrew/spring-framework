@@ -8,7 +8,10 @@
       try {
         AsyncHandlerInterceptor asyncInterceptor=(AsyncHandlerInterceptor)interceptor;
         AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
-        chain.addDelegatingCallable(asyncInterceptor.getAsyncCallable(request,response,this.handler));
+        AbstractDelegatingCallable callable=asyncInterceptor.getAsyncCallable(request,response,this.handler);
+        if (callable != null) {
+          chain.addDelegatingCallable(callable);
+        }
       }
  catch (      Throwable ex) {
         logger.error("HandlerInterceptor.addAsyncCallables threw exception",ex);
