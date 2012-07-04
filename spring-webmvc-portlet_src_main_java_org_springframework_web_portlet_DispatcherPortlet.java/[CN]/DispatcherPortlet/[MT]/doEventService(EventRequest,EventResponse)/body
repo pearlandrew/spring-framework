@@ -27,11 +27,16 @@
   }
  catch (  Exception ex) {
     triggerAfterEventCompletion(mappedHandler,interceptorIndex,request,response,ex);
-    try {
-      exposeActionException(request,response,ex);
-      logger.debug("Caught exception during event phase - forwarding to render phase",ex);
+    if (this.forwardEventException) {
+      try {
+        exposeActionException(request,response,ex);
+        logger.debug("Caught exception during event phase - forwarding to render phase",ex);
+      }
+ catch (      IllegalStateException ex2) {
+        throw ex;
+      }
     }
- catch (    IllegalStateException ex2) {
+ else {
       throw ex;
     }
   }
