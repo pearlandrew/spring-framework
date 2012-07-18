@@ -1,13 +1,13 @@
 {
   DeferredResultHandler resultHandler=createMock(DeferredResultHandler.class);
-  DeferredResult deferredResult=new DeferredResult("foo");
-  deferredResult.init(resultHandler);
   resultHandler.handle("foo");
   replay(resultHandler);
+  DeferredResult<String> deferredResult=new DeferredResult<String>("foo");
+  deferredResult.init(resultHandler);
   deferredResult.set("foo");
   verify(resultHandler);
   reset(resultHandler);
   replay(resultHandler);
-  deferredResult.handleTimeout();
+  deferredResult.getTimeoutHandler().run();
   verify(resultHandler);
 }

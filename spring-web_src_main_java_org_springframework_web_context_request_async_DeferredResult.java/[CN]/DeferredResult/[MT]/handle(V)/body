@@ -1,8 +1,9 @@
 {
   Assert.isNull(this.result,"A deferred result can be set once only");
   this.result=result;
+  this.timeoutValueUsed=(this.timeoutValueSet && (this.result == this.timeoutValue));
   try {
-    this.readySignal.await(10,TimeUnit.SECONDS);
+    this.initializationLatch.await(10,TimeUnit.SECONDS);
   }
  catch (  InterruptedException e) {
     throw new IllegalStateException("Gave up on waiting for DeferredResult to be initialized. " + "Are you perhaps creating and setting a DeferredResult in the same thread? " + "The DeferredResult must be fully initialized before you can set it. "+ "See the class javadoc for more details");
