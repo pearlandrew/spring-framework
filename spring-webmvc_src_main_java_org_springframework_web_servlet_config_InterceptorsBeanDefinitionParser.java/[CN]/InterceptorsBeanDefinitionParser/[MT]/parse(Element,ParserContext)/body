@@ -6,23 +6,21 @@
     RootBeanDefinition mappedInterceptorDef=new RootBeanDefinition(MappedInterceptor.class);
     mappedInterceptorDef.setSource(parserContext.extractSource(interceptor));
     mappedInterceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-    String[] pathPatterns;
+    String[] includePatterns=null;
+    String[] excludePatterns=null;
     Object interceptorBean;
     if ("interceptor".equals(interceptor.getLocalName())) {
-      List<Element> paths=DomUtils.getChildElementsByTagName(interceptor,"mapping");
-      pathPatterns=new String[paths.size()];
-      for (int i=0; i < paths.size(); i++) {
-        pathPatterns[i]=paths.get(i).getAttribute("path");
-      }
+      includePatterns=getIncludePatterns(interceptor,"mapping");
+      excludePatterns=getIncludePatterns(interceptor,"exclude-mapping");
       Element beanElem=DomUtils.getChildElementsByTagName(interceptor,new String[]{"bean","ref"}).get(0);
       interceptorBean=parserContext.getDelegate().parsePropertySubElement(beanElem,null);
     }
  else {
-      pathPatterns=null;
       interceptorBean=parserContext.getDelegate().parsePropertySubElement(interceptor,null);
     }
-    mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0,pathPatterns);
-    mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1,interceptorBean);
+    mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0,includePatterns);
+    mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1,excludePatterns);
+    mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(2,interceptorBean);
     String beanName=parserContext.getReaderContext().registerWithGeneratedName(mappedInterceptorDef);
     parserContext.registerComponent(new BeanComponentDefinition(mappedInterceptorDef,beanName));
   }
