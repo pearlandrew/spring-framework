@@ -1,6 +1,4 @@
 {
-  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(webRequest.getRequest());
-  chain.addDelegatingCallable(geAsyncCallable(webRequest,mavContainer,providedArgs));
   Object returnValue=invokeForRequest(webRequest,mavContainer,providedArgs);
   setResponseStatus(webRequest);
   if (returnValue == null) {
@@ -14,6 +12,8 @@
     return;
   }
   mavContainer.setRequestHandled(false);
+  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(webRequest.getRequest());
+  chain.push(geAsyncCallable(webRequest,mavContainer,providedArgs));
   try {
     this.returnValueHandlers.handleReturnValue(returnValue,getReturnValueType(returnValue),mavContainer,webRequest);
   }
@@ -22,5 +22,8 @@
       logger.trace(getReturnValueHandlingErrorMessage("Error handling return value",returnValue),ex);
     }
     throw ex;
+  }
+ finally {
+    chain.pop();
   }
 }

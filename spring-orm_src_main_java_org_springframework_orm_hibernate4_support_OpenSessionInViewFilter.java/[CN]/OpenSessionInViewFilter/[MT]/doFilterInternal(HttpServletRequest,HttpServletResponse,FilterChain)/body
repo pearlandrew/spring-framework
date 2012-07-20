@@ -10,7 +10,7 @@
     Session session=openSession(sessionFactory);
     SessionHolder sessionHolder=new SessionHolder(session);
     TransactionSynchronizationManager.bindResource(sessionFactory,sessionHolder);
-    chain.addDelegatingCallable(getAsyncCallable(request,sessionFactory,sessionHolder));
+    chain.push(getAsyncCallable(request,sessionFactory,sessionHolder));
   }
   try {
     filterChain.doFilter(request,response);
@@ -18,7 +18,7 @@
   finally {
     if (!participate) {
       SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.unbindResource(sessionFactory);
-      if (chain.isAsyncStarted()) {
+      if (!chain.pop()) {
         return;
       }
       logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");

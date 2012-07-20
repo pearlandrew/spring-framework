@@ -10,13 +10,13 @@
   }
  else {
     AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
-    chain.addDelegatingCallable(getAsyncCallable(request,alreadyFilteredAttributeName));
+    chain.push(getAsyncCallable(request,alreadyFilteredAttributeName));
     request.setAttribute(alreadyFilteredAttributeName,Boolean.TRUE);
     try {
       doFilterInternal(httpRequest,httpResponse,filterChain);
     }
   finally {
-      if (chain.isAsyncStarted()) {
+      if (!chain.pop()) {
         return;
       }
       request.removeAttribute(alreadyFilteredAttributeName);

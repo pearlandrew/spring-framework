@@ -1,13 +1,14 @@
 {
   Assert.notNull(deferredResult,"DeferredResult is required");
-  startAsync();
+  Assert.state(this.asyncWebRequest != null,"AsyncWebRequest was not set");
+  this.asyncWebRequest.startAsync();
   deferredResult.init(new DeferredResultHandler(){
     public void handle(    Object result){
       if (asyncWebRequest.isAsyncCompleted()) {
-        throw new StaleAsyncWebRequestException("Async request processing already completed");
+        throw new StaleAsyncWebRequestException("Too late to set DeferredResult: " + result);
       }
-      setCallable(new PassThroughCallable(result));
-      new AsyncExecutionChainRunnable(asyncWebRequest,buildChain()).run();
+      setLastCallable(new PassThroughCallable(result));
+      taskExecutor.execute(new AsyncExecutionChainRunnable(asyncWebRequest,buildChain()));
     }
   }
 );

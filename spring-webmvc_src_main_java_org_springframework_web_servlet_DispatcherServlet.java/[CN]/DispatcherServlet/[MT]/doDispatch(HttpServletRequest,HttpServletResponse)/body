@@ -2,6 +2,7 @@
   HttpServletRequest processedRequest=request;
   HandlerExecutionChain mappedHandler=null;
   AsyncExecutionChain asyncChain=AsyncExecutionChain.getForCurrentRequest(request);
+  boolean asyncStarted=false;
   try {
     ModelAndView mv=null;
     Exception dispatchException=null;
@@ -28,13 +29,18 @@
       if (!mappedHandler.applyPreHandle(processedRequest,response)) {
         return;
       }
-      mappedHandler.addDelegatingCallables(processedRequest,response);
-      asyncChain.addDelegatingCallable(getDispatchAsyncCallable(mappedHandler,request,response,processedRequest));
-      mv=ha.handle(processedRequest,response,mappedHandler.getHandler());
-      if (asyncChain.isAsyncStarted()) {
-        mappedHandler.applyPostHandleAsyncStarted(processedRequest,response);
-        logger.debug("Exiting request thread and leaving the response open");
-        return;
+      mappedHandler.pushInterceptorCallables(processedRequest,response);
+      asyncChain.push(getDispatchAsyncCallable(mappedHandler,request,response,processedRequest));
+      try {
+        mv=ha.handle(processedRequest,response,mappedHandler.getHandler());
+      }
+  finally {
+        asyncStarted=!asyncChain.pop();
+        mappedHandler.popInterceptorCallables(processedRequest,response,asyncStarted);
+        if (asyncStarted) {
+          logger.debug("Exiting request thread and leaving the response open");
+          return;
+        }
       }
       applyDefaultViewName(request,mv);
       mappedHandler.applyPostHandle(processedRequest,response,mv);
@@ -51,7 +57,7 @@ catch (  Error err) {
     triggerAfterCompletionWithError(processedRequest,response,mappedHandler,err);
   }
  finally {
-    if (asyncChain.isAsyncStarted()) {
+    if (asyncStarted) {
       return;
     }
     if (processedRequest != request) {

@@ -11,7 +11,7 @@
       Session session=getSession(sessionFactory);
       SessionHolder sessionHolder=new SessionHolder(session);
       TransactionSynchronizationManager.bindResource(sessionFactory,sessionHolder);
-      chain.addDelegatingCallable(getAsyncCallable(request,sessionFactory,sessionHolder));
+      chain.push(getAsyncCallable(request,sessionFactory,sessionHolder));
     }
   }
  else {
@@ -29,14 +29,14 @@
     if (!participate) {
       if (isSingleSession()) {
         SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.unbindResource(sessionFactory);
-        if (chain.isAsyncStarted()) {
+        if (!chain.pop()) {
           return;
         }
         logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
         closeSession(sessionHolder.getSession(),sessionFactory);
       }
  else {
-        if (chain.isAsyncStarted()) {
+        if (!chain.pop()) {
           throw new IllegalStateException("Deferred close is not supported with async requests.");
         }
         SessionFactoryUtils.processDeferredClose(sessionFactory);

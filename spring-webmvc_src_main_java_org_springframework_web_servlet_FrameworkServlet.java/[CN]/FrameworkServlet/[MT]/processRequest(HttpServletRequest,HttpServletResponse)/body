@@ -10,7 +10,7 @@
   }
   initContextHolders(request,localeContext,requestAttributes);
   AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
-  chain.addDelegatingCallable(getAsyncCallable(startTime,request,response,previousLocaleContext,previousAttributes,localeContext,requestAttributes));
+  chain.push(getAsyncCallable(startTime,request,response,previousLocaleContext,previousAttributes,localeContext,requestAttributes));
   try {
     doService(request,response);
   }
@@ -19,7 +19,7 @@
   }
  finally {
     resetContextHolders(request,previousLocaleContext,previousAttributes);
-    if (chain.isAsyncStarted()) {
+    if (!chain.pop()) {
       return;
     }
     finalizeProcessing(startTime,request,response,requestAttributes,failureCause);

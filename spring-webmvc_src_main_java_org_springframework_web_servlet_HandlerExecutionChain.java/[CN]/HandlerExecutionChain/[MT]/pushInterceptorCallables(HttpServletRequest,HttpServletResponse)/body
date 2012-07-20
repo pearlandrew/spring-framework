@@ -2,19 +2,18 @@
   if (getInterceptors() == null) {
     return;
   }
-  for (int i=getInterceptors().length - 1; i >= 0; i--) {
-    HandlerInterceptor interceptor=getInterceptors()[i];
+  for (  HandlerInterceptor interceptor : getInterceptors()) {
     if (interceptor instanceof AsyncHandlerInterceptor) {
       try {
         AsyncHandlerInterceptor asyncInterceptor=(AsyncHandlerInterceptor)interceptor;
-        AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
         AbstractDelegatingCallable callable=asyncInterceptor.getAsyncCallable(request,response,this.handler);
         if (callable != null) {
-          chain.addDelegatingCallable(callable);
+          AsyncExecutionChain.getForCurrentRequest(request).push(callable);
+          this.pushedCallableCount++;
         }
       }
  catch (      Throwable ex) {
-        logger.error("HandlerInterceptor.addAsyncCallables threw exception",ex);
+        logger.error("HandlerInterceptor failed to return an async Callable",ex);
       }
     }
   }

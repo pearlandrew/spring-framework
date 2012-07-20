@@ -4,12 +4,12 @@
   }
   beforeRequest(request,getBeforeMessage(request));
   AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
-  chain.addDelegatingCallable(getAsyncCallable(request));
+  chain.push(getAsyncCallable(request));
   try {
     filterChain.doFilter(request,response);
   }
   finally {
-    if (chain.isAsyncStarted()) {
+    if (!chain.pop()) {
       return;
     }
     afterRequest(request,getAfterMessage(request));
