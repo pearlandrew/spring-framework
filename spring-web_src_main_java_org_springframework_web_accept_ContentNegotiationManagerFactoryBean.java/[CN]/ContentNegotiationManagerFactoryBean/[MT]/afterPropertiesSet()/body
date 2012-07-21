@@ -1,0 +1,23 @@
+{
+  List<ContentNegotiationStrategy> strategies=new ArrayList<ContentNegotiationStrategy>();
+  if (this.favorPathExtension) {
+    PathExtensionContentNegotiationStrategy strategy=new PathExtensionContentNegotiationStrategy(this.mediaTypes);
+    if (this.useJaf != null) {
+      strategy.setUseJaf(this.useJaf);
+    }
+    strategies.add(strategy);
+  }
+  if (this.favorParameter) {
+    ParameterContentNegotiationStrategy strategy=new ParameterContentNegotiationStrategy(this.mediaTypes);
+    strategy.setParameterName(this.parameterName);
+    strategies.add(strategy);
+  }
+  if (!this.ignoreAcceptHeader) {
+    strategies.add(new HeaderContentNegotiationStrategy());
+  }
+  if (this.defaultContentType != null) {
+    strategies.add(new FixedContentNegotiationStrategy(this.defaultContentType));
+  }
+  ContentNegotiationStrategy[] array=strategies.toArray(new ContentNegotiationStrategy[strategies.size()]);
+  this.contentNegotiationManager=new ContentNegotiationManager(array);
+}
