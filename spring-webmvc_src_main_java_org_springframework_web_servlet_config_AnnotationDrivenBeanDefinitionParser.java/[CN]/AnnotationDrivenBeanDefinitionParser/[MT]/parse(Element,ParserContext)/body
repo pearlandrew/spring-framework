@@ -2,11 +2,13 @@
   Object source=parserContext.extractSource(element);
   CompositeComponentDefinition compDefinition=new CompositeComponentDefinition(element.getTagName(),source);
   parserContext.pushContainingComponent(compDefinition);
-  RootBeanDefinition methodMappingDef=new RootBeanDefinition(RequestMappingHandlerMapping.class);
-  methodMappingDef.setSource(source);
-  methodMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-  methodMappingDef.getPropertyValues().add("order",0);
-  String methodMappingName=parserContext.getReaderContext().registerWithGeneratedName(methodMappingDef);
+  RuntimeBeanReference contentNegotiationManager=getContentNegotiationManager(element,source,parserContext);
+  RootBeanDefinition handlerMappingDef=new RootBeanDefinition(RequestMappingHandlerMapping.class);
+  handlerMappingDef.setSource(source);
+  handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  handlerMappingDef.getPropertyValues().add("order",0);
+  handlerMappingDef.getPropertyValues().add("contentNegotiationManager",contentNegotiationManager);
+  String methodMappingName=parserContext.getReaderContext().registerWithGeneratedName(handlerMappingDef);
   RuntimeBeanReference conversionService=getConversionService(element,source,parserContext);
   RuntimeBeanReference validator=getValidator(element,source,parserContext);
   RuntimeBeanReference messageCodesResolver=getMessageCodesResolver(element,source,parserContext);
@@ -19,22 +21,23 @@
   ManagedList<?> messageConverters=getMessageConverters(element,source,parserContext);
   ManagedList<?> argumentResolvers=getArgumentResolvers(element,source,parserContext);
   ManagedList<?> returnValueHandlers=getReturnValueHandlers(element,source,parserContext);
-  RootBeanDefinition methodAdapterDef=new RootBeanDefinition(RequestMappingHandlerAdapter.class);
-  methodAdapterDef.setSource(source);
-  methodAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-  methodAdapterDef.getPropertyValues().add("webBindingInitializer",bindingDef);
-  methodAdapterDef.getPropertyValues().add("messageConverters",messageConverters);
+  RootBeanDefinition handlerAdapterDef=new RootBeanDefinition(RequestMappingHandlerAdapter.class);
+  handlerAdapterDef.setSource(source);
+  handlerAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  handlerAdapterDef.getPropertyValues().add("contentNegotiationManager",contentNegotiationManager);
+  handlerAdapterDef.getPropertyValues().add("webBindingInitializer",bindingDef);
+  handlerAdapterDef.getPropertyValues().add("messageConverters",messageConverters);
   if (element.hasAttribute("ignoreDefaultModelOnRedirect")) {
     Boolean ignoreDefaultModel=Boolean.valueOf(element.getAttribute("ignoreDefaultModelOnRedirect"));
-    methodAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect",ignoreDefaultModel);
+    handlerAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect",ignoreDefaultModel);
   }
   if (argumentResolvers != null) {
-    methodAdapterDef.getPropertyValues().add("customArgumentResolvers",argumentResolvers);
+    handlerAdapterDef.getPropertyValues().add("customArgumentResolvers",argumentResolvers);
   }
   if (returnValueHandlers != null) {
-    methodAdapterDef.getPropertyValues().add("customReturnValueHandlers",returnValueHandlers);
+    handlerAdapterDef.getPropertyValues().add("customReturnValueHandlers",returnValueHandlers);
   }
-  String methodAdapterName=parserContext.getReaderContext().registerWithGeneratedName(methodAdapterDef);
+  String handlerAdapterName=parserContext.getReaderContext().registerWithGeneratedName(handlerAdapterDef);
   RootBeanDefinition csInterceptorDef=new RootBeanDefinition(ConversionServiceExposingInterceptor.class);
   csInterceptorDef.setSource(source);
   csInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0,conversionService);
@@ -44,12 +47,13 @@
   mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0,(Object)null);
   mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1,csInterceptorDef);
   String mappedInterceptorName=parserContext.getReaderContext().registerWithGeneratedName(mappedCsInterceptorDef);
-  RootBeanDefinition methodExceptionResolver=new RootBeanDefinition(ExceptionHandlerExceptionResolver.class);
-  methodExceptionResolver.setSource(source);
-  methodExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-  methodExceptionResolver.getPropertyValues().add("messageConverters",messageConverters);
-  methodExceptionResolver.getPropertyValues().add("order",0);
-  String methodExceptionResolverName=parserContext.getReaderContext().registerWithGeneratedName(methodExceptionResolver);
+  RootBeanDefinition exceptionHandlerExceptionResolver=new RootBeanDefinition(ExceptionHandlerExceptionResolver.class);
+  exceptionHandlerExceptionResolver.setSource(source);
+  exceptionHandlerExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  exceptionHandlerExceptionResolver.getPropertyValues().add("contentNegotiationManager",contentNegotiationManager);
+  exceptionHandlerExceptionResolver.getPropertyValues().add("messageConverters",messageConverters);
+  exceptionHandlerExceptionResolver.getPropertyValues().add("order",0);
+  String methodExceptionResolverName=parserContext.getReaderContext().registerWithGeneratedName(exceptionHandlerExceptionResolver);
   RootBeanDefinition responseStatusExceptionResolver=new RootBeanDefinition(ResponseStatusExceptionResolver.class);
   responseStatusExceptionResolver.setSource(source);
   responseStatusExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -60,9 +64,9 @@
   defaultExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
   defaultExceptionResolver.getPropertyValues().add("order",2);
   String defaultExceptionResolverName=parserContext.getReaderContext().registerWithGeneratedName(defaultExceptionResolver);
-  parserContext.registerComponent(new BeanComponentDefinition(methodMappingDef,methodMappingName));
-  parserContext.registerComponent(new BeanComponentDefinition(methodAdapterDef,methodAdapterName));
-  parserContext.registerComponent(new BeanComponentDefinition(methodExceptionResolver,methodExceptionResolverName));
+  parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef,methodMappingName));
+  parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterDef,handlerAdapterName));
+  parserContext.registerComponent(new BeanComponentDefinition(exceptionHandlerExceptionResolver,methodExceptionResolverName));
   parserContext.registerComponent(new BeanComponentDefinition(responseStatusExceptionResolver,responseStatusExceptionResolverName));
   parserContext.registerComponent(new BeanComponentDefinition(defaultExceptionResolver,defaultExceptionResolverName));
   parserContext.registerComponent(new BeanComponentDefinition(mappedCsInterceptorDef,mappedInterceptorName));

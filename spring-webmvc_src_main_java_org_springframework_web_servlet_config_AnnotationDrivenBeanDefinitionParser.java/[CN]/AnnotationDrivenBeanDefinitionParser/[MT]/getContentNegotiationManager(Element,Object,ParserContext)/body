@@ -1,0 +1,19 @@
+{
+  RuntimeBeanReference contentNegotiationManagerRef;
+  if (element.hasAttribute("content-negotiation-manager")) {
+    contentNegotiationManagerRef=new RuntimeBeanReference(element.getAttribute("content-negotiation-manager"));
+  }
+ else {
+    RootBeanDefinition managerDef=new RootBeanDefinition(ContentNegotiationManager.class);
+    managerDef.setSource(source);
+    managerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    PathExtensionContentNegotiationStrategy strategy1=new PathExtensionContentNegotiationStrategy(getDefaultMediaTypes());
+    HeaderContentNegotiationStrategy strategy2=new HeaderContentNegotiationStrategy();
+    managerDef.getConstructorArgumentValues().addIndexedArgumentValue(0,Arrays.asList(strategy1,strategy2));
+    String beanName="mvcContentNegotiationManager";
+    parserContext.getReaderContext().getRegistry().registerBeanDefinition(beanName,managerDef);
+    parserContext.registerComponent(new BeanComponentDefinition(managerDef,beanName));
+    contentNegotiationManagerRef=new RuntimeBeanReference(beanName);
+  }
+  return contentNegotiationManagerRef;
+}
