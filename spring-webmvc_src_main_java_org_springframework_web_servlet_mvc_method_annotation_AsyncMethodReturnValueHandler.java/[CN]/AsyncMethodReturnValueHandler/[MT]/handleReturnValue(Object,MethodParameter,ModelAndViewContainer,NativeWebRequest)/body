@@ -1,15 +1,13 @@
 {
   Assert.notNull(returnValue,"A Callable or a DeferredValue is required");
-  mavContainer.setRequestHandled(true);
   Class<?> paramType=returnType.getParameterType();
   ServletRequest servletRequest=webRequest.getNativeRequest(ServletRequest.class);
-  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(servletRequest);
+  WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(servletRequest);
   if (Callable.class.isAssignableFrom(paramType)) {
-    chain.setLastCallable((Callable<Object>)returnValue);
-    chain.startCallableProcessing();
+    asyncManager.startCallableProcessing((Callable<Object>)returnValue,mavContainer);
   }
  else   if (DeferredResult.class.isAssignableFrom(paramType)) {
-    chain.startDeferredResultProcessing((DeferredResult<?>)returnValue);
+    asyncManager.startDeferredResultProcessing((DeferredResult<?>)returnValue,mavContainer);
   }
  else {
     Method method=returnType.getMethod();

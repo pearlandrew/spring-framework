@@ -1,10 +1,14 @@
 {
-  ShallowEtagResponseWrapper responseWrapper=new ShallowEtagResponseWrapper(response);
-  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
-  chain.push(getAsyncCallable(request,response,responseWrapper));
-  filterChain.doFilter(request,responseWrapper);
-  if (!chain.pop()) {
-    return;
+  ShallowEtagResponseWrapper responseWrapper;
+  if (isAsyncDispatch(request)) {
+    responseWrapper=WebUtils.getNativeResponse(response,ShallowEtagResponseWrapper.class);
+    Assert.notNull(responseWrapper,"Expected wrapped response");
   }
-  updateResponse(request,response,responseWrapper);
+ else {
+    responseWrapper=new ShallowEtagResponseWrapper(response);
+  }
+  filterChain.doFilter(request,responseWrapper);
+  if (isLastRequestThread(request)) {
+    updateResponse(request,response,responseWrapper);
+  }
 }

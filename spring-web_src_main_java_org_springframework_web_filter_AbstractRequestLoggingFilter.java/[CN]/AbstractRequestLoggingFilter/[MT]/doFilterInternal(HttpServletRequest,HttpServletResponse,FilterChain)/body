@@ -1,17 +1,23 @@
 {
+  boolean isAsyncDispatch=isAsyncDispatch(request);
   if (isIncludePayload()) {
-    request=new RequestCachingRequestWrapper(request);
+    if (isAsyncDispatch) {
+      request=WebUtils.getNativeRequest(request,RequestCachingRequestWrapper.class);
+      Assert.notNull(request,"Expected wrapped request");
+    }
+ else {
+      request=new RequestCachingRequestWrapper(request);
+    }
   }
-  beforeRequest(request,getBeforeMessage(request));
-  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
-  chain.push(getAsyncCallable(request));
+  if (!isAsyncDispatch) {
+    beforeRequest(request,getBeforeMessage(request));
+  }
   try {
     filterChain.doFilter(request,response);
   }
   finally {
-    if (!chain.pop()) {
-      return;
+    if (isLastRequestThread(request)) {
+      afterRequest(request,getAfterMessage(request));
     }
-    afterRequest(request,getAfterMessage(request));
   }
 }

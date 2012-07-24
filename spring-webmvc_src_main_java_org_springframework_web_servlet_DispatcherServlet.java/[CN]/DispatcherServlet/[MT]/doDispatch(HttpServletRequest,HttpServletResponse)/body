@@ -1,13 +1,14 @@
 {
   HttpServletRequest processedRequest=request;
   HandlerExecutionChain mappedHandler=null;
-  AsyncExecutionChain asyncChain=AsyncExecutionChain.getForCurrentRequest(request);
-  boolean asyncStarted=false;
+  boolean multipartRequestParsed=false;
+  WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(request);
   try {
     ModelAndView mv=null;
     Exception dispatchException=null;
     try {
       processedRequest=checkMultipart(request);
+      multipartRequestParsed=processedRequest != request;
       mappedHandler=getHandler(processedRequest,false);
       if (mappedHandler == null || mappedHandler.getHandler() == null) {
         noHandlerFound(processedRequest,response);
@@ -29,16 +30,11 @@
       if (!mappedHandler.applyPreHandle(processedRequest,response)) {
         return;
       }
-      mappedHandler.pushInterceptorCallables(processedRequest,response);
-      asyncChain.push(getDispatchAsyncCallable(mappedHandler,request,response,processedRequest));
       try {
         mv=ha.handle(processedRequest,response,mappedHandler.getHandler());
       }
   finally {
-        asyncStarted=!asyncChain.pop();
-        mappedHandler.popInterceptorCallables(processedRequest,response,asyncStarted);
-        if (asyncStarted) {
-          logger.debug("Exiting request thread and leaving the response open");
+        if (asyncManager.isConcurrentHandlingStarted()) {
           return;
         }
       }
@@ -57,10 +53,11 @@ catch (  Error err) {
     triggerAfterCompletionWithError(processedRequest,response,mappedHandler,err);
   }
  finally {
-    if (asyncStarted) {
+    if (asyncManager.isConcurrentHandlingStarted()) {
+      mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest,response);
       return;
     }
-    if (processedRequest != request) {
+    if (multipartRequestParsed) {
       cleanupMultipart(processedRequest);
     }
   }

@@ -10,31 +10,36 @@
   replay(session);
   interceptor.preHandle(this.webRequest);
   assertTrue(TransactionSynchronizationManager.hasResource(sf));
-  AbstractDelegatingCallable asyncCallable=interceptor.getAsyncCallable(this.webRequest);
-  assertNotNull(asyncCallable);
-  interceptor.postHandleAsyncStarted(this.webRequest);
-  assertFalse(TransactionSynchronizationManager.hasResource(sf));
   verify(sf);
   verify(session);
-  asyncCallable.setNext(new Callable<Object>(){
-    public Object call(){
-      return null;
+  AsyncWebRequest asyncWebRequest=createStrictMock(AsyncWebRequest.class);
+  asyncWebRequest.addCompletionHandler((Runnable)anyObject());
+  asyncWebRequest.startAsync();
+  replay(asyncWebRequest);
+  WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(this.request);
+  asyncManager.setAsyncWebRequest(asyncWebRequest);
+  asyncManager.startCallableProcessing(new Callable<String>(){
+    public String call() throws Exception {
+      return "anything";
     }
   }
 );
-  asyncCallable.call();
+  verify(asyncWebRequest);
+  interceptor.afterConcurrentHandlingStarted(this.webRequest);
+  assertFalse(TransactionSynchronizationManager.hasResource(sf));
+  interceptor.preHandle(this.webRequest);
   assertTrue("Session not bound to async thread",TransactionSynchronizationManager.hasResource(sf));
   verify(sf);
-  verify(session);
   reset(sf);
-  reset(session);
   replay(sf);
+  verify(session);
+  reset(session);
   replay(session);
   interceptor.postHandle(this.webRequest,null);
   assertTrue(TransactionSynchronizationManager.hasResource(sf));
   verify(sf);
-  verify(session);
   reset(sf);
+  verify(session);
   reset(session);
   expect(session.close()).andReturn(null);
   replay(sf);

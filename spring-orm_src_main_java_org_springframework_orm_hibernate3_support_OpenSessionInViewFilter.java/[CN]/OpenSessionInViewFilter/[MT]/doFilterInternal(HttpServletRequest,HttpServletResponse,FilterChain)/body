@@ -1,20 +1,25 @@
 {
-  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
   SessionFactory sessionFactory=lookupSessionFactory(request);
   boolean participate=false;
+  WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(request);
+  String key=getAlreadyFilteredAttributeName();
   if (isSingleSession()) {
     if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
       participate=true;
     }
  else {
-      logger.debug("Opening single Hibernate Session in OpenSessionInViewFilter");
-      Session session=getSession(sessionFactory);
-      SessionHolder sessionHolder=new SessionHolder(session);
-      TransactionSynchronizationManager.bindResource(sessionFactory,sessionHolder);
-      chain.push(getAsyncCallable(request,sessionFactory,sessionHolder));
+      if (!isAsyncDispatch(request) || !asyncManager.applyAsyncThreadInitializer(key)) {
+        logger.debug("Opening single Hibernate Session in OpenSessionInViewFilter");
+        Session session=getSession(sessionFactory);
+        SessionHolder sessionHolder=new SessionHolder(session);
+        TransactionSynchronizationManager.bindResource(sessionFactory,sessionHolder);
+        AsyncThreadInitializer initializer=createAsyncThreadInitializer(sessionFactory,sessionHolder);
+        asyncManager.registerAsyncThreadInitializer(key,initializer);
+      }
     }
   }
  else {
+    Assert.state(isLastRequestThread(request),"Deferred close mode is not supported on async dispatches");
     if (SessionFactoryUtils.isDeferredCloseActive(sessionFactory)) {
       participate=true;
     }
@@ -29,16 +34,12 @@
     if (!participate) {
       if (isSingleSession()) {
         SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.unbindResource(sessionFactory);
-        if (!chain.pop()) {
-          return;
+        if (isLastRequestThread(request)) {
+          logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
+          closeSession(sessionHolder.getSession(),sessionFactory);
         }
-        logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
-        closeSession(sessionHolder.getSession(),sessionFactory);
       }
  else {
-        if (chain.isAsyncStarted()) {
-          throw new IllegalStateException("Deferred close is not supported with async requests.");
-        }
         SessionFactoryUtils.processDeferredClose(sessionFactory);
       }
     }

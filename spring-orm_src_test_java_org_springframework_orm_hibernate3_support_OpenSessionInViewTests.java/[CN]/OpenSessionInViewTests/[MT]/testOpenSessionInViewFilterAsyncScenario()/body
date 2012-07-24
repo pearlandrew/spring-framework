@@ -1,0 +1,63 @@
+{
+  final SessionFactory sf=createStrictMock(SessionFactory.class);
+  Session session=createStrictMock(Session.class);
+  expect(sf.openSession()).andReturn(session);
+  expect(session.getSessionFactory()).andReturn(sf);
+  session.setFlushMode(FlushMode.MANUAL);
+  replay(sf);
+  replay(session);
+  StaticWebApplicationContext wac=new StaticWebApplicationContext();
+  wac.setServletContext(sc);
+  wac.getDefaultListableBeanFactory().registerSingleton("sessionFactory",sf);
+  wac.refresh();
+  sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,wac);
+  MockFilterConfig filterConfig=new MockFilterConfig(wac.getServletContext(),"filter");
+  final AtomicInteger count=new AtomicInteger(0);
+  final OpenSessionInViewFilter filter=new OpenSessionInViewFilter();
+  filter.init(filterConfig);
+  final FilterChain filterChain=new FilterChain(){
+    public void doFilter(    ServletRequest servletRequest,    ServletResponse servletResponse){
+      assertTrue(TransactionSynchronizationManager.hasResource(sf));
+      count.incrementAndGet();
+    }
+  }
+;
+  AsyncWebRequest asyncWebRequest=createStrictMock(AsyncWebRequest.class);
+  asyncWebRequest.addCompletionHandler((Runnable)anyObject());
+  asyncWebRequest.startAsync();
+  expect(asyncWebRequest.isAsyncStarted()).andReturn(true);
+  expectLastCall().anyTimes();
+  replay(asyncWebRequest);
+  WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(this.request);
+  asyncManager.setAsyncWebRequest(asyncWebRequest);
+  asyncManager.startCallableProcessing(new Callable<String>(){
+    public String call() throws Exception {
+      return "anything";
+    }
+  }
+);
+  assertFalse(TransactionSynchronizationManager.hasResource(sf));
+  filter.doFilter(this.request,this.response,filterChain);
+  assertFalse(TransactionSynchronizationManager.hasResource(sf));
+  assertEquals(1,count.get());
+  verify(sf);
+  verify(session);
+  verify(asyncWebRequest);
+  reset(sf);
+  reset(session);
+  reset(asyncWebRequest);
+  expect(session.close()).andReturn(null);
+  expect(asyncWebRequest.isAsyncStarted()).andReturn(false);
+  expectLastCall().anyTimes();
+  replay(sf);
+  replay(session);
+  replay(asyncWebRequest);
+  assertFalse(TransactionSynchronizationManager.hasResource(sf));
+  filter.doFilter(this.request,this.response,filterChain);
+  assertFalse(TransactionSynchronizationManager.hasResource(sf));
+  assertEquals(2,count.get());
+  verify(sf);
+  verify(session);
+  verify(asyncWebRequest);
+  wac.close();
+}

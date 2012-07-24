@@ -1,19 +1,14 @@
 {
   ServletRequestAttributes attributes=new ServletRequestAttributes(request);
   initContextHolders(request,attributes);
-  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
-  chain.push(getChainedCallable(request,attributes));
   try {
     filterChain.doFilter(request,response);
   }
   finally {
     resetContextHolders();
-    if (!chain.pop()) {
-      return;
-    }
-    attributes.requestCompleted();
     if (logger.isDebugEnabled()) {
       logger.debug("Cleared thread-bound request context: " + request);
     }
+    attributes.requestCompleted();
   }
 }

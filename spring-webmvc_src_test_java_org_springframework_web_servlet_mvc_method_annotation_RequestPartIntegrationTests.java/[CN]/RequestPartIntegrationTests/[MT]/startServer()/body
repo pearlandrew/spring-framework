@@ -2,16 +2,18 @@
   int port=FreePortScanner.getFreePort();
   baseUrl="http://localhost:" + port;
   server=new Server(port);
-  Context context=new Context(server,"/");
+  ServletContextHandler handler=new ServletContextHandler();
+  handler.setContextPath("/");
   Class<?> config=CommonsMultipartResolverTestConfig.class;
   ServletHolder commonsResolverServlet=new ServletHolder(DispatcherServlet.class);
   commonsResolverServlet.setInitParameter("contextConfigLocation",config.getName());
   commonsResolverServlet.setInitParameter("contextClass",AnnotationConfigWebApplicationContext.class.getName());
-  context.addServlet(commonsResolverServlet,"/commons-resolver/*");
+  handler.addServlet(commonsResolverServlet,"/commons-resolver/*");
   config=StandardMultipartResolverTestConfig.class;
   ServletHolder standardResolverServlet=new ServletHolder(DispatcherServlet.class);
   standardResolverServlet.setInitParameter("contextConfigLocation",config.getName());
   standardResolverServlet.setInitParameter("contextClass",AnnotationConfigWebApplicationContext.class.getName());
-  context.addServlet(standardResolverServlet,"/standard-resolver/*");
+  handler.addServlet(standardResolverServlet,"/standard-resolver/*");
+  server.setHandler(handler);
   server.start();
 }

@@ -1,12 +1,8 @@
 {
-  AsyncContext asyncContext=EasyMock.createMock(AsyncContext.class);
-  reset(this.request);
-  expect(this.request.isAsyncSupported()).andReturn(true);
-  expect(this.request.startAsync(this.request,this.response)).andStubReturn(asyncContext);
-  replay(this.request);
-  asyncContext.addListener(this.asyncRequest);
-  asyncContext.setTimeout(60 * 1000);
-  replay(asyncContext);
   this.asyncRequest.startAsync();
-  verify(this.request);
+  MockAsyncContext asyncContext=(MockAsyncContext)this.request.getAsyncContext();
+  assertNotNull(asyncContext);
+  assertEquals("Timeout value not set",44 * 1000,asyncContext.getTimeout());
+  assertEquals(1,asyncContext.getListeners().size());
+  assertSame(this.asyncRequest,asyncContext.getListeners().get(0));
 }

@@ -1,0 +1,34 @@
+{
+  Assert.notNull(callable,"Callable is required");
+  startAsyncProcessing(processingContext);
+  this.taskExecutor.submit(new Runnable(){
+    public void run(){
+      List<AsyncThreadInitializer> initializers=new ArrayList<AsyncThreadInitializer>(threadInitializers.values());
+      try {
+        for (        AsyncThreadInitializer initializer : initializers) {
+          initializer.initialize();
+        }
+        concurrentResult=callable.call();
+      }
+ catch (      Throwable t) {
+        concurrentResult=t;
+      }
+ finally {
+        Collections.reverse(initializers);
+        for (        AsyncThreadInitializer initializer : initializers) {
+          initializer.reset();
+        }
+      }
+      if (logger.isDebugEnabled()) {
+        logger.debug("Concurrent result value [" + concurrentResult + "]");
+      }
+      if (asyncWebRequest.isAsyncComplete()) {
+        logger.error("Could not complete processing due to a timeout or network error");
+        return;
+      }
+      logger.debug("Dispatching request to continue processing");
+      asyncWebRequest.dispatch();
+    }
+  }
+);
+}

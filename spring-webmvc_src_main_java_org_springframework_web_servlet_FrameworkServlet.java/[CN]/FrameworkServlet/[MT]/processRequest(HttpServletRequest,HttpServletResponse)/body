@@ -9,19 +9,46 @@
     requestAttributes=new ServletRequestAttributes(request);
   }
   initContextHolders(request,localeContext,requestAttributes);
-  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
-  chain.push(getAsyncCallable(startTime,request,response,previousLocaleContext,previousAttributes,localeContext,requestAttributes));
+  WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(request);
+  asyncManager.registerAsyncThreadInitializer(this.getClass().getName(),createAsyncThreadInitializer(request));
   try {
     doService(request,response);
   }
- catch (  Throwable t) {
-    failureCause=t;
+ catch (  ServletException ex) {
+    failureCause=ex;
+    throw ex;
+  }
+catch (  IOException ex) {
+    failureCause=ex;
+    throw ex;
+  }
+catch (  Throwable ex) {
+    failureCause=ex;
+    throw new NestedServletException("Request processing failed",ex);
   }
  finally {
     resetContextHolders(request,previousLocaleContext,previousAttributes);
-    if (!chain.pop()) {
-      return;
+    if (requestAttributes != null) {
+      requestAttributes.requestCompleted();
     }
-    finalizeProcessing(startTime,request,response,requestAttributes,failureCause);
+    if (logger.isDebugEnabled()) {
+      if (failureCause != null) {
+        this.logger.debug("Could not complete request",failureCause);
+      }
+ else {
+        if (asyncManager.isConcurrentHandlingStarted()) {
+          if (logger.isDebugEnabled()) {
+            logger.debug("Leaving response open for concurrent processing");
+          }
+        }
+ else {
+          this.logger.debug("Successfully completed request");
+        }
+      }
+    }
+    if (this.publishEvents) {
+      long processingTime=System.currentTimeMillis() - startTime;
+      this.webApplicationContext.publishEvent(new ServletRequestHandledEvent(this,request.getRequestURI(),request.getRemoteAddr(),request.getMethod(),getServletConfig().getServletName(),WebUtils.getSessionId(request),getUsernameForRequest(request),processingTime,failureCause));
+    }
   }
 }

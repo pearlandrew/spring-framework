@@ -1,16 +1,20 @@
 {
-  AsyncExecutionChain chain=AsyncExecutionChain.getForCurrentRequest(request);
   SessionFactory sessionFactory=lookupSessionFactory(request);
   boolean participate=false;
+  WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(request);
+  String key=getAlreadyFilteredAttributeName();
   if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
     participate=true;
   }
  else {
-    logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
-    Session session=openSession(sessionFactory);
-    SessionHolder sessionHolder=new SessionHolder(session);
-    TransactionSynchronizationManager.bindResource(sessionFactory,sessionHolder);
-    chain.push(getAsyncCallable(request,sessionFactory,sessionHolder));
+    if (!isAsyncDispatch(request) || !asyncManager.applyAsyncThreadInitializer(key)) {
+      logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
+      Session session=openSession(sessionFactory);
+      SessionHolder sessionHolder=new SessionHolder(session);
+      TransactionSynchronizationManager.bindResource(sessionFactory,sessionHolder);
+      AsyncThreadInitializer initializer=createAsyncThreadInitializer(sessionFactory,sessionHolder);
+      asyncManager.registerAsyncThreadInitializer(key,initializer);
+    }
   }
   try {
     filterChain.doFilter(request,response);
@@ -18,11 +22,10 @@
   finally {
     if (!participate) {
       SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.unbindResource(sessionFactory);
-      if (!chain.pop()) {
-        return;
+      if (isLastRequestThread(request)) {
+        logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
+        SessionFactoryUtils.closeSession(sessionHolder.getSession());
       }
-      logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
-      SessionFactoryUtils.closeSession(sessionHolder.getSession());
     }
   }
 }

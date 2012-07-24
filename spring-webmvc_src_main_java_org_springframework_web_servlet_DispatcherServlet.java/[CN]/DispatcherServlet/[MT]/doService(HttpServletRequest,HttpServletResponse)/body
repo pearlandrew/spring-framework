@@ -1,7 +1,8 @@
 {
   if (logger.isDebugEnabled()) {
     String requestUri=urlPathHelper.getRequestUri(request);
-    logger.debug("DispatcherServlet with name '" + getServletName() + "' processing "+ request.getMethod()+ " request for ["+ requestUri+ "]");
+    String resumed=AsyncWebUtils.getAsyncManager(request).hasConcurrentResult() ? " resumed" : "";
+    logger.debug("DispatcherServlet with name '" + getServletName() + "'"+ resumed+ " processing "+ request.getMethod()+ " request for ["+ requestUri+ "]");
   }
   Map<String,Object> attributesSnapshot=null;
   if (WebUtils.isIncludeRequest(request)) {
@@ -25,13 +26,11 @@
   }
   request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE,new FlashMap());
   request.setAttribute(FLASH_MAP_MANAGER_ATTRIBUTE,this.flashMapManager);
-  AsyncExecutionChain asyncChain=AsyncExecutionChain.getForCurrentRequest(request);
-  asyncChain.push(getServiceAsyncCallable(request,attributesSnapshot));
   try {
     doDispatch(request,response);
   }
   finally {
-    if (!asyncChain.pop()) {
+    if (AsyncWebUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
       return;
     }
     if (attributesSnapshot != null) {
