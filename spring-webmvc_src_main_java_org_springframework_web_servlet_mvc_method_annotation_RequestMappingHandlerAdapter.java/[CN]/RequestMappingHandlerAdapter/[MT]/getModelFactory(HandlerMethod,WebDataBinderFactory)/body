@@ -1,18 +1,21 @@
 {
   SessionAttributesHandler sessionAttrHandler=getSessionAttributesHandler(handlerMethod);
   Class<?> handlerType=handlerMethod.getBeanType();
-  Set<Method> methods=this.modelFactoryCache.get(handlerType);
+  Set<Method> methods=this.modelAttributeCache.get(handlerType);
   if (methods == null) {
     methods=HandlerMethodSelector.selectMethods(handlerType,MODEL_ATTRIBUTE_METHODS);
-    this.modelFactoryCache.put(handlerType,methods);
+    this.modelAttributeCache.put(handlerType,methods);
   }
   List<InvocableHandlerMethod> attrMethods=new ArrayList<InvocableHandlerMethod>();
   for (  Method method : methods) {
-    InvocableHandlerMethod attrMethod=new InvocableHandlerMethod(handlerMethod.getBean(),method);
-    attrMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-    attrMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-    attrMethod.setDataBinderFactory(binderFactory);
-    attrMethods.add(attrMethod);
+    Object bean=handlerMethod.getBean();
+    attrMethods.add(createModelAttributeMethod(binderFactory,bean,method));
+  }
+  for (  Entry<ControllerAdviceBean,Set<Method>> entry : this.modelAttributeAdviceCache.entrySet()) {
+    Object bean=entry.getKey().resolveBean();
+    for (    Method method : entry.getValue()) {
+      attrMethods.add(createModelAttributeMethod(binderFactory,bean,method));
+    }
   }
   return new ModelFactory(attrMethods,binderFactory,sessionAttrHandler);
 }

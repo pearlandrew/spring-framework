@@ -1,0 +1,22 @@
+{
+  if (getApplicationContext() == null) {
+    return;
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Looking for controller advice: " + getApplicationContext());
+  }
+  List<ControllerAdviceBean> beans=ControllerAdviceBean.findBeans(getApplicationContext());
+  Collections.sort(beans,new OrderComparator());
+  for (  ControllerAdviceBean bean : beans) {
+    Set<Method> attrMethods=HandlerMethodSelector.selectMethods(bean.getBeanType(),MODEL_ATTRIBUTE_METHODS);
+    if (!attrMethods.isEmpty()) {
+      this.modelAttributeAdviceCache.put(bean,attrMethods);
+      logger.info("Detected @ModelAttribute methods in " + bean);
+    }
+    Set<Method> binderMethods=HandlerMethodSelector.selectMethods(bean.getBeanType(),INIT_BINDER_METHODS);
+    if (!binderMethods.isEmpty()) {
+      this.initBinderAdviceCache.put(bean,binderMethods);
+      logger.info("Detected @InitBinder methods in " + bean);
+    }
+  }
+}

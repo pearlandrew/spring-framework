@@ -1,0 +1,17 @@
+{
+  if (getApplicationContext() == null) {
+    return;
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Looking for exception mappings: " + getApplicationContext());
+  }
+  List<ControllerAdviceBean> beans=ControllerAdviceBean.findBeans(getApplicationContext());
+  Collections.sort(beans,new OrderComparator());
+  for (  ControllerAdviceBean bean : beans) {
+    ExceptionHandlerMethodResolver resolver=new ExceptionHandlerMethodResolver(bean.getBeanType());
+    if (resolver.hasExceptionMappings()) {
+      this.exceptionHandlerAdviceCache.put(bean,resolver);
+      logger.info("Detected @ExceptionHandler methods in " + bean);
+    }
+  }
+}

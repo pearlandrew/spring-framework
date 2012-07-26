@@ -1,15 +1,21 @@
 {
   if (handlerMethod != null) {
     Class<?> handlerType=handlerMethod.getBeanType();
-    ExceptionHandlerMethodResolver resolver=this.exceptionHandlersByType.get(handlerType);
+    ExceptionHandlerMethodResolver resolver=this.exceptionHandlerCache.get(handlerType);
     if (resolver == null) {
       resolver=new ExceptionHandlerMethodResolver(handlerType);
-      this.exceptionHandlersByType.put(handlerType,resolver);
+      this.exceptionHandlerCache.put(handlerType,resolver);
     }
     Method method=resolver.resolveMethod(exception);
     if (method != null) {
       return new ServletInvocableHandlerMethod(handlerMethod.getBean(),method);
     }
   }
-  return getGlobalExceptionHandlerMethod(exception);
+  for (  Entry<ControllerAdviceBean,ExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
+    Method method=entry.getValue().resolveMethod(exception);
+    if (method != null) {
+      return new ServletInvocableHandlerMethod(entry.getKey().resolveBean(),method);
+    }
+  }
+  return null;
 }
