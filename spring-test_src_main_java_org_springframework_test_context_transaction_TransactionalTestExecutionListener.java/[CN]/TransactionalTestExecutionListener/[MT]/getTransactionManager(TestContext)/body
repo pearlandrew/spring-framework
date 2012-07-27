@@ -7,9 +7,16 @@
     }
     if (bf instanceof ListableBeanFactory) {
       ListableBeanFactory lbf=(ListableBeanFactory)bf;
-      Map<String,PlatformTransactionManager> beansOfType=BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf,PlatformTransactionManager.class);
-      if (beansOfType.size() == 1) {
-        return beansOfType.values().iterator().next();
+      Map<String,PlatformTransactionManager> txMgrs=BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf,PlatformTransactionManager.class);
+      if (txMgrs.size() == 1) {
+        return txMgrs.values().iterator().next();
+      }
+      Map<String,TransactionManagementConfigurer> configurers=BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf,TransactionManagementConfigurer.class);
+      if (configurers.size() > 1) {
+        throw new IllegalStateException("Only one TransactionManagementConfigurer may exist in the ApplicationContext");
+      }
+      if (configurers.size() == 1) {
+        return configurers.values().iterator().next().annotationDrivenTransactionManager();
       }
     }
     return bf.getBean(DEFAULT_TRANSACTION_MANAGER_NAME,PlatformTransactionManager.class);
