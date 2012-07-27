@@ -7,30 +7,22 @@
   if (testMethod.isAnnotationPresent(NotTransactional.class)) {
     return;
   }
+  PlatformTransactionManager tm=null;
   TransactionAttribute transactionAttribute=this.attributeSource.getTransactionAttribute(testMethod,testContext.getTestClass());
-  TransactionDefinition transactionDefinition=null;
   if (transactionAttribute != null) {
-    transactionDefinition=new DelegatingTransactionAttribute(transactionAttribute){
+    transactionAttribute=new DelegatingTransactionAttribute(transactionAttribute){
       public String getName(){
         return testMethod.getName();
       }
     }
 ;
-  }
-  if (transactionDefinition != null) {
     if (logger.isDebugEnabled()) {
-      logger.debug("Explicit transaction definition [" + transactionDefinition + "] found for test context ["+ testContext+ "]");
+      logger.debug("Explicit transaction definition [" + transactionAttribute + "] found for test context "+ testContext);
     }
-    String qualifier=transactionAttribute.getQualifier();
-    PlatformTransactionManager tm;
-    if (StringUtils.hasLength(qualifier)) {
-      BeanFactory bf=testContext.getApplicationContext().getAutowireCapableBeanFactory();
-      tm=BeanFactoryAnnotationUtils.qualifiedBeanOfType(bf,PlatformTransactionManager.class,qualifier);
-    }
- else {
-      tm=getTransactionManager(testContext);
-    }
-    TransactionContext txContext=new TransactionContext(tm,transactionDefinition);
+    tm=getTransactionManager(testContext,transactionAttribute.getQualifier());
+  }
+  if (tm != null) {
+    TransactionContext txContext=new TransactionContext(tm,transactionAttribute);
     runBeforeTransactionMethods(testContext);
     startNewTransaction(testContext,txContext);
     this.transactionContextCache.put(testMethod,txContext);

@@ -1,0 +1,15 @@
+{
+  if (StringUtils.hasText(qualifier)) {
+    try {
+      BeanFactory bf=testContext.getApplicationContext().getAutowireCapableBeanFactory();
+      return BeanFactoryAnnotationUtils.qualifiedBeanOfType(bf,PlatformTransactionManager.class,qualifier);
+    }
+ catch (    RuntimeException ex) {
+      if (logger.isWarnEnabled()) {
+        logger.warn("Caught exception while retrieving transaction manager for test context " + testContext + " and qualifier ["+ qualifier+ "]",ex);
+      }
+      throw ex;
+    }
+  }
+  return getTransactionManager(testContext);
+}
