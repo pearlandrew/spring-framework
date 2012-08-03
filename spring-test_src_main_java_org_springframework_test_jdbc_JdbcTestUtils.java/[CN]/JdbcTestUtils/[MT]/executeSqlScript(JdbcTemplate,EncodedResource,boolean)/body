@@ -1,0 +1,51 @@
+{
+  if (logger.isInfoEnabled()) {
+    logger.info("Executing SQL script from " + resource);
+  }
+  long startTime=System.currentTimeMillis();
+  List<String> statements=new LinkedList<String>();
+  LineNumberReader reader=null;
+  try {
+    reader=new LineNumberReader(resource.getReader());
+    String script=readScript(reader);
+    char delimiter=';';
+    if (!containsSqlScriptDelimiters(script,delimiter)) {
+      delimiter='\n';
+    }
+    splitSqlScript(script,delimiter,statements);
+    for (    String statement : statements) {
+      try {
+        int rowsAffected=jdbcTemplate.update(statement);
+        if (logger.isDebugEnabled()) {
+          logger.debug(rowsAffected + " rows affected by SQL: " + statement);
+        }
+      }
+ catch (      DataAccessException ex) {
+        if (continueOnError) {
+          if (logger.isWarnEnabled()) {
+            logger.warn("SQL statement [" + statement + "] failed",ex);
+          }
+        }
+ else {
+          throw ex;
+        }
+      }
+    }
+    long elapsedTime=System.currentTimeMillis() - startTime;
+    if (logger.isInfoEnabled()) {
+      logger.info(String.format("Executed SQL script from %s in %s ms.",resource,elapsedTime));
+    }
+  }
+ catch (  IOException ex) {
+    throw new DataAccessResourceFailureException("Failed to open SQL script from " + resource,ex);
+  }
+ finally {
+    try {
+      if (reader != null) {
+        reader.close();
+      }
+    }
+ catch (    IOException ex) {
+    }
+  }
+}
