@@ -1,0 +1,57 @@
+{
+  Assert.notNull(method,"method must not be null");
+  Assert.notNull(args,"args must not be null");
+  if (logger.isDebugEnabled()) {
+    logger.debug(String.format("Resolving return type for [%s] with concrete method arguments [%s].",method.toGenericString(),ObjectUtils.nullSafeToString(args)));
+  }
+  final TypeVariable<Method>[] declaredTypeVariables=method.getTypeParameters();
+  final Type genericReturnType=method.getGenericReturnType();
+  final Type[] methodArgumentTypes=method.getGenericParameterTypes();
+  if (declaredTypeVariables.length == 0) {
+    return method.getReturnType();
+  }
+  if (args.length < methodArgumentTypes.length) {
+    return null;
+  }
+  boolean locallyDeclaredTypeVariableMatchesReturnType=false;
+  for (  TypeVariable<Method> currentTypeVariable : declaredTypeVariables) {
+    if (currentTypeVariable.equals(genericReturnType)) {
+      if (logger.isDebugEnabled()) {
+        logger.debug(String.format("Found declared type variable [%s] that matches the target return type [%s].",currentTypeVariable,genericReturnType));
+      }
+      locallyDeclaredTypeVariableMatchesReturnType=true;
+      break;
+    }
+  }
+  if (locallyDeclaredTypeVariableMatchesReturnType) {
+    for (int i=0; i < methodArgumentTypes.length; i++) {
+      final Type currentMethodArgumentType=methodArgumentTypes[i];
+      if (currentMethodArgumentType.equals(genericReturnType)) {
+        if (logger.isDebugEnabled()) {
+          logger.debug(String.format("Found method argument type at index [%s] that matches the target return type.",i));
+        }
+        return args[i].getClass();
+      }
+      if (currentMethodArgumentType instanceof ParameterizedType) {
+        ParameterizedType parameterizedType=(ParameterizedType)currentMethodArgumentType;
+        Type[] actualTypeArguments=parameterizedType.getActualTypeArguments();
+        for (int j=0; j < actualTypeArguments.length; j++) {
+          final Type typeArg=actualTypeArguments[j];
+          if (typeArg.equals(genericReturnType)) {
+            if (logger.isDebugEnabled()) {
+              logger.debug(String.format("Found method argument type at index [%s] that is parameterized with a type argument that matches the target return type.",i));
+            }
+            if (args[i] instanceof Class) {
+              return (Class<?>)args[i];
+            }
+ else {
+              logger.info(String.format("Could not determine the target type for type argument [%s] for method [%s].",typeArg,method.toGenericString()));
+              return method.getReturnType();
+            }
+          }
+        }
+      }
+    }
+  }
+  return method.getReturnType();
+}
