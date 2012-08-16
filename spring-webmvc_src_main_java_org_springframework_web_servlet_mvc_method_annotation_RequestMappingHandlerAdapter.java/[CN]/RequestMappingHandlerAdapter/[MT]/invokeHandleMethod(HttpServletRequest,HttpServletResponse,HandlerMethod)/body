@@ -7,7 +7,7 @@
   mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
   modelFactory.initModel(webRequest,mavContainer,requestMappingMethod);
   mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
-  AsyncWebRequest asyncWebRequest=createAsyncWebRequest(request,response);
+  AsyncWebRequest asyncWebRequest=AsyncWebUtils.createAsyncWebRequest(request,response);
   asyncWebRequest.setTimeout(this.asyncRequestTimeout);
   final WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(request);
   asyncManager.setTaskExecutor(this.taskExecutor);
@@ -15,7 +15,7 @@
   if (asyncManager.hasConcurrentResult()) {
     Object result=asyncManager.getConcurrentResult();
     mavContainer=(ModelAndViewContainer)asyncManager.getConcurrentResultContext()[0];
-    asyncManager.resetConcurrentResult();
+    asyncManager.clearConcurrentResult();
     if (logger.isDebugEnabled()) {
       logger.debug("Found concurrent result value [" + result + "]");
     }

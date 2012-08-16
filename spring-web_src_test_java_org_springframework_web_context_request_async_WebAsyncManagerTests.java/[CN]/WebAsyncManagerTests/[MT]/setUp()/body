@@ -1,7 +1,10 @@
 {
-  this.request=new MockHttpServletRequest();
-  this.stubAsyncWebRequest=new StubAsyncWebRequest(this.request,new MockHttpServletResponse());
-  this.asyncManager=AsyncWebUtils.getAsyncManager(this.request);
+  this.asyncManager=AsyncWebUtils.getAsyncManager(new MockHttpServletRequest());
   this.asyncManager.setTaskExecutor(new SyncTaskExecutor());
-  this.asyncManager.setAsyncWebRequest(this.stubAsyncWebRequest);
+  this.asyncWebRequest=createStrictMock(AsyncWebRequest.class);
+  this.asyncWebRequest.addCompletionHandler((Runnable)notNull());
+  replay(this.asyncWebRequest);
+  this.asyncManager.setAsyncWebRequest(this.asyncWebRequest);
+  verify(this.asyncWebRequest);
+  reset(this.asyncWebRequest);
 }

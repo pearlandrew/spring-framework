@@ -1,6 +1,9 @@
 {
-  Assert.notNull(deferredResult,"DeferredResult is required");
-  startAsyncProcessing(processingContext);
+  Assert.notNull(deferredResult,"DeferredResult must not be null");
+  Long timeout=deferredResult.getTimeoutMilliseconds();
+  if (timeout != null) {
+    this.asyncWebRequest.setTimeout(timeout);
+  }
   this.asyncWebRequest.addCompletionHandler(new Runnable(){
     public void run(){
       deferredResult.setExpired();
@@ -15,6 +18,7 @@
     }
 );
   }
+  startAsyncProcessing(processingContext);
   deferredResult.setResultHandler(new DeferredResultHandler(){
     public void handleResult(    Object result){
       concurrentResult=result;

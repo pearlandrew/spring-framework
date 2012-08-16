@@ -1,7 +1,17 @@
 {
-  DeferredResult<Integer> deferredResult=new DeferredResult<Integer>();
+  this.asyncWebRequest.setTimeout(1000L);
+  this.asyncWebRequest.addCompletionHandler((Runnable)notNull());
+  this.asyncWebRequest.setTimeoutHandler((Runnable)notNull());
+  this.asyncWebRequest.startAsync();
+  replay(this.asyncWebRequest);
+  DeferredResult<Integer> deferredResult=new DeferredResult<Integer>(1000L,10);
   this.asyncManager.startDeferredResultProcessing(deferredResult);
-  assertTrue(this.asyncManager.isConcurrentHandlingStarted());
+  verify(this.asyncWebRequest);
+  reset(this.asyncWebRequest);
+  expect(this.asyncWebRequest.isAsyncComplete()).andReturn(false);
+  this.asyncWebRequest.dispatch();
+  replay(this.asyncWebRequest);
   deferredResult.setResult(25);
   assertEquals(25,this.asyncManager.getConcurrentResult());
+  verify(this.asyncWebRequest);
 }
