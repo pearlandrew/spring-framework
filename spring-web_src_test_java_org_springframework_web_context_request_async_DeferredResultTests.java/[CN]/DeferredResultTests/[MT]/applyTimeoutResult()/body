@@ -1,0 +1,10 @@
+{
+  DeferredResultHandler handler=createMock(DeferredResultHandler.class);
+  handler.handleResult("timed out");
+  replay(handler);
+  DeferredResult<String> result=new DeferredResult<String>("timed out");
+  result.setResultHandler(handler);
+  assertTrue(result.applyTimeoutResult());
+  assertFalse("Shouldn't be able to set result after timeout",result.setResult("hello"));
+  verify(handler);
+}

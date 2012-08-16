@@ -1,0 +1,19 @@
+{
+synchronized (this.lock) {
+    if (isSetOrExpired()) {
+      return false;
+    }
+    this.result=result;
+    if (!awaitResultHandler()) {
+      throw new IllegalStateException("DeferredResultHandler not set");
+    }
+    try {
+      this.resultHandler.handleResult(result);
+    }
+ catch (    Throwable t) {
+      logger.trace("DeferredResult not handled",t);
+      return false;
+    }
+    return true;
+  }
+}
