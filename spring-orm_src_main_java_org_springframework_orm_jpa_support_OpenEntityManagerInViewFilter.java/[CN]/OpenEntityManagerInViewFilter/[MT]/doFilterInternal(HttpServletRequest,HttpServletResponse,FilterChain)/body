@@ -1,17 +1,25 @@
 {
   EntityManagerFactory emf=lookupEntityManagerFactory(request);
   boolean participate=false;
+  WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(request);
+  boolean isFirstRequest=!isAsyncDispatch(request);
+  String key=getAlreadyFilteredAttributeName();
   if (TransactionSynchronizationManager.hasResource(emf)) {
     participate=true;
   }
  else {
-    logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewFilter");
-    try {
-      EntityManager em=createEntityManager(emf);
-      TransactionSynchronizationManager.bindResource(emf,new EntityManagerHolder(em));
-    }
- catch (    PersistenceException ex) {
-      throw new DataAccessResourceFailureException("Could not create JPA EntityManager",ex);
+    if (isFirstRequest || !asyncManager.initializeAsyncThread(key)) {
+      logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewFilter");
+      try {
+        EntityManager em=createEntityManager(emf);
+        EntityManagerHolder emHolder=new EntityManagerHolder(em);
+        TransactionSynchronizationManager.bindResource(emf,emHolder);
+        WebAsyncThreadInitializer initializer=createAsyncThreadInitializer(emf,emHolder);
+        asyncManager.registerAsyncThreadInitializer(key,initializer);
+      }
+ catch (      PersistenceException ex) {
+        throw new DataAccessResourceFailureException("Could not create JPA EntityManager",ex);
+      }
     }
   }
   try {
@@ -20,8 +28,10 @@
   finally {
     if (!participate) {
       EntityManagerHolder emHolder=(EntityManagerHolder)TransactionSynchronizationManager.unbindResource(emf);
-      logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewFilter");
-      EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
+      if (isLastRequestThread(request)) {
+        logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewFilter");
+        EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
+      }
     }
   }
 }

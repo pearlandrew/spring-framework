@@ -2,13 +2,14 @@
   SessionFactory sessionFactory=lookupSessionFactory(request);
   boolean participate=false;
   WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(request);
+  boolean isFirstRequest=!isAsyncDispatch(request);
   String key=getAlreadyFilteredAttributeName();
   if (isSingleSession()) {
     if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
       participate=true;
     }
  else {
-      if (!isAsyncDispatch(request) || !asyncManager.initializeAsyncThread(key)) {
+      if (isFirstRequest || !asyncManager.initializeAsyncThread(key)) {
         logger.debug("Opening single Hibernate Session in OpenSessionInViewFilter");
         Session session=getSession(sessionFactory);
         SessionHolder sessionHolder=new SessionHolder(session);

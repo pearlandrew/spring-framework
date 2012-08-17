@@ -1,15 +1,5 @@
 {
-  String participateAttributeName=getParticipateAttributeName();
-  Integer count=(Integer)request.getAttribute(participateAttributeName,WebRequest.SCOPE_REQUEST);
-  if (count != null) {
-    if (count > 1) {
-      request.setAttribute(participateAttributeName,count - 1,WebRequest.SCOPE_REQUEST);
-    }
- else {
-      request.removeAttribute(participateAttributeName,WebRequest.SCOPE_REQUEST);
-    }
-  }
- else {
+  if (!decrementParticipateCount(request)) {
     EntityManagerHolder emHolder=(EntityManagerHolder)TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
     logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewInterceptor");
     EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());

@@ -24,27 +24,57 @@
   filter.init(filterConfig);
   final OpenEntityManagerInViewFilter filter2=new OpenEntityManagerInViewFilter();
   filter2.init(filterConfig2);
+  final AtomicInteger count=new AtomicInteger(0);
   final FilterChain filterChain=new FilterChain(){
     public void doFilter(    ServletRequest servletRequest,    ServletResponse servletResponse){
       assertTrue(TransactionSynchronizationManager.hasResource(factory));
       servletRequest.setAttribute("invoked",Boolean.TRUE);
+      count.incrementAndGet();
     }
   }
 ;
+  final AtomicInteger count2=new AtomicInteger(0);
   final FilterChain filterChain2=new FilterChain(){
     public void doFilter(    ServletRequest servletRequest,    ServletResponse servletResponse) throws IOException, ServletException {
       assertTrue(TransactionSynchronizationManager.hasResource(factory2));
       filter.doFilter(servletRequest,servletResponse,filterChain);
+      count2.incrementAndGet();
     }
   }
 ;
   FilterChain filterChain3=new PassThroughFilterChain(filter2,filterChain2);
+  AsyncWebRequest asyncWebRequest=createStrictMock(AsyncWebRequest.class);
+  asyncWebRequest.addCompletionHandler((Runnable)anyObject());
+  asyncWebRequest.startAsync();
+  expect(asyncWebRequest.isAsyncStarted()).andReturn(true);
+  expectLastCall().anyTimes();
+  replay(asyncWebRequest);
+  WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(request);
+  asyncManager.setAsyncWebRequest(asyncWebRequest);
+  asyncManager.startCallableProcessing(new Callable<String>(){
+    public String call() throws Exception {
+      return "anything";
+    }
+  }
+);
   assertFalse(TransactionSynchronizationManager.hasResource(factory));
   assertFalse(TransactionSynchronizationManager.hasResource(factory2));
   filter2.doFilter(request,response,filterChain3);
   assertFalse(TransactionSynchronizationManager.hasResource(factory));
   assertFalse(TransactionSynchronizationManager.hasResource(factory2));
+  assertEquals(1,count.get());
+  assertEquals(1,count2.get());
   assertNotNull(request.getAttribute("invoked"));
+  reset(asyncWebRequest);
+  expect(asyncWebRequest.isAsyncStarted()).andReturn(false).anyTimes();
+  replay(asyncWebRequest);
+  assertFalse(TransactionSynchronizationManager.hasResource(factory));
+  assertFalse(TransactionSynchronizationManager.hasResource(factory2));
+  filter.doFilter(request,response,filterChain3);
+  assertFalse(TransactionSynchronizationManager.hasResource(factory));
+  assertFalse(TransactionSynchronizationManager.hasResource(factory2));
+  assertEquals(2,count.get());
+  assertEquals(2,count2.get());
   verify(manager,factory);
   verify(factory2,manager2);
   wac.close();

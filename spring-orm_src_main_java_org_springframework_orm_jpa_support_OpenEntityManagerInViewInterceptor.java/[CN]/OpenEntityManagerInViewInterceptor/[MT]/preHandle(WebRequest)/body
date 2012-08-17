@@ -1,6 +1,12 @@
 {
+  String participateAttributeName=getParticipateAttributeName();
+  WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(request);
+  if (asyncManager.hasConcurrentResult()) {
+    if (asyncManager.initializeAsyncThread(participateAttributeName)) {
+      return;
+    }
+  }
   if (TransactionSynchronizationManager.hasResource(getEntityManagerFactory())) {
-    String participateAttributeName=getParticipateAttributeName();
     Integer count=(Integer)request.getAttribute(participateAttributeName,WebRequest.SCOPE_REQUEST);
     int newCount=(count != null ? count + 1 : 1);
     request.setAttribute(getParticipateAttributeName(),newCount,WebRequest.SCOPE_REQUEST);
@@ -9,7 +15,10 @@
     logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewInterceptor");
     try {
       EntityManager em=createEntityManager();
-      TransactionSynchronizationManager.bindResource(getEntityManagerFactory(),new EntityManagerHolder(em));
+      EntityManagerHolder emHolder=new EntityManagerHolder(em);
+      TransactionSynchronizationManager.bindResource(getEntityManagerFactory(),emHolder);
+      WebAsyncThreadInitializer asyncThreadInitializer=createThreadInitializer(emHolder);
+      asyncManager.registerAsyncThreadInitializer(participateAttributeName,asyncThreadInitializer);
     }
  catch (    PersistenceException ex) {
       throw new DataAccessResourceFailureException("Could not create JPA EntityManager",ex);

@@ -1,14 +1,10 @@
 {
-  ShallowEtagResponseWrapper responseWrapper;
-  if (isAsyncDispatch(request)) {
-    responseWrapper=WebUtils.getNativeResponse(response,ShallowEtagResponseWrapper.class);
-    Assert.notNull(responseWrapper,"Expected wrapped response");
+  boolean isFirstRequest=!isAsyncDispatch(request);
+  if (isFirstRequest) {
+    response=new ShallowEtagResponseWrapper(response);
   }
- else {
-    responseWrapper=new ShallowEtagResponseWrapper(response);
-  }
-  filterChain.doFilter(request,responseWrapper);
+  filterChain.doFilter(request,response);
   if (isLastRequestThread(request)) {
-    updateResponse(request,response,responseWrapper);
+    updateResponse(request,response);
   }
 }
