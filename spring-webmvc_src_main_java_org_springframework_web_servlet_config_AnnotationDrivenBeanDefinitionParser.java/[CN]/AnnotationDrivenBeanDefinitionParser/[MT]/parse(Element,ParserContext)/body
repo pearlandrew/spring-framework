@@ -21,6 +21,8 @@
   ManagedList<?> messageConverters=getMessageConverters(element,source,parserContext);
   ManagedList<?> argumentResolvers=getArgumentResolvers(element,source,parserContext);
   ManagedList<?> returnValueHandlers=getReturnValueHandlers(element,source,parserContext);
+  String asyncTimeout=getAsyncTimeout(element,source,parserContext);
+  RuntimeBeanReference asyncExecutor=getAsyncExecutor(element,source,parserContext);
   RootBeanDefinition handlerAdapterDef=new RootBeanDefinition(RequestMappingHandlerAdapter.class);
   handlerAdapterDef.setSource(source);
   handlerAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -36,6 +38,12 @@
   }
   if (returnValueHandlers != null) {
     handlerAdapterDef.getPropertyValues().add("customReturnValueHandlers",returnValueHandlers);
+  }
+  if (asyncTimeout != null) {
+    handlerAdapterDef.getPropertyValues().add("asyncRequestTimeout",asyncTimeout);
+  }
+  if (asyncExecutor != null) {
+    handlerAdapterDef.getPropertyValues().add("taskExecutor",asyncExecutor);
   }
   String handlerAdapterName=parserContext.getReaderContext().registerWithGeneratedName(handlerAdapterDef);
   RootBeanDefinition csInterceptorDef=new RootBeanDefinition(ConversionServiceExposingInterceptor.class);

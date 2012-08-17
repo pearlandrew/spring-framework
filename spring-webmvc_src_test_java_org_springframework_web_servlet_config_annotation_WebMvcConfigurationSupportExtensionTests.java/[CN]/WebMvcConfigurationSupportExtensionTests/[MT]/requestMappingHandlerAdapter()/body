@@ -1,0 +1,13 @@
+{
+  RequestMappingHandlerAdapter adapter=webConfig.requestMappingHandlerAdapter();
+  String actual=webConfig.mvcConversionService().convert(new TestBean(),String.class);
+  assertEquals("converted",actual);
+  assertEquals(1,adapter.getMessageConverters().size());
+  @SuppressWarnings("unchecked") List<HandlerMethodArgumentResolver> argResolvers=(List<HandlerMethodArgumentResolver>)new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
+  assertEquals(1,argResolvers.size());
+  @SuppressWarnings("unchecked") List<HandlerMethodReturnValueHandler> handlers=(List<HandlerMethodReturnValueHandler>)new DirectFieldAccessor(adapter).getPropertyValue("customReturnValueHandlers");
+  assertEquals(1,handlers.size());
+  assertEquals(ConcurrentTaskExecutor.class,new DirectFieldAccessor(adapter).getPropertyValue("taskExecutor").getClass());
+  assertEquals(2500L,new DirectFieldAccessor(adapter).getPropertyValue("asyncRequestTimeout"));
+  assertEquals(false,new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
+}
