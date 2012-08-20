@@ -1,0 +1,14 @@
+{
+  Assert.notNull(configAttributesList,"configAttributesList must not be null");
+  final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses=new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
+  for (  ContextConfigurationAttributes configAttributes : reverseContextConfigurationAttributes(configAttributesList)) {
+    if (logger.isTraceEnabled()) {
+      logger.trace(String.format("Processing context initializers for context configuration attributes %s",configAttributes));
+    }
+    initializerClasses.addAll(Arrays.asList(configAttributes.getInitializers()));
+    if (!configAttributes.isInheritInitializers()) {
+      break;
+    }
+  }
+  return initializerClasses;
+}

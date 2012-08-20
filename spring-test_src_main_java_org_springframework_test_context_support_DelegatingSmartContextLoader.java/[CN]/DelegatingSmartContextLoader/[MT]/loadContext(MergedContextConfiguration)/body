@@ -3,11 +3,11 @@
   List<SmartContextLoader> candidates=Arrays.asList(xmlLoader,annotationConfigLoader);
   for (  SmartContextLoader loader : candidates) {
     if (supports(loader,mergedConfig)) {
-      if (logger.isDebugEnabled()) {
-        logger.debug(String.format("Delegating to %s to load context from %s.",name(loader),mergedConfig));
-      }
-      return loader.loadContext(mergedConfig);
+      return delegateLoading(loader,mergedConfig);
     }
+  }
+  if (!mergedConfig.getContextInitializerClasses().isEmpty()) {
+    return delegateLoading(annotationConfigLoader,mergedConfig);
   }
   throw new IllegalStateException(String.format("Neither %s nor %s was able to load an ApplicationContext from %s.",name(xmlLoader),name(annotationConfigLoader),mergedConfig));
 }

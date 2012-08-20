@@ -3,23 +3,27 @@
   final List<ContextConfigurationAttributes> configAttributesList=resolveContextConfigurationAttributes(testClass);
   final List<String> locationsList=new ArrayList<String>();
   final List<Class<?>> classesList=new ArrayList<Class<?>>();
-  for (  ContextConfigurationAttributes configAttributes : configAttributesList) {
+  for (  ContextConfigurationAttributes configAttributes : reverseContextConfigurationAttributes(configAttributesList)) {
     if (logger.isTraceEnabled()) {
-      logger.trace(String.format("Processing locations and classes for context configuration attributes [%s]",configAttributes));
+      logger.trace(String.format("Processing locations and classes for context configuration attributes %s",configAttributes));
     }
     if (contextLoader instanceof SmartContextLoader) {
       SmartContextLoader smartContextLoader=(SmartContextLoader)contextLoader;
       smartContextLoader.processContextConfiguration(configAttributes);
-      locationsList.addAll(Arrays.asList(configAttributes.getLocations()));
-      classesList.addAll(Arrays.asList(configAttributes.getClasses()));
+      locationsList.addAll(0,Arrays.asList(configAttributes.getLocations()));
+      classesList.addAll(0,Arrays.asList(configAttributes.getClasses()));
     }
  else {
       String[] processedLocations=contextLoader.processLocations(configAttributes.getDeclaringClass(),configAttributes.getLocations());
-      locationsList.addAll(Arrays.asList(processedLocations));
+      locationsList.addAll(0,Arrays.asList(processedLocations));
+    }
+    if (!configAttributes.isInheritLocations()) {
+      break;
     }
   }
   String[] locations=StringUtils.toStringArray(locationsList);
   Class<?>[] classes=ClassUtils.toClassArray(classesList);
+  Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses=resolveInitializerClasses(configAttributesList);
   String[] activeProfiles=resolveActiveProfiles(testClass);
-  return new MergedContextConfiguration(testClass,locations,classes,activeProfiles,contextLoader);
+  return new MergedContextConfiguration(testClass,locations,classes,initializerClasses,activeProfiles,contextLoader);
 }
