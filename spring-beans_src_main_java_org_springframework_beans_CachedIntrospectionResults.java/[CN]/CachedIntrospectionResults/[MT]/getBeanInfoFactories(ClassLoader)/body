@@ -1,0 +1,28 @@
+{
+  if (beanInfoFactories == null) {
+synchronized (beanInfoFactoriesMutex) {
+      if (beanInfoFactories == null) {
+        try {
+          Properties properties=PropertiesLoaderUtils.loadAllProperties(BEAN_INFO_FACTORIES_LOCATION,classLoader);
+          if (logger.isDebugEnabled()) {
+            logger.debug("Loaded BeanInfoFactories: " + properties.keySet());
+          }
+          List<BeanInfoFactory> factories=new ArrayList<BeanInfoFactory>(properties.size());
+          for (          Object key : properties.keySet()) {
+            if (key instanceof String) {
+              String className=(String)key;
+              BeanInfoFactory factory=instantiateBeanInfoFactory(className,classLoader);
+              factories.add(factory);
+            }
+          }
+          Collections.sort(factories,new AnnotationAwareOrderComparator());
+          beanInfoFactories=Collections.synchronizedList(factories);
+        }
+ catch (        IOException ex) {
+          throw new IllegalStateException("Unable to load BeanInfoFactories from location [" + BEAN_INFO_FACTORIES_LOCATION + "]",ex);
+        }
+      }
+    }
+  }
+  return beanInfoFactories;
+}
