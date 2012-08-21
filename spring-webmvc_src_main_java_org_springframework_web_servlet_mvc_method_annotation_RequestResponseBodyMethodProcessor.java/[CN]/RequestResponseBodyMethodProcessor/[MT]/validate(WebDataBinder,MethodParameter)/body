@@ -4,6 +4,12 @@
     if (annot.annotationType().getSimpleName().startsWith("Valid")) {
       Object hints=AnnotationUtils.getValue(annot);
       binder.validate(hints instanceof Object[] ? (Object[])hints : new Object[]{hints});
+      BindingResult bindingResult=binder.getBindingResult();
+      if (bindingResult.hasErrors()) {
+        if (isBindExceptionRequired(binder,parameter)) {
+          throw new MethodArgumentNotValidException(parameter,bindingResult);
+        }
+      }
       break;
     }
   }

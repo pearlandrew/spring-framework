@@ -19,20 +19,11 @@
     try {
       HttpInputMessage inputMessage=new RequestPartServletServerHttpRequest(servletRequest,partName);
       arg=readWithMessageConverters(inputMessage,parameter,parameter.getParameterType());
+      WebDataBinder binder=binderFactory.createBinder(request,arg,partName);
       if (arg != null) {
-        Annotation[] annotations=parameter.getParameterAnnotations();
-        for (        Annotation annot : annotations) {
-          if (annot.annotationType().getSimpleName().startsWith("Valid")) {
-            WebDataBinder binder=binderFactory.createBinder(request,arg,partName);
-            Object hints=AnnotationUtils.getValue(annot);
-            binder.validate(hints instanceof Object[] ? (Object[])hints : new Object[]{hints});
-            BindingResult bindingResult=binder.getBindingResult();
-            if (bindingResult.hasErrors()) {
-              throw new MethodArgumentNotValidException(parameter,bindingResult);
-            }
-          }
-        }
+        validate(binder,parameter);
       }
+      mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + partName,binder.getBindingResult());
     }
  catch (    MissingServletRequestPartException ex) {
       arg=null;
