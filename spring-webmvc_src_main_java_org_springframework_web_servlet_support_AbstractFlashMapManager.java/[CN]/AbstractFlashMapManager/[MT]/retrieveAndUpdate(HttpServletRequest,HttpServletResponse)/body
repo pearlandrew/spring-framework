@@ -1,24 +1,24 @@
 {
-  List<FlashMap> allMaps=retrieveFlashMaps(request);
-  if (CollectionUtils.isEmpty(allMaps)) {
+  List<FlashMap> maps=retrieveFlashMaps(request);
+  if (CollectionUtils.isEmpty(maps)) {
     return null;
   }
   if (logger.isDebugEnabled()) {
-    logger.debug("Retrieved FlashMap(s): " + allMaps);
+    logger.debug("Retrieved FlashMap(s): " + maps);
   }
-  List<FlashMap> mapsToRemove=getExpiredFlashMaps(allMaps);
-  FlashMap match=getMatchingFlashMap(allMaps,request);
+  List<FlashMap> mapsToRemove=getExpiredFlashMaps(maps);
+  FlashMap match=getMatchingFlashMap(maps,request);
   if (match != null) {
     mapsToRemove.add(match);
   }
   if (!mapsToRemove.isEmpty()) {
     if (logger.isDebugEnabled()) {
-      logger.debug("Removing FlashMap(s): " + allMaps);
+      logger.debug("Removing FlashMap(s): " + mapsToRemove);
     }
 synchronized (writeLock) {
-      allMaps=retrieveFlashMaps(request);
-      allMaps.removeAll(mapsToRemove);
-      updateFlashMaps(allMaps,request,response);
+      maps=retrieveFlashMaps(request);
+      maps.removeAll(mapsToRemove);
+      updateFlashMaps(maps,request,response);
     }
   }
   return match;

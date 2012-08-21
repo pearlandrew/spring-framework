@@ -4,10 +4,11 @@
   }
   String path=decodeAndNormalizePath(flashMap.getTargetRequestPath(),request);
   flashMap.setTargetRequestPath(path);
-  flashMap.startExpirationPeriod(this.flashMapTimeout);
+  decodeParameters(flashMap.getTargetRequestParams(),request);
   if (logger.isDebugEnabled()) {
     logger.debug("Saving FlashMap=" + flashMap);
   }
+  flashMap.startExpirationPeriod(this.flashMapTimeout);
 synchronized (writeLock) {
     List<FlashMap> allMaps=retrieveFlashMaps(request);
     allMaps=(allMaps == null) ? new CopyOnWriteArrayList<FlashMap>() : allMaps;
