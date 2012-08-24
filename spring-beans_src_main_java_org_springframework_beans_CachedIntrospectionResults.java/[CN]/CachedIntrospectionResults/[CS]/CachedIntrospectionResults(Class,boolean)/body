@@ -3,7 +3,18 @@
     if (logger.isTraceEnabled()) {
       logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
     }
-    this.beanInfo=new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass));
+    BeanInfo beanInfo=null;
+    List<BeanInfoFactory> beanInfoFactories=getBeanInfoFactories(beanClass.getClassLoader());
+    for (    BeanInfoFactory beanInfoFactory : beanInfoFactories) {
+      if (beanInfoFactory.supports(beanClass)) {
+        beanInfo=beanInfoFactory.getBeanInfo(beanClass);
+        break;
+      }
+    }
+    if (beanInfo == null) {
+      beanInfo=new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass));
+    }
+    this.beanInfo=beanInfo;
     Class classToFlush=beanClass;
     do {
       Introspector.flushFromCaches(classToFlush);
