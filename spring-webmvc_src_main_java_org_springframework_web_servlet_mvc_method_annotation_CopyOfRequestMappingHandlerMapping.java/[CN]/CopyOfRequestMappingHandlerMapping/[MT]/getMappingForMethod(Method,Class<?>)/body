@@ -1,0 +1,14 @@
+{
+  RequestMappingInfo info=null;
+  RequestMapping methodAnnotation=AnnotationUtils.findAnnotation(method,RequestMapping.class);
+  if (methodAnnotation != null) {
+    RequestCondition<?> methodCondition=getCustomMethodCondition(method);
+    info=createRequestMappingInfo(methodAnnotation,methodCondition);
+    RequestMapping typeAnnotation=AnnotationUtils.findAnnotation(handlerType,RequestMapping.class);
+    if (typeAnnotation != null) {
+      RequestCondition<?> typeCondition=getCustomTypeCondition(handlerType);
+      info=createRequestMappingInfo(typeAnnotation,typeCondition).combine(info);
+    }
+  }
+  return info;
+}

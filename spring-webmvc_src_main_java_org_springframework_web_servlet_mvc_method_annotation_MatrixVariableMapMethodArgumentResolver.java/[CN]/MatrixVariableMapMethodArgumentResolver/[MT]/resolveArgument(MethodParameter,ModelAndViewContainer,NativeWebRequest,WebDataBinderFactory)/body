@@ -1,0 +1,20 @@
+{
+  @SuppressWarnings("unchecked") Map<String,MultiValueMap<String,String>> matrixVariables=(Map<String,MultiValueMap<String,String>>)request.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE,RequestAttributes.SCOPE_REQUEST);
+  if (CollectionUtils.isEmpty(matrixVariables)) {
+    return Collections.emptyMap();
+  }
+  String pathVariable=parameter.getParameterAnnotation(MatrixVariable.class).pathVar();
+  if (!pathVariable.equals(ValueConstants.DEFAULT_NONE)) {
+    MultiValueMap<String,String> map=matrixVariables.get(pathVariable);
+    return (map != null) ? map : Collections.emptyMap();
+  }
+  MultiValueMap<String,String> map=new LinkedMultiValueMap<String,String>();
+  for (  MultiValueMap<String,String> vars : matrixVariables.values()) {
+    for (    String name : vars.keySet()) {
+      for (      String value : vars.get(name)) {
+        map.add(name,value);
+      }
+    }
+  }
+  return map;
+}

@@ -1,0 +1,36 @@
+{
+  @SuppressWarnings("unchecked") Map<String,MultiValueMap<String,String>> pathParameters=(Map<String,MultiValueMap<String,String>>)request.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE,RequestAttributes.SCOPE_REQUEST);
+  if (CollectionUtils.isEmpty(pathParameters)) {
+    return null;
+  }
+  String pathVar=parameter.getParameterAnnotation(MatrixVariable.class).pathVar();
+  List<String> paramValues=null;
+  if (!pathVar.equals(ValueConstants.DEFAULT_NONE)) {
+    if (pathParameters.containsKey(pathVar)) {
+      paramValues=pathParameters.get(pathVar).get(name);
+    }
+  }
+ else {
+    boolean found=false;
+    paramValues=new ArrayList<String>();
+    for (    MultiValueMap<String,String> params : pathParameters.values()) {
+      if (params.containsKey(name)) {
+        if (found) {
+          String paramType=parameter.getParameterType().getName();
+          throw new ServletRequestBindingException("Found more than one match for URI path parameter '" + name + "' for parameter type ["+ paramType+ "]. Use pathVar attribute to disambiguate.");
+        }
+        paramValues.addAll(params.get(name));
+        found=true;
+      }
+    }
+  }
+  if (CollectionUtils.isEmpty(paramValues)) {
+    return null;
+  }
+ else   if (paramValues.size() == 1) {
+    return paramValues.get(0);
+  }
+ else {
+    return paramValues;
+  }
+}

@@ -1,0 +1,30 @@
+{
+  MockHttpServletRequest request;
+  MultiValueMap<String,String> matrixVariables;
+  Map<String,String> uriVariables;
+  String lookupPath="/cars;colors=red,blue,green;year=2012";
+  request=new MockHttpServletRequest();
+  testHandleMatch(request,"/{cars}",lookupPath);
+  matrixVariables=getMatrixVariables(request,"cars");
+  assertNotNull(matrixVariables);
+  assertEquals(Arrays.asList("red","blue","green"),matrixVariables.get("colors"));
+  assertEquals("2012",matrixVariables.getFirst("year"));
+  uriVariables=getUriTemplateVariables(request);
+  assertEquals("cars",uriVariables.get("cars"));
+  request=new MockHttpServletRequest();
+  testHandleMatch(request,"/{cars:[^;]+}{params}",lookupPath);
+  matrixVariables=getMatrixVariables(request,"params");
+  assertNotNull(matrixVariables);
+  assertEquals(Arrays.asList("red","blue","green"),matrixVariables.get("colors"));
+  assertEquals("2012",matrixVariables.getFirst("year"));
+  uriVariables=getUriTemplateVariables(request);
+  assertEquals("cars",uriVariables.get("cars"));
+  assertEquals(";colors=red,blue,green;year=2012",uriVariables.get("params"));
+  request=new MockHttpServletRequest();
+  testHandleMatch(request,"/{cars:[^;]+}{params}","/cars");
+  matrixVariables=getMatrixVariables(request,"params");
+  assertNull(matrixVariables);
+  uriVariables=getUriTemplateVariables(request);
+  assertEquals("cars",uriVariables.get("cars"));
+  assertEquals("",uriVariables.get("params"));
+}
