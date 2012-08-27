@@ -1,9 +1,7 @@
 {
   TestBean target=new TestBean();
-  try {
-    createProxy(target,getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new DeclarePrecedenceShouldSucceed(),"someBean")),ITestBean.class);
-    fail();
-  }
- catch (  IllegalArgumentException ex) {
-  }
+  thrown.expect(IllegalArgumentException.class);
+  thrown.expectMessage("DeclarePrecendence not presently supported in Spring AOP");
+  MetadataAwareAspectInstanceFactory aspectInstanceFactory=new SingletonMetadataAwareAspectInstanceFactory(new DeclarePrecedenceShouldSucceed(),"someBean");
+  createProxy(target,getFixture().getAdvisors(aspectInstanceFactory),ITestBean.class);
 }
