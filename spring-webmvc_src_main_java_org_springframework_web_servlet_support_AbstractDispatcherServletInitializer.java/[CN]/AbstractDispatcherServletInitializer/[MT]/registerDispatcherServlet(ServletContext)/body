@@ -7,5 +7,12 @@
   ServletRegistration.Dynamic registration=servletContext.addServlet(servletName,dispatcherServlet);
   registration.setLoadOnStartup(1);
   registration.addMapping(getServletMappings());
+  registration.setAsyncSupported(isAsyncSupported());
+  Filter[] filters=getServletFilters();
+  if (!ObjectUtils.isEmpty(filters)) {
+    for (    Filter filter : filters) {
+      registerServletFilter(servletContext,filter);
+    }
+  }
   this.customizeRegistration(registration);
 }
