@@ -2,9 +2,16 @@
   if (msg == null || (!this.alwaysUseMessageFormat && ObjectUtils.isEmpty(args))) {
     return msg;
   }
-  MessageFormat messageFormat;
-synchronized (this.cachedMessageFormats) {
-    messageFormat=this.cachedMessageFormats.get(msg);
+  MessageFormat messageFormat=null;
+synchronized (this.messageFormatsPerMessage) {
+    Map<Locale,MessageFormat> messageFormatsPerLocale=this.messageFormatsPerMessage.get(msg);
+    if (messageFormatsPerLocale != null) {
+      messageFormat=messageFormatsPerLocale.get(locale);
+    }
+ else {
+      messageFormatsPerLocale=new HashMap<Locale,MessageFormat>();
+      this.messageFormatsPerMessage.put(msg,messageFormatsPerLocale);
+    }
     if (messageFormat == null) {
       try {
         messageFormat=createMessageFormat(msg,locale);
@@ -15,7 +22,7 @@ synchronized (this.cachedMessageFormats) {
         }
         messageFormat=INVALID_MESSAGE_FORMAT;
       }
-      this.cachedMessageFormats.put(msg,messageFormat);
+      messageFormatsPerLocale.put(locale,messageFormat);
     }
   }
   if (messageFormat == INVALID_MESSAGE_FORMAT) {
