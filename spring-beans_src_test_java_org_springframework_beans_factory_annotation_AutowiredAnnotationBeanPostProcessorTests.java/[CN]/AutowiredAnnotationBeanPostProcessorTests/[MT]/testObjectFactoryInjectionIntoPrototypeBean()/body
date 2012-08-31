@@ -1,0 +1,13 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  AutowiredAnnotationBeanPostProcessor bpp=new AutowiredAnnotationBeanPostProcessor();
+  bpp.setBeanFactory(bf);
+  bf.addBeanPostProcessor(bpp);
+  bf.registerBeanDefinition("annotatedBean",new RootBeanDefinition(ObjectFactoryInjectionBean.class,false));
+  bf.registerBeanDefinition("testBean",new RootBeanDefinition(TestBean.class));
+  ObjectFactoryInjectionBean bean=(ObjectFactoryInjectionBean)bf.getBean("annotatedBean");
+  assertSame(bf.getBean("testBean"),bean.getTestBean());
+  ObjectFactoryInjectionBean anotherBean=(ObjectFactoryInjectionBean)bf.getBean("annotatedBean");
+  assertNotSame(anotherBean,bean);
+  assertSame(bf.getBean("testBean"),anotherBean.getTestBean());
+}
