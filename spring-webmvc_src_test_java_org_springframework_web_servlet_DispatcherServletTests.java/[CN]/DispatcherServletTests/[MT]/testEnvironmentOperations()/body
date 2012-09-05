@@ -1,0 +1,23 @@
+{
+  DispatcherServlet servlet=new DispatcherServlet();
+  ConfigurableWebEnvironment defaultEnv=servlet.getEnvironment();
+  assertThat(defaultEnv,notNullValue());
+  ConfigurableEnvironment env1=new StandardServletEnvironment();
+  servlet.setEnvironment(env1);
+  assertThat(servlet.getEnvironment(),sameInstance(env1));
+  try {
+    servlet.setEnvironment(new StandardEnvironment());
+    fail("expected exception");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+class CustomServletEnvironment extends StandardServletEnvironment {
+  }
+  @SuppressWarnings("serial") DispatcherServlet custom=new DispatcherServlet(){
+    @Override protected ConfigurableWebEnvironment createEnvironment(){
+      return new CustomServletEnvironment();
+    }
+  }
+;
+  assertThat(custom.getEnvironment(),instanceOf(CustomServletEnvironment.class));
+}
