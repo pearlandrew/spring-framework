@@ -3,8 +3,8 @@
   propertyName=pd == null ? propertyName : pd.getName();
   for (  PropertyDescriptor existingPD : this.propertyDescriptors) {
     if (existingPD.getName().equals(propertyName)) {
-      if (existingPD.getReadMethod() != null) {
-        if (readMethod != null && existingPD.getReadMethod().getReturnType() != readMethod.getReturnType() || writeMethod != null && existingPD.getReadMethod().getReturnType() != writeMethod.getParameterTypes()[0]) {
+      if (readMethodFor(existingPD) != null) {
+        if (readMethod != null && readMethodFor(existingPD).getReturnType() != readMethod.getReturnType() || writeMethod != null && readMethodFor(existingPD).getReturnType() != writeMethod.getParameterTypes()[0]) {
           break;
         }
       }
@@ -17,8 +17,8 @@
           existingPD.setReadMethod(readMethod);
         }
       }
-      if (existingPD.getWriteMethod() != null) {
-        if (readMethod != null && existingPD.getWriteMethod().getParameterTypes()[0] != readMethod.getReturnType() || writeMethod != null && existingPD.getWriteMethod().getParameterTypes()[0] != writeMethod.getParameterTypes()[0]) {
+      if (writeMethodFor(existingPD) != null) {
+        if (readMethod != null && writeMethodFor(existingPD).getParameterTypes()[0] != readMethod.getReturnType() || writeMethod != null && writeMethodFor(existingPD).getParameterTypes()[0] != writeMethod.getParameterTypes()[0]) {
           break;
         }
       }
@@ -27,8 +27,8 @@
       }
       if (existingPD instanceof IndexedPropertyDescriptor) {
         IndexedPropertyDescriptor existingIPD=(IndexedPropertyDescriptor)existingPD;
-        if (existingIPD.getIndexedReadMethod() != null) {
-          if (indexedReadMethod != null && existingIPD.getIndexedReadMethod().getReturnType() != indexedReadMethod.getReturnType() || indexedWriteMethod != null && existingIPD.getIndexedReadMethod().getReturnType() != indexedWriteMethod.getParameterTypes()[1]) {
+        if (indexedReadMethodFor(existingIPD) != null) {
+          if (indexedReadMethod != null && indexedReadMethodFor(existingIPD).getReturnType() != indexedReadMethod.getReturnType() || indexedWriteMethod != null && indexedReadMethodFor(existingIPD).getReturnType() != indexedWriteMethod.getParameterTypes()[1]) {
             break;
           }
         }
@@ -41,8 +41,8 @@
           existingIPD.setIndexedWriteMethod(null);
           existingIPD.setIndexedReadMethod(indexedReadMethod);
         }
-        if (existingIPD.getIndexedWriteMethod() != null) {
-          if (indexedReadMethod != null && existingIPD.getIndexedWriteMethod().getParameterTypes()[1] != indexedReadMethod.getReturnType() || indexedWriteMethod != null && existingIPD.getIndexedWriteMethod().getParameterTypes()[1] != indexedWriteMethod.getParameterTypes()[1]) {
+        if (indexedWriteMethodFor(existingIPD) != null) {
+          if (indexedReadMethod != null && indexedWriteMethodFor(existingIPD).getParameterTypes()[1] != indexedReadMethod.getReturnType() || indexedWriteMethod != null && indexedWriteMethodFor(existingIPD).getParameterTypes()[1] != indexedWriteMethod.getParameterTypes()[1]) {
             break;
           }
         }
