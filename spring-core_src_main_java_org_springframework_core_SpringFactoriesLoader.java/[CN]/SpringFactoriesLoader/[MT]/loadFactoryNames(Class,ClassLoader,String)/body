@@ -1,0 +1,17 @@
+{
+  String factoryClassName=factoryClass.getName();
+  try {
+    List<String> result=new ArrayList<String>();
+    Enumeration urls=classLoader.getResources(factoriesLocation);
+    while (urls.hasMoreElements()) {
+      URL url=(URL)urls.nextElement();
+      Properties properties=PropertiesLoaderUtils.loadProperties(new UrlResource(url));
+      String factoryClassNames=properties.getProperty(factoryClassName);
+      result.addAll(Arrays.asList(StringUtils.commaDelimitedListToStringArray(factoryClassNames)));
+    }
+    return result;
+  }
+ catch (  IOException ex) {
+    throw new IllegalArgumentException("Unable to load [" + factoryClass.getName() + "] factories from location ["+ factoriesLocation+ "]",ex);
+  }
+}

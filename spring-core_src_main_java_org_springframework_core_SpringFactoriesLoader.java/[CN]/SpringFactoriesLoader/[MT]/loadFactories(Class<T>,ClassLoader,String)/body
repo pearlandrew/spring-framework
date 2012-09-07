@@ -1,0 +1,19 @@
+{
+  Assert.notNull(factoryClass,"'factoryClass' must not be null");
+  if (classLoader == null) {
+    classLoader=ClassUtils.getDefaultClassLoader();
+  }
+  if (factoriesLocation == null) {
+    factoriesLocation=DEFAULT_FACTORIES_LOCATION;
+  }
+  List<String> factoryNames=loadFactoryNames(factoryClass,classLoader,factoriesLocation);
+  if (logger.isTraceEnabled()) {
+    logger.trace("Loaded [" + factoryClass.getName() + "] names: "+ factoryNames);
+  }
+  List<T> result=new ArrayList<T>(factoryNames.size());
+  for (  String factoryName : factoryNames) {
+    result.add(instantiateFactory(factoryName,factoryClass,classLoader));
+  }
+  Collections.sort(result,new OrderComparator());
+  return result;
+}

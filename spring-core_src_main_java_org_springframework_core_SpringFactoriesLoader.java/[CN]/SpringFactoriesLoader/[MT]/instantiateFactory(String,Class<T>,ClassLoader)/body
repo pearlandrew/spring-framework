@@ -1,0 +1,21 @@
+{
+  try {
+    Class<?> instanceClass=ClassUtils.forName(instanceClassName,classLoader);
+    if (!factoryClass.isAssignableFrom(instanceClass)) {
+      throw new IllegalArgumentException("Class [" + instanceClassName + "] is not assignable to ["+ factoryClass.getName()+ "]");
+    }
+    return (T)instanceClass.newInstance();
+  }
+ catch (  ClassNotFoundException ex) {
+    throw new IllegalArgumentException(factoryClass.getName() + " class [" + instanceClassName+ "] not found",ex);
+  }
+catch (  LinkageError err) {
+    throw new IllegalArgumentException("Invalid " + factoryClass.getName() + " class ["+ instanceClassName+ "]: problem with handler class file or dependent class",err);
+  }
+catch (  InstantiationException ex) {
+    throw new IllegalArgumentException("Could not instantiate bean class [" + instanceClassName + "]: Is it an abstract class?",ex);
+  }
+catch (  IllegalAccessException ex) {
+    throw new IllegalArgumentException("Could not instantiate bean class [" + instanceClassName + "Is the constructor accessible?",ex);
+  }
+}
