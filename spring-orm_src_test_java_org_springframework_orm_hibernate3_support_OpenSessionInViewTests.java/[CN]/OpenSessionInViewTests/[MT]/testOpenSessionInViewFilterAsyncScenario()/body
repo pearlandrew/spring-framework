@@ -22,11 +22,11 @@
     }
   }
 ;
-  AsyncWebRequest asyncWebRequest=createStrictMock(AsyncWebRequest.class);
+  AsyncWebRequest asyncWebRequest=createMock(AsyncWebRequest.class);
   asyncWebRequest.addCompletionHandler((Runnable)anyObject());
   asyncWebRequest.startAsync();
-  expect(asyncWebRequest.isAsyncStarted()).andReturn(true);
-  expectLastCall().anyTimes();
+  expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();
+  expect(asyncWebRequest.isDispatched()).andReturn(false).anyTimes();
   replay(asyncWebRequest);
   WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(this.request);
   asyncManager.setAsyncWebRequest(asyncWebRequest);
@@ -48,6 +48,7 @@
   reset(asyncWebRequest);
   expect(session.close()).andReturn(null);
   expect(asyncWebRequest.isAsyncStarted()).andReturn(false).anyTimes();
+  expect(asyncWebRequest.isDispatched()).andReturn(true).anyTimes();
   replay(sf);
   replay(session);
   replay(asyncWebRequest);

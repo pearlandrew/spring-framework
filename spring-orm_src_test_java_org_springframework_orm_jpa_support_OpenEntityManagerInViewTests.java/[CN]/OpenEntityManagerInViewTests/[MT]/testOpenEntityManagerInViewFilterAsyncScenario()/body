@@ -43,11 +43,11 @@
   }
 ;
   FilterChain filterChain3=new PassThroughFilterChain(filter2,filterChain2);
-  AsyncWebRequest asyncWebRequest=createStrictMock(AsyncWebRequest.class);
+  AsyncWebRequest asyncWebRequest=createMock(AsyncWebRequest.class);
   asyncWebRequest.addCompletionHandler((Runnable)anyObject());
   asyncWebRequest.startAsync();
-  expect(asyncWebRequest.isAsyncStarted()).andReturn(true);
-  expectLastCall().anyTimes();
+  expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();
+  expect(asyncWebRequest.isDispatched()).andReturn(false).anyTimes();
   replay(asyncWebRequest);
   WebAsyncManager asyncManager=AsyncWebUtils.getAsyncManager(request);
   asyncManager.setAsyncWebRequest(asyncWebRequest);
@@ -67,6 +67,7 @@
   assertNotNull(request.getAttribute("invoked"));
   reset(asyncWebRequest);
   expect(asyncWebRequest.isAsyncStarted()).andReturn(false).anyTimes();
+  expect(asyncWebRequest.isDispatched()).andReturn(true).anyTimes();
   replay(asyncWebRequest);
   assertFalse(TransactionSynchronizationManager.hasResource(factory));
   assertFalse(TransactionSynchronizationManager.hasResource(factory2));
