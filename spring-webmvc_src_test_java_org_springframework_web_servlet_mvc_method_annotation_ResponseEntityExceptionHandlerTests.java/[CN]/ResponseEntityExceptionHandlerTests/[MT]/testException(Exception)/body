@@ -1,5 +1,8 @@
 {
   ResponseEntity<Object> responseEntity=this.exceptionHandlerSupport.handleException(ex,this.request);
+  if (HttpStatus.INTERNAL_SERVER_ERROR.equals(responseEntity.getStatusCode())) {
+    assertSame(ex,this.servletRequest.getAttribute("javax.servlet.error.exception"));
+  }
   this.defaultExceptionResolver.resolveException(this.servletRequest,this.servletResponse,null,ex);
   assertEquals(this.servletResponse.getStatus(),responseEntity.getStatusCode().value());
   return responseEntity;
