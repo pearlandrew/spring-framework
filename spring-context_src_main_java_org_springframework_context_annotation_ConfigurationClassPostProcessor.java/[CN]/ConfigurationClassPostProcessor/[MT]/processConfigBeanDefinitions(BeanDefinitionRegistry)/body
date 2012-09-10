@@ -12,11 +12,13 @@
   SingletonBeanRegistry singletonRegistry=null;
   if (registry instanceof SingletonBeanRegistry) {
     singletonRegistry=(SingletonBeanRegistry)registry;
-    if (singletonRegistry.containsSingleton(CONFIGURATION_BEAN_NAME_GENERATOR)) {
-      this.beanNameGenerator=(BeanNameGenerator)singletonRegistry.getSingleton(CONFIGURATION_BEAN_NAME_GENERATOR);
+    if (!this.localBeanNameGeneratorSet && singletonRegistry.containsSingleton(CONFIGURATION_BEAN_NAME_GENERATOR)) {
+      BeanNameGenerator generator=(BeanNameGenerator)singletonRegistry.getSingleton(CONFIGURATION_BEAN_NAME_GENERATOR);
+      this.componentScanBeanNameGenerator=generator;
+      this.importBeanNameGenerator=generator;
     }
   }
-  ConfigurationClassParser parser=new ConfigurationClassParser(this.metadataReaderFactory,this.problemReporter,this.environment,this.resourceLoader,this.beanNameGenerator,registry);
+  ConfigurationClassParser parser=new ConfigurationClassParser(this.metadataReaderFactory,this.problemReporter,this.environment,this.resourceLoader,this.componentScanBeanNameGenerator,registry);
   for (  BeanDefinitionHolder holder : configCandidates) {
     BeanDefinition bd=holder.getBeanDefinition();
     try {
@@ -45,12 +47,12 @@
     }
   }
   if (this.reader == null) {
-    this.reader=new ConfigurationClassBeanDefinitionReader(registry,this.sourceExtractor,this.problemReporter,this.metadataReaderFactory,this.resourceLoader,this.environment,this.beanNameGenerator);
+    this.reader=new ConfigurationClassBeanDefinitionReader(registry,this.sourceExtractor,this.problemReporter,this.metadataReaderFactory,this.resourceLoader,this.environment,this.importBeanNameGenerator);
   }
   this.reader.loadBeanDefinitions(parser.getConfigurationClasses());
   if (singletonRegistry != null) {
-    if (!singletonRegistry.containsSingleton("importRegistry")) {
-      singletonRegistry.registerSingleton("importRegistry",parser.getImportRegistry());
+    if (!singletonRegistry.containsSingleton(IMPORT_REGISTRY_BEAN_NAME)) {
+      singletonRegistry.registerSingleton(IMPORT_REGISTRY_BEAN_NAME,parser.getImportRegistry());
     }
   }
 }
