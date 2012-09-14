@@ -1,22 +1,28 @@
 {
   Assert.notNull(uri,"'uri' must not be null");
-  Assert.isTrue(!uri.isOpaque(),"Opaque URI [" + uri + "] not supported");
   this.scheme=uri.getScheme();
-  if (uri.getRawUserInfo() != null) {
-    this.userInfo=uri.getRawUserInfo();
+  if (uri.isOpaque()) {
+    this.ssp=uri.getRawSchemeSpecificPart();
+    resetHierarchicalComponents();
   }
-  if (uri.getHost() != null) {
-    this.host=uri.getHost();
-  }
-  if (uri.getPort() != -1) {
-    this.port=uri.getPort();
-  }
-  if (StringUtils.hasLength(uri.getRawPath())) {
-    this.pathBuilder=new FullPathComponentBuilder(uri.getRawPath());
-  }
-  if (StringUtils.hasLength(uri.getRawQuery())) {
-    this.queryParams.clear();
-    query(uri.getRawQuery());
+ else {
+    if (uri.getRawUserInfo() != null) {
+      this.userInfo=uri.getRawUserInfo();
+    }
+    if (uri.getHost() != null) {
+      this.host=uri.getHost();
+    }
+    if (uri.getPort() != -1) {
+      this.port=uri.getPort();
+    }
+    if (StringUtils.hasLength(uri.getRawPath())) {
+      this.pathBuilder=new FullPathComponentBuilder(uri.getRawPath());
+    }
+    if (StringUtils.hasLength(uri.getRawQuery())) {
+      this.queryParams.clear();
+      query(uri.getRawQuery());
+    }
+    resetSchemeSpecificPart();
   }
   if (uri.getRawFragment() != null) {
     this.fragment=uri.getRawFragment();
