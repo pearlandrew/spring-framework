@@ -3,21 +3,16 @@
   startAsyncProcessing(processingContext);
   this.taskExecutor.submit(new Runnable(){
     public void run(){
-      List<WebAsyncThreadInitializer> initializers=new ArrayList<WebAsyncThreadInitializer>(threadInitializers.values());
+      CallableInterceptorChain chain=new CallableInterceptorChain(callableInterceptors.values());
       try {
-        for (        WebAsyncThreadInitializer initializer : initializers) {
-          initializer.initialize();
-        }
+        chain.applyPreProcess(asyncWebRequest,callable);
         concurrentResult=callable.call();
       }
  catch (      Throwable t) {
         concurrentResult=t;
       }
  finally {
-        Collections.reverse(initializers);
-        for (        WebAsyncThreadInitializer initializer : initializers) {
-          initializer.reset();
-        }
+        chain.applyPostProcess(asyncWebRequest,callable,concurrentResult);
       }
       if (logger.isDebugEnabled()) {
         logger.debug("Concurrent result value [" + concurrentResult + "]");

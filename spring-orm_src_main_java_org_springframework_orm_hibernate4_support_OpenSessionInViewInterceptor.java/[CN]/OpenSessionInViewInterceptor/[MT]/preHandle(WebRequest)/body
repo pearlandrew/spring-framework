@@ -2,7 +2,7 @@
   String participateAttributeName=getParticipateAttributeName();
   WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
   if (asyncManager.hasConcurrentResult()) {
-    if (asyncManager.initializeAsyncThread(participateAttributeName)) {
+    if (applySessionBindingInterceptor(asyncManager,participateAttributeName)) {
       return;
     }
   }
@@ -16,7 +16,6 @@
     Session session=openSession();
     SessionHolder sessionHolder=new SessionHolder(session);
     TransactionSynchronizationManager.bindResource(getSessionFactory(),sessionHolder);
-    WebAsyncThreadInitializer asyncThreadInitializer=createThreadInitializer(sessionHolder);
-    asyncManager.registerAsyncThreadInitializer(participateAttributeName,asyncThreadInitializer);
+    asyncManager.registerCallableInterceptor(participateAttributeName,new SessionBindingCallableInterceptor(sessionHolder));
   }
 }

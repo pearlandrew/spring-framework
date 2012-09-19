@@ -1,9 +1,9 @@
 {
 synchronized (this.lock) {
-    if (isSetOrExpired()) {
+    boolean wasExpired=getAndSetExpired();
+    if (wasExpired) {
       return false;
     }
-    this.result=result;
     if (!awaitResultHandler()) {
       throw new IllegalStateException("DeferredResultHandler not set");
     }

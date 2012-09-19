@@ -17,6 +17,7 @@
   asyncWebRequest.startAsync();
   replay(asyncWebRequest);
   WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(this.request);
+  asyncManager.setTaskExecutor(new SyncTaskExecutor());
   asyncManager.setAsyncWebRequest(asyncWebRequest);
   asyncManager.startCallableProcessing(new Callable<String>(){
     public String call() throws Exception {
@@ -27,9 +28,6 @@
   verify(asyncWebRequest);
   interceptor.afterConcurrentHandlingStarted(this.webRequest);
   assertFalse(TransactionSynchronizationManager.hasResource(sf));
-  reset(asyncWebRequest);
-  expect(asyncWebRequest.isDispatched()).andReturn(true);
-  replay(asyncWebRequest);
   interceptor.preHandle(this.webRequest);
   assertTrue("Session not bound to async thread",TransactionSynchronizationManager.hasResource(sf));
   verify(sf);

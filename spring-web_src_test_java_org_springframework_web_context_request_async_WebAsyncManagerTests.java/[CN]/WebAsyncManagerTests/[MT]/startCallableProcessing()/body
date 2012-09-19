@@ -1,18 +1,19 @@
 {
-  WebAsyncThreadInitializer initializer=createStrictMock(WebAsyncThreadInitializer.class);
-  initializer.initialize();
-  initializer.reset();
-  replay(initializer);
-  this.asyncWebRequest.startAsync();
-  expect(this.asyncWebRequest.isAsyncComplete()).andReturn(false);
-  this.asyncWebRequest.dispatch();
-  replay(this.asyncWebRequest);
-  this.asyncManager.registerAsyncThreadInitializer("testInitializer",initializer);
-  this.asyncManager.startCallableProcessing(new Callable<Object>(){
+  Callable<Object> task=new Callable<Object>(){
     public Object call() throws Exception {
       return 1;
     }
   }
-);
-  verify(initializer,this.asyncWebRequest);
+;
+  CallableProcessingInterceptor interceptor=createStrictMock(CallableProcessingInterceptor.class);
+  interceptor.preProcess(this.asyncWebRequest,task);
+  interceptor.postProcess(this.asyncWebRequest,task,new Integer(1));
+  replay(interceptor);
+  this.asyncWebRequest.startAsync();
+  expect(this.asyncWebRequest.isAsyncComplete()).andReturn(false);
+  this.asyncWebRequest.dispatch();
+  replay(this.asyncWebRequest);
+  this.asyncManager.registerCallableInterceptor("interceptor",interceptor);
+  this.asyncManager.startCallableProcessing(task);
+  verify(interceptor,this.asyncWebRequest);
 }

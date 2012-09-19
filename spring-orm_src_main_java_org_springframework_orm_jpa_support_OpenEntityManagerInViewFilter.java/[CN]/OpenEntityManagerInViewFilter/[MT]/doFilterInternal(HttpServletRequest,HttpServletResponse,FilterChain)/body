@@ -8,14 +8,13 @@
     participate=true;
   }
  else {
-    if (isFirstRequest || !asyncManager.initializeAsyncThread(key)) {
+    if (isFirstRequest || !applyEntityManagerBindingInterceptor(asyncManager,key)) {
       logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewFilter");
       try {
         EntityManager em=createEntityManager(emf);
         EntityManagerHolder emHolder=new EntityManagerHolder(em);
         TransactionSynchronizationManager.bindResource(emf,emHolder);
-        WebAsyncThreadInitializer initializer=createAsyncThreadInitializer(emf,emHolder);
-        asyncManager.registerAsyncThreadInitializer(key,initializer);
+        asyncManager.registerCallableInterceptor(key,new EntityManagerBindingCallableInterceptor(emf,emHolder));
       }
  catch (      PersistenceException ex) {
         throw new DataAccessResourceFailureException("Could not create JPA EntityManager",ex);

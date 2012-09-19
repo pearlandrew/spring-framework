@@ -8,13 +8,12 @@
     participate=true;
   }
  else {
-    if (isFirstRequest || !asyncManager.initializeAsyncThread(key)) {
+    if (isFirstRequest || !applySessionBindingInterceptor(asyncManager,key)) {
       logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
       Session session=openSession(sessionFactory);
       SessionHolder sessionHolder=new SessionHolder(session);
       TransactionSynchronizationManager.bindResource(sessionFactory,sessionHolder);
-      WebAsyncThreadInitializer initializer=createAsyncThreadInitializer(sessionFactory,sessionHolder);
-      asyncManager.registerAsyncThreadInitializer(key,initializer);
+      asyncManager.registerCallableInterceptor(key,new SessionBindingCallableInterceptor(sessionFactory,sessionHolder));
     }
   }
   try {
