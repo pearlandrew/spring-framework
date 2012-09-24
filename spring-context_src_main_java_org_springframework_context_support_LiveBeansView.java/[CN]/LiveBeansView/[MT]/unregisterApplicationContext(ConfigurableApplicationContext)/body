@@ -1,0 +1,14 @@
+{
+synchronized (applicationContexts) {
+    if (applicationContexts.remove(applicationContext) && applicationContexts.isEmpty()) {
+      try {
+        MBeanServer server=ManagementFactory.getPlatformMBeanServer();
+        String mbeanDomain=applicationContext.getEnvironment().getProperty(MBEAN_DOMAIN_PROPERTY_NAME);
+        server.unregisterMBean(new ObjectName(mbeanDomain,MBEAN_APPLICATION_KEY,applicationContext.getApplicationName()));
+      }
+ catch (      Exception ex) {
+        throw new ApplicationContextException("Failed to unregister LiveBeansView MBean",ex);
+      }
+    }
+  }
+}

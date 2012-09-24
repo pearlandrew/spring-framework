@@ -1,0 +1,17 @@
+{
+  String mbeanDomain=applicationContext.getEnvironment().getProperty(MBEAN_DOMAIN_PROPERTY_NAME);
+  if (mbeanDomain != null) {
+synchronized (applicationContexts) {
+      if (applicationContexts.isEmpty()) {
+        try {
+          MBeanServer server=ManagementFactory.getPlatformMBeanServer();
+          server.registerMBean(new LiveBeansView(),new ObjectName(mbeanDomain,MBEAN_APPLICATION_KEY,applicationContext.getApplicationName()));
+        }
+ catch (        Exception ex) {
+          throw new ApplicationContextException("Failed to register LiveBeansView MBean",ex);
+        }
+      }
+      applicationContexts.add(applicationContext);
+    }
+  }
+}

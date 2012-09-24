@@ -1,0 +1,45 @@
+{
+  StringBuilder result=new StringBuilder();
+  for (  ConfigurableApplicationContext context : contexts) {
+    result.append("{\n\"context\": \"").append(context.getId()).append("\"\n");
+    if (context.getParent() != null) {
+      result.append("\"parent\": \"").append(context.getParent().getId()).append("\"\n");
+    }
+ else {
+      result.append("\"parent\": null\n");
+    }
+    ConfigurableListableBeanFactory bf=context.getBeanFactory();
+    String[] beanNames=bf.getBeanDefinitionNames();
+    for (    String beanName : beanNames) {
+      BeanDefinition bd=bf.getBeanDefinition(beanName);
+      if (bd.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE && (!bd.isLazyInit() || bf.containsSingleton(beanName))) {
+        result.append("{\n\"bean\": \"").append(beanName).append("\"\n");
+        String scope=bd.getScope();
+        if (!StringUtils.hasText(scope)) {
+          scope=BeanDefinition.SCOPE_SINGLETON;
+        }
+        result.append("\"scope\": \"").append(scope).append("\"\n");
+        Class beanType=bf.getType(beanName);
+        if (beanType != null) {
+          result.append("\"type\": \"").append(beanType.getName()).append("\"\n");
+        }
+ else {
+          result.append("\"type\": null\n");
+        }
+        result.append("\"resource\": \"").append(bd.getResourceDescription()).append("\"\n");
+        result.append("\"dependencies\": [");
+        String[] dependencies=bf.getDependenciesForBean(beanName);
+        if (dependencies.length > 0) {
+          result.append("\"");
+        }
+        result.append(StringUtils.arrayToDelimitedString(dependencies,"\", \""));
+        if (dependencies.length > 0) {
+          result.append("\"");
+        }
+        result.append("]\n}\n");
+      }
+    }
+    result.append("}");
+  }
+  return result.toString();
+}
