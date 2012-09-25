@@ -1,21 +1,25 @@
 {
-  if (this.skip == null) {
-    if (pvs != null) {
+  if (this.skip != null) {
+    return this.skip;
+  }
+  if (pvs == null) {
+    this.skip=false;
+    return false;
+  }
 synchronized (pvs) {
-        if (this.skip == null) {
-          if (this.pd != null) {
-            if (pvs.contains(this.pd.getName())) {
-              this.skip=true;
-              return true;
-            }
- else             if (pvs instanceof MutablePropertyValues) {
-              ((MutablePropertyValues)pvs).registerProcessedProperty(this.pd.getName());
-            }
-          }
-        }
+    if (this.skip != null) {
+      return this.skip;
+    }
+    if (this.pd != null) {
+      if (pvs.contains(this.pd.getName())) {
+        this.skip=true;
+        return true;
+      }
+ else       if (pvs instanceof MutablePropertyValues) {
+        ((MutablePropertyValues)pvs).registerProcessedProperty(this.pd.getName());
       }
     }
     this.skip=false;
+    return false;
   }
-  return this.skip;
 }
