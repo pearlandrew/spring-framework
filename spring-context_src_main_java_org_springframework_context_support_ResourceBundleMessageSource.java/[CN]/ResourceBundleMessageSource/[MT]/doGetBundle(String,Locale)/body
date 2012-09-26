@@ -1,3 +1,11 @@
 {
-  return ResourceBundle.getBundle(basename,locale,getBundleClassLoader());
+  if ((this.defaultEncoding != null && !"ISO-8859-1".equals(this.defaultEncoding)) || !this.fallbackToSystemLocale || this.cacheMillis >= 0) {
+    if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16) {
+      throw new IllegalStateException("Cannot use 'defaultEncoding', 'fallbackToSystemLocale' and " + "'cacheSeconds' on the standard ResourceBundleMessageSource when running on Java 5. " + "Consider using ReloadableResourceBundleMessageSource instead.");
+    }
+    return new ControlBasedResourceBundleFactory().getBundle(basename,locale);
+  }
+ else {
+    return ResourceBundle.getBundle(basename,locale,getBundleClassLoader());
+  }
 }
