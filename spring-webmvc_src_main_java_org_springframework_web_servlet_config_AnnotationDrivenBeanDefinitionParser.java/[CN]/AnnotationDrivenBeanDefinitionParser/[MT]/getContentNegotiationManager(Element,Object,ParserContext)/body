@@ -4,15 +4,13 @@
     contentNegotiationManagerRef=new RuntimeBeanReference(element.getAttribute("content-negotiation-manager"));
   }
  else {
-    RootBeanDefinition managerDef=new RootBeanDefinition(ContentNegotiationManager.class);
-    managerDef.setSource(source);
-    managerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-    PathExtensionContentNegotiationStrategy strategy1=new PathExtensionContentNegotiationStrategy(getDefaultMediaTypes());
-    HeaderContentNegotiationStrategy strategy2=new HeaderContentNegotiationStrategy();
-    managerDef.getConstructorArgumentValues().addIndexedArgumentValue(0,Arrays.asList(strategy1,strategy2));
+    RootBeanDefinition factoryBeanDef=new RootBeanDefinition(ContentNegotiationManagerFactoryBean.class);
+    factoryBeanDef.setSource(source);
+    factoryBeanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    factoryBeanDef.getPropertyValues().add("mediaTypes",getDefaultMediaTypes());
     String beanName="mvcContentNegotiationManager";
-    parserContext.getReaderContext().getRegistry().registerBeanDefinition(beanName,managerDef);
-    parserContext.registerComponent(new BeanComponentDefinition(managerDef,beanName));
+    parserContext.getReaderContext().getRegistry().registerBeanDefinition(beanName,factoryBeanDef);
+    parserContext.registerComponent(new BeanComponentDefinition(factoryBeanDef,beanName));
     contentNegotiationManagerRef=new RuntimeBeanReference(beanName);
   }
   return contentNegotiationManagerRef;

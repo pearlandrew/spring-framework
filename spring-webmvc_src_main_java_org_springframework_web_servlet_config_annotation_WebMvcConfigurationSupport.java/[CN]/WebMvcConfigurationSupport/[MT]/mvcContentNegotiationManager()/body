@@ -1,9 +1,14 @@
 {
   if (this.contentNegotiationManager == null) {
-    ContentNegotiationConfigurer configurer=new ContentNegotiationConfigurer();
-    configurer.addMediaTypes(getDefaultMediaTypes());
+    ContentNegotiationConfigurer configurer=new ContentNegotiationConfigurer(this.servletContext);
+    configurer.mediaTypes(getDefaultMediaTypes());
     configureContentNegotiation(configurer);
-    this.contentNegotiationManager=configurer.getContentNegotiationManager();
+    try {
+      this.contentNegotiationManager=configurer.getContentNegotiationManager();
+    }
+ catch (    Exception e) {
+      throw new BeanInitializationException("Could not create ContentNegotiationManager",e);
+    }
   }
   return this.contentNegotiationManager;
 }
