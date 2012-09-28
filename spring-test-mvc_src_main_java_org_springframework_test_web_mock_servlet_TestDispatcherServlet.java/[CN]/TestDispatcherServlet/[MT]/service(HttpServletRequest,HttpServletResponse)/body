@@ -1,0 +1,14 @@
+{
+  WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
+  TestCallableInterceptor callableInterceptor=new TestCallableInterceptor();
+  asyncManager.registerCallableInterceptor("mock-mvc",callableInterceptor);
+  TestDeferredResultInterceptor deferredResultInterceptor=new TestDeferredResultInterceptor();
+  asyncManager.registerDeferredResultInterceptor("mock-mvc",deferredResultInterceptor);
+  super.service(request,response);
+  Object handler=getMvcResult(request).getHandler();
+  if (asyncManager.isConcurrentHandlingStarted() && !deferredResultInterceptor.wasInvoked) {
+    if (!callableInterceptor.await()) {
+      throw new ServletException("Gave up waiting on Callable from [" + handler.getClass().getName() + "] to complete");
+    }
+  }
+}

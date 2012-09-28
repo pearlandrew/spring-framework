@@ -1,0 +1,71 @@
+{
+  if (parent == null) {
+    return this;
+  }
+  if (!(parent instanceof MockHttpServletRequestBuilder)) {
+    throw new IllegalArgumentException("Cannot merge with [" + parent.getClass().getName() + "]");
+  }
+  MockHttpServletRequestBuilder parentBuilder=(MockHttpServletRequestBuilder)parent;
+  for (  String headerName : parentBuilder.headers.keySet()) {
+    if (!this.headers.containsKey(headerName)) {
+      this.headers.put(headerName,parentBuilder.headers.get(headerName));
+    }
+  }
+  if (this.contentType == null) {
+    this.contentType=parentBuilder.contentType;
+  }
+  if (this.content == null) {
+    this.content=parentBuilder.content;
+  }
+  for (  String paramName : parentBuilder.parameters.keySet()) {
+    if (!this.parameters.containsKey(paramName)) {
+      this.parameters.put(paramName,parentBuilder.parameters.get(paramName));
+    }
+  }
+  for (  Cookie cookie : parentBuilder.cookies) {
+    if (!containsCookie(cookie)) {
+      this.cookies.add(cookie);
+    }
+  }
+  if (this.locale == null) {
+    this.locale=parentBuilder.locale;
+  }
+  if (this.characterEncoding == null) {
+    this.characterEncoding=parentBuilder.characterEncoding;
+  }
+  if (this.principal == null) {
+    this.principal=parentBuilder.principal;
+  }
+  if (this.secure == null) {
+    this.secure=parentBuilder.secure;
+  }
+  for (  String attributeName : parentBuilder.attributes.keySet()) {
+    if (!this.attributes.containsKey(attributeName)) {
+      this.attributes.put(attributeName,parentBuilder.attributes.get(attributeName));
+    }
+  }
+  if (this.session == null) {
+    this.session=parentBuilder.session;
+  }
+  for (  String sessionAttributeName : parentBuilder.sessionAttributes.keySet()) {
+    if (!this.sessionAttributes.containsKey(sessionAttributeName)) {
+      this.sessionAttributes.put(sessionAttributeName,parentBuilder.sessionAttributes.get(sessionAttributeName));
+    }
+  }
+  for (  String flashAttributeName : parentBuilder.flashAttributes.keySet()) {
+    if (!this.flashAttributes.containsKey(flashAttributeName)) {
+      this.flashAttributes.put(flashAttributeName,parentBuilder.flashAttributes.get(flashAttributeName));
+    }
+  }
+  if (!StringUtils.hasText(this.contextPath)) {
+    this.contextPath=parentBuilder.contextPath;
+  }
+  if (!StringUtils.hasText(this.servletPath)) {
+    this.servletPath=parentBuilder.servletPath;
+  }
+  if (ValueConstants.DEFAULT_NONE.equals(this.pathInfo)) {
+    this.pathInfo=parentBuilder.pathInfo;
+  }
+  this.postProcessors.addAll(parentBuilder.postProcessors);
+  return this;
+}

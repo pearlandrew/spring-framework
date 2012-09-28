@@ -1,0 +1,62 @@
+{
+  MockHttpServletRequest request=createServletRequest(servletContext);
+  UriComponents uriComponents=this.uriComponentsBuilder.build();
+  String requestUri=uriComponents.getPath();
+  request.setRequestURI(requestUri);
+  updatePathRequestProperties(request,requestUri);
+  if (uriComponents.getScheme() != null) {
+    request.setScheme(uriComponents.getScheme());
+  }
+  if (uriComponents.getHost() != null) {
+    request.setServerName(uriComponents.getHost());
+  }
+  if (uriComponents.getPort() != -1) {
+    request.setServerPort(uriComponents.getPort());
+  }
+  request.setMethod(this.method.name());
+  for (  String name : this.headers.keySet()) {
+    for (    Object value : this.headers.get(name)) {
+      request.addHeader(name,value);
+    }
+  }
+  request.setQueryString(uriComponents.getQuery());
+  for (  Entry<String,List<String>> entry : uriComponents.getQueryParams().entrySet()) {
+    for (    String value : entry.getValue()) {
+      request.addParameter(entry.getKey(),value);
+    }
+  }
+  for (  String name : this.parameters.keySet()) {
+    for (    String value : this.parameters.get(name)) {
+      request.addParameter(name,value);
+    }
+  }
+  request.setContentType(this.contentType);
+  request.setContent(this.content);
+  request.setCookies(this.cookies.toArray(new Cookie[this.cookies.size()]));
+  if (this.locale != null) {
+    request.addPreferredLocale(this.locale);
+  }
+  request.setCharacterEncoding(this.characterEncoding);
+  request.setUserPrincipal(this.principal);
+  if (this.secure != null) {
+    request.setSecure(this.secure);
+  }
+  for (  String name : this.attributes.keySet()) {
+    request.setAttribute(name,this.attributes.get(name));
+  }
+  if (this.session != null) {
+    request.setSession(this.session);
+  }
+  for (  String name : this.sessionAttributes.keySet()) {
+    request.getSession().setAttribute(name,this.sessionAttributes.get(name));
+  }
+  FlashMap flashMap=new FlashMap();
+  flashMap.putAll(this.flashAttributes);
+  FlashMapManager flashMapManager=getFlashMapManager(request);
+  flashMapManager.saveOutputFlashMap(flashMap,request,new MockHttpServletResponse());
+  for (  RequestPostProcessor postProcessor : this.postProcessors) {
+    request=postProcessor.postProcessRequest(request);
+    Assert.notNull(request,"Post-processor [" + postProcessor.getClass().getName() + "] returned null");
+  }
+  return request;
+}

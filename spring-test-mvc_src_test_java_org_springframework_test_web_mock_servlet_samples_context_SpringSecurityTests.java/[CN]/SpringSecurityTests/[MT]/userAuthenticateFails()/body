@@ -1,0 +1,11 @@
+{
+  final String username="user";
+  mockMvc.perform(post("/j_spring_security_check").param("j_username",username).param("j_password","invalid")).andExpect(redirectedUrl("/spring_security_login?login_error")).andExpect(new ResultMatcher(){
+    public void match(    MvcResult mvcResult) throws Exception {
+      HttpSession session=mvcResult.getRequest().getSession();
+      SecurityContext securityContext=(SecurityContext)session.getAttribute(SEC_CONTEXT_ATTR);
+      Assert.assertNull(securityContext);
+    }
+  }
+);
+}

@@ -1,0 +1,19 @@
+{
+  StandaloneConfiguration configuration=new StandaloneConfiguration();
+  RequestMappingHandlerMapping handlerMapping=configuration.requestMappingHandlerMapping();
+  handlerMapping.setServletContext(cxt.getServletContext());
+  handlerMapping.setApplicationContext(cxt);
+  cxt.addBean("requestMappingHandlerMapping",handlerMapping);
+  RequestMappingHandlerAdapter handlerAdapter=configuration.requestMappingHandlerAdapter();
+  handlerAdapter.setServletContext(cxt.getServletContext());
+  handlerAdapter.setApplicationContext(cxt);
+  handlerAdapter.afterPropertiesSet();
+  cxt.addBean("requestMappingHandlerAdapter",handlerAdapter);
+  cxt.addBean("handlerExceptionResolver",configuration.handlerExceptionResolver());
+  cxt.addBeans(initViewResolvers(cxt));
+  cxt.addBean(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME,this.localeResolver);
+  cxt.addBean(DispatcherServlet.THEME_RESOLVER_BEAN_NAME,new FixedThemeResolver());
+  cxt.addBean(DispatcherServlet.REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME,new DefaultRequestToViewNameTranslator());
+  this.flashMapManager=new SessionFlashMapManager();
+  cxt.addBean(DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME,this.flashMapManager);
+}
