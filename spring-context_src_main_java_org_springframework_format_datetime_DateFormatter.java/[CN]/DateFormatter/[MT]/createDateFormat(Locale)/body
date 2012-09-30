@@ -1,0 +1,27 @@
+{
+  if (StringUtils.hasLength(this.pattern)) {
+    return new SimpleDateFormat(this.pattern,locale);
+  }
+  if (iso != null && iso != ISO.NONE) {
+    String pattern=ISO_PATTERNS.get(iso);
+    Assert.state(pattern != null,"Unsupported ISO format " + iso);
+    SimpleDateFormat format=new SimpleDateFormat(pattern);
+    format.setTimeZone(TimeZone.getTimeZone("UTC"));
+    return format;
+  }
+  if (StringUtils.hasLength(stylePattern)) {
+    int dateStyle=getStylePatternForChar(0);
+    int timeStyle=getStylePatternForChar(1);
+    if (dateStyle != -1 && timeStyle != -1) {
+      return DateFormat.getDateTimeInstance(dateStyle,timeStyle,locale);
+    }
+    if (dateStyle != -1) {
+      return DateFormat.getDateInstance(dateStyle,locale);
+    }
+    if (timeStyle != -1) {
+      return DateFormat.getTimeInstance(timeStyle,locale);
+    }
+    throw new IllegalStateException("Unsupported style pattern '" + stylePattern + "'");
+  }
+  return DateFormat.getDateInstance(this.style,locale);
+}
