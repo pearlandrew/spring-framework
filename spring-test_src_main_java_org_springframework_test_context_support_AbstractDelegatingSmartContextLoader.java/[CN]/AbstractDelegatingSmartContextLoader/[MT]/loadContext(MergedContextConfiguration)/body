@@ -1,0 +1,13 @@
+{
+  Assert.notNull(mergedConfig,"mergedConfig must not be null");
+  List<SmartContextLoader> candidates=Arrays.asList(getXmlLoader(),getAnnotationConfigLoader());
+  for (  SmartContextLoader loader : candidates) {
+    if (supports(loader,mergedConfig)) {
+      return delegateLoading(loader,mergedConfig);
+    }
+  }
+  if (!mergedConfig.getContextInitializerClasses().isEmpty()) {
+    return delegateLoading(getAnnotationConfigLoader(),mergedConfig);
+  }
+  throw new IllegalStateException(String.format("Neither %s nor %s was able to load an ApplicationContext from %s.",name(getXmlLoader()),name(getAnnotationConfigLoader()),mergedConfig));
+}

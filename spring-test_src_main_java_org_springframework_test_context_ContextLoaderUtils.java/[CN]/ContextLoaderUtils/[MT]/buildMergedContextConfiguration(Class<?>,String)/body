@@ -25,5 +25,10 @@
   Class<?>[] classes=ClassUtils.toClassArray(classesList);
   Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses=resolveInitializerClasses(configAttributesList);
   String[] activeProfiles=resolveActiveProfiles(testClass);
+  if (testClass.isAnnotationPresent(WebAppConfiguration.class)) {
+    WebAppConfiguration webAppConfig=testClass.getAnnotation(WebAppConfiguration.class);
+    String resourceBasePath=webAppConfig.value();
+    return new WebMergedContextConfiguration(testClass,locations,classes,initializerClasses,activeProfiles,resourceBasePath,contextLoader);
+  }
   return new MergedContextConfiguration(testClass,locations,classes,initializerClasses,activeProfiles,contextLoader);
 }
