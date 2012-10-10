@@ -4,8 +4,21 @@
     String value=DomUtils.getTextValue(element).trim();
     if (StringUtils.hasText(value)) {
       Resource[] resources=this.resourcePatternResolver.getResources(value);
+      boolean found=false;
       for (      Resource resource : resources) {
-        unitInfo.addJarFileUrl(resource.getURL());
+        if (resource.exists()) {
+          found=true;
+          unitInfo.addJarFileUrl(resource.getURL());
+        }
+      }
+      if (!found) {
+        URL rootUrl=unitInfo.getPersistenceUnitRootUrl();
+        if (rootUrl != null) {
+          unitInfo.addJarFileUrl(new URL(rootUrl,value));
+        }
+ else {
+          logger.warn("Cannot resolve jar-file entry [" + value + "] in persistence unit '"+ unitInfo.getPersistenceUnitName()+ "' without root URL");
+        }
       }
     }
   }
