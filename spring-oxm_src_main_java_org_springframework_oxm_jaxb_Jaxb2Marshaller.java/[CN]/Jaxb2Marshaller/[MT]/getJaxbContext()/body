@@ -1,19 +1,24 @@
 {
-  if (this.jaxbContext == null) {
-    try {
-      if (StringUtils.hasLength(this.contextPath)) {
-        this.jaxbContext=createJaxbContextFromContextPath();
-      }
- else       if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
-        this.jaxbContext=createJaxbContextFromClasses();
-      }
- else       if (!ObjectUtils.isEmpty(this.packagesToScan)) {
-        this.jaxbContext=createJaxbContextFromPackages();
-      }
-    }
- catch (    JAXBException ex) {
-      throw convertJaxbException(ex);
-    }
+  if (this.jaxbContext != null) {
+    return this.jaxbContext;
   }
-  return this.jaxbContext;
+synchronized (this.jaxbContextMonitor) {
+    if (this.jaxbContext == null) {
+      try {
+        if (StringUtils.hasLength(this.contextPath)) {
+          this.jaxbContext=createJaxbContextFromContextPath();
+        }
+ else         if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
+          this.jaxbContext=createJaxbContextFromClasses();
+        }
+ else         if (!ObjectUtils.isEmpty(this.packagesToScan)) {
+          this.jaxbContext=createJaxbContextFromPackages();
+        }
+      }
+ catch (      JAXBException ex) {
+        throw convertJaxbException(ex);
+      }
+    }
+    return this.jaxbContext;
+  }
 }
