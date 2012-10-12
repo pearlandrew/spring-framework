@@ -7,16 +7,23 @@
   if (!copyRequired && sourceMap.isEmpty()) {
     return sourceMap;
   }
-  Map<Object,Object> targetMap=CollectionFactory.createMap(targetType.getType(),sourceMap.size());
+  List<MapEntry> targetEntries=new ArrayList<MapEntry>(sourceMap.size());
   for (  Map.Entry<Object,Object> entry : sourceMap.entrySet()) {
     Object sourceKey=entry.getKey();
     Object sourceValue=entry.getValue();
     Object targetKey=convertKey(sourceKey,sourceType,targetType.getMapKeyTypeDescriptor());
     Object targetValue=convertValue(sourceValue,sourceType,targetType.getMapValueTypeDescriptor());
-    targetMap.put(targetKey,targetValue);
+    targetEntries.add(new MapEntry(targetKey,targetValue));
     if (sourceKey != targetKey || sourceValue != targetValue) {
       copyRequired=true;
     }
   }
-  return (copyRequired ? targetMap : sourceMap);
+  if (!copyRequired) {
+    return sourceMap;
+  }
+  Map<Object,Object> targetMap=CollectionFactory.createMap(targetType.getType(),sourceMap.size());
+  for (  MapEntry entry : targetEntries) {
+    entry.addToMap(targetMap);
+  }
+  return targetMap;
 }
