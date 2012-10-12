@@ -1,21 +1,4 @@
 {
   Assert.notNull(beanFactory,"BeanFactory must not be null");
-  this.callbackInstances.add(new BeanMethodInterceptor(beanFactory));
-  this.callbackInstances.add(new DisposableBeanMethodInterceptor());
-  this.callbackInstances.add(NoOp.INSTANCE);
-  for (  Callback callback : this.callbackInstances) {
-    this.callbackTypes.add(callback.getClass());
-  }
-  callbackFilter=new CallbackFilter(){
-    public int accept(    Method candidateMethod){
-      if (BeanAnnotationHelper.isBeanAnnotated(candidateMethod)) {
-        return 0;
-      }
-      if (DisposableBeanMethodInterceptor.isDestroyMethod(candidateMethod)) {
-        return 1;
-      }
-      return 2;
-    }
-  }
-;
+  this.callbackInstances=new Callback[]{new BeanMethodInterceptor(beanFactory),DISPOSABLE_BEAN_METHOD_INTERCEPTOR,NoOp.INSTANCE};
 }
