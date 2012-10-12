@@ -1,17 +1,16 @@
 {
   MockHttpServletRequest request=createServletRequest(servletContext);
-  UriComponents uriComponents=this.uriComponentsBuilder.build();
-  String requestUri=uriComponents.getPath();
+  String requestUri=this.uriComponents.getPath();
   request.setRequestURI(requestUri);
   updatePathRequestProperties(request,requestUri);
-  if (uriComponents.getScheme() != null) {
-    request.setScheme(uriComponents.getScheme());
+  if (this.uriComponents.getScheme() != null) {
+    request.setScheme(this.uriComponents.getScheme());
   }
-  if (uriComponents.getHost() != null) {
+  if (this.uriComponents.getHost() != null) {
     request.setServerName(uriComponents.getHost());
   }
-  if (uriComponents.getPort() != -1) {
-    request.setServerPort(uriComponents.getPort());
+  if (this.uriComponents.getPort() != -1) {
+    request.setServerPort(this.uriComponents.getPort());
   }
   request.setMethod(this.method.name());
   for (  String name : this.headers.keySet()) {
@@ -19,11 +18,18 @@
       request.addHeader(name,value);
     }
   }
-  request.setQueryString(uriComponents.getQuery());
-  for (  Entry<String,List<String>> entry : uriComponents.getQueryParams().entrySet()) {
-    for (    String value : entry.getValue()) {
-      request.addParameter(entry.getKey(),value);
+  try {
+    if (this.uriComponents.getQuery() != null) {
+      String query=UriUtils.decode(this.uriComponents.getQuery(),"UTF-8");
+      request.setQueryString(query);
     }
+    for (    Entry<String,List<String>> entry : this.uriComponents.getQueryParams().entrySet()) {
+      for (      String value : entry.getValue()) {
+        request.addParameter(UriUtils.decode(entry.getKey(),"UTF-8"),UriUtils.decode(value,"UTF-8"));
+      }
+    }
+  }
+ catch (  UnsupportedEncodingException ex) {
   }
   for (  String name : this.parameters.keySet()) {
     for (    String value : this.parameters.get(name)) {
