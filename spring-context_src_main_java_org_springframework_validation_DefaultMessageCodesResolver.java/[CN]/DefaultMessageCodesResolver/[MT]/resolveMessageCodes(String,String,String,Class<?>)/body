@@ -1,20 +1,16 @@
 {
-  List<String> codeList=new ArrayList<String>();
+  Set<String> codeList=new LinkedHashSet<String>();
   List<String> fieldList=new ArrayList<String>();
   buildFieldList(field,fieldList);
-  for (  String fieldInList : fieldList) {
-    codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + objectName+ CODE_SEPARATOR+ fieldInList));
-  }
+  addCodes(codeList,errorCode,objectName,fieldList);
   int dotIndex=field.lastIndexOf('.');
   if (dotIndex != -1) {
     buildFieldList(field.substring(dotIndex + 1),fieldList);
   }
-  for (  String fieldInList : fieldList) {
-    codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + fieldInList));
-  }
+  addCodes(codeList,errorCode,null,fieldList);
   if (fieldType != null) {
-    codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + fieldType.getName()));
+    addCode(codeList,errorCode,null,fieldType.getName());
   }
-  codeList.add(postProcessMessageCode(errorCode));
+  addCode(codeList,errorCode,null,null);
   return StringUtils.toStringArray(codeList);
 }
