@@ -8,12 +8,14 @@
   try {
     reader=new LineNumberReader(resource.getReader());
     String script=readScript(reader);
-    char delimiter=';';
+    char delimiter=DEFAULT_STATEMENT_SEPARATOR;
     if (!containsSqlScriptDelimiters(script,delimiter)) {
       delimiter='\n';
     }
     splitSqlScript(script,delimiter,statements);
+    int lineNumber=0;
     for (    String statement : statements) {
+      lineNumber++;
       try {
         int rowsAffected=jdbcTemplate.update(statement);
         if (logger.isDebugEnabled()) {
@@ -23,7 +25,7 @@
  catch (      DataAccessException ex) {
         if (continueOnError) {
           if (logger.isWarnEnabled()) {
-            logger.warn("SQL statement [" + statement + "] failed",ex);
+            logger.warn("Failed to execute SQL script statement at line " + lineNumber + " of resource "+ resource+ ": "+ statement,ex);
           }
         }
  else {
