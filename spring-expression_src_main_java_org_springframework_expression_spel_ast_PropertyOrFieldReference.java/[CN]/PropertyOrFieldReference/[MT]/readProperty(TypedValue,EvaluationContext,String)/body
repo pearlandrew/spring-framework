@@ -1,0 +1,39 @@
+{
+  Object targetObject=contextObject.getValue();
+  if (targetObject == null && this.nullSafe) {
+    return TypedValue.NULL;
+  }
+  PropertyAccessor accessorToUse=this.cachedReadAccessor;
+  if (accessorToUse != null) {
+    try {
+      return accessorToUse.read(eContext,contextObject.getValue(),name);
+    }
+ catch (    AccessException ae) {
+      this.cachedReadAccessor=null;
+    }
+  }
+  Class<?> contextObjectClass=getObjectClass(contextObject.getValue());
+  List<PropertyAccessor> accessorsToTry=getPropertyAccessorsToTry(contextObjectClass,eContext.getPropertyAccessors());
+  if (accessorsToTry != null) {
+    try {
+      for (      PropertyAccessor accessor : accessorsToTry) {
+        if (accessor.canRead(eContext,contextObject.getValue(),name)) {
+          if (accessor instanceof ReflectivePropertyAccessor) {
+            accessor=((ReflectivePropertyAccessor)accessor).createOptimalAccessor(eContext,contextObject.getValue(),name);
+          }
+          this.cachedReadAccessor=accessor;
+          return accessor.read(eContext,contextObject.getValue(),name);
+        }
+      }
+    }
+ catch (    AccessException ae) {
+      throw new SpelEvaluationException(ae,SpelMessage.EXCEPTION_DURING_PROPERTY_READ,name,ae.getMessage());
+    }
+  }
+  if (contextObject.getValue() == null) {
+    throw new SpelEvaluationException(SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL,name);
+  }
+ else {
+    throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE,name,FormatHelper.formatClassNameForMessage(contextObjectClass));
+  }
+}

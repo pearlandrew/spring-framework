@@ -1,0 +1,48 @@
+{
+  TypedValue context=state.getActiveContextObject();
+  Object targetObject=context.getValue();
+  TypeDescriptor targetObjectTypeDescriptor=context.getTypeDescriptor();
+  TypedValue indexValue=null;
+  Object index=null;
+  if (targetObject instanceof Map && (children[0] instanceof PropertyOrFieldReference)) {
+    PropertyOrFieldReference reference=(PropertyOrFieldReference)children[0];
+    index=reference.getName();
+    indexValue=new TypedValue(index);
+  }
+ else {
+    try {
+      state.pushActiveContextObject(state.getRootContextObject());
+      indexValue=children[0].getValueInternal(state);
+      index=indexValue.getValue();
+    }
+  finally {
+      state.popActiveContextObject();
+    }
+  }
+  if (targetObject instanceof Map) {
+    Object key=index;
+    if (targetObjectTypeDescriptor.getMapKeyTypeDescriptor() != null) {
+      key=state.convertValue(key,targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
+    }
+    return new MapIndexingValueRef(state.getTypeConverter(),(Map<?,?>)targetObject,key,targetObjectTypeDescriptor);
+  }
+  if (targetObject == null) {
+    throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
+  }
+  if (targetObject instanceof Collection || targetObject.getClass().isArray() || targetObject instanceof String) {
+    int idx=(Integer)state.convertValue(index,TypeDescriptor.valueOf(Integer.class));
+    if (targetObject.getClass().isArray()) {
+      return new ArrayIndexingValueRef(state.getTypeConverter(),targetObject,idx,targetObjectTypeDescriptor);
+    }
+ else     if (targetObject instanceof Collection) {
+      return new CollectionIndexingValueRef((Collection<?>)targetObject,idx,targetObjectTypeDescriptor,state.getTypeConverter(),state.getConfiguration().isAutoGrowCollections());
+    }
+ else     if (targetObject instanceof String) {
+      return new StringIndexingLValue((String)targetObject,idx,targetObjectTypeDescriptor);
+    }
+  }
+  if (indexValue.getTypeDescriptor().getType() == String.class) {
+    return new PropertyIndexingValueRef(targetObject,(String)indexValue.getValue(),state.getEvaluationContext(),targetObjectTypeDescriptor);
+  }
+  throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,targetObjectTypeDescriptor.toString());
+}

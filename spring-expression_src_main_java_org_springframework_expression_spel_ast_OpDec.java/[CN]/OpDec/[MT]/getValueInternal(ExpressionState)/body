@@ -1,0 +1,54 @@
+{
+  SpelNodeImpl operand=getLeftOperand();
+  ValueRef lvalue=operand.getValueRef(state);
+  final TypedValue operandTypedValue=lvalue.getValue();
+  final Object operandValue=operandTypedValue.getValue();
+  TypedValue returnValue=operandTypedValue;
+  TypedValue newValue=null;
+  if (operandValue instanceof Number) {
+    Number op1=(Number)operandValue;
+    if (op1 instanceof Double) {
+      newValue=new TypedValue(op1.doubleValue() - 1.0d,operandTypedValue.getTypeDescriptor());
+    }
+ else     if (op1 instanceof Float) {
+      newValue=new TypedValue(op1.floatValue() - 1.0f,operandTypedValue.getTypeDescriptor());
+    }
+ else     if (op1 instanceof Long) {
+      newValue=new TypedValue(op1.longValue() - 1L,operandTypedValue.getTypeDescriptor());
+    }
+ else     if (op1 instanceof Short) {
+      newValue=new TypedValue(op1.shortValue() - (short)1,operandTypedValue.getTypeDescriptor());
+    }
+ else {
+      newValue=new TypedValue(op1.intValue() - 1,operandTypedValue.getTypeDescriptor());
+    }
+  }
+  if (newValue == null) {
+    try {
+      newValue=state.operate(Operation.SUBTRACT,returnValue.getValue(),1);
+    }
+ catch (    SpelEvaluationException see) {
+      if (see.getMessageCode() == SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES) {
+        throw new SpelEvaluationException(operand.getStartPosition(),SpelMessage.OPERAND_NOT_DECREMENTABLE,operand.toStringAST());
+      }
+ else {
+        throw see;
+      }
+    }
+  }
+  try {
+    lvalue.setValue(newValue.getValue());
+  }
+ catch (  SpelEvaluationException see) {
+    if (see.getMessageCode() == SpelMessage.SETVALUE_NOT_SUPPORTED) {
+      throw new SpelEvaluationException(operand.getStartPosition(),SpelMessage.OPERAND_NOT_DECREMENTABLE);
+    }
+ else {
+      throw see;
+    }
+  }
+  if (!postfix) {
+    returnValue=newValue;
+  }
+  return returnValue;
+}

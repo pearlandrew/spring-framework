@@ -1,0 +1,21 @@
+{
+  if (index >= collection.size()) {
+    if (growCollection) {
+      growCollection(collectionEntryTypeDescriptor,index,collection);
+    }
+ else {
+      throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,collection.size(),index);
+    }
+  }
+  if (collection instanceof List) {
+    List list=(List)collection;
+    if (collectionEntryTypeDescriptor.getElementTypeDescriptor() != null) {
+      newValue=typeConverter.convertValue(newValue,TypeDescriptor.forObject(newValue),collectionEntryTypeDescriptor.getElementTypeDescriptor());
+    }
+    list.set(index,newValue);
+    return;
+  }
+ else {
+    throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,collectionEntryTypeDescriptor.toString());
+  }
+}

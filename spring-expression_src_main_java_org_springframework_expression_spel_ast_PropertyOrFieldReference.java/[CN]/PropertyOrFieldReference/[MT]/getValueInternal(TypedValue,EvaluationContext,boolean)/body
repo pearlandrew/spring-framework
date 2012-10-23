@@ -1,0 +1,54 @@
+{
+  TypedValue result=readProperty(contextObject,eContext,this.name);
+  if (result.getValue() == null && isAutoGrowNullReferences && nextChildIs(Indexer.class,PropertyOrFieldReference.class)) {
+    TypeDescriptor resultDescriptor=result.getTypeDescriptor();
+    if ((resultDescriptor.getType().equals(List.class) || resultDescriptor.getType().equals(Map.class))) {
+      if (resultDescriptor.getType().equals(List.class)) {
+        try {
+          if (isWritableProperty(this.name,contextObject,eContext)) {
+            List<?> newList=ArrayList.class.newInstance();
+            writeProperty(contextObject,eContext,this.name,newList);
+            result=readProperty(contextObject,eContext,this.name);
+          }
+        }
+ catch (        InstantiationException ex) {
+          throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+        }
+catch (        IllegalAccessException ex) {
+          throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+        }
+      }
+ else {
+        try {
+          if (isWritableProperty(this.name,contextObject,eContext)) {
+            Map<?,?> newMap=HashMap.class.newInstance();
+            writeProperty(contextObject,eContext,name,newMap);
+            result=readProperty(contextObject,eContext,this.name);
+          }
+        }
+ catch (        InstantiationException ex) {
+          throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
+        }
+catch (        IllegalAccessException ex) {
+          throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
+        }
+      }
+    }
+ else {
+      try {
+        if (isWritableProperty(this.name,contextObject,eContext)) {
+          Object newObject=result.getTypeDescriptor().getType().newInstance();
+          writeProperty(contextObject,eContext,name,newObject);
+          result=readProperty(contextObject,eContext,this.name);
+        }
+      }
+ catch (      InstantiationException ex) {
+        throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT,result.getTypeDescriptor().getType());
+      }
+catch (      IllegalAccessException ex) {
+        throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT,result.getTypeDescriptor().getType());
+      }
+    }
+  }
+  return result;
+}
