@@ -1,0 +1,28 @@
+{
+  List<PropertyAccessor> specificAccessors=new ArrayList<PropertyAccessor>();
+  List<PropertyAccessor> generalAccessors=new ArrayList<PropertyAccessor>();
+  for (  PropertyAccessor resolver : propertyAccessors) {
+    Class<?>[] targets=resolver.getSpecificTargetClasses();
+    if (targets == null) {
+      generalAccessors.add(resolver);
+    }
+ else {
+      if (targetType != null) {
+        for (        Class<?> clazz : targets) {
+          if (clazz == targetType) {
+            specificAccessors.add(resolver);
+            break;
+          }
+ else           if (clazz.isAssignableFrom(targetType)) {
+            generalAccessors.add(resolver);
+          }
+        }
+      }
+    }
+  }
+  List<PropertyAccessor> resolvers=new ArrayList<PropertyAccessor>();
+  resolvers.addAll(specificAccessors);
+  generalAccessors.removeAll(specificAccessors);
+  resolvers.addAll(generalAccessors);
+  return resolvers;
+}

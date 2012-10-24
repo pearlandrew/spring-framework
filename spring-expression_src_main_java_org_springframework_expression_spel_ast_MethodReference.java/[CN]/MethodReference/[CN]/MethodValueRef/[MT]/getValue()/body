@@ -1,0 +1,21 @@
+{
+  MethodExecutor executorToUse=cachedExecutor;
+  if (executorToUse != null) {
+    try {
+      return executorToUse.execute(evaluationContext,target,arguments);
+    }
+ catch (    AccessException ae) {
+      throwSimpleExceptionIfPossible(state,ae);
+      cachedExecutor=null;
+    }
+  }
+  executorToUse=findAccessorForMethod(name,getTypes(arguments),target,evaluationContext);
+  cachedExecutor=executorToUse;
+  try {
+    return executorToUse.execute(evaluationContext,target,arguments);
+  }
+ catch (  AccessException ae) {
+    throwSimpleExceptionIfPossible(state,ae);
+    throw new SpelEvaluationException(getStartPosition(),ae,SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,name,state.getActiveContextObject().getValue().getClass().getName(),ae.getMessage());
+  }
+}

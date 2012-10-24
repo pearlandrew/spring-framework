@@ -1,0 +1,37 @@
+{
+  if (contextObject.getValue() == null && nullSafe) {
+    return;
+  }
+  PropertyAccessor accessorToUse=this.cachedWriteAccessor;
+  if (accessorToUse != null) {
+    try {
+      accessorToUse.write(eContext,contextObject.getValue(),name,newValue);
+      return;
+    }
+ catch (    AccessException ae) {
+      this.cachedWriteAccessor=null;
+    }
+  }
+  Class<?> contextObjectClass=getObjectClass(contextObject.getValue());
+  List<PropertyAccessor> accessorsToTry=getPropertyAccessorsToTry(contextObjectClass,eContext.getPropertyAccessors());
+  if (accessorsToTry != null) {
+    try {
+      for (      PropertyAccessor accessor : accessorsToTry) {
+        if (accessor.canWrite(eContext,contextObject.getValue(),name)) {
+          this.cachedWriteAccessor=accessor;
+          accessor.write(eContext,contextObject.getValue(),name,newValue);
+          return;
+        }
+      }
+    }
+ catch (    AccessException ae) {
+      throw new SpelEvaluationException(getStartPosition(),ae,SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE,name,ae.getMessage());
+    }
+  }
+  if (contextObject.getValue() == null) {
+    throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL,name);
+  }
+ else {
+    throw new SpelEvaluationException(getStartPosition(),SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE,name,FormatHelper.formatClassNameForMessage(contextObjectClass));
+  }
+}

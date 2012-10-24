@@ -1,0 +1,101 @@
+{
+  TypedValue op=state.getActiveContextObject();
+  Object operand=op.getValue();
+  SpelNodeImpl selectionCriteria=children[0];
+  if (operand instanceof Map) {
+    Map<?,?> mapdata=(Map<?,?>)operand;
+    Map<Object,Object> result=new HashMap<Object,Object>();
+    Object lastKey=null;
+    for (    Map.Entry<?,?> entry : mapdata.entrySet()) {
+      try {
+        TypedValue kvpair=new TypedValue(entry);
+        state.pushActiveContextObject(kvpair);
+        Object o=selectionCriteria.getValueInternal(state).getValue();
+        if (o instanceof Boolean) {
+          if (((Boolean)o).booleanValue() == true) {
+            if (variant == FIRST) {
+              result.put(entry.getKey(),entry.getValue());
+              return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
+            }
+            result.put(entry.getKey(),entry.getValue());
+            lastKey=entry.getKey();
+          }
+        }
+ else {
+          throw new SpelEvaluationException(selectionCriteria.getStartPosition(),SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+        }
+      }
+  finally {
+        state.popActiveContextObject();
+      }
+    }
+    if ((variant == FIRST || variant == LAST) && result.size() == 0) {
+      return new ValueRef.TypedValueHolderValueRef(new TypedValue(null),this);
+    }
+    if (variant == LAST) {
+      Map<Object,Object> resultMap=new HashMap<Object,Object>();
+      Object lastValue=result.get(lastKey);
+      resultMap.put(lastKey,lastValue);
+      return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultMap),this);
+    }
+    return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
+  }
+ else   if ((operand instanceof Collection) || ObjectUtils.isArray(operand)) {
+    List<Object> data=new ArrayList<Object>();
+    Collection<?> c=(operand instanceof Collection) ? (Collection<?>)operand : Arrays.asList(ObjectUtils.toObjectArray(operand));
+    data.addAll(c);
+    List<Object> result=new ArrayList<Object>();
+    int idx=0;
+    for (    Object element : data) {
+      try {
+        state.pushActiveContextObject(new TypedValue(element));
+        state.enterScope("index",idx);
+        Object o=selectionCriteria.getValueInternal(state).getValue();
+        if (o instanceof Boolean) {
+          if (((Boolean)o).booleanValue() == true) {
+            if (variant == FIRST) {
+              return new ValueRef.TypedValueHolderValueRef(new TypedValue(element),this);
+            }
+            result.add(element);
+          }
+        }
+ else {
+          throw new SpelEvaluationException(selectionCriteria.getStartPosition(),SpelMessage.RESULT_OF_SELECTION_CRITERIA_IS_NOT_BOOLEAN);
+        }
+        idx++;
+      }
+  finally {
+        state.exitScope();
+        state.popActiveContextObject();
+      }
+    }
+    if ((variant == FIRST || variant == LAST) && result.size() == 0) {
+      return ValueRef.NullValueRef.instance;
+    }
+    if (variant == LAST) {
+      return new ValueRef.TypedValueHolderValueRef(new TypedValue(result.get(result.size() - 1)),this);
+    }
+    if (operand instanceof Collection) {
+      return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
+    }
+ else {
+      Class<?> elementType=ClassUtils.resolvePrimitiveIfNecessary(op.getTypeDescriptor().getElementTypeDescriptor().getType());
+      Object resultArray=Array.newInstance(elementType,result.size());
+      System.arraycopy(result.toArray(),0,resultArray,0,result.size());
+      return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray),this);
+    }
+  }
+ else {
+    if (operand == null) {
+      if (nullSafe) {
+        return ValueRef.NullValueRef.instance;
+      }
+ else {
+        throw new SpelEvaluationException(getStartPosition(),SpelMessage.INVALID_TYPE_FOR_SELECTION,"null");
+      }
+    }
+ else {
+      throw new SpelEvaluationException(getStartPosition(),SpelMessage.INVALID_TYPE_FOR_SELECTION,operand.getClass().getName());
+    }
+  }
+}
