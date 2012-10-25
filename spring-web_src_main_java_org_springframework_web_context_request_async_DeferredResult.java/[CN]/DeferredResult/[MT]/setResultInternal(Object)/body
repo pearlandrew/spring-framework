@@ -1,14 +1,18 @@
 {
-  Assert.notNull(resultHandler,"DeferredResultHandler is required");
 synchronized (this) {
-    this.resultHandler=resultHandler;
-    if ((this.result != RESULT_NONE) && (!this.expired)) {
+    if (isSetOrExpired()) {
+      return false;
+    }
+    this.result=result;
+    if (this.resultHandler != null) {
       try {
         this.resultHandler.handleResult(this.result);
       }
  catch (      Throwable t) {
         logger.trace("DeferredResult not handled",t);
+        return false;
       }
     }
   }
+  return true;
 }
