@@ -1,14 +1,14 @@
 {
-  Callable<Object> task=new StubCallable();
+  int concurrentResult=21;
+  Callable<Object> task=new StubCallable(concurrentResult);
   CallableProcessingInterceptor interceptor=createStrictMock(CallableProcessingInterceptor.class);
   interceptor.preProcess(this.asyncWebRequest,task);
-  interceptor.postProcess(this.asyncWebRequest,task,new Integer(1));
+  interceptor.postProcess(this.asyncWebRequest,task,new Integer(concurrentResult));
   replay(interceptor);
-  this.asyncWebRequest.startAsync();
-  expect(this.asyncWebRequest.isAsyncComplete()).andReturn(false);
-  this.asyncWebRequest.dispatch();
-  replay(this.asyncWebRequest);
+  setupDefaultAsyncScenario();
   this.asyncManager.registerCallableInterceptor("interceptor",interceptor);
   this.asyncManager.startCallableProcessing(task);
+  assertTrue(this.asyncManager.hasConcurrentResult());
+  assertEquals(concurrentResult,this.asyncManager.getConcurrentResult());
   verify(interceptor,this.asyncWebRequest);
 }

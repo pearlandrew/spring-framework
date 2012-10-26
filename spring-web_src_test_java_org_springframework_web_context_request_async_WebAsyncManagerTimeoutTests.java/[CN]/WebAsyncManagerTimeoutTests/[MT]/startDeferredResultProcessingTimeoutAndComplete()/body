@@ -1,0 +1,15 @@
+{
+  DeferredResult<Integer> deferredResult=new DeferredResult<Integer>();
+  DeferredResultProcessingInterceptor interceptor=createStrictMock(DeferredResultProcessingInterceptor.class);
+  interceptor.preProcess(this.asyncWebRequest,deferredResult);
+  interceptor.afterTimeout(this.asyncWebRequest,deferredResult);
+  interceptor.afterCompletion(this.asyncWebRequest,deferredResult);
+  replay(interceptor);
+  this.asyncManager.registerDeferredResultInterceptor("interceptor",interceptor);
+  this.asyncManager.startDeferredResultProcessing(deferredResult);
+  this.asyncWebRequest.onTimeout(ASYNC_EVENT);
+  this.asyncWebRequest.onComplete(ASYNC_EVENT);
+  assertFalse(this.asyncManager.hasConcurrentResult());
+  assertEquals(DispatcherType.REQUEST,this.servletRequest.getDispatcherType());
+  verify(interceptor);
+}

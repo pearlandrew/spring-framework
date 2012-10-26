@@ -1,22 +1,15 @@
 {
-  DeferredResult<Integer> deferredResult=new DeferredResult<Integer>(1000L,10);
-  this.asyncWebRequest.setTimeout(1000L);
-  this.asyncWebRequest.setTimeoutHandler((Runnable)notNull());
-  this.asyncWebRequest.addCompletionHandler((Runnable)notNull());
-  this.asyncWebRequest.startAsync();
-  replay(this.asyncWebRequest);
+  DeferredResult<String> deferredResult=new DeferredResult<String>(1000L);
+  String concurrentResult="abc";
   DeferredResultProcessingInterceptor interceptor=createStrictMock(DeferredResultProcessingInterceptor.class);
   interceptor.preProcess(this.asyncWebRequest,deferredResult);
+  interceptor.postProcess(asyncWebRequest,deferredResult,concurrentResult);
   replay(interceptor);
+  this.asyncWebRequest.setTimeout(1000L);
+  setupDefaultAsyncScenario();
   this.asyncManager.registerDeferredResultInterceptor("interceptor",interceptor);
   this.asyncManager.startDeferredResultProcessing(deferredResult);
-  verify(this.asyncWebRequest,interceptor);
-  reset(this.asyncWebRequest,interceptor);
-  this.asyncWebRequest.dispatch();
-  replay(this.asyncWebRequest);
-  interceptor.postProcess(asyncWebRequest,deferredResult,25);
-  replay(interceptor);
-  deferredResult.setResult(25);
-  assertEquals(25,this.asyncManager.getConcurrentResult());
+  deferredResult.setResult(concurrentResult);
+  assertEquals(concurrentResult,this.asyncManager.getConcurrentResult());
   verify(this.asyncWebRequest,interceptor);
 }

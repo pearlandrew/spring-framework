@@ -1,28 +1,38 @@
 {
   Assert.notNull(callable,"Callable must not be null");
+  Assert.state(this.asyncWebRequest != null,"AsyncWebRequest must not be null");
+  final CallableInterceptorChain chain=new CallableInterceptorChain(this.callableInterceptors.values());
+  this.asyncWebRequest.setTimeoutHandler(new Runnable(){
+    public void run(){
+      logger.debug("Processing timeout");
+      Object result=chain.triggerAfterTimeout(asyncWebRequest,callable);
+      if (result != CallableProcessingInterceptor.RESULT_NONE) {
+        setConcurrentResultAndDispatch(result);
+      }
+    }
+  }
+);
+  this.asyncWebRequest.addCompletionHandler(new Runnable(){
+    public void run(){
+      chain.triggerAfterCompletion(asyncWebRequest,callable);
+    }
+  }
+);
   startAsyncProcessing(processingContext);
   this.taskExecutor.submit(new Runnable(){
     public void run(){
-      CallableInterceptorChain chain=new CallableInterceptorChain(callableInterceptors.values());
+      Object result=null;
       try {
         chain.applyPreProcess(asyncWebRequest,callable);
-        concurrentResult=callable.call();
+        result=callable.call();
       }
  catch (      Throwable t) {
-        concurrentResult=t;
+        result=t;
       }
  finally {
-        chain.applyPostProcess(asyncWebRequest,callable,concurrentResult);
+        result=chain.applyPostProcess(asyncWebRequest,callable,result);
       }
-      if (logger.isDebugEnabled()) {
-        logger.debug("Concurrent result value [" + concurrentResult + "]");
-      }
-      if (asyncWebRequest.isAsyncComplete()) {
-        logger.error("Could not complete processing due to a timeout or network error");
-        return;
-      }
-      logger.debug("Dispatching request to continue processing");
-      asyncWebRequest.dispatch();
+      setConcurrentResultAndDispatch(result);
     }
   }
 );

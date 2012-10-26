@@ -1,0 +1,12 @@
+{
+  StubCallable callable=new StubCallable();
+  CallableProcessingInterceptor interceptor=createStrictMock(CallableProcessingInterceptor.class);
+  expect(interceptor.afterTimeout(this.asyncWebRequest,callable)).andReturn(22);
+  replay(interceptor);
+  this.asyncManager.registerCallableInterceptor("timeoutInterceptor",interceptor);
+  this.asyncManager.startCallableProcessing(callable);
+  this.asyncWebRequest.onTimeout(ASYNC_EVENT);
+  assertEquals(22,this.asyncManager.getConcurrentResult());
+  assertEquals(DispatcherType.ASYNC,this.servletRequest.getDispatcherType());
+  verify(interceptor);
+}

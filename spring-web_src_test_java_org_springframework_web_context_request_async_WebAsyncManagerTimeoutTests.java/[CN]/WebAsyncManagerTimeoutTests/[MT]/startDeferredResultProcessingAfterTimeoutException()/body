@@ -1,0 +1,16 @@
+{
+  DeferredResult<Integer> deferredResult=new DeferredResult<Integer>();
+  final Exception exception=new Exception();
+  DeferredResultProcessingInterceptor interceptor=new DeferredResultProcessingInterceptorAdapter(){
+    public <T>void afterTimeout(    NativeWebRequest request,    DeferredResult<T> result) throws Exception {
+      throw exception;
+    }
+  }
+;
+  this.asyncManager.registerDeferredResultInterceptor("interceptor",interceptor);
+  this.asyncManager.startDeferredResultProcessing(deferredResult);
+  AsyncEvent event=null;
+  this.asyncWebRequest.onTimeout(event);
+  assertEquals(exception,this.asyncManager.getConcurrentResult());
+  assertEquals(DispatcherType.ASYNC,this.servletRequest.getDispatcherType());
+}

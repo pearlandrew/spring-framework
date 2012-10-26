@@ -1,0 +1,11 @@
+{
+  this.servletRequest=new MockHttpServletRequest();
+  this.servletRequest.setAsyncSupported(true);
+  this.asyncWebRequest=new StandardServletAsyncWebRequest(servletRequest,new MockHttpServletResponse());
+  AsyncTaskExecutor executor=createMock(AsyncTaskExecutor.class);
+  expect(executor.submit((Runnable)notNull())).andReturn(null);
+  replay(executor);
+  this.asyncManager=WebAsyncUtils.getAsyncManager(servletRequest);
+  this.asyncManager.setTaskExecutor(executor);
+  this.asyncManager.setAsyncWebRequest(this.asyncWebRequest);
+}

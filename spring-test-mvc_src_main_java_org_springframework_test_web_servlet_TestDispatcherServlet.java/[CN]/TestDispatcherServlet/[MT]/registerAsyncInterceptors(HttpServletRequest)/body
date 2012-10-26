@@ -1,21 +1,15 @@
 {
   final CountDownLatch asyncResultLatch=new CountDownLatch(1);
   WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
-  asyncManager.registerCallableInterceptor("mockmvc",new CallableProcessingInterceptor(){
-    public void preProcess(    NativeWebRequest request,    Callable<?> task) throws Exception {
-    }
-    public void postProcess(    NativeWebRequest request,    Callable<?> task,    Object value) throws Exception {
+  asyncManager.registerCallableInterceptor(KEY,new CallableProcessingInterceptorAdapter(){
+    public <T>void postProcess(    NativeWebRequest request,    Callable<T> task,    Object value) throws Exception {
       asyncResultLatch.countDown();
     }
   }
 );
-  asyncManager.registerDeferredResultInterceptor("mockmvc",new DeferredResultProcessingInterceptor(){
-    public void preProcess(    NativeWebRequest request,    DeferredResult<?> result) throws Exception {
-    }
-    public void postProcess(    NativeWebRequest request,    DeferredResult<?> result,    Object value) throws Exception {
+  asyncManager.registerDeferredResultInterceptor(KEY,new DeferredResultProcessingInterceptorAdapter(){
+    public <T>void postProcess(    NativeWebRequest request,    DeferredResult<T> result,    Object value) throws Exception {
       asyncResultLatch.countDown();
-    }
-    public void afterExpiration(    NativeWebRequest request,    DeferredResult<?> result) throws Exception {
     }
   }
 );
