@@ -1,9 +1,11 @@
 {
-  WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(this.mockRequest);
-  if (asyncManager.isConcurrentHandlingStarted()) {
-    if (!awaitAsyncResult()) {
+  HttpServletRequest request=this.mockRequest;
+  if (request.isAsyncStarted()) {
+    long timeout=request.getAsyncContext().getTimeout();
+    if (!awaitAsyncResult(timeout)) {
       throw new IllegalStateException("Gave up waiting on async result from [" + this.handler + "] to complete");
     }
+    WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(this.mockRequest);
     if (asyncManager.hasConcurrentResult()) {
       return asyncManager.getConcurrentResult();
     }
