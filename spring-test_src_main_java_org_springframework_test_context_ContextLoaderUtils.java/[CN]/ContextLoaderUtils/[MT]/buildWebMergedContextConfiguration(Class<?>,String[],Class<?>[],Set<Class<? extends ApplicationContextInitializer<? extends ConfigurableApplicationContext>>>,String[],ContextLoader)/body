@@ -1,0 +1,20 @@
+{
+  Class<? extends Annotation> webAppConfigClass=loadWebAppConfigurationClass();
+  if (webAppConfigClass != null && testClass.isAnnotationPresent(webAppConfigClass)) {
+    Annotation annotation=testClass.getAnnotation(webAppConfigClass);
+    String resourceBasePath=(String)AnnotationUtils.getValue(annotation);
+    try {
+      Class<? extends MergedContextConfiguration> webMergedConfigClass=(Class<? extends MergedContextConfiguration>)ClassUtils.forName(WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME,ContextLoaderUtils.class.getClassLoader());
+      Constructor<? extends MergedContextConfiguration> constructor=ClassUtils.getConstructorIfAvailable(webMergedConfigClass,Class.class,String[].class,Class[].class,Set.class,String[].class,String.class,ContextLoader.class);
+      if (constructor != null) {
+        return instantiateClass(constructor,testClass,locations,classes,initializerClasses,activeProfiles,resourceBasePath,contextLoader);
+      }
+    }
+ catch (    Throwable t) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Could not instantiate [" + WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME + "].",t);
+      }
+    }
+  }
+  return null;
+}
