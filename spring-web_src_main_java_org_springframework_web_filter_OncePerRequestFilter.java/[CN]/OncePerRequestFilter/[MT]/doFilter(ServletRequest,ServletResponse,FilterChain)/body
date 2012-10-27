@@ -4,10 +4,11 @@
   }
   HttpServletRequest httpRequest=(HttpServletRequest)request;
   HttpServletResponse httpResponse=(HttpServletResponse)response;
-  boolean processAsyncRequestThread=isAsyncDispatch(httpRequest) && shouldFilterAsyncDispatches();
+  WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
+  boolean processAsyncDispatch=asyncManager.hasConcurrentResult() && !shouldNotFilterAsyncDispatch();
   String alreadyFilteredAttributeName=getAlreadyFilteredAttributeName();
   boolean hasAlreadyFilteredAttribute=request.getAttribute(alreadyFilteredAttributeName) != null;
-  if ((hasAlreadyFilteredAttribute && (!processAsyncRequestThread)) || shouldNotFilter(httpRequest)) {
+  if ((hasAlreadyFilteredAttribute && (!processAsyncDispatch)) || shouldNotFilter(httpRequest)) {
     filterChain.doFilter(request,response);
   }
  else {
@@ -16,7 +17,7 @@
       doFilterInternal(httpRequest,httpResponse,filterChain);
     }
   finally {
-      if (isLastRequestThread(httpRequest)) {
+      if (!asyncManager.isConcurrentHandlingStarted()) {
         request.removeAttribute(alreadyFilteredAttributeName);
       }
     }

@@ -1,10 +1,11 @@
 {
-  boolean isFirstRequest=!isAsyncDispatch(request);
+  WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
+  boolean isFirstRequest=!asyncManager.hasConcurrentResult();
   if (isFirstRequest) {
     response=new ShallowEtagResponseWrapper(response);
   }
   filterChain.doFilter(request,response);
-  if (isLastRequestThread(request)) {
+  if (!asyncManager.isConcurrentHandlingStarted()) {
     updateResponse(request,response);
   }
 }
