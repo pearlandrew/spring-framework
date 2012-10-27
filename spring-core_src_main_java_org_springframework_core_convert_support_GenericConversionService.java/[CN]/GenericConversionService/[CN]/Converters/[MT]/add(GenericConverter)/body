@@ -1,8 +1,13 @@
 {
   Set<ConvertiblePair> convertibleTypes=converter.getConvertibleTypes();
-  Assert.state(converter.getConvertibleTypes() != null,"Converter does not specifiy ConvertibleTypes");
-  for (  ConvertiblePair convertiblePair : convertibleTypes) {
-    ConvertersForPair convertersForPair=getMatchableConverters(convertiblePair);
-    convertersForPair.add(converter);
+  if (convertibleTypes == null) {
+    Assert.state(converter instanceof ConditionalConversion,"Only conditional converters may return null convertible types");
+    globalConverters.add(converter);
+  }
+ else {
+    for (    ConvertiblePair convertiblePair : convertibleTypes) {
+      ConvertersForPair convertersForPair=getMatchableConverters(convertiblePair);
+      convertersForPair.add(converter);
+    }
   }
 }
