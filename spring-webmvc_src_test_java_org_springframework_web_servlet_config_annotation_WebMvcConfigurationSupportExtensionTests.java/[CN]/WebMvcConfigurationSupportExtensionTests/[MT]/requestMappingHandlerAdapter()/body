@@ -3,11 +3,16 @@
   String actual=webConfig.mvcConversionService().convert(new TestBean(),String.class);
   assertEquals("converted",actual);
   assertEquals(1,adapter.getMessageConverters().size());
-  @SuppressWarnings("unchecked") List<HandlerMethodArgumentResolver> argResolvers=(List<HandlerMethodArgumentResolver>)new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
+  DirectFieldAccessor fieldAccessor=new DirectFieldAccessor(adapter);
+  List<HandlerMethodArgumentResolver> argResolvers=(List<HandlerMethodArgumentResolver>)fieldAccessor.getPropertyValue("customArgumentResolvers");
   assertEquals(1,argResolvers.size());
-  @SuppressWarnings("unchecked") List<HandlerMethodReturnValueHandler> handlers=(List<HandlerMethodReturnValueHandler>)new DirectFieldAccessor(adapter).getPropertyValue("customReturnValueHandlers");
+  List<HandlerMethodReturnValueHandler> handlers=(List<HandlerMethodReturnValueHandler>)fieldAccessor.getPropertyValue("customReturnValueHandlers");
   assertEquals(1,handlers.size());
-  assertEquals(ConcurrentTaskExecutor.class,new DirectFieldAccessor(adapter).getPropertyValue("taskExecutor").getClass());
-  assertEquals(2500L,new DirectFieldAccessor(adapter).getPropertyValue("asyncRequestTimeout"));
-  assertEquals(false,new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
+  assertEquals(ConcurrentTaskExecutor.class,fieldAccessor.getPropertyValue("taskExecutor").getClass());
+  assertEquals(2500L,fieldAccessor.getPropertyValue("asyncRequestTimeout"));
+  Map<Object,CallableProcessingInterceptor> callableInterceptors=(Map<Object,CallableProcessingInterceptor>)fieldAccessor.getPropertyValue("callableInterceptors");
+  assertEquals(1,callableInterceptors.size());
+  Map<Object,DeferredResultProcessingInterceptor> deferredResultInterceptors=(Map<Object,DeferredResultProcessingInterceptor>)fieldAccessor.getPropertyValue("deferredResultInterceptors");
+  assertEquals(1,deferredResultInterceptors.size());
+  assertEquals(false,fieldAccessor.getPropertyValue("ignoreDefaultModelOnRedirect"));
 }
