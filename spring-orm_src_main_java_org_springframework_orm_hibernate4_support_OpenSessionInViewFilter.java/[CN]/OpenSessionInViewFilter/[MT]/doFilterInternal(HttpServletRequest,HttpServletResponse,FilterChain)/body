@@ -2,12 +2,12 @@
   SessionFactory sessionFactory=lookupSessionFactory(request);
   boolean participate=false;
   WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
-  boolean isFirstRequest=!asyncManager.hasConcurrentResult();
   String key=getAlreadyFilteredAttributeName();
   if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
     participate=true;
   }
  else {
+    boolean isFirstRequest=!isAsyncDispatch(request);
     if (isFirstRequest || !applySessionBindingInterceptor(asyncManager,key)) {
       logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
       Session session=openSession(sessionFactory);
@@ -22,7 +22,7 @@
   finally {
     if (!participate) {
       SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.unbindResource(sessionFactory);
-      if (!asyncManager.isConcurrentHandlingStarted()) {
+      if (!isAsyncStarted(request)) {
         logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
         SessionFactoryUtils.closeSession(sessionHolder.getSession());
       }

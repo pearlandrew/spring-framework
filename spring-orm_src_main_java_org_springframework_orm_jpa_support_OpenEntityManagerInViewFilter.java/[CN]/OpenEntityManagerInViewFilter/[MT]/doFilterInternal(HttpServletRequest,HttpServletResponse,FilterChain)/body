@@ -2,12 +2,12 @@
   EntityManagerFactory emf=lookupEntityManagerFactory(request);
   boolean participate=false;
   WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
-  boolean isFirstRequest=!asyncManager.hasConcurrentResult();
   String key=getAlreadyFilteredAttributeName();
   if (TransactionSynchronizationManager.hasResource(emf)) {
     participate=true;
   }
  else {
+    boolean isFirstRequest=!isAsyncDispatch(request);
     if (isFirstRequest || !applyEntityManagerBindingInterceptor(asyncManager,key)) {
       logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewFilter");
       try {
@@ -27,7 +27,7 @@
   finally {
     if (!participate) {
       EntityManagerHolder emHolder=(EntityManagerHolder)TransactionSynchronizationManager.unbindResource(emf);
-      if (!asyncManager.isConcurrentHandlingStarted()) {
+      if (!isAsyncStarted(request)) {
         logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewFilter");
         EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
       }

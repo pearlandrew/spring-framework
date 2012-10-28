@@ -1,6 +1,5 @@
 {
-  WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
-  boolean isFirstRequest=!asyncManager.hasConcurrentResult();
+  boolean isFirstRequest=!isAsyncDispatch(request);
   if (isIncludePayload()) {
     if (isFirstRequest) {
       request=new RequestCachingRequestWrapper(request);
@@ -13,7 +12,7 @@
     filterChain.doFilter(request,response);
   }
   finally {
-    if (!asyncManager.isConcurrentHandlingStarted()) {
+    if (!isAsyncStarted(request)) {
       afterRequest(request,getAfterMessage(request));
     }
   }

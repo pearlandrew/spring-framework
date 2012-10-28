@@ -2,13 +2,13 @@
   SessionFactory sessionFactory=lookupSessionFactory(request);
   boolean participate=false;
   WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
-  boolean isFirstRequest=!asyncManager.hasConcurrentResult();
   String key=getAlreadyFilteredAttributeName();
   if (isSingleSession()) {
     if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
       participate=true;
     }
  else {
+      boolean isFirstRequest=!isAsyncDispatch(request);
       if (isFirstRequest || !applySessionBindingInterceptor(asyncManager,key)) {
         logger.debug("Opening single Hibernate Session in OpenSessionInViewFilter");
         Session session=getSession(sessionFactory);
@@ -19,7 +19,7 @@
     }
   }
  else {
-    Assert.state(!asyncManager.isConcurrentHandlingStarted(),"Deferred close mode is not supported on async dispatches");
+    Assert.state(!isAsyncStarted(request),"Deferred close mode is not supported on async dispatches");
     if (SessionFactoryUtils.isDeferredCloseActive(sessionFactory)) {
       participate=true;
     }
@@ -34,7 +34,7 @@
     if (!participate) {
       if (isSingleSession()) {
         SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.unbindResource(sessionFactory);
-        if (!asyncManager.isConcurrentHandlingStarted()) {
+        if (!isAsyncStarted(request)) {
           logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
           closeSession(sessionHolder.getSession(),sessionFactory);
         }
