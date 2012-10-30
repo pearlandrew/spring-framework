@@ -1,0 +1,14 @@
+{
+  if (type != null && !IGNORED_CLASSES.contains(type.getType())) {
+    if (typeHierarchy.add(type)) {
+      Class<?> superclass=type.getType().getSuperclass();
+      if (type.isArray()) {
+        superclass=ClassUtils.resolvePrimitiveIfNecessary(superclass);
+      }
+      collectTypeHierarchy(typeHierarchy,createRelated(type,superclass));
+      for (      Class<?> implementsInterface : type.getType().getInterfaces()) {
+        collectTypeHierarchy(typeHierarchy,createRelated(type,implementsInterface));
+      }
+    }
+  }
+}
