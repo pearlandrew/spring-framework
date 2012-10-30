@@ -1,10 +1,19 @@
 {
-  List<SpelNodeImpl> qualifiedIdPieces=new ArrayList<SpelNodeImpl>();
-  Token startnode=eatToken(TokenKind.IDENTIFIER);
-  qualifiedIdPieces.add(new Identifier(startnode.stringValue(),toPos(startnode)));
-  while (peekToken(TokenKind.DOT,true)) {
-    Token node=eatToken(TokenKind.IDENTIFIER);
-    qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));
+  LinkedList<SpelNodeImpl> qualifiedIdPieces=new LinkedList<SpelNodeImpl>();
+  Token node=peekToken();
+  while (isValidQualifiedId(node)) {
+    nextToken();
+    if (node.kind != TokenKind.DOT) {
+      qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));
+    }
+    node=peekToken();
   }
-  return new QualifiedIdentifier(toPos(startnode.startpos,qualifiedIdPieces.get(qualifiedIdPieces.size() - 1).getEndPosition()),qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
+  if (qualifiedIdPieces.isEmpty()) {
+    if (node == null) {
+      raiseInternalException(expressionString.length(),SpelMessage.OOD);
+    }
+    raiseInternalException(node.startpos,SpelMessage.NOT_EXPECTED_TOKEN,"qualified ID",node.getKind().toString().toLowerCase());
+  }
+  int pos=toPos(qualifiedIdPieces.getFirst().getStartPosition(),qualifiedIdPieces.getLast().getEndPosition());
+  return new QualifiedIdentifier(pos,qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
 }
