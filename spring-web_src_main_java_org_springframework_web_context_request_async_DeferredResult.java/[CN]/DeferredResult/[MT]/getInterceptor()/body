@@ -1,0 +1,21 @@
+{
+  return new DeferredResultProcessingInterceptorAdapter(){
+    @Override public <S>void afterTimeout(    NativeWebRequest request,    DeferredResult<S> deferredResult){
+      if (timeoutCallback != null) {
+        timeoutCallback.run();
+      }
+      if (DeferredResult.this.timeoutResult != RESULT_NONE) {
+        setResultInternal(timeoutResult);
+      }
+    }
+    @Override public <S>void afterCompletion(    NativeWebRequest request,    DeferredResult<S> deferredResult){
+synchronized (this) {
+        expired=true;
+      }
+      if (completionCallback != null) {
+        completionCallback.run();
+      }
+    }
+  }
+;
+}

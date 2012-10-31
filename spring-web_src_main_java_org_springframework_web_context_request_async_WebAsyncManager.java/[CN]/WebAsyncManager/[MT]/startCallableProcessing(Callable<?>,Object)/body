@@ -1,39 +1,4 @@
 {
   Assert.notNull(callable,"Callable must not be null");
-  Assert.state(this.asyncWebRequest != null,"AsyncWebRequest must not be null");
-  final CallableInterceptorChain chain=new CallableInterceptorChain(this.callableInterceptors.values());
-  this.asyncWebRequest.setTimeoutHandler(new Runnable(){
-    public void run(){
-      logger.debug("Processing timeout");
-      Object result=chain.triggerAfterTimeout(asyncWebRequest,callable);
-      if (result != CallableProcessingInterceptor.RESULT_NONE) {
-        setConcurrentResultAndDispatch(result);
-      }
-    }
-  }
-);
-  this.asyncWebRequest.addCompletionHandler(new Runnable(){
-    public void run(){
-      chain.triggerAfterCompletion(asyncWebRequest,callable);
-    }
-  }
-);
-  startAsyncProcessing(processingContext);
-  this.taskExecutor.submit(new Runnable(){
-    public void run(){
-      Object result=null;
-      try {
-        chain.applyPreProcess(asyncWebRequest,callable);
-        result=callable.call();
-      }
- catch (      Throwable t) {
-        result=t;
-      }
- finally {
-        result=chain.applyPostProcess(asyncWebRequest,callable,result);
-      }
-      setConcurrentResultAndDispatch(result);
-    }
-  }
-);
+  startCallableProcessing(new MvcAsyncTask(callable),processingContext);
 }
