@@ -1,0 +1,15 @@
+{
+  AnnotationConfigApplicationContext ac=new AnnotationConfigApplicationContext();
+  ac.registerBeanDefinition("valueBean",new RootBeanDefinition(MetaValueBean.class,false));
+  ac.registerBeanDefinition("conversionService",new RootBeanDefinition(FormattingConversionServiceFactoryBean.class));
+  ac.registerBeanDefinition("ppc",new RootBeanDefinition(PropertyPlaceholderConfigurer.class));
+  ac.refresh();
+  System.setProperty("myDate","10-31-09");
+  try {
+    MetaValueBean valueBean=ac.getBean(MetaValueBean.class);
+    assertEquals(new LocalDate(2009,10,31),new LocalDate(valueBean.date));
+  }
+  finally {
+    System.clearProperty("myDate");
+  }
+}
