@@ -1,0 +1,17 @@
+{
+  if (visited.add(className)) {
+    AnnotationMetadata metadata=metadataReaderFactory.getMetadataReader(className).getAnnotationMetadata();
+    Map<String,Object> attributes=metadata.getAnnotationAttributes(Import.class.getName(),true);
+    if (attributes != null) {
+      String[] value=(String[])attributes.get("value");
+      if (value != null && value.length > 0) {
+        imports=(imports == null ? new LinkedHashSet<String>() : imports);
+        imports.addAll(Arrays.asList(value));
+      }
+    }
+    for (    String annotationType : metadata.getAnnotationTypes()) {
+      getImports(annotationType,imports,visited);
+    }
+  }
+  return imports;
+}
