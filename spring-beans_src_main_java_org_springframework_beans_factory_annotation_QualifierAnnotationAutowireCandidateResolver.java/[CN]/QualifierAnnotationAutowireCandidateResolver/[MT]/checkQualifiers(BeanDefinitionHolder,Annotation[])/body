@@ -5,8 +5,28 @@
   SimpleTypeConverter typeConverter=new SimpleTypeConverter();
   for (  Annotation annotation : annotationsToSearch) {
     Class<? extends Annotation> type=annotation.annotationType();
+    boolean checkMeta=true;
+    boolean fallbackToMeta=false;
     if (isQualifier(type)) {
       if (!checkQualifier(bdHolder,annotation,typeConverter)) {
+        fallbackToMeta=true;
+      }
+ else {
+        checkMeta=false;
+      }
+    }
+    if (checkMeta) {
+      boolean foundMeta=false;
+      for (      Annotation metaAnn : type.getAnnotations()) {
+        Class<? extends Annotation> metaType=metaAnn.annotationType();
+        if (isQualifier(metaType)) {
+          foundMeta=true;
+          if ((fallbackToMeta && AnnotationUtils.getValue(metaAnn) == null) || !checkQualifier(bdHolder,metaAnn,typeConverter)) {
+            return false;
+          }
+        }
+      }
+      if (fallbackToMeta && !foundMeta) {
         return false;
       }
     }
