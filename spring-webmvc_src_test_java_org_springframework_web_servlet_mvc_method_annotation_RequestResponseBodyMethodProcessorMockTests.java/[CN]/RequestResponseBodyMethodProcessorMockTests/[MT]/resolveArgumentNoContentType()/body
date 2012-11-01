@@ -1,4 +1,11 @@
 {
-  servletRequest.setContent(new byte[]{});
-  processor.resolveArgument(paramRequestBodyString,mavContainer,webRequest,null);
+  expect(messageConverter.canRead(String.class,MediaType.APPLICATION_OCTET_STREAM)).andReturn(false);
+  replay(messageConverter);
+  try {
+    processor.resolveArgument(paramRequestBodyString,mavContainer,webRequest,null);
+    fail("Expected exception");
+  }
+ catch (  HttpMediaTypeNotSupportedException ex) {
+  }
+  verify(messageConverter);
 }
