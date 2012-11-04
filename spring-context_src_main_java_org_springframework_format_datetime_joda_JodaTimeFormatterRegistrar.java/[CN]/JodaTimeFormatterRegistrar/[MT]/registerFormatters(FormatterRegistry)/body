@@ -1,13 +1,11 @@
 {
   JodaTimeConverters.registerConverters(registry);
-  DateTimeFormatter jodaDateFormatter=getJodaDateFormatter();
-  registry.addFormatterForFieldType(LocalDate.class,new ReadablePartialPrinter(jodaDateFormatter),new DateTimeParser(jodaDateFormatter));
-  DateTimeFormatter jodaTimeFormatter=getJodaTimeFormatter();
-  registry.addFormatterForFieldType(LocalTime.class,new ReadablePartialPrinter(jodaTimeFormatter),new DateTimeParser(jodaTimeFormatter));
-  DateTimeFormatter jodaDateTimeFormatter=getJodaDateTimeFormatter();
-  Parser<DateTime> dateTimeParser=new DateTimeParser(jodaDateTimeFormatter);
-  registry.addFormatterForFieldType(LocalDateTime.class,new ReadablePartialPrinter(jodaDateTimeFormatter),dateTimeParser);
-  Printer<ReadableInstant> readableInstantPrinter=new ReadableInstantPrinter(jodaDateTimeFormatter);
-  registry.addFormatterForFieldType(ReadableInstant.class,readableInstantPrinter,dateTimeParser);
+  DateTimeFormatter dateFormatter=getFormatter(Type.DATE);
+  DateTimeFormatter timeFormatter=getFormatter(Type.TIME);
+  DateTimeFormatter dateTimeFormatter=getFormatter(Type.DATE_TIME);
+  addFormatterForFields(registry,new ReadablePartialPrinter(dateFormatter),new DateTimeParser(dateFormatter),LocalDate.class);
+  addFormatterForFields(registry,new ReadablePartialPrinter(timeFormatter),new DateTimeParser(timeFormatter),LocalTime.class);
+  addFormatterForFields(registry,new ReadablePartialPrinter(dateTimeFormatter),new DateTimeParser(dateTimeFormatter),LocalDateTime.class);
+  addFormatterForFields(registry,new ReadableInstantPrinter(dateTimeFormatter),new DateTimeParser(dateTimeFormatter),ReadableInstant.class,Date.class,Calendar.class);
   registry.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
 }
