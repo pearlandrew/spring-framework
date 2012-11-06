@@ -1,3 +1,4 @@
 {
-  this.mockMvc.perform(get("/1").param("callable","true")).andExpect(status().isOk()).andExpect(request().asyncStarted()).andExpect(request().asyncResult(new Person("Joe")));
+  MvcResult mvcResult=this.mockMvc.perform(get("/1").param("callable","true")).andExpect(request().asyncStarted()).andExpect(request().asyncResult(new Person("Joe"))).andReturn();
+  this.mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON)).andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 }
