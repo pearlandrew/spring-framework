@@ -1,7 +1,11 @@
 {
-  @SuppressWarnings("unchecked") Matcher<? super String>[] matchers=new IsEqual[values.length];
-  for (int i=0; i < values.length; i++) {
-    matchers[i]=Matchers.equalTo(values[i]);
+  return new RequestMatcher(){
+    public void match(    ClientHttpRequest request){
+      assertHeaderValueCount(name,request.getHeaders(),expectedValues.length);
+      for (int i=0; i < expectedValues.length; i++) {
+        assertEquals("Request header + [" + name + "]",expectedValues[i],request.getHeaders().get(name).get(i));
+      }
+    }
   }
-  return header(name,matchers);
+;
 }
