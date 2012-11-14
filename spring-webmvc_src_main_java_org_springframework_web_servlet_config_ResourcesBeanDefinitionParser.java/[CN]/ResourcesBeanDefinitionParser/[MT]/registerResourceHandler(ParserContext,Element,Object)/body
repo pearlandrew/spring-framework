@@ -4,10 +4,12 @@
     parserContext.getReaderContext().error("The 'location' attribute is required.",parserContext.extractSource(element));
     return null;
   }
+  ManagedList<String> locations=new ManagedList<String>();
+  locations.addAll(StringUtils.commaDelimitedListToSet(locationAttr));
   RootBeanDefinition resourceHandlerDef=new RootBeanDefinition(ResourceHttpRequestHandler.class);
   resourceHandlerDef.setSource(source);
   resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-  resourceHandlerDef.getPropertyValues().add("locations",StringUtils.commaDelimitedListToStringArray(locationAttr));
+  resourceHandlerDef.getPropertyValues().add("locations",locations);
   String cacheSeconds=element.getAttribute("cache-period");
   if (StringUtils.hasText(cacheSeconds)) {
     resourceHandlerDef.getPropertyValues().add("cacheSeconds",cacheSeconds);
