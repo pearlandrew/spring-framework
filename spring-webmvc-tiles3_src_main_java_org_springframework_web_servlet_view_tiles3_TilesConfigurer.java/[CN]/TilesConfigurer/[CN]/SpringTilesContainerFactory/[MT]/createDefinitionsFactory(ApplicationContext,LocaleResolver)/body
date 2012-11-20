@@ -1,0 +1,19 @@
+{
+  if (definitionsFactoryClass != null) {
+    DefinitionsFactory factory=BeanUtils.instantiate(definitionsFactoryClass);
+    if (factory instanceof org.apache.tiles.request.ApplicationContextAware) {
+      ((org.apache.tiles.request.ApplicationContextAware)factory).setApplicationContext(applicationContext);
+    }
+    BeanWrapper bw=PropertyAccessorFactory.forBeanPropertyAccess(factory);
+    if (bw.isWritableProperty("localeResolver")) {
+      bw.setPropertyValue("localeResolver",resolver);
+    }
+    if (bw.isWritableProperty("definitionDAO")) {
+      bw.setPropertyValue("definitionDAO",createLocaleDefinitionDao(applicationContext,resolver));
+    }
+    return factory;
+  }
+ else {
+    return super.createDefinitionsFactory(applicationContext,resolver);
+  }
+}
