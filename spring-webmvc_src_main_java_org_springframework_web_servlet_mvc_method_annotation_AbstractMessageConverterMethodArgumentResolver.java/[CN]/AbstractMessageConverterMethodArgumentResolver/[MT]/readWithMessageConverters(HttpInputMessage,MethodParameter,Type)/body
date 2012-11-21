@@ -3,23 +3,25 @@
   if (contentType == null) {
     contentType=MediaType.APPLICATION_OCTET_STREAM;
   }
-  Class<T> paramClass=getParamClass(paramType);
-  for (  HttpMessageConverter<?> messageConverter : this.messageConverters) {
-    if (messageConverter instanceof GenericHttpMessageConverter) {
-      GenericHttpMessageConverter genericMessageConverter=(GenericHttpMessageConverter)messageConverter;
-      if (genericMessageConverter.canRead(paramType,contentType)) {
+  Class<?> contextClass=methodParam.getDeclaringClass();
+  Map<TypeVariable,Type> map=GenericTypeResolver.getTypeVariableMap(contextClass);
+  Class<T> targetClass=(Class<T>)GenericTypeResolver.resolveType(targetType,map);
+  for (  HttpMessageConverter<?> converter : this.messageConverters) {
+    if (converter instanceof GenericHttpMessageConverter) {
+      GenericHttpMessageConverter genericConverter=(GenericHttpMessageConverter)converter;
+      if (genericConverter.canRead(targetType,contextClass,contentType)) {
         if (logger.isDebugEnabled()) {
-          logger.debug("Reading [" + paramType + "] as \""+ contentType+ "\" using ["+ messageConverter+ "]");
+          logger.debug("Reading [" + targetType + "] as \""+ contentType+ "\" using ["+ converter+ "]");
         }
-        return (T)genericMessageConverter.read(paramType,inputMessage);
+        return (T)genericConverter.read(targetType,contextClass,inputMessage);
       }
     }
-    if (paramClass != null) {
-      if (messageConverter.canRead(paramClass,contentType)) {
+    if (targetClass != null) {
+      if (converter.canRead(targetClass,contentType)) {
         if (logger.isDebugEnabled()) {
-          logger.debug("Reading [" + paramClass.getName() + "] as \""+ contentType+ "\" using ["+ messageConverter+ "]");
+          logger.debug("Reading [" + targetClass.getName() + "] as \""+ contentType+ "\" using ["+ converter+ "]");
         }
-        return ((HttpMessageConverter<T>)messageConverter).read(paramClass,inputMessage);
+        return ((HttpMessageConverter<T>)converter).read(targetClass,inputMessage);
       }
     }
   }
