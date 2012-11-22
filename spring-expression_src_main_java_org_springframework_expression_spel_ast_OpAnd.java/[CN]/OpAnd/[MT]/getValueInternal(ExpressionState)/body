@@ -1,26 +1,6 @@
 {
-  boolean leftValue;
-  boolean rightValue;
-  try {
-    TypedValue typedValue=getLeftOperand().getValueInternal(state);
-    this.assertTypedValueNotNull(typedValue);
-    leftValue=(Boolean)state.convertValue(typedValue,TypeDescriptor.valueOf(Boolean.class));
+  if (getBooleanValue(state,getLeftOperand()) == false) {
+    return BooleanTypedValue.FALSE;
   }
- catch (  SpelEvaluationException ee) {
-    ee.setPosition(getLeftOperand().getStartPosition());
-    throw ee;
-  }
-  if (leftValue == false) {
-    return BooleanTypedValue.forValue(false);
-  }
-  try {
-    TypedValue typedValue=getRightOperand().getValueInternal(state);
-    this.assertTypedValueNotNull(typedValue);
-    rightValue=(Boolean)state.convertValue(typedValue,TypeDescriptor.valueOf(Boolean.class));
-  }
- catch (  SpelEvaluationException ee) {
-    ee.setPosition(getRightOperand().getStartPosition());
-    throw ee;
-  }
-  return BooleanTypedValue.forValue(rightValue);
+  return BooleanTypedValue.forValue(getBooleanValue(state,getRightOperand()));
 }
