@@ -1,7 +1,10 @@
 {
   HandlerExceptionResolverComposite compositeResolver=(HandlerExceptionResolverComposite)mvcConfiguration.handlerExceptionResolver();
   assertEquals(0,compositeResolver.getOrder());
-  List<HandlerExceptionResolver> expectedResolvers=new ArrayList<HandlerExceptionResolver>();
-  mvcConfiguration.addDefaultHandlerExceptionResolvers(expectedResolvers);
-  assertEquals(expectedResolvers.size(),compositeResolver.getExceptionResolvers().size());
+  List<HandlerExceptionResolver> expectedResolvers=compositeResolver.getExceptionResolvers();
+  assertEquals(ExceptionHandlerExceptionResolver.class,expectedResolvers.get(0).getClass());
+  assertEquals(ResponseStatusExceptionResolver.class,expectedResolvers.get(1).getClass());
+  assertEquals(DefaultHandlerExceptionResolver.class,expectedResolvers.get(2).getClass());
+  ExceptionHandlerExceptionResolver eher=(ExceptionHandlerExceptionResolver)expectedResolvers.get(0);
+  assertNotNull(eher.getApplicationContext());
 }
