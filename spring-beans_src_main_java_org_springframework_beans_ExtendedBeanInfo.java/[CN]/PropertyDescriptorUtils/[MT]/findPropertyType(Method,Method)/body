@@ -1,0 +1,24 @@
+{
+  Class<?> propertyType=null;
+  if (readMethod != null) {
+    Class<?>[] params=readMethod.getParameterTypes();
+    if (params.length != 0) {
+      throw new IntrospectionException("bad read method arg count: " + readMethod);
+    }
+    propertyType=readMethod.getReturnType();
+    if (propertyType == Void.TYPE) {
+      throw new IntrospectionException("read method " + readMethod.getName() + " returns void");
+    }
+  }
+  if (writeMethod != null) {
+    Class<?> params[]=writeMethod.getParameterTypes();
+    if (params.length != 1) {
+      throw new IntrospectionException("bad write method arg count: " + writeMethod);
+    }
+    if (propertyType != null && !params[0].isAssignableFrom(propertyType)) {
+      throw new IntrospectionException("type mismatch between read and write methods");
+    }
+    propertyType=params[0];
+  }
+  return propertyType;
+}

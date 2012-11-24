@@ -1,0 +1,33 @@
+{
+  Class<?> indexedPropertyType=null;
+  if (indexedReadMethod != null) {
+    Class<?> params[]=indexedReadMethod.getParameterTypes();
+    if (params.length != 1) {
+      throw new IntrospectionException("bad indexed read method arg count");
+    }
+    if (params[0] != Integer.TYPE) {
+      throw new IntrospectionException("non int index to indexed read method");
+    }
+    indexedPropertyType=indexedReadMethod.getReturnType();
+    if (indexedPropertyType == Void.TYPE) {
+      throw new IntrospectionException("indexed read method returns void");
+    }
+  }
+  if (indexedWriteMethod != null) {
+    Class<?> params[]=indexedWriteMethod.getParameterTypes();
+    if (params.length != 2) {
+      throw new IntrospectionException("bad indexed write method arg count");
+    }
+    if (params[0] != Integer.TYPE) {
+      throw new IntrospectionException("non int index to indexed write method");
+    }
+    if (indexedPropertyType != null && indexedPropertyType != params[1]) {
+      throw new IntrospectionException("type mismatch between indexed read and indexed write methods: " + name);
+    }
+    indexedPropertyType=params[1];
+  }
+  if (propertyType != null && (!propertyType.isArray() || propertyType.getComponentType() != indexedPropertyType)) {
+    throw new IntrospectionException("type mismatch between indexed and non-indexed methods: " + name);
+  }
+  return indexedPropertyType;
+}
