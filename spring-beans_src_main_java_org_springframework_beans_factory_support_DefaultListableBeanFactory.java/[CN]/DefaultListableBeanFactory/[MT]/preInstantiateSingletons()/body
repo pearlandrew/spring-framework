@@ -2,32 +2,33 @@
   if (this.logger.isInfoEnabled()) {
     this.logger.info("Pre-instantiating singletons in " + this);
   }
+  List<String> beanNames;
 synchronized (this.beanDefinitionMap) {
-    List<String> beanNames=new ArrayList<String>(this.beanDefinitionNames);
-    for (    String beanName : beanNames) {
-      RootBeanDefinition bd=getMergedLocalBeanDefinition(beanName);
-      if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
-        if (isFactoryBean(beanName)) {
-          final FactoryBean<?> factory=(FactoryBean<?>)getBean(FACTORY_BEAN_PREFIX + beanName);
-          boolean isEagerInit;
-          if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
-            isEagerInit=AccessController.doPrivileged(new PrivilegedAction<Boolean>(){
-              public Boolean run(){
-                return ((SmartFactoryBean<?>)factory).isEagerInit();
-              }
+    beanNames=new ArrayList<String>(this.beanDefinitionNames);
+  }
+  for (  String beanName : beanNames) {
+    RootBeanDefinition bd=getMergedLocalBeanDefinition(beanName);
+    if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+      if (isFactoryBean(beanName)) {
+        final FactoryBean<?> factory=(FactoryBean<?>)getBean(FACTORY_BEAN_PREFIX + beanName);
+        boolean isEagerInit;
+        if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
+          isEagerInit=AccessController.doPrivileged(new PrivilegedAction<Boolean>(){
+            public Boolean run(){
+              return ((SmartFactoryBean<?>)factory).isEagerInit();
             }
+          }
 ,getAccessControlContext());
-          }
- else {
-            isEagerInit=(factory instanceof SmartFactoryBean && ((SmartFactoryBean<?>)factory).isEagerInit());
-          }
-          if (isEagerInit) {
-            getBean(beanName);
-          }
         }
  else {
+          isEagerInit=(factory instanceof SmartFactoryBean && ((SmartFactoryBean<?>)factory).isEagerInit());
+        }
+        if (isEagerInit) {
           getBean(beanName);
         }
+      }
+ else {
+        getBean(beanName);
       }
     }
   }
