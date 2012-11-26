@@ -1,11 +1,17 @@
 {
+  Throwable exceptionResult=null;
   for (int i=this.preProcessIndex; i >= 0; i--) {
     try {
       this.interceptors.get(i).postProcess(request,task,concurrentResult);
     }
  catch (    Throwable t) {
-      return t;
+      if (exceptionResult != null) {
+        logger.error("postProcess error",t);
+      }
+ else {
+        exceptionResult=t;
+      }
     }
   }
-  return concurrentResult;
+  return (exceptionResult != null) ? exceptionResult : concurrentResult;
 }
