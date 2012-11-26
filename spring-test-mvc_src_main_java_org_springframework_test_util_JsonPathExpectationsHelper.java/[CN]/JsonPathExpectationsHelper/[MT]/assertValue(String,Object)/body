@@ -1,4 +1,14 @@
 {
   Object actualValue=evaluateJsonPath(responseContent);
+  if ((actualValue instanceof List) && !(expectedValue instanceof List)) {
+    @SuppressWarnings("rawtypes") List actualValueList=(List)actualValue;
+    if (actualValueList.size() == 0) {
+      fail("No matching value for JSON path \"" + this.expression + "\"");
+    }
+    if (actualValueList.size() != 1) {
+      fail("Got a list of values " + actualValue + " instead of the value "+ expectedValue);
+    }
+    actualValue=actualValueList.get(0);
+  }
   assertEquals("JSON path" + this.expression,expectedValue,actualValue);
 }
