@@ -1,19 +1,19 @@
 {
-  Assert.notNull(mvcAsyncTask,"MvcAsyncTask must not be null");
+  Assert.notNull(webAsyncTask,"WebAsyncTask must not be null");
   Assert.state(this.asyncWebRequest != null,"AsyncWebRequest must not be null");
-  Long timeout=mvcAsyncTask.getTimeout();
+  Long timeout=webAsyncTask.getTimeout();
   if (timeout != null) {
     this.asyncWebRequest.setTimeout(timeout);
   }
-  AsyncTaskExecutor executor=mvcAsyncTask.getExecutor();
+  AsyncTaskExecutor executor=webAsyncTask.getExecutor();
   if (executor != null) {
     this.taskExecutor=executor;
   }
   List<CallableProcessingInterceptor> interceptors=new ArrayList<CallableProcessingInterceptor>();
-  interceptors.add(mvcAsyncTask.getInterceptor());
+  interceptors.add(webAsyncTask.getInterceptor());
   interceptors.addAll(this.callableInterceptors.values());
   interceptors.add(timeoutCallableInterceptor);
-  final Callable<?> callable=mvcAsyncTask.getCallable();
+  final Callable<?> callable=webAsyncTask.getCallable();
   final CallableInterceptorChain interceptorChain=new CallableInterceptorChain(interceptors);
   this.asyncWebRequest.addTimeoutHandler(new Runnable(){
     public void run(){
