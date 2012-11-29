@@ -1,0 +1,21 @@
+{
+  Callable<Object> task=new StubCallable(21);
+  Exception exception=new Exception();
+  CallableProcessingInterceptor interceptor=createStrictMock(CallableProcessingInterceptor.class);
+  interceptor.beforeConcurrentHandling(this.asyncWebRequest,task);
+  expectLastCall().andThrow(exception);
+  replay(interceptor);
+  this.asyncWebRequest.addTimeoutHandler((Runnable)notNull());
+  this.asyncWebRequest.addCompletionHandler((Runnable)notNull());
+  replay(this.asyncWebRequest);
+  this.asyncManager.registerCallableInterceptor("interceptor",interceptor);
+  try {
+    this.asyncManager.startCallableProcessing(task);
+    fail("Expected Exception");
+  }
+ catch (  Exception e) {
+    assertEquals(exception,e);
+  }
+  assertFalse(this.asyncManager.hasConcurrentResult());
+  verify(this.asyncWebRequest,interceptor);
+}
