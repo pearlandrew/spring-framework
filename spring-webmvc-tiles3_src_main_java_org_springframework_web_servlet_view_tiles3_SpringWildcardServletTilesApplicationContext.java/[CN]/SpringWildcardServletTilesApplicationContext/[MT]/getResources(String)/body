@@ -1,0 +1,23 @@
+{
+  Resource[] resources;
+  try {
+    resources=resolver.getResources(path);
+  }
+ catch (  IOException e) {
+    return Collections.<ApplicationResource>emptyList();
+  }
+  Collection<ApplicationResource> resourceList=new ArrayList<ApplicationResource>();
+  if (resources != null && resources.length > 0) {
+    for (int i=0; i < resources.length; i++) {
+      URL url;
+      try {
+        url=resources[i].getURL();
+        resourceList.add(new URLApplicationResource(url.toExternalForm(),url));
+      }
+ catch (      IOException e) {
+        throw new IllegalArgumentException("no URL for " + resources[i].toString(),e);
+      }
+    }
+  }
+  return resourceList;
+}
