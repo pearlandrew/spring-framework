@@ -19,7 +19,7 @@
       inLiteral=!inLiteral;
     }
     if (!inLiteral) {
-      if (startsWithDelimiter(script,i,delim)) {
+      if (script.startsWith(delim,i)) {
         if (sb.length() > 0) {
           statements.add(sb.toString());
           sb=new StringBuilder();
@@ -27,8 +27,23 @@
         i+=delim.length() - 1;
         continue;
       }
- else       if (c == '\n' || c == '\t') {
-        c=' ';
+ else       if (script.startsWith(commentPrefix,i)) {
+        int indexOfNextNewline=script.indexOf("\n",i);
+        if (indexOfNextNewline > i) {
+          i=indexOfNextNewline;
+          continue;
+        }
+ else {
+          break;
+        }
+      }
+ else       if (c == ' ' || c == '\n' || c == '\t') {
+        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
+          c=' ';
+        }
+ else {
+          continue;
+        }
       }
     }
     sb.append(c);
