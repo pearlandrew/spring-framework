@@ -9,7 +9,7 @@
       MetadataReader reader=this.metadataReaderFactory.getMetadataReader(candidate);
       if (new AssignableTypeFilter(ImportSelector.class).match(reader,this.metadataReaderFactory)) {
         try {
-          ImportSelector selector=BeanUtils.instantiateClass(Class.forName(candidate),ImportSelector.class);
+          ImportSelector selector=BeanUtils.instantiateClass(this.resourceLoader.getClassLoader().loadClass(candidate),ImportSelector.class);
           processImport(configClass,selector.selectImports(importingClassMetadata),false);
         }
  catch (        ClassNotFoundException ex) {
@@ -18,7 +18,7 @@
       }
  else       if (new AssignableTypeFilter(ImportBeanDefinitionRegistrar.class).match(reader,metadataReaderFactory)) {
         try {
-          ImportBeanDefinitionRegistrar registrar=BeanUtils.instantiateClass(Class.forName(candidate),ImportBeanDefinitionRegistrar.class);
+          ImportBeanDefinitionRegistrar registrar=BeanUtils.instantiateClass(this.resourceLoader.getClassLoader().loadClass(candidate),ImportBeanDefinitionRegistrar.class);
           invokeAwareMethods(registrar);
           registrar.registerBeanDefinitions(importingClassMetadata,registry);
         }

@@ -68,6 +68,14 @@
         Class<?> clazz=((StandardAnnotationMetadata)metadata).getIntrospectedClass();
         return new StandardAnnotationMetadata(clazz.getSuperclass(),true);
       }
+ else       if (superclass.startsWith("java")) {
+        try {
+          return new StandardAnnotationMetadata(this.resourceLoader.getClassLoader().loadClass(superclass),true);
+        }
+ catch (        ClassNotFoundException ex) {
+          throw new IllegalStateException(ex);
+        }
+      }
  else {
         MetadataReader reader=this.metadataReaderFactory.getMetadataReader(superclass);
         return reader.getAnnotationMetadata();
