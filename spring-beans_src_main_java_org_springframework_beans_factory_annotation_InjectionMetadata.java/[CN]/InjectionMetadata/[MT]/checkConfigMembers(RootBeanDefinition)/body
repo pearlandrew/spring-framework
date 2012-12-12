@@ -1,13 +1,14 @@
 {
-synchronized (this.injectedElements) {
-    for (Iterator<InjectedElement> it=this.injectedElements.iterator(); it.hasNext(); ) {
-      Member member=it.next().getMember();
-      if (!beanDefinition.isExternallyManagedConfigMember(member)) {
-        beanDefinition.registerExternallyManagedConfigMember(member);
-      }
- else {
-        it.remove();
+  Set<InjectedElement> checkedElements=new LinkedHashSet<InjectedElement>(this.injectedElements.size());
+  for (  InjectedElement element : this.injectedElements) {
+    Member member=element.getMember();
+    if (!beanDefinition.isExternallyManagedConfigMember(member)) {
+      beanDefinition.registerExternallyManagedConfigMember(member);
+      checkedElements.add(element);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Registered injected element on class [" + this.targetClass.getName() + "]: "+ element);
       }
     }
   }
+  this.checkedElements=checkedElements;
 }
