@@ -2,10 +2,14 @@
   if (isLogEnabled()) {
     String[] beanNames=beanFactory.getBeanDefinitionNames();
     for (    String beanName : beanNames) {
-      Class<?> beanType=beanFactory.getType(beanName);
+      String nameToLookup=beanName;
+      if (beanFactory.isFactoryBean(beanName)) {
+        nameToLookup=BeanFactory.FACTORY_BEAN_PREFIX + beanName;
+      }
+      Class<?> beanType=ClassUtils.getUserClass(beanFactory.getType(nameToLookup));
       if (beanType != null && beanType.isAnnotationPresent(Deprecated.class)) {
         BeanDefinition beanDefinition=beanFactory.getBeanDefinition(beanName);
-        logDeprecatedBean(beanName,beanDefinition);
+        logDeprecatedBean(beanName,beanType,beanDefinition);
       }
     }
   }
