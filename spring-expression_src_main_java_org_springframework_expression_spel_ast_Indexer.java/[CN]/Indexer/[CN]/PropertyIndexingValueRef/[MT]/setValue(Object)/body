@@ -2,23 +2,23 @@
   Class<?> contextObjectClass=getObjectClass(targetObject);
   try {
     if (cachedWriteName != null && cachedWriteName.equals(name) && cachedWriteTargetType != null && cachedWriteTargetType.equals(contextObjectClass)) {
-      cachedWriteAccessor.write(eContext,targetObject,name,newValue);
+      cachedWriteAccessor.write(this.eContext,this.targetObject,this.name,newValue);
       return;
     }
-    List<PropertyAccessor> accessorsToTry=AstUtils.getPropertyAccessorsToTry(contextObjectClass,eContext.getPropertyAccessors());
+    List<PropertyAccessor> accessorsToTry=AstUtils.getPropertyAccessorsToTry(contextObjectClass,this.eContext.getPropertyAccessors());
     if (accessorsToTry != null) {
       for (      PropertyAccessor accessor : accessorsToTry) {
-        if (accessor.canWrite(eContext,targetObject,name)) {
-          cachedWriteName=name;
+        if (accessor.canWrite(this.eContext,this.targetObject,this.name)) {
+          cachedWriteName=this.name;
           cachedWriteTargetType=contextObjectClass;
           cachedWriteAccessor=accessor;
-          accessor.write(eContext,targetObject,name,newValue);
+          accessor.write(this.eContext,this.targetObject,this.name,newValue);
           return;
         }
       }
     }
   }
- catch (  AccessException ae) {
-    throw new SpelEvaluationException(getStartPosition(),ae,SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE,name,ae.getMessage());
+ catch (  AccessException ex) {
+    throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE,this.name,ex.getMessage());
   }
 }

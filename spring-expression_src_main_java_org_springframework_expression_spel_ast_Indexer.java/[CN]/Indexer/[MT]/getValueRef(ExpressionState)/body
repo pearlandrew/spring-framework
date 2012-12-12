@@ -4,15 +4,15 @@
   TypeDescriptor targetObjectTypeDescriptor=context.getTypeDescriptor();
   TypedValue indexValue=null;
   Object index=null;
-  if (targetObject instanceof Map && (children[0] instanceof PropertyOrFieldReference)) {
-    PropertyOrFieldReference reference=(PropertyOrFieldReference)children[0];
+  if (targetObject instanceof Map && (this.children[0] instanceof PropertyOrFieldReference)) {
+    PropertyOrFieldReference reference=(PropertyOrFieldReference)this.children[0];
     index=reference.getName();
     indexValue=new TypedValue(index);
   }
  else {
     try {
       state.pushActiveContextObject(state.getRootContextObject());
-      indexValue=children[0].getValueInternal(state);
+      indexValue=this.children[0].getValueInternal(state);
       index=indexValue.getValue();
     }
   finally {
@@ -29,7 +29,7 @@
   if (targetObject == null) {
     throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
   }
-  if (targetObject instanceof Collection || targetObject.getClass().isArray() || targetObject instanceof String) {
+  if (targetObject.getClass().isArray() || targetObject instanceof Collection || targetObject instanceof String) {
     int idx=(Integer)state.convertValue(index,TypeDescriptor.valueOf(Integer.class));
     if (targetObject.getClass().isArray()) {
       return new ArrayIndexingValueRef(state.getTypeConverter(),targetObject,idx,targetObjectTypeDescriptor);

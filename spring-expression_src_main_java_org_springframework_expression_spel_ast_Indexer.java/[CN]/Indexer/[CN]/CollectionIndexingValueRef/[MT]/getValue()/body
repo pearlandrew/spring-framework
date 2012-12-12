@@ -1,18 +1,22 @@
 {
-  if (index >= collection.size()) {
-    if (growCollection) {
-      growCollection(collectionEntryTypeDescriptor,index,collection);
+  if (this.index >= this.collection.size()) {
+    if (this.growCollection) {
+      growCollection(this.collectionEntryTypeDescriptor,this.index,this.collection);
     }
  else {
-      throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,collection.size(),index);
+      throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,this.collection.size(),this.index);
     }
   }
+  if (this.collection instanceof List) {
+    Object o=((List)this.collection).get(this.index);
+    return new TypedValue(o,this.collectionEntryTypeDescriptor.elementTypeDescriptor(o));
+  }
   int pos=0;
-  for (  Object o : collection) {
-    if (pos == index) {
-      return new TypedValue(o,collectionEntryTypeDescriptor.elementTypeDescriptor(o));
+  for (  Object o : this.collection) {
+    if (pos == this.index) {
+      return new TypedValue(o,this.collectionEntryTypeDescriptor.elementTypeDescriptor(o));
     }
     pos++;
   }
-  throw new IllegalStateException();
+  throw new IllegalStateException("Failed to find indexed element " + this.index + ": "+ this.collection);
 }
