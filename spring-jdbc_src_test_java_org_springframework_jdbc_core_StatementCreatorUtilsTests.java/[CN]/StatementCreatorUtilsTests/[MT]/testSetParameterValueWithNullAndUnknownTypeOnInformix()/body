@@ -1,22 +1,12 @@
 {
-  MockControl conControl=MockControl.createControl(Connection.class);
-  Connection con=(Connection)conControl.getMock();
-  MockControl metaDataControl=MockControl.createControl(DatabaseMetaData.class);
-  DatabaseMetaData metaData=(DatabaseMetaData)metaDataControl.getMock();
-  ps.getConnection();
-  psControl.setReturnValue(con,1);
-  con.getMetaData();
-  conControl.setReturnValue(metaData,1);
-  metaData.getDatabaseProductName();
-  metaDataControl.setReturnValue("Informix Dynamic Server");
-  metaData.getDriverName();
-  metaDataControl.setReturnValue("Informix Driver");
-  ps.setObject(1,null);
-  psControl.setVoidCallable(1);
-  psControl.replay();
-  conControl.replay();
-  metaDataControl.replay();
-  StatementCreatorUtils.setParameterValue(ps,1,SqlTypeValue.TYPE_UNKNOWN,null,null);
-  conControl.verify();
-  metaDataControl.verify();
+  Connection con=mock(Connection.class);
+  DatabaseMetaData metaData=mock(DatabaseMetaData.class);
+  given(preparedStatement.getConnection()).willReturn(con);
+  given(con.getMetaData()).willReturn(metaData);
+  given(metaData.getDatabaseProductName()).willReturn("Informix Dynamic Server");
+  given(metaData.getDriverName()).willReturn("Informix Driver");
+  StatementCreatorUtils.setParameterValue(preparedStatement,1,SqlTypeValue.TYPE_UNKNOWN,null,null);
+  verify(metaData).getDatabaseProductName();
+  verify(metaData).getDriverName();
+  verify(preparedStatement).setObject(1,null);
 }

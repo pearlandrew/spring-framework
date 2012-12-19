@@ -1,52 +1,14 @@
 {
   if (arg instanceof String) {
-    Method findMethod=ResultSet.class.getDeclaredMethod("findColumn",new Class[]{String.class});
-    findMethod.invoke(rset,new Object[]{arg});
-    rsetControl.setReturnValue(1);
-    rsetMethod.invoke(rset,new Object[]{1});
+    given(rset.findColumn((String)arg)).willReturn(1);
+    given(rsetMethod.invoke(rset,1)).willReturn(ret).willThrow(new SQLException("test"));
   }
  else {
-    rsetMethod.invoke(rset,new Object[]{arg});
+    given(rsetMethod.invoke(rset,arg)).willReturn(ret).willThrow(new SQLException("test"));
   }
-  if (ret instanceof Double) {
-    rsetControl.setReturnValue(((Double)ret).doubleValue());
-  }
- else   if (ret instanceof Float) {
-    rsetControl.setReturnValue(((Float)ret).floatValue());
-  }
- else   if (ret instanceof Integer) {
-    rsetControl.setReturnValue(((Integer)ret).intValue());
-  }
- else   if (ret instanceof Short) {
-    rsetControl.setReturnValue(((Short)ret).shortValue());
-  }
- else   if (ret instanceof Long) {
-    rsetControl.setReturnValue(((Long)ret).longValue());
-  }
- else   if (ret instanceof Boolean) {
-    rsetControl.setReturnValue(((Boolean)ret).booleanValue());
-  }
- else   if (ret instanceof Byte) {
-    rsetControl.setReturnValue(((Byte)ret).byteValue());
-  }
- else {
-    rsetControl.setReturnValue(ret);
-  }
-  if (arg instanceof String) {
-    Method findMethod=ResultSet.class.getDeclaredMethod("findColumn",new Class[]{String.class});
-    findMethod.invoke(rset,new Object[]{arg});
-    rsetControl.setReturnValue(1);
-    rsetMethod.invoke(rset,new Object[]{1});
-  }
- else {
-    rsetMethod.invoke(rset,new Object[]{arg});
-  }
-  rsetControl.setThrowable(new SQLException("test"));
-  rsetControl.replay();
-  rowset=new ResultSetWrappingSqlRowSet(rset);
-  rowsetMethod.invoke(rowset,new Object[]{arg});
+  rowsetMethod.invoke(rowset,arg);
   try {
-    rowsetMethod.invoke(rowset,new Object[]{arg});
+    rowsetMethod.invoke(rowset,arg);
     fail("InvalidResultSetAccessException should have been thrown");
   }
  catch (  InvocationTargetException ex) {

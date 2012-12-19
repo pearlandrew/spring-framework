@@ -2,29 +2,16 @@
   final String sql="UPDATE FOO SET NAME=? WHERE ID = 1";
   final String name="Gary";
   int expectedRowsUpdated=1;
-  MockControl ctrlPreparedStatement=MockControl.createControl(PreparedStatement.class);
-  PreparedStatement mockPreparedStatement=(PreparedStatement)ctrlPreparedStatement.getMock();
-  mockPreparedStatement.setString(1,name);
-  ctrlPreparedStatement.setVoidCallable();
-  mockPreparedStatement.executeUpdate();
-  ctrlPreparedStatement.setReturnValue(expectedRowsUpdated);
-  if (debugEnabled) {
-    mockPreparedStatement.getWarnings();
-    ctrlPreparedStatement.setReturnValue(null);
-  }
-  mockPreparedStatement.close();
-  ctrlPreparedStatement.setVoidCallable();
-  mockConnection.prepareStatement(sql);
-  ctrlConnection.setReturnValue(mockPreparedStatement);
-  ctrlPreparedStatement.replay();
-  replay();
+  given(this.preparedStatement.executeUpdate()).willReturn(expectedRowsUpdated);
   PreparedStatementSetter pss=new PreparedStatementSetter(){
     @Override public void setValues(    PreparedStatement ps) throws SQLException {
       ps.setString(1,name);
     }
   }
 ;
-  int actualRowsUpdated=new JdbcTemplate(mockDataSource).update(sql,pss);
+  int actualRowsUpdated=new JdbcTemplate(this.dataSource).update(sql,pss);
   assertTrue("updated correct # of rows",actualRowsUpdated == expectedRowsUpdated);
-  ctrlPreparedStatement.verify();
+  verify(this.preparedStatement).setString(1,name);
+  verify(this.preparedStatement).close();
+  verify(this.connection).close();
 }

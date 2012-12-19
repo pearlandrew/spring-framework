@@ -1,15 +1,9 @@
 {
-  Log log=createMock(Log.class);
-  MethodInvocation methodInvocation=createMock(MethodInvocation.class);
-  expect(log.isTraceEnabled()).andReturn(true);
-  log.trace(isA(String.class));
-  expect(methodInvocation.proceed()).andReturn(null);
-  log.trace(isA(String.class));
-  replay(methodInvocation);
-  replay(log);
+  MethodInvocation methodInvocation=mock(MethodInvocation.class);
+  Log log=mock(Log.class);
+  given(log.isTraceEnabled()).willReturn(true);
   DebugInterceptor interceptor=new StubDebugInterceptor(log);
   interceptor.invoke(methodInvocation);
   checkCallCountTotal(interceptor);
-  verify(methodInvocation);
-  verify(log);
+  verify(log,times(2)).trace(anyString());
 }

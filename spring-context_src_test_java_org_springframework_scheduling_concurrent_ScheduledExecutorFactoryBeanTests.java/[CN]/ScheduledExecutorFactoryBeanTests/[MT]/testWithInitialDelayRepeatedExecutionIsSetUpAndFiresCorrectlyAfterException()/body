@@ -1,11 +1,6 @@
 {
-  MockControl mockRunnable=MockControl.createControl(Runnable.class);
-  Runnable runnable=(Runnable)mockRunnable.getMock();
-  runnable.run();
-  mockRunnable.setThrowable(new IllegalStateException());
-  runnable.run();
-  mockRunnable.setThrowable(new IllegalStateException());
-  mockRunnable.replay();
+  Runnable runnable=mock(Runnable.class);
+  willThrow(new IllegalStateException()).given(runnable).run();
   ScheduledExecutorTask task=new ScheduledExecutorTask(runnable);
   task.setPeriod(500);
   task.setDelay(3000);
@@ -15,10 +10,5 @@
   factory.afterPropertiesSet();
   pauseToLetTaskStart(1);
   factory.destroy();
-  try {
-    mockRunnable.verify();
-    fail("Mock must never have been called");
-  }
- catch (  AssertionFailedError expected) {
-  }
+  verify(runnable,never()).run();
 }

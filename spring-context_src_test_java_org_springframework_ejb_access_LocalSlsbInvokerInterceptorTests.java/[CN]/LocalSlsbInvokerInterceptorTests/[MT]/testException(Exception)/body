@@ -1,7 +1,6 @@
 {
-  LocalInterfaceWithBusinessMethods ejb=createMock(LocalInterfaceWithBusinessMethods.class);
-  expect(ejb.targetMethod()).andThrow(expected);
-  replay(ejb);
+  LocalInterfaceWithBusinessMethods ejb=mock(LocalInterfaceWithBusinessMethods.class);
+  given(ejb.targetMethod()).willThrow(expected);
   String jndiName="foobar";
   Context mockContext=mockContext(jndiName,ejb);
   LocalSlsbInvokerInterceptor si=configuredInterceptor(mockContext,jndiName);
@@ -15,6 +14,5 @@
  catch (  Exception thrown) {
     assertTrue(thrown == expected);
   }
-  verify(mockContext);
-  verify(ejb);
+  verify(mockContext).close();
 }

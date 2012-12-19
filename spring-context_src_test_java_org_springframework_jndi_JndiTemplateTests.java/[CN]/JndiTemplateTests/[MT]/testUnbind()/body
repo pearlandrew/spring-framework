@@ -1,9 +1,6 @@
 {
   String name="something";
-  final Context context=createMock(Context.class);
-  context.unbind(name);
-  context.close();
-  replay(context);
+  final Context context=mock(Context.class);
   JndiTemplate jt=new JndiTemplate(){
     @Override protected Context createInitialContext(){
       return context;
@@ -11,5 +8,6 @@
   }
 ;
   jt.unbind(name);
-  verify(context);
+  verify(context).unbind(name);
+  verify(context).close();
 }

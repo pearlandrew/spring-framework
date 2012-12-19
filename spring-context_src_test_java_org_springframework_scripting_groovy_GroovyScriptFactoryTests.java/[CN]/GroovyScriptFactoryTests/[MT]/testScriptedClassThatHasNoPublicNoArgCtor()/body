@@ -1,9 +1,8 @@
 {
-  ScriptSource script=EasyMock.createMock(ScriptSource.class);
+  ScriptSource script=mock(ScriptSource.class);
   final String badScript="class Foo { protected Foo() {}}";
-  EasyMock.expect(script.getScriptAsString()).andReturn(badScript);
-  EasyMock.expect(script.suggestedClassName()).andReturn("someName");
-  EasyMock.replay(script);
+  given(script.getScriptAsString()).willReturn(badScript);
+  given(script.suggestedClassName()).willReturn("someName");
   GroovyScriptFactory factory=new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript);
   try {
     factory.getScriptedObject(script,new Class<?>[]{});
@@ -12,5 +11,4 @@
  catch (  ScriptCompilationException expected) {
     assertTrue(expected.contains(IllegalAccessException.class));
   }
-  EasyMock.verify(script);
 }

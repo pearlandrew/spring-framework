@@ -1,10 +1,8 @@
 {
   NameNotFoundException ne=new NameNotFoundException();
   String name="foo";
-  final Context context=createMock(Context.class);
-  expect(context.lookup(name)).andThrow(ne);
-  context.close();
-  replay(context);
+  final Context context=mock(Context.class);
+  given(context.lookup(name)).willThrow(ne);
   JndiTemplate jt=new JndiTemplate(){
     @Override protected Context createInitialContext(){
       return context;
@@ -17,5 +15,5 @@
   }
  catch (  NameNotFoundException ex) {
   }
-  verify(context);
+  verify(context).close();
 }

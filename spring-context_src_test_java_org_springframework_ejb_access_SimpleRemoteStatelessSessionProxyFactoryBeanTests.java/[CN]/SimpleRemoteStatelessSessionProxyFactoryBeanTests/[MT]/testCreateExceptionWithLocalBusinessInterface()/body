@@ -1,9 +1,8 @@
 {
   final String jndiName="foo";
   final CreateException cex=new CreateException();
-  final MyHome home=createMock(MyHome.class);
-  expect(home.create()).andThrow(cex);
-  replay(home);
+  final MyHome home=mock(MyHome.class);
+  given(home.create()).willThrow(cex);
   JndiTemplate jt=new JndiTemplate(){
     @Override public Object lookup(    String name){
       assertTrue(name.equals(jndiName));
@@ -26,5 +25,4 @@
  catch (  RemoteAccessException ex) {
     assertTrue(ex.getCause() == cex);
   }
-  verify(home);
 }

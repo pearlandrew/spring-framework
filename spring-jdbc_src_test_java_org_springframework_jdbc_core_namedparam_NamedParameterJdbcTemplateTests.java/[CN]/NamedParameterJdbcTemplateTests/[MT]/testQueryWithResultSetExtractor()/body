@@ -1,33 +1,11 @@
 {
-  mockResultSet.next();
-  ctrlResultSet.setReturnValue(true);
-  mockResultSet.getInt("id");
-  ctrlResultSet.setReturnValue(1);
-  mockResultSet.getString("forename");
-  ctrlResultSet.setReturnValue("rod");
-  mockResultSet.close();
-  ctrlResultSet.setVoidCallable();
-  mockPreparedStatement.setObject(1,new Integer(1),Types.DECIMAL);
-  ctrlPreparedStatement.setVoidCallable();
-  mockPreparedStatement.setString(2,"UK");
-  ctrlPreparedStatement.setVoidCallable();
-  mockPreparedStatement.executeQuery();
-  ctrlPreparedStatement.setReturnValue(mockResultSet);
-  if (debugEnabled) {
-    mockPreparedStatement.getWarnings();
-    ctrlPreparedStatement.setReturnValue(null);
-  }
-  mockPreparedStatement.close();
-  ctrlPreparedStatement.setVoidCallable();
-  mockConnection.prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
-  ctrlConnection.setReturnValue(mockPreparedStatement);
-  replay();
-  NamedParameterJdbcTemplate jt=new NamedParameterJdbcTemplate(mockDataSource);
-  Map params=new HashMap();
-  params.put("id",new SqlParameterValue(Types.DECIMAL,new Integer(1)));
+  given(resultSet.next()).willReturn(true);
+  given(resultSet.getInt("id")).willReturn(1);
+  given(resultSet.getString("forename")).willReturn("rod");
+  params.put("id",new SqlParameterValue(Types.DECIMAL,1));
   params.put("country","UK");
-  Customer cust=(Customer)jt.query(SELECT_NAMED_PARAMETERS,params,new ResultSetExtractor(){
-    @Override public Object extractData(    ResultSet rs) throws SQLException, DataAccessException {
+  Customer cust=namedParameterTemplate.query(SELECT_NAMED_PARAMETERS,params,new ResultSetExtractor<Customer>(){
+    @Override public Customer extractData(    ResultSet rs) throws SQLException, DataAccessException {
       rs.next();
       Customer cust=new Customer();
       cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -38,4 +16,9 @@
 );
   assertTrue("Customer id was assigned correctly",cust.getId() == 1);
   assertTrue("Customer forename was assigned correctly",cust.getForename().equals("rod"));
+  verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
+  verify(preparedStatement).setObject(1,1,Types.DECIMAL);
+  verify(preparedStatement).setString(2,"UK");
+  verify(preparedStatement).close();
+  verify(connection).close();
 }

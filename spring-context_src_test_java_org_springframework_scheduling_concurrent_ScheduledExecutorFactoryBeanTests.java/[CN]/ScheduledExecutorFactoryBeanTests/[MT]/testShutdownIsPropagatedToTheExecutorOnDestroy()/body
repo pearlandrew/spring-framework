@@ -1,9 +1,5 @@
 {
-  MockControl mockScheduledExecutorService=MockControl.createNiceControl(ScheduledExecutorService.class);
-  final ScheduledExecutorService executor=(ScheduledExecutorService)mockScheduledExecutorService.getMock();
-  executor.shutdown();
-  mockScheduledExecutorService.setVoidCallable();
-  mockScheduledExecutorService.replay();
+  final ScheduledExecutorService executor=mock(ScheduledExecutorService.class);
   ScheduledExecutorFactoryBean factory=new ScheduledExecutorFactoryBean(){
     @Override protected ScheduledExecutorService createExecutor(    int poolSize,    ThreadFactory threadFactory,    RejectedExecutionHandler rejectedExecutionHandler){
       return executor;
@@ -14,5 +10,5 @@
   factory.setWaitForTasksToCompleteOnShutdown(true);
   factory.afterPropertiesSet();
   factory.destroy();
-  mockScheduledExecutorService.verify();
+  verify(executor).shutdown();
 }

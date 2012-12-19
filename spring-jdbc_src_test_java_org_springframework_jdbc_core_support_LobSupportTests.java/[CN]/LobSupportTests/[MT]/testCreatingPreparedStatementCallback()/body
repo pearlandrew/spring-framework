@@ -1,18 +1,9 @@
 {
-  MockControl lobHandlerControl=MockControl.createControl(LobHandler.class);
-  LobHandler handler=(LobHandler)lobHandlerControl.getMock();
-  MockControl lobCreatorControl=MockControl.createControl(LobCreator.class);
-  LobCreator creator=(LobCreator)lobCreatorControl.getMock();
-  MockControl psControl=MockControl.createControl(PreparedStatement.class);
-  PreparedStatement ps=(PreparedStatement)psControl.getMock();
-  handler.getLobCreator();
-  lobHandlerControl.setReturnValue(creator);
-  ps.executeUpdate();
-  psControl.setReturnValue(3);
-  creator.close();
-  lobHandlerControl.replay();
-  lobCreatorControl.replay();
-  psControl.replay();
+  LobHandler handler=mock(LobHandler.class);
+  LobCreator creator=mock(LobCreator.class);
+  PreparedStatement ps=mock(PreparedStatement.class);
+  given(handler.getLobCreator()).willReturn(creator);
+  given(ps.executeUpdate()).willReturn(3);
 class SetValuesCalled {
     boolean b=false;
   }
@@ -24,8 +15,8 @@ class SetValuesCalled {
   }
 ;
   assertEquals(new Integer(3),psc.doInPreparedStatement(ps));
-  lobHandlerControl.verify();
-  lobCreatorControl.verify();
-  psControl.verify();
   assertTrue(svc.b);
+  verify(creator).close();
+  verify(handler).getLobCreator();
+  verify(ps).executeUpdate();
 }

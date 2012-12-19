@@ -1,9 +1,8 @@
 {
   final int value=11;
   final String jndiName="foo";
-  final MyEjb myEjb=createMock(MyEjb.class);
-  expect(myEjb.getValue()).andReturn(value);
-  replay(myEjb);
+  final MyEjb myEjb=mock(MyEjb.class);
+  given(myEjb.getValue()).willReturn(value);
   JndiTemplate jt=new JndiTemplate(){
     @Override public Object lookup(    String name){
       assertTrue(name.equals("java:comp/env/" + jndiName));
@@ -20,5 +19,4 @@
   MyBusinessMethods mbm=(MyBusinessMethods)fb.getObject();
   assertTrue(Proxy.isProxyClass(mbm.getClass()));
   assertEquals("Returns expected value",value,mbm.getValue());
-  verify(myEjb);
 }

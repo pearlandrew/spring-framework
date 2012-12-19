@@ -26,37 +26,16 @@
   trigger1.setStartDelay(0);
   trigger1.setRepeatInterval(20);
   trigger1.afterPropertiesSet();
-  MockControl schedulerControl=MockControl.createControl(Scheduler.class);
-  final Scheduler scheduler=(Scheduler)schedulerControl.getMock();
-  scheduler.getContext();
-  schedulerControl.setReturnValue(new SchedulerContext());
-  scheduler.getTrigger("myTrigger0",Scheduler.DEFAULT_GROUP);
-  schedulerControl.setReturnValue(null);
-  scheduler.getTrigger("myTrigger1",Scheduler.DEFAULT_GROUP);
-  schedulerControl.setReturnValue(new SimpleTrigger());
+  final Scheduler scheduler=mock(Scheduler.class);
+  given(scheduler.getContext()).willReturn(new SchedulerContext());
+  given(scheduler.getTrigger("myTrigger1",Scheduler.DEFAULT_GROUP)).willReturn(new SimpleTrigger());
   if (overwrite) {
-    scheduler.addJob(jobDetail1,true);
-    schedulerControl.setVoidCallable();
-    scheduler.rescheduleJob("myTrigger1",Scheduler.DEFAULT_GROUP,trigger1);
-    schedulerControl.setReturnValue(new Date());
+    given(scheduler.rescheduleJob("myTrigger1",Scheduler.DEFAULT_GROUP,trigger1)).willReturn(new Date());
   }
- else {
-    scheduler.getJobDetail("myJob0",Scheduler.DEFAULT_GROUP);
-    schedulerControl.setReturnValue(null);
-  }
-  scheduler.addJob(jobDetail0,true);
-  schedulerControl.setVoidCallable();
-  scheduler.scheduleJob(trigger0);
-  schedulerControl.setThrowable(new ObjectAlreadyExistsException(""));
+  given(scheduler.scheduleJob(trigger0)).willThrow(new ObjectAlreadyExistsException(""));
   if (overwrite) {
-    scheduler.rescheduleJob("myTrigger0",Scheduler.DEFAULT_GROUP,trigger0);
-    schedulerControl.setReturnValue(new Date());
+    given(scheduler.rescheduleJob("myTrigger0",Scheduler.DEFAULT_GROUP,trigger0)).willReturn(new Date());
   }
-  scheduler.start();
-  schedulerControl.setVoidCallable();
-  scheduler.shutdown(false);
-  schedulerControl.setVoidCallable();
-  schedulerControl.replay();
   SchedulerFactoryBean schedulerFactoryBean=new SchedulerFactoryBean(){
     @Override protected Scheduler createScheduler(    SchedulerFactory schedulerFactory,    String schedulerName){
       return scheduler;
@@ -78,5 +57,16 @@
   finally {
     schedulerFactoryBean.destroy();
   }
-  schedulerControl.verify();
+  verify(scheduler).getTrigger("myTrigger0",Scheduler.DEFAULT_GROUP);
+  verify(scheduler).getTrigger("myTrigger1",Scheduler.DEFAULT_GROUP);
+  if (overwrite) {
+    verify(scheduler).addJob(jobDetail1,true);
+    verify(scheduler).rescheduleJob("myTrigger1",Scheduler.DEFAULT_GROUP,trigger1);
+  }
+ else {
+    verify(scheduler).getJobDetail("myJob0",Scheduler.DEFAULT_GROUP);
+  }
+  verify(scheduler).addJob(jobDetail0,true);
+  verify(scheduler).start();
+  verify(scheduler).shutdown(false);
 }

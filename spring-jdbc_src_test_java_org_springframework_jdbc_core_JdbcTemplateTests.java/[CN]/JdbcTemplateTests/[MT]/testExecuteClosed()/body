@@ -1,47 +1,26 @@
 {
-  MockControl ctrlResultSet;
-  ResultSet mockResultSet;
-  MockControl ctrlCallable;
-  CallableStatement mockCallable;
-  ctrlResultSet=MockControl.createControl(ResultSet.class);
-  mockResultSet=(ResultSet)ctrlResultSet.getMock();
-  mockResultSet.next();
-  ctrlResultSet.setReturnValue(true);
-  mockResultSet.close();
-  ctrlResultSet.setVoidCallable();
-  ctrlCallable=MockControl.createControl(CallableStatement.class);
-  mockCallable=(CallableStatement)ctrlCallable.getMock();
-  mockCallable.execute();
-  ctrlCallable.setReturnValue(true);
-  mockCallable.getUpdateCount();
-  ctrlCallable.setReturnValue(-1);
-  mockCallable.getResultSet();
-  ctrlCallable.setReturnValue(mockResultSet);
-  mockCallable.close();
-  ctrlCallable.setVoidCallable();
-  mockConnection.prepareCall("my query");
-  ctrlConnection.setReturnValue(mockCallable);
-  ctrlResultSet.replay();
-  ctrlCallable.replay();
-  replay();
-  List params=new ArrayList();
+  given(this.resultSet.next()).willReturn(true);
+  given(this.callableStatement.execute()).willReturn(true);
+  given(this.callableStatement.getUpdateCount()).willReturn(-1);
+  List<SqlParameter> params=new ArrayList<SqlParameter>();
   params.add(new SqlReturnResultSet("",new RowCallbackHandler(){
     @Override public void processRow(    ResultSet rs){
       throw new InvalidDataAccessApiUsageException("");
     }
   }
 ));
-  JdbcTemplate template=new JdbcTemplate(mockDataSource);
+  this.thrown.expect(InvalidDataAccessApiUsageException.class);
   try {
-    template.call(new CallableStatementCreator(){
+    this.template.call(new CallableStatementCreator(){
       @Override public CallableStatement createCallableStatement(      Connection conn) throws SQLException {
         return conn.prepareCall("my query");
       }
     }
 ,params);
   }
- catch (  InvalidDataAccessApiUsageException idaauex) {
+  finally {
+    verify(this.resultSet).close();
+    verify(this.callableStatement).close();
+    verify(this.connection).close();
   }
-  ctrlResultSet.verify();
-  ctrlCallable.verify();
 }

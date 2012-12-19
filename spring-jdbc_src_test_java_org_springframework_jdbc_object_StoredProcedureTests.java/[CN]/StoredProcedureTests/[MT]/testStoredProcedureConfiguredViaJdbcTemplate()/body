@@ -1,25 +1,12 @@
 {
-  mockCallable.setObject(1,new Integer(1106),Types.INTEGER);
-  ctrlCallable.setVoidCallable();
-  mockCallable.registerOutParameter(2,Types.INTEGER);
-  ctrlCallable.setVoidCallable();
-  mockCallable.execute();
-  ctrlCallable.setReturnValue(false);
-  mockCallable.getUpdateCount();
-  ctrlCallable.setReturnValue(-1);
-  mockCallable.getObject(2);
-  ctrlCallable.setReturnValue(new Integer(4));
-  if (debugEnabled) {
-    mockCallable.getWarnings();
-    ctrlCallable.setReturnValue(null);
-  }
-  mockCallable.close();
-  ctrlCallable.setVoidCallable();
-  mockConnection.prepareCall("{call " + StoredProcedureConfiguredViaJdbcTemplate.SQL + "(?, ?)}");
-  ctrlConnection.setReturnValue(mockCallable);
-  replay();
+  given(callableStatement.execute()).willReturn(false);
+  given(callableStatement.getUpdateCount()).willReturn(-1);
+  given(callableStatement.getObject(2)).willReturn(4);
+  given(connection.prepareCall("{call " + StoredProcedureConfiguredViaJdbcTemplate.SQL + "(?, ?)}")).willReturn(callableStatement);
   JdbcTemplate t=new JdbcTemplate();
-  t.setDataSource(mockDataSource);
+  t.setDataSource(dataSource);
   StoredProcedureConfiguredViaJdbcTemplate sp=new StoredProcedureConfiguredViaJdbcTemplate(t);
   assertEquals(sp.execute(1106),4);
+  verify(callableStatement).setObject(1,1106,Types.INTEGER);
+  verify(callableStatement).registerOutParameter(2,Types.INTEGER);
 }

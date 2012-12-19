@@ -1,29 +1,24 @@
 {
-  replay();
-class CustomerQuery extends MappingSqlQuery {
+class CustomerQuery extends MappingSqlQuery<Customer> {
     public CustomerQuery(    DataSource ds){
       super(ds,SELECT_ID_FORENAME_WHERE);
       setResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE);
       declareParameter(new SqlParameter(Types.NUMERIC));
       compile();
     }
-    @Override protected Object mapRow(    ResultSet rs,    int rownum) throws SQLException {
+    @Override protected Customer mapRow(    ResultSet rs,    int rownum) throws SQLException {
       Customer cust=new Customer();
       cust.setId(rs.getInt(COLUMN_NAMES[0]));
       cust.setForename(rs.getString(COLUMN_NAMES[1]));
       return cust;
     }
     public Customer findCustomer(    int id){
-      Map params=new HashMap();
-      params.put("id",new Integer(id));
-      return (Customer)executeByNamedParam(params).get(0);
+      Map<String,Integer> params=new HashMap<String,Integer>();
+      params.put("id",id);
+      return executeByNamedParam(params).get(0);
     }
   }
-  CustomerQuery query=new CustomerQuery(mockDataSource);
-  try {
-    Customer cust=query.findCustomer(1);
-    fail("Query should not succeed since parameter declaration did not specify parameter name");
-  }
- catch (  InvalidDataAccessApiUsageException ex) {
-  }
+  CustomerQuery query=new CustomerQuery(dataSource);
+  thrown.expect(InvalidDataAccessApiUsageException.class);
+  query.findCustomer(1);
 }

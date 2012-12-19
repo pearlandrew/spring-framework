@@ -1,20 +1,10 @@
 {
-  mockCallable.execute();
-  ctrlCallable.setReturnValue(true);
-  mockCallable.getUpdateCount();
-  ctrlCallable.setReturnValue(-1);
-  if (debugEnabled) {
-    mockCallable.getWarnings();
-    ctrlCallable.setReturnValue(null);
-  }
-  mockCallable.close();
-  ctrlCallable.setVoidCallable();
-  mockConnection.prepareCall("{call " + StoredProcedureWithResultSetMapped.SQL + "()}");
-  ctrlConnection.setReturnValue(mockCallable);
-  replay();
-  JdbcTemplate jdbcTemplate=new JdbcTemplate(mockDataSource);
+  given(callableStatement.execute()).willReturn(true);
+  given(callableStatement.getUpdateCount()).willReturn(-1);
+  given(connection.prepareCall("{call " + StoredProcedureWithResultSetMapped.SQL + "()}")).willReturn(callableStatement);
+  JdbcTemplate jdbcTemplate=new JdbcTemplate(dataSource);
   jdbcTemplate.setSkipResultsProcessing(true);
   StoredProcedureWithResultSetMapped sproc=new StoredProcedureWithResultSetMapped(jdbcTemplate);
-  Map res=sproc.execute();
+  Map<String,Object> res=sproc.execute();
   assertEquals("incorrect number of returns",0,res.size());
 }

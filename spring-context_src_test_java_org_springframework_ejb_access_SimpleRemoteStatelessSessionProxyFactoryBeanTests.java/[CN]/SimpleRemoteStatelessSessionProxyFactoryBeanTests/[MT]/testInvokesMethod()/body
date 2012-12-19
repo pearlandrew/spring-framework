@@ -1,13 +1,10 @@
 {
   final int value=11;
   final String jndiName="foo";
-  MyEjb myEjb=createMock(MyEjb.class);
-  expect(myEjb.getValue()).andReturn(value);
-  myEjb.remove();
-  replay(myEjb);
-  final MyHome home=createMock(MyHome.class);
-  expect(home.create()).andReturn(myEjb);
-  replay(home);
+  MyEjb myEjb=mock(MyEjb.class);
+  given(myEjb.getValue()).willReturn(value);
+  final MyHome home=mock(MyHome.class);
+  given(home.create()).willReturn(myEjb);
   JndiTemplate jt=new JndiTemplate(){
     @Override public Object lookup(    String name){
       assertTrue(name.equals("java:comp/env/" + jndiName));
@@ -24,6 +21,5 @@
   MyBusinessMethods mbm=(MyBusinessMethods)fb.getObject();
   assertTrue(Proxy.isProxyClass(mbm.getClass()));
   assertEquals("Returns expected value",value,mbm.getValue());
-  verify(myEjb);
-  verify(home);
+  verify(myEjb).remove();
 }
