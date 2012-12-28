@@ -1,0 +1,49 @@
+{
+  String sql="SELECT FORENAME FROM CUSTMR";
+  String[] results={"rod","gary"," portia"};
+class StringHandler implements RowCallbackHandler {
+    private List<String> list=new LinkedList<String>();
+    @Override public void processRow(    ResultSet rs) throws SQLException {
+      this.list.add(rs.getString(1));
+    }
+    public String[] getStrings(){
+      return this.list.toArray(new String[this.list.size()]);
+    }
+  }
+  given(this.resultSet.next()).willReturn(true,true,true,false);
+  given(this.resultSet.getString(1)).willReturn(results[0],results[1],results[2]);
+  given(this.connection.createStatement()).willReturn(this.preparedStatement);
+  StringHandler sh=new StringHandler();
+  JdbcTemplate template=new JdbcTemplate();
+  template.setDataSource(this.dataSource);
+  if (fetchSize != null) {
+    template.setFetchSize(fetchSize.intValue());
+  }
+  if (maxRows != null) {
+    template.setMaxRows(maxRows.intValue());
+  }
+  if (queryTimeout != null) {
+    template.setQueryTimeout(queryTimeout.intValue());
+  }
+  jdbcTemplateCallback.doInJdbcTemplate(template,sql,sh);
+  String[] forenames=sh.getStrings();
+  assertTrue("same length",forenames.length == results.length);
+  for (int i=0; i < forenames.length; i++) {
+    assertTrue("Row " + i + " matches",forenames[i].equals(results[i]));
+  }
+  if (fetchSize != null) {
+    verify(this.preparedStatement).setFetchSize(fetchSize.intValue());
+  }
+  if (maxRows != null) {
+    verify(this.preparedStatement).setMaxRows(maxRows.intValue());
+  }
+  if (queryTimeout != null) {
+    verify(this.preparedStatement).setQueryTimeout(queryTimeout.intValue());
+  }
+  if (argument != null) {
+    verify(this.preparedStatement).setObject(1,argument);
+  }
+  verify(this.resultSet).close();
+  verify(this.preparedStatement).close();
+  verify(this.connection).close();
+}

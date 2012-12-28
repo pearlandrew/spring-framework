@@ -1,24 +1,11 @@
 {
-  mockCallable.setString(1,"EasyMock for interface java.sql.Connection");
-  ctrlCallable.setVoidCallable();
-  mockCallable.registerOutParameter(2,Types.VARCHAR);
-  ctrlCallable.setVoidCallable();
-  mockCallable.execute();
-  ctrlCallable.setReturnValue(false);
-  mockCallable.getUpdateCount();
-  ctrlCallable.setReturnValue(-1);
-  mockCallable.getObject(2);
-  ctrlCallable.setReturnValue("OK");
-  if (debugEnabled) {
-    mockCallable.getWarnings();
-    ctrlCallable.setReturnValue(null);
-  }
-  mockCallable.close();
-  ctrlCallable.setVoidCallable();
-  mockConnection.prepareCall("{call " + ParameterMapperStoredProcedure.SQL + "(?, ?)}");
-  ctrlConnection.setReturnValue(mockCallable);
-  replay();
-  ParameterMapperStoredProcedure pmsp=new ParameterMapperStoredProcedure(mockDataSource);
-  Map out=pmsp.executeTest();
+  given(callableStatement.execute()).willReturn(false);
+  given(callableStatement.getUpdateCount()).willReturn(-1);
+  given(callableStatement.getObject(2)).willReturn("OK");
+  given(connection.prepareCall("{call " + ParameterMapperStoredProcedure.SQL + "(?, ?)}")).willReturn(callableStatement);
+  ParameterMapperStoredProcedure pmsp=new ParameterMapperStoredProcedure(dataSource);
+  Map<String,Object> out=pmsp.executeTest();
   assertEquals("OK",out.get("out"));
+  verify(callableStatement).setString(eq(1),startsWith("Mock for Connection"));
+  verify(callableStatement).registerOutParameter(2,Types.VARCHAR);
 }

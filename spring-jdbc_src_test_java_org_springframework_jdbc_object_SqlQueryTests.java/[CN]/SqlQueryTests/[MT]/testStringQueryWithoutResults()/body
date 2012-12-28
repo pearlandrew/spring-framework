@@ -1,21 +1,10 @@
 {
-  mockResultSet.next();
-  ctrlResultSet.setReturnValue(false);
-  mockResultSet.close();
-  ctrlResultSet.setVoidCallable();
-  mockPreparedStatement.executeQuery();
-  ctrlPreparedStatement.setReturnValue(mockResultSet);
-  if (debugEnabled) {
-    mockPreparedStatement.getWarnings();
-    ctrlPreparedStatement.setReturnValue(null);
-  }
-  mockPreparedStatement.close();
-  ctrlPreparedStatement.setVoidCallable();
-  mockConnection.prepareStatement(SELECT_FORENAME_EMPTY);
-  ctrlConnection.setReturnValue(mockPreparedStatement);
-  replay();
-  StringQuery query=new StringQuery(mockDataSource,SELECT_FORENAME_EMPTY);
+  given(resultSet.next()).willReturn(false);
+  StringQuery query=new StringQuery(dataSource,SELECT_FORENAME_EMPTY);
   String[] results=query.run();
-  assertTrue("Array is non null",results != null);
-  assertTrue("Found 0 results",results.length == 0);
+  assertThat(results,is(equalTo(new String[0])));
+  verify(connection).prepareStatement(SELECT_FORENAME_EMPTY);
+  verify(resultSet).close();
+  verify(preparedStatement).close();
+  verify(connection).close();
 }

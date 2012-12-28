@@ -1,33 +1,15 @@
 {
-  String sql="SELECT AGE FROM CUSTMR WHERE ID = :id";
-  String sqlToUse="SELECT AGE FROM CUSTMR WHERE ID = ?";
-  mockResultSet.next();
-  ctrlResultSet.setReturnValue(true);
-  mockResultSet.getInt(1);
-  ctrlResultSet.setReturnValue(22);
-  mockResultSet.next();
-  ctrlResultSet.setReturnValue(false);
-  mockResultSet.close();
-  ctrlResultSet.setVoidCallable();
-  mockPreparedStatement.setObject(1,new Integer(3));
-  ctrlPreparedStatement.setVoidCallable();
-  mockPreparedStatement.executeQuery();
-  ctrlPreparedStatement.setReturnValue(mockResultSet);
-  mockPreparedStatement.getWarnings();
-  ctrlPreparedStatement.setReturnValue(null);
-  mockPreparedStatement.close();
-  ctrlPreparedStatement.setVoidCallable();
-  mockConnection.prepareStatement(sqlToUse);
-  ctrlConnection.setReturnValue(mockPreparedStatement);
-  replay();
-  NamedParameterJdbcTemplate template=new NamedParameterJdbcTemplate(mockDataSource);
+  given(resultSet.next()).willReturn(true,false);
+  given(resultSet.getInt(1)).willReturn(22);
   MapSqlParameterSource parms=new MapSqlParameterSource();
-  parms.addValue("id",new Integer(3));
-  Object o=template.queryForObject(sql,parms,new RowMapper(){
+  parms.addValue("id",3);
+  Object o=template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id",parms,new RowMapper<Object>(){
     @Override public Object mapRow(    ResultSet rs,    int rowNum) throws SQLException {
-      return new Integer(rs.getInt(1));
+      return rs.getInt(1);
     }
   }
 );
   assertTrue("Correct result type",o instanceof Integer);
+  verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
+  verify(preparedStatement).setObject(1,3);
 }

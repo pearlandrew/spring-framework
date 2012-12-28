@@ -1,51 +1,14 @@
 {
-  MockControl utControl=MockControl.createControl(UserTransaction.class);
-  UserTransaction ut=(UserTransaction)utControl.getMock();
-  MockControl tmControl=MockControl.createControl(TransactionManager.class);
-  TransactionManager tm=(TransactionManager)tmControl.getMock();
-  MockControl txControl=MockControl.createControl(Transaction.class);
-  Transaction tx=(Transaction)txControl.getMock();
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
-  ut.begin();
-  utControl.setVoidCallable(1);
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_ACTIVE,16);
-  tm.suspend();
-  tmControl.setReturnValue(tx,5);
-  ut.begin();
-  utControl.setVoidCallable(5);
-  ut.commit();
-  utControl.setVoidCallable(5);
-  tm.resume(tx);
-  tmControl.setVoidCallable(5);
+  given(transactionManager.suspend()).willReturn(transaction);
   if (rollback) {
-    ut.rollback();
+    given(userTransaction.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION,Status.STATUS_ACTIVE);
   }
  else {
-    ut.getStatus();
-    utControl.setReturnValue(Status.STATUS_ACTIVE,1);
-    ut.commit();
+    given(userTransaction.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION,Status.STATUS_ACTIVE,Status.STATUS_ACTIVE);
   }
-  utControl.setVoidCallable(1);
-  utControl.replay();
-  tmControl.replay();
-  final MockControl dsControl=MockControl.createControl(DataSource.class);
-  final DataSource ds=(DataSource)dsControl.getMock();
-  final MockControl conControl=MockControl.createControl(Connection.class);
-  final Connection con=(Connection)conControl.getMock();
-  ds.getConnection();
-  dsControl.setReturnValue(con,1);
-  con.isReadOnly();
-  conControl.setReturnValue(true,1);
-  if (!openOuterConnection) {
-    con.close();
-    conControl.setVoidCallable(1);
-  }
-  conControl.replay();
-  dsControl.replay();
-  final DataSource dsToUse=useTransactionAwareDataSource ? new TransactionAwareDataSourceProxy(ds) : ds;
-  JtaTransactionManager ptm=new JtaTransactionManager(ut,tm);
+  given(connection.isReadOnly()).willReturn(true);
+  final DataSource dsToUse=useTransactionAwareDataSource ? new TransactionAwareDataSourceProxy(dataSource) : dataSource;
+  JtaTransactionManager ptm=new JtaTransactionManager(userTransaction,transactionManager);
   final TransactionTemplate tt=new TransactionTemplate(ptm);
   tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
   assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(dsToUse));
@@ -75,18 +38,6 @@
             assertTrue("JTA synchronizations active",TransactionSynchronizationManager.isSynchronizationActive());
             assertTrue("Is new transaction",status.isNewTransaction());
             try {
-              dsControl.verify();
-              conControl.verify();
-              dsControl.reset();
-              conControl.reset();
-              ds.getConnection();
-              dsControl.setReturnValue(con,1);
-              con.isReadOnly();
-              conControl.setReturnValue(true,1);
-              con.close();
-              conControl.setVoidCallable(1);
-              dsControl.replay();
-              conControl.replay();
               Connection c=DataSourceUtils.getConnection(dsToUse);
               c.isReadOnly();
               assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(dsToUse));
@@ -107,20 +58,6 @@
       if (accessAfterResume) {
         try {
           if (!openOuterConnection) {
-            dsControl.verify();
-            dsControl.reset();
-            ds.getConnection();
-            dsControl.setReturnValue(con,1);
-            dsControl.replay();
-          }
-          conControl.verify();
-          conControl.reset();
-          con.isReadOnly();
-          conControl.setReturnValue(true,1);
-          con.close();
-          conControl.setVoidCallable(1);
-          conControl.replay();
-          if (!openOuterConnection) {
             c=DataSourceUtils.getConnection(dsToUse);
           }
           assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(dsToUse));
@@ -135,15 +72,6 @@
       }
  else {
         if (openOuterConnection) {
-          try {
-            conControl.verify();
-            conControl.reset();
-            con.close();
-            conControl.setVoidCallable(1);
-            conControl.replay();
-          }
- catch (          SQLException ex) {
-          }
           DataSourceUtils.releaseConnection(c,dsToUse);
         }
       }
@@ -152,8 +80,19 @@
 );
   assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(dsToUse));
   assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
-  dsControl.verify();
-  conControl.verify();
-  utControl.verify();
-  tmControl.verify();
+  verify(userTransaction,times(6)).begin();
+  verify(transactionManager,times(5)).resume(transaction);
+  if (rollback) {
+    verify(userTransaction,times(5)).commit();
+    verify(userTransaction).rollback();
+  }
+ else {
+    verify(userTransaction,times(6)).commit();
+  }
+  if (accessAfterResume && !openOuterConnection) {
+    verify(connection,times(7)).close();
+  }
+ else {
+    verify(connection,times(6)).close();
+  }
 }

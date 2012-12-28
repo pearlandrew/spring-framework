@@ -2,12 +2,10 @@
   MyThrowsHandler th=new MyThrowsHandler();
   ThrowsAdviceInterceptor ti=new ThrowsAdviceInterceptor(th);
   FileNotFoundException ex=new FileNotFoundException();
-  MethodInvocation mi=createMock(MethodInvocation.class);
-  expect(mi.getMethod()).andReturn(Object.class.getMethod("hashCode",(Class[])null));
-  expect(mi.getArguments()).andReturn(null);
-  expect(mi.getThis()).andReturn(new Object());
-  expect(mi.proceed()).andThrow(ex);
-  replay(mi);
+  MethodInvocation mi=mock(MethodInvocation.class);
+  given(mi.getMethod()).willReturn(Object.class.getMethod("hashCode",(Class[])null));
+  given(mi.getThis()).willReturn(new Object());
+  given(mi.proceed()).willThrow(ex);
   try {
     ti.invoke(mi);
     fail();
@@ -17,5 +15,4 @@
   }
   assertEquals(1,th.getCalls());
   assertEquals(1,th.getCalls("ioException"));
-  verify(mi);
 }

@@ -1,38 +1,20 @@
 {
-  mockResultSet.next();
-  ctrlResultSet.setReturnValue(true);
-  mockResultSet.getInt(1);
-  ctrlResultSet.setReturnValue(1);
-  mockResultSet.next();
-  ctrlResultSet.setReturnValue(false);
-  mockResultSet.close();
-  ctrlResultSet.setVoidCallable();
-  mockPreparedStatement.executeQuery();
-  ctrlPreparedStatement.setReturnValue(mockResultSet);
-  if (debugEnabled) {
-    mockPreparedStatement.getWarnings();
-    ctrlPreparedStatement.setReturnValue(null);
-  }
-  mockPreparedStatement.close();
-  ctrlPreparedStatement.setVoidCallable();
-  mockConnection.prepareStatement(SELECT_ID);
-  ctrlConnection.setReturnValue(mockPreparedStatement);
-  replay();
-  SqlQuery query=new MappingSqlQueryWithParameters(){
-    @Override protected Object mapRow(    ResultSet rs,    int rownum,    Object[] params,    Map context) throws SQLException {
+  given(resultSet.next()).willReturn(true,false);
+  given(resultSet.getInt(1)).willReturn(1);
+  SqlQuery<Integer> query=new MappingSqlQueryWithParameters<Integer>(){
+    @Override protected Integer mapRow(    ResultSet rs,    int rownum,    Object[] params,    Map context) throws SQLException {
       assertTrue("params were null",params == null);
       assertTrue("context was null",context == null);
-      return new Integer(rs.getInt(1));
+      return rs.getInt(1);
     }
   }
 ;
-  query.setDataSource(mockDataSource);
+  query.setDataSource(dataSource);
   query.setSql(SELECT_ID);
   query.compile();
-  List list=query.execute();
-  assertTrue("Found customers",list.size() != 0);
-  for (Iterator itr=list.iterator(); itr.hasNext(); ) {
-    Integer id=(Integer)itr.next();
-    assertTrue("Customer id was assigned correctly",id.intValue() == 1);
-  }
+  List<Integer> list=query.execute();
+  assertThat(list,is(equalTo(Arrays.asList(1))));
+  verify(connection).prepareStatement(SELECT_ID);
+  verify(resultSet).close();
+  verify(preparedStatement).close();
 }

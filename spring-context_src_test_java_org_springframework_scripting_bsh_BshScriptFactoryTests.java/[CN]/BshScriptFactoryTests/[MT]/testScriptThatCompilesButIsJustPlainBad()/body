@@ -1,12 +1,8 @@
 {
-  MockControl mock=MockControl.createControl(ScriptSource.class);
-  ScriptSource script=(ScriptSource)mock.getMock();
-  script.getScriptAsString();
+  ScriptSource script=mock(ScriptSource.class);
   final String badScript="String getMessage() { throw new IllegalArgumentException(); }";
-  mock.setReturnValue(badScript);
-  script.isModified();
-  mock.setReturnValue(true);
-  mock.replay();
+  given(script.getScriptAsString()).willReturn(badScript);
+  given(script.isModified()).willReturn(true);
   BshScriptFactory factory=new BshScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript,new Class<?>[]{Messenger.class});
   try {
     Messenger messenger=(Messenger)factory.getScriptedObject(script,new Class<?>[]{Messenger.class});
@@ -15,5 +11,4 @@
   }
  catch (  BshScriptUtils.BshExecutionException expected) {
   }
-  mock.verify();
 }

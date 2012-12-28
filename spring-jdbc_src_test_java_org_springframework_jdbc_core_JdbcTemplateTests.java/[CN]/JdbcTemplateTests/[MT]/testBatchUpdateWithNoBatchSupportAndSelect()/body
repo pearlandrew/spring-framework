@@ -1,38 +1,18 @@
 {
   final String[] sql={"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 1","SELECT * FROM NOSUCHTABLE"};
-  MockControl ctrlStatement=MockControl.createControl(Statement.class);
-  Statement mockStatement=(Statement)ctrlStatement.getMock();
-  mockStatement.getConnection();
-  ctrlStatement.setReturnValue(mockConnection);
-  mockStatement.execute(sql[0]);
-  ctrlStatement.setReturnValue(false);
-  mockStatement.getUpdateCount();
-  ctrlStatement.setReturnValue(1);
-  mockStatement.execute(sql[1]);
-  ctrlStatement.setReturnValue(true);
-  mockStatement.close();
-  ctrlStatement.setVoidCallable();
-  MockControl ctrlDatabaseMetaData=MockControl.createControl(DatabaseMetaData.class);
-  DatabaseMetaData mockDatabaseMetaData=(DatabaseMetaData)ctrlDatabaseMetaData.getMock();
-  mockDatabaseMetaData.getDatabaseProductName();
-  ctrlDatabaseMetaData.setReturnValue("MySQL");
-  mockDatabaseMetaData.supportsBatchUpdates();
-  ctrlDatabaseMetaData.setReturnValue(false);
-  mockConnection.getMetaData();
-  ctrlConnection.setReturnValue(mockDatabaseMetaData,2);
-  mockConnection.createStatement();
-  ctrlConnection.setReturnValue(mockStatement);
-  ctrlStatement.replay();
-  ctrlDatabaseMetaData.replay();
-  replay();
-  JdbcTemplate template=new JdbcTemplate(mockDataSource,false);
+  given(this.statement.execute(sql[0])).willReturn(false);
+  given(this.statement.getUpdateCount()).willReturn(1);
+  given(this.statement.execute(sql[1])).willReturn(true);
+  mockDatabaseMetaData(false);
+  given(this.connection.createStatement()).willReturn(this.statement);
+  JdbcTemplate template=new JdbcTemplate(this.dataSource,false);
+  this.thrown.expect(InvalidDataAccessApiUsageException.class);
   try {
     template.batchUpdate(sql);
-    fail("Shouldn't have executed batch statement with a select");
   }
- catch (  DataAccessException ex) {
-    assertTrue("Check exception type",ex.getClass() == InvalidDataAccessApiUsageException.class);
+  finally {
+    verify(this.statement,never()).addBatch(anyString());
+    verify(this.statement).close();
+    verify(this.connection,atLeastOnce()).close();
   }
-  ctrlStatement.verify();
-  ctrlDatabaseMetaData.verify();
 }

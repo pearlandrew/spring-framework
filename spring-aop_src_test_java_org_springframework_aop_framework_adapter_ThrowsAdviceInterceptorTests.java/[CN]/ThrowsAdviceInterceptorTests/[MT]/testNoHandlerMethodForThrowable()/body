@@ -3,9 +3,8 @@
   ThrowsAdviceInterceptor ti=new ThrowsAdviceInterceptor(th);
   assertEquals(2,ti.getHandlerMethodCount());
   Exception ex=new Exception();
-  MethodInvocation mi=createMock(MethodInvocation.class);
-  expect(mi.proceed()).andThrow(ex);
-  replay(mi);
+  MethodInvocation mi=mock(MethodInvocation.class);
+  given(mi.proceed()).willThrow(ex);
   try {
     ti.invoke(mi);
     fail();
@@ -14,5 +13,4 @@
     assertEquals(ex,caught);
   }
   assertEquals(0,th.getCalls());
-  verify(mi);
 }

@@ -1,11 +1,7 @@
 {
   SQLException expectedSQLException=new SQLException();
-  MockControl ctrlDataSource=MockControl.createControl(DataSource.class);
-  DataSource mockDataSource=(DataSource)ctrlDataSource.getMock();
-  mockDataSource.getConnection();
-  ctrlDataSource.setThrowable(expectedSQLException);
-  ctrlDataSource.replay();
-  SQLErrorCodes sec=SQLErrorCodesFactory.getInstance().getErrorCodes(mockDataSource);
+  DataSource dataSource=mock(DataSource.class);
+  given(dataSource.getConnection()).willThrow(expectedSQLException);
+  SQLErrorCodes sec=SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
   assertIsEmpty(sec);
-  ctrlDataSource.verify();
 }

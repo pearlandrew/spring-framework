@@ -1,9 +1,6 @@
 {
-  final RemoteInterface ejb=createMock(RemoteInterface.class);
-  expect(ejb.targetMethod()).andThrow(new ConnectException("")).times(2);
-  ejb.remove();
-  expectLastCall().times(2);
-  replay(ejb);
+  final RemoteInterface ejb=mock(RemoteInterface.class);
+  given(ejb.targetMethod()).willThrow(new ConnectException(""));
   int lookupCount=2;
   if (!cacheHome) {
     lookupCount++;
@@ -12,7 +9,7 @@
     }
   }
   final String jndiName="foobar";
-  Context mockContext=mockContext(jndiName,ejb,2,lookupCount,lookupCount);
+  Context mockContext=mockContext(jndiName,ejb);
   SimpleRemoteSlsbInvokerInterceptor si=configuredInterceptor(mockContext,jndiName);
   si.setRefreshHomeOnConnectFailure(true);
   si.setLookupHomeOnStartup(lookupHomeOnStartup);
@@ -24,5 +21,6 @@
   }
  catch (  ConnectException ex) {
   }
-  verify(mockContext,ejb);
+  verify(mockContext,times(lookupCount)).close();
+  verify(ejb,times(2)).remove();
 }

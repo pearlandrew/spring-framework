@@ -2,12 +2,10 @@
   TestBean raw=new TestBean();
   assertTrue(!(raw instanceof TimeStamped));
   ProxyFactory factory=new ProxyFactory(raw);
-  TimeStamped ts=createMock(TimeStamped.class);
+  TimeStamped ts=mock(TimeStamped.class);
   long timestamp=111L;
-  expect(ts.getTimeStamp()).andReturn(timestamp);
-  replay(ts);
+  given(ts.getTimeStamp()).willReturn(timestamp);
   factory.addAdvisor(0,new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts)));
   TimeStamped tsp=(TimeStamped)factory.getProxy();
   assertTrue(tsp.getTimeStamp() == timestamp);
-  verify(ts);
 }

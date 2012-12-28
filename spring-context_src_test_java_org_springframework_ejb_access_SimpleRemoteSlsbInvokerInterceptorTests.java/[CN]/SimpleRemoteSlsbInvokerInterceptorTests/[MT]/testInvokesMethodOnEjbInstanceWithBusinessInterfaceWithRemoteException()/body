@@ -1,10 +1,8 @@
 {
-  final RemoteInterface ejb=createMock(RemoteInterface.class);
-  expect(ejb.targetMethod()).andThrow(new RemoteException());
-  ejb.remove();
-  replay(ejb);
+  final RemoteInterface ejb=mock(RemoteInterface.class);
+  given(ejb.targetMethod()).willThrow(new RemoteException());
   final String jndiName="foobar";
-  Context mockContext=mockContext(jndiName,ejb,1,1,1);
+  Context mockContext=mockContext(jndiName,ejb);
   SimpleRemoteSlsbInvokerInterceptor si=configuredInterceptor(mockContext,jndiName);
   BusinessInterface target=(BusinessInterface)configuredProxy(si,BusinessInterface.class);
   try {
@@ -13,5 +11,6 @@
   }
  catch (  RemoteAccessException ex) {
   }
-  verify(mockContext,ejb);
+  verify(mockContext).close();
+  verify(ejb).remove();
 }
