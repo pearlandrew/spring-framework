@@ -2,16 +2,16 @@
   final DriverManagerDataSource ds=new DriverManagerDataSource();
   final Set invocations=new HashSet();
   LocalSessionFactoryBean sfb=new LocalSessionFactoryBean(){
-    protected Configuration newConfiguration(){
+    @Override protected Configuration newConfiguration(){
       return new Configuration(){
-        public Configuration addJar(        File file){
+        @Override public Configuration addJar(        File file){
           invocations.add("addResource " + file.getPath());
           return this;
         }
       }
 ;
     }
-    protected SessionFactory newSessionFactory(    Configuration config){
+    @Override protected SessionFactory newSessionFactory(    Configuration config){
       assertEquals(LocalDataSourceConnectionProvider.class.getName(),config.getProperty(Environment.CONNECTION_PROVIDER));
       assertEquals(ds,LocalSessionFactoryBean.getConfigTimeDataSource());
       invocations.add("newSessionFactory");

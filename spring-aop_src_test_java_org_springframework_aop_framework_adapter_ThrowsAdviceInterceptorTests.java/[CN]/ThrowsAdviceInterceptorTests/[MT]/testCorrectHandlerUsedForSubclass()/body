@@ -2,9 +2,8 @@
   MyThrowsHandler th=new MyThrowsHandler();
   ThrowsAdviceInterceptor ti=new ThrowsAdviceInterceptor(th);
   TransactionRolledbackException ex=new TransactionRolledbackException();
-  MethodInvocation mi=createMock(MethodInvocation.class);
-  expect(mi.proceed()).andThrow(ex);
-  replay(mi);
+  MethodInvocation mi=mock(MethodInvocation.class);
+  given(mi.proceed()).willThrow(ex);
   try {
     ti.invoke(mi);
     fail();
@@ -14,5 +13,4 @@
   }
   assertEquals(1,th.getCalls());
   assertEquals(1,th.getCalls("remoteException"));
-  verify(mi);
 }

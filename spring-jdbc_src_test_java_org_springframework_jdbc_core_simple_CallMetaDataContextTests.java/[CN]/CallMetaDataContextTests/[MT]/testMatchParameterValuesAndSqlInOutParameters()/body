@@ -1,19 +1,9 @@
 {
   final String TABLE="customers";
   final String USER="me";
-  mockDatabaseMetaData.getDatabaseProductName();
-  ctrlDatabaseMetaData.setReturnValue("MyDB");
-  mockDatabaseMetaData.supportsCatalogsInProcedureCalls();
-  ctrlDatabaseMetaData.setReturnValue(false);
-  mockDatabaseMetaData.supportsSchemasInProcedureCalls();
-  ctrlDatabaseMetaData.setReturnValue(false);
-  mockDatabaseMetaData.getUserName();
-  ctrlDatabaseMetaData.setReturnValue(USER);
-  mockDatabaseMetaData.storesUpperCaseIdentifiers();
-  ctrlDatabaseMetaData.setReturnValue(false);
-  mockDatabaseMetaData.storesLowerCaseIdentifiers();
-  ctrlDatabaseMetaData.setReturnValue(true);
-  replay();
+  given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
+  given(databaseMetaData.getUserName()).willReturn(USER);
+  given(databaseMetaData.storesLowerCaseIdentifiers()).willReturn(true);
   List<SqlParameter> parameters=new ArrayList<SqlParameter>();
   parameters.add(new SqlParameter("id",Types.NUMERIC));
   parameters.add(new SqlInOutParameter("name",Types.NUMERIC));
@@ -23,7 +13,7 @@
   parameterSource.addValue("name","Sven");
   parameterSource.addValue("customer_no","12345XYZ");
   context.setProcedureName(TABLE);
-  context.initializeMetaData(mockDataSource);
+  context.initializeMetaData(dataSource);
   context.processParameters(parameters);
   Map<String,Object> inParameters=context.matchInParameterValuesWithCallParameters(parameterSource);
   assertEquals("Wrong number of matched in parameter values",2,inParameters.size());

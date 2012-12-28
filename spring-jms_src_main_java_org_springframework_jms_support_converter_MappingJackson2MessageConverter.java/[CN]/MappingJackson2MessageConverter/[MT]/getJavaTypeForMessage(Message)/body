@@ -1,0 +1,16 @@
+{
+  String typeId=message.getStringProperty(this.typeIdPropertyName);
+  if (typeId == null) {
+    throw new MessageConversionException("Could not find type id property [" + this.typeIdPropertyName + "]");
+  }
+  Class mappedClass=this.idClassMappings.get(typeId);
+  if (mappedClass != null) {
+    return this.objectMapper.getTypeFactory().constructType(mappedClass);
+  }
+  try {
+    return this.objectMapper.getTypeFactory().constructType(ClassUtils.forName(typeId,getClass().getClassLoader()));
+  }
+ catch (  Throwable ex) {
+    throw new MessageConversionException("Failed to resolve type id [" + typeId + "]",ex);
+  }
+}

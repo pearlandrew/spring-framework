@@ -1,7 +1,7 @@
 {
   final RollbackException rex=new RollbackException();
   MockUOWManager manager=new MockUOWManager(){
-    public void runUnderUOW(    int type,    boolean join,    UOWAction action) throws UOWException {
+    @Override public void runUnderUOW(    int type,    boolean join,    UOWAction action) throws UOWException {
       throw new UOWException(rex);
     }
   }
@@ -13,7 +13,7 @@
   assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
   try {
     ptm.execute(definition,new TransactionCallback(){
-      public Object doInTransaction(      TransactionStatus status){
+      @Override public Object doInTransaction(      TransactionStatus status){
         assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
         assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
         assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());

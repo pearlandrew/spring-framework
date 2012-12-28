@@ -37,14 +37,14 @@
   assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
   assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
   Object result=tt.execute(new TransactionCallback(){
-    public Object doInTransaction(    TransactionStatus status){
+    @Override public Object doInTransaction(    TransactionStatus status){
       try {
         assertTrue("JTA synchronizations active",TransactionSynchronizationManager.isSynchronizationActive());
         assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
         HibernateTemplate ht=new HibernateTemplate(sf);
         ht.setExposeNativeSession(true);
         List htl=ht.executeFind(new HibernateCallback(){
-          public Object doInHibernate(          org.hibernate.Session sess){
+          @Override public Object doInHibernate(          org.hibernate.Session sess){
             assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
             assertEquals(session,sess);
             return l;
@@ -54,7 +54,7 @@
         ht=new HibernateTemplate(sf);
         ht.setExposeNativeSession(true);
         htl=ht.executeFind(new HibernateCallback(){
-          public Object doInHibernate(          org.hibernate.Session sess){
+          @Override public Object doInHibernate(          org.hibernate.Session sess){
             assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
             assertEquals(session,sess);
             return l;

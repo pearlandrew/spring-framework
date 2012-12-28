@@ -2,15 +2,15 @@
   ConversionServiceFactoryBean factory=new ConversionServiceFactoryBean();
   Set<Object> converters=new HashSet<Object>();
   converters.add(new Converter<String,Foo>(){
-    public Foo convert(    String source){
+    @Override public Foo convert(    String source){
       return new Foo();
     }
   }
 );
   converters.add(new ConverterFactory<String,Bar>(){
-    public <T extends Bar>Converter<String,T> getConverter(    Class<T> targetType){
+    @Override public <T extends Bar>Converter<String,T> getConverter(    Class<T> targetType){
       return new Converter<String,T>(){
-        public T convert(        String source){
+        @SuppressWarnings("unchecked") @Override public T convert(        String source){
           return (T)new Bar();
         }
       }
@@ -19,10 +19,10 @@
   }
 );
   converters.add(new GenericConverter(){
-    public Set<ConvertiblePair> getConvertibleTypes(){
+    @Override public Set<ConvertiblePair> getConvertibleTypes(){
       return Collections.singleton(new ConvertiblePair(String.class,Baz.class));
     }
-    public Object convert(    Object source,    TypeDescriptor sourceType,    TypeDescriptor targetType){
+    @Override public Object convert(    Object source,    TypeDescriptor sourceType,    TypeDescriptor targetType){
       return new Baz();
     }
   }

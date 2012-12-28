@@ -3,7 +3,7 @@
     long timeout=getReceiveTimeout();
     JmsResourceHolder resourceHolder=(JmsResourceHolder)TransactionSynchronizationManager.getResource(getConnectionFactory());
     if (resourceHolder != null && resourceHolder.hasTimeout()) {
-      timeout=resourceHolder.getTimeToLiveInMillis();
+      timeout=Math.min(timeout,resourceHolder.getTimeToLiveInMillis());
     }
     Message message=doReceive(consumer,timeout);
     if (session.getTransacted()) {

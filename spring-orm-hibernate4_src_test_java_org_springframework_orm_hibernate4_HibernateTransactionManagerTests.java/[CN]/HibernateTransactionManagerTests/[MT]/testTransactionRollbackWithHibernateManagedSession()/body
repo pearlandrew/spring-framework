@@ -39,10 +39,10 @@
   assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
   try {
     tt.execute(new TransactionCallbackWithoutResult(){
-      public void doInTransactionWithoutResult(      TransactionStatus status){
+      @Override public void doInTransactionWithoutResult(      TransactionStatus status){
         assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
         tt.execute(new TransactionCallbackWithoutResult(){
-          public void doInTransactionWithoutResult(          TransactionStatus status){
+          @Override public void doInTransactionWithoutResult(          TransactionStatus status){
             status.setRollbackOnly();
             Session sess=((SessionHolder)TransactionSynchronizationManager.getResource(sf)).getSession();
             assertEquals(session,sess);
@@ -58,7 +58,7 @@
   }
   assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
   tt.execute(new TransactionCallbackWithoutResult(){
-    public void doInTransactionWithoutResult(    TransactionStatus status){
+    @Override public void doInTransactionWithoutResult(    TransactionStatus status){
       assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
       Session sess=((SessionHolder)TransactionSynchronizationManager.getResource(sf)).getSession();
       assertEquals(session,sess);
