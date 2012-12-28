@@ -1,17 +1,15 @@
 {
   Object o=new Object();
   String name="foo";
-  final Context context=createMock(Context.class);
-  expect(context.lookup(name)).andReturn(o);
-  context.close();
-  replay(context);
+  final Context context=mock(Context.class);
+  given(context.lookup(name)).willReturn(o);
   JndiTemplate jt=new JndiTemplate(){
-    protected Context createInitialContext(){
+    @Override protected Context createInitialContext(){
       return context;
     }
   }
 ;
   Object o2=jt.lookup(name);
   assertEquals(o,o2);
-  verify(context);
+  verify(context).close();
 }

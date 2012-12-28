@@ -12,14 +12,14 @@
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
   Object result=tt.execute(new TransactionCallback(){
-    public Object doInTransaction(    TransactionStatus status){
+    @Override public Object doInTransaction(    TransactionStatus status){
       assertFalse(TransactionSynchronizationManager.hasResource(factory));
       TransactionTemplate tt2=new TransactionTemplate(transactionManager);
       tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
       return tt2.execute(new TransactionCallback(){
-        public Object doInTransaction(        TransactionStatus status){
+        @Override public Object doInTransaction(        TransactionStatus status){
           return template.execute(new JpaCallback(){
-            public Object doInJpa(            EntityManager em2){
+            @Override public Object doInJpa(            EntityManager em2){
               em2.flush();
               return l;
             }

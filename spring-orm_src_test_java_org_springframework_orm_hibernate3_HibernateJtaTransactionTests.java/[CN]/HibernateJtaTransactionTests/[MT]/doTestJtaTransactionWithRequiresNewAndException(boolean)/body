@@ -49,13 +49,13 @@
   assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
   try {
     tt.execute(new TransactionCallback(){
-      public Object doInTransaction(      TransactionStatus status){
+      @Override public Object doInTransaction(      TransactionStatus status){
         org.hibernate.Session outerSession=SessionFactoryUtils.getSession(sf,false);
         assertSame(session1,outerSession);
         SessionHolder holder=(SessionHolder)TransactionSynchronizationManager.getResource(sf);
         assertTrue("Has thread session",holder != null);
         tt.execute(new TransactionCallback(){
-          public Object doInTransaction(          TransactionStatus status){
+          @Override public Object doInTransaction(          TransactionStatus status){
             return null;
           }
         }

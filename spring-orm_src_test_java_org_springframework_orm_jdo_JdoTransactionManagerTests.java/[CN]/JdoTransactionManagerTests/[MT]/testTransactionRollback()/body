@@ -22,11 +22,11 @@
   assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
   try {
     tt.execute(new TransactionCallback(){
-      public Object doInTransaction(      TransactionStatus status){
+      @Override public Object doInTransaction(      TransactionStatus status){
         assertTrue("Has thread pm",TransactionSynchronizationManager.hasResource(pmf));
         JdoTemplate jt=new JdoTemplate(pmf);
         return jt.execute(new JdoCallback(){
-          public Object doInJdo(          PersistenceManager pm){
+          @Override public Object doInJdo(          PersistenceManager pm){
             throw new RuntimeException("application exception");
           }
         }

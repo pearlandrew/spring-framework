@@ -2,8 +2,8 @@
   expect(manager.isOpen()).andReturn(true);
   manager.close();
   replay(manager,factory);
-  final EntityManagerFactory factory2=(EntityManagerFactory)createMock(EntityManagerFactory.class);
-  final EntityManager manager2=(EntityManager)createMock(EntityManager.class);
+  final EntityManagerFactory factory2=createMock(EntityManagerFactory.class);
+  final EntityManager manager2=createMock(EntityManager.class);
   expect(factory2.createEntityManager()).andReturn(manager2);
   expect(manager2.isOpen()).andReturn(true);
   manager2.close();
@@ -25,14 +25,14 @@
   final OpenEntityManagerInViewFilter filter2=new OpenEntityManagerInViewFilter();
   filter2.init(filterConfig2);
   final FilterChain filterChain=new FilterChain(){
-    public void doFilter(    ServletRequest servletRequest,    ServletResponse servletResponse){
+    @Override public void doFilter(    ServletRequest servletRequest,    ServletResponse servletResponse){
       assertTrue(TransactionSynchronizationManager.hasResource(factory));
       servletRequest.setAttribute("invoked",Boolean.TRUE);
     }
   }
 ;
   final FilterChain filterChain2=new FilterChain(){
-    public void doFilter(    ServletRequest servletRequest,    ServletResponse servletResponse) throws IOException, ServletException {
+    @Override public void doFilter(    ServletRequest servletRequest,    ServletResponse servletResponse) throws IOException, ServletException {
       assertTrue(TransactionSynchronizationManager.hasResource(factory2));
       filter.doFilter(servletRequest,servletResponse,filterChain);
     }

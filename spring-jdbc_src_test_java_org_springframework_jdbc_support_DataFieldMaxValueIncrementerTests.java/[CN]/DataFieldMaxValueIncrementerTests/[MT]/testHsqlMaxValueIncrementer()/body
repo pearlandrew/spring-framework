@@ -1,42 +1,14 @@
 {
-  MockControl dsControl=MockControl.createControl(DataSource.class);
-  DataSource ds=(DataSource)dsControl.getMock();
-  MockControl conControl=MockControl.createControl(Connection.class);
-  Connection con=(Connection)conControl.getMock();
-  MockControl stmtControl=MockControl.createControl(Statement.class);
-  Statement stmt=(Statement)stmtControl.getMock();
-  MockControl rsControl=MockControl.createControl(ResultSet.class);
-  ResultSet rs=(ResultSet)rsControl.getMock();
-  ds.getConnection();
-  dsControl.setReturnValue(con,2);
-  con.createStatement();
-  conControl.setReturnValue(stmt,2);
-  stmt.executeUpdate("insert into myseq values(null)");
-  stmtControl.setReturnValue(1,6);
-  stmt.executeQuery("select max(identity()) from myseq");
-  stmtControl.setReturnValue(rs,6);
-  rs.next();
-  rsControl.setReturnValue(true,6);
-  for (long i=0; i < 6; i++) {
-    rs.getLong(1);
-    rsControl.setReturnValue(i);
-  }
-  rs.close();
-  rsControl.setVoidCallable(6);
-  stmt.executeUpdate("delete from myseq where seq < 2");
-  stmtControl.setReturnValue(1);
-  stmt.executeUpdate("delete from myseq where seq < 5");
-  stmtControl.setReturnValue(1);
-  stmt.close();
-  stmtControl.setVoidCallable(2);
-  con.close();
-  conControl.setVoidCallable(2);
-  dsControl.replay();
-  conControl.replay();
-  stmtControl.replay();
-  rsControl.replay();
+  given(dataSource.getConnection()).willReturn(connection);
+  given(connection.createStatement()).willReturn(statement);
+  given(statement.executeUpdate("insert into myseq values(null)")).willReturn(1);
+  given(statement.executeQuery("select max(identity()) from myseq")).willReturn(resultSet);
+  given(resultSet.next()).willReturn(true);
+  given(resultSet.getLong(1)).willReturn(0L,1L,2L,3L,4L,5L);
+  given(statement.executeUpdate("delete from myseq where seq < 2")).willReturn(1);
+  given(statement.executeUpdate("delete from myseq where seq < 5")).willReturn(1);
   HsqlMaxValueIncrementer incrementer=new HsqlMaxValueIncrementer();
-  incrementer.setDataSource(ds);
+  incrementer.setDataSource(dataSource);
   incrementer.setIncrementerName("myseq");
   incrementer.setColumnName("seq");
   incrementer.setCacheSize(3);
@@ -47,8 +19,7 @@
   assertEquals("002",incrementer.nextStringValue());
   assertEquals(3,incrementer.nextIntValue());
   assertEquals(4,incrementer.nextLongValue());
-  dsControl.verify();
-  conControl.verify();
-  stmtControl.verify();
-  rsControl.verify();
+  verify(resultSet,times(6)).close();
+  verify(statement,times(2)).close();
+  verify(connection,times(2)).close();
 }

@@ -52,7 +52,7 @@
   TransactionSynchronizationManager.bindResource(sf,new SessionHolder(session));
   assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
   Object result=tt.execute(new TransactionCallback(){
-    public Object doInTransaction(    TransactionStatus status){
+    @Override public Object doInTransaction(    TransactionStatus status){
       assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
       assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(ds));
       SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.getResource(sf);
@@ -60,7 +60,7 @@
       HibernateTemplate ht=new HibernateTemplate(sf);
       ht.setExposeNativeSession(true);
       return ht.executeFind(new HibernateCallback(){
-        public Object doInHibernate(        org.hibernate.Session sess) throws HibernateException {
+        @Override public Object doInHibernate(        org.hibernate.Session sess) throws HibernateException {
           assertEquals(session,sess);
           return l;
         }

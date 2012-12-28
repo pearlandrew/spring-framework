@@ -1,15 +1,13 @@
 {
   final String targetBeanName="singleton";
   final String expectedSingleton="Alicia Keys";
-  BeanFactory beanFactory=createMock(BeanFactory.class);
-  expect(beanFactory.getBean(targetBeanName)).andReturn(expectedSingleton);
-  replay(beanFactory);
+  BeanFactory beanFactory=mock(BeanFactory.class);
+  given(beanFactory.getBean(targetBeanName)).willReturn(expectedSingleton);
   ObjectFactoryCreatingFactoryBean factory=new ObjectFactoryCreatingFactoryBean();
   factory.setTargetBeanName(targetBeanName);
   factory.setBeanFactory(beanFactory);
   factory.afterPropertiesSet();
-  ObjectFactory<?> objectFactory=(ObjectFactory<?>)factory.getObject();
+  ObjectFactory<?> objectFactory=factory.getObject();
   Object actualSingleton=objectFactory.getObject();
   assertSame(expectedSingleton,actualSingleton);
-  verify(beanFactory);
 }

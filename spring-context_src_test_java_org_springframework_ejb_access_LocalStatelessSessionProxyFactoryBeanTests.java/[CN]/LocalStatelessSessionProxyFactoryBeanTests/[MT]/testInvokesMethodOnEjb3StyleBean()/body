@@ -1,11 +1,10 @@
 {
   final int value=11;
   final String jndiName="foo";
-  final MyEjb myEjb=createMock(MyEjb.class);
-  expect(myEjb.getValue()).andReturn(value);
-  replay(myEjb);
+  final MyEjb myEjb=mock(MyEjb.class);
+  given(myEjb.getValue()).willReturn(value);
   JndiTemplate jt=new JndiTemplate(){
-    public Object lookup(    String name) throws NamingException {
+    @Override public Object lookup(    String name) throws NamingException {
       assertTrue(name.equals("java:comp/env/" + jndiName));
       return myEjb;
     }
@@ -20,5 +19,4 @@
   MyBusinessMethods mbm=(MyBusinessMethods)fb.getObject();
   assertTrue(Proxy.isProxyClass(mbm.getClass()));
   assertTrue(mbm.getValue() == value);
-  verify(myEjb);
 }

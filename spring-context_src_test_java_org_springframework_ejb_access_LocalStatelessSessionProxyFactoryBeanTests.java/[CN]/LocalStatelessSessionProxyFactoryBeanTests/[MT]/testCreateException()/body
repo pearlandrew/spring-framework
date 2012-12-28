@@ -1,11 +1,10 @@
 {
   final String jndiName="foo";
   final CreateException cex=new CreateException();
-  final MyHome home=createMock(MyHome.class);
-  expect(home.create()).andThrow(cex);
-  replay(home);
+  final MyHome home=mock(MyHome.class);
+  given(home.create()).willThrow(cex);
   JndiTemplate jt=new JndiTemplate(){
-    public Object lookup(    String name) throws NamingException {
+    @Override public Object lookup(    String name) throws NamingException {
       assertTrue(name.equals(jndiName));
       return home;
     }
@@ -27,5 +26,4 @@
  catch (  EjbAccessException ex) {
     assertSame(cex,ex.getCause());
   }
-  verify(home);
 }

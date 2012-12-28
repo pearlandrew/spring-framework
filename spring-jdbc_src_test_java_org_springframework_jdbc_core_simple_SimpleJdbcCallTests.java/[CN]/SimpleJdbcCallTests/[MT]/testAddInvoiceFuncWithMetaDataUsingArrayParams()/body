@@ -1,11 +1,8 @@
 {
-  final int amount=1103;
-  final int custid=3;
-  MockControl ctrlResultSet=initializeAddInvoiceWithMetaData(true);
-  ctrlResultSet.replay();
-  replay();
-  SimpleJdbcCall adder=new SimpleJdbcCall(mockDataSource).withFunctionName("add_invoice");
-  Number newId=adder.executeFunction(Number.class,amount,custid);
+  initializeAddInvoiceWithMetaData(true);
+  SimpleJdbcCall adder=new SimpleJdbcCall(dataSource).withFunctionName("add_invoice");
+  Number newId=adder.executeFunction(Number.class,1103,3);
   assertEquals(4,newId.intValue());
-  ctrlResultSet.verify();
+  verifyAddInvoiceWithMetaData(true);
+  verify(connection,atLeastOnce()).close();
 }

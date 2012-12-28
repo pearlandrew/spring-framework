@@ -32,11 +32,11 @@
   assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
   try {
     tt.execute(new TransactionCallback(){
-      public Object doInTransaction(      TransactionStatus status){
+      @Override public Object doInTransaction(      TransactionStatus status){
         assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
         HibernateTemplate ht=new HibernateTemplate(sf);
         return ht.executeFind(new HibernateCallback(){
-          public Object doInHibernate(          org.hibernate.Session session){
+          @Override public Object doInHibernate(          org.hibernate.Session session){
             throw new RuntimeException("application exception");
           }
         }

@@ -1,39 +1,24 @@
 {
   String sql="SELECT forename from custmr";
   SQLWarning warnings=new SQLWarning("My warning");
-  MockControl ctrlResultSet=MockControl.createControl(ResultSet.class);
-  ResultSet mockResultSet=(ResultSet)ctrlResultSet.getMock();
-  mockResultSet.next();
-  ctrlResultSet.setReturnValue(false);
-  mockResultSet.close();
-  ctrlResultSet.setVoidCallable();
-  MockControl ctrlStatement=MockControl.createControl(PreparedStatement.class);
-  PreparedStatement mockStatement=(PreparedStatement)ctrlStatement.getMock();
-  mockStatement.executeQuery(sql);
-  ctrlStatement.setReturnValue(mockResultSet);
-  mockStatement.getWarnings();
-  ctrlStatement.setReturnValue(warnings);
-  mockStatement.close();
-  ctrlStatement.setVoidCallable();
-  mockConnection.createStatement();
-  ctrlConnection.setReturnValue(mockStatement);
-  ctrlResultSet.replay();
-  ctrlStatement.replay();
-  replay();
-  JdbcTemplate t=new JdbcTemplate(mockDataSource);
+  given(this.resultSet.next()).willReturn(false);
+  given(this.preparedStatement.getWarnings()).willReturn(warnings);
+  given(this.connection.createStatement()).willReturn(this.preparedStatement);
+  JdbcTemplate t=new JdbcTemplate(this.dataSource);
   t.setIgnoreWarnings(false);
+  this.thrown.expect(SQLWarningException.class);
+  this.thrown.expect(exceptionCause(sameInstance(warnings)));
   try {
     t.query(sql,new RowCallbackHandler(){
-      public void processRow(      ResultSet rs) throws SQLException {
+      @Override public void processRow(      ResultSet rs) throws SQLException {
         rs.getByte(1);
       }
     }
 );
-    fail("Should have thrown exception on warning");
   }
- catch (  SQLWarningException ex) {
-    assertTrue("Root cause of warning was correct",ex.getCause() == warnings);
+  finally {
+    verify(this.resultSet).close();
+    verify(this.preparedStatement).close();
+    verify(this.connection).close();
   }
-  ctrlResultSet.verify();
-  ctrlStatement.verify();
 }

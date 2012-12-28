@@ -9,7 +9,7 @@
   final TransactionStatus ts=(TransactionStatus)statusControl.getMock();
   ptm=new PlatformTransactionManager(){
     private boolean invoked;
-    public TransactionStatus getTransaction(    TransactionDefinition def) throws TransactionException {
+    @Override public TransactionStatus getTransaction(    TransactionDefinition def) throws TransactionException {
       if (invoked) {
         throw new IllegalStateException("getTransaction should not get invoked more than once");
       }
@@ -19,10 +19,10 @@
       }
       return ts;
     }
-    public void commit(    TransactionStatus status) throws TransactionException {
+    @Override public void commit(    TransactionStatus status) throws TransactionException {
       assertTrue(status == ts);
     }
-    public void rollback(    TransactionStatus status) throws TransactionException {
+    @Override public void rollback(    TransactionStatus status) throws TransactionException {
       throw new IllegalStateException("rollback should not get invoked");
     }
   }

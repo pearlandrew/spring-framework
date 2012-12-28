@@ -1,12 +1,11 @@
 {
-  RemoteInterface ejb=createMock(RemoteInterface.class);
-  expect(ejb.targetMethod()).andReturn(null);
-  replay(ejb);
+  RemoteInterface ejb=mock(RemoteInterface.class);
   String jndiName="foobar";
-  Context mockContext=mockContext(jndiName,ejb,1,1,2);
+  Context mockContext=mockContext(jndiName,ejb);
   SimpleRemoteSlsbInvokerInterceptor si=configuredInterceptor(mockContext,jndiName);
   si.setExposeAccessContext(true);
   RemoteInterface target=(RemoteInterface)configuredProxy(si,RemoteInterface.class);
   assertNull(target.targetMethod());
-  verify(mockContext);
+  verify(mockContext,times(2)).close();
+  verify(ejb).targetMethod();
 }

@@ -1,18 +1,12 @@
 {
-  MockControl rsetControl=MockControl.createControl(ResultSet.class);
-  ResultSet rset=(ResultSet)rsetControl.getMock();
-  rset.next();
-  rsetControl.setReturnValue(true);
-  rset.clearWarnings();
-  rset.next();
-  rsetControl.setReturnValue(true);
-  rsetControl.replay();
+  ResultSet rset=mock(ResultSet.class);
+  given(rset.next()).willReturn(true,true,false);
   AbstractLobStreamingResultSetExtractor lobRse=getResultSetExtractor(false);
+  thrown.expect(IncorrectResultSizeDataAccessException.class);
   try {
     lobRse.extractData(rset);
-    fail("IncorrectResultSizeDataAccessException should have been thrown");
   }
- catch (  IncorrectResultSizeDataAccessException e) {
+  finally {
+    verify(rset).clearWarnings();
   }
-  rsetControl.verify();
 }

@@ -1,24 +1,10 @@
 {
-  mockCallable.getConnection();
-  ctrlCallable.setDefaultReturnValue(mockConnection);
-  mockCallable.registerOutParameter(1,Types.DECIMAL,4);
-  ctrlCallable.setVoidCallable();
-  mockCallable.execute();
-  ctrlCallable.setReturnValue(false);
-  mockCallable.getUpdateCount();
-  ctrlCallable.setReturnValue(-1);
-  mockCallable.getObject(1);
-  ctrlCallable.setReturnValue(new BigDecimal("12345.6789"));
-  if (debugEnabled) {
-    mockCallable.getWarnings();
-    ctrlCallable.setReturnValue(null);
-  }
-  mockCallable.close();
-  ctrlCallable.setVoidCallable();
-  mockConnection.prepareCall("{call " + NumericWithScaleStoredProcedure.SQL + "(?)}");
-  ctrlConnection.setReturnValue(mockCallable);
-  replay();
-  NumericWithScaleStoredProcedure nwssp=new NumericWithScaleStoredProcedure(mockDataSource);
-  Map out=nwssp.executeTest();
+  given(callableStatement.execute()).willReturn(false);
+  given(callableStatement.getUpdateCount()).willReturn(-1);
+  given(callableStatement.getObject(1)).willReturn(new BigDecimal("12345.6789"));
+  given(connection.prepareCall("{call " + NumericWithScaleStoredProcedure.SQL + "(?)}")).willReturn(callableStatement);
+  NumericWithScaleStoredProcedure nwssp=new NumericWithScaleStoredProcedure(dataSource);
+  Map<String,Object> out=nwssp.executeTest();
   assertEquals(new BigDecimal("12345.6789"),out.get("out"));
+  verify(callableStatement).registerOutParameter(1,Types.DECIMAL,4);
 }
