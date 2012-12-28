@@ -21,13 +21,13 @@
   assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
   assertTrue("Synchronization not active",!TransactionSynchronizationManager.isSynchronizationActive());
   tt.execute(new TransactionCallbackWithoutResult(){
-    protected void doInTransactionWithoutResult(    TransactionStatus status) throws RuntimeException {
+    @Override protected void doInTransactionWithoutResult(    TransactionStatus status) throws RuntimeException {
       assertTrue("Is new transaction",status.isNewTransaction());
       assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
       assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
       tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
       tt.execute(new TransactionCallbackWithoutResult(){
-        protected void doInTransactionWithoutResult(        TransactionStatus status) throws RuntimeException {
+        @Override protected void doInTransactionWithoutResult(        TransactionStatus status) throws RuntimeException {
           assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
           assertTrue("Synchronization active",TransactionSynchronizationManager.isSynchronizationActive());
           assertTrue("Isn't new transaction",!status.isNewTransaction());

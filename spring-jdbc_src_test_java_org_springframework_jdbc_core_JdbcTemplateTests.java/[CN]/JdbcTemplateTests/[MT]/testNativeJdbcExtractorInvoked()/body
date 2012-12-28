@@ -67,59 +67,59 @@
   replay();
   JdbcTemplate template=new JdbcTemplate(mockDataSource);
   template.setNativeJdbcExtractor(new NativeJdbcExtractor(){
-    public boolean isNativeConnectionNecessaryForNativeStatements(){
+    @Override public boolean isNativeConnectionNecessaryForNativeStatements(){
       return false;
     }
-    public boolean isNativeConnectionNecessaryForNativePreparedStatements(){
+    @Override public boolean isNativeConnectionNecessaryForNativePreparedStatements(){
       return false;
     }
-    public boolean isNativeConnectionNecessaryForNativeCallableStatements(){
+    @Override public boolean isNativeConnectionNecessaryForNativeCallableStatements(){
       return false;
     }
-    public Connection getNativeConnection(    Connection con){
+    @Override public Connection getNativeConnection(    Connection con){
       return con;
     }
-    public Connection getNativeConnectionFromStatement(    Statement stmt) throws SQLException {
+    @Override public Connection getNativeConnectionFromStatement(    Statement stmt) throws SQLException {
       return stmt.getConnection();
     }
-    public Statement getNativeStatement(    Statement stmt){
+    @Override public Statement getNativeStatement(    Statement stmt){
       assertTrue(stmt == mockStatement);
       return mockStatement2;
     }
-    public PreparedStatement getNativePreparedStatement(    PreparedStatement ps){
+    @Override public PreparedStatement getNativePreparedStatement(    PreparedStatement ps){
       assertTrue(ps == mockPreparedStatement);
       return mockPreparedStatement2;
     }
-    public CallableStatement getNativeCallableStatement(    CallableStatement cs){
+    @Override public CallableStatement getNativeCallableStatement(    CallableStatement cs){
       assertTrue(cs == mockCallableStatement);
       return mockCallableStatement2;
     }
-    public ResultSet getNativeResultSet(    ResultSet rs){
+    @Override public ResultSet getNativeResultSet(    ResultSet rs){
       return rs;
     }
   }
 );
   template.query("my query",new ResultSetExtractor(){
-    public Object extractData(    ResultSet rs2){
+    @Override public Object extractData(    ResultSet rs2){
       assertEquals(mockResultSet,rs2);
       return null;
     }
   }
 );
   template.query(new PreparedStatementCreator(){
-    public PreparedStatement createPreparedStatement(    Connection conn){
+    @Override public PreparedStatement createPreparedStatement(    Connection conn){
       return mockPreparedStatement;
     }
   }
 ,new ResultSetExtractor(){
-    public Object extractData(    ResultSet rs2){
+    @Override public Object extractData(    ResultSet rs2){
       assertEquals(mockResultSet,rs2);
       return null;
     }
   }
 );
   template.call(new CallableStatementCreator(){
-    public CallableStatement createCallableStatement(    Connection con){
+    @Override public CallableStatement createCallableStatement(    Connection con){
       return mockCallableStatement;
     }
   }

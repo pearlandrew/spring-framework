@@ -24,20 +24,20 @@
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
   tt.execute(new TransactionCallback(){
-    public Object doInTransaction(    TransactionStatus status){
+    @Override public Object doInTransaction(    TransactionStatus status){
       template.execute(new JpaCallback(){
-        public Object doInJpa(        EntityManager em2){
+        @Override public Object doInJpa(        EntityManager em2){
           em2.flush();
           return null;
         }
       }
 );
       TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter(){
-        public void afterCompletion(        int status){
+        @Override public void afterCompletion(        int status){
           tt.execute(new TransactionCallback(){
-            public Object doInTransaction(            TransactionStatus status){
+            @Override public Object doInTransaction(            TransactionStatus status){
               return template.execute(new JpaCallback(){
-                public Object doInJpa(                EntityManager em2){
+                @Override public Object doInJpa(                EntityManager em2){
                   em2.flush();
                   return null;
                 }

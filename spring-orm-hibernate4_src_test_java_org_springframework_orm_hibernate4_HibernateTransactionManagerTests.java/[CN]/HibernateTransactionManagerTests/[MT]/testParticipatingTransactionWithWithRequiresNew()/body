@@ -45,13 +45,13 @@
   tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
   assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
   tt.execute(new TransactionCallback(){
-    public Object doInTransaction(    TransactionStatus status){
+    @Override public Object doInTransaction(    TransactionStatus status){
       final SessionHolder holder=(SessionHolder)TransactionSynchronizationManager.getResource(sf);
       assertTrue("Has thread session",holder != null);
       assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
       assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
       tt.execute(new TransactionCallback(){
-        public Object doInTransaction(        TransactionStatus status){
+        @Override public Object doInTransaction(        TransactionStatus status){
           Session session=((SessionHolder)TransactionSynchronizationManager.getResource(sf)).getSession();
           assertTrue("Not enclosing session",session != holder.getSession());
           session.flush();

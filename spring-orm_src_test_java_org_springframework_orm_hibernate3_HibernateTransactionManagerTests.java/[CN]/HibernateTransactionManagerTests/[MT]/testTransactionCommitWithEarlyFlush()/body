@@ -56,7 +56,7 @@
   txControl.replay();
   queryControl.replay();
   LocalSessionFactoryBean lsfb=new LocalSessionFactoryBean(){
-    protected SessionFactory newSessionFactory(    Configuration config) throws HibernateException {
+    @Override protected SessionFactory newSessionFactory(    Configuration config) throws HibernateException {
       return sf;
     }
   }
@@ -75,7 +75,7 @@
   assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
   assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
   Object result=tt.execute(new TransactionCallback(){
-    public Object doInTransaction(    TransactionStatus status){
+    @Override public Object doInTransaction(    TransactionStatus status){
       assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sfProxy));
       assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(ds));
       assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());

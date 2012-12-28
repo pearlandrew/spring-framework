@@ -21,10 +21,10 @@
   final TransactionTemplate tt=new TransactionTemplate(tm);
   tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
   final TestTransactionSynchronization synch=new TestTransactionSynchronization(ds,TransactionSynchronization.STATUS_COMMITTED){
-    public void afterCompletion(    int status){
+    @Override public void afterCompletion(    int status){
       super.afterCompletion(status);
       tt.execute(new TransactionCallbackWithoutResult(){
-        protected void doInTransactionWithoutResult(        TransactionStatus status) throws RuntimeException {
+        @Override protected void doInTransactionWithoutResult(        TransactionStatus status) throws RuntimeException {
         }
       }
 );
@@ -32,7 +32,7 @@
   }
 ;
   tt.execute(new TransactionCallbackWithoutResult(){
-    protected void doInTransactionWithoutResult(    TransactionStatus status) throws RuntimeException {
+    @Override protected void doInTransactionWithoutResult(    TransactionStatus status) throws RuntimeException {
       TransactionSynchronizationManager.registerSynchronization(synch);
     }
   }

@@ -18,7 +18,7 @@
   final TransactionTemplate tt=new TransactionTemplate(tm);
   try {
     tt.execute(new TransactionCallback(){
-      public Object doInTransaction(      TransactionStatus status){
+      @Override public Object doInTransaction(      TransactionStatus status){
         txControl.reset();
         tx.isActive();
         txControl.setReturnValue(true,3);
@@ -28,10 +28,10 @@
         txControl.setVoidCallable(1);
         txControl.replay();
         return tt.execute(new TransactionCallback(){
-          public Object doInTransaction(          TransactionStatus status){
+          @Override public Object doInTransaction(          TransactionStatus status){
             JdoTemplate jt=new JdoTemplate(pmf);
             return jt.execute(new JdoCallback(){
-              public Object doInJdo(              PersistenceManager pm){
+              @Override public Object doInJdo(              PersistenceManager pm){
                 throw new RuntimeException("application exception");
               }
             }

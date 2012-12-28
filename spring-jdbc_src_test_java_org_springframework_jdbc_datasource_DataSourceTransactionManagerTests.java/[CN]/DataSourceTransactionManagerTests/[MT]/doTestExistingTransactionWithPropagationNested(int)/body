@@ -37,12 +37,12 @@
   assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
   assertTrue("Synchronization not active",!TransactionSynchronizationManager.isSynchronizationActive());
   tt.execute(new TransactionCallbackWithoutResult(){
-    protected void doInTransactionWithoutResult(    TransactionStatus status) throws RuntimeException {
+    @Override protected void doInTransactionWithoutResult(    TransactionStatus status) throws RuntimeException {
       assertTrue("Is new transaction",status.isNewTransaction());
       assertTrue("Isn't nested transaction",!status.hasSavepoint());
       for (int i=0; i < count; i++) {
         tt.execute(new TransactionCallbackWithoutResult(){
-          protected void doInTransactionWithoutResult(          TransactionStatus status) throws RuntimeException {
+          @Override protected void doInTransactionWithoutResult(          TransactionStatus status) throws RuntimeException {
             assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(ds));
             assertTrue("Synchronization active",TransactionSynchronizationManager.isSynchronizationActive());
             assertTrue("Isn't new transaction",!status.isNewTransaction());

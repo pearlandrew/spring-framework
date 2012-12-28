@@ -26,11 +26,11 @@
     assertTrue("Is new transaction",ts.isNewTransaction());
     final TransactionTemplate tt=new TransactionTemplate(tm2);
     tt.execute(new TransactionCallbackWithoutResult(){
-      protected void doInTransactionWithoutResult(      TransactionStatus status) throws RuntimeException {
+      @Override protected void doInTransactionWithoutResult(      TransactionStatus status) throws RuntimeException {
         assertTrue("Is existing transaction",!status.isNewTransaction());
         assertFalse("Is not rollback-only",status.isRollbackOnly());
         tt.execute(new TransactionCallbackWithoutResult(){
-          protected void doInTransactionWithoutResult(          TransactionStatus status) throws RuntimeException {
+          @Override protected void doInTransactionWithoutResult(          TransactionStatus status) throws RuntimeException {
             assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(ds));
             assertTrue("Synchronization active",TransactionSynchronizationManager.isSynchronizationActive());
             assertTrue("Is existing transaction",!status.isNewTransaction());

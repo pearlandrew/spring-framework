@@ -6,9 +6,9 @@
   MockControl conControl=MockControl.createControl(Connection.class);
   Connection con=(Connection)conControl.getMock();
   @SuppressWarnings("serial") JtaTransactionManager ptm=new JtaTransactionManager(ut){
-    protected void doRegisterAfterCompletionWithJtaTransaction(    JtaTransactionObject txObject,    final List synchronizations){
+    @Override protected void doRegisterAfterCompletionWithJtaTransaction(    JtaTransactionObject txObject,    final List synchronizations){
       Thread async=new Thread(){
-        public void run(){
+        @Override public void run(){
           invokeAfterCompletion(synchronizations,TransactionSynchronization.STATUS_COMMITTED);
         }
       }
@@ -41,7 +41,7 @@
     conControl.replay();
     final boolean releaseCon=(i != 1);
     tt.execute(new TransactionCallbackWithoutResult(){
-      protected void doInTransactionWithoutResult(      TransactionStatus status) throws RuntimeException {
+      @Override protected void doInTransactionWithoutResult(      TransactionStatus status) throws RuntimeException {
         assertTrue("JTA synchronizations active",TransactionSynchronizationManager.isSynchronizationActive());
         assertTrue("Is existing transaction",!status.isNewTransaction());
         Connection c=DataSourceUtils.getConnection(ds);

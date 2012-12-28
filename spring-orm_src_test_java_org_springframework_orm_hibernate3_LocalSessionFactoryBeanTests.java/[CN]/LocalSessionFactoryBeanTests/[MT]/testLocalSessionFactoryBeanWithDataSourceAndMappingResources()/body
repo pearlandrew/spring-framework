@@ -4,9 +4,9 @@
   final TransactionManager tm=(TransactionManager)tmControl.getMock();
   final List invocations=new ArrayList();
   LocalSessionFactoryBean sfb=new LocalSessionFactoryBean(){
-    protected Configuration newConfiguration(){
+    @Override protected Configuration newConfiguration(){
       return new Configuration(){
-        public Configuration addInputStream(        InputStream is){
+        @Override public Configuration addInputStream(        InputStream is){
           try {
             is.close();
           }
@@ -18,7 +18,7 @@
       }
 ;
     }
-    protected SessionFactory newSessionFactory(    Configuration config){
+    @Override protected SessionFactory newSessionFactory(    Configuration config){
       assertEquals(LocalJtaDataSourceConnectionProvider.class.getName(),config.getProperty(Environment.CONNECTION_PROVIDER));
       assertEquals(ds,LocalSessionFactoryBean.getConfigTimeDataSource());
       assertEquals(LocalTransactionManagerLookup.class.getName(),config.getProperty(Environment.TRANSACTION_MANAGER_STRATEGY));

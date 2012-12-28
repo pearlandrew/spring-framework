@@ -15,10 +15,10 @@
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
   Object result=tt.execute(new TransactionCallback(){
-    public Object doInTransaction(    TransactionStatus status){
+    @Override public Object doInTransaction(    TransactionStatus status){
       JpaTemplate template2=new JpaTemplate(factory);
       template2.execute(new JpaCallback(){
-        public Object doInJpa(        EntityManager em) throws PersistenceException {
+        @Override public Object doInJpa(        EntityManager em) throws PersistenceException {
           return null;
         }
       }
@@ -27,9 +27,9 @@
       TransactionTemplate tt2=new TransactionTemplate(transactionManager);
       tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
       return tt2.execute(new TransactionCallback(){
-        public Object doInTransaction(        TransactionStatus status){
+        @Override public Object doInTransaction(        TransactionStatus status){
           return template.execute(new JpaCallback(){
-            public Object doInJpa(            EntityManager em2){
+            @Override public Object doInJpa(            EntityManager em2){
               em2.flush();
               return l;
             }

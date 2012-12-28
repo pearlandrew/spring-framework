@@ -26,7 +26,7 @@
   tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
   assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
   tt.execute(new TransactionCallbackWithoutResult(){
-    protected void doInTransactionWithoutResult(    TransactionStatus status){
+    @Override protected void doInTransactionWithoutResult(    TransactionStatus status){
       assertEquals(con,DataSourceUtils.getConnection(ds));
       final TransactionAwareDataSourceProxy dsProxy=new TransactionAwareDataSourceProxy(ds);
       try {
@@ -38,7 +38,7 @@
         throw new UncategorizedSQLException("","",ex);
       }
       tt.execute(new TransactionCallbackWithoutResult(){
-        protected void doInTransactionWithoutResult(        TransactionStatus status){
+        @Override protected void doInTransactionWithoutResult(        TransactionStatus status){
           assertEquals(con,DataSourceUtils.getConnection(ds));
           try {
             assertEquals(con,((ConnectionProxy)dsProxy.getConnection()).getTargetConnection());

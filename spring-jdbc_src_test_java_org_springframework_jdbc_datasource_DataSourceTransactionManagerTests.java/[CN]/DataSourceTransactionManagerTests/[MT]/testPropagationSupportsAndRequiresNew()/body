@@ -21,12 +21,12 @@
   assertTrue("Hasn't thread connection",!TransactionSynchronizationManager.hasResource(ds));
   assertTrue("Synchronization not active",!TransactionSynchronizationManager.isSynchronizationActive());
   tt.execute(new TransactionCallbackWithoutResult(){
-    protected void doInTransactionWithoutResult(    TransactionStatus status) throws RuntimeException {
+    @Override protected void doInTransactionWithoutResult(    TransactionStatus status) throws RuntimeException {
       assertTrue("Synchronization active",TransactionSynchronizationManager.isSynchronizationActive());
       TransactionTemplate tt2=new TransactionTemplate(tm);
       tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
       tt2.execute(new TransactionCallbackWithoutResult(){
-        protected void doInTransactionWithoutResult(        TransactionStatus status) throws RuntimeException {
+        @Override protected void doInTransactionWithoutResult(        TransactionStatus status) throws RuntimeException {
           assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(ds));
           assertTrue("Synchronization active",TransactionSynchronizationManager.isSynchronizationActive());
           assertTrue("Is new transaction",status.isNewTransaction());

@@ -4,7 +4,7 @@
   exporter.setServiceInterface(ITestBean.class);
   exporter.setService(target);
   exporter.setRemoteInvocationExecutor(new DefaultRemoteInvocationExecutor(){
-    public Object invoke(    RemoteInvocation invocation,    Object targetObject) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    @Override public Object invoke(    RemoteInvocation invocation,    Object targetObject) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
       assertNotNull(invocation.getAttributes());
       assertEquals(1,invocation.getAttributes().size());
       assertEquals("myValue",invocation.getAttributes().get("myKey"));
@@ -18,7 +18,7 @@
   pfb.setServiceInterface(ITestBean.class);
   pfb.setServiceUrl("http://myurl");
   pfb.setRemoteInvocationFactory(new RemoteInvocationFactory(){
-    public RemoteInvocation createRemoteInvocation(    MethodInvocation methodInvocation){
+    @Override public RemoteInvocation createRemoteInvocation(    MethodInvocation methodInvocation){
       RemoteInvocation invocation=new RemoteInvocation(methodInvocation);
       invocation.addAttribute("myKey","myValue");
       try {
@@ -36,7 +36,7 @@
   }
 );
   pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor(){
-    protected RemoteInvocationResult doExecuteRequest(    HttpInvokerClientConfiguration config,    ByteArrayOutputStream baos) throws Exception {
+    @Override protected RemoteInvocationResult doExecuteRequest(    HttpInvokerClientConfiguration config,    ByteArrayOutputStream baos) throws Exception {
       assertEquals("http://myurl",config.getServiceUrl());
       MockHttpServletRequest request=new MockHttpServletRequest();
       MockHttpServletResponse response=new MockHttpServletResponse();
