@@ -77,20 +77,20 @@
   assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
   try {
     tt.execute(new TransactionCallback(){
-      public Object doInTransaction(      TransactionStatus status){
+      @Override public Object doInTransaction(      TransactionStatus status){
         org.hibernate.Session outerSession=SessionFactoryUtils.getSession(sf,false);
         assertSame(session1,outerSession);
         SessionHolder holder=(SessionHolder)TransactionSynchronizationManager.getResource(sf);
         assertTrue("Has thread session",holder != null);
         try {
           tt.execute(new TransactionCallback(){
-            public Object doInTransaction(            TransactionStatus status){
+            @Override public Object doInTransaction(            TransactionStatus status){
               org.hibernate.Session innerSession=SessionFactoryUtils.getSession(sf,false);
               assertSame(session2,innerSession);
               HibernateTemplate ht=new HibernateTemplate(sf);
               ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
               return ht.executeFind(new HibernateCallback(){
-                public Object doInHibernate(                org.hibernate.Session innerSession){
+                @Override public Object doInHibernate(                org.hibernate.Session innerSession){
                   if (rollback) {
                     throw new HibernateException("");
                   }

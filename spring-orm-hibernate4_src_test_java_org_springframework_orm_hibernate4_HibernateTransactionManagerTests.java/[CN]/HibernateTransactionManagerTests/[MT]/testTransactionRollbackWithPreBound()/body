@@ -47,13 +47,13 @@
   assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
   try {
     tt.execute(new TransactionCallbackWithoutResult(){
-      public void doInTransactionWithoutResult(      TransactionStatus status){
+      @Override public void doInTransactionWithoutResult(      TransactionStatus status){
         assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
         assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(ds));
         SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.getResource(sf);
         assertEquals(tx1,sessionHolder.getTransaction());
         tt.execute(new TransactionCallbackWithoutResult(){
-          public void doInTransactionWithoutResult(          TransactionStatus status){
+          @Override public void doInTransactionWithoutResult(          TransactionStatus status){
             status.setRollbackOnly();
             Session sess=((SessionHolder)TransactionSynchronizationManager.getResource(sf)).getSession();
             assertEquals(session,sess);
@@ -72,7 +72,7 @@
   assertTrue("Hasn't thread transaction",sessionHolder.getTransaction() == null);
   assertTrue("Not marked rollback-only",!sessionHolder.isRollbackOnly());
   tt.execute(new TransactionCallbackWithoutResult(){
-    public void doInTransactionWithoutResult(    TransactionStatus status){
+    @Override public void doInTransactionWithoutResult(    TransactionStatus status){
       assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
       assertTrue("Has thread connection",TransactionSynchronizationManager.hasResource(ds));
       SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.getResource(sf);

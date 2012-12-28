@@ -1,17 +1,8 @@
 {
-  SQLException sex=new SQLException("Syntax error or access violation exception","42000");
-  mockCallable.execute();
-  ctrlCallable.setThrowable(sex);
-  mockCallable.close();
-  ctrlCallable.setVoidCallable();
-  mockConnection.prepareCall("{call " + NoSuchStoredProcedure.SQL + "()}");
-  ctrlConnection.setReturnValue(mockCallable);
-  replay();
-  NoSuchStoredProcedure sproc=new NoSuchStoredProcedure(mockDataSource);
-  try {
-    sproc.execute();
-    fail("Shouldn't succeed in running stored procedure which doesn't exist");
-  }
- catch (  BadSqlGrammarException ex) {
-  }
+  SQLException sqlException=new SQLException("Syntax error or access violation exception","42000");
+  given(callableStatement.execute()).willThrow(sqlException);
+  given(connection.prepareCall("{call " + NoSuchStoredProcedure.SQL + "()}")).willReturn(callableStatement);
+  NoSuchStoredProcedure sproc=new NoSuchStoredProcedure(dataSource);
+  thrown.expect(BadSqlGrammarException.class);
+  sproc.execute();
 }

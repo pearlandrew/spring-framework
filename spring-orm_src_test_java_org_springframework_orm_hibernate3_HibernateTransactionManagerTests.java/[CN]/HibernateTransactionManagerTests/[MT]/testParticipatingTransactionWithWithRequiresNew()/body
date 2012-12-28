@@ -51,17 +51,17 @@
   tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
   assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
   tt.execute(new TransactionCallback(){
-    public Object doInTransaction(    TransactionStatus status){
+    @Override public Object doInTransaction(    TransactionStatus status){
       final SessionHolder holder=(SessionHolder)TransactionSynchronizationManager.getResource(sf);
       assertTrue("Has thread session",holder != null);
       assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
       assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
       tt.execute(new TransactionCallback(){
-        public Object doInTransaction(        TransactionStatus status){
+        @Override public Object doInTransaction(        TransactionStatus status){
           HibernateTemplate ht=new HibernateTemplate(sf);
           ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
           return ht.executeFind(new HibernateCallback(){
-            public Object doInHibernate(            org.hibernate.Session session){
+            @Override public Object doInHibernate(            org.hibernate.Session session){
               assertTrue("Not enclosing session",session != holder.getSession());
               assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
               assertTrue(TransactionSynchronizationManager.isActualTransactionActive());

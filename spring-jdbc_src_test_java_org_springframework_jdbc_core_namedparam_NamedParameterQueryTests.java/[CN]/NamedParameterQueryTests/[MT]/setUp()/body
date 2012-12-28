@@ -1,9 +1,13 @@
 {
-  super.setUp();
-  ctrlPreparedStatement=MockControl.createControl(PreparedStatement.class);
-  mockPreparedStatement=(PreparedStatement)ctrlPreparedStatement.getMock();
-  ctrlResultSet=MockControl.createControl(ResultSet.class);
-  mockResultSet=(ResultSet)ctrlResultSet.getMock();
-  ctrlResultSetMetaData=MockControl.createControl(ResultSetMetaData.class);
-  mockResultSetMetaData=(ResultSetMetaData)ctrlResultSetMetaData.getMock();
+  connection=mock(Connection.class);
+  dataSource=mock(DataSource.class);
+  preparedStatement=mock(PreparedStatement.class);
+  resultSet=mock(ResultSet.class);
+  resultSetMetaData=mock(ResultSetMetaData.class);
+  template=new NamedParameterJdbcTemplate(dataSource);
+  given(dataSource.getConnection()).willReturn(connection);
+  given(resultSetMetaData.getColumnCount()).willReturn(1);
+  given(resultSetMetaData.getColumnLabel(1)).willReturn("age");
+  given(connection.prepareStatement(anyString())).willReturn(preparedStatement);
+  given(preparedStatement.executeQuery()).willReturn(resultSet);
 }

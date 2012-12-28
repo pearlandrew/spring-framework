@@ -10,10 +10,10 @@
     JtaTransactionManager ptm=newJtaTransactionManager(ut);
     TransactionTemplate tt=new TransactionTemplate(ptm);
     tt.execute(new TransactionCallbackWithoutResult(){
-      protected void doInTransactionWithoutResult(      TransactionStatus status){
+      @Override protected void doInTransactionWithoutResult(      TransactionStatus status){
         status.setRollbackOnly();
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter(){
-          public void afterCompletion(          int status){
+          @Override public void afterCompletion(          int status){
             assertTrue("Correct completion status",status == TransactionSynchronization.STATUS_UNKNOWN);
           }
         }

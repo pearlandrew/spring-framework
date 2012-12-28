@@ -1,55 +1,15 @@
 {
-  mockDatabaseMetaData.getDatabaseProductName();
-  ctrlDatabaseMetaData.setReturnValue("MyDB");
-  mockDatabaseMetaData.getUserName();
-  ctrlDatabaseMetaData.setReturnValue("me");
-  mockDatabaseMetaData.supportsCatalogsInProcedureCalls();
-  ctrlDatabaseMetaData.setReturnValue(false);
-  mockDatabaseMetaData.supportsSchemasInProcedureCalls();
-  ctrlDatabaseMetaData.setReturnValue(false);
-  mockDatabaseMetaData.storesUpperCaseIdentifiers();
-  ctrlDatabaseMetaData.setReturnValue(false);
-  mockDatabaseMetaData.storesLowerCaseIdentifiers();
-  ctrlDatabaseMetaData.setReturnValue(true);
+  given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
+  given(databaseMetaData.getUserName()).willReturn("me");
+  given(databaseMetaData.storesLowerCaseIdentifiers()).willReturn(true);
+  given(callableStatement.execute()).willReturn(false);
+  given(callableStatement.getUpdateCount()).willReturn(-1);
   if (isFunction) {
-    mockCallable.registerOutParameter(1,4);
-    ctrlCallable.setVoidCallable();
-    mockCallable.setObject(2,1103,4);
-    ctrlCallable.setVoidCallable();
-    mockCallable.setObject(3,3,4);
-    ctrlCallable.setVoidCallable();
+    given(callableStatement.getObject(1)).willReturn(4L);
+    given(connection.prepareCall("{? = call add_invoice(?, ?)}")).willReturn(callableStatement);
   }
  else {
-    mockCallable.setObject(1,1103,4);
-    ctrlCallable.setVoidCallable();
-    mockCallable.setObject(2,3,4);
-    ctrlCallable.setVoidCallable();
-    mockCallable.registerOutParameter(3,4);
-    ctrlCallable.setVoidCallable();
-  }
-  mockCallable.execute();
-  ctrlCallable.setReturnValue(false);
-  mockCallable.getUpdateCount();
-  ctrlCallable.setReturnValue(-1);
-  if (isFunction) {
-    mockCallable.getObject(1);
-  }
- else {
-    mockCallable.getObject(3);
-  }
-  ctrlCallable.setReturnValue(new Long(4));
-  if (debugEnabled) {
-    mockCallable.getWarnings();
-    ctrlCallable.setReturnValue(null);
-  }
-  mockCallable.close();
-  ctrlCallable.setVoidCallable();
-  if (isFunction) {
-    mockConnection.prepareCall("{? = call add_invoice(?, ?)}");
-    ctrlConnection.setReturnValue(mockCallable);
-  }
- else {
-    mockConnection.prepareCall("{call add_invoice(?, ?, ?)}");
-    ctrlConnection.setReturnValue(mockCallable);
+    given(callableStatement.getObject(3)).willReturn(4L);
+    given(connection.prepareCall("{call add_invoice(?, ?, ?)}")).willReturn(callableStatement);
   }
 }

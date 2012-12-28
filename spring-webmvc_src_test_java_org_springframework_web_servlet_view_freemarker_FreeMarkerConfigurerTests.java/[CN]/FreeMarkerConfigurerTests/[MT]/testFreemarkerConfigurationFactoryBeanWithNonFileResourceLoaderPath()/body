@@ -5,20 +5,20 @@
   settings.setProperty("localized_lookup","false");
   fcfb.setFreemarkerSettings(settings);
   fcfb.setResourceLoader(new ResourceLoader(){
-    public Resource getResource(    String location){
+    @Override public Resource getResource(    String location){
       if (!("file:/mydir".equals(location) || "file:/mydir/test".equals(location))) {
         throw new IllegalArgumentException(location);
       }
       return new ByteArrayResource("test".getBytes(),"test");
     }
-    public ClassLoader getClassLoader(){
+    @Override public ClassLoader getClassLoader(){
       return getClass().getClassLoader();
     }
   }
 );
   fcfb.afterPropertiesSet();
   assertTrue(fcfb.getObject() instanceof Configuration);
-  Configuration fc=(Configuration)fcfb.getObject();
+  Configuration fc=fcfb.getObject();
   Template ft=fc.getTemplate("test");
   assertEquals("test",FreeMarkerTemplateUtils.processTemplateIntoString(ft,new HashMap()));
 }

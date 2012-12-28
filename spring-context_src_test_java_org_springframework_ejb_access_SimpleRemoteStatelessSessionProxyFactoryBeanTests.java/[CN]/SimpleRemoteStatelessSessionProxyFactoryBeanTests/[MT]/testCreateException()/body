@@ -1,11 +1,10 @@
 {
   final String jndiName="foo";
   final CreateException cex=new CreateException();
-  final MyHome home=createMock(MyHome.class);
-  expect(home.create()).andThrow(cex);
-  replay(home);
+  final MyHome home=mock(MyHome.class);
+  given(home.create()).willThrow(cex);
   JndiTemplate jt=new JndiTemplate(){
-    public Object lookup(    String name){
+    @Override public Object lookup(    String name){
       assertTrue(name.equals(jndiName));
       return home;
     }
@@ -25,5 +24,4 @@
   }
  catch (  RemoteException ex) {
   }
-  verify(home);
 }

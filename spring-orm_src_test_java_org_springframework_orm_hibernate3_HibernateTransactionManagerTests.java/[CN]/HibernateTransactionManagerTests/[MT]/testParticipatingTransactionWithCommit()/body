@@ -31,7 +31,7 @@
   sessionControl.replay();
   txControl.replay();
   LocalSessionFactoryBean lsfb=new LocalSessionFactoryBean(){
-    protected SessionFactory newSessionFactory(    Configuration config) throws HibernateException {
+    @Override protected SessionFactory newSessionFactory(    Configuration config) throws HibernateException {
       return sf;
     }
   }
@@ -43,13 +43,13 @@
   final List l=new ArrayList();
   l.add("test");
   Object result=tt.execute(new TransactionCallback(){
-    public Object doInTransaction(    TransactionStatus status){
+    @Override public Object doInTransaction(    TransactionStatus status){
       return tt.execute(new TransactionCallback(){
-        public Object doInTransaction(        TransactionStatus status){
+        @Override public Object doInTransaction(        TransactionStatus status){
           HibernateTemplate ht=new HibernateTemplate(sfProxy);
           ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
           return ht.executeFind(new HibernateCallback(){
-            public Object doInHibernate(            org.hibernate.Session session){
+            @Override public Object doInHibernate(            org.hibernate.Session session){
               return l;
             }
           }
