@@ -1,6 +1,6 @@
 {
   final ExposedInvocationTestBean expectedTarget=new ExposedInvocationTestBean(){
-    protected void assertions(    MethodInvocation invocation){
+    @Override protected void assertions(    MethodInvocation invocation){
       assertTrue(invocation.getThis() == this);
       assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(),invocation.getMethod().getDeclaringClass() == ITestBean.class);
     }
@@ -9,7 +9,7 @@
   AdvisedSupport pc=new AdvisedSupport(new Class<?>[]{ITestBean.class,IOther.class});
   pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
   TrapTargetInterceptor tii=new TrapTargetInterceptor(){
-    public Object invoke(    MethodInvocation invocation) throws Throwable {
+    @Override public Object invoke(    MethodInvocation invocation) throws Throwable {
       assertEquals("Target is correct",expectedTarget,invocation.getThis());
       return super.invoke(invocation);
     }

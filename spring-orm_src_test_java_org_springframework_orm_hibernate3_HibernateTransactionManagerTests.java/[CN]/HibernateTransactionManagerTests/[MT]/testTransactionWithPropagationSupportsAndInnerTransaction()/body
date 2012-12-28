@@ -44,7 +44,7 @@
   session2Control.replay();
   txControl.replay();
   LocalSessionFactoryBean lsfb=new LocalSessionFactoryBean(){
-    protected SessionFactory newSessionFactory(    Configuration config) throws HibernateException {
+    @Override protected SessionFactory newSessionFactory(    Configuration config) throws HibernateException {
       return sf;
     }
   }
@@ -61,13 +61,13 @@
   ht.setExposeNativeSession(true);
   assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
   tt.execute(new TransactionCallback(){
-    public Object doInTransaction(    TransactionStatus status){
+    @Override public Object doInTransaction(    TransactionStatus status){
       assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sfProxy));
       assertTrue("Is not new transaction",!status.isNewTransaction());
       assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
       assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
       ht.execute(new HibernateCallback(){
-        public Object doInHibernate(        org.hibernate.Session session){
+        @Override public Object doInHibernate(        org.hibernate.Session session){
           assertSame(session1,session);
           return null;
         }
@@ -75,9 +75,9 @@
 );
       assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sfProxy));
       tt2.execute(new TransactionCallback(){
-        public Object doInTransaction(        TransactionStatus status){
+        @Override public Object doInTransaction(        TransactionStatus status){
           return ht.executeFind(new HibernateCallback(){
-            public Object doInHibernate(            org.hibernate.Session session){
+            @Override public Object doInHibernate(            org.hibernate.Session session){
               assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
               assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
               assertSame(session2,session);

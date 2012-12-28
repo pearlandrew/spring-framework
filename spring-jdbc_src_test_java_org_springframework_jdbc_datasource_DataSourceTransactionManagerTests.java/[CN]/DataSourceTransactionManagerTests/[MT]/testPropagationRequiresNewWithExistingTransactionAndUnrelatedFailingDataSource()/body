@@ -33,13 +33,13 @@
   assertTrue("Synchronization not active",!TransactionSynchronizationManager.isSynchronizationActive());
   try {
     tt.execute(new TransactionCallbackWithoutResult(){
-      protected void doInTransactionWithoutResult(      TransactionStatus status) throws RuntimeException {
+      @Override protected void doInTransactionWithoutResult(      TransactionStatus status) throws RuntimeException {
         assertTrue("Is new transaction",status.isNewTransaction());
         assertTrue("Synchronization active",TransactionSynchronizationManager.isSynchronizationActive());
         assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
         assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
         tt2.execute(new TransactionCallbackWithoutResult(){
-          protected void doInTransactionWithoutResult(          TransactionStatus status) throws RuntimeException {
+          @Override protected void doInTransactionWithoutResult(          TransactionStatus status) throws RuntimeException {
             status.setRollbackOnly();
           }
         }

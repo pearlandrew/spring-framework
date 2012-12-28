@@ -1,7 +1,7 @@
 {
   TestBean target=new TestBean("myname",99);
   final HttpInvokerServiceExporter exporter=new HttpInvokerServiceExporter(){
-    protected InputStream decorateInputStream(    HttpServletRequest request,    InputStream is) throws IOException {
+    @Override protected InputStream decorateInputStream(    HttpServletRequest request,    InputStream is) throws IOException {
       if ("gzip".equals(request.getHeader("Compression"))) {
         return new GZIPInputStream(is);
       }
@@ -9,7 +9,7 @@
         return is;
       }
     }
-    protected OutputStream decorateOutputStream(    HttpServletRequest request,    HttpServletResponse response,    OutputStream os) throws IOException {
+    @Override protected OutputStream decorateOutputStream(    HttpServletRequest request,    HttpServletResponse response,    OutputStream os) throws IOException {
       if ("gzip".equals(request.getHeader("Compression"))) {
         return new GZIPOutputStream(os);
       }
@@ -26,7 +26,7 @@
   pfb.setServiceInterface(ITestBean.class);
   pfb.setServiceUrl("http://myurl");
   pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor(){
-    protected RemoteInvocationResult doExecuteRequest(    HttpInvokerClientConfiguration config,    ByteArrayOutputStream baos) throws IOException, ClassNotFoundException {
+    @Override protected RemoteInvocationResult doExecuteRequest(    HttpInvokerClientConfiguration config,    ByteArrayOutputStream baos) throws IOException, ClassNotFoundException {
       assertEquals("http://myurl",config.getServiceUrl());
       MockHttpServletRequest request=new MockHttpServletRequest();
       request.addHeader("Compression","gzip");
@@ -40,10 +40,10 @@
       }
       return readRemoteInvocationResult(new ByteArrayInputStream(response.getContentAsByteArray()),config.getCodebaseUrl());
     }
-    protected OutputStream decorateOutputStream(    OutputStream os) throws IOException {
+    @Override protected OutputStream decorateOutputStream(    OutputStream os) throws IOException {
       return new GZIPOutputStream(os);
     }
-    protected InputStream decorateInputStream(    InputStream is) throws IOException {
+    @Override protected InputStream decorateInputStream(    InputStream is) throws IOException {
       return new GZIPInputStream(is);
     }
   }

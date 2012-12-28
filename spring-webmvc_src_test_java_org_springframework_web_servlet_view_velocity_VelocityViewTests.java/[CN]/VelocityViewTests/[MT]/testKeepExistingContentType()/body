@@ -5,7 +5,7 @@
   sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,wac);
   final Template expectedTemplate=new Template();
   VelocityConfig vc=new VelocityConfig(){
-    public VelocityEngine getVelocityEngine(){
+    @Override public VelocityEngine getVelocityEngine(){
       return new TestVelocityEngine(templateName,expectedTemplate);
     }
   }
@@ -25,11 +25,11 @@
   final HttpServletResponse expectedResponse=new MockHttpServletResponse();
   expectedResponse.setContentType("myContentType");
   VelocityView vv=new VelocityView(){
-    protected void mergeTemplate(    Template template,    Context context,    HttpServletResponse response){
+    @Override protected void mergeTemplate(    Template template,    Context context,    HttpServletResponse response){
       assertTrue(template == expectedTemplate);
       assertTrue(response == expectedResponse);
     }
-    protected void exposeHelpers(    Map<String,Object> model,    HttpServletRequest request) throws Exception {
+    @Override protected void exposeHelpers(    Map<String,Object> model,    HttpServletRequest request) throws Exception {
       model.put("myHelper","myValue");
     }
   }
