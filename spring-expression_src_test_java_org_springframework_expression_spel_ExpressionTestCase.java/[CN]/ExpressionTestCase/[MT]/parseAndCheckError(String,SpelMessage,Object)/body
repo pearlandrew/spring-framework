@@ -2,17 +2,17 @@
   try {
     Expression expr=parser.parseExpression(expression);
     SpelUtilities.printAbstractSyntaxTree(System.out,expr);
-    Assert.fail("Parsing should have failed!");
+    fail("Parsing should have failed!");
   }
  catch (  ParseException pe) {
     SpelParseException ex=(SpelParseException)pe;
     if (ex.getMessageCode() != expectedMessage) {
       ex.printStackTrace();
-      Assert.assertEquals("Failed to get expected message",expectedMessage,ex.getMessageCode());
+      assertEquals("Failed to get expected message",expectedMessage,ex.getMessageCode());
     }
     if (otherProperties != null && otherProperties.length != 0) {
       int pos=((Integer)otherProperties[0]).intValue();
-      Assert.assertEquals("Did not get correct position reported in error ",pos,ex.getPosition());
+      assertEquals("Did not get correct position reported in error ",pos,ex.getPosition());
       if (otherProperties.length > 1) {
         Object[] inserts=ex.getInserts();
         if (inserts == null) {
@@ -20,12 +20,12 @@
         }
         if (inserts.length < otherProperties.length - 1) {
           ex.printStackTrace();
-          Assert.fail("Cannot check " + (otherProperties.length - 1) + " properties of the exception, it only has "+ inserts.length+ " inserts");
+          fail("Cannot check " + (otherProperties.length - 1) + " properties of the exception, it only has "+ inserts.length+ " inserts");
         }
         for (int i=1; i < otherProperties.length; i++) {
           if (!inserts[i - 1].equals(otherProperties[i])) {
             ex.printStackTrace();
-            Assert.fail("Insert does not match, expected '" + otherProperties[i] + "' but insert value was '"+ inserts[i - 1]+ "'");
+            fail("Insert does not match, expected '" + otherProperties[i] + "' but insert value was '"+ inserts[i - 1]+ "'");
           }
         }
       }
