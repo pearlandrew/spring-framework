@@ -1,14 +1,12 @@
 {
   List<ContentNegotiationStrategy> strategies=new ArrayList<ContentNegotiationStrategy>();
-  Map<String,MediaType> mediaTypesMap=new HashMap<String,MediaType>();
-  CollectionUtils.mergePropertiesIntoMap(this.mediaTypes,mediaTypesMap);
   if (this.favorPathExtension) {
     PathExtensionContentNegotiationStrategy strategy;
     if (this.servletContext != null) {
-      strategy=new ServletPathExtensionContentNegotiationStrategy(this.servletContext,mediaTypesMap);
+      strategy=new ServletPathExtensionContentNegotiationStrategy(this.servletContext,this.mediaTypes);
     }
  else {
-      strategy=new PathExtensionContentNegotiationStrategy(mediaTypesMap);
+      strategy=new PathExtensionContentNegotiationStrategy(this.mediaTypes);
     }
     if (this.useJaf != null) {
       strategy.setUseJaf(this.useJaf);
@@ -16,7 +14,7 @@
     strategies.add(strategy);
   }
   if (this.favorParameter) {
-    ParameterContentNegotiationStrategy strategy=new ParameterContentNegotiationStrategy(mediaTypesMap);
+    ParameterContentNegotiationStrategy strategy=new ParameterContentNegotiationStrategy(this.mediaTypes);
     strategy.setParameterName(this.parameterName);
     strategies.add(strategy);
   }
