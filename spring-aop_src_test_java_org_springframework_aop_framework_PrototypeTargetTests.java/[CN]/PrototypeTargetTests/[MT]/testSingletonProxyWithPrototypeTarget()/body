@@ -1,11 +1,12 @@
 {
   TestBeanImpl.constructionCount=0;
-  XmlBeanFactory xbf=new XmlBeanFactory(CONTEXT);
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
   for (int i=0; i < 10; i++) {
-    TestBean tb=(TestBean)xbf.getBean("testBeanSingleton");
+    TestBean tb=(TestBean)bf.getBean("testBeanSingleton");
     tb.doSomething();
   }
-  TestInterceptor interceptor=(TestInterceptor)xbf.getBean("testInterceptor");
+  TestInterceptor interceptor=(TestInterceptor)bf.getBean("testInterceptor");
   assertEquals(1,TestBeanImpl.constructionCount);
   assertEquals(10,interceptor.invocationCount);
 }

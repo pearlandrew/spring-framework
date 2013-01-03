@@ -3,9 +3,15 @@
   CommonAnnotationBeanPostProcessor bpp=new CommonAnnotationBeanPostProcessor();
   bpp.setResourceFactory(bf);
   bf.addBeanPostProcessor(bpp);
-  bf.registerBeanDefinition("annotatedBean",new RootBeanDefinition(ResourceInjectionBean.class,false));
-  bf.registerBeanDefinition("testBean",new RootBeanDefinition(TestBean.class,false));
-  bf.registerBeanDefinition("testBean2",new RootBeanDefinition(TestBean.class,false));
+  RootBeanDefinition abd=new RootBeanDefinition(ResourceInjectionBean.class);
+  abd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+  bf.registerBeanDefinition("annotatedBean",abd);
+  RootBeanDefinition tbd1=new RootBeanDefinition(TestBean.class);
+  tbd1.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+  bf.registerBeanDefinition("testBean",tbd1);
+  RootBeanDefinition tbd2=new RootBeanDefinition(TestBean.class);
+  tbd2.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+  bf.registerBeanDefinition("testBean2",tbd2);
   ResourceInjectionBean bean=(ResourceInjectionBean)bf.getBean("annotatedBean");
   assertTrue(bean.initCalled);
   assertTrue(bean.init2Called);
