@@ -1,19 +1,13 @@
 {
   Method[] ms=clazz.getMethods();
-  String propertyWriteMethodSuffix;
-  if (propertyName.length() > 1 && Character.isUpperCase(propertyName.charAt(1))) {
-    propertyWriteMethodSuffix=propertyName;
-  }
- else {
-    propertyWriteMethodSuffix=StringUtils.capitalize(propertyName);
-  }
-  String getterName="get" + propertyWriteMethodSuffix;
+  String propertyMethodSuffix=getPropertyMethodSuffix(propertyName);
+  String getterName="get" + propertyMethodSuffix;
   for (  Method method : ms) {
     if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 && (!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
       return method;
     }
   }
-  getterName="is" + propertyWriteMethodSuffix;
+  getterName="is" + propertyMethodSuffix;
   for (  Method method : ms) {
     if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 && (boolean.class.equals(method.getReturnType()) || Boolean.class.equals(method.getReturnType())) && (!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
       return method;
