@@ -1,16 +1,11 @@
 {
-  Log log=createMock(Log.class);
-  MethodInvocation methodInvocation=createMock(MethodInvocation.class);
-  Method toString=String.class.getMethod("toString",new Class[]{});
-  expect(log.isTraceEnabled()).andReturn(true);
-  expect(methodInvocation.getMethod()).andReturn(toString).times(4);
-  expect(methodInvocation.getThis()).andReturn(this).times(2);
-  log.trace(isA(String.class));
+  MethodInvocation methodInvocation=mock(MethodInvocation.class);
   IllegalArgumentException exception=new IllegalArgumentException();
-  expect(methodInvocation.proceed()).andThrow(exception);
-  log.trace(isA(String.class),eq(exception));
-  replay(log);
-  replay(methodInvocation);
+  given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString",new Class[]{}));
+  given(methodInvocation.getThis()).willReturn(this);
+  given(methodInvocation.proceed()).willThrow(exception);
+  Log log=mock(Log.class);
+  given(log.isTraceEnabled()).willReturn(true);
   CustomizableTraceInterceptor interceptor=new StubCustomizableTraceInterceptor(log);
   try {
     interceptor.invoke(methodInvocation);
@@ -18,6 +13,6 @@
   }
  catch (  IllegalArgumentException expected) {
   }
-  verify(log);
-  verify(methodInvocation);
+  verify(log).trace(anyString());
+  verify(log).trace(anyString(),eq(exception));
 }

@@ -12,7 +12,7 @@
   TransactionSynchronizationManager.bindResource(factory,new EntityManagerHolder(manager));
   try {
     Object result=tt.execute(new TransactionCallback(){
-      public Object doInTransaction(      TransactionStatus status){
+      @Override public Object doInTransaction(      TransactionStatus status){
         txControl.verify();
         txControl.reset();
         tx.begin();
@@ -23,16 +23,16 @@
         txControl.replay();
         JpaTemplate template2=new JpaTemplate(factory);
         template2.execute(new JpaCallback(){
-          public Object doInJpa(          EntityManager em) throws PersistenceException {
+          @Override public Object doInJpa(          EntityManager em) throws PersistenceException {
             return null;
           }
         }
 );
         assertTrue(TransactionSynchronizationManager.hasResource(factory));
         return tt.execute(new TransactionCallback(){
-          public Object doInTransaction(          TransactionStatus status){
+          @Override public Object doInTransaction(          TransactionStatus status){
             return template.execute(new JpaCallback(){
-              public Object doInJpa(              EntityManager em2){
+              @Override public Object doInJpa(              EntityManager em2){
                 em2.flush();
                 return l;
               }

@@ -4,10 +4,10 @@
   tb.getArray()[1].setNestedIndexedBean(new IndexedTestBean());
   DataBinder binder=new DataBinder(tb,"tb");
   binder.registerCustomEditor(String.class,"array[0].nestedIndexedBean.list.name",new PropertyEditorSupport(){
-    public void setAsText(    String text) throws IllegalArgumentException {
+    @Override public void setAsText(    String text) throws IllegalArgumentException {
       setValue("list" + text);
     }
-    public String getAsText(){
+    @Override public String getAsText(){
       return ((String)getValue()).substring(4);
     }
   }
@@ -16,8 +16,8 @@
   pvs.add("array[0].nestedIndexedBean.list[0].name","test1");
   pvs.add("array[1].nestedIndexedBean.list[1].name","test2");
   binder.bind(pvs);
-  assertEquals("listtest1",tb.getArray()[0].getNestedIndexedBean().getList().get(0).getName());
-  assertEquals("test2",tb.getArray()[1].getNestedIndexedBean().getList().get(1).getName());
+  assertEquals("listtest1",((TestBean)tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
+  assertEquals("test2",((TestBean)tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
   assertEquals("test1",binder.getBindingResult().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
   assertEquals("test2",binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 }

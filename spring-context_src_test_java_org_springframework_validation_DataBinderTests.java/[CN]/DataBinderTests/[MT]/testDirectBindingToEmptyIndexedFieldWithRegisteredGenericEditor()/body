@@ -2,12 +2,12 @@
   IndexedTestBean tb=new IndexedTestBean();
   DataBinder binder=new DataBinder(tb,"tb");
   binder.registerCustomEditor(TestBean.class,"map",new PropertyEditorSupport(){
-    public void setAsText(    String text) throws IllegalArgumentException {
+    @Override public void setAsText(    String text) throws IllegalArgumentException {
       DerivedTestBean tb=new DerivedTestBean();
       tb.setName("array" + text);
       setValue(tb);
     }
-    public String getAsText(){
+    @Override public String getAsText(){
       return ((TestBean)getValue()).getName();
     }
   }
@@ -20,6 +20,6 @@
   assertEquals("NOT_NULL.tb.map",errors.getFieldError("map[key0]").getCodes()[1]);
   assertEquals("NOT_NULL.map[key0]",errors.getFieldError("map[key0]").getCodes()[2]);
   assertEquals("NOT_NULL.map",errors.getFieldError("map[key0]").getCodes()[3]);
-  assertEquals("NOT_NULL.org.springframework.beans.TestBean",errors.getFieldError("map[key0]").getCodes()[4]);
+  assertEquals("NOT_NULL.org.springframework.tests.sample.beans.TestBean",errors.getFieldError("map[key0]").getCodes()[4]);
   assertEquals("NOT_NULL",errors.getFieldError("map[key0]").getCodes()[5]);
 }

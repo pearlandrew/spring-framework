@@ -1,15 +1,6 @@
 {
-  mockPreparedStatement.executeUpdate();
-  ctrlPreparedStatement.setReturnValue(3);
-  if (debugEnabled) {
-    mockPreparedStatement.getWarnings();
-    ctrlPreparedStatement.setReturnValue(null);
-  }
-  mockPreparedStatement.close();
-  ctrlPreparedStatement.setVoidCallable();
-  mockConnection.prepareStatement(UPDATE);
-  ctrlConnection.setReturnValue(mockPreparedStatement);
-  replay();
+  given(preparedStatement.executeUpdate()).willReturn(3);
+  given(connection.prepareStatement(UPDATE)).willReturn(preparedStatement);
   RequiredRowsUpdater pc=new RequiredRowsUpdater();
   int rowsAffected=pc.run();
   assertEquals(3,rowsAffected);

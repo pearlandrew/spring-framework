@@ -1,6 +1,8 @@
 {
-  XmlBeanFactory parent=new XmlBeanFactory(PARENT_CONTEXT);
-  XmlBeanFactory child=new XmlBeanFactory(CHILD_CONTEXT,parent);
+  DefaultListableBeanFactory parent=new DefaultListableBeanFactory();
+  new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
+  DefaultListableBeanFactory child=new DefaultListableBeanFactory(parent);
+  new XmlBeanDefinitionReader(child).loadBeanDefinitions(CHILD_CONTEXT);
   assertEquals(TestBean.class,child.getType("inheritsFromParentFactory"));
   TestBean inherits=(TestBean)child.getBean("inheritsFromParentFactory");
   assertTrue(inherits.getName().equals("override"));

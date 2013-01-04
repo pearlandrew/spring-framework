@@ -30,33 +30,11 @@
   trigger1.setStartTime(new Date());
   trigger1.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
   trigger1.setRepeatInterval(20);
-  MockControl schedulerControl=MockControl.createControl(Scheduler.class);
-  final Scheduler scheduler=(Scheduler)schedulerControl.getMock();
-  scheduler.setJobFactory(jobFactory);
-  schedulerControl.setVoidCallable();
-  scheduler.getJobDetail("myJob0",Scheduler.DEFAULT_GROUP);
-  schedulerControl.setReturnValue(null);
-  scheduler.getJobDetail("myJob1",Scheduler.DEFAULT_GROUP);
-  schedulerControl.setReturnValue(null);
-  scheduler.getTrigger("myTrigger0",Scheduler.DEFAULT_GROUP);
-  schedulerControl.setReturnValue(null);
-  scheduler.getTrigger("myTrigger1",Scheduler.DEFAULT_GROUP);
-  schedulerControl.setReturnValue(null);
-  scheduler.addJob(jobDetail0,true);
-  schedulerControl.setVoidCallable();
-  scheduler.addJob(jobDetail1,true);
-  schedulerControl.setVoidCallable();
-  scheduler.scheduleJob(trigger0);
-  schedulerControl.setReturnValue(new Date());
-  scheduler.scheduleJob(trigger1);
-  schedulerControl.setReturnValue(new Date());
-  scheduler.start();
-  schedulerControl.setVoidCallable();
-  scheduler.shutdown(false);
-  schedulerControl.setVoidCallable();
-  schedulerControl.replay();
+  final Scheduler scheduler=mock(Scheduler.class);
+  given(scheduler.scheduleJob(trigger0)).willReturn(new Date());
+  given(scheduler.scheduleJob(trigger1)).willReturn(new Date());
   SchedulerFactoryBean schedulerFactoryBean=new SchedulerFactoryBean(){
-    protected Scheduler createScheduler(    SchedulerFactory schedulerFactory,    String schedulerName){
+    @Override protected Scheduler createScheduler(    SchedulerFactory schedulerFactory,    String schedulerName){
       return scheduler;
     }
   }
@@ -71,5 +49,15 @@
   finally {
     schedulerFactoryBean.destroy();
   }
-  schedulerControl.verify();
+  verify(scheduler).setJobFactory(jobFactory);
+  verify(scheduler).getJobDetail("myJob0",Scheduler.DEFAULT_GROUP);
+  verify(scheduler).getJobDetail("myJob1",Scheduler.DEFAULT_GROUP);
+  verify(scheduler).getTrigger("myTrigger0",Scheduler.DEFAULT_GROUP);
+  verify(scheduler).getTrigger("myTrigger1",Scheduler.DEFAULT_GROUP);
+  verify(scheduler).addJob(jobDetail0,true);
+  verify(scheduler).addJob(jobDetail1,true);
+  verify(scheduler).scheduleJob(trigger0);
+  verify(scheduler).scheduleJob(trigger1);
+  verify(scheduler).start();
+  verify(scheduler).shutdown(false);
 }

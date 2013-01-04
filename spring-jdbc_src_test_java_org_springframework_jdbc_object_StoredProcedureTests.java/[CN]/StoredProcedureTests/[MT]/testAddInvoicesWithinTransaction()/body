@@ -1,30 +1,18 @@
 {
-  mockCallable.setObject(1,new Integer(1106),Types.INTEGER);
-  ctrlCallable.setVoidCallable();
-  mockCallable.setObject(2,new Integer(3),Types.INTEGER);
-  ctrlCallable.setVoidCallable();
-  mockCallable.registerOutParameter(3,Types.INTEGER);
-  ctrlCallable.setVoidCallable();
-  mockCallable.execute();
-  ctrlCallable.setReturnValue(false);
-  mockCallable.getUpdateCount();
-  ctrlCallable.setReturnValue(-1);
-  mockCallable.getObject(3);
-  ctrlCallable.setReturnValue(new Integer(4));
-  if (debugEnabled) {
-    mockCallable.getWarnings();
-    ctrlCallable.setReturnValue(null);
-  }
-  mockCallable.close();
-  ctrlCallable.setVoidCallable();
-  mockConnection.prepareCall("{call " + AddInvoice.SQL + "(?, ?, ?)}");
-  ctrlConnection.setReturnValue(mockCallable);
-  replay();
-  TransactionSynchronizationManager.bindResource(mockDataSource,new ConnectionHolder(mockConnection));
+  given(callableStatement.execute()).willReturn(false);
+  given(callableStatement.getUpdateCount()).willReturn(-1);
+  given(callableStatement.getObject(3)).willReturn(4);
+  given(connection.prepareCall("{call " + AddInvoice.SQL + "(?, ?, ?)}")).willReturn(callableStatement);
+  TransactionSynchronizationManager.bindResource(dataSource,new ConnectionHolder(connection));
   try {
     testAddInvoice(1106,3);
+    verify(callableStatement).setObject(1,1106,Types.INTEGER);
+    verify(callableStatement).setObject(2,3,Types.INTEGER);
+    verify(callableStatement).registerOutParameter(3,Types.INTEGER);
+    verify(connection,never()).close();
   }
   finally {
-    TransactionSynchronizationManager.unbindResource(mockDataSource);
+    TransactionSynchronizationManager.unbindResource(dataSource);
+    connection.close();
   }
 }

@@ -10,7 +10,7 @@
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
   try {
     tt.execute(new TransactionCallback(){
-      public Object doInTransaction(      TransactionStatus status){
+      @Override public Object doInTransaction(      TransactionStatus status){
         txControl.reset();
         txControl.expectAndReturn(tx.isActive(),true);
         tx.setRollbackOnly();
@@ -20,9 +20,9 @@
         txControl.replay();
         assertTrue(TransactionSynchronizationManager.hasResource(factory));
         return tt.execute(new TransactionCallback(){
-          public Object doInTransaction(          TransactionStatus status){
+          @Override public Object doInTransaction(          TransactionStatus status){
             template.execute(new JpaCallback(){
-              public Object doInJpa(              EntityManager em2){
+              @Override public Object doInJpa(              EntityManager em2){
                 em2.flush();
                 return l;
               }

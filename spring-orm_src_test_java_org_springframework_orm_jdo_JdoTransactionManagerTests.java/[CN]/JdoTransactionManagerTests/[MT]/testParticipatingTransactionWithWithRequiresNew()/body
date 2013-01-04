@@ -20,7 +20,7 @@
   final List l=new ArrayList();
   l.add("test");
   Object result=tt.execute(new TransactionCallback(){
-    public Object doInTransaction(    TransactionStatus status){
+    @Override public Object doInTransaction(    TransactionStatus status){
       txControl.verify();
       txControl.reset();
       tx.isActive();
@@ -33,10 +33,10 @@
       txControl.setVoidCallable(2);
       txControl.replay();
       return tt.execute(new TransactionCallback(){
-        public Object doInTransaction(        TransactionStatus status){
+        @Override public Object doInTransaction(        TransactionStatus status){
           JdoTemplate jt=new JdoTemplate(pmf);
           return jt.execute(new JdoCallback(){
-            public Object doInJdo(            PersistenceManager pm2){
+            @Override public Object doInJdo(            PersistenceManager pm2){
               pm2.flush();
               return l;
             }

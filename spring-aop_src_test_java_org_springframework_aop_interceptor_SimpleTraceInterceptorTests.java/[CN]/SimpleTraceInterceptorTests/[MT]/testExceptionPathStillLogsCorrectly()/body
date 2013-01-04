@@ -1,14 +1,10 @@
 {
-  Log log=createMock(Log.class);
-  MethodInvocation mi=createMock(MethodInvocation.class);
-  Method toString=String.class.getMethod("toString",new Class[]{});
-  expect(mi.getMethod()).andReturn(toString);
-  expect(mi.getThis()).andReturn(this);
-  log.trace(isA(String.class));
+  MethodInvocation mi=mock(MethodInvocation.class);
+  given(mi.getMethod()).willReturn(String.class.getMethod("toString",new Class[]{}));
+  given(mi.getThis()).willReturn(this);
   IllegalArgumentException exception=new IllegalArgumentException();
-  expect(mi.proceed()).andThrow(exception);
-  log.trace(isA(String.class));
-  replay(mi,log);
+  given(mi.proceed()).willThrow(exception);
+  Log log=mock(Log.class);
   final SimpleTraceInterceptor interceptor=new SimpleTraceInterceptor(true);
   try {
     interceptor.invokeUnderTrace(mi,log);
@@ -16,5 +12,6 @@
   }
  catch (  IllegalArgumentException expected) {
   }
-  verify(mi,log);
+  verify(log).trace(anyString());
+  verify(log).trace(anyString(),eq(exception));
 }

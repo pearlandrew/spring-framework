@@ -1,11 +1,6 @@
 {
-  MockControl mockRunnable=MockControl.createControl(Runnable.class);
-  Runnable runnable=(Runnable)mockRunnable.getMock();
-  runnable.run();
-  mockRunnable.setVoidCallable();
-  runnable.run();
-  mockRunnable.setVoidCallable();
-  mockRunnable.replay();
+  Assume.group(TestGroup.PERFORMANCE);
+  Runnable runnable=mock(Runnable.class);
   ScheduledExecutorTask task=new ScheduledExecutorTask(runnable);
   task.setPeriod(500);
   task.setFixedRate(true);
@@ -14,5 +9,5 @@
   factory.afterPropertiesSet();
   pauseToLetTaskStart(2);
   factory.destroy();
-  mockRunnable.verify();
+  verify(runnable,atLeast(2)).run();
 }

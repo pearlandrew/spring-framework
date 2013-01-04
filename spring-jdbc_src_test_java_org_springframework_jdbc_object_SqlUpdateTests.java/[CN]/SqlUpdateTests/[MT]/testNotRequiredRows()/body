@@ -1,20 +1,7 @@
 {
-  mockPreparedStatement.executeUpdate();
-  ctrlPreparedStatement.setReturnValue(2);
-  if (debugEnabled) {
-    mockPreparedStatement.getWarnings();
-    ctrlPreparedStatement.setReturnValue(null);
-  }
-  mockPreparedStatement.close();
-  ctrlPreparedStatement.setVoidCallable();
-  mockConnection.prepareStatement(UPDATE);
-  ctrlConnection.setReturnValue(mockPreparedStatement);
-  replay();
+  given(preparedStatement.executeUpdate()).willReturn(2);
+  given(connection.prepareStatement(UPDATE)).willReturn(preparedStatement);
+  thrown.expect(JdbcUpdateAffectedIncorrectNumberOfRowsException.class);
   RequiredRowsUpdater pc=new RequiredRowsUpdater();
-  try {
-    int rowsAffected=pc.run();
-    fail("Shouldn't continue when too many rows affected");
-  }
- catch (  JdbcUpdateAffectedIncorrectNumberOfRowsException juaicrex) {
-  }
+  pc.run();
 }

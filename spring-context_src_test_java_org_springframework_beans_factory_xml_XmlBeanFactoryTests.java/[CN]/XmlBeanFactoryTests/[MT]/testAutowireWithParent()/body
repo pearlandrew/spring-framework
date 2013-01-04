@@ -1,9 +1,12 @@
 {
-  XmlBeanFactory xbf=new XmlBeanFactory(AUTOWIRE_CONTEXT);
+  DefaultListableBeanFactory xbf=new DefaultListableBeanFactory();
+  new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(AUTOWIRE_CONTEXT);
   DefaultListableBeanFactory lbf=new DefaultListableBeanFactory();
   MutablePropertyValues pvs=new MutablePropertyValues();
   pvs.add("name","kerry");
-  lbf.registerBeanDefinition("spouse",new RootBeanDefinition(TestBean.class,pvs));
+  RootBeanDefinition bd=new RootBeanDefinition(TestBean.class);
+  bd.setPropertyValues(pvs);
+  lbf.registerBeanDefinition("spouse",bd);
   xbf.setParentBeanFactory(lbf);
   doTestAutowire(xbf);
 }

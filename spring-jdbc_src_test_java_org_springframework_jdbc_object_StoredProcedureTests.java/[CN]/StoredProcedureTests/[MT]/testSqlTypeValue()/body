@@ -1,27 +1,12 @@
 {
   int[] testVal=new int[]{1,2};
-  mockCallable.getConnection();
-  ctrlCallable.setDefaultReturnValue(mockConnection);
-  mockCallable.setObject(1,testVal,Types.ARRAY);
-  ctrlCallable.setVoidCallable();
-  mockCallable.registerOutParameter(2,Types.VARCHAR);
-  ctrlCallable.setVoidCallable();
-  mockCallable.execute();
-  ctrlCallable.setReturnValue(false);
-  mockCallable.getUpdateCount();
-  ctrlCallable.setReturnValue(-1);
-  mockCallable.getObject(2);
-  ctrlCallable.setReturnValue("OK");
-  if (debugEnabled) {
-    mockCallable.getWarnings();
-    ctrlCallable.setReturnValue(null);
-  }
-  mockCallable.close();
-  ctrlCallable.setVoidCallable();
-  mockConnection.prepareCall("{call " + SqlTypeValueStoredProcedure.SQL + "(?, ?)}");
-  ctrlConnection.setReturnValue(mockCallable);
-  replay();
-  SqlTypeValueStoredProcedure stvsp=new SqlTypeValueStoredProcedure(mockDataSource);
-  Map out=stvsp.executeTest(testVal);
+  given(callableStatement.execute()).willReturn(false);
+  given(callableStatement.getUpdateCount()).willReturn(-1);
+  given(callableStatement.getObject(2)).willReturn("OK");
+  given(connection.prepareCall("{call " + SqlTypeValueStoredProcedure.SQL + "(?, ?)}")).willReturn(callableStatement);
+  SqlTypeValueStoredProcedure stvsp=new SqlTypeValueStoredProcedure(dataSource);
+  Map<String,Object> out=stvsp.executeTest(testVal);
   assertEquals("OK",out.get("out"));
+  verify(callableStatement).setObject(1,testVal,Types.ARRAY);
+  verify(callableStatement).registerOutParameter(2,Types.VARCHAR);
 }
