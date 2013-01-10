@@ -1,18 +1,8 @@
 {
-  sf.openSession();
-  sfControl.setReturnValue(session,1);
-  session.getSessionFactory();
-  sessionControl.setReturnValue(sf,1);
-  session.load(TestBean.class,"id");
   ObjectNotFoundException onfex=new ObjectNotFoundException("id",TestBean.class.getName());
-  sessionControl.setThrowable(onfex);
-  session.close();
-  sessionControl.setReturnValue(null,1);
-  sfControl.replay();
-  sessionControl.replay();
-  HibernateTemplate ht=new HibernateTemplate(sf);
+  given(session.load(TestBean.class,"id")).willThrow(onfex);
   try {
-    ht.load(TestBean.class,"id");
+    hibernateTemplate.load(TestBean.class,"id");
     fail("Should have thrown HibernateObjectRetrievalFailureException");
   }
  catch (  HibernateObjectRetrievalFailureException ex) {
@@ -20,4 +10,5 @@
     assertEquals("id",ex.getIdentifier());
     assertEquals(onfex,ex.getCause());
   }
+  verify(session).close();
 }

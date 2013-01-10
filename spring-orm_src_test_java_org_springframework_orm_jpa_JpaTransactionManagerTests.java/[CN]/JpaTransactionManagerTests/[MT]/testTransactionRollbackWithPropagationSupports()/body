@@ -1,12 +1,5 @@
 {
-  managerControl.reset();
-  txControl.reset();
-  manager.flush();
-  managerControl.expectAndReturn(manager.isOpen(),true);
-  manager.close();
-  factoryControl.replay();
-  managerControl.replay();
-  txControl.replay();
+  given(manager.isOpen()).willReturn(true);
   tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
@@ -29,7 +22,6 @@
 );
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
-  factoryControl.verify();
-  managerControl.verify();
-  txControl.verify();
+  verify(manager).flush();
+  verify(manager).close();
 }

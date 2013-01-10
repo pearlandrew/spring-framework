@@ -1,8 +1,6 @@
 {
-  managerControl.expectAndReturn(manager.getTransaction(),tx,2);
-  factoryControl.replay();
-  managerControl.replay();
-  txControl.replay();
+  given(manager.getTransaction()).willReturn(tx);
+  given(tx.isActive()).willReturn(true);
   final List<String> l=new ArrayList<String>();
   l.add("test");
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
@@ -10,11 +8,6 @@
   try {
     tt.execute(new TransactionCallback(){
       @Override public Object doInTransaction(      TransactionStatus status){
-        txControl.reset();
-        txControl.expectAndReturn(tx.isActive(),true,2);
-        tx.setRollbackOnly();
-        tx.rollback();
-        txControl.replay();
         assertTrue(TransactionSynchronizationManager.hasResource(factory));
         return tt.execute(new TransactionCallback(){
           @Override public Object doInTransaction(          TransactionStatus status){
@@ -36,7 +29,7 @@
   }
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
-  factoryControl.verify();
-  managerControl.verify();
-  txControl.verify();
+  verify(tx).setRollbackOnly();
+  verify(tx).rollback();
+  verify(manager).close();
 }

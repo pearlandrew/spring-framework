@@ -1,12 +1,9 @@
 {
-  final SessionFactory sf=createStrictMock(SessionFactory.class);
-  final Session session=createStrictMock(Session.class);
-  expect(sf.openSession()).andReturn(session);
-  expect(session.getSessionFactory()).andReturn(sf);
-  expect(session.getFlushMode()).andReturn(FlushMode.MANUAL);
-  session.setFlushMode(FlushMode.MANUAL);
-  replay(sf);
-  replay(session);
+  final SessionFactory sf=mock(SessionFactory.class);
+  final Session session=mock(Session.class);
+  given(sf.openSession()).willReturn(session);
+  given(session.getSessionFactory()).willReturn(sf);
+  given(session.getFlushMode()).willReturn(FlushMode.MANUAL);
   StaticWebApplicationContext wac=new StaticWebApplicationContext();
   wac.setServletContext(sc);
   wac.getDefaultListableBeanFactory().registerSingleton("sessionFactory",sf);
@@ -32,14 +29,6 @@
       org.hibernate.Session sess=SessionFactoryUtils.getSession(sf,true);
       SessionFactoryUtils.releaseSession(sess,sf);
       tm.commit(ts);
-      verify(session);
-      reset(session);
-      try {
-        expect(session.close()).andReturn(null);
-      }
- catch (      HibernateException ex) {
-      }
-      replay(session);
       servletRequest.setAttribute("invoked",Boolean.TRUE);
     }
   }
@@ -54,7 +43,7 @@
   assertNotNull(this.request.getAttribute("invoked"));
   interceptor.postHandle(webRequest,null);
   interceptor.afterCompletion(webRequest,null);
-  verify(sf);
-  verify(session);
+  verify(session).setFlushMode(FlushMode.MANUAL);
+  verify(session).close();
   wac.close();
 }

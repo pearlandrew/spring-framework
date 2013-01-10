@@ -1,13 +1,7 @@
 {
-  managerControl.expectAndReturn(manager.getTransaction(),tx);
-  txControl.expectAndReturn(tx.getRollbackOnly(),true);
-  managerControl.expectAndReturn(manager.getTransaction(),tx);
-  tx.commit();
-  txControl.setThrowable(new RollbackException());
-  manager.flush();
-  factoryControl.replay();
-  managerControl.replay();
-  txControl.replay();
+  given(manager.getTransaction()).willReturn(tx);
+  given(tx.getRollbackOnly()).willReturn(true);
+  willThrow(new RollbackException()).given(tx).commit();
   final List<String> l=new ArrayList<String>();
   l.add("test");
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
@@ -33,7 +27,6 @@
   }
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
-  factoryControl.verify();
-  managerControl.verify();
-  txControl.verify();
+  verify(manager).flush();
+  verify(manager).close();
 }

@@ -1,19 +1,7 @@
 {
-  pmf.getConnectionFactory();
-  pmfControl.setReturnValue(null,2);
-  pmf.getPersistenceManager();
-  pmfControl.setReturnValue(pm,2);
-  pm.currentTransaction();
-  pmControl.setReturnValue(tx,6);
-  tx.begin();
-  txControl.setVoidCallable(1);
-  pm.flush();
-  pmControl.setVoidCallable(1);
-  pm.close();
-  pmControl.setVoidCallable(2);
-  pmfControl.replay();
-  pmControl.replay();
-  txControl.replay();
+  given(pmf.getPersistenceManager()).willReturn(pm);
+  given(pm.currentTransaction()).willReturn(tx);
+  given(tx.isActive()).willReturn(true);
   PlatformTransactionManager tm=new JdoTransactionManager(pmf);
   final TransactionTemplate tt=new TransactionTemplate(tm);
   tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -21,17 +9,6 @@
   l.add("test");
   Object result=tt.execute(new TransactionCallback(){
     @Override public Object doInTransaction(    TransactionStatus status){
-      txControl.verify();
-      txControl.reset();
-      tx.isActive();
-      txControl.setReturnValue(true,1);
-      tx.begin();
-      txControl.setVoidCallable(1);
-      tx.getRollbackOnly();
-      txControl.setReturnValue(false,2);
-      tx.commit();
-      txControl.setVoidCallable(2);
-      txControl.replay();
       return tt.execute(new TransactionCallback(){
         @Override public Object doInTransaction(        TransactionStatus status){
           JdoTemplate jt=new JdoTemplate(pmf);
@@ -49,4 +26,8 @@
   }
 );
   assertTrue("Correct result list",result == l);
+  verify(tx,times(2)).begin();
+  verify(tx,times(2)).commit();
+  verify(pm).flush();
+  verify(pm,times(2)).close();
 }

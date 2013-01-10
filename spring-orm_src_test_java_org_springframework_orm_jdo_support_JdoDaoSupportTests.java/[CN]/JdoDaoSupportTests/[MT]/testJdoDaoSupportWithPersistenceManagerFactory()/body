@@ -1,9 +1,6 @@
 {
-  MockControl pmfControl=MockControl.createControl(PersistenceManagerFactory.class);
-  PersistenceManagerFactory pmf=(PersistenceManagerFactory)pmfControl.getMock();
+  PersistenceManagerFactory pmf=mock(PersistenceManagerFactory.class);
   pmf.getConnectionFactory();
-  pmfControl.setReturnValue(null,1);
-  pmfControl.replay();
   final List test=new ArrayList();
   JdoDaoSupport dao=new JdoDaoSupport(){
     @Override protected void initDao(){
@@ -16,5 +13,4 @@
   assertEquals("Correct PersistenceManagerFactory",pmf,dao.getPersistenceManagerFactory());
   assertEquals("Correct JdoTemplate",pmf,dao.getJdoTemplate().getPersistenceManagerFactory());
   assertEquals("initDao called",test.size(),1);
-  pmfControl.verify();
 }

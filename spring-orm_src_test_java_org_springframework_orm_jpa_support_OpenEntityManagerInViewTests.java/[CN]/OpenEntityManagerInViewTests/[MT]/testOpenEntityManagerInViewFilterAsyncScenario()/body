@@ -1,13 +1,9 @@
 {
-  expect(manager.isOpen()).andReturn(true);
-  manager.close();
-  replay(manager,factory);
-  final EntityManagerFactory factory2=createMock(EntityManagerFactory.class);
-  final EntityManager manager2=createMock(EntityManager.class);
-  expect(factory2.createEntityManager()).andReturn(manager2);
-  expect(manager2.isOpen()).andReturn(true);
-  manager2.close();
-  replay(factory2,manager2);
+  given(manager.isOpen()).willReturn(true);
+  final EntityManagerFactory factory2=mock(EntityManagerFactory.class);
+  final EntityManager manager2=mock(EntityManager.class);
+  given(factory2.createEntityManager()).willReturn(manager2);
+  given(manager2.isOpen()).willReturn(true);
   MockServletContext sc=new MockServletContext();
   StaticWebApplicationContext wac=new StaticWebApplicationContext();
   wac.setServletContext(sc);
@@ -43,13 +39,8 @@
   }
 ;
   FilterChain filterChain3=new PassThroughFilterChain(filter2,filterChain2);
-  AsyncWebRequest asyncWebRequest=createMock(AsyncWebRequest.class);
-  asyncWebRequest.addCompletionHandler((Runnable)anyObject());
-  asyncWebRequest.addTimeoutHandler((Runnable)anyObject());
-  asyncWebRequest.addCompletionHandler((Runnable)anyObject());
-  asyncWebRequest.startAsync();
-  expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();
-  replay(asyncWebRequest);
+  AsyncWebRequest asyncWebRequest=mock(AsyncWebRequest.class);
+  given(asyncWebRequest.isAsyncStarted()).willReturn(true);
   WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
   asyncManager.setTaskExecutor(new SyncTaskExecutor());
   asyncManager.setAsyncWebRequest(asyncWebRequest);
@@ -67,9 +58,12 @@
   assertEquals(1,count.get());
   assertEquals(1,count2.get());
   assertNotNull(request.getAttribute("invoked"));
+  verify(asyncWebRequest,times(2)).addCompletionHandler(any(Runnable.class));
+  verify(asyncWebRequest).addTimeoutHandler(any(Runnable.class));
+  verify(asyncWebRequest,times(2)).addCompletionHandler(any(Runnable.class));
+  verify(asyncWebRequest).startAsync();
   reset(asyncWebRequest);
-  expect(asyncWebRequest.isAsyncStarted()).andReturn(false).anyTimes();
-  replay(asyncWebRequest);
+  given(asyncWebRequest.isAsyncStarted()).willReturn(false);
   assertFalse(TransactionSynchronizationManager.hasResource(factory));
   assertFalse(TransactionSynchronizationManager.hasResource(factory2));
   filter.doFilter(request,response,filterChain3);
@@ -77,7 +71,7 @@
   assertFalse(TransactionSynchronizationManager.hasResource(factory2));
   assertEquals(2,count.get());
   assertEquals(2,count2.get());
-  verify(manager,factory);
-  verify(factory2,manager2);
+  verify(manager).close();
+  verify(manager2).close();
   wac.close();
 }

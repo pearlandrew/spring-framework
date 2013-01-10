@@ -1,14 +1,11 @@
 {
-  SessionFactory sf=createStrictMock(SessionFactory.class);
-  Session session=createStrictMock(Session.class);
+  SessionFactory sf=mock(SessionFactory.class);
+  Session session=mock(Session.class);
   OpenSessionInViewInterceptor interceptor=new OpenSessionInViewInterceptor();
   interceptor.setSessionFactory(sf);
   interceptor.setSingleSession(false);
-  expect(sf.openSession()).andReturn(session);
-  expect(session.getSessionFactory()).andReturn(sf);
-  session.setFlushMode(FlushMode.MANUAL);
-  replay(sf);
-  replay(session);
+  given(sf.openSession()).willReturn(session);
+  given(session.getSessionFactory()).willReturn(sf);
   interceptor.preHandle(this.webRequest);
   org.hibernate.Session sess=SessionFactoryUtils.getSession(sf,true);
   SessionFactoryUtils.releaseSession(sess,sf);
@@ -21,15 +18,8 @@
   interceptor.preHandle(this.webRequest);
   interceptor.postHandle(this.webRequest,null);
   interceptor.afterCompletion(this.webRequest,null);
-  verify(sf);
-  verify(session);
-  reset(sf);
-  reset(session);
-  expect(session.close()).andReturn(null);
-  replay(sf);
-  replay(session);
   interceptor.postHandle(this.webRequest,null);
   interceptor.afterCompletion(this.webRequest,null);
-  verify(sf);
-  verify(session);
+  verify(session).setFlushMode(FlushMode.MANUAL);
+  verify(session).close();
 }

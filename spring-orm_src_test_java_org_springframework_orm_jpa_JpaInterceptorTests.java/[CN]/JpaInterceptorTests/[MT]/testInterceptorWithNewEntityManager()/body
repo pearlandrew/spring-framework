@@ -1,9 +1,6 @@
 {
-  factoryControl.expectAndReturn(factory.createEntityManager(),entityManager);
-  managerControl.expectAndReturn(entityManager.isOpen(),true);
-  entityManager.close();
-  factoryControl.replay();
-  managerControl.replay();
+  given(factory.createEntityManager()).willReturn(entityManager);
+  given(entityManager.isOpen()).willReturn(true);
   JpaInterceptor interceptor=new JpaInterceptor();
   interceptor.setEntityManagerFactory(factory);
   try {
@@ -12,6 +9,5 @@
  catch (  Throwable t) {
     fail("Should not have thrown Throwable: " + t.getMessage());
   }
-  factoryControl.verify();
-  managerControl.verify();
+  verify(entityManager).close();
 }

@@ -1,15 +1,6 @@
 {
-  factoryControl.reset();
-  managerControl.reset();
-  txControl.reset();
-  managerControl.expectAndReturn(manager.getTransaction(),tx,2);
-  tx.begin();
-  txControl.expectAndReturn(tx.isActive(),true);
-  tx.rollback();
-  manager.clear();
-  factoryControl.replay();
-  managerControl.replay();
-  txControl.replay();
+  given(manager.getTransaction()).willReturn(tx);
+  given(tx.isActive()).willReturn(true);
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
   TransactionSynchronizationManager.bindResource(factory,new EntityManagerHolder(manager));
@@ -35,7 +26,7 @@
   finally {
     TransactionSynchronizationManager.unbindResource(factory);
   }
-  factoryControl.verify();
-  managerControl.verify();
-  txControl.verify();
+  verify(tx).begin();
+  verify(tx).rollback();
+  verify(manager).clear();
 }
