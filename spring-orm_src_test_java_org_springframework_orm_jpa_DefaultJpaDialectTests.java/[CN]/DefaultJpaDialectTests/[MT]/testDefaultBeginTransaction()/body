@@ -1,14 +1,7 @@
 {
   TransactionDefinition definition=new DefaultTransactionDefinition();
-  MockControl entityControl=MockControl.createControl(EntityManager.class);
-  EntityManager entityManager=(EntityManager)entityControl.getMock();
-  MockControl txControl=MockControl.createControl(EntityTransaction.class);
-  EntityTransaction entityTx=(EntityTransaction)txControl.getMock();
-  entityControl.expectAndReturn(entityManager.getTransaction(),entityTx);
-  entityTx.begin();
-  entityControl.replay();
-  txControl.replay();
+  EntityManager entityManager=mock(EntityManager.class);
+  EntityTransaction entityTx=mock(EntityTransaction.class);
+  given(entityManager.getTransaction()).willReturn(entityTx);
   dialect.beginTransaction(entityManager,definition);
-  entityControl.verify();
-  txControl.verify();
 }

@@ -1,28 +1,18 @@
 {
-  final SessionFactory sf=createStrictMock(SessionFactory.class);
-  final Session session=createStrictMock(Session.class);
-  expect(sf.openSession()).andReturn(session);
-  expect(session.getSessionFactory()).andReturn(sf);
-  expect(session.getFlushMode()).andReturn(FlushMode.MANUAL);
-  session.setFlushMode(FlushMode.MANUAL);
-  replay(sf);
-  replay(session);
-  final SessionFactory sf2=createStrictMock(SessionFactory.class);
-  final Session session2=createStrictMock(Session.class);
-  Transaction tx=createStrictMock(Transaction.class);
-  Connection con=createStrictMock(Connection.class);
-  expect(sf2.openSession()).andReturn(session2);
-  expect(session2.connection()).andReturn(con);
-  expect(session2.beginTransaction()).andReturn(tx);
-  expect(session2.isConnected()).andReturn(true);
-  expect(session2.connection()).andReturn(con);
-  tx.commit();
-  expect(con.isReadOnly()).andReturn(false);
-  session2.setFlushMode(FlushMode.MANUAL);
-  replay(sf2);
-  replay(session2);
-  replay(tx);
-  replay(con);
+  final SessionFactory sf=mock(SessionFactory.class);
+  final Session session=mock(Session.class);
+  given(sf.openSession()).willReturn(session);
+  given(session.getSessionFactory()).willReturn(sf);
+  given(session.getFlushMode()).willReturn(FlushMode.MANUAL);
+  final SessionFactory sf2=mock(SessionFactory.class);
+  final Session session2=mock(Session.class);
+  Transaction tx=mock(Transaction.class);
+  Connection con=mock(Connection.class);
+  given(sf2.openSession()).willReturn(session2);
+  given(session2.connection()).willReturn(con);
+  given(session2.beginTransaction()).willReturn(tx);
+  given(session2.isConnected()).willReturn(true);
+  given(session2.connection()).willReturn(con);
   StaticWebApplicationContext wac=new StaticWebApplicationContext();
   wac.setServletContext(sc);
   wac.getDefaultListableBeanFactory().registerSingleton("sessionFactory",sf);
@@ -45,10 +35,6 @@
       org.hibernate.Session sess=SessionFactoryUtils.getSession(sf,true);
       SessionFactoryUtils.releaseSession(sess,sf);
       tm.commit(ts);
-      verify(session);
-      reset(session);
-      expect(session.close()).andReturn(null);
-      replay(session);
       servletRequest.setAttribute("invoked",Boolean.TRUE);
     }
   }
@@ -58,10 +44,6 @@
       HibernateTransactionManager tm=new HibernateTransactionManager(sf2);
       TransactionStatus ts=tm.getTransaction(new DefaultTransactionDefinition());
       tm.commit(ts);
-      verify(session2);
-      reset(session2);
-      expect(session2.close()).andReturn(null);
-      replay(session2);
       filter.doFilter(servletRequest,servletResponse,filterChain);
     }
   }
@@ -69,11 +51,10 @@
   FilterChain filterChain3=new PassThroughFilterChain(filter2,filterChain2);
   filter2.doFilter(this.request,this.response,filterChain3);
   assertNotNull(this.request.getAttribute("invoked"));
-  verify(sf);
-  verify(session);
-  verify(sf2);
-  verify(session2);
-  verify(tx);
-  verify(con);
+  verify(session).setFlushMode(FlushMode.MANUAL);
+  verify(tx).commit();
+  verify(session2).setFlushMode(FlushMode.MANUAL);
+  verify(session).close();
+  verify(session2).close();
   wac.close();
 }

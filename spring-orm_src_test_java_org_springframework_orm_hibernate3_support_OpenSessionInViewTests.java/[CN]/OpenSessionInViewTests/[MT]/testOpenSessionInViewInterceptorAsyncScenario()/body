@@ -1,23 +1,13 @@
 {
-  final SessionFactory sf=createStrictMock(SessionFactory.class);
-  Session session=createStrictMock(Session.class);
+  final SessionFactory sf=mock(SessionFactory.class);
+  Session session=mock(Session.class);
   OpenSessionInViewInterceptor interceptor=new OpenSessionInViewInterceptor();
   interceptor.setSessionFactory(sf);
-  expect(sf.openSession()).andReturn(session);
-  expect(session.getSessionFactory()).andReturn(sf);
-  session.setFlushMode(FlushMode.MANUAL);
-  replay(sf);
-  replay(session);
+  given(sf.openSession()).willReturn(session);
+  given(session.getSessionFactory()).willReturn(sf);
   interceptor.preHandle(this.webRequest);
   assertTrue(TransactionSynchronizationManager.hasResource(sf));
-  verify(sf);
-  verify(session);
-  AsyncWebRequest asyncWebRequest=createStrictMock(AsyncWebRequest.class);
-  asyncWebRequest.addCompletionHandler((Runnable)anyObject());
-  asyncWebRequest.addTimeoutHandler((Runnable)anyObject());
-  asyncWebRequest.addCompletionHandler((Runnable)anyObject());
-  asyncWebRequest.startAsync();
-  replay(asyncWebRequest);
+  AsyncWebRequest asyncWebRequest=mock(AsyncWebRequest.class);
   WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(this.request);
   asyncManager.setTaskExecutor(new SyncTaskExecutor());
   asyncManager.setAsyncWebRequest(asyncWebRequest);
@@ -27,28 +17,16 @@
     }
   }
 );
-  verify(asyncWebRequest);
   interceptor.afterConcurrentHandlingStarted(this.webRequest);
   assertFalse(TransactionSynchronizationManager.hasResource(sf));
   interceptor.preHandle(this.webRequest);
   assertTrue("Session not bound to async thread",TransactionSynchronizationManager.hasResource(sf));
-  verify(sf);
-  reset(sf);
-  replay(sf);
-  verify(session);
-  reset(session);
-  replay(session);
   interceptor.postHandle(this.webRequest,null);
   assertTrue(TransactionSynchronizationManager.hasResource(sf));
-  verify(sf);
-  reset(sf);
-  verify(session);
-  reset(session);
-  expect(session.close()).andReturn(null);
-  replay(sf);
-  replay(session);
   interceptor.afterCompletion(this.webRequest,null);
   assertFalse(TransactionSynchronizationManager.hasResource(sf));
-  verify(sf);
-  verify(session);
+  verify(session).setFlushMode(FlushMode.MANUAL);
+  verify(asyncWebRequest,times(2)).addCompletionHandler(any(Runnable.class));
+  verify(asyncWebRequest).addTimeoutHandler(any(Runnable.class));
+  verify(asyncWebRequest).startAsync();
 }

@@ -1,28 +1,14 @@
 {
-  MockControl queryControl=MockControl.createControl(Query.class);
-  Query query=(Query)queryControl.getMock();
+  Query query=mock(Query.class);
   List list=new ArrayList();
-  sf.openSession();
-  sfControl.setReturnValue(session,1);
-  session.getSessionFactory();
-  sessionControl.setReturnValue(sf,1);
-  session.createQuery("some query string");
-  sessionControl.setReturnValue(query,1);
-  query.setParameter("myparam1","myvalue1");
-  queryControl.setReturnValue(query,1);
-  query.setParameter("myparam2",new Integer(2));
-  queryControl.setReturnValue(query,1);
-  query.list();
-  queryControl.setReturnValue(list,1);
-  session.flush();
-  sessionControl.setVoidCallable(1);
-  session.close();
-  sessionControl.setReturnValue(null,1);
-  sfControl.replay();
-  sessionControl.replay();
-  queryControl.replay();
-  HibernateTemplate ht=new HibernateTemplate(sf);
-  List result=ht.findByNamedParam("some query string",new String[]{"myparam1","myparam2"},new Object[]{"myvalue1",new Integer(2)});
+  given(session.createQuery("some query string")).willReturn(query);
+  given(query.setParameter("myparam1","myvalue1")).willReturn(query);
+  given(query.setParameter("myparam2",2)).willReturn(query);
+  given(query.list()).willReturn(list);
+  List result=hibernateTemplate.findByNamedParam("some query string",new String[]{"myparam1","myparam2"},new Object[]{"myvalue1",2});
   assertTrue("Correct list",result == list);
-  queryControl.verify();
+  verify(query).setParameter("myparam1","myvalue1");
+  verify(query).setParameter("myparam2",2);
+  verify(session).flush();
+  verify(session).close();
 }

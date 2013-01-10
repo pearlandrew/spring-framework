@@ -1,29 +1,10 @@
 {
-  MockControl utControl=MockControl.createControl(UserTransaction.class);
-  UserTransaction ut=(UserTransaction)utControl.getMock();
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
-  ut.begin();
-  utControl.setVoidCallable(1);
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_ACTIVE,1);
-  ut.rollback();
-  utControl.setVoidCallable(1);
-  utControl.replay();
-  MockControl sfControl=MockControl.createControl(SessionFactory.class);
-  final SessionFactory sf=(SessionFactory)sfControl.getMock();
-  final MockControl sessionControl=MockControl.createControl(Session.class);
-  final Session session=(Session)sessionControl.getMock();
-  sf.openSession();
-  sfControl.setReturnValue(session,1);
-  session.getSessionFactory();
-  sessionControl.setReturnValue(sf,1);
-  if (flush) {
-    session.flush();
-    sessionControl.setVoidCallable(1);
-  }
-  sfControl.replay();
-  sessionControl.replay();
+  UserTransaction ut=mock(UserTransaction.class);
+  given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION,Status.STATUS_ACTIVE);
+  final SessionFactory sf=mock(SessionFactory.class);
+  final Session session=mock(Session.class);
+  given(sf.openSession()).willReturn(session);
+  given(session.getSessionFactory()).willReturn(sf);
   JtaTransactionManager ptm=new JtaTransactionManager(ut);
   TransactionTemplate tt=new TransactionTemplate(ptm);
   final List l=new ArrayList();
@@ -44,11 +25,6 @@
           status.flush();
         }
         status.setRollbackOnly();
-        sessionControl.verify();
-        sessionControl.reset();
-        session.close();
-        sessionControl.setReturnValue(null,1);
-        sessionControl.replay();
         return htl;
       }
  catch (      Error err) {
@@ -60,7 +36,11 @@
 );
   assertTrue("Correct result list",result == l);
   assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
-  utControl.verify();
-  sfControl.verify();
-  sessionControl.verify();
+  InOrder ordered=inOrder(ut);
+  ordered.verify(ut).begin();
+  ordered.verify(ut).rollback();
+  if (flush) {
+    verify(session).flush();
+  }
+  verify(session).close();
 }

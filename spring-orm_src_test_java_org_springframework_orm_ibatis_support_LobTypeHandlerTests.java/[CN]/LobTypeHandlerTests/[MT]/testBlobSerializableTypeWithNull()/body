@@ -1,9 +1,5 @@
 {
-  lobHandler.getBlobAsBinaryStream(rs,1);
-  lobHandlerControl.setReturnValue(null,2);
-  lobCreator.setBlobAsBytes(ps,1,null);
-  lobHandlerControl.replay();
-  lobCreatorControl.replay();
+  given(lobHandler.getBlobAsBinaryStream(rs,1)).willReturn(null);
   BlobSerializableTypeHandler type=new BlobSerializableTypeHandler(lobHandler);
   assertEquals(null,type.valueOf(null));
   assertEquals(null,type.getResult(rs,"column"));
@@ -18,4 +14,5 @@
   finally {
     TransactionSynchronizationManager.clearSynchronization();
   }
+  verify(lobCreator).setBlobAsBytes(ps,1,null);
 }

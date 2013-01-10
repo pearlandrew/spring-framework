@@ -1,9 +1,5 @@
 {
-  lobHandler.getBlobAsBytes(rs,"column");
-  lobHandlerControl.setReturnValue(null);
-  lobCreator.setBlobAsBytes(ps,1,null);
-  lobHandlerControl.replay();
-  lobCreatorControl.replay();
+  given(lobHandler.getBlobAsBytes(rs,"column")).willReturn(null);
   BlobStringType type=new BlobStringType(lobHandler,null);
   assertEquals(null,type.nullSafeGet(rs,new String[]{"column"},null));
   TransactionSynchronizationManager.initSynchronization();
@@ -16,4 +12,5 @@
   finally {
     TransactionSynchronizationManager.clearSynchronization();
   }
+  verify(lobCreator).setBlobAsBytes(ps,1,null);
 }

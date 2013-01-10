@@ -1,20 +1,10 @@
 {
-  MockControl dsControl=MockControl.createControl(DataSource.class);
-  DataSource ds=(DataSource)dsControl.getMock();
-  MockControl conControl=MockControl.createControl(Connection.class);
-  final Connection con=(Connection)conControl.getMock();
-  dsControl.replay();
-  conControl.replay();
-  MockControl sessionControl=MockControl.createControl(SqlMapSession.class);
-  final SqlMapSession session=(SqlMapSession)sessionControl.getMock();
-  MockControl clientControl=MockControl.createControl(SqlMapClient.class);
-  SqlMapClient client=(SqlMapClient)clientControl.getMock();
-  client.openSession();
-  clientControl.setReturnValue(session,1);
-  session.getCurrentConnection();
-  sessionControl.setReturnValue(con,1);
-  sessionControl.replay();
-  clientControl.replay();
+  DataSource ds=mock(DataSource.class);
+  final Connection con=mock(Connection.class);
+  final SqlMapSession session=mock(SqlMapSession.class);
+  SqlMapClient client=mock(SqlMapClient.class);
+  given(client.openSession()).willReturn(session);
+  given(session.getCurrentConnection()).willReturn(con);
   SqlMapClientTemplate template=new SqlMapClientTemplate();
   template.setDataSource(ds);
   template.setSqlMapClient(client);
@@ -27,8 +17,4 @@
   }
 );
   assertEquals("done",result);
-  dsControl.verify();
-  conControl.verify();
-  sessionControl.verify();
-  clientControl.verify();
 }

@@ -1,9 +1,5 @@
 {
-  MockControl factoryControl=MockControl.createControl(SessionFactory.class);
-  final SessionFactory sessionFactory=(SessionFactory)factoryControl.getMock();
-  sessionFactory.close();
-  factoryControl.setVoidCallable(1);
-  factoryControl.replay();
+  final SessionFactory sessionFactory=mock(SessionFactory.class);
   LocalSessionFactoryBean sfb=new LocalSessionFactoryBean(){
     @Override protected SessionFactory newSessionFactory(    Configuration config){
       return sessionFactory;
@@ -16,5 +12,5 @@
   sfb.afterPropertiesSet();
   assertTrue(sessionFactory == sfb.getObject());
   sfb.destroy();
-  factoryControl.verify();
+  verify(sessionFactory).close();
 }

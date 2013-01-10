@@ -1,23 +1,8 @@
 {
-  final MockControl utControl=MockControl.createControl(UserTransaction.class);
-  final UserTransaction ut=(UserTransaction)utControl.getMock();
-  final MockControl tmControl=MockControl.createControl(TransactionManager.class);
-  final TransactionManager tm=(TransactionManager)tmControl.getMock();
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
-  ut.begin();
-  utControl.setVoidCallable(1);
-  utControl.replay();
-  pmf.getConnectionFactory();
-  pmfControl.setReturnValue(null,1);
-  pmf.getPersistenceManager();
-  pmfControl.setReturnValue(pm,1);
-  pm.flush();
-  pmControl.setVoidCallable(1);
-  pm.close();
-  pmControl.setVoidCallable(1);
-  pmfControl.replay();
-  pmControl.replay();
+  final UserTransaction ut=mock(UserTransaction.class);
+  final TransactionManager tm=mock(TransactionManager.class);
+  given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION,Status.STATUS_ACTIVE,Status.STATUS_ACTIVE,Status.STATUS_ACTIVE,Status.STATUS_ACTIVE,Status.STATUS_ACTIVE);
+  given(pmf.getPersistenceManager()).willReturn(pm);
   JtaTransactionManager ptm=new JtaTransactionManager(ut,tm);
   final TransactionTemplate tt=new TransactionTemplate(ptm);
   tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -29,23 +14,8 @@
   Object result=tt.execute(new TransactionCallback(){
     @Override public Object doInTransaction(    TransactionStatus status){
       try {
-        utControl.verify();
-        utControl.reset();
-        ut.getStatus();
-        utControl.setReturnValue(Status.STATUS_ACTIVE,1);
         MockJtaTransaction transaction=new MockJtaTransaction();
-        tm.suspend();
-        tmControl.setReturnValue(transaction,1);
-        ut.begin();
-        utControl.setVoidCallable(1);
-        ut.getStatus();
-        utControl.setReturnValue(Status.STATUS_ACTIVE,4);
-        ut.commit();
-        utControl.setVoidCallable(2);
-        tm.resume(transaction);
-        tmControl.setVoidCallable(1);
-        utControl.replay();
-        tmControl.replay();
+        given(tm.suspend()).willReturn(transaction);
       }
  catch (      Exception ex) {
       }
@@ -76,5 +46,7 @@
   assertTrue("Has thread pm",TransactionSynchronizationManager.hasResource(pmf));
   TransactionSynchronizationManager.unbindResource(pmf);
   assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
-  utControl.verify();
+  verify(ut,times(2)).begin();
+  verify(pm).flush();
+  verify(pm,times(2)).close();
 }

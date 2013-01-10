@@ -1,10 +1,6 @@
 {
-  MockControl pmfControl=MockControl.createControl(PersistenceManagerFactory.class);
-  PersistenceManagerFactory pmf=(PersistenceManagerFactory)pmfControl.getMock();
-  MockControl pmControl=MockControl.createControl(PersistenceManager.class);
-  PersistenceManager pm=(PersistenceManager)pmControl.getMock();
-  pmfControl.replay();
-  pmControl.replay();
+  PersistenceManagerFactory pmf=mock(PersistenceManagerFactory.class);
+  PersistenceManager pm=mock(PersistenceManager.class);
   TransactionSynchronizationManager.bindResource(pmf,new PersistenceManagerHolder(pm));
   JdoInterceptor interceptor=new JdoInterceptor();
   interceptor.setPersistenceManagerFactory(pmf);
@@ -17,6 +13,4 @@
  finally {
     TransactionSynchronizationManager.unbindResource(pmf);
   }
-  pmfControl.verify();
-  pmControl.verify();
 }

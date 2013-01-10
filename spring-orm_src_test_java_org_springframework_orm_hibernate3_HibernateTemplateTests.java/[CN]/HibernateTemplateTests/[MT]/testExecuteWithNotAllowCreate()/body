@@ -1,12 +1,11 @@
 {
-  sf.getCurrentSession();
-  sfControl.setThrowable(new HibernateException(""));
-  sfControl.replay();
+  reset(sessionFactory);
+  given(sessionFactory.getCurrentSession()).willThrow(new HibernateException(""));
   HibernateTemplate ht=new HibernateTemplate();
-  ht.setSessionFactory(sf);
+  ht.setSessionFactory(sessionFactory);
   ht.setAllowCreate(false);
   try {
-    ht.execute(new HibernateCallback(){
+    ht.execute(new HibernateCallback<Object>(){
       @Override public Object doInHibernate(      org.hibernate.Session session) throws HibernateException {
         return null;
       }
