@@ -1,10 +1,6 @@
 {
   tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-  managerControl.expectAndReturn(manager.getTransaction(),tx,5);
-  manager.flush();
-  factoryControl.replay();
-  managerControl.replay();
-  txControl.replay();
+  given(manager.getTransaction()).willReturn(tx);
   final List<String> l=new ArrayList<String>();
   l.add("test");
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
@@ -13,14 +9,6 @@
   try {
     Object result=tt.execute(new TransactionCallback(){
       @Override public Object doInTransaction(      TransactionStatus status){
-        txControl.verify();
-        txControl.reset();
-        tx.begin();
-        txControl.expectAndReturn(tx.getRollbackOnly(),false);
-        tx.commit();
-        txControl.expectAndReturn(tx.getRollbackOnly(),false);
-        tx.commit();
-        txControl.replay();
         JpaTemplate template2=new JpaTemplate(factory);
         template2.execute(new JpaCallback(){
           @Override public Object doInJpa(          EntityManager em) throws PersistenceException {
@@ -51,7 +39,8 @@
   }
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
-  factoryControl.verify();
-  managerControl.verify();
-  txControl.verify();
+  verify(tx,times(2)).begin();
+  verify(tx,times(2)).commit();
+  verify(manager).flush();
+  verify(manager).close();
 }

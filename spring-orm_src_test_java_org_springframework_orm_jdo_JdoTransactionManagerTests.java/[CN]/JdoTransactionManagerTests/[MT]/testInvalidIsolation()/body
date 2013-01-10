@@ -1,14 +1,6 @@
 {
-  pmf.getConnectionFactory();
-  pmfControl.setReturnValue(null,1);
-  pmf.getPersistenceManager();
-  pmfControl.setReturnValue(pm,1);
-  pm.currentTransaction();
-  pmControl.setReturnValue(null,1);
-  pm.close();
-  pmControl.setVoidCallable(1);
-  pmfControl.replay();
-  pmControl.replay();
+  given(pmf.getPersistenceManager()).willReturn(pm);
+  given(pm.currentTransaction()).willReturn(tx);
   PlatformTransactionManager tm=new JdoTransactionManager(pmf);
   TransactionTemplate tt=new TransactionTemplate(tm);
   tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
@@ -22,4 +14,5 @@
   }
  catch (  InvalidIsolationLevelException ex) {
   }
+  verify(pm).close();
 }

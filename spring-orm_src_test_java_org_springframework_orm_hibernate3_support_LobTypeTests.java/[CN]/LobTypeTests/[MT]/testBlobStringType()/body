@@ -1,12 +1,7 @@
 {
   String content="content";
   byte[] contentBytes=content.getBytes();
-  lobHandler.getBlobAsBytes(rs,"column");
-  lobHandlerControl.setReturnValue(contentBytes);
-  lobCreator.setBlobAsBytes(ps,1,contentBytes);
-  lobCreatorControl.setMatcher(new ArrayMatcher());
-  lobHandlerControl.replay();
-  lobCreatorControl.replay();
+  given(lobHandler.getBlobAsBytes(rs,"column")).willReturn(contentBytes);
   BlobStringType type=new BlobStringType(lobHandler,null);
   assertEquals(1,type.sqlTypes().length);
   assertEquals(Types.BLOB,type.sqlTypes()[0]);
@@ -26,4 +21,5 @@
   finally {
     TransactionSynchronizationManager.clearSynchronization();
   }
+  verify(lobCreator).setBlobAsBytes(ps,1,contentBytes);
 }

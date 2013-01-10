@@ -1,46 +1,22 @@
 {
-  MockControl utControl=MockControl.createControl(UserTransaction.class);
-  UserTransaction ut=(UserTransaction)utControl.getMock();
-  MockControl sfControl=MockControl.createControl(SessionFactory.class);
-  final SessionFactory sf=(SessionFactory)sfControl.getMock();
-  final MockControl sessionControl=MockControl.createControl(Session.class);
-  final Session session=(Session)sessionControl.getMock();
-  final MockControl queryControl=MockControl.createControl(Query.class);
-  Query query=(Query)queryControl.getMock();
-  ut.getStatus();
-  utControl.setReturnValue(status,1);
+  UserTransaction ut=mock(UserTransaction.class);
+  final SessionFactory sf=mock(SessionFactory.class);
+  final Session session=mock(Session.class);
+  Query query=mock(Query.class);
   if (status == Status.STATUS_NO_TRANSACTION) {
-    ut.begin();
-    utControl.setVoidCallable(1);
-    ut.getStatus();
-    utControl.setReturnValue(Status.STATUS_ACTIVE,2);
-    ut.commit();
-    utControl.setVoidCallable(1);
+    given(ut.getStatus()).willReturn(status,Status.STATUS_ACTIVE);
   }
  else {
-    ut.getStatus();
-    utControl.setReturnValue(status,1);
+    given(ut.getStatus()).willReturn(status);
   }
   final List list=new ArrayList();
   list.add("test");
-  sf.openSession();
-  sfControl.setReturnValue(session,1);
-  session.getSessionFactory();
-  sessionControl.setReturnValue(sf,1);
-  session.isOpen();
-  sessionControl.setReturnValue(true,1);
-  session.createQuery("some query string");
-  sessionControl.setReturnValue(query,1);
-  if (readOnly) {
-    session.setFlushMode(FlushMode.MANUAL);
-    sessionControl.setVoidCallable(1);
-  }
-  query.list();
-  queryControl.setReturnValue(list,1);
-  utControl.replay();
-  sfControl.replay();
-  sessionControl.replay();
-  queryControl.replay();
+  given(sf.openSession()).willReturn(session);
+  given(session.getSessionFactory()).willReturn(sf);
+  given(session.isOpen()).willReturn(true);
+  given(session.createQuery("some query string")).willReturn(query);
+  given(query.list()).willReturn(list);
+  given(session.getFlushMode()).willReturn(FlushMode.AUTO);
   JtaTransactionManager ptm=new JtaTransactionManager(ut);
   TransactionTemplate tt=new TransactionTemplate(ptm);
   tt.setReadOnly(readOnly);
@@ -70,18 +46,6 @@
         }
 );
         assertTrue("Has thread session",TransactionSynchronizationManager.hasResource(sf));
-        sessionControl.verify();
-        queryControl.verify();
-        sessionControl.reset();
-        if (!readOnly) {
-          session.getFlushMode();
-          sessionControl.setReturnValue(FlushMode.AUTO,1);
-          session.flush();
-          sessionControl.setVoidCallable(1);
-        }
-        session.close();
-        sessionControl.setReturnValue(null,1);
-        sessionControl.replay();
         return htl;
       }
  catch (      Error err) {
@@ -94,7 +58,16 @@
   assertTrue("Correct result list",result == list);
   assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
   assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
-  utControl.verify();
-  sfControl.verify();
-  sessionControl.verify();
+  if (status == Status.STATUS_NO_TRANSACTION) {
+    InOrder ordered=inOrder(ut);
+    ordered.verify(ut).begin();
+    ordered.verify(ut).commit();
+  }
+  if (readOnly) {
+    verify(session).setFlushMode(FlushMode.MANUAL);
+  }
+ else {
+    verify(session).flush();
+  }
+  verify(session).close();
 }

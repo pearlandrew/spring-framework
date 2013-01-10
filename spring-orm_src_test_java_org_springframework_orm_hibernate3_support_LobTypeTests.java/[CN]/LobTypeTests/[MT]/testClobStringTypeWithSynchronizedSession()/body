@@ -1,22 +1,9 @@
 {
-  MockControl sfControl=MockControl.createControl(SessionFactory.class);
-  SessionFactory sf=(SessionFactory)sfControl.getMock();
-  MockControl sessionControl=MockControl.createControl(Session.class);
-  Session session=(Session)sessionControl.getMock();
-  sf.openSession();
-  sfControl.setReturnValue(session,1);
-  session.getSessionFactory();
-  sessionControl.setReturnValue(sf,1);
-  session.close();
-  sessionControl.setReturnValue(null,1);
-  sfControl.replay();
-  sessionControl.replay();
-  lobHandler.getClobAsString(rs,"column");
-  lobHandlerControl.setReturnValue("content");
-  lobCreator.setClobAsString(ps,1,"content");
-  lobCreatorControl.setVoidCallable(1);
-  lobHandlerControl.replay();
-  lobCreatorControl.replay();
+  SessionFactory sf=mock(SessionFactory.class);
+  Session session=mock(Session.class);
+  given(sf.openSession()).willReturn(session);
+  given(session.getSessionFactory()).willReturn(sf);
+  given(lobHandler.getClobAsString(rs,"column")).willReturn("content");
   ClobStringType type=new ClobStringType(lobHandler,null);
   assertEquals(1,type.sqlTypes().length);
   assertEquals(Types.CLOB,type.sqlTypes()[0]);
@@ -40,6 +27,6 @@
   finally {
     TransactionSynchronizationManager.clearSynchronization();
   }
-  sfControl.verify();
-  sessionControl.verify();
+  verify(session).close();
+  verify(lobCreator).setClobAsString(ps,1,"content");
 }

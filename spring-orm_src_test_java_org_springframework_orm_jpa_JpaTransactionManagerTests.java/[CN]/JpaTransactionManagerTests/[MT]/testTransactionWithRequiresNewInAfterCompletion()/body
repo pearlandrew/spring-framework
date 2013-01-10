@@ -1,26 +1,11 @@
 {
   tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-  MockControl managerControl2=MockControl.createControl(EntityManager.class);
-  EntityManager manager2=(EntityManager)managerControl2.getMock();
-  MockControl txControl2=MockControl.createControl(EntityTransaction.class);
-  EntityTransaction tx2=(EntityTransaction)txControl2.getMock();
-  managerControl.expectAndReturn(manager.getTransaction(),tx,2);
-  factoryControl.expectAndReturn(factory.createEntityManager(),manager2);
-  managerControl2.expectAndReturn(manager2.getTransaction(),tx2,3);
-  txControl.expectAndReturn(tx.getRollbackOnly(),false);
-  txControl2.expectAndReturn(tx2.getRollbackOnly(),false);
-  manager.flush();
-  tx.commit();
-  tx2.begin();
-  tx2.commit();
-  manager2.flush();
-  managerControl2.expectAndReturn(manager2.isOpen(),true);
-  manager2.close();
-  factoryControl.replay();
-  managerControl.replay();
-  txControl.replay();
-  managerControl2.replay();
-  txControl2.replay();
+  EntityManager manager2=mock(EntityManager.class);
+  EntityTransaction tx2=mock(EntityTransaction.class);
+  given(manager.getTransaction()).willReturn(tx);
+  given(factory.createEntityManager()).willReturn(manager,manager2);
+  given(manager2.getTransaction()).willReturn(tx2);
+  given(manager2.isOpen()).willReturn(true);
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
   tt.execute(new TransactionCallback(){
@@ -55,9 +40,11 @@
 );
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
-  factoryControl.verify();
-  managerControl.verify();
-  txControl.verify();
-  managerControl2.verify();
-  txControl2.verify();
+  verify(tx).commit();
+  verify(tx2).begin();
+  verify(tx2).commit();
+  verify(manager).flush();
+  verify(manager).close();
+  verify(manager2).flush();
+  verify(manager2).close();
 }

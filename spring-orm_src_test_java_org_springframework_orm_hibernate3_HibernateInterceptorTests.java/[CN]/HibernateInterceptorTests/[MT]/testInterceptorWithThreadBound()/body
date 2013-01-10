@@ -1,26 +1,17 @@
 {
-  MockControl sfControl=MockControl.createControl(SessionFactory.class);
-  SessionFactory sf=(SessionFactory)sfControl.getMock();
-  MockControl sessionControl=MockControl.createControl(Session.class);
-  Session session=(Session)sessionControl.getMock();
-  session.getSessionFactory();
-  sessionControl.setReturnValue(sf,1);
-  session.isOpen();
-  sessionControl.setReturnValue(true,1);
-  sfControl.replay();
-  sessionControl.replay();
-  TransactionSynchronizationManager.bindResource(sf,new SessionHolder(session));
+  given(session.isOpen()).willReturn(true);
+  TransactionSynchronizationManager.bindResource(sessionFactory,new SessionHolder(session));
   HibernateInterceptor interceptor=new HibernateInterceptor();
-  interceptor.setSessionFactory(sf);
+  interceptor.setSessionFactory(sessionFactory);
   try {
-    interceptor.invoke(new TestInvocation(sf));
+    interceptor.invoke(invocation);
   }
  catch (  Throwable t) {
     fail("Should not have thrown Throwable: " + t.getMessage());
   }
  finally {
-    TransactionSynchronizationManager.unbindResource(sf);
+    verify(session,never()).flush();
+    verify(session,never()).close();
+    TransactionSynchronizationManager.unbindResource(sessionFactory);
   }
-  sfControl.verify();
-  sessionControl.verify();
 }

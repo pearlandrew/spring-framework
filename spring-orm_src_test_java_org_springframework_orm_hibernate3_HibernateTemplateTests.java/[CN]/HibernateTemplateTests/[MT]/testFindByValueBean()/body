@@ -1,27 +1,13 @@
 {
-  MockControl queryControl=MockControl.createControl(Query.class);
-  Query query=(Query)queryControl.getMock();
+  Query query=mock(Query.class);
   TestBean tb=new TestBean();
   List list=new ArrayList();
-  sf.openSession();
-  sfControl.setReturnValue(session,1);
-  session.getSessionFactory();
-  sessionControl.setReturnValue(sf,1);
-  session.createQuery("some query string");
-  sessionControl.setReturnValue(query,1);
-  query.setProperties(tb);
-  queryControl.setReturnValue(query,1);
-  query.list();
-  queryControl.setReturnValue(list,1);
-  session.flush();
-  sessionControl.setVoidCallable(1);
-  session.close();
-  sessionControl.setReturnValue(null,1);
-  sfControl.replay();
-  sessionControl.replay();
-  queryControl.replay();
-  HibernateTemplate ht=new HibernateTemplate(sf);
-  List result=ht.findByValueBean("some query string",tb);
+  given(session.createQuery("some query string")).willReturn(query);
+  given(query.setProperties(tb)).willReturn(query);
+  given(query.list()).willReturn(list);
+  List result=hibernateTemplate.findByValueBean("some query string",tb);
   assertTrue("Correct list",result == list);
-  queryControl.verify();
+  verify(query).setProperties(tb);
+  verify(session).flush();
+  verify(session).close();
 }

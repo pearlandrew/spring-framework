@@ -3,11 +3,9 @@
   template.setExposeNativeEntityManager(false);
   template.setEntityManagerFactory(factory);
   template.afterPropertiesSet();
-  factoryControl.expectAndReturn(factory.createEntityManager(),manager);
-  managerControl.expectAndReturn(manager.isOpen(),true);
+  given(factory.createEntityManager()).willReturn(manager);
+  given(manager.isOpen()).willReturn(true);
   manager.close();
-  managerControl.replay();
-  factoryControl.replay();
   template.execute(new JpaCallback(){
     @Override public Object doInJpa(    EntityManager em) throws PersistenceException {
       assertSame(em,manager);
@@ -15,6 +13,4 @@
     }
   }
 ,true);
-  managerControl.verify();
-  factoryControl.verify();
 }

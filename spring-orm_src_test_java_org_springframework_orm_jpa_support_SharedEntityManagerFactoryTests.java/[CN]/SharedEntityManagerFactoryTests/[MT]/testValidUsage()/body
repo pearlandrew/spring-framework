@@ -1,18 +1,9 @@
 {
   Object o=new Object();
-  MockControl emMc=MockControl.createControl(EntityManager.class);
-  EntityManager mockEm=(EntityManager)emMc.getMock();
-  mockEm.contains(o);
-  emMc.setReturnValue(false,1);
-  emMc.expectAndReturn(mockEm.isOpen(),true);
-  mockEm.close();
-  emMc.setVoidCallable(1);
-  emMc.replay();
-  MockControl emfMc=MockControl.createControl(EntityManagerFactory.class);
-  EntityManagerFactory mockEmf=(EntityManagerFactory)emfMc.getMock();
-  mockEmf.createEntityManager();
-  emfMc.setReturnValue(mockEm,1);
-  emfMc.replay();
+  EntityManager mockEm=mock(EntityManager.class);
+  given(mockEm.isOpen()).willReturn(true);
+  EntityManagerFactory mockEmf=mock(EntityManagerFactory.class);
+  given(mockEmf.createEntityManager()).willReturn(mockEm);
   SharedEntityManagerBean proxyFactoryBean=new SharedEntityManagerBean();
   proxyFactoryBean.setEntityManagerFactory(mockEmf);
   proxyFactoryBean.afterPropertiesSet();
@@ -36,7 +27,7 @@
   finally {
     TransactionSynchronizationManager.unbindResource(mockEmf);
   }
-  emfMc.verify();
-  emMc.verify();
   assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+  verify(mockEm).contains(o);
+  verify(mockEm).close();
 }

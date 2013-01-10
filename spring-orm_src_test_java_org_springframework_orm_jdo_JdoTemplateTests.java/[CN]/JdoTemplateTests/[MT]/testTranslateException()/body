@@ -1,10 +1,7 @@
 {
-  MockControl dialectControl=MockControl.createControl(JdoDialect.class);
-  JdoDialect dialect=(JdoDialect)dialectControl.getMock();
+  JdoDialect dialect=mock(JdoDialect.class);
   final JDOException ex=new JDOException();
-  dialect.translateException(ex);
-  dialectControl.setReturnValue(new DataIntegrityViolationException("test",ex));
-  dialectControl.replay();
+  given(dialect.translateException(ex)).willReturn(new DataIntegrityViolationException("test",ex));
   try {
     JdoTemplate template=createTemplate();
     template.setJdoDialect(dialect);
@@ -18,5 +15,4 @@
   }
  catch (  DataIntegrityViolationException dive) {
   }
-  dialectControl.verify();
 }

@@ -1,20 +1,12 @@
 {
-  Object mockEm=Proxy.newProxyInstance(getClass().getClassLoader(),new Class[]{EntityManager.class},new DummyInvocationHandler());
-  MockControl emfMc=MockControl.createControl(EntityManagerFactoryWithInfo.class);
-  EntityManagerFactoryWithInfo mockEmf=(EntityManagerFactoryWithInfo)emfMc.getMock();
-  mockEmf.getNativeEntityManagerFactory();
-  emfMc.setReturnValue(mockEmf);
-  mockEmf.getPersistenceUnitInfo();
-  emfMc.setReturnValue(null);
-  mockEmf.getJpaDialect();
-  emfMc.setReturnValue(new DefaultJpaDialect());
-  mockEmf.getEntityManagerInterface();
-  emfMc.setReturnValue(EntityManager.class);
-  mockEmf.getBeanClassLoader();
-  emfMc.setReturnValue(getClass().getClassLoader());
-  mockEmf.createEntityManager();
-  emfMc.setReturnValue(mockEm);
-  emfMc.replay();
+  EntityManager mockEm=mock(EntityManager.class,withSettings().serializable());
+  given(mockEm.isOpen()).willReturn(true);
+  EntityManagerFactoryWithInfo mockEmf=mock(EntityManagerFactoryWithInfo.class);
+  given(mockEmf.getNativeEntityManagerFactory()).willReturn(mockEmf);
+  given(mockEmf.getJpaDialect()).willReturn(new DefaultJpaDialect());
+  given(mockEmf.getEntityManagerInterface()).willReturn((Class)EntityManager.class);
+  given(mockEmf.getBeanClassLoader()).willReturn(getClass().getClassLoader());
+  given(mockEmf.createEntityManager()).willReturn(mockEm);
   GenericApplicationContext gac=new GenericApplicationContext();
   gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory",mockEmf);
   gac.registerBeanDefinition("annotationProcessor",new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
@@ -23,5 +15,4 @@
   DefaultPublicPersistenceContextSetter bean=(DefaultPublicPersistenceContextSetter)gac.getBean(DefaultPublicPersistenceContextSetter.class.getName());
   assertNotNull(bean.em);
   assertNotNull(SerializationTestUtils.serializeAndDeserialize(bean.em));
-  emfMc.verify();
 }

@@ -1,14 +1,10 @@
 {
   Properties props=new Properties();
   props.put("foo","bar");
-  MockControl emC=MockControl.createControl(EntityManager.class);
-  EntityManager em=(EntityManager)emC.getMock();
-  emfMc.expectAndReturn(mockEmf.createEntityManager(),em);
-  emC.expectAndReturn(em.getDelegate(),new Object(),2);
-  emC.expectAndReturn(em.isOpen(),true);
-  em.close();
-  emfMc.replay();
-  emC.replay();
+  EntityManager em=mock(EntityManager.class);
+  given(mockEmf.createEntityManager()).willReturn(em);
+  given(em.getDelegate()).willReturn(new Object(),2);
+  given(em.isOpen()).willReturn(true);
   PersistenceAnnotationBeanPostProcessor babpp=new MockPersistenceAnnotationBeanPostProcessor();
   DefaultPrivatePersistenceContextFieldWithProperties transactionalFieldWithProperties=new DefaultPrivatePersistenceContextFieldWithProperties();
   DefaultPrivatePersistenceContextField transactionalField=new DefaultPrivatePersistenceContextField();
@@ -20,8 +16,7 @@
   try {
     TransactionSynchronizationManager.bindResource(mockEmf,new EntityManagerHolder(em));
     assertNotNull(transactionalFieldWithProperties.em.getDelegate());
-    emfMc.verify();
-    emC.verify();
+    verify(em).close();
   }
   finally {
     TransactionSynchronizationManager.unbindResource(mockEmf);

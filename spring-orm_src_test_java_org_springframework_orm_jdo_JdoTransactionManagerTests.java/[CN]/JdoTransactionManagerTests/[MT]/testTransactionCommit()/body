@@ -1,25 +1,7 @@
 {
-  pmf.getConnectionFactory();
-  pmfControl.setReturnValue(null,3);
-  pmf.getPersistenceManager();
-  pmfControl.setReturnValue(pm,1);
-  pmf.getPersistenceManagerProxy();
-  pmfControl.setReturnValue(pm,1);
-  pm.currentTransaction();
-  pmControl.setReturnValue(tx,3);
-  pm.flush();
-  pmControl.setVoidCallable(4);
-  pm.close();
-  pmControl.setVoidCallable(1);
-  tx.begin();
-  txControl.setVoidCallable(1);
-  tx.getRollbackOnly();
-  txControl.setReturnValue(false,1);
-  tx.commit();
-  txControl.setVoidCallable(1);
-  pmfControl.replay();
-  pmControl.replay();
-  txControl.replay();
+  given(pmf.getPersistenceManager()).willReturn(pm);
+  given(pmf.getPersistenceManagerProxy()).willReturn(pm);
+  given(pm.currentTransaction()).willReturn(tx);
   PlatformTransactionManager tm=new JdoTransactionManager(pmf);
   TransactionTemplate tt=new TransactionTemplate(tm);
   final List l=new ArrayList();
@@ -60,4 +42,8 @@
   assertTrue("Correct result list",result == l);
   assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
   assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
+  verify(pm,times(4)).flush();
+  verify(pm).close();
+  verify(tx).begin();
+  verify(tx).commit();
 }

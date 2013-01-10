@@ -1,10 +1,5 @@
 {
-  lobHandler.getClobAsString(rs,"column");
-  lobHandlerControl.setReturnValue("content");
-  lobCreator.setClobAsString(ps,1,"content");
-  lobCreatorControl.setVoidCallable(1);
-  lobHandlerControl.replay();
-  lobCreatorControl.replay();
+  given(lobHandler.getClobAsString(rs,"column")).willReturn("content");
   ClobStringType type=new ClobStringType(lobHandler,null);
   assertEquals(1,type.sqlTypes().length);
   assertEquals(Types.CLOB,type.sqlTypes()[0]);
@@ -23,4 +18,5 @@
   finally {
     TransactionSynchronizationManager.clearSynchronization();
   }
+  verify(lobCreator).setClobAsString(ps,1,"content");
 }

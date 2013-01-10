@@ -1,12 +1,9 @@
 {
-  sf.getCurrentSession();
-  sfControl.setReturnValue(session);
-  sfControl.replay();
-  HibernateTemplate ht=new HibernateTemplate(sf);
-  ht.setAllowCreate(false);
+  given(sessionFactory.getCurrentSession()).willReturn(session);
+  hibernateTemplate.setAllowCreate(false);
   final List l=new ArrayList();
   l.add("test");
-  List result=ht.executeFind(new HibernateCallback(){
+  List result=hibernateTemplate.executeFind(new HibernateCallback<Object>(){
     @Override public Object doInHibernate(    org.hibernate.Session session) throws HibernateException {
       return l;
     }
