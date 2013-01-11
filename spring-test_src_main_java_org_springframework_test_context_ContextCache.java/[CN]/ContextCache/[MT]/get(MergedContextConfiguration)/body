@@ -1,11 +1,13 @@
 {
   Assert.notNull(key,"Key must not be null");
-  ApplicationContext context=this.contextMap.get(key);
-  if (context == null) {
-    incrementMissCount();
-  }
+synchronized (monitor) {
+    ApplicationContext context=this.contextMap.get(key);
+    if (context == null) {
+      incrementMissCount();
+    }
  else {
-    incrementHitCount();
+      incrementHitCount();
+    }
+    return context;
   }
-  return context;
 }

@@ -1,0 +1,19 @@
+{
+  if (testClass.isAnnotationPresent(ContextHierarchy.class)) {
+    Map<String,List<ContextConfigurationAttributes>> hierarchyMap=buildContextHierarchyMap(testClass);
+    MergedContextConfiguration parentConfig=null;
+    MergedContextConfiguration mergedConfig=null;
+    for (    List<ContextConfigurationAttributes> list : hierarchyMap.values()) {
+      List<ContextConfigurationAttributes> reversedList=new ArrayList<ContextConfigurationAttributes>(list);
+      Collections.reverse(reversedList);
+      Assert.notEmpty(reversedList,"ContextConfigurationAttributes list must not be empty");
+      Class<?> declaringClass=reversedList.get(0).getDeclaringClass();
+      mergedConfig=buildMergedContextConfiguration(declaringClass,reversedList,defaultContextLoaderClassName,parentConfig,cacheAwareContextLoaderDelegate);
+      parentConfig=mergedConfig;
+    }
+    return mergedConfig;
+  }
+ else {
+    return buildMergedContextConfiguration(testClass,resolveContextConfigurationAttributes(testClass),defaultContextLoaderClassName,null,cacheAwareContextLoaderDelegate);
+  }
+}

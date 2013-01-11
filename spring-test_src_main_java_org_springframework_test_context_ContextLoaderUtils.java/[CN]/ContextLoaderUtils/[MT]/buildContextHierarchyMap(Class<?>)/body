@@ -1,0 +1,18 @@
+{
+  final Map<String,List<ContextConfigurationAttributes>> map=new LinkedHashMap<String,List<ContextConfigurationAttributes>>();
+  int hierarchyLevel=1;
+  for (  List<ContextConfigurationAttributes> configAttributesList : resolveContextHierarchyAttributes(testClass)) {
+    for (    ContextConfigurationAttributes configAttributes : configAttributesList) {
+      String name=configAttributes.getName();
+      if (!StringUtils.hasText(name)) {
+        name=GENERATED_CONTEXT_HIERARCHY_LEVEL_PREFIX + hierarchyLevel;
+      }
+      if (!map.containsKey(name)) {
+        hierarchyLevel++;
+        map.put(name,new ArrayList<ContextConfigurationAttributes>());
+      }
+      map.get(name).add(configAttributes);
+    }
+  }
+  return map;
+}
