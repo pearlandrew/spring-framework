@@ -1,15 +1,15 @@
 {
-  Method[] ms=clazz.getMethods();
+  Method[] ms=getSortedClassMethods(clazz);
   String propertyMethodSuffix=getPropertyMethodSuffix(propertyName);
   String getterName="get" + propertyMethodSuffix;
   for (  Method method : ms) {
-    if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 && (!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
+    if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 && (!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
       return method;
     }
   }
   getterName="is" + propertyMethodSuffix;
   for (  Method method : ms) {
-    if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 && (boolean.class.equals(method.getReturnType()) || Boolean.class.equals(method.getReturnType())) && (!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
+    if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 && (boolean.class.equals(method.getReturnType()) || Boolean.class.equals(method.getReturnType())) && (!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
       return method;
     }
   }
