@@ -13,7 +13,14 @@
       this.context=createWebApplicationContext(servletContext);
     }
     if (this.context instanceof ConfigurableWebApplicationContext) {
-      configureAndRefreshWebApplicationContext((ConfigurableWebApplicationContext)this.context,servletContext);
+      ConfigurableWebApplicationContext cwac=(ConfigurableWebApplicationContext)this.context;
+      if (!cwac.isActive()) {
+        if (cwac.getParent() == null) {
+          ApplicationContext parent=loadParentContext(servletContext);
+          cwac.setParent(parent);
+        }
+        configureAndRefreshWebApplicationContext(cwac,servletContext);
+      }
     }
     servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,this.context);
     ClassLoader ccl=Thread.currentThread().getContextClassLoader();
