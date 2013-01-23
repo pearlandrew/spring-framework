@@ -4,21 +4,8 @@
       if (logger.isInfoEnabled()) {
         logger.info("Loading properties file from " + location);
       }
-      InputStream is=null;
       try {
-        is=location.getInputStream();
-        String filename=location.getFilename();
-        if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
-          this.propertiesPersister.loadFromXml(props,is);
-        }
- else {
-          if (this.fileEncoding != null) {
-            this.propertiesPersister.load(props,new InputStreamReader(is,this.fileEncoding));
-          }
- else {
-            this.propertiesPersister.load(props,is);
-          }
-        }
+        PropertiesLoaderUtils.fillProperties(props,new EncodedResource(location,this.fileEncoding),this.propertiesPersister);
       }
  catch (      IOException ex) {
         if (this.ignoreResourceNotFound) {
@@ -28,11 +15,6 @@
         }
  else {
           throw ex;
-        }
-      }
- finally {
-        if (is != null) {
-          is.close();
         }
       }
     }
