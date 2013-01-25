@@ -1,6 +1,6 @@
 {
   Map<CacheOperationContext,Object> cUpdates=new LinkedHashMap<CacheOperationContext,Object>(cacheables.size());
-  boolean updateRequire=false;
+  boolean updateRequired=false;
   Object retVal=null;
   if (!cacheables.isEmpty()) {
     boolean log=logger.isTraceEnabled();
@@ -17,7 +17,7 @@
         }
         cUpdates.put(context,key);
         boolean localCacheHit=false;
-        if (!updateRequire) {
+        if (!updateRequired) {
           for (          Cache cache : context.getCaches()) {
             Cache.ValueWrapper wrapper=cache.get(key);
             if (wrapper != null) {
@@ -28,7 +28,7 @@
           }
         }
         if (!localCacheHit) {
-          updateRequire=true;
+          updateRequired=true;
         }
       }
  else {
@@ -38,7 +38,7 @@
       }
     }
     if (atLeastOnePassed) {
-      return new CacheStatus(cUpdates,updateRequire,retVal);
+      return new CacheStatus(cUpdates,updateRequired,retVal);
     }
   }
   return null;
