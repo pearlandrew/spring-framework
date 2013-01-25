@@ -23,7 +23,10 @@
   wac.setServletConfig(getServletConfig());
   wac.setNamespace(getNamespace());
   wac.addApplicationListener(new SourceFilteringListener(wac,new ContextRefreshListener()));
-  wac.getEnvironment().initPropertySources(getServletContext(),getServletConfig());
+  ConfigurableEnvironment env=wac.getEnvironment();
+  if (env instanceof ConfigurableWebEnvironment) {
+    ((ConfigurableWebEnvironment)env).initPropertySources(getServletContext(),getServletConfig());
+  }
   postProcessWebApplicationContext(wac);
   applyInitializers(wac);
   wac.refresh();
