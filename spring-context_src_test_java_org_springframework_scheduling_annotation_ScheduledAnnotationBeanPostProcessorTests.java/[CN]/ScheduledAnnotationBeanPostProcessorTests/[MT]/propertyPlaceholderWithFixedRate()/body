@@ -1,7 +1,13 @@
 {
   StaticApplicationContext context=new StaticApplicationContext();
   BeanDefinition processorDefinition=new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-  BeanDefinition targetDefinition=new RootBeanDefinition(FixedRateWithInitialDelayTestBean.class);
+  BeanDefinition placeholderDefinition=new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
+  Properties properties=new Properties();
+  properties.setProperty("fixedRate","3000");
+  properties.setProperty("initialDelay","1000");
+  placeholderDefinition.getPropertyValues().addPropertyValue("properties",properties);
+  BeanDefinition targetDefinition=new RootBeanDefinition(PropertyPlaceholderWithFixedRateTestBean.class);
+  context.registerBeanDefinition("placeholder",placeholderDefinition);
   context.registerBeanDefinition("postProcessor",processorDefinition);
   context.registerBeanDefinition("target",targetDefinition);
   context.refresh();

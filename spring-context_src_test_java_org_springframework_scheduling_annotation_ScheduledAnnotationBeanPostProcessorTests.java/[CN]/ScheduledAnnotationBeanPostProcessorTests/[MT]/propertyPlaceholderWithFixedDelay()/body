@@ -1,7 +1,13 @@
 {
   StaticApplicationContext context=new StaticApplicationContext();
   BeanDefinition processorDefinition=new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-  BeanDefinition targetDefinition=new RootBeanDefinition(FixedDelayTestBean.class);
+  BeanDefinition placeholderDefinition=new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
+  Properties properties=new Properties();
+  properties.setProperty("fixedDelay","5000");
+  properties.setProperty("initialDelay","1000");
+  placeholderDefinition.getPropertyValues().addPropertyValue("properties",properties);
+  BeanDefinition targetDefinition=new RootBeanDefinition(PropertyPlaceholderWithFixedDelayTestBean.class);
+  context.registerBeanDefinition("placeholder",placeholderDefinition);
   context.registerBeanDefinition("postProcessor",processorDefinition);
   context.registerBeanDefinition("target",targetDefinition);
   context.refresh();
@@ -16,6 +22,6 @@
   Method targetMethod=runnable.getMethod();
   assertEquals(target,targetObject);
   assertEquals("fixedDelay",targetMethod.getName());
-  assertEquals(0L,task.getInitialDelay());
+  assertEquals(1000L,task.getInitialDelay());
   assertEquals(5000L,task.getInterval());
 }
