@@ -1,7 +1,8 @@
 {
-  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
-  bf.registerBeanDefinition("foo",new RootBeanDefinition(FooFactoryBean.class));
-  bf.addBeanPostProcessor(new PredictingBPP());
+  AnnotationConfigApplicationContext bf=new AnnotationConfigApplicationContext();
+  bf.registerBeanDefinition("fooConfig",new RootBeanDefinition(FooConfig.class));
+  bf.getBeanFactory().addBeanPostProcessor(new PredictingBPP());
+  bf.refresh();
   assertThat(bf.getBean("foo"),instanceOf(Foo.class));
   assertThat(bf.getBean("&foo"),instanceOf(FooFactoryBean.class));
   assertThat(bf.isTypeMatch("&foo",FactoryBean.class),is(true));

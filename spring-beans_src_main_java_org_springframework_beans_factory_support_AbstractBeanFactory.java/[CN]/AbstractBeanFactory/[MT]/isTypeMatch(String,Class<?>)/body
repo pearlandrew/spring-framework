@@ -25,15 +25,16 @@
       return parentBeanFactory.isTypeMatch(originalBeanName(name),targetType);
     }
     RootBeanDefinition mbd=getMergedLocalBeanDefinition(beanName);
+    Class[] typesToMatch=(FactoryBean.class.equals(typeToMatch) ? new Class[]{typeToMatch} : new Class[]{FactoryBean.class,typeToMatch});
     BeanDefinitionHolder dbd=mbd.getDecoratedDefinition();
     if (dbd != null && !BeanFactoryUtils.isFactoryDereference(name)) {
       RootBeanDefinition tbd=getMergedBeanDefinition(dbd.getBeanName(),dbd.getBeanDefinition(),mbd);
-      Class<?> targetClass=predictBeanType(dbd.getBeanName(),tbd,FactoryBean.class,typeToMatch);
+      Class<?> targetClass=predictBeanType(dbd.getBeanName(),tbd,typesToMatch);
       if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
         return typeToMatch.isAssignableFrom(targetClass);
       }
     }
-    Class<?> beanClass=predictBeanType(beanName,mbd,FactoryBean.class,typeToMatch);
+    Class<?> beanClass=predictBeanType(beanName,mbd,typesToMatch);
     if (beanClass == null) {
       return false;
     }
