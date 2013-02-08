@@ -1,5 +1,8 @@
 {
-  Future<?> result=this.determineAsyncExecutor(invocation.getMethod()).submit(new Callable<Object>(){
+  Class<?> targetClass=(invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
+  Method specificMethod=ClassUtils.getMostSpecificMethod(invocation.getMethod(),targetClass);
+  specificMethod=BridgeMethodResolver.findBridgedMethod(specificMethod);
+  Future<?> result=determineAsyncExecutor(specificMethod).submit(new Callable<Object>(){
     public Object call() throws Exception {
       try {
         Object result=invocation.proceed();
