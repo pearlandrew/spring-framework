@@ -1,8 +1,15 @@
 {
-  testRollback(new TransactionOperationCallback(){
-    public Object performTransactionalOperation() throws Throwable {
-      return new SubclassOfClassWithTransactionalAnnotation().echo(new Exception());
+  final Exception ex=new Exception();
+  try {
+    testRollback(new TransactionOperationCallback(){
+      public Object performTransactionalOperation() throws Throwable {
+        return new SubclassOfClassWithTransactionalAnnotation().echo(ex);
+      }
     }
-  }
 ,false);
+    fail("Should have thrown Exception");
+  }
+ catch (  Exception ex2) {
+    assertSame(ex,ex2);
+  }
 }
