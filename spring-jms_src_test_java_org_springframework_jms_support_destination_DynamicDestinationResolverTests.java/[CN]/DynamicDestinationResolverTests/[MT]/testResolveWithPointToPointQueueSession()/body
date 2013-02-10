@@ -1,10 +1,6 @@
 {
   Queue expectedDestination=new StubQueue();
-  MockControl mockSession=MockControl.createControl(QueueSession.class);
-  Session session=(Session)mockSession.getMock();
-  session.createQueue(DESTINATION_NAME);
-  mockSession.setReturnValue(expectedDestination);
-  mockSession.replay();
+  Session session=mock(QueueSession.class);
+  given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination);
   testResolveDestination(session,expectedDestination,false);
-  mockSession.verify();
 }

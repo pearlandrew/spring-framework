@@ -1,38 +1,16 @@
 {
-  MockControl mockDestination=MockControl.createControl(Queue.class);
-  Queue destination=(Queue)mockDestination.getMock();
-  mockDestination.replay();
-  MockControl mockSentTextMessage=MockControl.createControl(TextMessage.class);
-  final TextMessage sentTextMessage=(TextMessage)mockSentTextMessage.getMock();
-  sentTextMessage.getJMSCorrelationID();
-  mockSentTextMessage.setReturnValue(CORRELATION_ID);
-  sentTextMessage.getJMSReplyTo();
-  mockSentTextMessage.setReturnValue(destination);
-  mockSentTextMessage.replay();
-  MockControl mockResponseTextMessage=MockControl.createControl(TextMessage.class);
-  TextMessage responseTextMessage=(TextMessage)mockResponseTextMessage.getMock();
-  responseTextMessage.setJMSCorrelationID(CORRELATION_ID);
-  mockResponseTextMessage.setVoidCallable();
-  mockResponseTextMessage.replay();
-  MockControl mockMessageProducer=MockControl.createControl(MessageProducer.class);
-  MessageProducer messageProducer=(MessageProducer)mockMessageProducer.getMock();
-  messageProducer.send(responseTextMessage);
-  mockMessageProducer.setThrowable(new JMSException("Dow!"));
-  messageProducer.close();
-  mockMessageProducer.setVoidCallable();
-  mockMessageProducer.replay();
-  MockControl mockSession=MockControl.createControl(QueueSession.class);
-  final QueueSession session=(QueueSession)mockSession.getMock();
-  session.createTextMessage(RESPONSE_TEXT);
-  mockSession.setReturnValue(responseTextMessage);
-  session.createProducer(destination);
-  mockSession.setReturnValue(messageProducer);
-  mockSession.replay();
-  MockControl mockDelegate=MockControl.createControl(ResponsiveMessageDelegate.class);
-  ResponsiveMessageDelegate delegate=(ResponsiveMessageDelegate)mockDelegate.getMock();
-  delegate.handleMessage(sentTextMessage);
-  mockDelegate.setReturnValue(RESPONSE_TEXT);
-  mockDelegate.replay();
+  Queue destination=mock(Queue.class);
+  final TextMessage sentTextMessage=mock(TextMessage.class);
+  given(sentTextMessage.getJMSCorrelationID()).willReturn(CORRELATION_ID);
+  given(sentTextMessage.getJMSReplyTo()).willReturn(destination);
+  TextMessage responseTextMessage=mock(TextMessage.class);
+  MessageProducer messageProducer=mock(MessageProducer.class);
+  willThrow(new JMSException("Doe!")).given(messageProducer).send(responseTextMessage);
+  final QueueSession session=mock(QueueSession.class);
+  given(session.createTextMessage(RESPONSE_TEXT)).willReturn(responseTextMessage);
+  given(session.createProducer(destination)).willReturn(messageProducer);
+  ResponsiveMessageDelegate delegate=mock(ResponsiveMessageDelegate.class);
+  given(delegate.handleMessage(sentTextMessage)).willReturn(RESPONSE_TEXT);
   final MessageListenerAdapter adapter=new MessageListenerAdapter(delegate){
     @Override protected Object extractMessage(    Message message){
       return message;
@@ -45,10 +23,7 @@
   }
  catch (  JMSException ex) {
   }
-  mockDelegate.verify();
-  mockSentTextMessage.verify();
-  mockResponseTextMessage.verify();
-  mockSession.verify();
-  mockDestination.verify();
-  mockMessageProducer.verify();
+  verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
+  verify(messageProducer).close();
+  verify(delegate).handleMessage(sentTextMessage);
 }

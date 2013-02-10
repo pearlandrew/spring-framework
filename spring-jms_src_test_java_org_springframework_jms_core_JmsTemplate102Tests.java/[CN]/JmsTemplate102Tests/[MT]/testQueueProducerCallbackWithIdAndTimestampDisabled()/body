@@ -1,28 +1,12 @@
 {
   JmsTemplate102 template=createTemplate();
-  template.setConnectionFactory(mockQueueConnectionFactory);
+  template.setConnectionFactory(queueConnectionFactory);
   template.setMessageIdEnabled(false);
   template.setMessageTimestampEnabled(false);
   template.afterPropertiesSet();
-  MockControl queueSenderControl=MockControl.createControl(QueueSender.class);
-  QueueSender mockQueueSender=(QueueSender)queueSenderControl.getMock();
-  mockQueueSession.createSender(null);
-  queueSessionControl.setReturnValue(mockQueueSender);
-  mockQueueSender.setDisableMessageID(true);
-  queueSenderControl.setVoidCallable(1);
-  mockQueueSender.setDisableMessageTimestamp(true);
-  queueSenderControl.setVoidCallable(1);
-  mockQueueSender.getPriority();
-  queueSenderControl.setReturnValue(4);
-  mockQueueSender.close();
-  queueSenderControl.setVoidCallable(1);
-  mockQueueSession.close();
-  queueSessionControl.setVoidCallable(1);
-  mockQueueConnection.close();
-  queueConnectionControl.setVoidCallable(1);
-  queueSenderControl.replay();
-  queueSessionControl.replay();
-  queueConnectionControl.replay();
+  QueueSender queueSender=mock(QueueSender.class);
+  given(queueSession.createSender(null)).willReturn(queueSender);
+  given(queueSender.getPriority()).willReturn(4);
   template.execute(new ProducerCallback(){
     @Override public Object doInJms(    Session session,    MessageProducer producer) throws JMSException {
       boolean b=session.getTransacted();
@@ -31,7 +15,9 @@
     }
   }
 );
-  queueConnectionFactoryControl.verify();
-  queueConnectionControl.verify();
-  queueSessionControl.verify();
+  verify(queueSender).setDisableMessageID(true);
+  verify(queueSender).setDisableMessageTimestamp(true);
+  verify(queueSender).close();
+  verify(queueSession).close();
+  verify(queueConnection).close();
 }

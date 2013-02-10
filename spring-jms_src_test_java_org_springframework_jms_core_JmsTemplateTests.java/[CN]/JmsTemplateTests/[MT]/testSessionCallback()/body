@@ -1,12 +1,6 @@
 {
   JmsTemplate template=createTemplate();
-  template.setConnectionFactory(mockConnectionFactory);
-  mockSession.close();
-  sessionControl.setVoidCallable(1);
-  mockConnection.close();
-  connectionControl.setVoidCallable(1);
-  sessionControl.replay();
-  connectionControl.replay();
+  template.setConnectionFactory(connectionFactory);
   template.execute(new SessionCallback(){
     @Override public Object doInJms(    Session session) throws JMSException {
       session.getTransacted();
@@ -14,7 +8,6 @@
     }
   }
 );
-  connectionFactoryControl.verify();
-  connectionControl.verify();
-  sessionControl.verify();
+  verify(session).close();
+  verify(connection).close();
 }

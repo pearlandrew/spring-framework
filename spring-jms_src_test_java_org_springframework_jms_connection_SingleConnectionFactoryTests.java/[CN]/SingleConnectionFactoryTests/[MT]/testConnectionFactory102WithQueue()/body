@@ -1,18 +1,7 @@
 {
-  MockControl cfControl=MockControl.createControl(QueueConnectionFactory.class);
-  QueueConnectionFactory cf=(QueueConnectionFactory)cfControl.getMock();
-  MockControl conControl=MockControl.createControl(QueueConnection.class);
-  QueueConnection con=(QueueConnection)conControl.getMock();
-  cf.createQueueConnection();
-  cfControl.setReturnValue(con,1);
-  con.start();
-  conControl.setVoidCallable(1);
-  con.stop();
-  conControl.setVoidCallable(1);
-  con.close();
-  conControl.setVoidCallable(1);
-  cfControl.replay();
-  conControl.replay();
+  QueueConnectionFactory cf=mock(QueueConnectionFactory.class);
+  QueueConnection con=mock(QueueConnection.class);
+  given(cf.createQueueConnection()).willReturn(con);
   SingleConnectionFactory scf=new SingleConnectionFactory102(cf,false);
   QueueConnection con1=scf.createQueueConnection();
   con1.start();
@@ -21,6 +10,8 @@
   con2.start();
   con2.close();
   scf.destroy();
-  cfControl.verify();
-  conControl.verify();
+  verify(con).start();
+  verify(con).stop();
+  verify(con).close();
+  verifyNoMoreInteractions(con);
 }

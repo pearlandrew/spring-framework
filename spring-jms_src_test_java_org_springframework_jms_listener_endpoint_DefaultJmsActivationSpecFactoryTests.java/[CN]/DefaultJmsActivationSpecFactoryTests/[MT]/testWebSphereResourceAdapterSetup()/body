@@ -1,14 +1,10 @@
 {
   Destination destination=new StubQueue();
-  MockControl control=MockControl.createControl(DestinationResolver.class);
-  DestinationResolver destinationResolver=(DestinationResolver)control.getMock();
-  destinationResolver.resolveDestinationName(null,"destinationname",false);
-  control.setReturnValue(destination);
-  control.replay();
+  DestinationResolver destinationResolver=mock(DestinationResolver.class);
+  given(destinationResolver.resolveDestinationName(null,"destinationname",false)).willReturn(destination);
   DefaultJmsActivationSpecFactory activationSpecFactory=new DefaultJmsActivationSpecFactory();
   activationSpecFactory.setDestinationResolver(destinationResolver);
   StubWebSphereActivationSpecImpl spec=(StubWebSphereActivationSpecImpl)activationSpecFactory.createActivationSpec(new StubWebSphereResourceAdapterImpl(),activationSpecConfig);
-  control.verify();
   assertEquals(destination,spec.getDestination());
   assertEquals(5,spec.getMaxConcurrency());
   assertEquals(3,spec.getMaxBatchSize());

@@ -1,15 +1,8 @@
 {
-  MockControl mockTextMessage=MockControl.createControl(TextMessage.class);
-  TextMessage textMessage=(TextMessage)mockTextMessage.getMock();
-  mockTextMessage.replay();
-  MockControl mockDelegate=MockControl.createControl(MessageDelegate.class);
-  MessageDelegate delegate=(MessageDelegate)mockDelegate.getMock();
-  delegate.handleMessage(textMessage);
-  mockDelegate.setVoidCallable();
-  mockDelegate.replay();
+  TextMessage textMessage=mock(TextMessage.class);
+  MessageDelegate delegate=mock(MessageDelegate.class);
   MessageListenerAdapter adapter=new MessageListenerAdapter(delegate);
   adapter.setMessageConverter(null);
   adapter.onMessage(textMessage);
-  mockDelegate.verify();
-  mockTextMessage.verify();
+  verify(delegate).handleMessage(textMessage);
 }

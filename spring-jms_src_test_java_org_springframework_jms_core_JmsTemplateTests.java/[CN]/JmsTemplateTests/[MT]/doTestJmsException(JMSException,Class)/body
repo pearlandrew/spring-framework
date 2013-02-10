@@ -1,38 +1,23 @@
 {
   JmsTemplate template=createTemplate();
-  template.setConnectionFactory(mockConnectionFactory);
+  template.setConnectionFactory(connectionFactory);
   template.setMessageConverter(new SimpleMessageConverter());
   String s="Hello world";
-  MockControl messageProducerControl=MockControl.createControl(MessageProducer.class);
-  MessageProducer mockMessageProducer=(MessageProducer)messageProducerControl.getMock();
-  MockControl messageControl=MockControl.createControl(TextMessage.class);
-  TextMessage mockMessage=(TextMessage)messageControl.getMock();
-  sessionControl.reset();
-  mockSession.createProducer(mockQueue);
-  sessionControl.setReturnValue(mockMessageProducer);
-  mockSession.createTextMessage("Hello world");
-  sessionControl.setReturnValue(mockMessage);
-  mockMessageProducer.send(mockMessage);
-  messageProducerControl.setThrowable(original,1);
-  mockMessageProducer.close();
-  messageProducerControl.setVoidCallable(1);
-  mockSession.close();
-  sessionControl.setVoidCallable(1);
-  mockConnection.close();
-  connectionControl.setVoidCallable(1);
-  messageProducerControl.replay();
-  sessionControl.replay();
-  connectionControl.replay();
+  MessageProducer messageProducer=mock(MessageProducer.class);
+  TextMessage textMessage=mock(TextMessage.class);
+  reset(session);
+  given(session.createProducer(queue)).willReturn(messageProducer);
+  given(session.createTextMessage("Hello world")).willReturn(textMessage);
+  willThrow(original).given(messageProducer).send(textMessage);
   try {
-    template.convertAndSend(mockQueue,s);
+    template.convertAndSend(queue,s);
     fail("Should have thrown JmsException");
   }
  catch (  JmsException wrappedEx) {
     assertEquals(thrownExceptionClass,wrappedEx.getClass());
     assertEquals(original,wrappedEx.getCause());
   }
-  messageProducerControl.verify();
-  sessionControl.verify();
-  connectionControl.verify();
-  connectionFactoryControl.verify();
+  verify(messageProducer).close();
+  verify(session).close();
+  verify(connection).close();
 }

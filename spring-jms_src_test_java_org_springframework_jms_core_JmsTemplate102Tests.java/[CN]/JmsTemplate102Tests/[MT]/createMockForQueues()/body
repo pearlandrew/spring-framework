@@ -1,19 +1,10 @@
 {
-  queueConnectionFactoryControl=MockControl.createControl(QueueConnectionFactory.class);
-  mockQueueConnectionFactory=(QueueConnectionFactory)queueConnectionFactoryControl.getMock();
-  queueConnectionControl=MockControl.createControl(QueueConnection.class);
-  mockQueueConnection=(QueueConnection)queueConnectionControl.getMock();
-  queueControl=MockControl.createControl(Queue.class);
-  mockQueue=(Queue)queueControl.getMock();
-  queueSessionControl=MockControl.createControl(QueueSession.class);
-  mockQueueSession=(QueueSession)queueSessionControl.getMock();
-  mockQueueConnectionFactory.createQueueConnection();
-  queueConnectionFactoryControl.setReturnValue(mockQueueConnection);
-  queueConnectionFactoryControl.replay();
-  mockQueueConnection.createQueueSession(useTransactedTemplate(),Session.AUTO_ACKNOWLEDGE);
-  queueConnectionControl.setReturnValue(mockQueueSession);
-  mockQueueSession.getTransacted();
-  queueSessionControl.setReturnValue(useTransactedSession());
-  mockJndiContext.lookup("testQueue");
-  mockJndiControl.setReturnValue(mockQueue);
+  queueConnectionFactory=mock(QueueConnectionFactory.class);
+  queueConnection=mock(QueueConnection.class);
+  queue=mock(Queue.class);
+  queueSession=mock(QueueSession.class);
+  given(queueConnectionFactory.createQueueConnection()).willReturn(queueConnection);
+  given(queueConnection.createQueueSession(useTransactedTemplate(),Session.AUTO_ACKNOWLEDGE)).willReturn(queueSession);
+  given(queueSession.getTransacted()).willReturn(useTransactedSession());
+  given(jndiContext.lookup("testQueue")).willReturn(queue);
 }
