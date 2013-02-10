@@ -1,10 +1,8 @@
 {
   converter.setTargetType(MessageType.TEXT);
-  TextMessage textMessageMock=createMock(TextMessage.class);
+  TextMessage textMessageMock=mock(TextMessage.class);
   Object toBeMarshalled=new Object();
-  expect(sessionMock.createTextMessage(isA(String.class))).andReturn(textMessageMock);
-  marshallerMock.marshal(eq(toBeMarshalled),isA(Result.class));
-  replay(marshallerMock,unmarshallerMock,sessionMock,textMessageMock);
+  given(sessionMock.createTextMessage(isA(String.class))).willReturn(textMessageMock);
   converter.toMessage(toBeMarshalled,sessionMock);
-  verify(marshallerMock,unmarshallerMock,sessionMock,textMessageMock);
+  verify(marshallerMock).marshal(eq(toBeMarshalled),isA(Result.class));
 }

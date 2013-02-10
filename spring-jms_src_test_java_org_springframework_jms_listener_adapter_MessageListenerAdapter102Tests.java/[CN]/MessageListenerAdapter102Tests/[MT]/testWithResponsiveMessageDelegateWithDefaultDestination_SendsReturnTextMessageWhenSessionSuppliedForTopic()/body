@@ -1,38 +1,15 @@
 {
-  MockControl mockDestination=MockControl.createControl(Topic.class);
-  Topic destination=(Topic)mockDestination.getMock();
-  mockDestination.replay();
-  MockControl mockSentTextMessage=MockControl.createControl(TextMessage.class);
-  TextMessage sentTextMessage=(TextMessage)mockSentTextMessage.getMock();
-  sentTextMessage.getJMSCorrelationID();
-  mockSentTextMessage.setReturnValue(CORRELATION_ID);
-  sentTextMessage.getJMSReplyTo();
-  mockSentTextMessage.setReturnValue(null);
-  mockSentTextMessage.replay();
-  MockControl mockResponseTextMessage=MockControl.createControl(TextMessage.class);
-  TextMessage responseTextMessage=(TextMessage)mockResponseTextMessage.getMock();
-  responseTextMessage.setJMSCorrelationID(CORRELATION_ID);
-  mockResponseTextMessage.setVoidCallable();
-  mockResponseTextMessage.replay();
-  MockControl mockTopicPublisher=MockControl.createControl(TopicPublisher.class);
-  TopicPublisher topicPublisher=(TopicPublisher)mockTopicPublisher.getMock();
-  topicPublisher.publish(responseTextMessage);
-  mockTopicPublisher.setVoidCallable();
-  topicPublisher.close();
-  mockTopicPublisher.setVoidCallable();
-  mockTopicPublisher.replay();
-  MockControl mockSession=MockControl.createControl(TopicSession.class);
-  TopicSession session=(TopicSession)mockSession.getMock();
-  session.createTextMessage(RESPONSE_TEXT);
-  mockSession.setReturnValue(responseTextMessage);
-  session.createPublisher(destination);
-  mockSession.setReturnValue(topicPublisher);
-  mockSession.replay();
-  MockControl mockDelegate=MockControl.createControl(ResponsiveMessageDelegate.class);
-  ResponsiveMessageDelegate delegate=(ResponsiveMessageDelegate)mockDelegate.getMock();
-  delegate.handleMessage(sentTextMessage);
-  mockDelegate.setReturnValue(RESPONSE_TEXT);
-  mockDelegate.replay();
+  Topic destination=mock(Topic.class);
+  TextMessage sentTextMessage=mock(TextMessage.class);
+  given(sentTextMessage.getJMSCorrelationID()).willReturn(CORRELATION_ID);
+  given(sentTextMessage.getJMSReplyTo()).willReturn(null);
+  TextMessage responseTextMessage=mock(TextMessage.class);
+  TopicPublisher topicPublisher=mock(TopicPublisher.class);
+  TopicSession session=mock(TopicSession.class);
+  given(session.createTextMessage(RESPONSE_TEXT)).willReturn(responseTextMessage);
+  given(session.createPublisher(destination)).willReturn(topicPublisher);
+  ResponsiveMessageDelegate delegate=mock(ResponsiveMessageDelegate.class);
+  given(delegate.handleMessage(sentTextMessage)).willReturn(RESPONSE_TEXT);
   MessageListenerAdapter102 adapter=new MessageListenerAdapter102(delegate){
     @Override protected Object extractMessage(    Message message){
       return message;
@@ -41,10 +18,8 @@
 ;
   adapter.setDefaultResponseDestination(destination);
   adapter.onMessage(sentTextMessage,session);
-  mockDelegate.verify();
-  mockSentTextMessage.verify();
-  mockResponseTextMessage.verify();
-  mockSession.verify();
-  mockDestination.verify();
-  mockTopicPublisher.verify();
+  verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
+  verify(topicPublisher).publish(responseTextMessage);
+  verify(topicPublisher).close();
+  verify(delegate).handleMessage(sentTextMessage);
 }

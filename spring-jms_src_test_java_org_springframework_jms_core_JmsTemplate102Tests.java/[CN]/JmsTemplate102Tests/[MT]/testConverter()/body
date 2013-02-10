@@ -1,34 +1,18 @@
 {
   JmsTemplate102 template=createTemplate();
-  template.setConnectionFactory(mockQueueConnectionFactory);
+  template.setConnectionFactory(queueConnectionFactory);
   template.setMessageConverter(new SimpleMessageConverter());
   String s="Hello world";
-  MockControl queueSenderControl=MockControl.createControl(QueueSender.class);
-  QueueSender mockQueueSender=(QueueSender)queueSenderControl.getMock();
-  MockControl messageControl=MockControl.createControl(TextMessage.class);
-  TextMessage mockMessage=(TextMessage)messageControl.getMock();
-  mockQueueSession.createSender(this.mockQueue);
-  queueSessionControl.setReturnValue(mockQueueSender);
-  mockQueueSession.createTextMessage("Hello world");
-  queueSessionControl.setReturnValue(mockMessage);
+  QueueSender queueSender=mock(QueueSender.class);
+  TextMessage message=mock(TextMessage.class);
+  given(queueSession.createSender(this.queue)).willReturn(queueSender);
+  given(queueSession.createTextMessage("Hello world")).willReturn(message);
+  template.convertAndSend(queue,s);
   if (useTransactedTemplate()) {
-    mockQueueSession.commit();
-    queueSessionControl.setVoidCallable(1);
+    verify(queueSession).commit();
   }
-  mockQueueSender.send(mockMessage);
-  queueSenderControl.setVoidCallable(1);
-  mockQueueSender.close();
-  queueSenderControl.setVoidCallable(1);
-  mockQueueSession.close();
-  queueSessionControl.setVoidCallable(1);
-  mockQueueConnection.close();
-  queueConnectionControl.setVoidCallable(1);
-  queueSenderControl.replay();
-  queueSessionControl.replay();
-  queueConnectionControl.replay();
-  template.convertAndSend(mockQueue,s);
-  queueConnectionFactoryControl.verify();
-  queueConnectionControl.verify();
-  queueSessionControl.verify();
-  queueSenderControl.verify();
+  verify(queueSender).send(message);
+  verify(queueSender).close();
+  verify(queueSession).close();
+  verify(queueConnection).close();
 }

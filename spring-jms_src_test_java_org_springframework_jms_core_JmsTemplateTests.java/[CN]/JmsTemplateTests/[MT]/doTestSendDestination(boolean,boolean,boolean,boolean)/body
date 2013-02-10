@@ -1,10 +1,10 @@
 {
   JmsTemplate template=createTemplate();
-  template.setConnectionFactory(mockConnectionFactory);
+  template.setConnectionFactory(connectionFactory);
   String destinationName="testDestination";
   if (useDefaultDestination) {
     if (explicitDestination) {
-      template.setDefaultDestination(mockQueue);
+      template.setDefaultDestination(queue);
     }
  else {
       template.setDefaultDestinationName(destinationName);
@@ -14,44 +14,16 @@
     template.setMessageIdEnabled(false);
     template.setMessageTimestampEnabled(false);
   }
-  MockControl messageProducerControl=MockControl.createControl(MessageProducer.class);
-  MessageProducer mockMessageProducer=(MessageProducer)messageProducerControl.getMock();
-  MockControl messageControl=MockControl.createControl(TextMessage.class);
-  TextMessage mockMessage=(TextMessage)messageControl.getMock();
-  mockSession.createProducer(mockQueue);
-  sessionControl.setReturnValue(mockMessageProducer);
-  mockSession.createTextMessage("just testing");
-  sessionControl.setReturnValue(mockMessage);
-  if (useTransactedTemplate()) {
-    mockSession.commit();
-    sessionControl.setVoidCallable(1);
-  }
-  if (disableIdAndTimestamp) {
-    mockMessageProducer.setDisableMessageID(true);
-    messageProducerControl.setVoidCallable(1);
-    mockMessageProducer.setDisableMessageTimestamp(true);
-    messageProducerControl.setVoidCallable(1);
-  }
-  if (ignoreQOS) {
-    mockMessageProducer.send(mockMessage);
-  }
- else {
+  MessageProducer messageProducer=mock(MessageProducer.class);
+  TextMessage textMessage=mock(TextMessage.class);
+  given(session.createProducer(queue)).willReturn(messageProducer);
+  given(session.createTextMessage("just testing")).willReturn(textMessage);
+  if (!ignoreQOS) {
     template.setExplicitQosEnabled(true);
     template.setDeliveryMode(deliveryMode);
     template.setPriority(priority);
     template.setTimeToLive(timeToLive);
-    mockMessageProducer.send(mockMessage,deliveryMode,priority,timeToLive);
   }
-  messageProducerControl.setVoidCallable(1);
-  mockMessageProducer.close();
-  messageProducerControl.setVoidCallable(1);
-  mockSession.close();
-  sessionControl.setVoidCallable(1);
-  mockConnection.close();
-  connectionControl.setVoidCallable(1);
-  messageProducerControl.replay();
-  sessionControl.replay();
-  connectionControl.replay();
   if (useDefaultDestination) {
     template.send(new MessageCreator(){
       @Override public Message createMessage(      Session session) throws JMSException {
@@ -62,7 +34,7 @@
   }
  else {
     if (explicitDestination) {
-      template.send(mockQueue,new MessageCreator(){
+      template.send(queue,new MessageCreator(){
         @Override public Message createMessage(        Session session) throws JMSException {
           return session.createTextMessage("just testing");
         }
@@ -78,8 +50,20 @@
 );
     }
   }
-  connectionFactoryControl.verify();
-  connectionControl.verify();
-  sessionControl.verify();
-  messageProducerControl.verify();
+  if (useTransactedTemplate()) {
+    verify(session).commit();
+  }
+  if (disableIdAndTimestamp) {
+    verify(messageProducer).setDisableMessageID(true);
+    verify(messageProducer).setDisableMessageTimestamp(true);
+  }
+  if (ignoreQOS) {
+    verify(messageProducer).send(textMessage);
+  }
+ else {
+    verify(messageProducer).send(textMessage,deliveryMode,priority,timeToLive);
+  }
+  verify(messageProducer).close();
+  verify(session).close();
+  verify(connection).close();
 }

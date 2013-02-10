@@ -7,14 +7,10 @@
   exporter.afterPropertiesSet();
   JmsInvokerProxyFactoryBean pfb=new JmsInvokerProxyFactoryBean(){
     @Override protected Message doExecuteRequest(    Session session,    Queue queue,    Message requestMessage) throws JMSException {
-      MockControl exporterSessionControl=MockControl.createControl(Session.class);
-      Session mockExporterSession=(Session)exporterSessionControl.getMock();
+      Session mockExporterSession=mock(Session.class);
       ResponseStoringProducer mockProducer=new ResponseStoringProducer();
-      mockExporterSession.createProducer(requestMessage.getJMSReplyTo());
-      exporterSessionControl.setReturnValue(mockProducer);
-      exporterSessionControl.replay();
+      given(mockExporterSession.createProducer(requestMessage.getJMSReplyTo())).willReturn(mockProducer);
       exporter.onMessage(requestMessage,mockExporterSession);
-      exporterSessionControl.verify();
       assertTrue(mockProducer.closed);
       return mockProducer.response;
     }
@@ -49,7 +45,4 @@
   }
  catch (  IllegalAccessException ex) {
   }
-  connectionFactoryControl.verify();
-  connectionControl.verify();
-  sessionControl.verify();
 }

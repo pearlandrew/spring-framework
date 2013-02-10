@@ -1,52 +1,24 @@
 {
   JmsTemplate102 template=createTemplate();
-  template.setConnectionFactory(mockQueueConnectionFactory);
+  template.setConnectionFactory(queueConnectionFactory);
   template.afterPropertiesSet();
   if (useDefaultDestination) {
-    template.setDefaultDestination(mockQueue);
+    template.setDefaultDestination(queue);
   }
   if (disableIdAndTimestamp) {
     template.setMessageIdEnabled(false);
     template.setMessageTimestampEnabled(false);
   }
-  MockControl queueSenderControl=MockControl.createControl(QueueSender.class);
-  QueueSender mockQueueSender=(QueueSender)queueSenderControl.getMock();
-  MockControl messageControl=MockControl.createControl(TextMessage.class);
-  TextMessage mockMessage=(TextMessage)messageControl.getMock();
-  if (disableIdAndTimestamp) {
-    mockQueueSender.setDisableMessageID(true);
-    queueSenderControl.setVoidCallable(1);
-    mockQueueSender.setDisableMessageTimestamp(true);
-    queueSenderControl.setVoidCallable(1);
-  }
-  mockQueueSession.createSender(this.mockQueue);
-  queueSessionControl.setReturnValue(mockQueueSender);
-  mockQueueSession.createTextMessage("just testing");
-  queueSessionControl.setReturnValue(mockMessage);
-  if (useTransactedTemplate()) {
-    mockQueueSession.commit();
-    queueSessionControl.setVoidCallable(1);
-  }
-  if (ignoreQOS) {
-    mockQueueSender.send(mockMessage);
-  }
- else {
+  QueueSender queueSender=mock(QueueSender.class);
+  TextMessage message=mock(TextMessage.class);
+  given(queueSession.createSender(this.queue)).willReturn(queueSender);
+  given(queueSession.createTextMessage("just testing")).willReturn(message);
+  if (!ignoreQOS) {
     template.setExplicitQosEnabled(true);
     template.setDeliveryMode(deliveryMode);
     template.setPriority(priority);
     template.setTimeToLive(timeToLive);
-    mockQueueSender.send(mockMessage,deliveryMode,priority,timeToLive);
   }
-  queueSenderControl.setVoidCallable(1);
-  mockQueueSender.close();
-  queueSenderControl.setVoidCallable(1);
-  mockQueueSession.close();
-  queueSessionControl.setVoidCallable(1);
-  mockQueueConnection.close();
-  queueConnectionControl.setVoidCallable(1);
-  queueSenderControl.replay();
-  queueSessionControl.replay();
-  queueConnectionControl.replay();
   if (useDefaultDestination) {
     template.send(new MessageCreator(){
       @Override public Message createMessage(      Session session) throws JMSException {
@@ -57,7 +29,7 @@
   }
  else {
     if (explicitQueue) {
-      template.send(mockQueue,new MessageCreator(){
+      template.send(queue,new MessageCreator(){
         @Override public Message createMessage(        Session session) throws JMSException {
           return session.createTextMessage("just testing");
         }
@@ -73,8 +45,20 @@
 );
     }
   }
-  queueConnectionFactoryControl.verify();
-  queueConnectionControl.verify();
-  queueSessionControl.verify();
-  queueSenderControl.verify();
+  if (disableIdAndTimestamp) {
+    verify(queueSender).setDisableMessageID(true);
+    verify(queueSender).setDisableMessageTimestamp(true);
+  }
+  if (useTransactedTemplate()) {
+    verify(queueSession).commit();
+  }
+  if (ignoreQOS) {
+    verify(queueSender).send(message);
+  }
+ else {
+    verify(queueSender).send(message,deliveryMode,priority,timeToLive);
+  }
+  verify(queueSender).close();
+  verify(queueSession).close();
+  verify(queueConnection).close();
 }

@@ -1,13 +1,7 @@
 {
   JmsTemplate102 template=createTemplate();
-  template.setConnectionFactory(mockQueueConnectionFactory);
+  template.setConnectionFactory(queueConnectionFactory);
   template.afterPropertiesSet();
-  mockQueueSession.close();
-  queueSessionControl.setVoidCallable(1);
-  mockQueueConnection.close();
-  queueConnectionControl.setVoidCallable(1);
-  queueSessionControl.replay();
-  queueConnectionControl.replay();
   template.execute(new SessionCallback(){
     @Override public Object doInJms(    Session session) throws JMSException {
       boolean b=session.getTransacted();
@@ -15,7 +9,6 @@
     }
   }
 );
-  queueConnectionFactoryControl.verify();
-  queueConnectionControl.verify();
-  queueSessionControl.verify();
+  verify(queueSession).close();
+  verify(queueConnection).close();
 }

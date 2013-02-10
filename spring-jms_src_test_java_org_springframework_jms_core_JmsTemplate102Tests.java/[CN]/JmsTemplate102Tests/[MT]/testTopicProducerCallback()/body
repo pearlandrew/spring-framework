@@ -1,23 +1,11 @@
 {
   JmsTemplate102 template=createTemplate();
   template.setPubSubDomain(true);
-  template.setConnectionFactory(mockTopicConnectionFactory);
+  template.setConnectionFactory(topicConnectionFactory);
   template.afterPropertiesSet();
-  MockControl topicPublisherControl=MockControl.createControl(TopicPublisher.class);
-  TopicPublisher mockTopicPublisher=(TopicPublisher)topicPublisherControl.getMock();
-  mockTopicSession.createPublisher(null);
-  topicSessionControl.setReturnValue(mockTopicPublisher);
-  mockTopicPublisher.getPriority();
-  topicPublisherControl.setReturnValue(4);
-  mockTopicPublisher.close();
-  topicPublisherControl.setVoidCallable(1);
-  mockTopicSession.close();
-  topicSessionControl.setVoidCallable(1);
-  mockTopicConnection.close();
-  topicConnectionControl.setVoidCallable(1);
-  topicPublisherControl.replay();
-  topicSessionControl.replay();
-  topicConnectionControl.replay();
+  TopicPublisher topicPublisher=mock(TopicPublisher.class);
+  given(topicSession.createPublisher(null)).willReturn(topicPublisher);
+  given(topicPublisher.getPriority()).willReturn(4);
   template.execute(new ProducerCallback(){
     @Override public Object doInJms(    Session session,    MessageProducer producer) throws JMSException {
       session.getTransacted();
@@ -26,7 +14,7 @@
     }
   }
 );
-  topicConnectionFactoryControl.verify();
-  topicConnectionControl.verify();
-  topicSessionControl.verify();
+  verify(topicPublisher).close();
+  verify(topicSession).close();
+  verify(topicConnection).close();
 }
