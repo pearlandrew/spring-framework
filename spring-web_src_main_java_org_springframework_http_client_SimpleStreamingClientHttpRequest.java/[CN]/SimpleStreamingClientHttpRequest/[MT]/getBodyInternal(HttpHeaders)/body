@@ -1,11 +1,13 @@
 {
   if (this.body == null) {
-    int contentLength=(int)headers.getContentLength();
-    if (contentLength >= 0) {
-      this.connection.setFixedLengthStreamingMode(contentLength);
-    }
+    if (this.outputStreaming) {
+      int contentLength=(int)headers.getContentLength();
+      if (contentLength >= 0) {
+        this.connection.setFixedLengthStreamingMode(contentLength);
+      }
  else {
-      this.connection.setChunkedStreamingMode(this.chunkSize);
+        this.connection.setChunkedStreamingMode(this.chunkSize);
+      }
     }
     writeHeaders(headers);
     this.connection.connect();
