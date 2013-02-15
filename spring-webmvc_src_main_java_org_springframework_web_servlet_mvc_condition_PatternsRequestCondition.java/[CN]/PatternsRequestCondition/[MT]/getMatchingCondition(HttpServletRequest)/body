@@ -2,14 +2,18 @@
   if (this.patterns.isEmpty()) {
     return this;
   }
-  String lookupPath=this.urlPathHelper.getLookupPathForRequest(request);
+  String lookupPath=this.pathHelper.getLookupPathForRequest(request);
+  String lookupPathNoSemicolonContent=(lookupPath.indexOf(';') != -1) ? pathHelperNoSemicolonContent.getLookupPathForRequest(request) : null;
   List<String> matches=new ArrayList<String>();
   for (  String pattern : patterns) {
     String match=getMatchingPattern(pattern,lookupPath);
+    if (match == null && lookupPathNoSemicolonContent != null) {
+      match=getMatchingPattern(pattern,lookupPathNoSemicolonContent);
+    }
     if (match != null) {
       matches.add(match);
     }
   }
   Collections.sort(matches,this.pathMatcher.getPatternComparator(lookupPath));
-  return matches.isEmpty() ? null : new PatternsRequestCondition(matches,this.urlPathHelper,this.pathMatcher,this.useSuffixPatternMatch,this.useTrailingSlashMatch,this.fileExtensions);
+  return matches.isEmpty() ? null : new PatternsRequestCondition(matches,this.pathHelper,this.pathMatcher,this.useSuffixPatternMatch,this.useTrailingSlashMatch,this.fileExtensions);
 }
