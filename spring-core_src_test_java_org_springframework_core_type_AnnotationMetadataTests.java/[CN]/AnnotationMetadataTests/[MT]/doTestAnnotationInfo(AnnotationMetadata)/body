@@ -10,7 +10,7 @@
   assertThat(metadata.hasAnnotation(Component.class.getName()),is(true));
   assertThat(metadata.hasAnnotation(Scope.class.getName()),is(true));
   assertThat(metadata.hasAnnotation(SpecialAttr.class.getName()),is(true));
-  assertThat(metadata.getAnnotationTypes().size(),is(3));
+  assertThat(metadata.getAnnotationTypes().size(),is(5));
   assertThat(metadata.getAnnotationTypes().contains(Component.class.getName()),is(true));
   assertThat(metadata.getAnnotationTypes().contains(Scope.class.getName()),is(true));
   assertThat(metadata.getAnnotationTypes().contains(SpecialAttr.class.getName()),is(true));
@@ -20,6 +20,12 @@
   AnnotationAttributes scopeAttrs=(AnnotationAttributes)metadata.getAnnotationAttributes(Scope.class.getName());
   assertThat(scopeAttrs.size(),is(1));
   assertThat(scopeAttrs.getString("value"),is("myScope"));
+  Set<MethodMetadata> methods=metadata.getAnnotatedMethods(DirectAnnotation.class.getName());
+  MethodMetadata method=methods.iterator().next();
+  assertEquals("direct",method.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value"));
+  List<Object> allMeta=method.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
+  assertThat(new HashSet<Object>(allMeta),is(equalTo(new HashSet<Object>(Arrays.asList("direct","meta")))));
+  assertTrue(metadata.isAnnotated(IsAnnotatedAnnotation.class.getName()));
 {
     AnnotationAttributes specialAttrs=(AnnotationAttributes)metadata.getAnnotationAttributes(SpecialAttr.class.getName());
     assertThat(specialAttrs.size(),is(6));
@@ -49,6 +55,9 @@
     assertTrue(optionalArray[0].getEnum("anEnum").equals(SomeEnum.DEFAULT));
     assertArrayEquals(new Class[]{Void.class},(Class[])optionalArray[0].get("classArray"));
     assertArrayEquals(new Class[]{Void.class},optionalArray[0].getClassArray("classArray"));
+    assertEquals("direct",metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value"));
+    allMeta=metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
+    assertThat(new HashSet<Object>(allMeta),is(equalTo(new HashSet<Object>(Arrays.asList("direct","meta")))));
   }
 {
     AnnotationAttributes specialAttrs=(AnnotationAttributes)metadata.getAnnotationAttributes(SpecialAttr.class.getName(),true);
@@ -69,5 +78,8 @@
     AnnotationAttributes[] optionalArray=specialAttrs.getAnnotationArray("optionalArray");
     assertArrayEquals(new String[]{Void.class.getName()},(String[])optionalArray[0].get("classArray"));
     assertArrayEquals(new String[]{Void.class.getName()},optionalArray[0].getStringArray("classArray"));
+    assertEquals(metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value"),"direct");
+    allMeta=metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
+    assertThat(new HashSet<Object>(allMeta),is(equalTo(new HashSet<Object>(Arrays.asList("direct","meta")))));
   }
 }
