@@ -1,10 +1,7 @@
 {
   AnnotationMetadata metadata=configClass.getMetadata();
-  if (this.environment != null && metadata.isAnnotated(Profile.class.getName())) {
-    AnnotationAttributes profile=MetadataUtils.attributesFor(metadata,Profile.class);
-    if (!this.environment.acceptsProfiles(profile.getStringArray("value"))) {
-      return;
-    }
+  if (ConditionalAnnotationHelper.shouldSkip(configClass,this.registry,this.environment,this.beanNameGenerator)) {
+    return;
   }
   do {
     metadata=doProcessConfigurationClass(configClass,metadata);
