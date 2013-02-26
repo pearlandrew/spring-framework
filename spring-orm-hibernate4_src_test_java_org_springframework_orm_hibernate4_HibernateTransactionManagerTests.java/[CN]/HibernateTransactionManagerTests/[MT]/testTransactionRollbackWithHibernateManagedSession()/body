@@ -1,36 +1,13 @@
 {
-  MockControl sfControl=MockControl.createControl(SessionFactory.class);
-  final SessionFactory sf=(SessionFactory)sfControl.getMock();
-  MockControl sessionControl=MockControl.createControl(ImplementingSession.class);
-  final ImplementingSession session=(ImplementingSession)sessionControl.getMock();
-  MockControl tx1Control=MockControl.createControl(Transaction.class);
-  final Transaction tx1=(Transaction)tx1Control.getMock();
-  MockControl tx2Control=MockControl.createControl(Transaction.class);
-  final Transaction tx2=(Transaction)tx2Control.getMock();
-  sf.getCurrentSession();
-  sfControl.setReturnValue(session,2);
-  session.getFlushMode();
-  sessionControl.setReturnValue(FlushMode.AUTO,4);
-  session.getTransaction();
-  sessionControl.setReturnValue(tx1,1);
-  session.beginTransaction();
-  sessionControl.setReturnValue(tx1,1);
-  tx1.isActive();
-  tx1Control.setReturnValue(false,1);
-  tx1.rollback();
-  tx1Control.setVoidCallable(1);
-  session.getTransaction();
-  sessionControl.setReturnValue(tx2,1);
-  session.beginTransaction();
-  sessionControl.setReturnValue(tx2,1);
-  tx2.isActive();
-  tx2Control.setReturnValue(false,1);
-  tx2.commit();
-  tx2Control.setVoidCallable(1);
-  sfControl.replay();
-  sessionControl.replay();
-  tx1Control.replay();
-  tx2Control.replay();
+  final SessionFactory sf=mock(SessionFactory.class);
+  final Session session=mock(Session.class);
+  final Transaction tx1=mock(Transaction.class);
+  final Transaction tx2=mock(Transaction.class);
+  given(sf.getCurrentSession()).willReturn(session);
+  given(session.isOpen()).willReturn(true);
+  given(session.getTransaction()).willReturn(tx1,tx2);
+  given(session.beginTransaction()).willReturn(tx1,tx2);
+  given(session.getFlushMode()).willReturn(FlushMode.MANUAL);
   HibernateTransactionManager tm=new HibernateTransactionManager();
   tm.setSessionFactory(sf);
   tm.setPrepareConnection(false);
@@ -65,8 +42,9 @@
     }
   }
 );
-  sfControl.verify();
-  sessionControl.verify();
-  tx1Control.verify();
-  tx2Control.verify();
+  verify(tx1).rollback();
+  verify(tx2).commit();
+  InOrder ordered=inOrder(session);
+  ordered.verify(session).setFlushMode(FlushMode.AUTO);
+  ordered.verify(session).setFlushMode(FlushMode.MANUAL);
 }
