@@ -5,8 +5,13 @@
       return;
     }
   }
-  super.doOptions(request,response);
-  String allowedMethods=response.getHeader("Allow");
-  allowedMethods+=", " + RequestMethod.PATCH.name();
-  response.setHeader("Allow",allowedMethods);
+  super.doOptions(request,new HttpServletResponseWrapper(response){
+    @Override public void setHeader(    String name,    String value){
+      if ("Allow".equals(name)) {
+        value=(StringUtils.hasLength(value) ? value + ", " : "") + RequestMethod.PATCH.name();
+      }
+      super.setHeader(name,value);
+    }
+  }
+);
 }
