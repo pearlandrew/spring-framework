@@ -4,44 +4,96 @@
     public void doWith(    Method method) throws IllegalArgumentException, IllegalAccessException {
       Scheduled annotation=AnnotationUtils.getAnnotation(method,Scheduled.class);
       if (annotation != null) {
-        Assert.isTrue(void.class.equals(method.getReturnType()),"Only void-returning methods may be annotated with @Scheduled.");
-        Assert.isTrue(method.getParameterTypes().length == 0,"Only no-arg methods may be annotated with @Scheduled.");
-        if (AopUtils.isJdkDynamicProxy(bean)) {
-          try {
-            method=bean.getClass().getMethod(method.getName(),method.getParameterTypes());
+        try {
+          Assert.isTrue(void.class.equals(method.getReturnType()),"Only void-returning methods may be annotated with @Scheduled");
+          Assert.isTrue(method.getParameterTypes().length == 0,"Only no-arg methods may be annotated with @Scheduled");
+          if (AopUtils.isJdkDynamicProxy(bean)) {
+            try {
+              method=bean.getClass().getMethod(method.getName(),method.getParameterTypes());
+            }
+ catch (            SecurityException ex) {
+              ReflectionUtils.handleReflectionException(ex);
+            }
+catch (            NoSuchMethodException ex) {
+              throw new IllegalStateException(String.format("@Scheduled method '%s' found on bean target class '%s', " + "but not found in any interface(s) for bean JDK proxy. Either " + "pull the method up to an interface or switch to subclass (CGLIB) "+ "proxies by setting proxy-target-class/proxyTargetClass "+ "attribute to 'true'",method.getName(),targetClass.getSimpleName()));
+            }
           }
- catch (          SecurityException ex) {
-            ReflectionUtils.handleReflectionException(ex);
+          Runnable runnable=new ScheduledMethodRunnable(bean,method);
+          boolean processedSchedule=false;
+          String errorMessage="Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
+          long initialDelay=annotation.initialDelay();
+          String initialDelayString=annotation.initialDelayString();
+          if (!"".equals(initialDelayString)) {
+            Assert.isTrue(initialDelay < 0,"Specify 'initialDelay' or 'initialDelayString', not both");
+            if (embeddedValueResolver != null) {
+              initialDelayString=embeddedValueResolver.resolveStringValue(initialDelayString);
+            }
+            try {
+              initialDelay=Integer.parseInt(initialDelayString);
+            }
+ catch (            NumberFormatException ex) {
+              throw new IllegalArgumentException("Invalid initialDelayString value \"" + initialDelayString + "\" - cannot parse into integer");
+            }
           }
-catch (          NoSuchMethodException ex) {
-            throw new IllegalStateException(String.format("@Scheduled method '%s' found on bean target class '%s', " + "but not found in any interface(s) for bean JDK proxy. Either " + "pull the method up to an interface or switch to subclass (CGLIB) "+ "proxies by setting proxy-target-class/proxyTargetClass "+ "attribute to 'true'",method.getName(),targetClass.getSimpleName()));
+          String cron=annotation.cron();
+          if (!"".equals(cron)) {
+            Assert.isTrue(initialDelay == -1,"'initialDelay' not supported for cron triggers");
+            processedSchedule=true;
+            if (embeddedValueResolver != null) {
+              cron=embeddedValueResolver.resolveStringValue(cron);
+            }
+            registrar.addCronTask(new CronTask(runnable,cron));
           }
-        }
-        Runnable runnable=new ScheduledMethodRunnable(bean,method);
-        boolean processedSchedule=false;
-        String errorMessage="Exactly one of the 'cron', 'fixedDelay', or 'fixedRate' attributes is required.";
-        String cron=annotation.cron();
-        if (!"".equals(cron)) {
-          processedSchedule=true;
-          if (embeddedValueResolver != null) {
-            cron=embeddedValueResolver.resolveStringValue(cron);
+          if (initialDelay < 0) {
+            initialDelay=0;
           }
-          registrar.addCronTask(new CronTask(runnable,cron));
+          long fixedDelay=annotation.fixedDelay();
+          if (fixedDelay >= 0) {
+            Assert.isTrue(!processedSchedule,errorMessage);
+            processedSchedule=true;
+            registrar.addFixedDelayTask(new IntervalTask(runnable,fixedDelay,initialDelay));
+          }
+          String fixedDelayString=annotation.fixedDelayString();
+          if (!"".equals(fixedDelayString)) {
+            Assert.isTrue(!processedSchedule,errorMessage);
+            processedSchedule=true;
+            if (embeddedValueResolver != null) {
+              fixedDelayString=embeddedValueResolver.resolveStringValue(fixedDelayString);
+            }
+            try {
+              fixedDelay=Integer.parseInt(fixedDelayString);
+            }
+ catch (            NumberFormatException ex) {
+              throw new IllegalArgumentException("Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into integer");
+            }
+            registrar.addFixedDelayTask(new IntervalTask(runnable,fixedDelay,initialDelay));
+          }
+          long fixedRate=annotation.fixedRate();
+          if (fixedRate >= 0) {
+            Assert.isTrue(!processedSchedule,errorMessage);
+            processedSchedule=true;
+            registrar.addFixedRateTask(new IntervalTask(runnable,fixedRate,initialDelay));
+          }
+          String fixedRateString=annotation.fixedRateString();
+          if (!"".equals(fixedRateString)) {
+            Assert.isTrue(!processedSchedule,errorMessage);
+            processedSchedule=true;
+            if (embeddedValueResolver != null) {
+              fixedRateString=embeddedValueResolver.resolveStringValue(fixedRateString);
+            }
+            try {
+              fixedRate=Integer.parseInt(fixedRateString);
+            }
+ catch (            NumberFormatException ex) {
+              throw new IllegalArgumentException("Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into integer");
+            }
+            registrar.addFixedRateTask(new IntervalTask(runnable,fixedRate,initialDelay));
+          }
+          Assert.isTrue(processedSchedule,errorMessage);
         }
-        long initialDelay=annotation.initialDelay();
-        long fixedDelay=annotation.fixedDelay();
-        if (fixedDelay >= 0) {
-          Assert.isTrue(!processedSchedule,errorMessage);
-          processedSchedule=true;
-          registrar.addFixedDelayTask(new IntervalTask(runnable,fixedDelay,initialDelay));
+ catch (        IllegalArgumentException ex) {
+          throw new IllegalStateException("Encountered invalid @Scheduled method '" + method.getName() + "': "+ ex.getMessage());
         }
-        long fixedRate=annotation.fixedRate();
-        if (fixedRate >= 0) {
-          Assert.isTrue(!processedSchedule,errorMessage);
-          processedSchedule=true;
-          registrar.addFixedRateTask(new IntervalTask(runnable,fixedRate,initialDelay));
-        }
-        Assert.isTrue(processedSchedule,errorMessage);
       }
     }
   }

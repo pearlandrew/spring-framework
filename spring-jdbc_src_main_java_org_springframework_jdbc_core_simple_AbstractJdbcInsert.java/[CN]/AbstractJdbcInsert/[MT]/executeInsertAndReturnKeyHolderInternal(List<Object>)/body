@@ -4,7 +4,7 @@
   }
   final KeyHolder keyHolder=new GeneratedKeyHolder();
   if (this.tableMetaDataContext.isGetGeneratedKeysSupported()) {
-    jdbcTemplate.update(new PreparedStatementCreator(){
+    getJdbcTemplate().update(new PreparedStatementCreator(){
       public PreparedStatement createPreparedStatement(      Connection con) throws SQLException {
         PreparedStatement ps=prepareStatementForGeneratedKeys(con);
         setParameterValues(ps,values,getInsertTypes());
@@ -23,16 +23,16 @@
     if (getGeneratedKeyNames().length > 1) {
       throw new InvalidDataAccessApiUsageException("Current database only supports retreiving the key for a single column. There are " + getGeneratedKeyNames().length + " columns specified: "+ Arrays.asList(getGeneratedKeyNames()));
     }
-    final String keyQuery=tableMetaDataContext.getSimulationQueryForGetGeneratedKey(tableMetaDataContext.getTableName(),getGeneratedKeyNames()[0]);
+    final String keyQuery=this.tableMetaDataContext.getSimulationQueryForGetGeneratedKey(this.tableMetaDataContext.getTableName(),getGeneratedKeyNames()[0]);
     Assert.notNull(keyQuery,"Query for simulating get generated keys can't be null");
     if (keyQuery.toUpperCase().startsWith("RETURNING")) {
-      Long key=jdbcTemplate.queryForLong(getInsertString() + " " + keyQuery,values.toArray(new Object[values.size()]));
-      HashMap keys=new HashMap(1);
+      Long key=getJdbcTemplate().queryForObject(getInsertString() + " " + keyQuery,values.toArray(new Object[values.size()]),Long.class);
+      Map<String,Object> keys=new HashMap<String,Object>(1);
       keys.put(getGeneratedKeyNames()[0],key);
       keyHolder.getKeyList().add(keys);
     }
  else {
-      jdbcTemplate.execute(new ConnectionCallback(){
+      getJdbcTemplate().execute(new ConnectionCallback<Object>(){
         public Object doInConnection(        Connection con) throws SQLException, DataAccessException {
           PreparedStatement ps=null;
           try {
@@ -45,7 +45,7 @@
           }
           Statement keyStmt=null;
           ResultSet rs=null;
-          HashMap keys=new HashMap(1);
+          Map<String,Object> keys=new HashMap<String,Object>(1);
           try {
             keyStmt=con.createStatement();
             rs=keyStmt.executeQuery(keyQuery);

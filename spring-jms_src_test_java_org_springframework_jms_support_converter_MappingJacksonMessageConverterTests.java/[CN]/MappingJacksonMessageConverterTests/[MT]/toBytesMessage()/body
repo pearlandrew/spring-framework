@@ -1,11 +1,9 @@
 {
-  BytesMessage bytesMessageMock=createMock(BytesMessage.class);
+  BytesMessage bytesMessageMock=mock(BytesMessage.class);
   Object toBeMarshalled=new Object();
-  expect(sessionMock.createBytesMessage()).andReturn(bytesMessageMock);
-  bytesMessageMock.setStringProperty("__encoding__","UTF-8");
-  bytesMessageMock.setStringProperty("__typeid__",Object.class.getName());
-  bytesMessageMock.writeBytes(isA(byte[].class));
-  replay(sessionMock,bytesMessageMock);
+  given(sessionMock.createBytesMessage()).willReturn(bytesMessageMock);
   converter.toMessage(toBeMarshalled,sessionMock);
-  verify(sessionMock,bytesMessageMock);
+  verify(bytesMessageMock).setStringProperty("__encoding__","UTF-8");
+  verify(bytesMessageMock).setStringProperty("__typeid__",Object.class.getName());
+  verify(bytesMessageMock).writeBytes(isA(byte[].class));
 }

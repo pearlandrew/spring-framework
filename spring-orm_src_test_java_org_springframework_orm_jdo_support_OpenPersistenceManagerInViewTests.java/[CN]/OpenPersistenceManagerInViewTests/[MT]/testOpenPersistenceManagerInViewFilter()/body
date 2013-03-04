@@ -1,24 +1,10 @@
 {
-  MockControl pmfControl=MockControl.createControl(PersistenceManagerFactory.class);
-  final PersistenceManagerFactory pmf=(PersistenceManagerFactory)pmfControl.getMock();
-  MockControl pmControl=MockControl.createControl(PersistenceManager.class);
-  PersistenceManager pm=(PersistenceManager)pmControl.getMock();
-  pmf.getPersistenceManager();
-  pmfControl.setReturnValue(pm,1);
-  pm.close();
-  pmControl.setVoidCallable(1);
-  pmfControl.replay();
-  pmControl.replay();
-  MockControl pmf2Control=MockControl.createControl(PersistenceManagerFactory.class);
-  final PersistenceManagerFactory pmf2=(PersistenceManagerFactory)pmf2Control.getMock();
-  MockControl pm2Control=MockControl.createControl(PersistenceManager.class);
-  PersistenceManager pm2=(PersistenceManager)pm2Control.getMock();
-  pmf2.getPersistenceManager();
-  pmf2Control.setReturnValue(pm2,1);
-  pm2.close();
-  pm2Control.setVoidCallable(1);
-  pmf2Control.replay();
-  pm2Control.replay();
+  final PersistenceManagerFactory pmf=mock(PersistenceManagerFactory.class);
+  PersistenceManager pm=mock(PersistenceManager.class);
+  given(pmf.getPersistenceManager()).willReturn(pm);
+  final PersistenceManagerFactory pmf2=mock(PersistenceManagerFactory.class);
+  PersistenceManager pm2=mock(PersistenceManager.class);
+  given(pmf2.getPersistenceManager()).willReturn(pm2);
   MockServletContext sc=new MockServletContext();
   StaticWebApplicationContext wac=new StaticWebApplicationContext();
   wac.setServletContext(sc);
@@ -56,9 +42,7 @@
   assertFalse(TransactionSynchronizationManager.hasResource(pmf));
   assertFalse(TransactionSynchronizationManager.hasResource(pmf2));
   assertNotNull(request.getAttribute("invoked"));
-  pmfControl.verify();
-  pmControl.verify();
-  pmf2Control.verify();
-  pm2Control.verify();
+  verify(pm).close();
+  verify(pm2).close();
   wac.close();
 }

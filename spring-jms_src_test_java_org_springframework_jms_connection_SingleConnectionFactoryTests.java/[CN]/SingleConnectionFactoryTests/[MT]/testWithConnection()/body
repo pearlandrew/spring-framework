@@ -1,13 +1,5 @@
 {
-  MockControl conControl=MockControl.createControl(Connection.class);
-  Connection con=(Connection)conControl.getMock();
-  con.start();
-  conControl.setVoidCallable(1);
-  con.stop();
-  conControl.setVoidCallable(1);
-  con.close();
-  conControl.setVoidCallable(1);
-  conControl.replay();
+  Connection con=mock(Connection.class);
   SingleConnectionFactory scf=new SingleConnectionFactory(con);
   Connection con1=scf.createConnection();
   con1.start();
@@ -18,5 +10,8 @@
   con2.stop();
   con2.close();
   scf.destroy();
-  conControl.verify();
+  verify(con).start();
+  verify(con).stop();
+  verify(con).close();
+  verifyNoMoreInteractions(con);
 }

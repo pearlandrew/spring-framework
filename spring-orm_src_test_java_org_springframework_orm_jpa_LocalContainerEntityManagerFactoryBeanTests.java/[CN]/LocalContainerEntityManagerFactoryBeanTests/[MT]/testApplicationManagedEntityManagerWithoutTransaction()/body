@@ -1,15 +1,7 @@
 {
   Object testEntity=new Object();
-  MockControl emMc=MockControl.createControl(EntityManager.class);
-  EntityManager mockEm=(EntityManager)emMc.getMock();
-  mockEm.contains(testEntity);
-  emMc.setReturnValue(false);
-  emMc.replay();
-  mockEmf.createEntityManager();
-  emfMc.setReturnValue(mockEm);
-  mockEmf.close();
-  emfMc.setVoidCallable();
-  emfMc.replay();
+  EntityManager mockEm=mock(EntityManager.class);
+  given(mockEmf.createEntityManager()).willReturn(mockEm);
   LocalContainerEntityManagerFactoryBean cefb=parseValidPersistenceUnit();
   EntityManagerFactory emf=cefb.getObject();
   assertSame("EntityManagerFactory reference must be cached after init",emf,cefb.getObject());
@@ -17,6 +9,5 @@
   EntityManager em=emf.createEntityManager();
   assertFalse(em.contains(testEntity));
   cefb.destroy();
-  emfMc.verify();
-  emMc.verify();
+  verify(mockEmf).close();
 }

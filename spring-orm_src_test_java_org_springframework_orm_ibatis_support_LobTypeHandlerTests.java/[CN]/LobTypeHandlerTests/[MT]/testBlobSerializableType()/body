@@ -1,24 +1,14 @@
 {
-  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  final ByteArrayOutputStream baos=new ByteArrayOutputStream();
   ObjectOutputStream oos=new ObjectOutputStream(baos);
   oos.writeObject("content");
   oos.close();
-  lobHandler.getBlobAsBinaryStream(rs,1);
-  lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()),1);
-  lobHandler.getBlobAsBinaryStream(rs,1);
-  lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()),1);
-  lobCreator.setBlobAsBytes(ps,1,baos.toByteArray());
-  lobCreatorControl.setMatcher(new ArgumentsMatcher(){
-    @Override public boolean matches(    Object[] o1,    Object[] o2){
-      return Arrays.equals((byte[])o1[2],(byte[])o2[2]);
-    }
-    @Override public String toString(    Object[] objects){
-      return null;
+  given(lobHandler.getBlobAsBinaryStream(rs,1)).willAnswer(new Answer<InputStream>(){
+    @Override public InputStream answer(    InvocationOnMock invocation) throws Throwable {
+      return new ByteArrayInputStream(baos.toByteArray());
     }
   }
 );
-  lobHandlerControl.replay();
-  lobCreatorControl.replay();
   BlobSerializableTypeHandler type=new BlobSerializableTypeHandler(lobHandler);
   assertEquals("content",type.valueOf("content"));
   assertEquals("content",type.getResult(rs,"column"));
@@ -34,4 +24,5 @@
   finally {
     TransactionSynchronizationManager.clearSynchronization();
   }
+  verify(lobCreator).setBlobAsBytes(ps,1,baos.toByteArray());
 }

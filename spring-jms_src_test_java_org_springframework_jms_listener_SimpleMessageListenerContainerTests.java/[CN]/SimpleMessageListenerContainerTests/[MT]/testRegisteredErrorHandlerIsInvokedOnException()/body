@@ -1,23 +1,13 @@
 {
   final SimpleMessageConsumer messageConsumer=new SimpleMessageConsumer();
-  Session session=EasyMock.createMock(Session.class);
-  session.createQueue(DESTINATION_NAME);
-  EasyMock.expectLastCall().andReturn(QUEUE_DESTINATION);
-  session.createConsumer(QUEUE_DESTINATION,null);
-  EasyMock.expectLastCall().andReturn(messageConsumer);
-  session.getTransacted();
-  EasyMock.expectLastCall().andReturn(false);
-  EasyMock.replay(session);
-  Connection connection=EasyMock.createMock(Connection.class);
-  connection.setExceptionListener(this.container);
-  connection.createSession(this.container.isSessionTransacted(),this.container.getSessionAcknowledgeMode());
-  EasyMock.expectLastCall().andReturn(session);
-  connection.start();
-  EasyMock.replay(connection);
-  ConnectionFactory connectionFactory=EasyMock.createMock(ConnectionFactory.class);
-  connectionFactory.createConnection();
-  EasyMock.expectLastCall().andReturn(connection);
-  EasyMock.replay(connectionFactory);
+  Session session=mock(Session.class);
+  given(session.createQueue(DESTINATION_NAME)).willReturn(QUEUE_DESTINATION);
+  given(session.createConsumer(QUEUE_DESTINATION,null)).willReturn(messageConsumer);
+  given(session.getTransacted()).willReturn(false);
+  Connection connection=mock(Connection.class);
+  given(connection.createSession(this.container.isSessionTransacted(),this.container.getSessionAcknowledgeMode())).willReturn(session);
+  ConnectionFactory connectionFactory=mock(ConnectionFactory.class);
+  given(connectionFactory.createConnection()).willReturn(connection);
   final IllegalStateException theException=new IllegalStateException("intentional test failure");
   this.container.setConnectionFactory(connectionFactory);
   this.container.setDestinationName(DESTINATION_NAME);
@@ -27,15 +17,13 @@
     }
   }
 );
-  ErrorHandler errorHandler=EasyMock.createMock(ErrorHandler.class);
-  errorHandler.handleError(theException);
-  EasyMock.expectLastCall();
-  EasyMock.replay(errorHandler);
+  ErrorHandler errorHandler=mock(ErrorHandler.class);
   this.container.setErrorHandler(errorHandler);
   this.container.afterPropertiesSet();
   this.container.start();
-  Message message=EasyMock.createMock(Message.class);
-  EasyMock.replay(message);
+  Message message=mock(Message.class);
   messageConsumer.sendMessage(message);
-  EasyMock.verify(errorHandler,message,session,connection,connectionFactory);
+  verify(connection).setExceptionListener(this.container);
+  verify(connection).start();
+  verify(errorHandler).handleError(theException);
 }

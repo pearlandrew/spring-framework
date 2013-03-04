@@ -4,18 +4,25 @@
   }
  else {
     Object cacheKey=getCacheKey(viewName,locale);
-synchronized (this.viewCache) {
-      View view=this.viewCache.get(cacheKey);
-      if (view == null && (!this.cacheUnresolved || !this.viewCache.containsKey(cacheKey))) {
-        view=createView(viewName,locale);
-        if (view != null || this.cacheUnresolved) {
-          this.viewCache.put(cacheKey,view);
-          if (logger.isTraceEnabled()) {
-            logger.trace("Cached view [" + cacheKey + "]");
+    View view=this.viewAccessCache.get(cacheKey);
+    if (view == null) {
+synchronized (this.viewCreationCache) {
+        view=this.viewCreationCache.get(cacheKey);
+        if (view == null) {
+          view=createView(viewName,locale);
+          if (view == null && this.cacheUnresolved) {
+            view=UNRESOLVED_VIEW;
+          }
+          if (view != null) {
+            this.viewAccessCache.put(cacheKey,view);
+            this.viewCreationCache.put(cacheKey,view);
+            if (logger.isTraceEnabled()) {
+              logger.trace("Cached view [" + cacheKey + "]");
+            }
           }
         }
       }
-      return view;
     }
+    return (view != UNRESOLVED_VIEW ? view : null);
   }
 }

@@ -1,42 +1,25 @@
 {
   JmsTemplate102 template=createTemplate();
   template.setPubSubDomain(true);
-  template.setConnectionFactory(mockTopicConnectionFactory);
+  template.setConnectionFactory(topicConnectionFactory);
   template.afterPropertiesSet();
-  MockControl topicPublisherControl=MockControl.createControl(TopicPublisher.class);
-  TopicPublisher mockTopicPublisher=(TopicPublisher)topicPublisherControl.getMock();
-  MockControl messageControl=MockControl.createControl(TextMessage.class);
-  TextMessage mockMessage=(TextMessage)messageControl.getMock();
-  mockTopicSession.createPublisher(this.mockTopic);
-  topicSessionControl.setReturnValue(mockTopicPublisher);
-  mockTopicSession.createTextMessage("just testing");
-  topicSessionControl.setReturnValue(mockMessage);
-  if (useTransactedTemplate()) {
-    mockTopicSession.commit();
-    topicSessionControl.setVoidCallable(1);
-  }
-  mockTopicPublisher.close();
-  topicPublisherControl.setVoidCallable(1);
-  mockTopicSession.close();
-  topicSessionControl.setVoidCallable(1);
-  mockTopicConnection.close();
-  topicConnectionControl.setVoidCallable(1);
-  topicSessionControl.replay();
-  topicConnectionControl.replay();
+  TopicPublisher topicPublisher=mock(TopicPublisher.class);
+  TextMessage message=mock(TextMessage.class);
+  given(topicSession.createPublisher(this.topic)).willReturn(topicPublisher);
+  given(topicSession.createTextMessage("just testing")).willReturn(message);
   if (ignoreQOS) {
-    mockTopicPublisher.publish(mockMessage);
+    topicPublisher.publish(message);
   }
  else {
     template.setExplicitQosEnabled(true);
     template.setDeliveryMode(deliveryMode);
     template.setPriority(priority);
     template.setTimeToLive(timeToLive);
-    mockTopicPublisher.publish(mockMessage,deliveryMode,priority,timeToLive);
+    topicPublisher.publish(message,deliveryMode,priority,timeToLive);
   }
-  topicPublisherControl.replay();
   template.setPubSubDomain(true);
   if (explicitTopic) {
-    template.send(mockTopic,new MessageCreator(){
+    template.send(topic,new MessageCreator(){
       @Override public Message createMessage(      Session session) throws JMSException {
         return session.createTextMessage("just testing");
       }
@@ -51,8 +34,11 @@
     }
 );
   }
-  topicConnectionFactoryControl.verify();
-  topicConnectionControl.verify();
-  topicSessionControl.verify();
-  topicPublisherControl.verify();
+  if (useTransactedTemplate()) {
+    verify(topicSession).commit();
+  }
+  verify(topicPublisher).close();
+  verify(topicSession).close();
+  verify(topicConnection).close();
+  verify(jndiContext).close();
 }

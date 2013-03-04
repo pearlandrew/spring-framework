@@ -4,8 +4,9 @@
     FieldError fieldError=errors.getFieldError(field);
     if (fieldError == null || !fieldError.isBindingFailure()) {
       try {
-        String errorCode=violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName();
-        Object[] errorArgs=getArgumentsForConstraint(errors.getObjectName(),field,violation.getConstraintDescriptor());
+        ConstraintDescriptor<?> cd=violation.getConstraintDescriptor();
+        String errorCode=cd.getAnnotation().annotationType().getSimpleName();
+        Object[] errorArgs=getArgumentsForConstraint(errors.getObjectName(),field,cd);
         if (errors instanceof BindingResult) {
           BindingResult bindingResult=(BindingResult)errors;
           String nestedField=bindingResult.getNestedPath() + field;
@@ -15,7 +16,7 @@
           }
  else {
             Object invalidValue=violation.getInvalidValue();
-            if (!"".equals(field) && invalidValue == violation.getLeafBean()) {
+            if (!"".equals(field) && (invalidValue == violation.getLeafBean() || (field.contains(".") && !field.contains("[]")))) {
               invalidValue=bindingResult.getRawFieldValue(field);
             }
             String[] errorCodes=bindingResult.resolveMessageCodes(errorCode,field);

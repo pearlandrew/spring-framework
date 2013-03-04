@@ -1,13 +1,4 @@
 {
-  factoryControl.reset();
-  managerControl.reset();
-  txControl.reset();
-  manager.joinTransaction();
-  manager.flush();
-  manager.clear();
-  factoryControl.replay();
-  managerControl.replay();
-  txControl.replay();
   tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
@@ -36,7 +27,7 @@
   finally {
     TransactionSynchronizationManager.unbindResource(factory);
   }
-  factoryControl.verify();
-  managerControl.verify();
-  txControl.verify();
+  verify(manager).joinTransaction();
+  verify(manager).flush();
+  verify(manager).clear();
 }

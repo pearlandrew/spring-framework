@@ -1,12 +1,6 @@
 {
   tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
-  manager.flush();
-  managerControl.expectAndReturn(manager.getTransaction(),tx,2);
-  txControl.expectAndReturn(tx.getRollbackOnly(),false);
-  tx.commit();
-  factoryControl.replay();
-  managerControl.replay();
-  txControl.replay();
+  given(manager.getTransaction()).willReturn(tx);
   final List<String> l=new ArrayList<String>();
   l.add("test");
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
@@ -34,7 +28,7 @@
   assertSame(l,result);
   assertTrue(!TransactionSynchronizationManager.hasResource(factory));
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
-  factoryControl.verify();
-  managerControl.verify();
-  txControl.verify();
+  verify(tx).commit();
+  verify(manager).flush();
+  verify(manager).close();
 }

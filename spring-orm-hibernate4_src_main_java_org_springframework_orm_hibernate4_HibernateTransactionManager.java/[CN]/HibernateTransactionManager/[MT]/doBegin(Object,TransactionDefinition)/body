@@ -6,7 +6,8 @@
   Session session=null;
   try {
     if (txObject.getSessionHolder() == null || txObject.getSessionHolder().isSynchronizedWithTransaction()) {
-      Session newSession=getSessionFactory().openSession();
+      Interceptor entityInterceptor=getEntityInterceptor();
+      Session newSession=(entityInterceptor != null ? getSessionFactory().withOptions().interceptor(entityInterceptor).openSession() : getSessionFactory().openSession());
       if (logger.isDebugEnabled()) {
         logger.debug("Opened new Session [" + newSession + "] for Hibernate transaction");
       }

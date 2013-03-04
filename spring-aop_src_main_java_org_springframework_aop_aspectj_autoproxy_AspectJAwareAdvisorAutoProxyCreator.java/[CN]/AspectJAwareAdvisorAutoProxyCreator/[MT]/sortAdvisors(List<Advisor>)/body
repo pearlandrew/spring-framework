@@ -1,15 +1,17 @@
 {
-  List<PartiallyComparableAdvisorHolder> partiallyComparableAdvisors=new LinkedList<PartiallyComparableAdvisorHolder>();
+  List<PartiallyComparableAdvisorHolder> partiallyComparableAdvisors=new ArrayList<PartiallyComparableAdvisorHolder>(advisors.size());
   for (  Advisor element : advisors) {
     partiallyComparableAdvisors.add(new PartiallyComparableAdvisorHolder(element,DEFAULT_PRECEDENCE_COMPARATOR));
   }
   List<PartiallyComparableAdvisorHolder> sorted=PartialOrder.sort(partiallyComparableAdvisors);
-  if (sorted == null) {
-    throw new IllegalArgumentException("Advice precedence circularity error");
+  if (sorted != null) {
+    List<Advisor> result=new ArrayList<Advisor>(advisors.size());
+    for (    PartiallyComparableAdvisorHolder pcAdvisor : sorted) {
+      result.add(pcAdvisor.getAdvisor());
+    }
+    return result;
   }
-  List<Advisor> result=new LinkedList<Advisor>();
-  for (  PartiallyComparableAdvisorHolder pcAdvisor : sorted) {
-    result.add(pcAdvisor.getAdvisor());
+ else {
+    return super.sortAdvisors(advisors);
   }
-  return result;
 }

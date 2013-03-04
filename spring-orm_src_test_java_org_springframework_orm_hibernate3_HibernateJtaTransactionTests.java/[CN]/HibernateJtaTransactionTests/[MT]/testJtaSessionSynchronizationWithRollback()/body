@@ -1,24 +1,12 @@
 {
-  MockControl tmControl=MockControl.createControl(TransactionManager.class);
-  TransactionManager tm=(TransactionManager)tmControl.getMock();
+  TransactionManager tm=mock(TransactionManager.class);
   MockJtaTransaction transaction=new MockJtaTransaction();
-  tm.getTransaction();
-  tmControl.setReturnValue(transaction,6);
-  MockControl sfControl=MockControl.createControl(SessionFactoryImplementor.class);
-  final SessionFactoryImplementor sf=(SessionFactoryImplementor)sfControl.getMock();
-  final MockControl sessionControl=MockControl.createControl(Session.class);
-  final Session session=(Session)sessionControl.getMock();
-  sf.openSession();
-  sfControl.setReturnValue(session,1);
-  sf.getTransactionManager();
-  sfControl.setReturnValue(tm,6);
-  session.isOpen();
-  sessionControl.setReturnValue(true,4);
-  session.close();
-  sessionControl.setReturnValue(null,1);
-  tmControl.replay();
-  sfControl.replay();
-  sessionControl.replay();
+  given(tm.getTransaction()).willReturn(transaction);
+  final SessionFactoryImplementor sf=mock(SessionFactoryImplementor.class);
+  final Session session=mock(Session.class);
+  given(sf.openSession()).willReturn(session);
+  given(sf.getTransactionManager()).willReturn(tm);
+  given(session.isOpen()).willReturn(true);
   assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
   HibernateTemplate ht=new HibernateTemplate(sf);
   ht.setExposeNativeSession(true);
@@ -37,7 +25,5 @@
   synchronization.afterCompletion(Status.STATUS_ROLLEDBACK);
   assertTrue("Hasn't thread session",!TransactionSynchronizationManager.hasResource(sf));
   assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
-  tmControl.verify();
-  sfControl.verify();
-  sessionControl.verify();
+  verify(session).close();
 }

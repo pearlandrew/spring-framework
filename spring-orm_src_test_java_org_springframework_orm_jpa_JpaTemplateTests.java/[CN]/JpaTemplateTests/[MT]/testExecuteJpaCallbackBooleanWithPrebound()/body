@@ -3,8 +3,6 @@
   template.setEntityManagerFactory(factory);
   template.afterPropertiesSet();
   TransactionSynchronizationManager.bindResource(factory,new EntityManagerHolder(manager));
-  managerControl.replay();
-  factoryControl.replay();
   try {
     template.execute(new JpaCallback(){
       @Override public Object doInJpa(      EntityManager em) throws PersistenceException {
@@ -13,8 +11,6 @@
       }
     }
 ,true);
-    managerControl.verify();
-    factoryControl.verify();
   }
   finally {
     TransactionSynchronizationManager.unbindResource(factory);

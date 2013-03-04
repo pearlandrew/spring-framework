@@ -1,33 +1,18 @@
 {
-  MockControl sessionControl=MockControl.createControl(Session.class);
-  Session session=(Session)sessionControl.getMock();
-  MockControl messageControl=MockControl.createControl(BytesMessage.class);
-  BytesMessage message=(BytesMessage)messageControl.getMock();
+  Session session=mock(Session.class);
+  BytesMessage message=mock(BytesMessage.class);
   byte[] content="test".getBytes();
-  session.createBytesMessage();
-  sessionControl.setReturnValue(message,1);
-  message.writeBytes(content);
-  messageControl.setVoidCallable(1);
-  message.getBodyLength();
-  messageControl.setReturnValue(content.length,1);
-  message.readBytes(new byte[content.length]);
-  messageControl.setMatcher(new ArgumentsMatcher(){
-    @Override public boolean matches(    Object[] arg0,    Object[] arg1){
-      byte[] one=(byte[])arg0[0];
-      byte[] two=(byte[])arg1[0];
-      return Arrays.equals(one,two);
-    }
-    @Override public String toString(    Object[] arg0){
-      return "bla";
+  final ByteArrayInputStream byteArrayInputStream=new ByteArrayInputStream(content);
+  given(session.createBytesMessage()).willReturn(message);
+  given(message.getBodyLength()).willReturn((long)content.length);
+  given(message.readBytes(any(byte[].class))).willAnswer(new Answer<Integer>(){
+    @Override public Integer answer(    InvocationOnMock invocation) throws Throwable {
+      return byteArrayInputStream.read((byte[])invocation.getArguments()[0]);
     }
   }
 );
-  messageControl.setReturnValue(content.length,1);
-  sessionControl.replay();
-  messageControl.replay();
   SimpleMessageConverter converter=new SimpleMessageConverter();
   Message msg=converter.toMessage(content,session);
   assertEquals(content.length,((byte[])converter.fromMessage(msg)).length);
-  sessionControl.verify();
-  messageControl.verify();
+  verify(message).writeBytes(content);
 }

@@ -1,20 +1,17 @@
 {
-  BytesMessage bytesMessageMock=createMock(BytesMessage.class);
+  BytesMessage bytesMessageMock=mock(BytesMessage.class);
   Map<String,String> unmarshalled=Collections.singletonMap("foo","bar");
-  final byte[] bytes="{\"foo\":\"bar\"}".getBytes();
-  @SuppressWarnings("serial") Capture<byte[]> captured=new Capture<byte[]>(){
-    @Override public void setValue(    byte[] value){
-      super.setValue(value);
-      System.arraycopy(bytes,0,value,0,bytes.length);
+  byte[] bytes="{\"foo\":\"bar\"}".getBytes();
+  final ByteArrayInputStream byteStream=new ByteArrayInputStream(bytes);
+  given(bytesMessageMock.getStringProperty("__typeid__")).willReturn(Object.class.getName());
+  given(bytesMessageMock.propertyExists("__encoding__")).willReturn(false);
+  given(bytesMessageMock.getBodyLength()).willReturn(new Long(bytes.length));
+  given(bytesMessageMock.readBytes(any(byte[].class))).willAnswer(new Answer<Integer>(){
+    @Override public Integer answer(    InvocationOnMock invocation) throws Throwable {
+      return byteStream.read((byte[])invocation.getArguments()[0]);
     }
   }
-;
-  expect(bytesMessageMock.getStringProperty("__typeid__")).andReturn(Object.class.getName());
-  expect(bytesMessageMock.propertyExists("__encoding__")).andReturn(false);
-  expect(bytesMessageMock.getBodyLength()).andReturn(new Long(bytes.length));
-  expect(bytesMessageMock.readBytes(EasyMock.capture(captured))).andReturn(bytes.length);
-  replay(sessionMock,bytesMessageMock);
+);
   Object result=converter.fromMessage(bytesMessageMock);
   assertEquals("Invalid result",result,unmarshalled);
-  verify(sessionMock,bytesMessageMock);
 }

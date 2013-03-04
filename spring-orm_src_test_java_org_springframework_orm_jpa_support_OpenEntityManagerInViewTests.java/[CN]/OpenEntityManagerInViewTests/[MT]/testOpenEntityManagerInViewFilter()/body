@@ -1,13 +1,9 @@
 {
-  expect(manager.isOpen()).andReturn(true);
-  manager.close();
-  replay(manager,factory);
-  final EntityManagerFactory factory2=createMock(EntityManagerFactory.class);
-  final EntityManager manager2=createMock(EntityManager.class);
-  expect(factory2.createEntityManager()).andReturn(manager2);
-  expect(manager2.isOpen()).andReturn(true);
-  manager2.close();
-  replay(factory2,manager2);
+  given(manager.isOpen()).willReturn(true);
+  final EntityManagerFactory factory2=mock(EntityManagerFactory.class);
+  final EntityManager manager2=mock(EntityManager.class);
+  given(factory2.createEntityManager()).willReturn(manager2);
+  given(manager2.isOpen()).willReturn(true);
   MockServletContext sc=new MockServletContext();
   StaticWebApplicationContext wac=new StaticWebApplicationContext();
   wac.setServletContext(sc);
@@ -45,7 +41,7 @@
   assertFalse(TransactionSynchronizationManager.hasResource(factory));
   assertFalse(TransactionSynchronizationManager.hasResource(factory2));
   assertNotNull(request.getAttribute("invoked"));
-  verify(manager,factory);
-  verify(factory2,manager2);
+  verify(manager).close();
+  verify(manager2).close();
   wac.close();
 }

@@ -1,10 +1,8 @@
 {
-  BytesMessage bytesMessageMock=createMock(BytesMessage.class);
+  BytesMessage bytesMessageMock=mock(BytesMessage.class);
   Object toBeMarshalled=new Object();
-  expect(sessionMock.createBytesMessage()).andReturn(bytesMessageMock);
-  marshallerMock.marshal(eq(toBeMarshalled),isA(Result.class));
-  bytesMessageMock.writeBytes(isA(byte[].class));
-  replay(marshallerMock,unmarshallerMock,sessionMock,bytesMessageMock);
+  given(sessionMock.createBytesMessage()).willReturn(bytesMessageMock);
   converter.toMessage(toBeMarshalled,sessionMock);
-  verify(marshallerMock,unmarshallerMock,sessionMock,bytesMessageMock);
+  verify(marshallerMock).marshal(eq(toBeMarshalled),isA(Result.class));
+  verify(bytesMessageMock).writeBytes(isA(byte[].class));
 }

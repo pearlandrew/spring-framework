@@ -1,0 +1,17 @@
+{
+  ServletContext servletContext=webAppContext.getServletContext();
+  TestDispatcherServlet dispatcherServlet=new TestDispatcherServlet(webAppContext);
+  dispatcherServlet.setDispatchOptionsRequest(dispatchOptions);
+  try {
+    dispatcherServlet.init(servletConfig);
+  }
+ catch (  ServletException ex) {
+    throw new MockMvcBuildException("Failed to initialize TestDispatcherServlet",ex);
+  }
+  MockFilterChain filterChain=new MockFilterChain(dispatcherServlet,filters);
+  MockMvc mockMvc=new MockMvc(filterChain,servletContext);
+  mockMvc.setDefaultRequest(defaultRequestBuilder);
+  mockMvc.setGlobalResultMatchers(globalResultMatchers);
+  mockMvc.setGlobalResultHandlers(globalResultHandlers);
+  return mockMvc;
+}

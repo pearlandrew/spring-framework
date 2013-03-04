@@ -4,22 +4,24 @@
   if (clToUse == null) {
     clToUse=ClassUtils.getDefaultClassLoader();
   }
-  Properties properties=new Properties();
+  Properties props=new Properties();
   Enumeration urls=clToUse.getResources(resourceName);
   while (urls.hasMoreElements()) {
     URL url=(URL)urls.nextElement();
-    InputStream is=null;
+    URLConnection con=url.openConnection();
+    ResourceUtils.useCachesIfNecessary(con);
+    InputStream is=con.getInputStream();
     try {
-      URLConnection con=url.openConnection();
-      ResourceUtils.useCachesIfNecessary(con);
-      is=con.getInputStream();
-      properties.load(is);
-    }
-  finally {
-      if (is != null) {
-        is.close();
+      if (resourceName != null && resourceName.endsWith(XML_FILE_EXTENSION)) {
+        props.loadFromXML(is);
+      }
+ else {
+        props.load(is);
       }
     }
+  finally {
+      is.close();
+    }
   }
-  return properties;
+  return props;
 }

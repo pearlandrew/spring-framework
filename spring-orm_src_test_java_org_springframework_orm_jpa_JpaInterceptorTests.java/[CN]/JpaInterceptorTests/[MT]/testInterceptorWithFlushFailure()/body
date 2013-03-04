@@ -1,12 +1,8 @@
 {
-  factoryControl.expectAndReturn(factory.createEntityManager(),entityManager);
-  entityManager.flush();
+  given(factory.createEntityManager()).willReturn(entityManager);
   PersistenceException exception=new PersistenceException();
-  managerControl.setThrowable(exception,1);
-  managerControl.expectAndReturn(entityManager.isOpen(),true);
-  entityManager.close();
-  factoryControl.replay();
-  managerControl.replay();
+  willThrow(exception).given(entityManager).flush();
+  given(entityManager.isOpen()).willReturn(true);
   JpaInterceptor interceptor=new JpaInterceptor();
   interceptor.setFlushEager(true);
   interceptor.setEntityManagerFactory(factory);
@@ -16,6 +12,5 @@
  catch (  JpaSystemException ex) {
     assertEquals(exception,ex.getCause());
   }
-  factoryControl.verify();
-  managerControl.verify();
+  verify(entityManager).close();
 }

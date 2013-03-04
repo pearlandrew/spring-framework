@@ -1,45 +1,29 @@
 {
-  SingleConnectionFactory scf=new SingleConnectionFactory(mockConnectionFactory);
+  SingleConnectionFactory scf=new SingleConnectionFactory(connectionFactory);
   JmsTemplate template=createTemplate();
   template.setConnectionFactory(scf);
-  mockConnection.start();
-  connectionControl.setVoidCallable(1);
-  mockSession.getTransacted();
-  sessionControl.setReturnValue(useTransactedSession(),2);
-  if (useTransactedTemplate()) {
-    mockSession.commit();
-    sessionControl.setVoidCallable(1);
-  }
-  mockSession.close();
-  sessionControl.setVoidCallable(1);
-  mockConnection.stop();
-  connectionControl.setVoidCallable(1);
-  mockConnection.close();
-  connectionControl.setVoidCallable(1);
-  sessionControl.replay();
-  connectionControl.replay();
   TransactionSynchronizationManager.initSynchronization();
   try {
     template.execute(new SessionCallback(){
       @Override public Object doInJms(      Session session) throws JMSException {
-        boolean b=session.getTransacted();
+        session.getTransacted();
         return null;
       }
     }
 );
     template.execute(new SessionCallback(){
       @Override public Object doInJms(      Session session) throws JMSException {
-        boolean b=session.getTransacted();
+        session.getTransacted();
         return null;
       }
     }
 );
-    assertSame(mockSession,ConnectionFactoryUtils.getTransactionalSession(scf,null,false));
-    assertSame(mockSession,ConnectionFactoryUtils.getTransactionalSession(scf,scf.createConnection(),false));
+    assertSame(session,ConnectionFactoryUtils.getTransactionalSession(scf,null,false));
+    assertSame(session,ConnectionFactoryUtils.getTransactionalSession(scf,scf.createConnection(),false));
     TransactionAwareConnectionFactoryProxy tacf=new TransactionAwareConnectionFactoryProxy(scf);
     Connection tac=tacf.createConnection();
     Session tas=tac.createSession(false,Session.AUTO_ACKNOWLEDGE);
-    boolean b=tas.getTransacted();
+    tas.getTransacted();
     tas.close();
     tac.close();
     List synchs=TransactionSynchronizationManager.getSynchronizations();
@@ -55,7 +39,11 @@
     scf.destroy();
   }
   assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
-  connectionFactoryControl.verify();
-  connectionControl.verify();
-  sessionControl.verify();
+  verify(connection).start();
+  if (useTransactedTemplate()) {
+    verify(session).commit();
+  }
+  verify(session).close();
+  verify(connection).stop();
+  verify(connection).close();
 }

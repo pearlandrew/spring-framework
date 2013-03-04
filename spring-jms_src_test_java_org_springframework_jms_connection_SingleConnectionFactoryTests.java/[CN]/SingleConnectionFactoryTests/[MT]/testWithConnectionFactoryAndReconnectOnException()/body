@@ -1,10 +1,7 @@
 {
-  MockControl cfControl=MockControl.createControl(ConnectionFactory.class);
-  ConnectionFactory cf=(ConnectionFactory)cfControl.getMock();
+  ConnectionFactory cf=mock(ConnectionFactory.class);
   TestConnection con=new TestConnection();
-  cf.createConnection();
-  cfControl.setReturnValue(con,2);
-  cfControl.replay();
+  given(cf.createConnection()).willReturn(con);
   SingleConnectionFactory scf=new SingleConnectionFactory(cf);
   scf.setReconnectOnException(true);
   Connection con1=scf.createConnection();
@@ -14,7 +11,6 @@
   Connection con2=scf.createConnection();
   con2.start();
   scf.destroy();
-  cfControl.verify();
   assertEquals(2,con.getStartCount());
   assertEquals(2,con.getCloseCount());
 }

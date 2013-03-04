@@ -1,9 +1,6 @@
 {
-  MockControl emf2Mc=MockControl.createControl(EntityManagerFactoryWithInfo.class);
-  EntityManagerFactoryWithInfo mockEmf2=(EntityManagerFactoryWithInfo)emf2Mc.getMock();
-  mockEmf2.getPersistenceUnitName();
-  emf2Mc.setReturnValue("Person",2);
-  emf2Mc.replay();
+  EntityManagerFactoryWithInfo mockEmf2=mock(EntityManagerFactoryWithInfo.class);
+  given(mockEmf2.getPersistenceUnitName()).willReturn("Person");
   GenericApplicationContext gac=new GenericApplicationContext();
   gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory",mockEmf);
   gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory2",mockEmf2);
@@ -17,5 +14,4 @@
   DefaultPublicPersistenceUnitSetterNamedPerson bean2=(DefaultPublicPersistenceUnitSetterNamedPerson)gac.getBean(DefaultPublicPersistenceUnitSetterNamedPerson.class.getName());
   assertSame(mockEmf,bean.emf);
   assertSame(mockEmf2,bean2.emf);
-  emf2Mc.verify();
 }

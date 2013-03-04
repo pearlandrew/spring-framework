@@ -3,14 +3,25 @@
     boolean useSetObject=false;
     sqlType=Types.NULL;
     try {
-      DatabaseMetaData dbmd=ps.getConnection().getMetaData();
-      String databaseProductName=dbmd.getDatabaseProductName();
-      String jdbcDriverName=dbmd.getDriverName();
-      if (databaseProductName.startsWith("Informix") || jdbcDriverName.startsWith("Microsoft SQL Server")) {
-        useSetObject=true;
+      ParameterMetaData pmd=null;
+      try {
+        pmd=ps.getParameterMetaData();
       }
- else       if (databaseProductName.startsWith("DB2") || jdbcDriverName.startsWith("jConnect") || jdbcDriverName.startsWith("SQLServer")|| jdbcDriverName.startsWith("Apache Derby")) {
-        sqlType=Types.VARCHAR;
+ catch (      Throwable ex) {
+      }
+      if (pmd != null) {
+        sqlType=pmd.getParameterType(paramIndex);
+      }
+ else {
+        DatabaseMetaData dbmd=ps.getConnection().getMetaData();
+        String databaseProductName=dbmd.getDatabaseProductName();
+        String jdbcDriverName=dbmd.getDriverName();
+        if (databaseProductName.startsWith("Informix") || jdbcDriverName.startsWith("Microsoft SQL Server")) {
+          useSetObject=true;
+        }
+ else         if (databaseProductName.startsWith("DB2") || jdbcDriverName.startsWith("jConnect") || jdbcDriverName.startsWith("SQLServer")|| jdbcDriverName.startsWith("Apache Derby")) {
+          sqlType=Types.VARCHAR;
+        }
       }
     }
  catch (    Throwable ex) {

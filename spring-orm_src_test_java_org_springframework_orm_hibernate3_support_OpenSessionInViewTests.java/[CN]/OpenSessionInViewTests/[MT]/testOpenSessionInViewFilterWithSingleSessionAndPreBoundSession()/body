@@ -1,12 +1,8 @@
 {
-  final SessionFactory sf=createStrictMock(SessionFactory.class);
-  Session session=createStrictMock(Session.class);
-  expect(sf.openSession()).andReturn(session);
-  expect(session.getSessionFactory()).andReturn(sf);
-  session.setFlushMode(FlushMode.MANUAL);
-  expect(session.close()).andReturn(null);
-  replay(sf);
-  replay(session);
+  final SessionFactory sf=mock(SessionFactory.class);
+  Session session=mock(Session.class);
+  given(sf.openSession()).willReturn(session);
+  given(session.getSessionFactory()).willReturn(sf);
   StaticWebApplicationContext wac=new StaticWebApplicationContext();
   wac.setServletContext(sc);
   wac.getDefaultListableBeanFactory().registerSingleton("sessionFactory",sf);
@@ -33,7 +29,7 @@
   assertNotNull(this.request.getAttribute("invoked"));
   interceptor.postHandle(this.webRequest,null);
   interceptor.afterCompletion(this.webRequest,null);
-  verify(sf);
-  verify(session);
+  verify(session).setFlushMode(FlushMode.MANUAL);
+  verify(session).close();
   wac.close();
 }

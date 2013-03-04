@@ -1,14 +1,9 @@
 {
   Collection attached=new HashSet();
   Collection detached=new HashSet();
-  pmf.getPersistenceManager();
-  pmfControl.setReturnValue(pm);
-  pm.detachCopyAll(attached);
-  pmControl.setReturnValue(detached,1);
-  pm.close();
-  pmControl.setVoidCallable(1);
-  pmfControl.replay();
-  pmControl.replay();
+  given(pmf.getPersistenceManager()).willReturn(pm);
+  given(pm.detachCopyAll(attached)).willReturn(detached);
   JdoTemplate jt=new JdoTemplate(pmf);
   assertEquals(detached,jt.detachCopyAll(attached));
+  verify(pm).close();
 }

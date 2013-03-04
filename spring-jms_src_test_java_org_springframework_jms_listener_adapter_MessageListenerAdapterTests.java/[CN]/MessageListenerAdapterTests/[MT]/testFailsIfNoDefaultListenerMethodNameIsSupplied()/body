@@ -1,9 +1,6 @@
 {
-  MockControl mockMessage=MockControl.createControl(TextMessage.class);
-  final TextMessage message=(TextMessage)mockMessage.getMock();
-  message.getText();
-  mockMessage.setReturnValue(TEXT);
-  mockMessage.replay();
+  final TextMessage message=mock(TextMessage.class);
+  given(message.getText()).willReturn(TEXT);
   final MessageListenerAdapter adapter=new MessageListenerAdapter(){
     @Override protected void handleListenerException(    Throwable ex){
       assertTrue(ex instanceof IllegalStateException);
@@ -12,5 +9,4 @@
 ;
   adapter.setDefaultListenerMethod(null);
   adapter.onMessage(message);
-  mockMessage.verify();
 }

@@ -1,35 +1,13 @@
 {
-  MockControl queryControl=MockControl.createControl(Query.class);
-  Query query=(Query)queryControl.getMock();
-  MockControl dialectControl=MockControl.createControl(JdoDialect.class);
-  final JdoDialect dialect=(JdoDialect)dialectControl.getMock();
+  Query query=mock(Query.class);
+  final JdoDialect dialect=mock(JdoDialect.class);
   TransactionTemplate tt=new TransactionTemplate();
-  pmf.getConnectionFactory();
-  pmfControl.setReturnValue(null,2);
-  pmf.getPersistenceManager();
-  pmfControl.setReturnValue(pm,1);
-  pm.currentTransaction();
-  pmControl.setReturnValue(tx,3);
-  dialect.beginTransaction(tx,tt);
-  dialectControl.setReturnValue(null,1);
+  given(pmf.getPersistenceManager()).willReturn(pm);
+  given(pm.currentTransaction()).willReturn(tx);
   if (!exposeNativePm) {
     dialect.applyQueryTimeout(query,10);
   }
-  dialect.cleanupTransaction(null);
-  dialectControl.setVoidCallable(1);
-  pm.newQuery(TestBean.class);
-  pmControl.setReturnValue(query,1);
-  pm.close();
-  pmControl.setVoidCallable(1);
-  tx.getRollbackOnly();
-  txControl.setReturnValue(false,1);
-  tx.commit();
-  txControl.setVoidCallable(1);
-  pmfControl.replay();
-  pmControl.replay();
-  txControl.replay();
-  queryControl.replay();
-  dialectControl.replay();
+  given(pm.newQuery(TestBean.class)).willReturn(query);
   JdoTransactionManager tm=new JdoTransactionManager(pmf);
   tm.setJdoDialect(dialect);
   tt.setTransactionManager(tm);
@@ -62,6 +40,9 @@
 );
   assertTrue("Hasn't thread pm",!TransactionSynchronizationManager.hasResource(pmf));
   assertTrue("JTA synchronizations not active",!TransactionSynchronizationManager.isSynchronizationActive());
-  dialectControl.verify();
-  queryControl.verify();
+  verify(dialect).beginTransaction(tx,tt);
+  verify(dialect).cleanupTransaction(null);
+  verify(pm).close();
+  verify(tx).getRollbackOnly();
+  verify(tx).commit();
 }

@@ -1,7 +1,10 @@
 {
   for (  Map.Entry<CacheOperationContext,Object> entry : updates.entrySet()) {
-    for (    Cache cache : entry.getKey().getCaches()) {
-      cache.put(entry.getValue(),retVal);
+    CacheOperationContext operationContext=entry.getKey();
+    if (operationContext.canPutToCache(retVal)) {
+      for (      Cache cache : operationContext.getCaches()) {
+        cache.put(entry.getValue(),retVal);
+      }
     }
   }
 }

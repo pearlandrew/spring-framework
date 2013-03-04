@@ -1,60 +1,9 @@
 {
   Class<?> targetClass=(invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
-  final TransactionAttribute txAttr=getTransactionAttributeSource().getTransactionAttribute(invocation.getMethod(),targetClass);
-  final PlatformTransactionManager tm=determineTransactionManager(txAttr);
-  final String joinpointIdentification=methodIdentification(invocation.getMethod(),targetClass);
-  if (txAttr == null || !(tm instanceof CallbackPreferringPlatformTransactionManager)) {
-    TransactionInfo txInfo=createTransactionIfNecessary(tm,txAttr,joinpointIdentification);
-    Object retVal=null;
-    try {
-      retVal=invocation.proceed();
+  return invokeWithinTransaction(invocation.getMethod(),targetClass,new InvocationCallback(){
+    public Object proceedWithInvocation() throws Throwable {
+      return invocation.proceed();
     }
- catch (    Throwable ex) {
-      completeTransactionAfterThrowing(txInfo,ex);
-      throw ex;
-    }
- finally {
-      cleanupTransactionInfo(txInfo);
-    }
-    commitTransactionAfterReturning(txInfo);
-    return retVal;
   }
- else {
-    try {
-      Object result=((CallbackPreferringPlatformTransactionManager)tm).execute(txAttr,new TransactionCallback<Object>(){
-        public Object doInTransaction(        TransactionStatus status){
-          TransactionInfo txInfo=prepareTransactionInfo(tm,txAttr,joinpointIdentification,status);
-          try {
-            return invocation.proceed();
-          }
- catch (          Throwable ex) {
-            if (txAttr.rollbackOn(ex)) {
-              if (ex instanceof RuntimeException) {
-                throw (RuntimeException)ex;
-              }
- else {
-                throw new ThrowableHolderException(ex);
-              }
-            }
- else {
-              return new ThrowableHolder(ex);
-            }
-          }
- finally {
-            cleanupTransactionInfo(txInfo);
-          }
-        }
-      }
 );
-      if (result instanceof ThrowableHolder) {
-        throw ((ThrowableHolder)result).getThrowable();
-      }
- else {
-        return result;
-      }
-    }
- catch (    ThrowableHolderException ex) {
-      throw ex.getCause();
-    }
-  }
 }

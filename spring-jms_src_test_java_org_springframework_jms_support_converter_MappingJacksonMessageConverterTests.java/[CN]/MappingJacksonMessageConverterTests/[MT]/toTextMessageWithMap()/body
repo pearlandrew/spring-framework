@@ -1,11 +1,9 @@
 {
   converter.setTargetType(MessageType.TEXT);
-  TextMessage textMessageMock=createMock(TextMessage.class);
+  TextMessage textMessageMock=mock(TextMessage.class);
   Map<String,String> toBeMarshalled=new HashMap<String,String>();
   toBeMarshalled.put("foo","bar");
-  textMessageMock.setStringProperty("__typeid__",HashMap.class.getName());
-  expect(sessionMock.createTextMessage(isA(String.class))).andReturn(textMessageMock);
-  replay(sessionMock,textMessageMock);
+  given(sessionMock.createTextMessage(isA(String.class))).willReturn(textMessageMock);
   converter.toMessage(toBeMarshalled,sessionMock);
-  verify(sessionMock,textMessageMock);
+  verify(textMessageMock).setStringProperty("__typeid__",HashMap.class.getName());
 }

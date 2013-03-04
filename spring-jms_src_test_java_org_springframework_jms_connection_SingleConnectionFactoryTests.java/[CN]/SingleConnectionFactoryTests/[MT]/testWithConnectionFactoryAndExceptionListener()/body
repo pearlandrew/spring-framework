@@ -1,23 +1,9 @@
 {
-  MockControl cfControl=MockControl.createControl(ConnectionFactory.class);
-  ConnectionFactory cf=(ConnectionFactory)cfControl.getMock();
-  MockControl conControl=MockControl.createControl(Connection.class);
-  Connection con=(Connection)conControl.getMock();
+  ConnectionFactory cf=mock(ConnectionFactory.class);
+  Connection con=mock(Connection.class);
   ExceptionListener listener=new ChainedExceptionListener();
-  cf.createConnection();
-  cfControl.setReturnValue(con,1);
-  con.setExceptionListener(listener);
-  conControl.setVoidCallable(1);
-  con.getExceptionListener();
-  conControl.setReturnValue(listener,1);
-  con.start();
-  conControl.setVoidCallable(1);
-  con.stop();
-  conControl.setVoidCallable(1);
-  con.close();
-  conControl.setVoidCallable(1);
-  cfControl.replay();
-  conControl.replay();
+  given(cf.createConnection()).willReturn(con);
+  given(con.getExceptionListener()).willReturn(listener);
   SingleConnectionFactory scf=new SingleConnectionFactory(cf);
   scf.setExceptionListener(listener);
   Connection con1=scf.createConnection();
@@ -30,6 +16,8 @@
   con2.stop();
   con2.close();
   scf.destroy();
-  cfControl.verify();
-  conControl.verify();
+  verify(con).setExceptionListener(listener);
+  verify(con).start();
+  verify(con).stop();
+  verify(con).close();
 }

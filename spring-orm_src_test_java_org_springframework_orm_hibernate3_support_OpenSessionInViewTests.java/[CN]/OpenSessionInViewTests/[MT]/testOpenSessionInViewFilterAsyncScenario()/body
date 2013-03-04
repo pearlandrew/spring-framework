@@ -1,11 +1,8 @@
 {
-  final SessionFactory sf=createStrictMock(SessionFactory.class);
-  Session session=createStrictMock(Session.class);
-  expect(sf.openSession()).andReturn(session);
-  expect(session.getSessionFactory()).andReturn(sf);
-  session.setFlushMode(FlushMode.MANUAL);
-  replay(sf);
-  replay(session);
+  final SessionFactory sf=mock(SessionFactory.class);
+  Session session=mock(Session.class);
+  given(sf.openSession()).willReturn(session);
+  given(session.getSessionFactory()).willReturn(sf);
   StaticWebApplicationContext wac=new StaticWebApplicationContext();
   wac.setServletContext(sc);
   wac.getDefaultListableBeanFactory().registerSingleton("sessionFactory",sf);
@@ -22,13 +19,8 @@
     }
   }
 ;
-  AsyncWebRequest asyncWebRequest=createMock(AsyncWebRequest.class);
-  asyncWebRequest.addCompletionHandler((Runnable)anyObject());
-  asyncWebRequest.addTimeoutHandler(EasyMock.<Runnable>anyObject());
-  asyncWebRequest.addCompletionHandler((Runnable)anyObject());
-  asyncWebRequest.startAsync();
-  expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();
-  replay(asyncWebRequest);
+  AsyncWebRequest asyncWebRequest=mock(AsyncWebRequest.class);
+  given(asyncWebRequest.isAsyncStarted()).willReturn(true);
   WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(this.request);
   asyncManager.setTaskExecutor(new SyncTaskExecutor());
   asyncManager.setAsyncWebRequest(asyncWebRequest);
@@ -42,23 +34,13 @@
   filter.doFilter(this.request,this.response,filterChain);
   assertFalse(TransactionSynchronizationManager.hasResource(sf));
   assertEquals(1,count.get());
-  verify(sf);
-  verify(session);
-  verify(asyncWebRequest);
-  reset(sf);
-  reset(session);
-  reset(asyncWebRequest);
-  expect(session.close()).andReturn(null);
-  expect(asyncWebRequest.isAsyncStarted()).andReturn(false).anyTimes();
-  replay(sf);
-  replay(session);
-  replay(asyncWebRequest);
   assertFalse(TransactionSynchronizationManager.hasResource(sf));
   filter.doFilter(this.request,this.response,filterChain);
   assertFalse(TransactionSynchronizationManager.hasResource(sf));
   assertEquals(2,count.get());
-  verify(sf);
-  verify(session);
-  verify(asyncWebRequest);
+  verify(session).setFlushMode(FlushMode.MANUAL);
+  verify(asyncWebRequest,times(2)).addCompletionHandler(any(Runnable.class));
+  verify(asyncWebRequest).addTimeoutHandler(any(Runnable.class));
+  verify(asyncWebRequest).startAsync();
   wac.close();
 }

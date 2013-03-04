@@ -21,18 +21,21 @@
     }
   }
   if (this.sqlErrorCodes != null) {
-    String errorCode=null;
+    String errorCode;
     if (this.sqlErrorCodes.isUseSqlStateForTranslation()) {
       errorCode=sqlEx.getSQLState();
     }
  else {
-      errorCode=Integer.toString(sqlEx.getErrorCode());
+      SQLException current=sqlEx;
+      while (current.getErrorCode() == 0 && current.getCause() instanceof SQLException) {
+        current=(SQLException)current.getCause();
+      }
+      errorCode=Integer.toString(current.getErrorCode());
     }
     if (errorCode != null) {
       CustomSQLErrorCodesTranslation[] customTranslations=this.sqlErrorCodes.getCustomTranslations();
       if (customTranslations != null) {
-        for (int i=0; i < customTranslations.length; i++) {
-          CustomSQLErrorCodesTranslation customTranslation=customTranslations[i];
+        for (        CustomSQLErrorCodesTranslation customTranslation : customTranslations) {
           if (Arrays.binarySearch(customTranslation.getErrorCodes(),errorCode) >= 0) {
             if (customTranslation.getExceptionClass() != null) {
               DataAccessException customException=createCustomException(task,sql,sqlEx,customTranslation.getExceptionClass());
@@ -87,7 +90,7 @@
     }
   }
   if (logger.isDebugEnabled()) {
-    String codes=null;
+    String codes;
     if (this.sqlErrorCodes != null && this.sqlErrorCodes.isUseSqlStateForTranslation()) {
       codes="SQL state '" + sqlEx.getSQLState() + "', error code '"+ sqlEx.getErrorCode();
     }

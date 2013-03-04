@@ -3,7 +3,6 @@
   interceptor.setEntityManagerFactory(factory);
   MockServletContext sc=new MockServletContext();
   MockHttpServletRequest request=new MockHttpServletRequest(sc);
-  replay(manager,factory);
   interceptor.preHandle(new ServletWebRequest(request));
   assertTrue(TransactionSynchronizationManager.hasResource(factory));
   interceptor.preHandle(new ServletWebRequest(request));
@@ -15,17 +14,10 @@
   interceptor.preHandle(new ServletWebRequest(request));
   interceptor.postHandle(new ServletWebRequest(request),null);
   interceptor.afterCompletion(new ServletWebRequest(request),null);
-  verify(manager,factory);
-  reset(manager,factory);
-  replay(manager,factory);
   interceptor.postHandle(new ServletWebRequest(request),null);
   assertTrue(TransactionSynchronizationManager.hasResource(factory));
-  verify(manager,factory);
-  reset(manager,factory);
-  expect(manager.isOpen()).andReturn(true);
-  manager.close();
-  replay(manager,factory);
+  given(manager.isOpen()).willReturn(true);
   interceptor.afterCompletion(new ServletWebRequest(request),null);
   assertFalse(TransactionSynchronizationManager.hasResource(factory));
-  verify(manager,factory);
+  verify(manager).close();
 }

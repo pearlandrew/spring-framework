@@ -1,8 +1,15 @@
 {
-  testRollback(new TransactionOperationCallback(){
-    public Object performTransactionalOperation() throws Throwable {
-      return annotationOnlyOnClassWithNoInterface.echo(new RuntimeException());
+  final RuntimeException ex=new RuntimeException();
+  try {
+    testRollback(new TransactionOperationCallback(){
+      public Object performTransactionalOperation() throws Throwable {
+        return annotationOnlyOnClassWithNoInterface.echo(ex);
+      }
     }
-  }
 ,true);
+    fail("Should have thrown RuntimeException");
+  }
+ catch (  RuntimeException ex2) {
+    assertSame(ex,ex2);
+  }
 }

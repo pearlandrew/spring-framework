@@ -1,26 +1,9 @@
 {
   Object testEntity=new Object();
-  MockControl sharedEmMc=MockControl.createControl(EntityManager.class);
-  EntityManager sharedEm=(EntityManager)sharedEmMc.getMock();
-  sharedEm.getTransaction();
-  sharedEmMc.setReturnValue(new NoOpEntityTransaction(),3);
-  sharedEm.close();
-  sharedEmMc.setVoidCallable(1);
-  sharedEmMc.replay();
-  mockEmf.createEntityManager();
-  emfMc.setReturnValue(sharedEm);
-  MockControl emMc=MockControl.createControl(EntityManager.class);
-  EntityManager mockEm=(EntityManager)emMc.getMock();
-  mockEm.joinTransaction();
-  emMc.setVoidCallable(1);
-  mockEm.contains(testEntity);
-  emMc.setReturnValue(false);
-  emMc.replay();
-  mockEmf.createEntityManager();
-  emfMc.setReturnValue(mockEm);
-  mockEmf.close();
-  emfMc.setVoidCallable();
-  emfMc.replay();
+  EntityManager sharedEm=mock(EntityManager.class);
+  given(sharedEm.getTransaction()).willReturn(new NoOpEntityTransaction());
+  EntityManager mockEm=mock(EntityManager.class);
+  given(mockEmf.createEntityManager()).willReturn(sharedEm,mockEm);
   LocalContainerEntityManagerFactoryBean cefb=parseValidPersistenceUnit();
   MutablePersistenceUnitInfo pui=((MutablePersistenceUnitInfo)cefb.getPersistenceUnitInfo());
   pui.setTransactionType(PersistenceUnitTransactionType.JTA);
@@ -35,6 +18,7 @@
   assertFalse(em.contains(testEntity));
   jpatm.commit(txStatus);
   cefb.destroy();
-  emfMc.verify();
-  emMc.verify();
+  verify(mockEm).joinTransaction();
+  verify(mockEm).contains(testEntity);
+  verify(mockEmf).close();
 }
