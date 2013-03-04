@@ -1,17 +1,20 @@
 {
-  if (streamAsLob || wrapAsLob) {
+  if (streamAsLob) {
     if (asciiStream != null) {
       try {
-        if (streamAsLob) {
-          ps.setClob(paramIndex,new InputStreamReader(asciiStream,"US-ASCII"),contentLength);
-        }
- else {
-          ps.setClob(paramIndex,new PassThroughClob(asciiStream,contentLength));
-        }
+        ps.setClob(paramIndex,new InputStreamReader(asciiStream,"US-ASCII"),contentLength);
       }
  catch (      UnsupportedEncodingException ex) {
         throw new SQLException("US-ASCII encoding not supported: " + ex);
       }
+    }
+ else {
+      ps.setClob(paramIndex,(Clob)null);
+    }
+  }
+ else   if (wrapAsLob) {
+    if (asciiStream != null) {
+      ps.setClob(paramIndex,new PassThroughClob(asciiStream,contentLength));
     }
  else {
       ps.setClob(paramIndex,(Clob)null);

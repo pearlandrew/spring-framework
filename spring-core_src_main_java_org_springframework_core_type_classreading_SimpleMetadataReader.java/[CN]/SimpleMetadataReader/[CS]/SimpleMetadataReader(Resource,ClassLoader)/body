@@ -1,10 +1,13 @@
 {
   InputStream is=new BufferedInputStream(resource.getInputStream());
-  ClassReader classReader=null;
+  ClassReader classReader;
   try {
     classReader=new ClassReader(is);
   }
-  finally {
+ catch (  IllegalArgumentException ex) {
+    throw new NestedIOException("ASM ClassReader failed to parse class file - " + "probably due to a new Java class file version that isn't supported yet: " + resource,ex);
+  }
+ finally {
     is.close();
   }
   AnnotationMetadataReadingVisitor visitor=new AnnotationMetadataReadingVisitor(classLoader);

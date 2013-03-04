@@ -1,14 +1,7 @@
 {
-  OutputStream stream=this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream();
+  OutputStream stream=(this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream());
   Object value=filterModel(model);
-  JsonGenerator generator=this.objectMapper.getJsonFactory().createJsonGenerator(stream,this.encoding);
-  if (this.objectMapper.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
-    generator.useDefaultPrettyPrinter();
-  }
-  if (this.prefixJson) {
-    generator.writeRaw("{} && ");
-  }
-  this.objectMapper.writeValue(generator,value);
+  writeContent(stream,value,this.prefixJson);
   if (this.updateContentLength) {
     writeToResponse(response,(ByteArrayOutputStream)stream);
   }

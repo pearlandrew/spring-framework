@@ -3,15 +3,10 @@
   assertEquals(0,txManager.begun);
   try {
     toc.performTransactionalOperation();
-    assertEquals(1,txManager.commits);
   }
- catch (  Throwable caught) {
-    if (caught instanceof AssertionFailedError) {
-      return;
-    }
+  finally {
+    assertEquals(1,txManager.begun);
+    assertEquals(rollback ? 0 : 1,txManager.commits);
+    assertEquals(rollback ? 1 : 0,txManager.rollbacks);
   }
-  if (rollback) {
-    assertEquals(1,txManager.rollbacks);
-  }
-  assertEquals(1,txManager.begun);
 }

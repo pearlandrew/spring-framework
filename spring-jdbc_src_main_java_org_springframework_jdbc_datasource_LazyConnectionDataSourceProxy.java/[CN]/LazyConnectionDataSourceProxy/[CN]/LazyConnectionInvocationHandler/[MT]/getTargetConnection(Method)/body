@@ -6,7 +6,12 @@
     this.target=(this.username != null) ? getTargetDataSource().getConnection(this.username,this.password) : getTargetDataSource().getConnection();
     checkDefaultConnectionProperties(this.target);
     if (this.readOnly) {
-      this.target.setReadOnly(this.readOnly);
+      try {
+        this.target.setReadOnly(this.readOnly);
+      }
+ catch (      Exception ex) {
+        logger.debug("Could not set JDBC Connection read-only",ex);
+      }
     }
     if (this.transactionIsolation != null && !this.transactionIsolation.equals(defaultTransactionIsolation())) {
       this.target.setTransactionIsolation(this.transactionIsolation);
