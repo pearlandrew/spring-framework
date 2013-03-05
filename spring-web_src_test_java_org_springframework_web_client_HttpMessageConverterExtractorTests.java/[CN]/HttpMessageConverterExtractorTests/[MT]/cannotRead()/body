@@ -1,20 +1,18 @@
 {
-  HttpMessageConverter<String> converter=createMock(HttpMessageConverter.class);
+  HttpMessageConverter<String> converter=mock(HttpMessageConverter.class);
   List<HttpMessageConverter<?>> converters=new ArrayList<HttpMessageConverter<?>>();
   converters.add(converter);
   HttpHeaders responseHeaders=new HttpHeaders();
   MediaType contentType=MediaType.TEXT_PLAIN;
   responseHeaders.setContentType(contentType);
   extractor=new HttpMessageConverterExtractor<String>(String.class,converters);
-  expect(response.getStatusCode()).andReturn(HttpStatus.OK);
-  expect(response.getHeaders()).andReturn(responseHeaders).times(2);
-  expect(converter.canRead(String.class,contentType)).andReturn(false);
-  replay(response,converter);
+  given(response.getStatusCode()).willReturn(HttpStatus.OK);
+  given(response.getHeaders()).willReturn(responseHeaders);
+  given(converter.canRead(String.class,contentType)).willReturn(false);
   try {
     extractor.extractData(response);
     fail("RestClientException expected");
   }
  catch (  RestClientException expected) {
   }
-  verify(response,converter);
 }

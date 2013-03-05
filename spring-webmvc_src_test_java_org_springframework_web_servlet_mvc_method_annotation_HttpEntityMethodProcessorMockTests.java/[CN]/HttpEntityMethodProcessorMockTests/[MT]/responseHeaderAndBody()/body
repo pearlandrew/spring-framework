@@ -2,14 +2,12 @@
   HttpHeaders responseHeaders=new HttpHeaders();
   responseHeaders.set("header","headerValue");
   ResponseEntity<String> returnValue=new ResponseEntity<String>("body",responseHeaders,HttpStatus.ACCEPTED);
-  Capture<HttpOutputMessage> outputMessage=new Capture<HttpOutputMessage>();
-  expect(messageConverter.canWrite(String.class,null)).andReturn(true);
-  expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-  expect(messageConverter.canWrite(String.class,MediaType.TEXT_PLAIN)).andReturn(true);
-  messageConverter.write(eq("body"),eq(MediaType.TEXT_PLAIN),capture(outputMessage));
-  replay(messageConverter);
+  given(messageConverter.canWrite(String.class,null)).willReturn(true);
+  given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+  given(messageConverter.canWrite(String.class,MediaType.TEXT_PLAIN)).willReturn(true);
   processor.handleReturnValue(returnValue,returnTypeResponseEntity,mavContainer,webRequest);
+  ArgumentCaptor<HttpOutputMessage> outputMessage=ArgumentCaptor.forClass(HttpOutputMessage.class);
+  verify(messageConverter).write(eq("body"),eq(MediaType.TEXT_PLAIN),outputMessage.capture());
   assertTrue(mavContainer.isRequestHandled());
   assertEquals("headerValue",outputMessage.getValue().getHeaders().get("header").get(0));
-  verify(messageConverter);
 }

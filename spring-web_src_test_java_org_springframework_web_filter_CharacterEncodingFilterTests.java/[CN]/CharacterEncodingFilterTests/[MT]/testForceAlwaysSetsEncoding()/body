@@ -1,24 +1,17 @@
 {
-  HttpServletRequest request=createMock(HttpServletRequest.class);
-  addAsyncManagerExpectations(request);
+  HttpServletRequest request=mock(HttpServletRequest.class);
   request.setCharacterEncoding(ENCODING);
-  expect(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).andReturn(null);
-  expect(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
-  request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX,Boolean.TRUE);
-  request.removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
-  replay(request);
-  HttpServletResponse response=createMock(HttpServletResponse.class);
-  response.setCharacterEncoding(ENCODING);
-  replay(response);
-  FilterChain filterChain=createMock(FilterChain.class);
-  filterChain.doFilter(request,response);
-  replay(filterChain);
+  given(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).willReturn(null);
+  given(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).willReturn(null);
+  HttpServletResponse response=mock(HttpServletResponse.class);
+  FilterChain filterChain=mock(FilterChain.class);
   CharacterEncodingFilter filter=new CharacterEncodingFilter();
   filter.setForceEncoding(true);
   filter.setEncoding(ENCODING);
   filter.init(new MockFilterConfig(FILTER_NAME));
   filter.doFilter(request,response,filterChain);
-  verify(request);
-  verify(response);
-  verify(filterChain);
+  verify(request).setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX,Boolean.TRUE);
+  verify(request).removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
+  verify(response).setCharacterEncoding(ENCODING);
+  verify(filterChain).doFilter(request,response);
 }

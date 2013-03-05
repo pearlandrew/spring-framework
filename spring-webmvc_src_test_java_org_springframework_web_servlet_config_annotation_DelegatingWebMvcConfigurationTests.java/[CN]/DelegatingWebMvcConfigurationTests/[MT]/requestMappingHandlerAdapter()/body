@@ -1,27 +1,18 @@
 {
-  Capture<List<HttpMessageConverter<?>>> converters=new Capture<List<HttpMessageConverter<?>>>();
-  Capture<ContentNegotiationConfigurer> contentNegotiationConfigurer=new Capture<ContentNegotiationConfigurer>();
-  Capture<FormattingConversionService> conversionService=new Capture<FormattingConversionService>();
-  Capture<List<HandlerMethodArgumentResolver>> resolvers=new Capture<List<HandlerMethodArgumentResolver>>();
-  Capture<List<HandlerMethodReturnValueHandler>> handlers=new Capture<List<HandlerMethodReturnValueHandler>>();
-  Capture<AsyncSupportConfigurer> asyncConfigurer=new Capture<AsyncSupportConfigurer>();
-  webMvcConfigurer.configureMessageConverters(capture(converters));
-  webMvcConfigurer.configureContentNegotiation(capture(contentNegotiationConfigurer));
-  expect(webMvcConfigurer.getValidator()).andReturn(null);
-  expect(webMvcConfigurer.getMessageCodesResolver()).andReturn(null);
-  webMvcConfigurer.addFormatters(capture(conversionService));
-  webMvcConfigurer.addArgumentResolvers(capture(resolvers));
-  webMvcConfigurer.addReturnValueHandlers(capture(handlers));
-  webMvcConfigurer.configureAsyncSupport(capture(asyncConfigurer));
-  replay(webMvcConfigurer);
   delegatingConfig.setConfigurers(Arrays.asList(webMvcConfigurer));
   RequestMappingHandlerAdapter adapter=delegatingConfig.requestMappingHandlerAdapter();
   ConfigurableWebBindingInitializer initializer=(ConfigurableWebBindingInitializer)adapter.getWebBindingInitializer();
-  assertSame(conversionService.getValue(),initializer.getConversionService());
+  ConversionService initializerConversionService=initializer.getConversionService();
   assertTrue(initializer.getValidator() instanceof LocalValidatorFactoryBean);
+  verify(webMvcConfigurer).configureMessageConverters(converters.capture());
+  verify(webMvcConfigurer).configureContentNegotiation(contentNegotiationConfigurer.capture());
+  verify(webMvcConfigurer).addFormatters(conversionService.capture());
+  verify(webMvcConfigurer).addArgumentResolvers(resolvers.capture());
+  verify(webMvcConfigurer).addReturnValueHandlers(handlers.capture());
+  verify(webMvcConfigurer).configureAsyncSupport(asyncConfigurer.capture());
+  assertSame(conversionService.getValue(),initializerConversionService);
   assertEquals(0,resolvers.getValue().size());
   assertEquals(0,handlers.getValue().size());
   assertEquals(converters.getValue(),adapter.getMessageConverters());
   assertNotNull(asyncConfigurer);
-  verify(webMvcConfigurer);
 }

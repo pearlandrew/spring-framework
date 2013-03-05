@@ -1,17 +1,6 @@
 {
-  MockControl utControl=MockControl.createControl(UserTransaction.class);
-  UserTransaction ut=(UserTransaction)utControl.getMock();
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
-  ut.setTransactionTimeout(10);
-  utControl.setVoidCallable(1);
-  ut.begin();
-  utControl.setVoidCallable(1);
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_ACTIVE,1);
-  ut.rollback();
-  utControl.setVoidCallable(1);
-  utControl.replay();
+  UserTransaction ut=mock(UserTransaction.class);
+  given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION,Status.STATUS_ACTIVE);
   JtaTransactionManager ptm=newJtaTransactionManager(ut);
   TransactionTemplate tt=new TransactionTemplate(ptm);
   ptm.setTransactionSynchronizationName("SYNCHRONIZATION_NEVER");
@@ -26,5 +15,8 @@
   }
 );
   assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
-  utControl.verify();
+  verify(ut).setTransactionTimeout(10);
+  verify(ut).begin();
+  verify(ut,atLeastOnce()).getStatus();
+  verify(ut).rollback();
 }

@@ -1,15 +1,11 @@
 {
   ByteArrayMultipartFileEditor editor=new ByteArrayMultipartFileEditor();
-  MockControl mock=MockControl.createControl(MultipartFile.class);
-  MultipartFile file=(MultipartFile)mock.getMock();
-  file.getBytes();
-  mock.setThrowable(new IOException());
-  mock.replay();
+  MultipartFile file=mock(MultipartFile.class);
+  given(file.getBytes()).willThrow(new IOException());
   try {
     editor.setValue(file);
     fail("Must have thrown an IllegalArgumentException: IOException thrown when reading MultipartFile bytes");
   }
  catch (  IllegalArgumentException expected) {
   }
-  mock.verify();
 }

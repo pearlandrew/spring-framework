@@ -1,15 +1,7 @@
 {
-  MockControl utControl=MockControl.createControl(UserTransaction.class);
-  UserTransaction ut=(UserTransaction)utControl.getMock();
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_ACTIVE,2);
-  ut.begin();
-  utControl.setVoidCallable(1);
-  ut.commit();
-  utControl.setThrowable(new HeuristicMixedException("heuristic exception"));
-  utControl.replay();
+  UserTransaction ut=mock(UserTransaction.class);
+  given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION,Status.STATUS_ACTIVE,Status.STATUS_ACTIVE);
+  willThrow(new HeuristicMixedException("heuristic exception")).given(ut).commit();
   try {
     JtaTransactionManager ptm=newJtaTransactionManager(ut);
     TransactionTemplate tt=new TransactionTemplate(ptm);
@@ -29,5 +21,5 @@
  catch (  HeuristicCompletionException ex) {
     assertTrue(ex.getOutcomeState() == HeuristicCompletionException.STATE_MIXED);
   }
-  utControl.verify();
+  verify(ut).begin();
 }

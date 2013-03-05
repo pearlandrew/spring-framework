@@ -6,19 +6,11 @@
   MapTransactionAttributeSource tas=new MapTransactionAttributeSource();
   tas.register(outerMethod,outerTxatt);
   tas.register(innerMethod,innerTxatt);
-  TransactionStatus outerStatus=transactionStatusForNewTransaction();
-  TransactionStatus innerStatus=transactionStatusForNewTransaction();
-  MockControl ptmControl=MockControl.createControl(PlatformTransactionManager.class);
-  PlatformTransactionManager ptm=(PlatformTransactionManager)ptmControl.getMock();
-  ptm.getTransaction(outerTxatt);
-  ptmControl.setReturnValue(outerStatus,1);
-  ptm.getTransaction(innerTxatt);
-  ptmControl.setReturnValue(innerStatus,1);
-  ptm.commit(innerStatus);
-  ptmControl.setVoidCallable(1);
-  ptm.commit(outerStatus);
-  ptmControl.setVoidCallable(1);
-  ptmControl.replay();
+  TransactionStatus outerStatus=mock(TransactionStatus.class);
+  TransactionStatus innerStatus=mock(TransactionStatus.class);
+  PlatformTransactionManager ptm=mock(PlatformTransactionManager.class);
+  given(ptm.getTransaction(outerTxatt)).willReturn(outerStatus);
+  given(ptm.getTransaction(innerTxatt)).willReturn(innerStatus);
   final String spouseName="innerName";
   TestBean outer=new TestBean(){
     @Override public void exceptional(    Throwable t) throws Throwable {
@@ -44,5 +36,6 @@
   checkTransactionStatus(false);
   outerProxy.exceptional(null);
   checkTransactionStatus(false);
-  ptmControl.verify();
+  verify(ptm).commit(innerStatus);
+  verify(ptm).commit(outerStatus);
 }

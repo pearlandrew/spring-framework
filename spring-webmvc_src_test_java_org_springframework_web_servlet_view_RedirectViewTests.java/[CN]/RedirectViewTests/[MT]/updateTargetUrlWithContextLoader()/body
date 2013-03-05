@@ -5,16 +5,15 @@
   ContextLoader contextLoader=new ContextLoader(wac);
   contextLoader.initWebApplicationContext(servletContext);
   try {
-    RequestDataValueProcessor mockProcessor=createMock(RequestDataValueProcessor.class);
+    RequestDataValueProcessor mockProcessor=mock(RequestDataValueProcessor.class);
     wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);
     RedirectView rv=new RedirectView();
     rv.setUrl("/path");
     MockHttpServletRequest request=createRequest();
     HttpServletResponse response=new MockHttpServletResponse();
-    EasyMock.expect(mockProcessor.processUrl(request,"/path")).andReturn("/path?key=123");
-    EasyMock.replay(mockProcessor);
+    given(mockProcessor.processUrl(request,"/path")).willReturn("/path?key=123");
     rv.render(new ModelMap(),request,response);
-    EasyMock.verify(mockProcessor);
+    verify(mockProcessor).processUrl(request,"/path");
   }
   finally {
     contextLoader.closeWebApplicationContext(servletContext);

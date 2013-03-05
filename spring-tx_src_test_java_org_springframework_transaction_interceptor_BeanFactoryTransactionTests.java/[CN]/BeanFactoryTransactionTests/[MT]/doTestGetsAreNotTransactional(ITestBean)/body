@@ -1,12 +1,9 @@
 {
-  MockControl ptmControl=MockControl.createControl(PlatformTransactionManager.class);
-  PlatformTransactionManager ptm=(PlatformTransactionManager)ptmControl.getMock();
-  ptmControl.replay();
+  PlatformTransactionManager ptm=mock(PlatformTransactionManager.class);
   PlatformTransactionManagerFacade.delegate=ptm;
   assertTrue("Age should not be " + testBean.getAge(),testBean.getAge() == 666);
-  ptmControl.verify();
-  MockControl statusControl=MockControl.createControl(TransactionStatus.class);
-  final TransactionStatus ts=(TransactionStatus)statusControl.getMock();
+  verifyZeroInteractions(ptm);
+  final TransactionStatus ts=mock(TransactionStatus.class);
   ptm=new PlatformTransactionManager(){
     private boolean invoked;
     @Override public TransactionStatus getTransaction(    TransactionDefinition def) throws TransactionException {
@@ -31,5 +28,4 @@
   int age=666;
   testBean.setAge(age);
   assertTrue(testBean.getAge() == age);
-  ptmControl.verify();
 }

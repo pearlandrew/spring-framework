@@ -11,11 +11,10 @@
     }
   }
 ;
-  ModuleConfig defaultModuleConfig=createMock(ModuleConfig.class);
-  expect(defaultModuleConfig.getPrefix()).andReturn("").anyTimes();
-  ModuleConfig moduleConfig=createMock(ModuleConfig.class);
-  expect(moduleConfig.getPrefix()).andReturn("/module").anyTimes();
-  replay(defaultModuleConfig,moduleConfig);
+  ModuleConfig defaultModuleConfig=mock(ModuleConfig.class);
+  given(defaultModuleConfig.getPrefix()).willReturn("");
+  ModuleConfig moduleConfig=mock(ModuleConfig.class);
+  given(moduleConfig.getPrefix()).willReturn("/module");
   plugin.init(actionServlet,defaultModuleConfig);
   assertTrue(servletContext.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX) != null);
   assertTrue(servletContext.getAttribute(ContextLoaderPlugIn.SERVLET_CONTEXT_PREFIX + "/module") == null);
@@ -31,5 +30,4 @@
   proxy.setServlet(null);
   plugin.destroy();
   assertTrue(testAction.getServlet() == null);
-  verify(defaultModuleConfig,moduleConfig);
 }

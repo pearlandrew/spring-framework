@@ -1,16 +1,15 @@
 {
-  ConnectionFactory connectionFactory=createMock(ConnectionFactory.class);
-  Connection connection=createMock(Connection.class);
-  Interaction interaction=createMock(Interaction.class);
-  Record inputOutputRecord=createMock(Record.class);
-  InteractionSpec interactionSpec=createMock(InteractionSpec.class);
-  expect(connectionFactory.getConnection()).andReturn(connection);
-  expect(connection.createInteraction()).andReturn(interaction);
-  expect(interaction.execute(interactionSpec,inputOutputRecord,inputOutputRecord)).andReturn(true);
-  interaction.close();
-  connection.close();
-  replay(connectionFactory,connection,interaction);
+  ConnectionFactory connectionFactory=mock(ConnectionFactory.class);
+  Connection connection=mock(Connection.class);
+  Interaction interaction=mock(Interaction.class);
+  Record inputOutputRecord=mock(Record.class);
+  InteractionSpec interactionSpec=mock(InteractionSpec.class);
+  given(connectionFactory.getConnection()).willReturn(connection);
+  given(connection.createInteraction()).willReturn(interaction);
+  given(interaction.execute(interactionSpec,inputOutputRecord,inputOutputRecord)).willReturn(true);
   CciTemplate ct=new CciTemplate(connectionFactory);
   ct.execute(interactionSpec,inputOutputRecord,inputOutputRecord);
-  verify(connectionFactory,connection,interaction);
+  verify(interaction).execute(interactionSpec,inputOutputRecord,inputOutputRecord);
+  verify(interaction).close();
+  verify(connection).close();
 }

@@ -1,14 +1,8 @@
 {
   FreeMarkerView fv=new FreeMarkerView();
-  MockControl wmc=MockControl.createControl(WebApplicationContext.class);
-  WebApplicationContext wac=(WebApplicationContext)wmc.getMock();
-  wac.getBeansOfType(FreeMarkerConfig.class,true,false);
-  wmc.setReturnValue(new HashMap());
-  wac.getParentBeanFactory();
-  wmc.setReturnValue(null);
-  wac.getServletContext();
-  wmc.setReturnValue(new MockServletContext());
-  wmc.replay();
+  WebApplicationContext wac=mock(WebApplicationContext.class);
+  given(wac.getBeansOfType(FreeMarkerConfig.class,true,false)).willReturn(new HashMap<String,FreeMarkerConfig>());
+  given(wac.getServletContext()).willReturn(new MockServletContext());
   fv.setUrl("anythingButNull");
   try {
     fv.setApplicationContext(wac);
@@ -18,5 +12,4 @@
  catch (  ApplicationContextException ex) {
     assertTrue(ex.getMessage().indexOf("FreeMarkerConfig") != -1);
   }
-  wmc.verify();
 }

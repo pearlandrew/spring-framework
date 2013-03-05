@@ -1,20 +1,8 @@
 {
-  MockControl utControl=MockControl.createControl(UserTransaction.class);
-  UserTransaction ut=(UserTransaction)utControl.getMock();
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_ACTIVE,3);
-  ut.setRollbackOnly();
-  utControl.setVoidCallable(1);
-  utControl.replay();
-  MockControl synchControl=MockControl.createControl(TransactionSynchronization.class);
-  final TransactionSynchronization synch=(TransactionSynchronization)synchControl.getMock();
-  synch.beforeCommit(false);
-  synchControl.setThrowable(new OptimisticLockingFailureException(""));
-  synch.beforeCompletion();
-  synchControl.setVoidCallable(1);
-  synch.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
-  synchControl.setVoidCallable(1);
-  synchControl.replay();
+  UserTransaction ut=mock(UserTransaction.class);
+  given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
+  final TransactionSynchronization synch=mock(TransactionSynchronization.class);
+  willThrow(new OptimisticLockingFailureException("")).given(synch).beforeCommit(false);
   JtaTransactionManager ptm=newJtaTransactionManager(ut);
   TransactionTemplate tt=new TransactionTemplate(ptm);
   assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
@@ -31,6 +19,7 @@
  catch (  OptimisticLockingFailureException ex) {
   }
   assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
-  utControl.verify();
-  synchControl.verify();
+  verify(ut).setRollbackOnly();
+  verify(synch).beforeCompletion();
+  verify(synch).afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 }
