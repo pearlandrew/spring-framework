@@ -3,17 +3,15 @@
   Map<String,MediaType> mapping=Collections.singletonMap("xls",MediaType.valueOf("application/vnd.ms-excel"));
   ParameterContentNegotiationStrategy paramStrategy=new ParameterContentNegotiationStrategy(mapping);
   viewResolver.setContentNegotiationManager(new ContentNegotiationManager(paramStrategy));
-  ViewResolver viewResolverMock=createMock(ViewResolver.class);
+  ViewResolver viewResolverMock=mock(ViewResolver.class);
   viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
   viewResolver.afterPropertiesSet();
-  View viewMock=createMock("application_xls",View.class);
+  View viewMock=mock(View.class,"application_xls");
   String viewName="view";
   Locale locale=Locale.ENGLISH;
-  expect(viewResolverMock.resolveViewName(viewName,locale)).andReturn(null);
-  expect(viewResolverMock.resolveViewName(viewName + ".xls",locale)).andReturn(viewMock);
-  expect(viewMock.getContentType()).andReturn("application/vnd.ms-excel").anyTimes();
-  replay(viewResolverMock,viewMock);
+  given(viewResolverMock.resolveViewName(viewName,locale)).willReturn(null);
+  given(viewResolverMock.resolveViewName(viewName + ".xls",locale)).willReturn(viewMock);
+  given(viewMock.getContentType()).willReturn("application/vnd.ms-excel");
   View result=viewResolver.resolveViewName(viewName,locale);
   assertSame("Invalid view",viewMock,result);
-  verify(viewResolverMock,viewMock);
 }

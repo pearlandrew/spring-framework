@@ -1,10 +1,10 @@
 {
-  expect(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.DELETE)).andReturn(request);
-  expect(request.execute()).andReturn(response);
-  expect(errorHandler.hasError(response)).andReturn(false);
-  addLogResponseStatusExpectations(HttpStatus.OK);
-  response.close();
-  replayMocks();
+  given(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.DELETE)).willReturn(request);
+  given(request.execute()).willReturn(response);
+  given(errorHandler.hasError(response)).willReturn(false);
+  HttpStatus status=HttpStatus.OK;
+  given(response.getStatusCode()).willReturn(status);
+  given(response.getStatusText()).willReturn(status.getReasonPhrase());
   template.delete("http://example.com");
-  verifyMocks();
+  verify(response).close();
 }

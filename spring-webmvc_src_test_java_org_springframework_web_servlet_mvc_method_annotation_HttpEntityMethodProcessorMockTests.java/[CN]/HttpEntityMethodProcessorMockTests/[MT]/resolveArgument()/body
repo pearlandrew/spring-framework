@@ -2,12 +2,10 @@
   MediaType contentType=MediaType.TEXT_PLAIN;
   servletRequest.addHeader("Content-Type",contentType.toString());
   String body="Foo";
-  expect(messageConverter.canRead(String.class,contentType)).andReturn(true);
-  expect(messageConverter.read(eq(String.class),isA(HttpInputMessage.class))).andReturn(body);
-  replay(messageConverter);
+  given(messageConverter.canRead(String.class,contentType)).willReturn(true);
+  given(messageConverter.read(eq(String.class),isA(HttpInputMessage.class))).willReturn(body);
   Object result=processor.resolveArgument(paramHttpEntity,mavContainer,webRequest,null);
   assertTrue(result instanceof HttpEntity);
   assertFalse("The requestHandled flag shouldn't change",mavContainer.isRequestHandled());
   assertEquals("Invalid argument",body,((HttpEntity<?>)result).getBody());
-  verify(messageConverter);
 }

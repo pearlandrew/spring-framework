@@ -1,15 +1,15 @@
 {
-  expect(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.POST)).andReturn(request);
+  given(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.POST)).willReturn(request);
   HttpHeaders requestHeaders=new HttpHeaders();
-  expect(request.getHeaders()).andReturn(requestHeaders);
-  expect(request.execute()).andReturn(response);
-  expect(errorHandler.hasError(response)).andReturn(false);
+  given(request.getHeaders()).willReturn(requestHeaders);
+  given(request.execute()).willReturn(response);
+  given(errorHandler.hasError(response)).willReturn(false);
   HttpHeaders responseHeaders=new HttpHeaders();
-  expect(response.getHeaders()).andReturn(responseHeaders);
-  addLogResponseStatusExpectations(HttpStatus.OK);
-  response.close();
-  replayMocks();
+  given(response.getHeaders()).willReturn(responseHeaders);
+  HttpStatus status=HttpStatus.OK;
+  given(response.getStatusCode()).willReturn(status);
+  given(response.getStatusText()).willReturn(status.getReasonPhrase());
   template.postForLocation("http://example.com",null);
   assertEquals("Invalid content length",0,requestHeaders.getContentLength());
-  verifyMocks();
+  verify(response).close();
 }

@@ -1,15 +1,13 @@
 {
   request.addHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9");
-  ViewResolver viewResolverMock=createMock(ViewResolver.class);
+  ViewResolver viewResolverMock=mock(ViewResolver.class);
   viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
   viewResolver.afterPropertiesSet();
-  View viewMock=createMock("application_xml",View.class);
+  View viewMock=mock(View.class,"application_xml");
   String viewName="view";
   Locale locale=Locale.ENGLISH;
-  expect(viewResolverMock.resolveViewName(viewName,locale)).andReturn(viewMock);
-  expect(viewMock.getContentType()).andReturn("application/pdf").anyTimes();
-  replay(viewResolverMock,viewMock);
+  given(viewResolverMock.resolveViewName(viewName,locale)).willReturn(viewMock);
+  given(viewMock.getContentType()).willReturn("application/pdf");
   View result=viewResolver.resolveViewName(viewName,locale);
   assertNull("Invalid view",result);
-  verify(viewResolverMock,viewMock);
 }

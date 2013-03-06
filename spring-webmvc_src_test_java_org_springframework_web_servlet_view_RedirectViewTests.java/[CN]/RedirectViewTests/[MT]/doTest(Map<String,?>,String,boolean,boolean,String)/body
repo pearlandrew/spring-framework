@@ -14,24 +14,22 @@ class TestRedirectView extends RedirectView {
   rv.setUrl(url);
   rv.setContextRelative(contextRelative);
   rv.setExposeModelAttributes(exposeModelAttributes);
-  HttpServletRequest request=createNiceMock("request",HttpServletRequest.class);
+  HttpServletRequest request=mock(HttpServletRequest.class,"request");
   if (exposeModelAttributes) {
-    expect(request.getCharacterEncoding()).andReturn(WebUtils.DEFAULT_CHARACTER_ENCODING);
+    given(request.getCharacterEncoding()).willReturn(WebUtils.DEFAULT_CHARACTER_ENCODING);
   }
   if (contextRelative) {
     expectedUrlForEncoding="/context" + expectedUrlForEncoding;
-    expect(request.getContextPath()).andReturn("/context");
+    given(request.getContextPath()).willReturn("/context");
   }
-  expect(request.getAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE)).andReturn(new FlashMap());
+  given(request.getAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE)).willReturn(new FlashMap());
   FlashMapManager flashMapManager=new SessionFlashMapManager();
-  expect(request.getAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE)).andReturn(flashMapManager);
-  HttpServletResponse response=createMock("response",HttpServletResponse.class);
-  expect(response.encodeRedirectURL(expectedUrlForEncoding)).andReturn(expectedUrlForEncoding);
+  given(request.getAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE)).willReturn(flashMapManager);
+  HttpServletResponse response=mock(HttpServletResponse.class,"response");
+  given(response.encodeRedirectURL(expectedUrlForEncoding)).willReturn(expectedUrlForEncoding);
   response.sendRedirect(expectedUrlForEncoding);
-  replay(request,response);
   rv.render(map,request,response);
   if (exposeModelAttributes) {
     assertTrue("queryProperties() should have been called.",rv.queryPropertiesCalled);
   }
-  verify(request,response);
 }

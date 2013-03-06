@@ -3,15 +3,11 @@
   Method m=setNameMethod;
   MapTransactionAttributeSource tas=new MapTransactionAttributeSource();
   tas.register(m,txatt);
-  MockControl ptmControl=MockControl.createControl(PlatformTransactionManager.class);
-  PlatformTransactionManager ptm=(PlatformTransactionManager)ptmControl.getMock();
-  TransactionStatus status=transactionStatusForNewTransaction();
-  ptm.getTransaction(txatt);
-  ptmControl.setReturnValue(status);
+  PlatformTransactionManager ptm=mock(PlatformTransactionManager.class);
+  TransactionStatus status=mock(TransactionStatus.class);
+  given(ptm.getTransaction(txatt)).willReturn(status);
   UnexpectedRollbackException ex=new UnexpectedRollbackException("foobar",null);
-  ptm.commit(status);
-  ptmControl.setThrowable(ex);
-  ptmControl.replay();
+  willThrow(ex).given(ptm).commit(status);
   TestBean tb=new TestBean();
   ITestBean itb=(ITestBean)advised(tb,ptm,tas);
   String name="new name";
@@ -23,5 +19,4 @@
     assertTrue(thrown == ex);
   }
   assertTrue(itb.getName() == name);
-  ptmControl.verify();
 }

@@ -7,12 +7,10 @@
   sessionAttributeStore.storeAttribute(webRequest,attrName,attrValue);
   assertTrue(sessionAttrsHandler.isHandlerSessionAttribute(attrName,null));
   WebDataBinder dataBinder=new WebDataBinder(attrValue,attrName);
-  WebDataBinderFactory binderFactory=createMock(WebDataBinderFactory.class);
-  expect(binderFactory.createBinder(webRequest,attrValue,attrName)).andReturn(dataBinder);
-  replay(binderFactory);
+  WebDataBinderFactory binderFactory=mock(WebDataBinderFactory.class);
+  given(binderFactory.createBinder(webRequest,attrValue,attrName)).willReturn(dataBinder);
   ModelFactory modelFactory=new ModelFactory(null,binderFactory,sessionAttrsHandler);
   modelFactory.updateModel(webRequest,mavContainer);
   assertEquals(attrValue,mavContainer.getModel().get(attrName));
   assertNull(sessionAttributeStore.retrieveAttribute(webRequest,attrName));
-  verify(binderFactory);
 }

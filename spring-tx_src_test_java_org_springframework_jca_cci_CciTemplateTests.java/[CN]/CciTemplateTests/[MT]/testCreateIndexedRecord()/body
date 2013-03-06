@@ -1,11 +1,10 @@
 {
-  ConnectionFactory connectionFactory=createMock(ConnectionFactory.class);
-  RecordFactory recordFactory=createMock(RecordFactory.class);
-  IndexedRecord indexedRecord=createMock(IndexedRecord.class);
-  expect(connectionFactory.getRecordFactory()).andReturn(recordFactory);
-  expect(recordFactory.createIndexedRecord("name")).andReturn(indexedRecord);
-  replay(connectionFactory,recordFactory);
+  ConnectionFactory connectionFactory=mock(ConnectionFactory.class);
+  RecordFactory recordFactory=mock(RecordFactory.class);
+  IndexedRecord indexedRecord=mock(IndexedRecord.class);
+  given(connectionFactory.getRecordFactory()).willReturn(recordFactory);
+  given(recordFactory.createIndexedRecord("name")).willReturn(indexedRecord);
   CciTemplate ct=new CciTemplate(connectionFactory);
   ct.createIndexedRecord("name");
-  verify(connectionFactory,recordFactory);
+  verify(recordFactory).createIndexedRecord("name");
 }

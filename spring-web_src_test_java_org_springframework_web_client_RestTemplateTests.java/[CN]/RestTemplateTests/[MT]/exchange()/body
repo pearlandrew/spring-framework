@@ -1,26 +1,26 @@
 {
-  expect(converter.canRead(Integer.class,null)).andReturn(true);
-  expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-  expect(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.POST)).andReturn(this.request);
+  given(converter.canRead(Integer.class,null)).willReturn(true);
+  given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+  given(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.POST)).willReturn(this.request);
   HttpHeaders requestHeaders=new HttpHeaders();
-  expect(this.request.getHeaders()).andReturn(requestHeaders).times(2);
-  expect(converter.canWrite(String.class,null)).andReturn(true);
+  given(this.request.getHeaders()).willReturn(requestHeaders);
+  given(converter.canWrite(String.class,null)).willReturn(true);
   String body="Hello World";
   converter.write(body,null,this.request);
-  expect(this.request.execute()).andReturn(response);
-  expect(errorHandler.hasError(response)).andReturn(false);
+  given(this.request.execute()).willReturn(response);
+  given(errorHandler.hasError(response)).willReturn(false);
   HttpHeaders responseHeaders=new HttpHeaders();
   responseHeaders.setContentType(MediaType.TEXT_PLAIN);
   responseHeaders.setContentLength(10);
-  expect(response.getStatusCode()).andReturn(HttpStatus.OK);
-  expect(response.getHeaders()).andReturn(responseHeaders).times(3);
+  given(response.getStatusCode()).willReturn(HttpStatus.OK);
+  given(response.getHeaders()).willReturn(responseHeaders);
   Integer expected=42;
-  expect(converter.canRead(Integer.class,MediaType.TEXT_PLAIN)).andReturn(true);
-  expect(converter.read(Integer.class,response)).andReturn(expected);
-  expect(response.getStatusCode()).andReturn(HttpStatus.OK);
-  addLogResponseStatusExpectations(HttpStatus.OK);
-  response.close();
-  replayMocks();
+  given(converter.canRead(Integer.class,MediaType.TEXT_PLAIN)).willReturn(true);
+  given(converter.read(Integer.class,response)).willReturn(expected);
+  given(response.getStatusCode()).willReturn(HttpStatus.OK);
+  HttpStatus status=HttpStatus.OK;
+  given(response.getStatusCode()).willReturn(status);
+  given(response.getStatusText()).willReturn(status.getReasonPhrase());
   HttpHeaders entityHeaders=new HttpHeaders();
   entityHeaders.set("MyHeader","MyValue");
   HttpEntity<String> requestEntity=new HttpEntity<String>(body,entityHeaders);
@@ -30,5 +30,5 @@
   assertEquals("Invalid Accept header",MediaType.TEXT_PLAIN_VALUE,requestHeaders.getFirst("Accept"));
   assertEquals("Invalid custom header","MyValue",requestHeaders.getFirst("MyHeader"));
   assertEquals("Invalid status code",HttpStatus.OK,result.getStatusCode());
-  verifyMocks();
+  verify(response).close();
 }

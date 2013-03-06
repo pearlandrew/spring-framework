@@ -1,11 +1,9 @@
 {
   MediaType contentType=MediaType.TEXT_PLAIN;
-  expect(messageConverter.canRead(SimpleBean.class,contentType)).andReturn(true);
-  expect(messageConverter.read(eq(SimpleBean.class),isA(RequestPartServletServerHttpRequest.class))).andReturn(argValue);
-  replay(messageConverter);
+  given(messageConverter.canRead(SimpleBean.class,contentType)).willReturn(true);
+  given(messageConverter.read(eq(SimpleBean.class),isA(RequestPartServletServerHttpRequest.class))).willReturn(argValue);
   ModelAndViewContainer mavContainer=new ModelAndViewContainer();
   Object actualValue=resolver.resolveArgument(parameter,mavContainer,webRequest,new ValidatingBinderFactory());
   assertEquals("Invalid argument value",argValue,actualValue);
   assertFalse("The requestHandled flag shouldn't change",mavContainer.isRequestHandled());
-  verify(messageConverter);
 }

@@ -1,21 +1,16 @@
 {
-  final ConnectionFactory connectionFactory=createMock(ConnectionFactory.class);
-  Connection connection=createMock(Connection.class);
-  Interaction interaction=createMock(Interaction.class);
-  LocalTransaction localTransaction=createMock(LocalTransaction.class);
-  final Record record=createMock(Record.class);
-  final InteractionSpec interactionSpec=createMock(InteractionSpec.class);
-  expect(connectionFactory.getConnection()).andReturn(connection);
-  expect(connection.getLocalTransaction()).andReturn(localTransaction);
-  localTransaction.begin();
-  expect(connection.createInteraction()).andReturn(interaction);
-  expect(interaction.execute(interactionSpec,record,record)).andReturn(true);
-  interaction.close();
-  expect(connection.getLocalTransaction()).andReturn(localTransaction);
-  localTransaction.commit();
-  connection.close();
-  replay(connectionFactory,connection,localTransaction,interaction,record);
-  org.springframework.jca.cci.connection.CciLocalTransactionManager tm=new org.springframework.jca.cci.connection.CciLocalTransactionManager();
+  final ConnectionFactory connectionFactory=mock(ConnectionFactory.class);
+  Connection connection=mock(Connection.class);
+  Interaction interaction=mock(Interaction.class);
+  LocalTransaction localTransaction=mock(LocalTransaction.class);
+  final Record record=mock(Record.class);
+  final InteractionSpec interactionSpec=mock(InteractionSpec.class);
+  given(connectionFactory.getConnection()).willReturn(connection);
+  given(connection.getLocalTransaction()).willReturn(localTransaction);
+  given(connection.createInteraction()).willReturn(interaction);
+  given(interaction.execute(interactionSpec,record,record)).willReturn(true);
+  given(connection.getLocalTransaction()).willReturn(localTransaction);
+  CciLocalTransactionManager tm=new CciLocalTransactionManager();
   tm.setConnectionFactory(connectionFactory);
   TransactionTemplate tt=new TransactionTemplate(tm);
   tt.execute(new TransactionCallbackWithoutResult(){
@@ -26,5 +21,8 @@
     }
   }
 );
-  verify(connectionFactory,connection,localTransaction,interaction,record);
+  verify(localTransaction).begin();
+  verify(interaction).close();
+  verify(localTransaction).commit();
+  verify(connection).close();
 }

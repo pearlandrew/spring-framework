@@ -1,9 +1,6 @@
 {
-  MockControl utControl=MockControl.createControl(UserTransaction.class);
-  UserTransaction ut=(UserTransaction)utControl.getMock();
-  ut.getStatus();
-  utControl.setThrowable(new SystemException("system exception"));
-  utControl.replay();
+  UserTransaction ut=mock(UserTransaction.class);
+  given(ut.getStatus()).willThrow(new SystemException("system exception"));
   try {
     JtaTransactionManager ptm=newJtaTransactionManager(ut);
     TransactionTemplate tt=new TransactionTemplate(ptm);
@@ -16,5 +13,4 @@
   }
  catch (  TransactionSystemException ex) {
   }
-  utControl.verify();
 }

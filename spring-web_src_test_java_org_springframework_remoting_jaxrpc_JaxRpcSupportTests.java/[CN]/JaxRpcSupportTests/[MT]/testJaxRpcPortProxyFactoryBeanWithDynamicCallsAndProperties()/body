@@ -1,6 +1,6 @@
 {
   JaxRpcPortProxyFactoryBean factory=new JaxRpcPortProxyFactoryBean();
-  factory.setServiceFactoryClass(CallWithPropertiesMockServiceFactory.class);
+  factory.setServiceFactoryClass(CallMockServiceFactory.class);
   factory.setNamespaceUri("myNamespace");
   factory.setServiceName("myService1");
   factory.setPortName("myPort");
@@ -14,6 +14,8 @@
   assertTrue(factory.getObject() instanceof IBusinessBean);
   IBusinessBean proxy=(IBusinessBean)factory.getObject();
   proxy.setName("myName");
-  MockServiceFactory.service1Control.verify();
-  CallMockServiceFactory.call1Control.verify();
+  verify(CallMockServiceFactory.call1).setProperty(Call.USERNAME_PROPERTY,"user");
+  verify(CallMockServiceFactory.call1).setProperty(Call.PASSWORD_PROPERTY,"pw");
+  verify(CallMockServiceFactory.call1).setTargetEndpointAddress("ea");
+  verify(CallMockServiceFactory.call1).setProperty(Call.SESSION_MAINTAIN_PROPERTY,Boolean.TRUE);
 }

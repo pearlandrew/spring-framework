@@ -1,19 +1,13 @@
 {
   FreeMarkerView fv=new FreeMarkerView();
-  MockControl wmc=MockControl.createNiceControl(WebApplicationContext.class);
-  WebApplicationContext wac=(WebApplicationContext)wmc.getMock();
+  WebApplicationContext wac=mock(WebApplicationContext.class);
   MockServletContext sc=new MockServletContext();
-  wac.getBeansOfType(FreeMarkerConfig.class,true,false);
   Map configs=new HashMap();
   FreeMarkerConfigurer configurer=new FreeMarkerConfigurer();
   configurer.setConfiguration(new TestConfiguration());
   configs.put("configurer",configurer);
-  wmc.setReturnValue(configs);
-  wac.getParentBeanFactory();
-  wmc.setReturnValue(null);
-  wac.getServletContext();
-  wmc.setReturnValue(sc,2);
-  wmc.replay();
+  given(wac.getBeansOfType(FreeMarkerConfig.class,true,false)).willReturn(configs);
+  given(wac.getServletContext()).willReturn(sc);
   fv.setUrl("templateName");
   fv.setApplicationContext(wac);
   MockHttpServletRequest request=new MockHttpServletRequest();
@@ -25,6 +19,5 @@
   Map model=new HashMap();
   model.put("myattr","myvalue");
   fv.render(model,request,response);
-  wmc.verify();
   assertEquals("myContentType",response.getContentType());
 }

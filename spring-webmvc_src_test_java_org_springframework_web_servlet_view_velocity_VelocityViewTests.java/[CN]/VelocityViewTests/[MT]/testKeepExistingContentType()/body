@@ -1,6 +1,6 @@
 {
   final String templateName="test.vm";
-  WebApplicationContext wac=createMock(WebApplicationContext.class);
+  WebApplicationContext wac=mock(WebApplicationContext.class);
   MockServletContext sc=new MockServletContext();
   sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,wac);
   final Template expectedTemplate=new Template();
@@ -10,17 +10,11 @@
     }
   }
 ;
-  wac.getBeansOfType(VelocityConfig.class,true,false);
-  Map<String,Object> configurers=new HashMap<String,Object>();
+  Map<String,VelocityConfig> configurers=new HashMap<String,VelocityConfig>();
   configurers.put("velocityConfigurer",vc);
-  expectLastCall().andReturn(configurers);
-  wac.getParentBeanFactory();
-  expectLastCall().andReturn(null);
-  wac.getServletContext();
-  expectLastCall().andReturn(sc).times(3);
-  wac.getBean("requestDataValueProcessor",RequestDataValueProcessor.class);
-  expectLastCall().andReturn(null);
-  replay(wac);
+  given(wac.getBeansOfType(VelocityConfig.class,true,false)).willReturn(configurers);
+  given(wac.getServletContext()).willReturn(sc);
+  given(wac.getBean("requestDataValueProcessor",RequestDataValueProcessor.class)).willReturn(null);
   HttpServletRequest request=new MockHttpServletRequest();
   final HttpServletResponse expectedResponse=new MockHttpServletResponse();
   expectedResponse.setContentType("myContentType");
@@ -37,6 +31,5 @@
   vv.setUrl(templateName);
   vv.setApplicationContext(wac);
   vv.render(new HashMap<String,Object>(),request,expectedResponse);
-  verify(wac);
   assertEquals("myContentType",expectedResponse.getContentType());
 }

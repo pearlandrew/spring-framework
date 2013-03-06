@@ -1,20 +1,6 @@
 {
-  MockControl utControl=MockControl.createControl(UserTransaction.class);
-  UserTransaction ut=(UserTransaction)utControl.getMock();
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_NO_TRANSACTION,1);
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_MARKED_ROLLBACK,3);
-  ut.begin();
-  utControl.setVoidCallable(1);
-  if (failEarly) {
-    ut.rollback();
-  }
- else {
-    ut.commit();
-  }
-  utControl.setVoidCallable(1);
-  utControl.replay();
+  UserTransaction ut=mock(UserTransaction.class);
+  given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION,Status.STATUS_MARKED_ROLLBACK,Status.STATUS_MARKED_ROLLBACK,Status.STATUS_MARKED_ROLLBACK);
   JtaTransactionManager tm=newJtaTransactionManager(ut);
   if (failEarly) {
     tm.setFailEarlyOnGlobalRollbackOnly(true);
@@ -50,5 +36,11 @@
       assertTrue(outerTransactionBoundaryReached);
     }
   }
-  utControl.verify();
+  verify(ut).begin();
+  if (failEarly) {
+    verify(ut).rollback();
+  }
+ else {
+    verify(ut).commit();
+  }
 }

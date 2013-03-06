@@ -1,14 +1,8 @@
 {
-  MockControl utControl=MockControl.createControl(UserTransaction.class);
-  UserTransaction ut=(UserTransaction)utControl.getMock();
-  MockControl tmControl=MockControl.createControl(TransactionManager.class);
-  TransactionManager tm=(TransactionManager)tmControl.getMock();
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_ACTIVE,1);
-  tm.suspend();
-  tmControl.setThrowable(new SystemException());
-  utControl.replay();
-  tmControl.replay();
+  UserTransaction ut=mock(UserTransaction.class);
+  TransactionManager tm=mock(TransactionManager.class);
+  given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
+  willThrow(new SystemException()).given(tm).suspend();
   JtaTransactionManager ptm=newJtaTransactionManager(ut,tm);
   TransactionTemplate tt=new TransactionTemplate(ptm);
   tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -25,6 +19,4 @@
  catch (  TransactionSystemException ex) {
   }
   assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
-  utControl.verify();
-  tmControl.verify();
 }

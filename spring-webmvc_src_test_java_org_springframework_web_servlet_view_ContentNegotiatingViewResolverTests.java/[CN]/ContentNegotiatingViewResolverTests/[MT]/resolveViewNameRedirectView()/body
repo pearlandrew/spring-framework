@@ -6,18 +6,16 @@
   webAppContext.refresh();
   UrlBasedViewResolver urlViewResolver=new InternalResourceViewResolver();
   urlViewResolver.setApplicationContext(webAppContext);
-  ViewResolver xmlViewResolver=createMock(ViewResolver.class);
+  ViewResolver xmlViewResolver=mock(ViewResolver.class);
   viewResolver.setViewResolvers(Arrays.<ViewResolver>asList(xmlViewResolver,urlViewResolver));
-  View xmlView=createMock("application_xml",View.class);
-  View jsonView=createMock("application_json",View.class);
+  View xmlView=mock(View.class,"application_xml");
+  View jsonView=mock(View.class,"application_json");
   viewResolver.setDefaultViews(Arrays.asList(jsonView));
   viewResolver.afterPropertiesSet();
   String viewName="redirect:anotherTest";
   Locale locale=Locale.ENGLISH;
-  expect(xmlViewResolver.resolveViewName(viewName,locale)).andReturn(xmlView);
-  expect(jsonView.getContentType()).andReturn("application/json").anyTimes();
-  replay(xmlViewResolver,xmlView,jsonView);
+  given(xmlViewResolver.resolveViewName(viewName,locale)).willReturn(xmlView);
+  given(jsonView.getContentType()).willReturn("application/json");
   View actualView=viewResolver.resolveViewName(viewName,locale);
   assertEquals("Invalid view",RedirectView.class,actualView.getClass());
-  verify(xmlViewResolver,xmlView,jsonView);
 }

@@ -1,16 +1,15 @@
 {
-  ConnectionFactory connectionFactory=createMock(ConnectionFactory.class);
-  Connection connection=createMock(Connection.class);
-  Interaction interaction=createMock(Interaction.class);
-  Record inputOutputRecord=createMock(Record.class);
-  InteractionSpec interactionSpec=createMock(InteractionSpec.class);
+  ConnectionFactory connectionFactory=mock(ConnectionFactory.class);
+  Connection connection=mock(Connection.class);
+  Interaction interaction=mock(Interaction.class);
+  Record inputOutputRecord=mock(Record.class);
+  InteractionSpec interactionSpec=mock(InteractionSpec.class);
   SimpleRecordOperation query=new SimpleRecordOperation(connectionFactory,interactionSpec);
-  expect(connectionFactory.getConnection()).andReturn(connection);
-  expect(connection.createInteraction()).andReturn(interaction);
-  expect(interaction.execute(interactionSpec,inputOutputRecord,inputOutputRecord)).andReturn(true);
-  interaction.close();
-  connection.close();
-  replay(connectionFactory,connection,interaction);
+  given(connectionFactory.getConnection()).willReturn(connection);
+  given(connection.createInteraction()).willReturn(interaction);
+  given(interaction.execute(interactionSpec,inputOutputRecord,inputOutputRecord)).willReturn(true);
   query.execute(inputOutputRecord,inputOutputRecord);
-  verify(connectionFactory,connection,interaction);
+  verify(interaction).execute(interactionSpec,inputOutputRecord,inputOutputRecord);
+  verify(interaction).close();
+  verify(connection).close();
 }

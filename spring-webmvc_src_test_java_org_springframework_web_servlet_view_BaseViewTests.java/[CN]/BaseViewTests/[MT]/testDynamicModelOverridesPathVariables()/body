@@ -1,8 +1,6 @@
 {
-  WebApplicationContext wac=createMock(WebApplicationContext.class);
-  wac.getServletContext();
-  expectLastCall().andReturn(new MockServletContext());
-  replay(wac);
+  WebApplicationContext wac=mock(WebApplicationContext.class);
+  given(wac.getServletContext()).willReturn(new MockServletContext());
   TestView tv=new TestView(wac);
   tv.setApplicationContext(wac);
   MockHttpServletRequest request=new MockHttpServletRequest();
@@ -19,5 +17,4 @@
   assertEquals(3,tv.model.size());
   assertTrue(tv.model.get("something").equals("else"));
   assertTrue(tv.inited);
-  verify(wac);
 }

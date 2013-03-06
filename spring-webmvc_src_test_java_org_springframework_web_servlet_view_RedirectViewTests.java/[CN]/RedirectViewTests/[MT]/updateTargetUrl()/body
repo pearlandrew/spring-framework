@@ -3,7 +3,7 @@
   wac.registerSingleton("requestDataValueProcessor",RequestDataValueProcessorWrapper.class);
   wac.setServletContext(new MockServletContext());
   wac.refresh();
-  RequestDataValueProcessor mockProcessor=createMock(RequestDataValueProcessor.class);
+  RequestDataValueProcessor mockProcessor=mock(RequestDataValueProcessor.class);
   wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);
   RedirectView rv=new RedirectView();
   rv.setApplicationContext(wac);
@@ -11,8 +11,7 @@
   MockHttpServletRequest request=createRequest();
   request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE,wac);
   HttpServletResponse response=new MockHttpServletResponse();
-  EasyMock.expect(mockProcessor.processUrl(request,"/path")).andReturn("/path?key=123");
-  EasyMock.replay(mockProcessor);
+  given(mockProcessor.processUrl(request,"/path")).willReturn("/path?key=123");
   rv.render(new ModelMap(),request,response);
-  EasyMock.verify(mockProcessor);
+  verify(mockProcessor).processUrl(request,"/path");
 }
