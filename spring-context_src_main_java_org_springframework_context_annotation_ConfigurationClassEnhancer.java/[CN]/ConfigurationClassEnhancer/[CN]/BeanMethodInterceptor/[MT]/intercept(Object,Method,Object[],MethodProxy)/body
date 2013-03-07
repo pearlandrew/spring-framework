@@ -1,37 +1,38 @@
 {
+  ConfigurableBeanFactory beanFactory=getBeanFactory(enhancedConfigInstance);
   String beanName=BeanAnnotationHelper.determineBeanNameFor(beanMethod);
   Scope scope=AnnotationUtils.findAnnotation(beanMethod,Scope.class);
   if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
     String scopedBeanName=ScopedProxyCreator.getTargetBeanName(beanName);
-    if (this.beanFactory.isCurrentlyInCreation(scopedBeanName)) {
+    if (beanFactory.isCurrentlyInCreation(scopedBeanName)) {
       beanName=scopedBeanName;
     }
   }
-  if (factoryContainsBean(BeanFactory.FACTORY_BEAN_PREFIX + beanName) && factoryContainsBean(beanName)) {
-    Object factoryBean=this.beanFactory.getBean(BeanFactory.FACTORY_BEAN_PREFIX + beanName);
+  if (factoryContainsBean(beanFactory,BeanFactory.FACTORY_BEAN_PREFIX + beanName) && factoryContainsBean(beanFactory,beanName)) {
+    Object factoryBean=beanFactory.getBean(BeanFactory.FACTORY_BEAN_PREFIX + beanName);
     if (factoryBean instanceof ScopedProxyFactoryBean) {
     }
  else {
-      return enhanceFactoryBean(factoryBean.getClass(),beanName);
+      return enhanceFactoryBean(factoryBean.getClass(),beanFactory,beanName);
     }
   }
-  if (isCurrentlyInvokedFactoryMethod(beanMethod) && !this.beanFactory.containsSingleton(beanName)) {
+  if (isCurrentlyInvokedFactoryMethod(beanMethod) && !beanFactory.containsSingleton(beanName)) {
     if (BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
       logger.warn(String.format("@Bean method %s.%s is non-static and returns an object " + "assignable to Spring's BeanFactoryPostProcessor interface. This will " + "result in a failure to process annotations such as @Autowired, "+ "@Resource and @PostConstruct within the method's declaring "+ "@Configuration class. Add the 'static' modifier to this method to avoid "+ "these container lifecycle issues; see @Bean Javadoc for complete details",beanMethod.getDeclaringClass().getSimpleName(),beanMethod.getName()));
     }
     return cglibMethodProxy.invokeSuper(enhancedConfigInstance,beanMethodArgs);
   }
  else {
-    boolean alreadyInCreation=this.beanFactory.isCurrentlyInCreation(beanName);
+    boolean alreadyInCreation=beanFactory.isCurrentlyInCreation(beanName);
     try {
       if (alreadyInCreation) {
-        this.beanFactory.setCurrentlyInCreation(beanName,false);
+        beanFactory.setCurrentlyInCreation(beanName,false);
       }
-      return this.beanFactory.getBean(beanName);
+      return beanFactory.getBean(beanName);
     }
   finally {
       if (alreadyInCreation) {
-        this.beanFactory.setCurrentlyInCreation(beanName,true);
+        beanFactory.setCurrentlyInCreation(beanName,true);
       }
     }
   }
