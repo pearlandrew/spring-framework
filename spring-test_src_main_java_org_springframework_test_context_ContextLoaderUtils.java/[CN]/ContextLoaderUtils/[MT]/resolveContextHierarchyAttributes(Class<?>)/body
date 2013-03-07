@@ -1,0 +1,43 @@
+{
+  Assert.notNull(testClass,"Class must not be null");
+  final Class<ContextConfiguration> contextConfigType=ContextConfiguration.class;
+  final Class<ContextHierarchy> contextHierarchyType=ContextHierarchy.class;
+  final List<Class<? extends Annotation>> annotationTypes=Arrays.asList(contextConfigType,contextHierarchyType);
+  final List<List<ContextConfigurationAttributes>> hierarchyAttributes=new ArrayList<List<ContextConfigurationAttributes>>();
+  Class<?> declaringClass=findAnnotationDeclaringClassForTypes(annotationTypes,testClass);
+  Assert.notNull(declaringClass,String.format("Could not find an 'annotation declaring class' for annotation type [%s] or [%s] and test class [%s]",contextConfigType.getName(),contextHierarchyType.getName(),testClass.getName()));
+  while (declaringClass != null) {
+    boolean contextConfigDeclaredLocally=isAnnotationDeclaredLocally(contextConfigType,declaringClass);
+    boolean contextHierarchyDeclaredLocally=isAnnotationDeclaredLocally(contextHierarchyType,declaringClass);
+    if (contextConfigDeclaredLocally && contextHierarchyDeclaredLocally) {
+      String msg=String.format("Test class [%s] has been configured with both @ContextConfiguration " + "and @ContextHierarchy as class-level annotations. Only one of these annotations may " + "be declared as a top-level annotation per test class.",declaringClass.getName());
+      logger.error(msg);
+      throw new IllegalStateException(msg);
+    }
+    final List<ContextConfigurationAttributes> configAttributesList=new ArrayList<ContextConfigurationAttributes>();
+    if (contextConfigDeclaredLocally) {
+      ContextConfiguration contextConfiguration=declaringClass.getAnnotation(contextConfigType);
+      convertContextConfigToConfigAttributesAndAddToList(contextConfiguration,declaringClass,configAttributesList);
+    }
+ else     if (contextHierarchyDeclaredLocally) {
+      ContextHierarchy contextHierarchy=declaringClass.getAnnotation(contextHierarchyType);
+      for (      ContextConfiguration contextConfiguration : contextHierarchy.value()) {
+        convertContextConfigToConfigAttributesAndAddToList(contextConfiguration,declaringClass,configAttributesList);
+      }
+      Set<ContextConfigurationAttributes> configAttributesSet=new HashSet<ContextConfigurationAttributes>(configAttributesList);
+      if (configAttributesSet.size() != configAttributesList.size()) {
+        String msg=String.format("The @ContextConfiguration elements configured via " + "@ContextHierarchy in test class [%s] must define unique contexts to load.",declaringClass.getName());
+        logger.error(msg);
+        throw new IllegalStateException(msg);
+      }
+    }
+ else {
+      String msg=String.format("Test class [%s] has been configured with neither @ContextConfiguration " + "nor @ContextHierarchy as a class-level annotation.",declaringClass.getName());
+      logger.error(msg);
+      throw new IllegalStateException(msg);
+    }
+    hierarchyAttributes.add(0,configAttributesList);
+    declaringClass=findAnnotationDeclaringClassForTypes(annotationTypes,declaringClass.getSuperclass());
+  }
+  return hierarchyAttributes;
+}

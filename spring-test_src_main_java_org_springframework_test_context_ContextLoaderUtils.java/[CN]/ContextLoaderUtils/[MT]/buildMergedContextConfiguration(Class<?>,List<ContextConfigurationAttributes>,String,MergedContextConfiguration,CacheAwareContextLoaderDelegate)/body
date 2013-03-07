@@ -1,0 +1,32 @@
+{
+  final ContextLoader contextLoader=resolveContextLoader(testClass,configAttributesList,defaultContextLoaderClassName);
+  final List<String> locationsList=new ArrayList<String>();
+  final List<Class<?>> classesList=new ArrayList<Class<?>>();
+  for (  ContextConfigurationAttributes configAttributes : configAttributesList) {
+    if (logger.isTraceEnabled()) {
+      logger.trace(String.format("Processing locations and classes for context configuration attributes %s",configAttributes));
+    }
+    if (contextLoader instanceof SmartContextLoader) {
+      SmartContextLoader smartContextLoader=(SmartContextLoader)contextLoader;
+      smartContextLoader.processContextConfiguration(configAttributes);
+      locationsList.addAll(0,Arrays.asList(configAttributes.getLocations()));
+      classesList.addAll(0,Arrays.asList(configAttributes.getClasses()));
+    }
+ else {
+      String[] processedLocations=contextLoader.processLocations(configAttributes.getDeclaringClass(),configAttributes.getLocations());
+      locationsList.addAll(0,Arrays.asList(processedLocations));
+    }
+    if (!configAttributes.isInheritLocations()) {
+      break;
+    }
+  }
+  String[] locations=StringUtils.toStringArray(locationsList);
+  Class<?>[] classes=ClassUtils.toClassArray(classesList);
+  Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses=resolveInitializerClasses(configAttributesList);
+  String[] activeProfiles=resolveActiveProfiles(testClass);
+  MergedContextConfiguration mergedConfig=buildWebMergedContextConfiguration(testClass,locations,classes,initializerClasses,activeProfiles,contextLoader,cacheAwareContextLoaderDelegate,parentConfig);
+  if (mergedConfig == null) {
+    mergedConfig=new MergedContextConfiguration(testClass,locations,classes,initializerClasses,activeProfiles,contextLoader,cacheAwareContextLoaderDelegate,parentConfig);
+  }
+  return mergedConfig;
+}
