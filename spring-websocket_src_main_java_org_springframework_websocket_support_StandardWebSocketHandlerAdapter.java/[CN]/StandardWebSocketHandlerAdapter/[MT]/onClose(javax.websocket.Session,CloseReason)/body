@@ -1,0 +1,17 @@
+{
+  String id=sourceSession.getId();
+  if (logger.isDebugEnabled()) {
+    logger.debug("Closing session: " + sourceSession + ", "+ closeReason);
+  }
+  try {
+    Session session=getSession(id);
+    this.sessionMap.remove(id);
+    int code=closeReason.getCloseCode().getCode();
+    String reason=closeReason.getReasonPhrase();
+    session.close(code,reason);
+    this.webSocketHandler.sessionClosed(session,code,reason);
+  }
+ catch (  Throwable ex) {
+    logger.error("Error while processing session closing",ex);
+  }
+}
