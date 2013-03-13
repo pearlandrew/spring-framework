@@ -4,13 +4,10 @@
   LocaleContext previousLocaleContext=LocaleContextHolder.getLocaleContext();
   LocaleContext localeContext=buildLocaleContext(request);
   RequestAttributes previousAttributes=RequestContextHolder.getRequestAttributes();
-  ServletRequestAttributes requestAttributes=null;
-  if (previousAttributes == null || (previousAttributes instanceof ServletRequestAttributes)) {
-    requestAttributes=new ServletRequestAttributes(request);
-  }
-  initContextHolders(request,localeContext,requestAttributes);
+  ServletRequestAttributes requestAttributes=buildRequestAttributes(request,response,previousAttributes);
   WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
-  asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(),getRequestBindingInterceptor(request));
+  asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(),new RequestBindingInterceptor());
+  initContextHolders(request,localeContext,requestAttributes);
   try {
     doService(request,response);
   }
@@ -37,18 +34,13 @@ catch (  Throwable ex) {
       }
  else {
         if (asyncManager.isConcurrentHandlingStarted()) {
-          if (logger.isDebugEnabled()) {
-            logger.debug("Leaving response open for concurrent processing");
-          }
+          logger.debug("Leaving response open for concurrent processing");
         }
  else {
           this.logger.debug("Successfully completed request");
         }
       }
     }
-    if (this.publishEvents) {
-      long processingTime=System.currentTimeMillis() - startTime;
-      this.webApplicationContext.publishEvent(new ServletRequestHandledEvent(this,request.getRequestURI(),request.getRemoteAddr(),request.getMethod(),getServletConfig().getServletName(),WebUtils.getSessionId(request),getUsernameForRequest(request),processingTime,failureCause));
-    }
+    publishRequestHandledEvent(request,startTime,failureCause);
   }
 }
