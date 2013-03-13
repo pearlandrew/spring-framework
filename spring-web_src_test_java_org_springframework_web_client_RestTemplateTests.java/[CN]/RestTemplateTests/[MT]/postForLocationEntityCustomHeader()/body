@@ -1,24 +1,24 @@
 {
-  expect(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.POST)).andReturn(request);
+  given(requestFactory.createRequest(new URI("http://example.com"),HttpMethod.POST)).willReturn(request);
   String helloWorld="Hello World";
-  expect(converter.canWrite(String.class,null)).andReturn(true);
+  given(converter.canWrite(String.class,null)).willReturn(true);
   HttpHeaders requestHeaders=new HttpHeaders();
-  expect(request.getHeaders()).andReturn(requestHeaders);
+  given(request.getHeaders()).willReturn(requestHeaders);
   converter.write(helloWorld,null,request);
-  expect(request.execute()).andReturn(response);
-  expect(errorHandler.hasError(response)).andReturn(false);
+  given(request.execute()).willReturn(response);
+  given(errorHandler.hasError(response)).willReturn(false);
   HttpHeaders responseHeaders=new HttpHeaders();
   URI expected=new URI("http://example.com/hotels");
   responseHeaders.setLocation(expected);
-  expect(response.getHeaders()).andReturn(responseHeaders);
-  addLogResponseStatusExpectations(HttpStatus.OK);
-  response.close();
-  replayMocks();
+  given(response.getHeaders()).willReturn(responseHeaders);
+  HttpStatus status=HttpStatus.OK;
+  given(response.getStatusCode()).willReturn(status);
+  given(response.getStatusText()).willReturn(status.getReasonPhrase());
   HttpHeaders entityHeaders=new HttpHeaders();
   entityHeaders.set("MyHeader","MyValue");
   HttpEntity<String> entity=new HttpEntity<String>(helloWorld,entityHeaders);
   URI result=template.postForLocation("http://example.com",entity);
   assertEquals("Invalid POST result",expected,result);
   assertEquals("No custom header set","MyValue",requestHeaders.getFirst("MyHeader"));
-  verifyMocks();
+  verify(response).close();
 }

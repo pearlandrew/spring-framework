@@ -1,10 +1,7 @@
 {
   final String templateName="test.vm";
-  WebApplicationContext wac=createMock(WebApplicationContext.class);
-  wac.getParentBeanFactory();
-  expectLastCall().andReturn(null);
-  wac.getServletContext();
-  expectLastCall().andReturn(new MockServletContext());
+  WebApplicationContext wac=mock(WebApplicationContext.class);
+  given(wac.getServletContext()).willReturn(new MockServletContext());
   final Template expectedTemplate=new Template();
   VelocityConfig vc=new VelocityConfig(){
     @Override public VelocityEngine getVelocityEngine(){
@@ -12,19 +9,13 @@
     }
   }
 ;
-  wac.getBeansOfType(VelocityConfig.class,true,false);
-  Map<String,Object> configurers=new HashMap<String,Object>();
+  Map<String,VelocityConfig> configurers=new HashMap<String,VelocityConfig>();
   configurers.put("velocityConfigurer",vc);
-  expectLastCall().andReturn(configurers);
-  replay(wac);
-  HttpServletRequest req=createMock(HttpServletRequest.class);
-  req.getAttribute(View.PATH_VARIABLES);
-  expectLastCall().andReturn(null);
-  req.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
-  expectLastCall().andReturn(new AcceptHeaderLocaleResolver());
-  req.getLocale();
-  expectLastCall().andReturn(Locale.CANADA);
-  replay(req);
+  given(wac.getBeansOfType(VelocityConfig.class,true,false)).willReturn(configurers);
+  HttpServletRequest req=mock(HttpServletRequest.class);
+  given(req.getAttribute(View.PATH_VARIABLES)).willReturn(null);
+  given(req.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE)).willReturn(new AcceptHeaderLocaleResolver());
+  given(req.getLocale()).willReturn(Locale.CANADA);
   final HttpServletResponse expectedResponse=new MockHttpServletResponse();
   VelocityView vv=new VelocityView(){
     @Override protected void mergeTemplate(    Template template,    Context context,    HttpServletResponse response) throws Exception {
@@ -53,7 +44,5 @@
   vv.setNumberToolAttribute("numberTool");
   vv.setExposeSpringMacroHelpers(false);
   vv.render(new HashMap<String,Object>(),req,expectedResponse);
-  verify(wac);
-  verify(req);
   assertEquals(AbstractView.DEFAULT_CONTENT_TYPE,expectedResponse.getContentType());
 }

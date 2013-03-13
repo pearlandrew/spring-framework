@@ -1,17 +1,14 @@
 {
-  ConnectionFactory connectionFactory=createMock(ConnectionFactory.class);
-  Connection connection=createMock(Connection.class);
-  Interaction interaction=createMock(Interaction.class);
-  Record inputRecord=createMock(Record.class);
-  final Record outputRecord=createMock(Record.class);
-  InteractionSpec interactionSpec=createMock(InteractionSpec.class);
-  expect(connectionFactory.getConnection()).andReturn(connection);
-  expect(connectionFactory.getRecordFactory()).andThrow(new NotSupportedException("not supported"));
-  expect(connection.createInteraction()).andReturn(interaction);
-  expect(interaction.execute(interactionSpec,inputRecord,outputRecord)).andReturn(true);
-  interaction.close();
-  connection.close();
-  replay(connectionFactory,connection,interaction);
+  ConnectionFactory connectionFactory=mock(ConnectionFactory.class);
+  Connection connection=mock(Connection.class);
+  Interaction interaction=mock(Interaction.class);
+  Record inputRecord=mock(Record.class);
+  final Record outputRecord=mock(Record.class);
+  InteractionSpec interactionSpec=mock(InteractionSpec.class);
+  given(connectionFactory.getConnection()).willReturn(connection);
+  given(connectionFactory.getRecordFactory()).willThrow(new NotSupportedException("not supported"));
+  given(connection.createInteraction()).willReturn(interaction);
+  given(interaction.execute(interactionSpec,inputRecord,outputRecord)).willReturn(true);
   CciTemplate ct=new CciTemplate(connectionFactory);
   ct.setOutputRecordCreator(new RecordCreator(){
     @Override public Record createRecord(    RecordFactory recordFactory){
@@ -21,5 +18,7 @@
   }
 );
   ct.execute(interactionSpec,inputRecord);
-  verify(connectionFactory,connection,interaction);
+  verify(interaction).execute(interactionSpec,inputRecord,outputRecord);
+  verify(interaction).close();
+  verify(connection).close();
 }

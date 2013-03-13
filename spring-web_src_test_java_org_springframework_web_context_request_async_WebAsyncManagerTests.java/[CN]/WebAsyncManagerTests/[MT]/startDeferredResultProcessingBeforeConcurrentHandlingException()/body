@@ -1,13 +1,8 @@
 {
   DeferredResult<Integer> deferredResult=new DeferredResult<Integer>();
   Exception exception=new Exception();
-  DeferredResultProcessingInterceptor interceptor=createStrictMock(DeferredResultProcessingInterceptor.class);
-  interceptor.beforeConcurrentHandling(this.asyncWebRequest,deferredResult);
-  expectLastCall().andThrow(exception);
-  replay(interceptor);
-  this.asyncWebRequest.addTimeoutHandler((Runnable)notNull());
-  this.asyncWebRequest.addCompletionHandler((Runnable)notNull());
-  replay(this.asyncWebRequest);
+  DeferredResultProcessingInterceptor interceptor=mock(DeferredResultProcessingInterceptor.class);
+  willThrow(exception).given(interceptor).beforeConcurrentHandling(this.asyncWebRequest,deferredResult);
   this.asyncManager.registerDeferredResultInterceptor("interceptor",interceptor);
   try {
     this.asyncManager.startDeferredResultProcessing(deferredResult);
@@ -17,5 +12,6 @@
     assertEquals(exception,success);
   }
   assertFalse(this.asyncManager.hasConcurrentResult());
-  verify(this.asyncWebRequest,interceptor);
+  verify(this.asyncWebRequest).addTimeoutHandler((Runnable)notNull());
+  verify(this.asyncWebRequest).addCompletionHandler((Runnable)notNull());
 }

@@ -1,0 +1,23 @@
+{
+  Assert.notNull(key,"Key must not be null");
+  MergedContextConfiguration startKey=key;
+  if (hierarchyMode == HierarchyMode.EXHAUSTIVE) {
+    while (startKey.getParent() != null) {
+      startKey=startKey.getParent();
+    }
+  }
+synchronized (monitor) {
+    final List<MergedContextConfiguration> removedContexts=new ArrayList<MergedContextConfiguration>();
+    remove(removedContexts,startKey);
+    for (    MergedContextConfiguration currentKey : removedContexts) {
+      for (      Set<MergedContextConfiguration> children : hierarchyMap.values()) {
+        children.remove(currentKey);
+      }
+    }
+    for (    MergedContextConfiguration currentKey : hierarchyMap.keySet()) {
+      if (hierarchyMap.get(currentKey).isEmpty()) {
+        hierarchyMap.remove(currentKey);
+      }
+    }
+  }
+}

@@ -6,9 +6,8 @@
   Object anotherTestBean=new TestBean();
   mavContainer.addAttribute("anotherTestBean",anotherTestBean);
   StubRequestDataBinder dataBinder=new StubRequestDataBinder(testBean,name);
-  WebDataBinderFactory binderFactory=createMock(WebDataBinderFactory.class);
-  expect(binderFactory.createBinder(webRequest,testBean,name)).andReturn(dataBinder);
-  replay(binderFactory);
+  WebDataBinderFactory binderFactory=mock(WebDataBinderFactory.class);
+  given(binderFactory.createBinder(webRequest,testBean,name)).willReturn(dataBinder);
   processor.resolveArgument(paramModelAttr,mavContainer,webRequest,binderFactory);
   assertSame("Resolved attribute should be updated to be last in the order",testBean,mavContainer.getModel().values().toArray()[1]);
   assertSame("BindingResult of resolved attribute should be last in the order",dataBinder.getBindingResult(),mavContainer.getModel().values().toArray()[2]);

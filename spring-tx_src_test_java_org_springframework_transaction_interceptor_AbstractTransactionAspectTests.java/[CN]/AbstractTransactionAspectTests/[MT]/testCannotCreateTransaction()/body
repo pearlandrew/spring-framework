@@ -3,12 +3,9 @@
   Method m=getNameMethod;
   MapTransactionAttributeSource tas=new MapTransactionAttributeSource();
   tas.register(m,txatt);
-  MockControl ptmControl=MockControl.createControl(PlatformTransactionManager.class);
-  PlatformTransactionManager ptm=(PlatformTransactionManager)ptmControl.getMock();
-  ptm.getTransaction(txatt);
+  PlatformTransactionManager ptm=mock(PlatformTransactionManager.class);
   CannotCreateTransactionException ex=new CannotCreateTransactionException("foobar",null);
-  ptmControl.setThrowable(ex);
-  ptmControl.replay();
+  given(ptm.getTransaction(txatt)).willThrow(ex);
   TestBean tb=new TestBean(){
     @Override public String getName(){
       throw new UnsupportedOperationException("Shouldn't have invoked target method when couldn't create transaction for transactional method");
@@ -23,5 +20,4 @@
  catch (  CannotCreateTransactionException thrown) {
     assertTrue(thrown == ex);
   }
-  ptmControl.verify();
 }

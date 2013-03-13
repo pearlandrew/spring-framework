@@ -1,11 +1,7 @@
 {
-  MockControl utControl=MockControl.createControl(UserTransaction.class);
-  UserTransaction ut=(UserTransaction)utControl.getMock();
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_ACTIVE,1);
-  ut.begin();
-  utControl.setThrowable(new UnsupportedOperationException("not supported"));
-  utControl.replay();
+  UserTransaction ut=mock(UserTransaction.class);
+  given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
+  willThrow(new UnsupportedOperationException("not supported")).given(ut).begin();
   try {
     JtaTransactionManager ptm=newJtaTransactionManager(ut);
     TransactionTemplate tt=new TransactionTemplate(ptm);
@@ -19,5 +15,4 @@
   }
  catch (  NestedTransactionNotSupportedException ex) {
   }
-  utControl.verify();
 }

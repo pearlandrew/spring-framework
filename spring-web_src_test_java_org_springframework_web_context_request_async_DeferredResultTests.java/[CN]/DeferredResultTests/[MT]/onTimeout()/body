@@ -1,8 +1,6 @@
 {
   final StringBuilder sb=new StringBuilder();
-  DeferredResultHandler handler=createMock(DeferredResultHandler.class);
-  handler.handleResult("timeout result");
-  replay(handler);
+  DeferredResultHandler handler=mock(DeferredResultHandler.class);
   DeferredResult<String> result=new DeferredResult<String>(null,"timeout result");
   result.setResultHandler(handler);
   result.onTimeout(new Runnable(){
@@ -14,5 +12,5 @@
   result.getInterceptor().handleTimeout(null,null);
   assertEquals("timeout event",sb.toString());
   assertFalse("Should not be able to set result a second time",result.setResult("hello"));
-  verify(handler);
+  verify(handler).handleResult("timeout result");
 }

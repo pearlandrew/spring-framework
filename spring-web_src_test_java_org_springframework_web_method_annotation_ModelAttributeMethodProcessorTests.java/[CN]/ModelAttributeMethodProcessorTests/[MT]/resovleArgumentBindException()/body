@@ -4,8 +4,8 @@
   mavContainer.getModel().addAttribute(target);
   StubRequestDataBinder dataBinder=new StubRequestDataBinder(target,name);
   dataBinder.getBindingResult().reject("error");
-  WebDataBinderFactory binderFactory=createMock(WebDataBinderFactory.class);
-  expect(binderFactory.createBinder(webRequest,target,name)).andReturn(dataBinder);
-  replay(binderFactory);
+  WebDataBinderFactory binderFactory=mock(WebDataBinderFactory.class);
+  given(binderFactory.createBinder(webRequest,target,name)).willReturn(dataBinder);
   processor.resolveArgument(paramNonSimpleType,mavContainer,webRequest,binderFactory);
+  verify(binderFactory).createBinder(webRequest,target,name);
 }

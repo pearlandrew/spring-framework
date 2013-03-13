@@ -1,11 +1,10 @@
 {
   HttpHeaders headers=new HttpHeaders();
   headers.setContentType(MediaType.TEXT_PLAIN);
-  expect(response.getStatusCode()).andReturn(HttpStatus.NOT_FOUND);
-  expect(response.getStatusText()).andReturn("Not Found");
-  expect(response.getHeaders()).andReturn(headers).atLeastOnce();
-  expect(response.getBody()).andReturn(new ByteArrayInputStream("Hello World".getBytes("UTF-8")));
-  replay(response);
+  given(response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+  given(response.getStatusText()).willReturn("Not Found");
+  given(response.getHeaders()).willReturn(headers);
+  given(response.getBody()).willReturn(new ByteArrayInputStream("Hello World".getBytes("UTF-8")));
   try {
     handler.handleError(response);
     fail("expected HttpClientErrorException");
@@ -13,5 +12,4 @@
  catch (  HttpClientErrorException e) {
     assertSame(headers,e.getResponseHeaders());
   }
-  verify(response);
 }

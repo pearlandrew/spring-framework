@@ -1,13 +1,6 @@
 {
-  MockControl utControl=MockControl.createControl(UserTransaction.class);
-  UserTransaction ut=(UserTransaction)utControl.getMock();
-  ut.getStatus();
-  utControl.setReturnValue(Status.STATUS_ACTIVE,3);
-  ut.begin();
-  utControl.setVoidCallable(1);
-  ut.commit();
-  utControl.setVoidCallable(1);
-  utControl.replay();
+  UserTransaction ut=mock(UserTransaction.class);
+  given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
   JtaTransactionManager ptm=newJtaTransactionManager(ut);
   TransactionTemplate tt=new TransactionTemplate(ptm);
   tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
@@ -16,5 +9,6 @@
     }
   }
 );
-  utControl.verify();
+  verify(ut).begin();
+  verify(ut).commit();
 }

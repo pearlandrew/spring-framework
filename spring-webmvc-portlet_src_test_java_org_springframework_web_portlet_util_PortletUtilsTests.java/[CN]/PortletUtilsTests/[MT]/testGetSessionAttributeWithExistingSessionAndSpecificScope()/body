@@ -1,11 +1,9 @@
 {
-  PortletSession session=createMock(PortletSession.class);
-  PortletRequest request=createMock(PortletRequest.class);
-  expect(request.getPortletSession(false)).andReturn(session);
-  expect(session.getAttribute("foo",PortletSession.APPLICATION_SCOPE)).andReturn("foo");
-  replay(request,session);
+  PortletSession session=mock(PortletSession.class);
+  PortletRequest request=mock(PortletRequest.class);
+  given(request.getPortletSession(false)).willReturn(session);
+  given(session.getAttribute("foo",PortletSession.APPLICATION_SCOPE)).willReturn("foo");
   Object sessionAttribute=PortletUtils.getSessionAttribute(request,"foo",PortletSession.APPLICATION_SCOPE);
   assertNotNull("Must not return null if session attribute exists (and Session exists)",sessionAttribute);
   assertEquals("foo",sessionAttribute);
-  verify(request,session);
 }
