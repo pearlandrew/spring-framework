@@ -3,27 +3,17 @@
   if (messageSource == null) {
     throw new JspTagException("No corresponding MessageSource found");
   }
-  MessageSourceResolvable resolvedMessage=null;
-  if (this.message instanceof MessageSourceResolvable) {
-    resolvedMessage=(MessageSourceResolvable)this.message;
+  if (this.message != null) {
+    return messageSource.getMessage(this.message,getRequestContext().getLocale());
   }
- else   if (this.message != null) {
-    String expr=this.message.toString();
-    resolvedMessage=(MessageSourceResolvable)ExpressionEvaluationUtils.evaluate("message",expr,MessageSourceResolvable.class,pageContext);
-  }
-  if (resolvedMessage != null) {
-    return messageSource.getMessage(resolvedMessage,getRequestContext().getLocale());
-  }
-  String resolvedCode=ExpressionEvaluationUtils.evaluateString("code",this.code,pageContext);
-  String resolvedText=ExpressionEvaluationUtils.evaluateString("text",this.text,pageContext);
-  if (resolvedCode != null || resolvedText != null) {
+  if (this.code != null || this.text != null) {
     Object[] argumentsArray=resolveArguments(this.arguments);
-    if (resolvedText != null) {
-      return messageSource.getMessage(resolvedCode,argumentsArray,resolvedText,getRequestContext().getLocale());
+    if (this.text != null) {
+      return messageSource.getMessage(this.code,argumentsArray,this.text,getRequestContext().getLocale());
     }
  else {
-      return messageSource.getMessage(resolvedCode,argumentsArray,getRequestContext().getLocale());
+      return messageSource.getMessage(this.code,argumentsArray,getRequestContext().getLocale());
     }
   }
-  return resolvedText;
+  return this.text;
 }

@@ -1,10 +1,5 @@
 {
-  Object resolvedValue=this.value;
-  if (this.value instanceof String) {
-    String strValue=(String)this.value;
-    resolvedValue=ExpressionEvaluationUtils.evaluate("value",strValue,pageContext);
-  }
-  if (resolvedValue != null) {
+  if (this.value != null) {
     EditorAwareTag tag=(EditorAwareTag)TagSupport.findAncestorWithClass(this,EditorAwareTag.class);
     if (tag == null) {
       throw new JspException("TransformTag can only be used within EditorAwareTag (e.g. BindTag)");
@@ -12,17 +7,15 @@
     String result=null;
     PropertyEditor editor=tag.getEditor();
     if (editor != null) {
-      editor.setValue(resolvedValue);
+      editor.setValue(this.value);
       result=editor.getAsText();
     }
  else {
-      result=resolvedValue.toString();
+      result=this.value.toString();
     }
     result=isHtmlEscape() ? HtmlUtils.htmlEscape(result) : result;
-    String resolvedVar=ExpressionEvaluationUtils.evaluateString("var",this.var,pageContext);
-    if (resolvedVar != null) {
-      String resolvedScope=ExpressionEvaluationUtils.evaluateString("scope",this.scope,pageContext);
-      pageContext.setAttribute(resolvedVar,result,TagUtils.getScope(resolvedScope));
+    if (this.var != null) {
+      pageContext.setAttribute(this.var,result,TagUtils.getScope(this.scope));
     }
  else {
       try {
