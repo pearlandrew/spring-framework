@@ -1,14 +1,8 @@
 {
-  if (transactionSynchronizationRegistryClass == null) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("JTA 1.1 [" + TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME + "] API not available");
-    }
-    return null;
-  }
   if (this.userTransactionObtainedFromJndi) {
     String jndiName=DEFAULT_TRANSACTION_SYNCHRONIZATION_REGISTRY_NAME;
     try {
-      Object tsr=getJndiTemplate().lookup(jndiName,transactionSynchronizationRegistryClass);
+      TransactionSynchronizationRegistry tsr=getJndiTemplate().lookup(jndiName,TransactionSynchronizationRegistry.class);
       if (logger.isDebugEnabled()) {
         logger.debug("JTA TransactionSynchronizationRegistry found at default JNDI location [" + jndiName + "]");
       }
@@ -20,11 +14,11 @@
       }
     }
   }
-  if (transactionSynchronizationRegistryClass.isInstance(ut)) {
-    return ut;
+  if (ut instanceof TransactionSynchronizationRegistry) {
+    return (TransactionSynchronizationRegistry)ut;
   }
-  if (transactionSynchronizationRegistryClass.isInstance(tm)) {
-    return tm;
+  if (tm instanceof TransactionSynchronizationRegistry) {
+    return (TransactionSynchronizationRegistry)tm;
   }
   return null;
 }
