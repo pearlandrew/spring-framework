@@ -14,27 +14,12 @@
     initVelocityResourceLoader(velocityEngine,this.resourceLoaderPath);
   }
   if (this.overrideLogging) {
-    velocityEngine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM,new CommonsLoggingLogSystem());
+    velocityEngine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM,new CommonsLogLogChute());
   }
   for (  Map.Entry<String,Object> entry : props.entrySet()) {
     velocityEngine.setProperty(entry.getKey(),entry.getValue());
   }
   postProcessVelocityEngine(velocityEngine);
-  try {
-    velocityEngine.init();
-  }
- catch (  IOException ex) {
-    throw ex;
-  }
-catch (  VelocityException ex) {
-    throw ex;
-  }
-catch (  RuntimeException ex) {
-    throw ex;
-  }
-catch (  Exception ex) {
-    logger.error("Why does VelocityEngine throw a generic checked exception, after all?",ex);
-    throw new VelocityException(ex.toString());
-  }
+  velocityEngine.init();
   return velocityEngine;
 }
