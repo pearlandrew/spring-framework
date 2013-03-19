@@ -1,25 +1,28 @@
 {
+  String cacheName=getName();
+  if (cacheName == null) {
+    cacheName=this.beanName;
+    setName(cacheName);
+  }
   if (this.cacheManager == null) {
     if (logger.isDebugEnabled()) {
-      logger.debug("Using default EhCache CacheManager for cache region '" + this.cacheName + "'");
+      logger.debug("Using default EhCache CacheManager for cache region '" + cacheName + "'");
     }
     this.cacheManager=CacheManager.getInstance();
   }
-  if (this.cacheName == null) {
-    this.cacheName=this.beanName;
-  }
   Ehcache rawCache;
-  if (this.cacheManager.cacheExists(this.cacheName)) {
+  if (this.cacheManager.cacheExists(cacheName)) {
     if (logger.isDebugEnabled()) {
-      logger.debug("Using existing EhCache cache region '" + this.cacheName + "'");
+      logger.debug("Using existing EhCache cache region '" + cacheName + "'");
     }
-    rawCache=this.cacheManager.getEhcache(this.cacheName);
+    rawCache=this.cacheManager.getEhcache(cacheName);
   }
  else {
     if (logger.isDebugEnabled()) {
-      logger.debug("Creating new EhCache cache region '" + this.cacheName + "'");
+      logger.debug("Creating new EhCache cache region '" + cacheName + "'");
     }
     rawCache=createCache();
+    rawCache.setBootstrapCacheLoader(this.bootstrapCacheLoader);
     this.cacheManager.addCache(rawCache);
   }
   if (this.cacheEventListeners != null) {

@@ -2,28 +2,11 @@
   logger.info("Initializing EhCache CacheManager");
   InputStream is=(this.configLocation != null ? this.configLocation.getInputStream() : null);
   try {
+    Configuration configuration=(is != null ? ConfigurationFactory.parseConfiguration(is) : ConfigurationFactory.parseConfiguration());
     if (this.cacheManagerName != null) {
-      if (this.shared && createWithConfiguration == null) {
-        this.cacheManager=(is != null ? CacheManager.create(is) : CacheManager.create());
-        this.cacheManager.setName(this.cacheManagerName);
-      }
- else {
-        Configuration configuration=(is != null ? ConfigurationFactory.parseConfiguration(is) : ConfigurationFactory.parseConfiguration());
-        configuration.setName(this.cacheManagerName);
-        if (this.shared) {
-          this.cacheManager=(CacheManager)ReflectionUtils.invokeMethod(createWithConfiguration,null,configuration);
-        }
- else {
-          this.cacheManager=new CacheManager(configuration);
-        }
-      }
+      configuration.setName(this.cacheManagerName);
     }
- else     if (this.shared) {
-      this.cacheManager=(is != null ? CacheManager.create(is) : CacheManager.create());
-    }
- else {
-      this.cacheManager=(is != null ? new CacheManager(is) : new CacheManager());
-    }
+    this.cacheManager=(this.shared ? CacheManager.create(configuration) : new CacheManager(configuration));
   }
   finally {
     if (is != null) {
