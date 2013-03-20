@@ -1,6 +1,7 @@
 {
   Cache cache;
   EhCacheManagerFactoryBean cacheManagerFb=null;
+  boolean cacheManagerFbInitialized=false;
   try {
     EhCacheFactoryBean cacheFb=new EhCacheFactoryBean();
     Class<? extends Ehcache> objectType=cacheFb.getObjectType();
@@ -10,6 +11,7 @@
       cacheManagerFb=new EhCacheManagerFactoryBean();
       cacheManagerFb.setConfigLocation(new ClassPathResource("testEhcache.xml",getClass()));
       cacheManagerFb.afterPropertiesSet();
+      cacheManagerFbInitialized=true;
       cacheFb.setCacheManager(cacheManagerFb.getObject());
     }
     cacheFb.setCacheName("myCache1");
@@ -58,7 +60,7 @@
     assertTrue("overridden diskExpiryThreadIntervalSeconds is correct",config.getDiskExpiryThreadIntervalSeconds() == 10);
   }
   finally {
-    if (useCacheManagerFb && cacheManagerFb != null) {
+    if (cacheManagerFbInitialized) {
       cacheManagerFb.destroy();
     }
  else {
