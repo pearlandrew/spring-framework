@@ -43,9 +43,17 @@ synchronized (connectionMonitor) {
     return null;
   }
  else   if (method.getName().equals("createSession") || method.getName().equals("createQueueSession") || method.getName().equals("createTopicSession")) {
-    boolean transacted=(Boolean)args[0];
-    Integer ackMode=(Integer)args[1];
-    Integer mode=(transacted ? Session.SESSION_TRANSACTED : ackMode);
+    Integer mode=Session.AUTO_ACKNOWLEDGE;
+    if (args != null) {
+      if (args.length == 1) {
+        mode=(Integer)args[0];
+      }
+ else       if (args.length == 2) {
+        boolean transacted=(Boolean)args[0];
+        Integer ackMode=(Integer)args[1];
+        mode=(transacted ? Session.SESSION_TRANSACTED : ackMode);
+      }
+    }
     Session session=getSession(this.target,mode);
     if (session != null) {
       if (!method.getReturnType().isInstance(session)) {

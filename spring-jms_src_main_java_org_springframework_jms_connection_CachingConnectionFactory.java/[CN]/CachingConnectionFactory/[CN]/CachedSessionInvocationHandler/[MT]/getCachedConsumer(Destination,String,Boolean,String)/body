@@ -1,0 +1,38 @@
+{
+  ConsumerCacheKey cacheKey=new ConsumerCacheKey(dest,selector,noLocal,subscription);
+  MessageConsumer consumer=this.cachedConsumers.get(cacheKey);
+  if (consumer != null) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Found cached JMS MessageConsumer for destination [" + dest + "]: "+ consumer);
+    }
+  }
+ else {
+    if (dest instanceof Topic) {
+      if (noLocal == null) {
+        try {
+          consumer=(MessageConsumer)createSharedDurableConsumerMethod.invoke(this.target,dest,subscription,selector);
+        }
+ catch (        InvocationTargetException ex) {
+          if (ex.getTargetException() instanceof JMSException) {
+            throw (JMSException)ex.getTargetException();
+          }
+          ReflectionUtils.handleInvocationTargetException(ex);
+        }
+catch (        IllegalAccessException ex) {
+          throw new IllegalStateException("Could not access JMS 2.0 API method: " + ex.getMessage());
+        }
+      }
+ else {
+        consumer=(subscription != null ? this.target.createDurableSubscriber((Topic)dest,subscription,selector,noLocal) : this.target.createConsumer(dest,selector,noLocal));
+      }
+    }
+ else {
+      consumer=this.target.createConsumer(dest,selector);
+    }
+    if (logger.isDebugEnabled()) {
+      logger.debug("Creating cached JMS MessageConsumer for destination [" + dest + "]: "+ consumer);
+    }
+    this.cachedConsumers.put(cacheKey,consumer);
+  }
+  return new CachedMessageConsumer(consumer);
+}
