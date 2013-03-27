@@ -1,0 +1,37 @@
+{
+  logger.debug("Starting handshake for " + request.getURI());
+  if (!HttpMethod.GET.equals(request.getMethod())) {
+    response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
+    response.getHeaders().setAllow(Collections.singleton(HttpMethod.GET));
+    logger.debug("Only HTTP GET is allowed, current method is " + request.getMethod());
+    return false;
+  }
+  if (!validateUpgradeHeader(request,response)) {
+    return false;
+  }
+  if (!validateConnectHeader(request,response)) {
+    return false;
+  }
+  if (!validateWebSocketVersion(request,response)) {
+    return false;
+  }
+  if (!validateOrigin(request,response)) {
+    return false;
+  }
+  String wsKey=request.getHeaders().getSecWebSocketKey();
+  if (wsKey == null) {
+    logger.debug("Missing \"Sec-WebSocket-Key\" header");
+    response.setStatusCode(HttpStatus.BAD_REQUEST);
+    return false;
+  }
+  String protocol=selectProtocol(request.getHeaders().getSecWebSocketProtocol());
+  response.setStatusCode(HttpStatus.SWITCHING_PROTOCOLS);
+  response.getHeaders().setUpgrade("WebSocket");
+  response.getHeaders().setConnection("Upgrade");
+  response.getHeaders().setSecWebSocketProtocol(protocol);
+  response.getHeaders().setSecWebSocketAccept(getWebSocketKeyHash(wsKey));
+  logger.debug("Successfully negotiated WebSocket handshake");
+  response.getBody();
+  doHandshakeInternal(request,response,protocol);
+  return true;
+}
