@@ -1,0 +1,17 @@
+{
+  RuleBasedTransactionAttribute rbta=new RuleBasedTransactionAttribute();
+  rbta.setPropagationBehaviorName(RuleBasedTransactionAttribute.PREFIX_PROPAGATION + ann.value().toString());
+  ArrayList<RollbackRuleAttribute> rollBackRules=new ArrayList<RollbackRuleAttribute>();
+  Class[] rbf=ann.rollbackOn();
+  for (  Class rbRule : rbf) {
+    RollbackRuleAttribute rule=new RollbackRuleAttribute(rbRule);
+    rollBackRules.add(rule);
+  }
+  Class[] nrbf=ann.dontRollbackOn();
+  for (  Class rbRule : nrbf) {
+    NoRollbackRuleAttribute rule=new NoRollbackRuleAttribute(rbRule);
+    rollBackRules.add(rule);
+  }
+  rbta.getRollbackRules().addAll(rollBackRules);
+  return rbta;
+}
