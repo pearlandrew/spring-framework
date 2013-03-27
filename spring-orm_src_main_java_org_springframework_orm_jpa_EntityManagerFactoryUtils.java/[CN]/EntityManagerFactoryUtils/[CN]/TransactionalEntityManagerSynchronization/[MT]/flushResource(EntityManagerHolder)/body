@@ -1,0 +1,20 @@
+{
+  EntityManager em=resourceHolder.getEntityManager();
+  if (em instanceof EntityManagerProxy) {
+    EntityManager target=((EntityManagerProxy)em).getTargetEntityManager();
+    if (TransactionSynchronizationManager.hasResource(target)) {
+      return;
+    }
+  }
+  try {
+    em.flush();
+  }
+ catch (  RuntimeException ex) {
+    if (this.jpaDialect != null) {
+      throw this.jpaDialect.translateExceptionIfPossible(ex);
+    }
+ else {
+      throw convertJpaAccessExceptionIfPossible(ex);
+    }
+  }
+}

@@ -5,10 +5,14 @@
  else   if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {
     return method.invoke(this.plusOperations,args);
   }
+ else   if (method.getName().equals("createEntityManager") && args != null && args.length > 0 && args[0] != null && args[0].getClass().isEnum() && "SYNCHRONIZED".equals(args[0].toString())) {
+    EntityManager rawEntityManager=(args.length > 1 ? this.nativeEntityManagerFactory.createEntityManager((Map)args[1]) : this.nativeEntityManagerFactory.createEntityManager());
+    return ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager,this,true);
+  }
   Object retVal=method.invoke(this.nativeEntityManagerFactory,args);
   if (retVal instanceof EntityManager) {
     EntityManager rawEntityManager=(EntityManager)retVal;
-    retVal=ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager,this);
+    retVal=ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager,this,false);
   }
   return retVal;
 }

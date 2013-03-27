@@ -1,11 +1,18 @@
 {
-  super.afterCompletion(status);
-  if (status != STATUS_COMMITTED) {
-    try {
-      this.entityManager.getTransaction().rollback();
+  try {
+    super.afterCompletion(status);
+    if (status != STATUS_COMMITTED) {
+      try {
+        this.entityManager.getTransaction().rollback();
+      }
+ catch (      RuntimeException ex) {
+        throw convertException(ex);
+      }
     }
- catch (    RuntimeException ex) {
-      throw convertException(ex);
+  }
+  finally {
+    if (this.closeOnCompletion) {
+      EntityManagerFactoryUtils.closeEntityManager(this.entityManager);
     }
   }
 }

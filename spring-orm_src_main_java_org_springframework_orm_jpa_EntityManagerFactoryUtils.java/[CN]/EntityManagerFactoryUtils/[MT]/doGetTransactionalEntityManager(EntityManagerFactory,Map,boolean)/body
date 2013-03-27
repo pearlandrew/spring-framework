@@ -1,0 +1,59 @@
+{
+  Assert.notNull(emf,"No EntityManagerFactory specified");
+  EntityManagerHolder emHolder=(EntityManagerHolder)TransactionSynchronizationManager.getResource(emf);
+  if (emHolder != null) {
+    if (synchronizedWithTransaction) {
+      if (!emHolder.isSynchronizedWithTransaction() && TransactionSynchronizationManager.isSynchronizationActive()) {
+        try {
+          emHolder.getEntityManager().joinTransaction();
+        }
+ catch (        TransactionRequiredException ex) {
+          logger.debug("Could not join transaction because none was actually active",ex);
+        }
+        Object transactionData=prepareTransaction(emHolder.getEntityManager(),emf);
+        TransactionSynchronizationManager.registerSynchronization(new TransactionalEntityManagerSynchronization(emHolder,emf,transactionData,false));
+        emHolder.setSynchronizedWithTransaction(true);
+      }
+      emHolder.requested();
+      return emHolder.getEntityManager();
+    }
+ else {
+      if (emHolder.isTransactionActive() && !emHolder.isOpen()) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+          return null;
+        }
+        TransactionSynchronizationManager.unbindResource(emf);
+      }
+ else {
+        return emHolder.getEntityManager();
+      }
+    }
+  }
+ else   if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+    return null;
+  }
+  logger.debug("Opening JPA EntityManager");
+  EntityManager em=null;
+  if (!synchronizedWithTransaction && createEntityManagerWithSynchronizationTypeMethod != null) {
+    try {
+      em=(EntityManager)ReflectionUtils.invokeMethod(createEntityManagerWithSynchronizationTypeMethod,emf,synchronizationTypeUnsynchronized,properties);
+    }
+ catch (    AbstractMethodError err) {
+    }
+  }
+  if (em == null) {
+    em=(!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
+  }
+  logger.debug("Registering transaction synchronization for JPA EntityManager");
+  emHolder=new EntityManagerHolder(em);
+  if (synchronizedWithTransaction) {
+    Object transactionData=prepareTransaction(em,emf);
+    TransactionSynchronizationManager.registerSynchronization(new TransactionalEntityManagerSynchronization(emHolder,emf,transactionData,true));
+    emHolder.setSynchronizedWithTransaction(true);
+  }
+ else {
+    TransactionSynchronizationManager.registerSynchronization(new TransactionScopedEntityManagerSynchronization(emHolder,emf));
+  }
+  TransactionSynchronizationManager.bindResource(emf,emHolder);
+  return em;
+}

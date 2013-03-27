@@ -23,17 +23,27 @@
     if (this.containerManaged) {
       throw new IllegalStateException("Invalid usage: Cannot close a container-managed EntityManager");
     }
+    ExtendedEntityManagerSynchronization synch=(ExtendedEntityManagerSynchronization)TransactionSynchronizationManager.getResource(this.target);
+    if (synch != null) {
+      synch.closeOnCompletion=true;
+      return null;
+    }
   }
  else   if (method.getName().equals("getTransaction")) {
-    if (this.containerManaged) {
-      throw new IllegalStateException("Cannot execute getTransaction() on a container-managed EntityManager");
+    if (this.synchronizedWithTransaction) {
+      throw new IllegalStateException("Cannot obtain local EntityTransaction from a transaction-synchronized EntityManager");
     }
   }
  else   if (method.getName().equals("joinTransaction")) {
     doJoinTransaction(true);
     return null;
   }
-  if (this.containerManaged && method.getDeclaringClass().isInterface()) {
+ else   if (method.getName().equals("isJoinedToTransaction")) {
+    if (!this.jta) {
+      return TransactionSynchronizationManager.hasResource(this.target);
+    }
+  }
+  if (this.synchronizedWithTransaction && method.getDeclaringClass().isInterface()) {
     doJoinTransaction(false);
   }
   try {
