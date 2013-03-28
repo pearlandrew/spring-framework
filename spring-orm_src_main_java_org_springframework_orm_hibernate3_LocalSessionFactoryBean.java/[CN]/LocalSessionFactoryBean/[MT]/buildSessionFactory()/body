@@ -37,11 +37,9 @@
       config.setNamingStrategy(this.namingStrategy);
     }
     if (this.typeDefinitions != null) {
-      Method createMappings=Configuration.class.getMethod("createMappings");
-      Method addTypeDef=createMappings.getReturnType().getMethod("addTypeDef",String.class,String.class,Properties.class);
-      Object mappings=ReflectionUtils.invokeMethod(createMappings,config);
+      Mappings mappings=config.createMappings();
       for (      TypeDefinitionBean typeDef : this.typeDefinitions) {
-        ReflectionUtils.invokeMethod(addTypeDef,mappings,typeDef.getTypeName(),typeDef.getTypeClass(),typeDef.getParameters());
+        mappings.addTypeDef(typeDef.getTypeName(),typeDef.getTypeClass(),typeDef.getParameters());
       }
     }
     if (this.filterDefinitions != null) {
@@ -68,7 +66,7 @@
       config.setProperty(Environment.CONNECTION_PROVIDER,providerClass.getName());
     }
     if (this.cacheRegionFactory != null) {
-      config.setProperty(Environment.CACHE_REGION_FACTORY,"org.springframework.orm.hibernate3.LocalRegionFactoryProxy");
+      config.setProperty(Environment.CACHE_REGION_FACTORY,LocalRegionFactoryProxy.class.getName());
     }
     if (this.mappingResources != null) {
       for (      String mapping : this.mappingResources) {
@@ -107,8 +105,7 @@
         String className=(String)classNames.nextElement();
         String[] strategyAndRegion=StringUtils.commaDelimitedListToStringArray(this.entityCacheStrategies.getProperty(className));
         if (strategyAndRegion.length > 1) {
-          Method setCacheConcurrencyStrategy=Configuration.class.getMethod("setCacheConcurrencyStrategy",String.class,String.class,String.class);
-          ReflectionUtils.invokeMethod(setCacheConcurrencyStrategy,config,className,strategyAndRegion[0],strategyAndRegion[1]);
+          config.setCacheConcurrencyStrategy(className,strategyAndRegion[0],strategyAndRegion[1]);
         }
  else         if (strategyAndRegion.length > 0) {
           config.setCacheConcurrencyStrategy(className,strategyAndRegion[0]);
