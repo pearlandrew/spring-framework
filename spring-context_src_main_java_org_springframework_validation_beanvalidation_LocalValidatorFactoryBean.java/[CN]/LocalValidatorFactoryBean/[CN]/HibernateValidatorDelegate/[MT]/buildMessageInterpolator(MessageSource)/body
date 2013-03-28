@@ -1,3 +1,36 @@
 {
-  return new ResourceBundleMessageInterpolator(new MessageSourceResourceBundleLocator(messageSource));
+  Class<?> locatorClass;
+  try {
+    locatorClass=ClassUtils.forName("org.hibernate.validator.spi.resourceloading.ResourceBundleLocator",HibernateValidatorDelegate.class.getClassLoader());
+  }
+ catch (  ClassNotFoundException ex) {
+    try {
+      locatorClass=ClassUtils.forName("org.hibernate.validator.resourceloading.ResourceBundleLocator",HibernateValidatorDelegate.class.getClassLoader());
+    }
+ catch (    ClassNotFoundException ex2) {
+      throw new IllegalStateException("Neither Hibernate Validator 5.x nor 4.x API found");
+    }
+  }
+  Object locator=Proxy.newProxyInstance(HibernateValidatorDelegate.class.getClassLoader(),new Class[]{locatorClass},new InvocationHandler(){
+    public Object invoke(    Object proxy,    Method method,    Object[] args) throws Throwable {
+      if (method.getName().equals("getResourceBundle")) {
+        return new MessageSourceResourceBundle(messageSource,(Locale)args[0]);
+      }
+ else {
+        try {
+          return method.invoke(this,args);
+        }
+ catch (        InvocationTargetException ex) {
+          throw ex.getTargetException();
+        }
+      }
+    }
+  }
+);
+  try {
+    return ResourceBundleMessageInterpolator.class.getConstructor(locatorClass).newInstance(locator);
+  }
+ catch (  Exception ex) {
+    throw new IllegalStateException("Unexpected Hibernate Validator API mismatch",ex);
+  }
 }

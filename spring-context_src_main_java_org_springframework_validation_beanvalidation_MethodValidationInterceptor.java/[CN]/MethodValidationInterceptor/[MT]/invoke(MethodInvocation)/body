@@ -1,13 +1,19 @@
 {
   Class[] groups=determineValidationGroups(invocation);
-  Set<MethodConstraintViolation<Object>> result=this.validator.validateAllParameters(invocation.getThis(),invocation.getMethod(),invocation.getArguments(),groups);
-  if (!result.isEmpty()) {
-    throw new MethodConstraintViolationException(result);
+  if (forExecutablesMethod != null) {
+    Object executableValidator=ReflectionUtils.invokeMethod(forExecutablesMethod,this.validator);
+    Set<ConstraintViolation<?>> result=(Set<ConstraintViolation<?>>)ReflectionUtils.invokeMethod(validateParametersMethod,executableValidator,invocation.getThis(),invocation.getMethod(),invocation.getArguments(),groups);
+    if (!result.isEmpty()) {
+      throw new ConstraintViolationException(result);
+    }
+    Object returnValue=invocation.proceed();
+    result=(Set<ConstraintViolation<?>>)ReflectionUtils.invokeMethod(validateReturnValueMethod,executableValidator,invocation.getThis(),invocation.getMethod(),returnValue,groups);
+    if (!result.isEmpty()) {
+      throw new ConstraintViolationException(result);
+    }
+    return returnValue;
   }
-  Object returnValue=invocation.proceed();
-  result=this.validator.validateReturnValue(invocation.getThis(),invocation.getMethod(),returnValue,groups);
-  if (!result.isEmpty()) {
-    throw new MethodConstraintViolationException(result);
+ else {
+    return HibernateValidatorDelegate.invokeWithinValidation(invocation,this.validator,groups);
   }
-  return returnValue;
 }
