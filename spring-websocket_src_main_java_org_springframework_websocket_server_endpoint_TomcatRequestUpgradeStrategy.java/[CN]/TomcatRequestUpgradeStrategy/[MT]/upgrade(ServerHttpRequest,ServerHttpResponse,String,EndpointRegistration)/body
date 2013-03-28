@@ -1,11 +1,10 @@
 {
-  logger.debug("Upgrading HTTP request");
   Assert.isTrue(request instanceof ServletServerHttpRequest);
   HttpServletRequest servletRequest=((ServletServerHttpRequest)request).getServletRequest();
+  WsHttpUpgradeHandler wsHandler=servletRequest.upgrade(WsHttpUpgradeHandler.class);
   WsHandshakeRequest wsRequest=new WsHandshakeRequest(servletRequest);
   Method method=ReflectionUtils.findMethod(WsHandshakeRequest.class,"finished");
   ReflectionUtils.makeAccessible(method);
   method.invoke(wsRequest);
-  WsHttpUpgradeHandler wsHandler=servletRequest.upgrade(WsHttpUpgradeHandler.class);
-  wsHandler.preInit(this.endpoint,this.endpointConfig,WsServerContainer.getServerContainer(),wsRequest,protocol,Collections.<String,String>emptyMap(),servletRequest.isSecure());
+  wsHandler.preInit(registration.getEndpoint(),registration,WsServerContainer.getServerContainer(),wsRequest,protocol,Collections.<String,String>emptyMap(),servletRequest.isSecure());
 }
