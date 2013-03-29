@@ -12,13 +12,8 @@
       tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
       return tt2.execute(new TransactionCallback(){
         @Override public Object doInTransaction(        TransactionStatus status){
-          return template.execute(new JpaCallback(){
-            @Override public Object doInJpa(            EntityManager em2){
-              em2.flush();
-              return l;
-            }
-          }
-);
+          EntityManagerFactoryUtils.getTransactionalEntityManager(factory).flush();
+          return l;
         }
       }
 );

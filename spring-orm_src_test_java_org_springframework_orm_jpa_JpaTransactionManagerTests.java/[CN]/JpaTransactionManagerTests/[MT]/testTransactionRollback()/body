@@ -9,12 +9,8 @@
     tt.execute(new TransactionCallback(){
       @Override public Object doInTransaction(      TransactionStatus status){
         assertTrue(TransactionSynchronizationManager.hasResource(factory));
-        return template.execute(new JpaCallback(){
-          @Override public Object doInJpa(          EntityManager em){
-            throw new RuntimeException("some exception");
-          }
-        }
-);
+        EntityManagerFactoryUtils.getTransactionalEntityManager(factory);
+        throw new RuntimeException("some exception");
       }
     }
 );

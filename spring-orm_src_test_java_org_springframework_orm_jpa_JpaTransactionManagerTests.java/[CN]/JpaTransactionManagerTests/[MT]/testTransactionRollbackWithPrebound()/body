@@ -9,12 +9,7 @@
       @Override public Object doInTransaction(      TransactionStatus status){
         assertTrue(TransactionSynchronizationManager.hasResource(factory));
         assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
-        template.execute(new JpaCallback(){
-          @Override public Object doInJpa(          EntityManager em){
-            return null;
-          }
-        }
-);
+        EntityManagerFactoryUtils.getTransactionalEntityManager(factory);
         status.setRollbackOnly();
         return null;
       }

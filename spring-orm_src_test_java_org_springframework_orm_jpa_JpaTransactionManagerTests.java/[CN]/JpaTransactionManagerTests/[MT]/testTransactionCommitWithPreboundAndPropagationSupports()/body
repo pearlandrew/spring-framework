@@ -11,13 +11,8 @@
         assertTrue(TransactionSynchronizationManager.hasResource(factory));
         assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
         assertTrue(!status.isNewTransaction());
-        return template.execute(new JpaCallback(){
-          @Override public Object doInJpa(          EntityManager em){
-            em.flush();
-            return l;
-          }
-        }
-);
+        EntityManagerFactoryUtils.getTransactionalEntityManager(factory).flush();
+        return l;
       }
     }
 );

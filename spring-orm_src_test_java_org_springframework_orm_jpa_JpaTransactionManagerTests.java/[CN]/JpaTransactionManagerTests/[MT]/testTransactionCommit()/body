@@ -7,13 +7,8 @@
   Object result=tt.execute(new TransactionCallback(){
     @Override public Object doInTransaction(    TransactionStatus status){
       assertTrue(TransactionSynchronizationManager.hasResource(factory));
-      return template.execute(new JpaCallback(){
-        @Override public Object doInJpa(        EntityManager em){
-          em.flush();
-          return l;
-        }
-      }
-);
+      EntityManagerFactoryUtils.getTransactionalEntityManager(factory).flush();
+      return l;
     }
   }
 );

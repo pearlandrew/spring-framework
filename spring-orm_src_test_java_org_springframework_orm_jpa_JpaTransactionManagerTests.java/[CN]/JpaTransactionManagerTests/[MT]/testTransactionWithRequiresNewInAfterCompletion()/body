@@ -10,24 +10,13 @@
   assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
   tt.execute(new TransactionCallback(){
     @Override public Object doInTransaction(    TransactionStatus status){
-      template.execute(new JpaCallback(){
-        @Override public Object doInJpa(        EntityManager em2){
-          em2.flush();
-          return null;
-        }
-      }
-);
+      EntityManagerFactoryUtils.getTransactionalEntityManager(factory).flush();
       TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter(){
         @Override public void afterCompletion(        int status){
           tt.execute(new TransactionCallback(){
             @Override public Object doInTransaction(            TransactionStatus status){
-              return template.execute(new JpaCallback(){
-                @Override public Object doInJpa(                EntityManager em2){
-                  em2.flush();
-                  return null;
-                }
-              }
-);
+              EntityManagerFactoryUtils.getTransactionalEntityManager(factory).flush();
+              return null;
             }
           }
 );
