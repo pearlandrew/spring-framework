@@ -1,0 +1,41 @@
+{
+  TransportHandler transportHandler=this.transportHandlers.get(transportType);
+  if (transportHandler == null) {
+    logger.debug("Transport handler not found");
+    response.setStatusCode(HttpStatus.NOT_FOUND);
+    return;
+  }
+  HttpMethod supportedMethod=transportType.getHttpMethod();
+  if (!supportedMethod.equals(request.getMethod())) {
+    if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.isCorsSupported()) {
+      response.setStatusCode(HttpStatus.NO_CONTENT);
+      addCorsHeaders(request,response,supportedMethod,HttpMethod.OPTIONS);
+      addCacheHeaders(response);
+      response.getBody();
+    }
+ else {
+      List<HttpMethod> supportedMethods=Arrays.asList(supportedMethod);
+      if (transportType.isCorsSupported()) {
+        supportedMethods.add(HttpMethod.OPTIONS);
+      }
+      sendMethodNotAllowed(response,supportedMethods);
+    }
+    return;
+  }
+  SockJsSessionSupport session=getSockJsSession(sessionId,transportHandler);
+  if (session == null) {
+    response.setStatusCode(HttpStatus.NOT_FOUND);
+    return;
+  }
+  addNoCacheHeaders(response);
+  if (isJsessionIdCookieNeeded()) {
+    Cookie cookie=request.getCookies().getCookie("JSESSIONID");
+    String jsid=(cookie != null) ? cookie.getValue() : "dummy";
+    response.getHeaders().set("Set-Cookie","JSESSIONID=" + jsid + ";path=/");
+  }
+  if (transportType.isCorsSupported()) {
+    addCorsHeaders(request,response);
+  }
+  transportHandler.handleRequest(request,response,session);
+  response.close();
+}

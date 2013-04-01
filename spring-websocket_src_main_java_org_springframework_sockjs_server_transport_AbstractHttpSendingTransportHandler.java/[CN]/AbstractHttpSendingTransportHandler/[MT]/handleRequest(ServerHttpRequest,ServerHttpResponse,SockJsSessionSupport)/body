@@ -1,0 +1,15 @@
+{
+  AbstractHttpServerSession httpServerSession=(AbstractHttpServerSession)session;
+  response.getHeaders().setContentType(getContentType());
+  if (httpServerSession.isNew()) {
+    handleNewSession(request,response,httpServerSession);
+  }
+ else   if (httpServerSession.isActive()) {
+    logger.debug("another " + getTransportType() + " connection still open: "+ httpServerSession);
+    httpServerSession.writeFrame(response.getBody(),SockJsFrame.closeFrameAnotherConnectionOpen());
+  }
+ else {
+    logger.debug("starting " + getTransportType() + " async request");
+    httpServerSession.setCurrentRequest(request,response,getFrameFormat(request));
+  }
+}

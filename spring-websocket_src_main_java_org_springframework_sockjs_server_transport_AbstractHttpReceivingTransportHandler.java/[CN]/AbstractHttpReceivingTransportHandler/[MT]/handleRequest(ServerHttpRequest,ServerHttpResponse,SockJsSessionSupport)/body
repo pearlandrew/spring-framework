@@ -1,0 +1,22 @@
+{
+  String[] messages=null;
+  try {
+    messages=readMessages(request);
+  }
+ catch (  JsonMappingException ex) {
+    response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+    response.getBody().write("Payload expected.".getBytes("UTF-8"));
+    return;
+  }
+catch (  IOException ex) {
+    response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+    response.getBody().write("Broken JSON encoding.".getBytes("UTF-8"));
+    return;
+  }
+  if (logger.isTraceEnabled()) {
+    logger.trace("Received messages: " + Arrays.asList(messages));
+  }
+  session.delegateMessages(messages);
+  response.setStatusCode(getResponseStatus());
+  response.getHeaders().setContentType(new MediaType("text","plain",Charset.forName("UTF-8")));
+}

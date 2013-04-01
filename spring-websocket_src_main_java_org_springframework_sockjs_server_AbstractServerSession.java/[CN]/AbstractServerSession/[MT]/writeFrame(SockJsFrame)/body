@@ -1,0 +1,18 @@
+{
+  if (logger.isTraceEnabled()) {
+    logger.trace("Preparing to write " + frame);
+  }
+  try {
+    writeFrameInternal(frame);
+  }
+ catch (  EOFException ex) {
+    logger.warn("Failed to send message due to client disconnect. Terminating connection abruptly");
+    deactivate();
+    close();
+  }
+catch (  Throwable t) {
+    logger.error("Failed to send message. Terminating connection abruptly",t);
+    deactivate();
+    close();
+  }
+}

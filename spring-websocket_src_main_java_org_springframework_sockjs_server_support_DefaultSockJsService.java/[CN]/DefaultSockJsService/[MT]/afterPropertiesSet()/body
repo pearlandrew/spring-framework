@@ -1,0 +1,28 @@
+{
+  this.sessionTimeoutScheduler.scheduleAtFixedRate(new Runnable(){
+    public void run(){
+      try {
+        int count=sessions.size();
+        if (logger.isTraceEnabled() && (count != 0)) {
+          logger.trace("Checking " + count + " session(s) for timeouts ["+ getSockJsServiceName()+ "]");
+        }
+        for (        SockJsSessionSupport session : sessions.values()) {
+          if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
+            if (logger.isTraceEnabled()) {
+              logger.trace("Removing " + session + " for ["+ getSockJsServiceName()+ "]");
+            }
+            session.close();
+            sessions.remove(session.getId());
+          }
+        }
+        if (logger.isTraceEnabled() && (count != 0)) {
+          logger.trace(sessions.size() + " remaining session(s) [" + getSockJsServiceName()+ "]");
+        }
+      }
+ catch (      Throwable t) {
+        logger.error("Failed to complete session timeout checks for [" + getSockJsServiceName() + "]",t);
+      }
+    }
+  }
+,getDisconnectDelay());
+}
