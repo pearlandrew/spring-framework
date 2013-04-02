@@ -1,13 +1,19 @@
 {
+  if (this.endpointClass != null) {
+    return this.endpointClass;
+  }
   Class<?> beanClass=this.bean.getClass();
   if (beanClass.equals(String.class)) {
     beanClass=this.beanFactory.getType((String)this.bean);
   }
   beanClass=ClassUtils.getUserClass(beanClass);
-  if (WebSocketHandler.class.isAssignableFrom(beanClass)) {
+  if (Endpoint.class.isAssignableFrom(beanClass)) {
+    return (Class<? extends Endpoint>)beanClass;
+  }
+ else   if (WebSocketHandler.class.isAssignableFrom(beanClass)) {
     return StandardWebSocketHandlerAdapter.class;
   }
  else {
-    return (Class<? extends Endpoint>)beanClass;
+    throw new IllegalStateException("Invalid endpoint bean: must be of type ... TODO ");
   }
 }

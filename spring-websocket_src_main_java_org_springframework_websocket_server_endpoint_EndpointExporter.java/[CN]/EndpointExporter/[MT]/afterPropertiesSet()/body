@@ -10,4 +10,15 @@
   if (this.maxBinaryMessageBufferSize != null) {
     serverContainer.setDefaultMaxBinaryMessageBufferSize(this.maxBinaryMessageBufferSize);
   }
+  if (!ObjectUtils.isEmpty(this.annotatedEndpointClasses)) {
+    for (    Class<?> clazz : this.annotatedEndpointClasses) {
+      try {
+        logger.info("Registering @ServerEndpoint type " + clazz);
+        serverContainer.addEndpoint(clazz);
+      }
+ catch (      DeploymentException e) {
+        throw new IllegalStateException("Failed to register @ServerEndpoint type " + clazz,e);
+      }
+    }
+  }
 }

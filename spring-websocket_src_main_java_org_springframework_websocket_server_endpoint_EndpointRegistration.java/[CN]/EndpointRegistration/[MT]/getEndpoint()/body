@@ -1,4 +1,11 @@
 {
+  if (this.endpointClass != null) {
+    WebApplicationContext wac=ContextLoader.getCurrentWebApplicationContext();
+    if (wac == null) {
+      throw new IllegalStateException("Failed to find WebApplicationContext. " + "Was org.springframework.web.context.ContextLoader used to load the WebApplicationContext?");
+    }
+    return wac.getAutowireCapableBeanFactory().createBean(this.endpointClass);
+  }
   Object bean=this.bean;
   if (this.bean instanceof String) {
     bean=this.beanFactory.getBean((String)this.bean);
