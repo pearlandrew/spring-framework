@@ -1,0 +1,17 @@
+{
+  if (logger.isTraceEnabled()) {
+    logger.trace("Received payload " + message + " for "+ sockJsSession);
+  }
+  if (StringUtils.isEmpty(message)) {
+    logger.trace("Ignoring empty payload");
+    return;
+  }
+  try {
+    String[] messages=this.objectMapper.readValue(message,String[].class);
+    this.sockJsSession.delegateMessages(messages);
+  }
+ catch (  IOException e) {
+    logger.error("Broken data received. Terminating WebSocket connection abruptly",e);
+    session.close();
+  }
+}
