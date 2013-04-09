@@ -1,12 +1,9 @@
 {
-  TransportType transportType=transportHandler.getTransportType();
-  sessionId=TransportType.WEBSOCKET.equals(transportType) ? sessionId + "#" + webSocketSessionIdSuffix.getAndIncrement() : sessionId;
   SockJsSessionSupport session=this.sessions.get(sessionId);
   if (session != null) {
     return session;
   }
-  if (TransportType.XHR_SEND.equals(transportType) || TransportType.JSONP_SEND.equals(transportType)) {
-    logger.debug(transportType + " did not find session");
+  if (!transportHandler.canCreateSession()) {
     return null;
   }
 synchronized (this.sessions) {
@@ -15,7 +12,7 @@ synchronized (this.sessions) {
       return session;
     }
     logger.debug("Creating new session with session id \"" + sessionId + "\"");
-    session=transportHandler.createSession(sessionId,this.sockJsHandler,this);
+    session=transportHandler.createSession(sessionId);
     this.sessions.put(sessionId,session);
     return session;
   }
