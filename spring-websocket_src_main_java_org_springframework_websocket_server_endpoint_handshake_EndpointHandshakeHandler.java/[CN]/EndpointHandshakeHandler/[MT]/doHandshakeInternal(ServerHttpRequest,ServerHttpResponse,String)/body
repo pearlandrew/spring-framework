@@ -1,0 +1,16 @@
+{
+  logger.debug("Upgrading HTTP request");
+  Object webSocketHandler=getWebSocketHandler();
+  Endpoint endpoint;
+  if (webSocketHandler instanceof Endpoint) {
+    endpoint=(Endpoint)webSocketHandler;
+  }
+ else   if (webSocketHandler instanceof WebSocketHandler) {
+    endpoint=new WebSocketHandlerEndpoint((WebSocketHandler)webSocketHandler);
+  }
+ else {
+    String className=webSocketHandler.getClass().getName();
+    throw new IllegalArgumentException("Unexpected WebSocket handler type: " + className);
+  }
+  this.upgradeStrategy.upgrade(request,response,protocol,endpoint);
+}
