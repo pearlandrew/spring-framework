@@ -6,16 +6,20 @@
     logger.debug("Only HTTP GET is allowed, current method is " + request.getMethod());
     return false;
   }
-  if (!validateUpgradeHeader(request,response)) {
+  if (!"WebSocket".equalsIgnoreCase(request.getHeaders().getUpgrade())) {
+    handleInvalidUpgradeHeader(request,response);
     return false;
   }
-  if (!validateConnectHeader(request,response)) {
+  if (!request.getHeaders().getConnection().contains("Upgrade")) {
+    handleInvalidConnectHeader(request,response);
     return false;
   }
-  if (!validateWebSocketVersion(request,response)) {
+  if (!isWebSocketVersionSupported(request)) {
+    handleWebSocketVersionNotSupported(request,response);
     return false;
   }
-  if (!validateOrigin(request,response)) {
+  if (!isValidOrigin(request)) {
+    response.setStatusCode(HttpStatus.FORBIDDEN);
     return false;
   }
   String wsKey=request.getHeaders().getSecWebSocketKey();

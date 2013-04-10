@@ -1,0 +1,14 @@
+{
+  final TyrusHttpUpgradeHandler upgradeHandler=request.upgrade(TyrusHttpUpgradeHandler.class);
+  Connection connection=createConnection(upgradeHandler,response);
+  RequestContext wsRequest=RequestContext.Builder.create().requestURI(URI.create(tyrusEndpoint.getPath())).requestPath(tyrusEndpoint.getPath()).connection(connection).secure(request.isSecure()).build();
+  for (  String header : headers.keySet()) {
+    wsRequest.getHeaders().put(header,headers.get(header));
+  }
+  return WebSocketEngine.getEngine().upgrade(connection,wsRequest,new WebSocketHolderListener(){
+    @Override public void onWebSocketHolder(    WebSocketEngine.WebSocketHolder webSocketHolder){
+      upgradeHandler.setWebSocketHolder(webSocketHolder);
+    }
+  }
+);
+}
