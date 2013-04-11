@@ -1,15 +1,15 @@
 {
   if (isClosed()) {
     logger.debug("connection already closed");
-    writeFrame(response.getBody(),SockJsFrame.closeFrameGoAway());
+    writeFrame(response,SockJsFrame.closeFrameGoAway());
     return;
   }
   Assert.isInstanceOf(AsyncServerHttpRequest.class,request,"Expected AsyncServerHttpRequest");
   this.asyncRequest=(AsyncServerHttpRequest)request;
   this.asyncRequest.setTimeout(-1);
   this.asyncRequest.startAsync();
-  this.outputStream=response.getBody();
+  this.response=response;
   this.frameFormat=frameFormat;
   scheduleHeartbeat();
-  tryFlush();
+  tryFlushCache();
 }

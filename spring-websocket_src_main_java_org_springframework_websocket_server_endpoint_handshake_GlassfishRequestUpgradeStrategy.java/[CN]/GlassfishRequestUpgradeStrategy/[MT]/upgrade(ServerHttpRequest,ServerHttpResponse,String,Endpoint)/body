@@ -5,13 +5,14 @@
   HttpServletResponse servletResponse=((ServletServerHttpResponse)response).getServletResponse();
   servletResponse=new AlreadyUpgradedResponseWrapper(servletResponse);
   TyrusEndpoint tyrusEndpoint=createTyrusEndpoint(servletRequest,endpoint);
-  WebSocketEngine.getEngine().register(tyrusEndpoint);
+  WebSocketEngine engine=WebSocketEngine.getEngine();
+  engine.register(tyrusEndpoint);
   try {
     if (!performUpgrade(servletRequest,servletResponse,request.getHeaders(),tyrusEndpoint)) {
       throw new IllegalStateException("Failed to upgrade HttpServletRequest");
     }
   }
   finally {
-    WebSocketEngine.getEngine().unregister(tyrusEndpoint);
+    engine.unregister(tyrusEndpoint);
   }
 }

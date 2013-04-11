@@ -3,9 +3,14 @@
   HttpServletRequest servletRequest=((ServletServerHttpRequest)request).getServletRequest();
   WsHttpUpgradeHandler upgradeHandler=servletRequest.upgrade(WsHttpUpgradeHandler.class);
   WsHandshakeRequest webSocketRequest=new WsHandshakeRequest(servletRequest);
-  Method method=ReflectionUtils.findMethod(WsHandshakeRequest.class,"finished");
-  ReflectionUtils.makeAccessible(method);
-  method.invoke(webSocketRequest);
+  try {
+    Method method=ReflectionUtils.findMethod(WsHandshakeRequest.class,"finished");
+    ReflectionUtils.makeAccessible(method);
+    method.invoke(webSocketRequest);
+  }
+ catch (  Exception ex) {
+    throw new NestedSockJsRuntimeException("Failed to upgrade HttpServletRequest",ex);
+  }
   WsServerContainer serverContainer=WsServerContainer.getServerContainer();
   ServerEndpointConfig endpointConfig=new EndpointRegistration("/shouldntmatter",endpoint);
   upgradeHandler.preInit(endpoint,endpointConfig,serverContainer,webSocketRequest,protocol,Collections.<String,String>emptyMap(),servletRequest.isSecure());

@@ -5,14 +5,21 @@
   try {
     writeFrameInternal(frame);
   }
- catch (  EOFException ex) {
-    logger.warn("Client went away. Terminating connection abruptly");
+ catch (  IOException ex) {
+    if (ex instanceof EOFException || ex instanceof SocketException) {
+      logger.warn("Client went away. Terminating connection");
+    }
+ else {
+      logger.warn("Failed to send message. Terminating connection: " + ex.getMessage());
+    }
     deactivate();
     close();
+    throw ex;
   }
 catch (  Throwable t) {
-    logger.warn("Failed to send message. Terminating connection abruptly: " + t.getMessage());
+    logger.warn("Failed to send message. Terminating connection: " + t.getMessage());
     deactivate();
     close();
+    throw new NestedSockJsRuntimeException("Failed to write frame " + frame,t);
   }
 }
