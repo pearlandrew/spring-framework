@@ -3,17 +3,18 @@
   if (session != null) {
     return session;
   }
-  if (!transportHandler.canCreateSession()) {
-    return null;
-  }
+  if (transportHandler instanceof SockJsSessionFactory) {
+    SockJsSessionFactory<?> sessionFactory=(SockJsSessionFactory<?>)transportHandler;
 synchronized (this.sessions) {
-    session=this.sessions.get(sessionId);
-    if (session != null) {
+      session=this.sessions.get(sessionId);
+      if (session != null) {
+        return session;
+      }
+      logger.debug("Creating new session with session id \"" + sessionId + "\"");
+      session=(SockJsSessionSupport)sessionFactory.createSession(sessionId);
+      this.sessions.put(sessionId,session);
       return session;
     }
-    logger.debug("Creating new session with session id \"" + sessionId + "\"");
-    session=transportHandler.createSession(sessionId);
-    this.sessions.put(sessionId,session);
-    return session;
   }
+  return null;
 }
