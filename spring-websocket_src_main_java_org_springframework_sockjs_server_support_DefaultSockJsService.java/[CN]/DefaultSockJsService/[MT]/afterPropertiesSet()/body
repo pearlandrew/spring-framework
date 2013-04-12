@@ -1,10 +1,22 @@
 {
-  if (this.sockJsHandler != null) {
-    Assert.notNull(this.beanFactory,"An AutowirecapableBeanFactory is required to initialize SockJS handler instances per request.");
+  if (this.transportHandlers.isEmpty()) {
+    if (isWebSocketEnabled() && (this.transportHandlerOverrides.get(TransportType.WEBSOCKET) == null)) {
+      this.transportHandlers.put(TransportType.WEBSOCKET,new WebSocketTransportHandler(new DefaultHandshakeHandler()));
+    }
+    this.transportHandlers.put(TransportType.XHR,new XhrPollingTransportHandler());
+    this.transportHandlers.put(TransportType.XHR_SEND,new XhrTransportHandler());
+    this.transportHandlers.put(TransportType.JSONP,new JsonpPollingTransportHandler());
+    this.transportHandlers.put(TransportType.JSONP_SEND,new JsonpTransportHandler());
+    this.transportHandlers.put(TransportType.XHR_STREAMING,new XhrStreamingTransportHandler());
+    this.transportHandlers.put(TransportType.EVENT_SOURCE,new EventSourceTransportHandler());
+    this.transportHandlers.put(TransportType.HTML_FILE,new HtmlFileTransportHandler());
   }
-  if (this.transportHandlers.get(TransportType.WEBSOCKET) == null) {
-    logger.warn("No WebSocket transport handler was registered");
+  if (!this.transportHandlerOverrides.isEmpty()) {
+    for (    TransportHandler transportHandler : this.transportHandlerOverrides.values()) {
+      this.transportHandlers.put(transportHandler.getTransportType(),transportHandler);
+    }
   }
+  configureTransportHandlers();
   this.sessionTimeoutScheduler.scheduleAtFixedRate(new Runnable(){
     public void run(){
       try {
