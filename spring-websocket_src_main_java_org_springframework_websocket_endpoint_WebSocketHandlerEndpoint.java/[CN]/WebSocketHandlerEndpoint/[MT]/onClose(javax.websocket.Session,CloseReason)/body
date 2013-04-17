@@ -1,14 +1,17 @@
 {
-  String id=session.getId();
   if (logger.isDebugEnabled()) {
-    logger.debug("Closing session: " + session + ", "+ closeReason);
+    logger.debug("Session closed: " + session + ", "+ closeReason);
   }
   try {
-    WebSocketSession webSocketSession=getSession(id);
-    this.sessions.remove(id);
-    int code=closeReason.getCloseCode().getCode();
-    String reason=closeReason.getReasonPhrase();
-    this.webSocketHandler.sessionClosed(webSocketSession,code,reason);
+    WebSocketSession wsSession=this.sessions.remove(session.getId());
+    if (wsSession != null) {
+      int code=closeReason.getCloseCode().getCode();
+      String reason=closeReason.getReasonPhrase();
+      this.webSocketHandler.sessionClosed(wsSession,code,reason);
+    }
+ else {
+      Assert.notNull(wsSession,"No WebSocket session");
+    }
   }
  catch (  Throwable ex) {
     logger.error("Error while processing session closing",ex);

@@ -1,8 +1,13 @@
 {
   logger.error("Error for WebSocket session: " + session.getId(),exception);
   try {
-    WebSocketSession webSocketSession=getSession(session.getId());
-    this.webSocketHandler.handleException(webSocketSession,exception);
+    WebSocketSession wsSession=getWebSocketSession(session);
+    if (wsSession != null) {
+      this.webSocketHandler.handleException(wsSession,exception);
+    }
+ else {
+      logger.warn("WebSocketSession not found. Perhaps onError was called after onClose?");
+    }
   }
  catch (  Throwable ex) {
     logger.error("Failed to handle error",ex);

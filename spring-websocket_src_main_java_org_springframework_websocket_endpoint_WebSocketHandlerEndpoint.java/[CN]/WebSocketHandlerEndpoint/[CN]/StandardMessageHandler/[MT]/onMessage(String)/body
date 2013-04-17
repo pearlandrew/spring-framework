@@ -1,10 +1,11 @@
 {
   if (logger.isTraceEnabled()) {
-    logger.trace("Message for session [" + this.sessionId + "]: "+ message);
+    logger.trace("Message for session [" + this.session + "]: "+ message);
   }
+  WebSocketSession wsSession=getWebSocketSession(this.session);
+  Assert.notNull(wsSession,"WebSocketSession not found");
   try {
-    WebSocketSession session=getSession(this.sessionId);
-    WebSocketHandlerEndpoint.this.webSocketHandler.handleTextMessage(session,message);
+    WebSocketHandlerEndpoint.this.webSocketHandler.handleTextMessage(wsSession,message);
   }
  catch (  Throwable ex) {
     logger.error("Error while processing message",ex);
