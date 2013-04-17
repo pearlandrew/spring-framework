@@ -1,0 +1,22 @@
+{
+  final String subscription=message.getHeaders().getId();
+  String replyToKey=StompCommand.SUBSCRIBE + ":" + session.getId()+ ":"+ subscription;
+  if (logger.isTraceEnabled()) {
+    logger.trace("Adding subscription with replyToKey=" + replyToKey);
+  }
+  Registration<?> registration=this.reactor.on(Fn.$(replyToKey),new Consumer<Event<StompMessage>>(){
+    @Override public void accept(    Event<StompMessage> event){
+      event.getData().getHeaders().setSubscription(subscription);
+      try {
+        session.sendMessage(event.getData());
+      }
+ catch (      IOException e) {
+        ReactorServerStompMessageProcessor.this.removeSubscriptions(session.getId());
+        e.printStackTrace();
+      }
+    }
+  }
+);
+  addSubscription(session.getId(),registration);
+  this.reactor.notify(StompCommand.SUBSCRIBE,Fn.event(Tuple.of(session.getId(),message),replyToKey));
+}

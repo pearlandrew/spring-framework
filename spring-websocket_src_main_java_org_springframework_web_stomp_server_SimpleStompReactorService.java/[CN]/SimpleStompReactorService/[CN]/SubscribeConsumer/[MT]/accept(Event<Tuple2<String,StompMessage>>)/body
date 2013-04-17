@@ -1,0 +1,19 @@
+{
+  String sessionId=event.getData().getT1();
+  StompMessage message=event.getData().getT2();
+  final Object replyToKey=event.getReplyTo();
+  if (logger.isDebugEnabled()) {
+    logger.debug("Subscribe " + message);
+  }
+  Registration<?> registration=SimpleStompReactorService.this.reactor.on(Fn.$("destination:" + message.getHeaders().getDestination()),new Consumer<Event<StompMessage>>(){
+    @Override public void accept(    Event<StompMessage> event){
+      StompMessage inMessage=event.getData();
+      StompHeaders headers=new StompHeaders();
+      headers.setDestination(inMessage.getHeaders().getDestination());
+      StompMessage outMessage=new StompMessage(StompCommand.MESSAGE,headers,inMessage.getPayload());
+      SimpleStompReactorService.this.reactor.notify(replyToKey,Fn.event(outMessage));
+    }
+  }
+);
+  addSubscription(sessionId,registration);
+}
