@@ -1,0 +1,15 @@
+{
+  if (StringUtils.isEmpty(message)) {
+    logger.trace("Ignoring empty message");
+    return;
+  }
+  try {
+    String[] messages=this.objectMapper.readValue(message,String[].class);
+    SockJsSessionSupport session=getSockJsSession(wsSession);
+    session.delegateMessages(messages);
+  }
+ catch (  IOException e) {
+    logger.error("Broken data received. Terminating WebSocket connection abruptly",e);
+    wsSession.close();
+  }
+}

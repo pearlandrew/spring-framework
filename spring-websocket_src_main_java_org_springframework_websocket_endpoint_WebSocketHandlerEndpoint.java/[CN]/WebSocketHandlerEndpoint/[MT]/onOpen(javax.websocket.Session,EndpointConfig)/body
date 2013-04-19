@@ -1,12 +1,12 @@
 {
   if (logger.isDebugEnabled()) {
-    logger.debug("New session: " + session);
+    logger.debug("Client connected, WebSocket session id=" + session.getId() + ", path="+ session.getRequestURI().getPath());
   }
   try {
     WebSocketSession webSocketSession=new StandardWebSocketSession(session);
     this.sessions.put(session.getId(),webSocketSession);
     session.addMessageHandler(new StandardMessageHandler(session));
-    this.webSocketHandler.newSession(webSocketSession);
+    this.webSocketHandler.afterConnectionEstablished(webSocketSession);
   }
  catch (  Throwable ex) {
     logger.error("Error while processing new session",ex);

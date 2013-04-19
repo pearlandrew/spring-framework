@@ -1,13 +1,12 @@
 {
   if (logger.isDebugEnabled()) {
-    logger.debug("Session closed: " + session + ", "+ closeReason);
+    logger.debug("Client disconnected, WebSocket session id=" + session.getId() + ", "+ reason);
   }
   try {
     WebSocketSession wsSession=this.sessions.remove(session.getId());
     if (wsSession != null) {
-      int code=closeReason.getCloseCode().getCode();
-      String reason=closeReason.getReasonPhrase();
-      this.webSocketHandler.sessionClosed(wsSession,code,reason);
+      CloseStatus closeStatus=new CloseStatus(reason.getCloseCode().getCode(),reason.getReasonPhrase());
+      this.webSocketHandler.afterConnectionClosed(closeStatus,wsSession);
     }
  else {
       Assert.notNull(wsSession,"No WebSocket session");

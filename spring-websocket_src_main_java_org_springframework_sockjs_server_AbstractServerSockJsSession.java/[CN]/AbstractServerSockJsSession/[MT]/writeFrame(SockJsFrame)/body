@@ -10,16 +10,14 @@
       logger.warn("Client went away. Terminating connection");
     }
  else {
-      logger.warn("Failed to send message. Terminating connection: " + ex.getMessage());
+      logger.warn("Terminating connection due to failure to send message: " + ex.getMessage());
     }
-    deactivate();
     close();
     throw ex;
   }
-catch (  Throwable t) {
-    logger.warn("Failed to send message. Terminating connection: " + t.getMessage());
-    deactivate();
+catch (  Throwable ex) {
+    logger.warn("Terminating connection due to failure to send message: " + ex.getMessage());
     close();
-    throw new NestedSockJsRuntimeException("Failed to write frame " + frame,t);
+    throw new NestedSockJsRuntimeException("Failed to write frame " + frame,ex);
   }
 }
