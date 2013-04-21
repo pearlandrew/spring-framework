@@ -1,24 +1,14 @@
 {
-  ServerContainer serverContainer=getServerContainer();
   Assert.notNull(serverContainer,"javax.websocket.server.ServerContainer not available");
-  if (this.maxSessionIdleTimeout != null) {
-    serverContainer.setDefaultMaxSessionIdleTimeout(this.maxSessionIdleTimeout);
-  }
-  if (this.maxTextMessageBufferSize != null) {
-    serverContainer.setDefaultMaxTextMessageBufferSize(this.maxTextMessageBufferSize);
-  }
-  if (this.maxBinaryMessageBufferSize != null) {
-    serverContainer.setDefaultMaxBinaryMessageBufferSize(this.maxBinaryMessageBufferSize);
-  }
-  if (!ObjectUtils.isEmpty(this.annotatedEndpointClasses)) {
-    for (    Class<?> clazz : this.annotatedEndpointClasses) {
-      try {
-        logger.info("Registering @ServerEndpoint type " + clazz);
-        serverContainer.addEndpoint(clazz);
-      }
- catch (      DeploymentException e) {
-        throw new IllegalStateException("Failed to register @ServerEndpoint type " + clazz,e);
-      }
+  List<Class<?>> allClasses=new ArrayList<Class<?>>(this.annotatedEndpointClasses);
+  allClasses.addAll(this.annotatedEndpointBeanTypes);
+  for (  Class<?> clazz : allClasses) {
+    try {
+      logger.info("Registering @ServerEndpoint type " + clazz);
+      this.serverContainer.addEndpoint(clazz);
+    }
+ catch (    DeploymentException e) {
+      throw new IllegalStateException("Failed to register @ServerEndpoint type " + clazz,e);
     }
   }
 }
