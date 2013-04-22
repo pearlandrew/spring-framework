@@ -17,7 +17,11 @@
       this.transportHandlers.put(transportHandler.getTransportType(),transportHandler);
     }
   }
-  configureTransportHandlers();
+  for (  TransportHandler h : this.transportHandlers.values()) {
+    if (h instanceof ConfigurableTransportHandler) {
+      ((ConfigurableTransportHandler)h).setSockJsConfiguration(this);
+    }
+  }
   this.sessionTimeoutSchedulerHolder.initialize();
   this.sessionTimeoutSchedulerHolder.getScheduler().scheduleAtFixedRate(new Runnable(){
     public void run(){
@@ -26,7 +30,7 @@
         if (logger.isTraceEnabled() && (count != 0)) {
           logger.trace("Checking " + count + " session(s) for timeouts ["+ getName()+ "]");
         }
-        for (        SockJsSessionSupport session : sessions.values()) {
+        for (        AbstractSockJsSession session : sessions.values()) {
           if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
             if (logger.isTraceEnabled()) {
               logger.trace("Removing " + session + " for ["+ getName()+ "]");

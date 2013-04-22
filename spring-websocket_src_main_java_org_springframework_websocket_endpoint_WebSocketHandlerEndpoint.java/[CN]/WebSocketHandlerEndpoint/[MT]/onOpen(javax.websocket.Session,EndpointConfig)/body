@@ -5,7 +5,35 @@
   try {
     WebSocketSession webSocketSession=new StandardWebSocketSession(session);
     this.sessions.put(session.getId(),webSocketSession);
-    session.addMessageHandler(new StandardMessageHandler(session));
+    if (this.webSocketHandler instanceof TextMessageHandler) {
+      session.addMessageHandler(new MessageHandler.Whole<String>(){
+        @Override public void onMessage(        String message){
+          handleTextMessage(session,message);
+        }
+      }
+);
+    }
+ else     if (this.webSocketHandler instanceof BinaryMessageHandler) {
+      if (this.webSocketHandler instanceof PartialMessageHandler) {
+        session.addMessageHandler(new MessageHandler.Partial<byte[]>(){
+          @Override public void onMessage(          byte[] messagePart,          boolean isLast){
+            handleBinaryMessage(session,messagePart,isLast);
+          }
+        }
+);
+      }
+ else {
+        session.addMessageHandler(new MessageHandler.Whole<byte[]>(){
+          @Override public void onMessage(          byte[] message){
+            handleBinaryMessage(session,message,true);
+          }
+        }
+);
+      }
+    }
+ else {
+      logger.warn("WebSocketHandler handles neither text nor binary messages: " + this.webSocketHandler);
+    }
     this.webSocketHandler.afterConnectionEstablished(webSocketSession);
   }
  catch (  Throwable ex) {
