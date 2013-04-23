@@ -1,0 +1,24 @@
+{
+  Assert.state(this.session != null,"WebSocket not open");
+  try {
+    CloseStatus closeStatus=new CloseStatus(statusCode,reason);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Client disconnected, WebSocket session id=" + this.session.getId() + ", "+ closeStatus);
+    }
+    this.handler.afterConnectionClosed(closeStatus,this.session);
+  }
+ catch (  Exception ex) {
+    onWebSocketError(ex);
+  }
+ finally {
+    try {
+      if (this.handler != null) {
+        this.provider.destroy(this.handler);
+      }
+    }
+  finally {
+      this.session=null;
+      this.handler=null;
+    }
+  }
+}
