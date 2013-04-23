@@ -3,9 +3,8 @@
     logger.debug("Client connected, WebSocket session id=" + session.getId() + ", uri="+ session.getRequestURI());
   }
   try {
-    WebSocketSession webSocketSession=new StandardWebSocketSession(session);
-    this.sessions.put(session.getId(),webSocketSession);
-    if (this.webSocketHandler instanceof TextMessageHandler) {
+    this.webSocketSession=new StandardWebSocketSession(session);
+    if (this.handler instanceof TextMessageHandler) {
       session.addMessageHandler(new MessageHandler.Whole<String>(){
         @Override public void onMessage(        String message){
           handleTextMessage(session,message);
@@ -13,8 +12,8 @@
       }
 );
     }
- else     if (this.webSocketHandler instanceof BinaryMessageHandler) {
-      if (this.webSocketHandler instanceof PartialMessageHandler) {
+ else     if (this.handler instanceof BinaryMessageHandler) {
+      if (this.handler instanceof PartialMessageHandler) {
         session.addMessageHandler(new MessageHandler.Partial<byte[]>(){
           @Override public void onMessage(          byte[] messagePart,          boolean isLast){
             handleBinaryMessage(session,messagePart,isLast);
@@ -32,9 +31,9 @@
       }
     }
  else {
-      logger.warn("WebSocketHandler handles neither text nor binary messages: " + this.webSocketHandler);
+      logger.warn("WebSocketHandler handles neither text nor binary messages: " + this.handler);
     }
-    this.webSocketHandler.afterConnectionEstablished(webSocketSession);
+    this.handler.afterConnectionEstablished(this.webSocketSession);
   }
  catch (  Throwable ex) {
     logger.error("Error while processing new session",ex);
