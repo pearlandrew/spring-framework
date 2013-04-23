@@ -4,12 +4,14 @@
     logger.trace("Ignoring empty message");
     return;
   }
+  String[] messages;
   try {
-    String[] messages=this.objectMapper.readValue(payload,String[].class);
-    this.session.delegateMessages(messages);
+    messages=this.objectMapper.readValue(payload,String[].class);
   }
  catch (  IOException e) {
     logger.error("Broken data received. Terminating WebSocket connection abruptly",e);
     wsSession.close();
+    return;
   }
+  this.session.delegateMessages(messages);
 }
