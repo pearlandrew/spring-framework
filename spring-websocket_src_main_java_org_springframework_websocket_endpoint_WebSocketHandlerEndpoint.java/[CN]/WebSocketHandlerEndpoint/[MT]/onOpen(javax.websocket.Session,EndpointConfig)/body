@@ -1,7 +1,7 @@
 {
   Assert.isTrue(this.sessionCount.compareAndSet(0,1),"Unexpected connection");
   if (logger.isDebugEnabled()) {
-    logger.debug("Client connected, javax.websocket.Session id=" + session.getId() + ", uri="+ session.getRequestURI());
+    logger.debug("Connection established, javax.websocket.Session id=" + session.getId() + ", uri="+ session.getRequestURI());
   }
   this.webSocketSession=new StandardWebSocketSession(session);
   this.handler=handlerProvider.getHandler();
@@ -40,6 +40,6 @@
     this.handler.afterConnectionEstablished(this.webSocketSession);
   }
  catch (  Throwable ex) {
-    this.handler.handleError(ex,this.webSocketSession);
+    onError(session,ex);
   }
 }

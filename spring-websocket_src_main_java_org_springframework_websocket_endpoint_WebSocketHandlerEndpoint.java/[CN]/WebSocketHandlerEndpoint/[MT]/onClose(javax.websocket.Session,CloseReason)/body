@@ -1,13 +1,13 @@
 {
   if (logger.isDebugEnabled()) {
-    logger.debug("Client disconnected, WebSocket session id=" + session.getId() + ", "+ reason);
+    logger.debug("Connection closed, WebSocket session id=" + session.getId() + ", "+ reason);
   }
   try {
     CloseStatus closeStatus=new CloseStatus(reason.getCloseCode().getCode(),reason.getReasonPhrase());
     this.handler.afterConnectionClosed(closeStatus,this.webSocketSession);
   }
  catch (  Throwable ex) {
-    logger.error("Error while processing session closing",ex);
+    onError(session,ex);
   }
  finally {
     this.handlerProvider.destroy(this.handler);
