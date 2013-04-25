@@ -5,36 +5,27 @@
   }
   this.webSocketSession=new StandardWebSocketSession(session);
   this.handler=handlerProvider.getHandler();
-  if (this.handler instanceof TextMessageHandler) {
-    session.addMessageHandler(new MessageHandler.Whole<String>(){
-      @Override public void onMessage(      String message){
-        handleTextMessage(session,message);
+  session.addMessageHandler(new MessageHandler.Whole<String>(){
+    @Override public void onMessage(    String message){
+      handleTextMessage(session,message);
+    }
+  }
+);
+  if (this.handler instanceof PartialMessageHandler) {
+    session.addMessageHandler(new MessageHandler.Partial<byte[]>(){
+      @Override public void onMessage(      byte[] messagePart,      boolean isLast){
+        handleBinaryMessage(session,messagePart,isLast);
       }
     }
 );
   }
- else   if (this.handler instanceof BinaryMessageHandler) {
-    if (this.handler instanceof PartialMessageHandler) {
-      session.addMessageHandler(new MessageHandler.Partial<byte[]>(){
-        @Override public void onMessage(        byte[] messagePart,        boolean isLast){
-          handleBinaryMessage(session,messagePart,isLast);
-        }
-      }
-);
-    }
  else {
-      session.addMessageHandler(new MessageHandler.Whole<byte[]>(){
-        @Override public void onMessage(        byte[] message){
-          handleBinaryMessage(session,message,true);
-        }
+    session.addMessageHandler(new MessageHandler.Whole<byte[]>(){
+      @Override public void onMessage(      byte[] message){
+        handleBinaryMessage(session,message,true);
       }
+    }
 );
-    }
-  }
- else {
-    if (logger.isWarnEnabled()) {
-      logger.warn("WebSocketHandler handles neither text nor binary messages: " + this.handler);
-    }
   }
   try {
     this.handler.afterConnectionEstablished(this.webSocketSession);
