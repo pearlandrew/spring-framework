@@ -1,20 +1,14 @@
 {
-  Assert.state(this.session == null,"WebSocket already open");
+  Assert.isTrue(this.sessionCount.compareAndSet(0,1),"Unexpected connection");
+  this.session=new WebSocketSessionAdapter(session);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Connection established, WebSocket session id=" + this.session.getId() + ", uri="+ this.session.getURI());
+  }
+  this.handler=this.provider.getHandler();
   try {
-    this.session=new WebSocketSessionAdapter(session);
-    if (logger.isDebugEnabled()) {
-      logger.debug("Connection established, WebSocket session id=" + this.session.getId() + ", uri="+ this.session.getURI());
-    }
-    this.handler=this.provider.getHandler();
     this.handler.afterConnectionEstablished(this.session);
   }
- catch (  Exception ex) {
-    try {
-      onWebSocketError(ex);
-    }
-  finally {
-      this.session=null;
-      this.handler=null;
-    }
+ catch (  Throwable ex) {
+    tryCloseWithError(ex);
   }
 }

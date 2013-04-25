@@ -1,7 +1,12 @@
 {
-  String name="org.glassfish.tyrus.servlet.ConnectionImpl";
-  Class<?> clazz=ClassUtils.forName(name,GlassfishRequestUpgradeStrategy.class.getClassLoader());
-  Constructor<?> constructor=clazz.getDeclaredConstructor(TyrusHttpUpgradeHandler.class,HttpServletResponse.class);
-  ReflectionUtils.makeAccessible(constructor);
-  return (Connection)constructor.newInstance(handler,response);
+  try {
+    String name="org.glassfish.tyrus.servlet.ConnectionImpl";
+    Class<?> clazz=ClassUtils.forName(name,GlassfishRequestUpgradeStrategy.class.getClassLoader());
+    Constructor<?> constructor=clazz.getDeclaredConstructor(TyrusHttpUpgradeHandler.class,HttpServletResponse.class);
+    ReflectionUtils.makeAccessible(constructor);
+    return (Connection)constructor.newInstance(handler,response);
+  }
+ catch (  Exception ex) {
+    throw new IllegalStateException("Failed to instantiate Glassfish connection",ex);
+  }
 }

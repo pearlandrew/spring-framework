@@ -4,13 +4,15 @@
     messages=readMessages(request);
   }
  catch (  JsonMappingException ex) {
-    response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-    response.getBody().write("Payload expected.".getBytes("UTF-8"));
+    sendInternalServerError(response,"Payload expected.",session.getId());
     return;
   }
 catch (  IOException ex) {
-    response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-    response.getBody().write("Broken JSON encoding.".getBytes("UTF-8"));
+    sendInternalServerError(response,"Broken JSON encoding.",session.getId());
+    return;
+  }
+catch (  Throwable t) {
+    sendInternalServerError(response,"Failed to process messages",session.getId());
     return;
   }
   if (logger.isTraceEnabled()) {

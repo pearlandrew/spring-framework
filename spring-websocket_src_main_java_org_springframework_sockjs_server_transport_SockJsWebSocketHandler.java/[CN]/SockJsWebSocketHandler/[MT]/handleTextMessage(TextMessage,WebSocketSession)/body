@@ -1,17 +1,3 @@
 {
-  String payload=message.getPayload();
-  if (StringUtils.isEmpty(payload)) {
-    logger.trace("Ignoring empty message");
-    return;
-  }
-  String[] messages;
-  try {
-    messages=this.objectMapper.readValue(payload,String[].class);
-  }
- catch (  IOException e) {
-    logger.error("Broken data received. Terminating WebSocket connection abruptly",e);
-    wsSession.close();
-    return;
-  }
-  this.session.delegateMessages(messages);
+  this.sockJsSession.handleMessage(message,wsSession);
 }

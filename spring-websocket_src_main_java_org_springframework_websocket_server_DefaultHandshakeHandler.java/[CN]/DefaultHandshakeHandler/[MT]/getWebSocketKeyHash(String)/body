@@ -1,5 +1,10 @@
 {
-  MessageDigest digest=MessageDigest.getInstance("SHA1");
-  byte[] bytes=digest.digest((key + GUID).getBytes(Charset.forName("ISO-8859-1")));
-  return DatatypeConverter.printBase64Binary(bytes);
+  try {
+    MessageDigest digest=MessageDigest.getInstance("SHA1");
+    byte[] bytes=digest.digest((key + GUID).getBytes(Charset.forName("ISO-8859-1")));
+    return DatatypeConverter.printBase64Binary(bytes);
+  }
+ catch (  NoSuchAlgorithmException ex) {
+    throw new IllegalStateException("Failed to generate value for Sec-WebSocket-Key header",ex);
+  }
 }

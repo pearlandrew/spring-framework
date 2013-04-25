@@ -1,5 +1,4 @@
 {
-  Assert.state(this.session != null,"WebSocket not open");
   try {
     CloseStatus closeStatus=new CloseStatus(statusCode,reason);
     if (logger.isDebugEnabled()) {
@@ -7,18 +6,10 @@
     }
     this.handler.afterConnectionClosed(closeStatus,this.session);
   }
- catch (  Exception ex) {
-    onWebSocketError(ex);
+ catch (  Throwable ex) {
+    logger.error("Unhandled error for " + this.session,ex);
   }
  finally {
-    try {
-      if (this.handler != null) {
-        this.provider.destroy(this.handler);
-      }
-    }
-  finally {
-      this.session=null;
-      this.handler=null;
-    }
+    destroyHandler();
   }
 }
