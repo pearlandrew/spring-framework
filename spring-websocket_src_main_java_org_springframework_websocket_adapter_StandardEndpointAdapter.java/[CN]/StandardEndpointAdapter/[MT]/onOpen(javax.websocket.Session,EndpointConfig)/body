@@ -1,0 +1,26 @@
+{
+  session.addMessageHandler(new MessageHandler.Whole<String>(){
+    @Override public void onMessage(    String message){
+      handleTextMessage(session,message);
+    }
+  }
+);
+  if (PartialMessageHandler.class.isAssignableFrom(this.handlerClass)) {
+    session.addMessageHandler(new MessageHandler.Partial<ByteBuffer>(){
+      @Override public void onMessage(      ByteBuffer messagePart,      boolean isLast){
+        handleBinaryMessage(session,messagePart,isLast);
+      }
+    }
+);
+  }
+ else {
+    session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>(){
+      @Override public void onMessage(      ByteBuffer message){
+        handleBinaryMessage(session,message,true);
+      }
+    }
+);
+  }
+  this.wsSession=new StandardWebSocketSessionAdapter(session);
+  this.handler.afterConnectionEstablished(this.wsSession);
+}
