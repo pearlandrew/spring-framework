@@ -1,0 +1,15 @@
+{
+  if (logger.isTraceEnabled()) {
+    logger.trace("Received " + message + ", "+ session);
+  }
+  if (!this.supportedMessageType.isAssignableFrom(message.getClass())) {
+    tryCloseWithError(session,null,CloseStatus.NOT_ACCEPTABLE.withReason("Message type not supported"));
+    return;
+  }
+  try {
+    ((WebSocketHandler)this.handler).handleMessage(session,message);
+  }
+ catch (  Throwable ex) {
+    tryCloseWithError(session,ex);
+  }
+}
