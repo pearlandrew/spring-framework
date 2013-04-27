@@ -1,0 +1,27 @@
+{
+  Endpoint endpoint=new StandardEndpointAdapter(webSocketHandler);
+  ClientEndpointConfig.Builder configBuidler=ClientEndpointConfig.Builder.create();
+  if (httpHeaders != null) {
+    List<String> protocols=httpHeaders.getSecWebSocketProtocol();
+    if (!protocols.isEmpty()) {
+      configBuidler.preferredSubprotocols(protocols);
+    }
+    configBuidler.configurator(new Configurator(){
+      @Override public void beforeRequest(      Map<String,List<String>> headers){
+        for (        String headerName : httpHeaders.keySet()) {
+          if (!EXCLUDED_HEADERS.contains(headerName)) {
+            headers.put(headerName,httpHeaders.get(headerName));
+          }
+        }
+      }
+    }
+);
+  }
+  try {
+    Session session=this.webSocketContainer.connectToServer(endpoint,configBuidler.build(),uri);
+    return new StandardWebSocketSessionAdapter(session);
+  }
+ catch (  Exception e) {
+    throw new WebSocketConnectFailureException("Failed to connect to " + uri,e);
+  }
+}
