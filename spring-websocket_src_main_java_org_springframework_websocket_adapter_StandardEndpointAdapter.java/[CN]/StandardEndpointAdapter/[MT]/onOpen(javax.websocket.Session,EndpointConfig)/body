@@ -1,11 +1,13 @@
 {
+  this.wsSession=new StandardWebSocketSessionAdapter(session);
+  this.handler.afterConnectionEstablished(this.wsSession);
   session.addMessageHandler(new MessageHandler.Whole<String>(){
     @Override public void onMessage(    String message){
       handleTextMessage(session,message);
     }
   }
 );
-  if (!PartialMessageHandler.class.isAssignableFrom(this.handlerClass)) {
+  if (!this.handler.isStreaming()) {
     session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>(){
       @Override public void onMessage(      ByteBuffer message){
         handleBinaryMessage(session,message,true);
@@ -21,6 +23,4 @@
     }
 );
   }
-  this.wsSession=new StandardWebSocketSessionAdapter(session);
-  this.handler.afterConnectionEstablished(this.wsSession);
 }
