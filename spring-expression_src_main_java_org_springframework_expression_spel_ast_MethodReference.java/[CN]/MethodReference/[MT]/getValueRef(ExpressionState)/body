@@ -4,18 +4,18 @@
   for (int i=0; i < arguments.length; i++) {
     try {
       state.pushActiveContextObject(state.getRootContextObject());
-      arguments[i]=children[i].getValueInternal(state).getValue();
+      arguments[i]=this.children[i].getValueInternal(state).getValue();
     }
   finally {
       state.popActiveContextObject();
     }
   }
   if (currentContext.getValue() == null) {
-    if (nullSafe) {
+    if (this.nullSafe) {
       return ValueRef.NullValueRef.instance;
     }
  else {
-      throw new SpelEvaluationException(getStartPosition(),SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,FormatHelper.formatMethodForMessage(name,getTypes(arguments)));
+      throw new SpelEvaluationException(getStartPosition(),SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,FormatHelper.formatMethodForMessage(this.name,getTypes(arguments)));
     }
   }
   return new MethodValueRef(state,state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
