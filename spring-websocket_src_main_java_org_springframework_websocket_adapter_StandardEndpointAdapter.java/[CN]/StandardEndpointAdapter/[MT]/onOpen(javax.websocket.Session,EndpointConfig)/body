@@ -1,6 +1,12 @@
 {
   this.wsSession=new StandardWebSocketSessionAdapter(session);
-  this.handler.afterConnectionEstablished(this.wsSession);
+  try {
+    this.handler.afterConnectionEstablished(this.wsSession);
+  }
+ catch (  Throwable t) {
+    ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession,t,logger);
+    return;
+  }
   session.addMessageHandler(new MessageHandler.Whole<String>(){
     @Override public void onMessage(    String message){
       handleTextMessage(session,message);
