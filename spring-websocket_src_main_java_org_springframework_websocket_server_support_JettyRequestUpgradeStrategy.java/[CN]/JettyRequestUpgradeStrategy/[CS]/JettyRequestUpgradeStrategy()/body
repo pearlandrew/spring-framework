@@ -3,9 +3,7 @@
   this.factory.setCreator(new WebSocketCreator(){
     @Override public Object createWebSocket(    UpgradeRequest request,    UpgradeResponse response){
       Assert.isInstanceOf(ServletWebSocketRequest.class,request);
-      ServletWebSocketRequest servletRequest=(ServletWebSocketRequest)request;
-      WebSocketHandler webSocketHandler=(WebSocketHandler)servletRequest.getServletAttributes().get(HANDLER_PROVIDER_ATTR_NAME);
-      return new JettyWebSocketListenerAdapter(webSocketHandler);
+      return ((ServletWebSocketRequest)request).getServletAttributes().get(WEBSOCKET_LISTENER_ATTR_NAME);
     }
   }
 );
@@ -13,6 +11,6 @@
     this.factory.init();
   }
  catch (  Exception ex) {
-    throw new IllegalStateException(ex);
+    throw new IllegalStateException("Unable to initialize Jetty WebSocketServerFactory",ex);
   }
 }
