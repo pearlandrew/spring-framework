@@ -1,22 +1,9 @@
 {
   Object convertedValue=newValue;
-  boolean sharedEditor=false;
-  if (editor != null) {
-    sharedEditor=this.propertyEditorRegistry.isSharedEditor(editor);
-  }
   if (editor != null && !(convertedValue instanceof String)) {
     try {
-      Object newConvertedValue;
-      if (sharedEditor) {
-synchronized (editor) {
-          editor.setValue(convertedValue);
-          newConvertedValue=editor.getValue();
-        }
-      }
- else {
-        editor.setValue(convertedValue);
-        newConvertedValue=editor.getValue();
-      }
+      editor.setValue(convertedValue);
+      Object newConvertedValue=editor.getValue();
       if (newConvertedValue != convertedValue) {
         convertedValue=newConvertedValue;
         editor=null;
@@ -41,14 +28,7 @@ synchronized (editor) {
         logger.trace("Converting String to [" + requiredType + "] using property editor ["+ editor+ "]");
       }
       String newTextValue=(String)convertedValue;
-      if (sharedEditor) {
-synchronized (editor) {
-          return doConvertTextValue(oldValue,newTextValue,editor);
-        }
-      }
- else {
-        return doConvertTextValue(oldValue,newTextValue,editor);
-      }
+      return doConvertTextValue(oldValue,newTextValue,editor);
     }
  else     if (String.class.equals(requiredType)) {
       returnValue=convertedValue;
