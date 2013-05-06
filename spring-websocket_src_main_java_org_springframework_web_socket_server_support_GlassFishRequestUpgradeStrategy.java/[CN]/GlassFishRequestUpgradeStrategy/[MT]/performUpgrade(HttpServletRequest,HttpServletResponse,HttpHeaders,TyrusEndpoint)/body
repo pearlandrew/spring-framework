@@ -1,5 +1,11 @@
 {
-  final TyrusHttpUpgradeHandler upgradeHandler=request.upgrade(TyrusHttpUpgradeHandler.class);
+  final TyrusHttpUpgradeHandler upgradeHandler;
+  try {
+    upgradeHandler=request.upgrade(TyrusHttpUpgradeHandler.class);
+  }
+ catch (  ServletException e) {
+    throw new HandshakeFailureException("Unable to create UpgardeHandler",e);
+  }
   Connection connection=createConnection(upgradeHandler,response);
   RequestContext wsRequest=RequestContext.Builder.create().requestURI(URI.create(tyrusEndpoint.getPath())).requestPath(tyrusEndpoint.getPath()).connection(connection).secure(request.isSecure()).build();
   for (  String header : headers.keySet()) {
