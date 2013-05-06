@@ -1,0 +1,19 @@
+{
+  if (isOpen()) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Closing " + this + ", "+ status);
+    }
+    try {
+      closeInternal(status);
+    }
+  finally {
+      this.state=State.CLOSED;
+      try {
+        this.handler.afterConnectionClosed(this,status);
+      }
+ catch (      Throwable t) {
+        logger.error("Unhandled error for " + this,t);
+      }
+    }
+  }
+}

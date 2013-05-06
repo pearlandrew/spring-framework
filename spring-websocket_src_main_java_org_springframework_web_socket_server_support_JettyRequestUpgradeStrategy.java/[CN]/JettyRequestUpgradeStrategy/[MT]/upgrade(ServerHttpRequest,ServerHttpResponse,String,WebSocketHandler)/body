@@ -1,0 +1,16 @@
+{
+  Assert.isInstanceOf(ServletServerHttpRequest.class,request);
+  HttpServletRequest servletRequest=((ServletServerHttpRequest)request).getServletRequest();
+  Assert.isInstanceOf(ServletServerHttpResponse.class,response);
+  HttpServletResponse servletResponse=((ServletServerHttpResponse)response).getServletResponse();
+  if (!this.factory.isUpgradeRequest(servletRequest,servletResponse)) {
+    throw new HandshakeFailureException("Not a WebSocket request");
+  }
+  JettyWebSocketSessionAdapter session=new JettyWebSocketSessionAdapter();
+  this.wsSessionInitializer.initialize(request,response,session);
+  JettyWebSocketListenerAdapter listener=new JettyWebSocketListenerAdapter(webSocketHandler,session);
+  servletRequest.setAttribute(WEBSOCKET_LISTENER_ATTR_NAME,listener);
+  if (!this.factory.acceptWebSocket(servletRequest,servletResponse)) {
+    throw new HandshakeFailureException("WebSocket request not accepted by Jetty");
+  }
+}

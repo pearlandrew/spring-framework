@@ -1,0 +1,22 @@
+{
+  String className;
+  if (tomcatWebSocketPresent) {
+    className="org.springframework.web.socket.server.support.TomcatRequestUpgradeStrategy";
+  }
+ else   if (glassFishWebSocketPresent) {
+    className="org.springframework.web.socket.server.support.GlassFishRequestUpgradeStrategy";
+  }
+ else   if (jettyWebSocketPresent) {
+    className="org.springframework.web.socket.server.support.JettyRequestUpgradeStrategy";
+  }
+ else {
+    throw new IllegalStateException("No suitable " + RequestUpgradeStrategy.class.getSimpleName());
+  }
+  try {
+    Class<?> clazz=ClassUtils.forName(className,DefaultHandshakeHandler.class.getClassLoader());
+    return (RequestUpgradeStrategy)BeanUtils.instantiateClass(clazz.getConstructor());
+  }
+ catch (  Throwable t) {
+    throw new IllegalStateException("Failed to instantiate " + className,t);
+  }
+}

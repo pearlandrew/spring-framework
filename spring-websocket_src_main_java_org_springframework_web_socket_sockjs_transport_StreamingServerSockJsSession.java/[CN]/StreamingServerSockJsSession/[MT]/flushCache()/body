@@ -1,0 +1,21 @@
+{
+  cancelHeartbeat();
+  do {
+    String message=getMessageCache().poll();
+    SockJsFrame frame=SockJsFrame.messageFrame(message);
+    writeFrame(frame);
+    this.byteCount+=frame.getContentBytes().length + 1;
+    if (logger.isTraceEnabled()) {
+      logger.trace(this.byteCount + " bytes written so far, " + getMessageCache().size()+ " more messages not flushed");
+    }
+    if (this.byteCount >= getSockJsConfig().getStreamBytesLimit()) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Streamed bytes limit reached. Recycling current request");
+      }
+      resetRequest();
+      break;
+    }
+  }
+ while (!getMessageCache().isEmpty());
+  scheduleHeartbeat();
+}

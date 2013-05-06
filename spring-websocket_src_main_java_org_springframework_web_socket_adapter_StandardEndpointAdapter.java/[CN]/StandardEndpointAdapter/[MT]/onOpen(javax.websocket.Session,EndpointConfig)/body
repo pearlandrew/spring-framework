@@ -1,0 +1,32 @@
+{
+  this.wsSession.initSession(session);
+  try {
+    this.handler.afterConnectionEstablished(this.wsSession);
+  }
+ catch (  Throwable t) {
+    ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession,t,logger);
+    return;
+  }
+  session.addMessageHandler(new MessageHandler.Whole<String>(){
+    @Override public void onMessage(    String message){
+      handleTextMessage(session,message);
+    }
+  }
+);
+  if (!this.handler.isStreaming()) {
+    session.addMessageHandler(new MessageHandler.Whole<ByteBuffer>(){
+      @Override public void onMessage(      ByteBuffer message){
+        handleBinaryMessage(session,message,true);
+      }
+    }
+);
+  }
+ else {
+    session.addMessageHandler(new MessageHandler.Partial<ByteBuffer>(){
+      @Override public void onMessage(      ByteBuffer messagePart,      boolean isLast){
+        handleBinaryMessage(session,messagePart,isLast);
+      }
+    }
+);
+  }
+}

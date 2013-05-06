@@ -1,0 +1,17 @@
+{
+  Assert.isTrue(request instanceof ServletServerHttpRequest);
+  HttpServletRequest servletRequest=((ServletServerHttpRequest)request).getServletRequest();
+  WsHttpUpgradeHandler upgradeHandler=servletRequest.upgrade(WsHttpUpgradeHandler.class);
+  WsHandshakeRequest webSocketRequest=new WsHandshakeRequest(servletRequest);
+  try {
+    Method method=ReflectionUtils.findMethod(WsHandshakeRequest.class,"finished");
+    ReflectionUtils.makeAccessible(method);
+    method.invoke(webSocketRequest);
+  }
+ catch (  Exception ex) {
+    throw new HandshakeFailureException("Failed to upgrade HttpServletRequest",ex);
+  }
+  WsServerContainer serverContainer=WsServerContainer.getServerContainer();
+  ServerEndpointConfig endpointConfig=new EndpointRegistration("/shouldntmatter",endpoint);
+  upgradeHandler.preInit(endpoint,endpointConfig,serverContainer,webSocketRequest,selectedProtocol,Collections.<String,String>emptyMap(),servletRequest.isSecure());
+}

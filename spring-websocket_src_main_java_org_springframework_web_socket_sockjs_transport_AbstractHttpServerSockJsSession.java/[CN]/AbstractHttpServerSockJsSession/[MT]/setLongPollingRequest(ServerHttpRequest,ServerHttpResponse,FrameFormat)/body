@@ -1,0 +1,23 @@
+{
+  try {
+    udpateRequest(request,response,frameFormat);
+    if (isClosed()) {
+      logger.debug("connection already closed");
+      try {
+        writeFrame(SockJsFrame.closeFrameGoAway());
+      }
+ catch (      IOException ex) {
+        throw new TransportErrorException("Failed to send SockJS close frame",ex,getId());
+      }
+      return;
+    }
+    this.asyncRequest.setTimeout(-1);
+    this.asyncRequest.startAsync();
+    scheduleHeartbeat();
+    tryFlushCache();
+  }
+ catch (  Throwable t) {
+    tryCloseWithSockJsTransportError(t,null);
+    throw new TransportErrorException("Failed to start long running request and flush messages",t,getId());
+  }
+}

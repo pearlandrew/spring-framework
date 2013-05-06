@@ -1,0 +1,24 @@
+{
+  AbstractSockJsSession session=this.sessions.get(sessionId);
+  if (session != null) {
+    return session;
+  }
+  if (transportHandler instanceof SockJsSessionFactory) {
+    SockJsSessionFactory sessionFactory=(SockJsSessionFactory)transportHandler;
+synchronized (this.sessions) {
+      session=this.sessions.get(sessionId);
+      if (session != null) {
+        return session;
+      }
+      if (this.sessionCleanupTask == null) {
+        scheduleSessionTask();
+      }
+      logger.debug("Creating new session with session id \"" + sessionId + "\"");
+      session=sessionFactory.createSession(sessionId,handler);
+      this.sessionInitializer.initialize(request,response,session);
+      this.sessions.put(sessionId,session);
+      return session;
+    }
+  }
+  return null;
+}

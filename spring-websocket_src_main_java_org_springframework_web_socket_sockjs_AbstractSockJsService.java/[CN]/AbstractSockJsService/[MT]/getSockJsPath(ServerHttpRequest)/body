@@ -1,0 +1,34 @@
+{
+  String path=request.getURI().getPath();
+  if (!this.sockJsPrefixes.isEmpty()) {
+    for (    String prefix : this.sockJsPrefixes) {
+      int index=path.indexOf(prefix);
+      if (index != -1) {
+        this.sockJsPathCache.add(path.substring(0,index + prefix.length()));
+        return path.substring(index + prefix.length());
+      }
+    }
+  }
+  if (path.endsWith("/info")) {
+    this.sockJsPathCache.add(path.substring(0,path.length() - 6));
+    return "/info";
+  }
+  String match=null;
+  for (  String sockJsPath : this.sockJsPathCache) {
+    if (path.startsWith(sockJsPath)) {
+      if ((match == null) || (match.length() < sockJsPath.length())) {
+        match=sockJsPath;
+      }
+    }
+  }
+  if (match != null) {
+    return path.substring(match.length());
+  }
+  String pathNoSlash=path.endsWith("/") ? path.substring(0,path.length() - 1) : path;
+  String lastSegment=pathNoSlash.substring(pathNoSlash.lastIndexOf('/') + 1);
+  if ((TransportType.fromValue(lastSegment) == null) && !lastSegment.startsWith("iframe")) {
+    this.sockJsPathCache.add(path);
+    return "";
+  }
+  return null;
+}
