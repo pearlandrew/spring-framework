@@ -4,20 +4,25 @@
     messages=readMessages(request);
   }
  catch (  JsonMappingException ex) {
+    logger.error("Failed to read message: ",ex);
     sendInternalServerError(response,"Payload expected.",session.getId());
     return;
   }
 catch (  IOException ex) {
+    logger.error("Failed to read message: ",ex);
     sendInternalServerError(response,"Broken JSON encoding.",session.getId());
     return;
   }
 catch (  Throwable t) {
+    logger.error("Failed to read message: ",t);
     sendInternalServerError(response,"Failed to process messages",session.getId());
     return;
   }
   if (logger.isTraceEnabled()) {
-    logger.trace("Received messages: " + Arrays.asList(messages));
+    logger.trace("Received message(s): " + Arrays.asList(messages));
   }
+  response.setStatusCode(getResponseStatus());
+  response.getHeaders().setContentType(new MediaType("text","plain",Charset.forName("UTF-8")));
   try {
     session.delegateMessages(messages);
   }
@@ -25,6 +30,4 @@ catch (  Throwable t) {
     ExceptionWebSocketHandlerDecorator.tryCloseWithError(session,t,logger);
     throw new SockJsRuntimeException("Unhandled WebSocketHandler error in " + this,t);
   }
-  response.setStatusCode(getResponseStatus());
-  response.getHeaders().setContentType(new MediaType("text","plain",Charset.forName("UTF-8")));
 }
