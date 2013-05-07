@@ -5,7 +5,8 @@
     List<Method> methods=new ArrayList<Method>(Arrays.asList(getMethods(type,targetObject)));
     MethodFilter filter=(this.filters != null ? this.filters.get(type) : null);
     if (filter != null) {
-      methods=filter.filter(methods);
+      List<Method> filtered=filter.filter(methods);
+      methods=(filtered instanceof ArrayList ? filtered : new ArrayList<Method>(filtered));
     }
     if (methods.size() > 1) {
       Collections.sort(methods,new Comparator<Method>(){
@@ -20,13 +21,13 @@
     for (int i=0; i < methods.size(); i++) {
       methods.set(i,BridgeMethodResolver.findBridgedMethod(methods.get(i)));
     }
-    methods=new ArrayList<Method>(new LinkedHashSet<Method>(methods));
+    Set<Method> methodsToIterate=new LinkedHashSet<Method>(methods);
     Method closeMatch=null;
     int closeMatchDistance=Integer.MAX_VALUE;
     int[] argsToConvert=null;
     Method matchRequiringConversion=null;
     boolean multipleOptions=false;
-    for (    Method method : methods) {
+    for (    Method method : methodsToIterate) {
       if (method.getName().equals(name)) {
         Class<?>[] paramTypes=method.getParameterTypes();
         List<TypeDescriptor> paramDescriptors=new ArrayList<TypeDescriptor>(paramTypes.length);
@@ -45,7 +46,7 @@
             return new ReflectiveMethodExecutor(method,null);
           }
  else           if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE) {
-            if (!useDistance) {
+            if (!this.useDistance) {
               closeMatch=method;
             }
  else {
