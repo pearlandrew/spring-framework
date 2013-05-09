@@ -2,19 +2,8 @@
   Method[] methods=getIntrospectedClass().getDeclaredMethods();
   Set<MethodMetadata> annotatedMethods=new LinkedHashSet<MethodMetadata>();
   for (  Method method : methods) {
-    for (    Annotation ann : method.getAnnotations()) {
-      if (ann.annotationType().getName().equals(annotationType)) {
-        annotatedMethods.add(new StandardMethodMetadata(method,this.nestedAnnotationsAsMap));
-        break;
-      }
- else {
-        for (        Annotation metaAnn : ann.annotationType().getAnnotations()) {
-          if (metaAnn.annotationType().getName().equals(annotationType)) {
-            annotatedMethods.add(new StandardMethodMetadata(method,this.nestedAnnotationsAsMap));
-            break;
-          }
-        }
-      }
+    if (AnnotatedElementUtils.isAnnotated(method,annotationType)) {
+      annotatedMethods.add(new StandardMethodMetadata(method,this.nestedAnnotationsAsMap));
     }
   }
   return annotatedMethods;

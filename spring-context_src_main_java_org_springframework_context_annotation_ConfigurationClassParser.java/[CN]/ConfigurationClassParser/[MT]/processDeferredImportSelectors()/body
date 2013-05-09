@@ -1,0 +1,14 @@
+{
+  Collections.sort(this.deferredImportSelectors,DEFERRED_IMPORT_COMPARATOR);
+  for (  DeferredImportSelectorHolder deferredImport : this.deferredImportSelectors) {
+    try {
+      ConfigurationClass configClass=deferredImport.getConfigurationClass();
+      String[] imports=deferredImport.getImportSelector().selectImports(configClass.getMetadata());
+      processImport(configClass,Arrays.asList(imports),false);
+    }
+ catch (    IOException ex) {
+      throw new BeanDefinitionStoreException("Failed to load bean class: ",ex);
+    }
+  }
+  deferredImportSelectors.clear();
+}

@@ -12,7 +12,12 @@
           Class<?> candidateClass=(candidate instanceof Class ? (Class)candidate : this.resourceLoader.getClassLoader().loadClass((String)candidate));
           ImportSelector selector=BeanUtils.instantiateClass(candidateClass,ImportSelector.class);
           invokeAwareMethods(selector);
-          processImport(configClass,Arrays.asList(selector.selectImports(importingClassMetadata)),false);
+          if (selector instanceof DeferredImportSelector) {
+            this.deferredImportSelectors.add(new DeferredImportSelectorHolder(configClass,(DeferredImportSelector)selector));
+          }
+ else {
+            processImport(configClass,Arrays.asList(selector.selectImports(importingClassMetadata)),false);
+          }
         }
  else         if (checkAssignability(ImportBeanDefinitionRegistrar.class,candidateToCheck)) {
           Class<?> candidateClass=(candidate instanceof Class ? (Class)candidate : this.resourceLoader.getClassLoader().loadClass((String)candidate));
@@ -22,7 +27,7 @@
         }
  else {
           this.importStack.registerImport(importingClassMetadata.getClassName(),(candidate instanceof Class ? ((Class)candidate).getName() : (String)candidate));
-          processConfigurationClass(candidateToCheck instanceof Class ? new ConfigurationClass((Class)candidateToCheck,true) : new ConfigurationClass((MetadataReader)candidateToCheck,true));
+          processConfigurationClass((candidateToCheck instanceof Class ? new ConfigurationClass((Class)candidateToCheck,configClass) : new ConfigurationClass((MetadataReader)candidateToCheck,configClass)));
         }
       }
     }

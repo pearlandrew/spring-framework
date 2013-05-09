@@ -1,5 +1,17 @@
 {
   super.doVisitEnd(annotationClass);
-  this.attributesMap.put(this.annotationType,this.attributes);
-  registerMetaAnnotations(annotationClass);
+  List<AnnotationAttributes> attributes=this.attributesMap.get(this.annotationType);
+  if (attributes == null) {
+    this.attributesMap.add(this.annotationType,this.attributes);
+  }
+ else {
+    attributes.add(0,this.attributes);
+  }
+  Set<String> metaAnnotationTypeNames=new LinkedHashSet<String>();
+  for (  Annotation metaAnnotation : annotationClass.getAnnotations()) {
+    recusivelyCollectMetaAnnotations(metaAnnotationTypeNames,metaAnnotation);
+  }
+  if (this.metaAnnotationMap != null) {
+    this.metaAnnotationMap.put(annotationClass.getName(),metaAnnotationTypeNames);
+  }
 }

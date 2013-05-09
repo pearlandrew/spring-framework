@@ -1,0 +1,18 @@
+{
+  if (metadata instanceof StandardAnnotationMetadata) {
+    for (    Class<?> memberClass : ((StandardAnnotationMetadata)metadata).getIntrospectedClass().getDeclaredClasses()) {
+      if (ConfigurationClassUtils.isConfigurationCandidate(new StandardAnnotationMetadata(memberClass))) {
+        processConfigurationClass(new ConfigurationClass(memberClass,configClass));
+      }
+    }
+  }
+ else {
+    for (    String memberClassName : metadata.getMemberClassNames()) {
+      MetadataReader reader=this.metadataReaderFactory.getMetadataReader(memberClassName);
+      AnnotationMetadata memberClassMetadata=reader.getAnnotationMetadata();
+      if (ConfigurationClassUtils.isConfigurationCandidate(memberClassMetadata)) {
+        processConfigurationClass(new ConfigurationClass(reader,configClass));
+      }
+    }
+  }
+}
