@@ -14,9 +14,13 @@
  else   if ("".equals(arg) && (namedValueInfo.defaultValue != null)) {
     arg=resolveDefaultValue(namedValueInfo.defaultValue);
   }
+  boolean emptyArgValue="".equals(arg);
   if (binderFactory != null) {
     WebDataBinder binder=binderFactory.createBinder(webRequest,null,namedValueInfo.name);
     arg=binder.convertIfNecessary(arg,paramType,parameter);
+  }
+  if (emptyArgValue && (arg == null)) {
+    handleMissingValue(namedValueInfo.name,parameter);
   }
   handleResolvedValue(arg,namedValueInfo.name,parameter,mavContainer,webRequest);
   return arg;
