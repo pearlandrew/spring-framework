@@ -1,12 +1,17 @@
 {
   String action=getAction();
+  String servletRelativeAction=getServletRelativeAction();
   if (StringUtils.hasText(action)) {
-    String pathToServlet=getRequestContext().getPathToServlet();
-    if (action.startsWith("/") && !action.startsWith(getRequestContext().getContextPath())) {
-      action=pathToServlet + action;
-    }
     action=getDisplayString(evaluate(ACTION_ATTRIBUTE,action));
     return processAction(action);
+  }
+ else   if (StringUtils.hasText(servletRelativeAction)) {
+    String pathToServlet=getRequestContext().getPathToServlet();
+    if (servletRelativeAction.startsWith("/") && !servletRelativeAction.startsWith(getRequestContext().getContextPath())) {
+      servletRelativeAction=pathToServlet + servletRelativeAction;
+    }
+    servletRelativeAction=getDisplayString(evaluate(ACTION_ATTRIBUTE,servletRelativeAction));
+    return processAction(servletRelativeAction);
   }
  else {
     String requestUri=getRequestContext().getRequestUri();
