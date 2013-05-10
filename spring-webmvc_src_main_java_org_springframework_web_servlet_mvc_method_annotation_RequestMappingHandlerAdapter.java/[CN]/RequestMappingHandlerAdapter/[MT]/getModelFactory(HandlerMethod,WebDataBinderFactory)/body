@@ -7,15 +7,15 @@
     this.modelAttributeCache.put(handlerType,methods);
   }
   List<InvocableHandlerMethod> attrMethods=new ArrayList<InvocableHandlerMethod>();
-  for (  Method method : methods) {
-    Object bean=handlerMethod.getBean();
-    attrMethods.add(createModelAttributeMethod(binderFactory,bean,method));
-  }
   for (  Entry<ControllerAdviceBean,Set<Method>> entry : this.modelAttributeAdviceCache.entrySet()) {
     Object bean=entry.getKey().resolveBean();
     for (    Method method : entry.getValue()) {
       attrMethods.add(createModelAttributeMethod(binderFactory,bean,method));
     }
+  }
+  for (  Method method : methods) {
+    Object bean=handlerMethod.getBean();
+    attrMethods.add(createModelAttributeMethod(binderFactory,bean,method));
   }
   return new ModelFactory(attrMethods,binderFactory,sessionAttrHandler);
 }
