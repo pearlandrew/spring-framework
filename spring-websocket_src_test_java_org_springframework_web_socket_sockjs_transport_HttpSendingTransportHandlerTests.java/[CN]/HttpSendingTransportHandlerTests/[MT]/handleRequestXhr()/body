@@ -1,0 +1,18 @@
+{
+  XhrPollingTransportHandler transportHandler=new XhrPollingTransportHandler();
+  transportHandler.setSockJsConfiguration(sockJsConfig);
+  AbstractSockJsSession session=transportHandler.createSession("1",webSocketHandler);
+  transportHandler.handleRequest(request,response,webSocketHandler,session);
+  assertEquals("application/javascript;charset=UTF-8",this.response.getHeaders().getContentType().toString());
+  assertEquals("o\n",this.servletResponse.getContentAsString());
+  assertFalse("Polling request should complete after open frame",this.servletRequest.isAsyncStarted());
+  verify(webSocketHandler).afterConnectionEstablished(session);
+  resetResponse();
+  transportHandler.handleRequest(request,response,webSocketHandler,session);
+  assertTrue("Polling request should remain open",this.servletRequest.isAsyncStarted());
+  verify(this.taskScheduler).schedule(any(Runnable.class),any(Date.class));
+  resetRequestAndResponse();
+  transportHandler.handleRequest(request,response,webSocketHandler,session);
+  assertFalse("Request should have been rejected",this.servletRequest.isAsyncStarted());
+  assertEquals("c[2010,\"Another connection still open\"]\n",this.servletResponse.getContentAsString());
+}

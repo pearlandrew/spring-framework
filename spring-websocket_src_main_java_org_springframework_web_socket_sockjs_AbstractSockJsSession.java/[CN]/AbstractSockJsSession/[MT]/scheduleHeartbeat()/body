@@ -1,0 +1,21 @@
+{
+  Assert.notNull(this.sockJsConfig.getTaskScheduler(),"heartbeatScheduler not configured");
+  cancelHeartbeat();
+  if (!isActive()) {
+    return;
+  }
+  Date time=new Date(System.currentTimeMillis() + this.sockJsConfig.getHeartbeatTime());
+  this.heartbeatTask=this.sockJsConfig.getTaskScheduler().schedule(new Runnable(){
+    public void run(){
+      try {
+        sendHeartbeat();
+      }
+ catch (      Throwable t) {
+      }
+    }
+  }
+,time);
+  if (logger.isTraceEnabled()) {
+    logger.trace("Scheduled heartbeat after " + this.sockJsConfig.getHeartbeatTime() / 1000 + " seconds");
+  }
+}

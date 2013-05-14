@@ -1,0 +1,9 @@
+{
+  EventSourceTransportHandler transportHandler=new EventSourceTransportHandler();
+  transportHandler.setSockJsConfiguration(sockJsConfig);
+  StreamingSockJsSession session=transportHandler.createSession("1",webSocketHandler);
+  transportHandler.handleRequest(request,response,webSocketHandler,session);
+  assertEquals("text/event-stream;charset=UTF-8",this.response.getHeaders().getContentType().toString());
+  assertTrue("Streaming request not started",this.servletRequest.isAsyncStarted());
+  verify(webSocketHandler).afterConnectionEstablished(session);
+}

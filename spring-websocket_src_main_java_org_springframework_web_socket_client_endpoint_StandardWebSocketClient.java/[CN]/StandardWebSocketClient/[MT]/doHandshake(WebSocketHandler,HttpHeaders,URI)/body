@@ -9,28 +9,7 @@
     if (!protocols.isEmpty()) {
       configBuidler.preferredSubprotocols(protocols);
     }
-    configBuidler.configurator(new Configurator(){
-      @Override public void beforeRequest(      Map<String,List<String>> headers){
-        for (        String headerName : httpHeaders.keySet()) {
-          if (!EXCLUDED_HEADERS.contains(headerName)) {
-            List<String> value=httpHeaders.get(headerName);
-            if (logger.isTraceEnabled()) {
-              logger.trace("Adding header [" + headerName + "="+ value+ "]");
-            }
-            headers.put(headerName,value);
-          }
-        }
-        if (logger.isTraceEnabled()) {
-          logger.trace("Handshake request headers: " + headers);
-        }
-      }
-      @Override public void afterResponse(      HandshakeResponse handshakeResponse){
-        if (logger.isTraceEnabled()) {
-          logger.trace("Handshake response headers: " + handshakeResponse.getHeaders());
-        }
-      }
-    }
-);
+    configBuidler.configurator(new StandardWebSocketClientConfigurator(httpHeaders));
   }
   try {
     this.webSocketContainer.connectToServer(endpoint,configBuidler.build(),uri);

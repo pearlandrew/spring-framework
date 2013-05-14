@@ -1,0 +1,15 @@
+{
+  handleRequest("GET","/a/info",HttpStatus.OK);
+  assertEquals("application/json;charset=UTF-8",this.servletResponse.getContentType());
+  assertEquals("*",this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+  assertEquals("true",this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+  assertEquals("no-store, no-cache, must-revalidate, max-age=0",this.servletResponse.getHeader("Cache-Control"));
+  String body=this.servletResponse.getContentAsString();
+  assertEquals("{\"entropy\"",body.substring(0,body.indexOf(':')));
+  assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":true,\"websocket\":true}",body.substring(body.indexOf(',')));
+  this.service.setJsessionIdCookieRequired(false);
+  this.service.setWebSocketsEnabled(false);
+  handleRequest("GET","/a/info",HttpStatus.OK);
+  body=this.servletResponse.getContentAsString();
+  assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":false,\"websocket\":false}",body.substring(body.indexOf(',')));
+}

@@ -1,0 +1,14 @@
+{
+  HtmlFileTransportHandler transportHandler=new HtmlFileTransportHandler();
+  transportHandler.setSockJsConfiguration(sockJsConfig);
+  StreamingSockJsSession session=transportHandler.createSession("1",webSocketHandler);
+  transportHandler.handleRequest(request,response,webSocketHandler,session);
+  assertEquals(500,this.servletResponse.getStatus());
+  assertEquals("\"callback\" parameter required",this.servletResponse.getContentAsString());
+  resetRequestAndResponse();
+  this.servletRequest.addParameter("c","callback");
+  transportHandler.handleRequest(request,response,webSocketHandler,session);
+  assertEquals("text/html;charset=UTF-8",this.response.getHeaders().getContentType().toString());
+  assertTrue("Streaming request not started",this.servletRequest.isAsyncStarted());
+  verify(webSocketHandler).afterConnectionEstablished(session);
+}

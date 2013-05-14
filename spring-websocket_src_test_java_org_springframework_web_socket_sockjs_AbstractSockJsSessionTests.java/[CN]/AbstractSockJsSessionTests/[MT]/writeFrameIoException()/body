@@ -1,0 +1,12 @@
+{
+  this.session.setExceptionOnWriteFrame(new IOException());
+  this.session.delegateConnectionEstablished();
+  try {
+    this.session.writeFrame(SockJsFrame.openFrame());
+    fail("expected exception");
+  }
+ catch (  IOException ex) {
+    assertEquals(CloseStatus.SERVER_ERROR,this.session.getStatus());
+    verify(this.webSocketHandler).afterConnectionClosed(this.session,CloseStatus.SERVER_ERROR);
+  }
+}

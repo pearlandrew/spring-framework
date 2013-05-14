@@ -1,0 +1,22 @@
+{
+  List<String> subprotocols=Arrays.asList("abc");
+  HttpHeaders headers=new HttpHeaders();
+  headers.setSecWebSocketProtocol(subprotocols);
+  WebSocketClient client=mock(WebSocketClient.class);
+  WebSocketHandler handler=new WebSocketHandlerAdapter();
+  WebSocketConnectionManager manager=new WebSocketConnectionManager(client,handler,"/path/{id}","123");
+  manager.setSubProtocols(subprotocols);
+  manager.openConnection();
+  ArgumentCaptor<WebSocketHandlerDecorator> captor=ArgumentCaptor.forClass(WebSocketHandlerDecorator.class);
+  ArgumentCaptor<HttpHeaders> headersCaptor=ArgumentCaptor.forClass(HttpHeaders.class);
+  ArgumentCaptor<URI> uriCaptor=ArgumentCaptor.forClass(URI.class);
+  verify(client).doHandshake(captor.capture(),headersCaptor.capture(),uriCaptor.capture());
+  assertEquals(headers,headersCaptor.getValue());
+  assertEquals(new URI("/path/123"),uriCaptor.getValue());
+  WebSocketHandlerDecorator loggingHandler=captor.getValue();
+  assertEquals(LoggingWebSocketHandlerDecorator.class,loggingHandler.getClass());
+  WebSocketHandlerDecorator exceptionHandler=(WebSocketHandlerDecorator)loggingHandler.getDelegate();
+  assertNotNull(exceptionHandler);
+  assertEquals(ExceptionWebSocketHandlerDecorator.class,exceptionHandler.getClass());
+  assertSame(handler,exceptionHandler.getDelegate());
+}

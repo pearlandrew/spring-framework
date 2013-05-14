@@ -1,7 +1,8 @@
 {
   if (MediaType.APPLICATION_FORM_URLENCODED.equals(request.getHeaders().getContentType())) {
-    String d=request.getQueryParams().getFirst("d");
-    return getObjectMapper().readValue(d,String[].class);
+    MultiValueMap<String,String> map=this.formConverter.read(null,request);
+    String d=map.getFirst("d");
+    return (StringUtils.hasText(d)) ? getObjectMapper().readValue(d,String[].class) : null;
   }
  else {
     return getObjectMapper().readValue(request.getBody(),String[].class);

@@ -1,0 +1,12 @@
+{
+  setRequest("OPTIONS","/a/server/session/xhr");
+  TaskScheduler taskScheduler=mock(TaskScheduler.class);
+  StubXhrTransportHandler xhrHandler=new StubXhrTransportHandler();
+  Set<TransportHandler> transportHandlers=Collections.<TransportHandler>singleton(xhrHandler);
+  DefaultSockJsService service=new DefaultSockJsService(taskScheduler,transportHandlers);
+  service.handleTransportRequest(this.request,this.response,"123",TransportType.XHR,null);
+  assertEquals(204,this.servletResponse.getStatus());
+  assertEquals("*",this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
+  assertEquals("true",this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
+  assertEquals("OPTIONS, POST",this.response.getHeaders().getFirst("Access-Control-Allow-Methods"));
+}

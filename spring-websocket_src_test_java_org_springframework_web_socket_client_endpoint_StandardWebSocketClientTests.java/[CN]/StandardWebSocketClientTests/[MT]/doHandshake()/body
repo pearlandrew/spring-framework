@@ -1,0 +1,26 @@
+{
+  URI uri=new URI("ws://example.com/abc");
+  List<String> subprotocols=Arrays.asList("abc");
+  HttpHeaders headers=new HttpHeaders();
+  headers.setSecWebSocketProtocol(subprotocols);
+  headers.add("foo","bar");
+  WebSocketHandler handler=new WebSocketHandlerAdapter();
+  WebSocketContainer webSocketContainer=mock(WebSocketContainer.class);
+  StandardWebSocketClient client=new StandardWebSocketClient();
+  client.setWebSocketContainer(webSocketContainer);
+  WebSocketSession session=client.doHandshake(handler,headers,uri);
+  ArgumentCaptor<Endpoint> endpointArg=ArgumentCaptor.forClass(Endpoint.class);
+  ArgumentCaptor<ClientEndpointConfig> configArg=ArgumentCaptor.forClass(ClientEndpointConfig.class);
+  ArgumentCaptor<URI> uriArg=ArgumentCaptor.forClass(URI.class);
+  verify(webSocketContainer).connectToServer(endpointArg.capture(),configArg.capture(),uriArg.capture());
+  assertNotNull(endpointArg.getValue());
+  assertEquals(StandardEndpointAdapter.class,endpointArg.getValue().getClass());
+  ClientEndpointConfig config=configArg.getValue();
+  assertEquals(subprotocols,config.getPreferredSubprotocols());
+  Map<String,List<String>> map=new HashMap<>();
+  config.getConfigurator().beforeRequest(map);
+  assertEquals(Collections.singletonMap("foo",Arrays.asList("bar")),map);
+  assertEquals(uri,uriArg.getValue());
+  assertEquals(uri,session.getUri());
+  assertEquals("example.com",session.getRemoteHostName());
+}

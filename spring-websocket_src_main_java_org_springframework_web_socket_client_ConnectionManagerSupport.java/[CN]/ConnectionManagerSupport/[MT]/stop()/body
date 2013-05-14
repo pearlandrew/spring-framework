@@ -1,7 +1,18 @@
 {
 synchronized (this.lifecycleMonitor) {
     if (isRunning()) {
-      stopInternal();
+      if (logger.isDebugEnabled()) {
+        logger.debug("Stopping " + this.getClass().getSimpleName());
+      }
+      try {
+        stopInternal();
+      }
+ catch (      Throwable e) {
+        logger.error("Failed to stop WebSocket connection",e);
+      }
+ finally {
+        this.isRunning=false;
+      }
     }
   }
 }

@@ -1,0 +1,19 @@
+{
+  this.servletRequest.addParameter("c","callback");
+  SockJsFrame frame=SockJsFrame.openFrame();
+  FrameFormat format=new XhrPollingTransportHandler().getFrameFormat(request);
+  SockJsFrame formatted=format.format(frame);
+  assertEquals(frame.getContent() + "\n",formatted.getContent());
+  format=new XhrStreamingTransportHandler().getFrameFormat(request);
+  formatted=format.format(frame);
+  assertEquals(frame.getContent() + "\n",formatted.getContent());
+  format=new HtmlFileTransportHandler().getFrameFormat(request);
+  formatted=format.format(frame);
+  assertEquals("<script>\np(\"" + frame.getContent() + "\");\n</script>\r\n",formatted.getContent());
+  format=new EventSourceTransportHandler().getFrameFormat(request);
+  formatted=format.format(frame);
+  assertEquals("data: " + frame.getContent() + "\r\n\r\n",formatted.getContent());
+  format=new JsonpPollingTransportHandler().getFrameFormat(request);
+  formatted=format.format(frame);
+  assertEquals("callback(\"" + frame.getContent() + "\");\r\n",formatted.getContent());
+}
