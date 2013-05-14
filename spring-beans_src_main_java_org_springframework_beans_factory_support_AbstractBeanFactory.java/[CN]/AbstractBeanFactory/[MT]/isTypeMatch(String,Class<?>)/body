@@ -34,21 +34,24 @@
         return typeToMatch.isAssignableFrom(targetClass);
       }
     }
-    Class<?> beanClass=predictBeanType(beanName,mbd,typesToMatch);
-    if (beanClass == null) {
+    Class<?> beanType=predictBeanType(beanName,mbd,typesToMatch);
+    if (beanType == null) {
       return false;
     }
-    if (FactoryBean.class.isAssignableFrom(beanClass)) {
+    if (FactoryBean.class.isAssignableFrom(beanType)) {
       if (!BeanFactoryUtils.isFactoryDereference(name)) {
-        Class<?> type=getTypeForFactoryBean(beanName,mbd);
-        return (type != null && typeToMatch.isAssignableFrom(type));
-      }
- else {
-        return typeToMatch.isAssignableFrom(beanClass);
+        beanType=getTypeForFactoryBean(beanName,mbd);
+        if (beanType == null) {
+          return false;
+        }
       }
     }
- else {
-      return !BeanFactoryUtils.isFactoryDereference(name) && typeToMatch.isAssignableFrom(beanClass);
+ else     if (BeanFactoryUtils.isFactoryDereference(name)) {
+      beanType=predictBeanType(beanName,mbd,FactoryBean.class);
+      if (beanType == null || !FactoryBean.class.isAssignableFrom(beanType)) {
+        return false;
+      }
     }
+    return typeToMatch.isAssignableFrom(beanType);
   }
 }
