@@ -1,0 +1,36 @@
+{
+  Map<TypeVariable,Type> typeVariableMap=typeVariableCache.get(clazz);
+  if (typeVariableMap == null) {
+    typeVariableMap=new HashMap<TypeVariable,Type>();
+    extractTypeVariablesFromGenericInterfaces(clazz.getGenericInterfaces(),typeVariableMap);
+    try {
+      Class<?> type=clazz;
+      while (type.getSuperclass() != null && !Object.class.equals(type.getSuperclass())) {
+        Type genericType=type.getGenericSuperclass();
+        if (genericType instanceof ParameterizedType) {
+          ParameterizedType pt=(ParameterizedType)genericType;
+          populateTypeMapFromParameterizedType(pt,typeVariableMap);
+        }
+        extractTypeVariablesFromGenericInterfaces(type.getSuperclass().getGenericInterfaces(),typeVariableMap);
+        type=type.getSuperclass();
+      }
+    }
+ catch (    MalformedParameterizedTypeException ex) {
+    }
+    try {
+      Class<?> type=clazz;
+      while (type.isMemberClass()) {
+        Type genericType=type.getGenericSuperclass();
+        if (genericType instanceof ParameterizedType) {
+          ParameterizedType pt=(ParameterizedType)genericType;
+          populateTypeMapFromParameterizedType(pt,typeVariableMap);
+        }
+        type=type.getEnclosingClass();
+      }
+    }
+ catch (    MalformedParameterizedTypeException ex) {
+    }
+    typeVariableCache.put(clazz,typeVariableMap);
+  }
+  return typeVariableMap;
+}
