@@ -1,24 +1,21 @@
 {
-  final char hashDelim='#';
+  if (getMetadata().isAnnotated(Configuration.class.getName())) {
+    if (getMetadata().isFinal()) {
+      problemReporter.error(new FinalConfigurationProblem());
+    }
+  }
   Map<String,Integer> methodNameCounts=new HashMap<String,Integer>();
-  for (  BeanMethod beanMethod : beanMethods) {
-    String dClassName=beanMethod.getMetadata().getDeclaringClassName();
-    String methodName=beanMethod.getMetadata().getMethodName();
-    String fqMethodName=dClassName + hashDelim + methodName;
+  for (  BeanMethod beanMethod : this.beanMethods) {
+    String fqMethodName=beanMethod.getFullyQualifiedMethodName();
     Integer currentCount=methodNameCounts.get(fqMethodName);
     int newCount=currentCount != null ? currentCount + 1 : 1;
     methodNameCounts.put(fqMethodName,newCount);
   }
-  for (  String methodName : methodNameCounts.keySet()) {
-    int count=methodNameCounts.get(methodName);
+  for (  String fqMethodName : methodNameCounts.keySet()) {
+    int count=methodNameCounts.get(fqMethodName);
     if (count > 1) {
-      String shortMethodName=methodName.substring(methodName.indexOf(hashDelim) + 1);
+      String shortMethodName=ConfigurationMethod.getShortMethodName(fqMethodName);
       problemReporter.error(new BeanMethodOverloadingProblem(shortMethodName,count));
-    }
-  }
-  if (getMetadata().isAnnotated(Configuration.class.getName())) {
-    if (getMetadata().isFinal()) {
-      problemReporter.error(new FinalConfigurationProblem());
     }
   }
   for (  BeanMethod beanMethod : this.beanMethods) {
