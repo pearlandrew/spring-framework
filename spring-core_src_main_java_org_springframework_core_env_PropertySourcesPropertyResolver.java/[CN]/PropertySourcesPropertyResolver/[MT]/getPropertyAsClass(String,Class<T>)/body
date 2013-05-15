@@ -1,41 +1,43 @@
 {
   boolean debugEnabled=logger.isDebugEnabled();
   if (logger.isTraceEnabled()) {
-    logger.trace(format("getPropertyAsClass(\"%s\", %s)",key,targetValueType.getSimpleName()));
+    logger.trace(String.format("getPropertyAsClass(\"%s\", %s)",key,targetValueType.getSimpleName()));
   }
-  for (  PropertySource<?> propertySource : this.propertySources) {
-    if (debugEnabled) {
-      logger.debug(format("Searching for key '%s' in [%s]",key,propertySource.getName()));
-    }
-    Object value;
-    if ((value=propertySource.getProperty(key)) != null) {
+  if (this.propertySources != null) {
+    for (    PropertySource<?> propertySource : this.propertySources) {
       if (debugEnabled) {
-        logger.debug(format("Found key '%s' in [%s] with value '%s'",key,propertySource.getName(),value));
+        logger.debug(String.format("Searching for key '%s' in [%s]",key,propertySource.getName()));
       }
-      Class<?> clazz;
-      if (value instanceof String) {
-        try {
-          clazz=ClassUtils.forName((String)value,null);
+      Object value=propertySource.getProperty(key);
+      if (value != null) {
+        if (debugEnabled) {
+          logger.debug(String.format("Found key '%s' in [%s] with value '%s'",key,propertySource.getName(),value));
         }
- catch (        Exception ex) {
-          throw new ClassConversionException((String)value,targetValueType,ex);
+        Class<?> clazz;
+        if (value instanceof String) {
+          try {
+            clazz=ClassUtils.forName((String)value,null);
+          }
+ catch (          Exception ex) {
+            throw new ClassConversionException((String)value,targetValueType,ex);
+          }
         }
-      }
- else       if (value instanceof Class) {
-        clazz=(Class<?>)value;
-      }
+ else         if (value instanceof Class) {
+          clazz=(Class<?>)value;
+        }
  else {
-        clazz=value.getClass();
+          clazz=value.getClass();
+        }
+        if (!targetValueType.isAssignableFrom(clazz)) {
+          throw new ClassConversionException(clazz,targetValueType);
+        }
+        @SuppressWarnings("unchecked") Class<T> targetClass=(Class<T>)clazz;
+        return targetClass;
       }
-      if (!targetValueType.isAssignableFrom(clazz)) {
-        throw new ClassConversionException(clazz,targetValueType);
-      }
-      @SuppressWarnings("unchecked") Class<T> targetClass=(Class<T>)clazz;
-      return targetClass;
     }
   }
   if (debugEnabled) {
-    logger.debug(format("Could not find key '%s' in any property source. Returning [null]",key));
+    logger.debug(String.format("Could not find key '%s' in any property source. Returning [null]",key));
   }
   return null;
 }
