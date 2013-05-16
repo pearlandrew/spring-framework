@@ -1,22 +1,22 @@
 {
   A annotation=getAnnotation(method,annotationType);
-  Class<?> cl=method.getDeclaringClass();
+  Class<?> clazz=method.getDeclaringClass();
   if (annotation == null) {
-    annotation=searchOnInterfaces(method,annotationType,cl.getInterfaces());
+    annotation=searchOnInterfaces(method,annotationType,clazz.getInterfaces());
   }
   while (annotation == null) {
-    cl=cl.getSuperclass();
-    if (cl == null || cl == Object.class) {
+    clazz=clazz.getSuperclass();
+    if (clazz == null || clazz.equals(Object.class)) {
       break;
     }
     try {
-      Method equivalentMethod=cl.getDeclaredMethod(method.getName(),method.getParameterTypes());
+      Method equivalentMethod=clazz.getDeclaredMethod(method.getName(),method.getParameterTypes());
       annotation=getAnnotation(equivalentMethod,annotationType);
     }
  catch (    NoSuchMethodException ex) {
     }
     if (annotation == null) {
-      annotation=searchOnInterfaces(method,annotationType,cl.getInterfaces());
+      annotation=searchOnInterfaces(method,annotationType,clazz.getInterfaces());
     }
   }
   return annotation;
