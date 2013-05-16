@@ -1,7 +1,7 @@
 {
   this.session=this.request.getPortletSession(false);
-synchronized (this.sessionAttributesToUpdate) {
-    if (this.session != null) {
+  if (this.session != null) {
+    try {
       for (      Map.Entry<String,Object> entry : this.sessionAttributesToUpdate.entrySet()) {
         String name=entry.getKey();
         Object newValue=entry.getValue();
@@ -10,11 +10,6 @@ synchronized (this.sessionAttributesToUpdate) {
           this.session.setAttribute(name,newValue);
         }
       }
-    }
-    this.sessionAttributesToUpdate.clear();
-  }
-synchronized (this.globalSessionAttributesToUpdate) {
-    if (this.session != null) {
       for (      Map.Entry<String,Object> entry : this.globalSessionAttributesToUpdate.entrySet()) {
         String name=entry.getKey();
         Object newValue=entry.getValue();
@@ -24,6 +19,9 @@ synchronized (this.globalSessionAttributesToUpdate) {
         }
       }
     }
-    this.globalSessionAttributesToUpdate.clear();
+ catch (    IllegalStateException ex) {
+    }
   }
+  this.sessionAttributesToUpdate.clear();
+  this.globalSessionAttributesToUpdate.clear();
 }
