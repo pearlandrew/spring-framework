@@ -1,5 +1,13 @@
 {
   Assert.notNull(this.webSocketSession,"Cannot send message without active session");
-  byte[] bytes=this.messageConverter.fromStompMessage(message);
-  this.webSocketSession.sendMessage(new TextMessage(new String(bytes,StompMessage.CHARSET)));
+  try {
+    byte[] bytes=this.messageConverter.fromStompMessage(message);
+    this.webSocketSession.sendMessage(new TextMessage(new String(bytes,StompMessage.CHARSET)));
+  }
+  finally {
+    if (StompCommand.ERROR.equals(message.getCommand())) {
+      this.webSocketSession.close(CloseStatus.PROTOCOL_ERROR);
+      this.webSocketSession=null;
+    }
+  }
 }

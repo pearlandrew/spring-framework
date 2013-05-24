@@ -1,9 +1,13 @@
 {
   List<Registration<?>> registrations=this.subscriptionsBySession.remove(sessionId);
+  if (CollectionUtils.isEmpty(registrations)) {
+    return false;
+  }
   if (logger.isTraceEnabled()) {
     logger.trace("Cancelling " + registrations.size() + " subscriptions for session="+ sessionId);
   }
   for (  Registration<?> registration : registrations) {
     registration.cancel();
   }
+  return true;
 }

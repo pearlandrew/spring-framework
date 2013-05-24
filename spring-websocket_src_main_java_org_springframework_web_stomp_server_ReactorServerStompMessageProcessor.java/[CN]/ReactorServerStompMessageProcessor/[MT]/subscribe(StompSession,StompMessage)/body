@@ -1,5 +1,5 @@
 {
-  final String subscription=message.getHeaders().getId();
+  final String subscription=stompMessage.getHeaders().getId();
   String replyToKey=StompCommand.SUBSCRIBE + ":" + session.getId()+ ":"+ subscription;
   if (logger.isTraceEnabled()) {
     logger.trace("Adding subscription with replyToKey=" + replyToKey);
@@ -10,13 +10,12 @@
       try {
         session.sendMessage(event.getData());
       }
- catch (      IOException e) {
-        ReactorServerStompMessageProcessor.this.removeSubscriptions(session.getId());
-        e.printStackTrace();
+ catch (      Throwable t) {
+        handleError(session,t);
       }
     }
   }
 );
   addSubscription(session.getId(),registration);
-  this.reactor.notify(StompCommand.SUBSCRIBE,Fn.event(Tuple.of(session.getId(),message),replyToKey));
+  this.reactor.notify(StompCommand.SUBSCRIBE,Fn.event(stompMessage,replyToKey));
 }

@@ -1,7 +1,5 @@
 {
-  String sessionId=event.getData().getT1();
-  StompMessage message=event.getData().getT2();
-  final Object replyToKey=event.getReplyTo();
+  StompMessage message=event.getData();
   if (logger.isDebugEnabled()) {
     logger.debug("Subscribe " + message);
   }
@@ -11,9 +9,9 @@
       StompHeaders headers=new StompHeaders();
       headers.setDestination(inMessage.getHeaders().getDestination());
       StompMessage outMessage=new StompMessage(StompCommand.MESSAGE,headers,inMessage.getPayload());
-      SimpleStompReactorService.this.reactor.notify(replyToKey,Fn.event(outMessage));
+      SimpleStompReactorService.this.reactor.notify(event.getReplyTo(),Fn.event(outMessage));
     }
   }
 );
-  addSubscription(sessionId,registration);
+  addSubscription(message.getStompSessionId(),registration);
 }

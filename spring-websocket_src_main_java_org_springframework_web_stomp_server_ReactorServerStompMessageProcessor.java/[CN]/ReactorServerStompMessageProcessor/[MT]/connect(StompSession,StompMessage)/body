@@ -1,6 +1,6 @@
 {
   StompHeaders headers=new StompHeaders();
-  Set<String> acceptVersions=connectMessage.getHeaders().getAcceptVersion();
+  Set<String> acceptVersions=stompMessage.getHeaders().getAcceptVersion();
   if (acceptVersions.contains("1.2")) {
     headers.setVersion("1.2");
   }
@@ -14,6 +14,6 @@
   }
   headers.setHeartbeat(0,0);
   headers.setId(session.getId());
-  this.reactor.notify(StompCommand.CONNECT,Fn.event(session.getId()));
   session.sendMessage(new StompMessage(StompCommand.CONNECTED,headers));
+  this.reactor.notify(StompCommand.CONNECT,Fn.event(stompMessage));
 }
