@@ -1,0 +1,26 @@
+{
+  try {
+    ByteArrayOutputStream out=new ByteArrayOutputStream();
+    while (!session.getSocket().isClosed()) {
+      int b=session.getInputStream().read();
+      if (b == -1) {
+        break;
+      }
+ else       if (b == 0x00) {
+        byte[] bytes=out.toByteArray();
+        StompMessage message=RelayStompService.this.converter.toStompMessage(bytes);
+        RelayStompService.this.reactor.notify(replyTo,Fn.event(message));
+        out.reset();
+      }
+ else {
+        out.write(b);
+      }
+    }
+    logger.debug("Socket closed, STOMP session=" + stompSessionId);
+    sendLostConnectionErrorMessage();
+  }
+ catch (  IOException e) {
+    e.printStackTrace();
+    clearRelaySession(stompSessionId);
+  }
+}

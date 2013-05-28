@@ -1,0 +1,19 @@
+{
+  StompSession stompSession=this.sessions.get(session.getId());
+  Assert.notNull(stompSession,"No STOMP session for WebSocket session id=" + session.getId());
+  try {
+    StompMessage stompMessage=this.messageConverter.toStompMessage(message.getPayload());
+    stompMessage.setSessionId(stompSession.getId());
+    this.messageHandler.handleMessage(stompSession,stompMessage);
+  }
+ catch (  Throwable error) {
+    StompHeaders headers=new StompHeaders();
+    headers.setMessage(error.getMessage());
+    StompMessage errorMessage=new StompMessage(StompCommand.ERROR,headers);
+    try {
+      stompSession.sendMessage(errorMessage);
+    }
+ catch (    Throwable t) {
+    }
+  }
+}
