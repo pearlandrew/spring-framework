@@ -15,5 +15,25 @@
   headers.setHeartbeat(0,0);
   headers.setId(session.getId());
   session.sendMessage(new StompMessage(StompCommand.CONNECTED,headers));
-  this.reactor.notify(StompCommand.CONNECT,Fn.event(stompMessage));
+  String replyToKey="relay-message" + session.getId();
+  Registration<?> registration=this.reactor.on(Fn.$(replyToKey),new Consumer<Event<StompMessage>>(){
+    @Override public void accept(    Event<StompMessage> event){
+      try {
+        StompMessage message=event.getData();
+        if (StompCommand.CONNECTED.equals(message.getCommand())) {
+          return;
+        }
+        if (logger.isTraceEnabled()) {
+          logger.trace("Relaying back to client: " + message);
+        }
+        session.sendMessage(message);
+      }
+ catch (      Throwable t) {
+        handleError(session,t);
+      }
+    }
+  }
+);
+  addRegistration(session.getId(),registration);
+  this.reactor.notify(StompCommand.CONNECT,Fn.event(stompMessage,replyToKey));
 }
