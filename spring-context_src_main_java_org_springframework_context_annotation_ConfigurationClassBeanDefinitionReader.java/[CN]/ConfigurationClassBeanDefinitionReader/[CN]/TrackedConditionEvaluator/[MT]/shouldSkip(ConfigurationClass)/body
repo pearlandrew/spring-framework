@@ -1,0 +1,15 @@
+{
+  Boolean skip=this.skipped.get(configClass);
+  if (skip == null) {
+    if (configClass.isImported()) {
+      if (shouldSkip(configClass.getImportedBy())) {
+        skip=true;
+      }
+    }
+    if (skip == null) {
+      skip=ConditionEvaluator.get(configClass.getMetadata(),false).shouldSkip(registry,environment);
+    }
+    this.skipped.put(configClass,skip);
+  }
+  return skip;
+}

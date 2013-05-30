@@ -6,10 +6,12 @@
   }
   AnnotationAttributes componentScan=attributesFor(metadata,ComponentScan.class);
   if (componentScan != null) {
-    Set<BeanDefinitionHolder> scannedBeanDefinitions=this.componentScanParser.parse(componentScan,metadata.getClassName());
-    for (    BeanDefinitionHolder holder : scannedBeanDefinitions) {
-      if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(),this.metadataReaderFactory)) {
-        this.parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
+    if (!ConditionEvaluator.get(configClass.getMetadata(),false).shouldSkip(this.registry,this.environment)) {
+      Set<BeanDefinitionHolder> scannedBeanDefinitions=this.componentScanParser.parse(componentScan,metadata.getClassName());
+      for (      BeanDefinitionHolder holder : scannedBeanDefinitions) {
+        if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(),this.metadataReaderFactory)) {
+          this.parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
+        }
       }
     }
   }

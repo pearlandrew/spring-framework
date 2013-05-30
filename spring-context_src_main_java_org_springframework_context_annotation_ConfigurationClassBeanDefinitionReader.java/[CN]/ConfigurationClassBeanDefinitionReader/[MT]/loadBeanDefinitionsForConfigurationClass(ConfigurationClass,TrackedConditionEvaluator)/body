@@ -1,0 +1,14 @@
+{
+  if (conditionEvaluator.shouldSkip(configClass)) {
+    removeBeanDefinition(configClass);
+    return;
+  }
+  if (configClass.isImported()) {
+    registerBeanDefinitionForImportedConfigurationClass(configClass);
+  }
+  for (  BeanMethod beanMethod : configClass.getBeanMethods()) {
+    loadBeanDefinitionsForBeanMethod(beanMethod);
+  }
+  loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+  loadBeanDefinitionsFromRegistrars(configClass.getMetadata(),configClass.getImportBeanDefinitionRegistrars());
+}
