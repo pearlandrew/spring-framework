@@ -1,0 +1,16 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Subscribe " + message);
+  }
+  Registration<?> registration=getReactor().on(Fn.$("destination:" + message.getHeaders().getDestination()),new Consumer<Event<StompMessage>>(){
+    @Override public void accept(    Event<StompMessage> sendEvent){
+      StompMessage inMessage=sendEvent.getData();
+      StompHeaders headers=new StompHeaders();
+      headers.setDestination(inMessage.getHeaders().getDestination());
+      StompMessage outMessage=new StompMessage(StompCommand.MESSAGE,headers,inMessage.getPayload());
+      getReactor().notify(replyTo,Event.wrap(outMessage));
+    }
+  }
+);
+  addSubscription(message.getStompSessionId(),registration);
+}
