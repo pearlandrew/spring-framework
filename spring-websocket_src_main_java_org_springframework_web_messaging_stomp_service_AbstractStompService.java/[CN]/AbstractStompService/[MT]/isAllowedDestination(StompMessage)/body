@@ -1,0 +1,22 @@
+{
+  String destination=message.getHeaders().getDestination();
+  if (destination == null) {
+    return true;
+  }
+  if (!this.disallowedDestinations.isEmpty()) {
+    for (    String pattern : this.disallowedDestinations) {
+      if (this.pathMatcher.match(pattern,destination)) {
+        return false;
+      }
+    }
+  }
+  if (!this.allowedDestinations.isEmpty()) {
+    for (    String pattern : this.allowedDestinations) {
+      if (this.pathMatcher.match(pattern,destination)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  return true;
+}

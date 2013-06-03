@@ -1,0 +1,11 @@
+{
+  initHandlerMethods();
+  if (this.messageConverters == null) {
+    this.messageConverters=new ArrayList<MessageConverter<?>>();
+    this.messageConverters.add(new StringMessageConverter());
+    this.messageConverters.add(new MappingJackson2MessageConverter());
+  }
+  this.argumentResolvers.addResolver(new SubscriptionArgumentResolver(getReactor(),this.messageConverters));
+  this.argumentResolvers.addResolver(new MessageBrokerArgumentResolver(getReactor(),this.messageConverters));
+  this.argumentResolvers.addResolver(new MessageBodyArgumentResolver(this.messageConverters));
+}

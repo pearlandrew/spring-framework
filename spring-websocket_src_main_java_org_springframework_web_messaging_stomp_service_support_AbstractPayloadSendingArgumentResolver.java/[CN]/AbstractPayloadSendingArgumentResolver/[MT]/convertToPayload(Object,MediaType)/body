@@ -1,0 +1,17 @@
+{
+  if (content == null) {
+    return null;
+  }
+  Class<? extends Object> clazz=content.getClass();
+  if (byte[].class.equals(clazz)) {
+    return (byte[])content;
+  }
+ else   if (!CollectionUtils.isEmpty(this.converters)) {
+    for (    MessageConverter converter : getMessageConverters()) {
+      if (converter.canConvertToPayload(clazz,contentType)) {
+        return converter.convertToPayload(content,contentType);
+      }
+    }
+  }
+  throw new ContentTypeNotSupportedException(contentType,clazz);
+}
