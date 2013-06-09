@@ -1,31 +1,48 @@
 {
+  if (logger.isTraceEnabled()) {
+    logger.trace("Processing: " + stompMessage);
+  }
   try {
-    StompCommand command=message.getCommand();
+    MessageType messageType=MessageType.OTHER;
+    String replyKey=null;
+    StompCommand command=stompMessage.getCommand();
     if (StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command)) {
-      registerConnectionClosedCallback(session);
-      handleConnect(session,message);
-    }
- else     if (StompCommand.SUBSCRIBE.equals(command)) {
-      handleSubscribe(session,message);
-    }
- else     if (StompCommand.UNSUBSCRIBE.equals(command)) {
-      handleUnsubscribe(session,message);
+      session.registerConnectionClosedTask(new ConnectionClosedTask(session));
+      messageType=MessageType.CONNECT;
+      replyKey=handleConnect(session,stompMessage);
     }
  else     if (StompCommand.SEND.equals(command)) {
-      handleSend(session,message);
+      messageType=MessageType.MESSAGE;
+      handleSend(session,stompMessage);
+    }
+ else     if (StompCommand.SUBSCRIBE.equals(command)) {
+      messageType=MessageType.SUBSCRIBE;
+      replyKey=handleSubscribe(session,stompMessage);
+    }
+ else     if (StompCommand.UNSUBSCRIBE.equals(command)) {
+      messageType=MessageType.UNSUBSCRIBE;
+      handleUnsubscribe(session,stompMessage);
     }
  else     if (StompCommand.DISCONNECT.equals(command)) {
-      handleDisconnect(session,message);
-    }
- else     if (StompCommand.ACK.equals(command) || StompCommand.NACK.equals(command)) {
-      this.reactor.notify(command,Event.wrap(message));
-    }
- else     if (StompCommand.BEGIN.equals(command) || StompCommand.COMMIT.equals(command) || StompCommand.ABORT.equals(command)) {
-      this.reactor.notify(command,Event.wrap(message));
+      messageType=MessageType.DISCONNECT;
+      handleDisconnect(session,stompMessage);
     }
  else {
       sendErrorMessage(session,"Invalid STOMP command " + command);
+      return;
     }
+    Map<String,Object> messageHeaders=this.headerMapper.toMessageHeaders(stompMessage.getHeaders());
+    messageHeaders.put("messageType",messageType);
+    if (replyKey != null) {
+      messageHeaders.put(MessageHeaders.REPLY_CHANNEL,replyKey);
+    }
+    messageHeaders.put("stompCommand",command);
+    messageHeaders.put("sessionId",session.getId());
+    Message<byte[]> genericMessage=new GenericMessage<byte[]>(stompMessage.getPayload(),messageHeaders);
+    if (logger.isTraceEnabled()) {
+      logger.trace("Sending notification: " + genericMessage);
+    }
+    this.eventBus.send(AbstractMessageService.MESSAGE_KEY,genericMessage);
   }
  catch (  Throwable t) {
     handleError(session,t);

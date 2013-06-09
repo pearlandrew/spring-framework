@@ -1,0 +1,28 @@
+{
+  String destination=(String)message.getHeaders().get("destination");
+  if (destination == null) {
+    return true;
+  }
+  if (!this.disallowedDestinations.isEmpty()) {
+    for (    String pattern : this.disallowedDestinations) {
+      if (this.pathMatcher.match(pattern,destination)) {
+        if (logger.isTraceEnabled()) {
+          logger.trace("Skip notification: " + message);
+        }
+        return false;
+      }
+    }
+  }
+  if (!this.allowedDestinations.isEmpty()) {
+    for (    String pattern : this.allowedDestinations) {
+      if (this.pathMatcher.match(pattern,destination)) {
+        return true;
+      }
+    }
+    if (logger.isTraceEnabled()) {
+      logger.trace("Skip notification: " + message);
+    }
+    return false;
+  }
+  return true;
+}

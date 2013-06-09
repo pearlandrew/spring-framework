@@ -1,0 +1,18 @@
+{
+  final String sessionId=(String)message.getHeaders().get("sessionId");
+  return new MessageChannel(){
+    @Override public boolean send(    Message<?> message){
+      Map<String,Object> headers=new HashMap<String,Object>(message.getHeaders());
+      headers.put("messageType",MessageType.MESSAGE);
+      headers.put("sessionId",sessionId);
+      message=new GenericMessage<Object>(message.getPayload(),headers);
+      if (logger.isTraceEnabled()) {
+        logger.trace("Sending notification: " + message);
+      }
+      String key=AbstractMessageService.MESSAGE_KEY;
+      MessageChannelArgumentResolver.this.eventBus.send(key,message);
+      return true;
+    }
+  }
+;
+}

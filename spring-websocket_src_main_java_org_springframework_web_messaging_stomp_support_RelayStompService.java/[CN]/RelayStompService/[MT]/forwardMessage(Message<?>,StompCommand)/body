@@ -1,0 +1,22 @@
+{
+  String sessionId=(String)message.getHeaders().get("sessionId");
+  RelaySession session=RelayStompService.this.relaySessions.get(sessionId);
+  Assert.notNull(session,"RelaySession not found");
+  try {
+    StompHeaders stompHeaders=new StompHeaders();
+    this.stompHeaderMapper.fromMessageHeaders(message.getHeaders(),stompHeaders);
+    MediaType contentType=stompHeaders.getContentType();
+    byte[] payload=this.payloadConverter.convertToPayload(message.getPayload(),contentType);
+    StompMessage stompMessage=new StompMessage(command,stompHeaders,payload);
+    if (logger.isTraceEnabled()) {
+      logger.trace("Forwarding: " + stompMessage);
+    }
+    byte[] bytesToWrite=this.stompMessageConverter.fromStompMessage(stompMessage);
+    session.getOutputStream().write(bytesToWrite);
+    session.getOutputStream().flush();
+  }
+ catch (  Exception ex) {
+    logger.error("Couldn't forward message",ex);
+    clearRelaySession(sessionId);
+  }
+}

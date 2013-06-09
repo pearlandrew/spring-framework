@@ -15,11 +15,10 @@
   headers.setHeartbeat(0,0);
   headers.setId(session.getId());
   session.sendMessage(new StompMessage(StompCommand.CONNECTED,headers));
-  String replyToKey="relay-message" + session.getId();
-  Registration<?> registration=this.reactor.on(Fn.$(replyToKey),new Consumer<Event<StompMessage>>(){
-    @Override public void accept(    Event<StompMessage> event){
+  String replyKey="relay-message" + session.getId();
+  EventRegistration registration=this.eventBus.registerConsumer(replyKey,new EventConsumer<StompMessage>(){
+    @Override public void accept(    StompMessage message){
       try {
-        StompMessage message=event.getData();
         if (StompCommand.CONNECTED.equals(message.getCommand())) {
           return;
         }
@@ -34,6 +33,6 @@
     }
   }
 );
-  addRegistration(session.getId(),registration);
-  this.reactor.notify(StompCommand.CONNECT,Event.wrap(stompMessage,replyToKey));
+  addRegistration(session,registration);
+  return replyKey;
 }

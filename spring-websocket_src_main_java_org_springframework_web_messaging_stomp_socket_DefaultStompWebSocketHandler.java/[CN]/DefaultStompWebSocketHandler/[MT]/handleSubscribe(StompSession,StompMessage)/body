@@ -1,14 +1,26 @@
 {
   final String subscriptionId=message.getHeaders().getId();
-  String replyToKey=getSubscriptionReplyKey(session,subscriptionId);
+  String replyKey=getSubscriptionReplyKey(session,subscriptionId);
   if (logger.isTraceEnabled()) {
-    logger.trace("Adding subscription, key=" + replyToKey);
+    logger.trace("Adding subscription, key=" + replyKey);
   }
-  Registration<?> registration=this.reactor.on(Fn.$(replyToKey),new Consumer<Event<StompMessage>>(){
-    @Override public void accept(    Event<StompMessage> event){
-      event.getData().getHeaders().setSubscription(subscriptionId);
+  EventRegistration registration=this.eventBus.registerConsumer(replyKey,new EventConsumer<Message<?>>(){
+    @Override public void accept(    Message<?> replyMessage){
+      StompHeaders headers=new StompHeaders();
+      headers.setSubscription(subscriptionId);
+      headerMapper.fromMessageHeaders(replyMessage.getHeaders(),headers);
+      byte[] payload;
       try {
-        session.sendMessage(event.getData());
+        MediaType contentType=headers.getContentType();
+        payload=payloadConverter.convertToPayload(replyMessage.getPayload(),contentType);
+      }
+ catch (      Exception e) {
+        logger.error("Failed to send " + replyMessage,e);
+        return;
+      }
+      try {
+        StompMessage stompMessage=new StompMessage(StompCommand.MESSAGE,headers,payload);
+        session.sendMessage(stompMessage);
       }
  catch (      Throwable t) {
         handleError(session,t);
@@ -16,6 +28,6 @@
     }
   }
 );
-  addRegistration(session.getId(),registration);
-  this.reactor.notify(StompCommand.SUBSCRIBE,Event.wrap(message,replyToKey));
+  addRegistration(session,registration);
+  return replyKey;
 }

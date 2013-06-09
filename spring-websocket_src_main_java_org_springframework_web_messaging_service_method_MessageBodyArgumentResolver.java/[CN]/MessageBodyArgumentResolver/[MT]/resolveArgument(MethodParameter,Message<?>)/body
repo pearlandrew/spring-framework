@@ -1,0 +1,19 @@
+{
+  Object arg=null;
+  MessageBody annot=parameter.getParameterAnnotation(MessageBody.class);
+  MediaType contentType=(MediaType)message.getHeaders().get("content-type");
+  if (annot == null || annot.required()) {
+    Class<?> sourceType=message.getPayload().getClass();
+    Class<?> parameterType=parameter.getParameterType();
+    if (parameterType.isAssignableFrom(sourceType)) {
+      return message.getPayload();
+    }
+ else     if (byte[].class.equals(sourceType)) {
+      return this.converter.convertFromPayload(parameterType,contentType,(byte[])message.getPayload());
+    }
+ else {
+      throw new MessageConversionException(message,"Unexpected payload type",null);
+    }
+  }
+  return arg;
+}

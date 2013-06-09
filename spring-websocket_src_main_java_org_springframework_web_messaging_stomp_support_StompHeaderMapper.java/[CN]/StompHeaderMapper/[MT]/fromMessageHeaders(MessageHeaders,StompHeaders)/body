@@ -1,0 +1,25 @@
+{
+  for (int i=0; i < stompHeaderNames[0].length; i++) {
+    String prefixedHeader=stompHeaderNames[1][i];
+    if (messageHeaders.containsKey(prefixedHeader)) {
+      String header=stompHeaderNames[0][i];
+      stompHeaders.add(header,(String)messageHeaders.get(prefixedHeader));
+    }
+  }
+  String destination=(String)messageHeaders.get("destination");
+  if (destination != null) {
+    stompHeaders.setDestination(destination);
+  }
+  Object contentType=messageHeaders.get("content-type");
+  if (contentType != null) {
+    if (contentType instanceof String) {
+      stompHeaders.setContentType(MediaType.valueOf((String)contentType));
+    }
+ else     if (contentType instanceof MediaType) {
+      stompHeaders.setContentType((MediaType)contentType);
+    }
+ else {
+      logger.warn("Invalid contentType class: " + contentType.getClass());
+    }
+  }
+}

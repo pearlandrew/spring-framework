@@ -1,0 +1,17 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Message received: " + message);
+  }
+  Map<String,Object> headers=new HashMap<String,Object>();
+  headers.put("destination",message.getHeaders().get("destination"));
+  MediaType contentType=(MediaType)message.getHeaders().get("content-type");
+  headers.put("content-type",contentType);
+  try {
+    byte[] payload=payloadConverter.convertToPayload(message.getPayload(),contentType);
+    message=new GenericMessage<byte[]>(payload,headers);
+    getEventBus().send(getPublishKey(message),Event.wrap(message));
+  }
+ catch (  Exception ex) {
+    logger.error("Failed to publish " + message,ex);
+  }
+}

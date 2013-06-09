@@ -1,0 +1,13 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Subscribe " + message);
+  }
+  final String replyKey=(String)message.getHeaders().getReplyChannel();
+  EventRegistration registration=getEventBus().registerConsumer(getPublishKey(message),new EventConsumer<Message<?>>(){
+    @Override public void accept(    Message<?> message){
+      getEventBus().send(replyKey,message);
+    }
+  }
+);
+  addSubscription((String)message.getHeaders().get("sessionId"),registration);
+}
