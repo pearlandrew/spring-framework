@@ -1,0 +1,44 @@
+{
+  processMemberClasses(configClass,sourceClass);
+  AnnotationAttributes propertySource=attributesFor(sourceClass.getMetadata(),org.springframework.context.annotation.PropertySource.class);
+  if (propertySource != null) {
+    processPropertySource(propertySource);
+  }
+  AnnotationAttributes componentScan=attributesFor(sourceClass.getMetadata(),ComponentScan.class);
+  if (componentScan != null) {
+    if (!ConditionEvaluator.get(configClass.getMetadata(),false).shouldSkip(this.registry,this.environment)) {
+      Set<BeanDefinitionHolder> scannedBeanDefinitions=this.componentScanParser.parse(componentScan,sourceClass.getMetadata().getClassName());
+      for (      BeanDefinitionHolder holder : scannedBeanDefinitions) {
+        if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(),this.metadataReaderFactory)) {
+          this.parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
+        }
+      }
+    }
+  }
+  processImports(configClass,getImports(sourceClass),true);
+  if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
+    AnnotationAttributes importResource=attributesFor(sourceClass.getMetadata(),ImportResource.class);
+    String[] resources=importResource.getStringArray("value");
+    Class<? extends BeanDefinitionReader> readerClass=importResource.getClass("reader");
+    for (    String resource : resources) {
+      configClass.addImportedResource(resource,readerClass);
+    }
+  }
+  Set<MethodMetadata> beanMethods=sourceClass.getMetadata().getAnnotatedMethods(Bean.class.getName());
+  for (  MethodMetadata methodMetadata : beanMethods) {
+    configClass.addBeanMethod(new BeanMethod(methodMetadata,configClass));
+  }
+  if (sourceClass.getMetadata().hasSuperClass()) {
+    String superclass=sourceClass.getMetadata().getSuperClassName();
+    if (!this.knownSuperclasses.containsKey(superclass)) {
+      this.knownSuperclasses.put(superclass,configClass);
+      try {
+        return sourceClass.getSuperClass();
+      }
+ catch (      ClassNotFoundException ex) {
+        throw new IllegalStateException(ex);
+      }
+    }
+  }
+  return null;
+}

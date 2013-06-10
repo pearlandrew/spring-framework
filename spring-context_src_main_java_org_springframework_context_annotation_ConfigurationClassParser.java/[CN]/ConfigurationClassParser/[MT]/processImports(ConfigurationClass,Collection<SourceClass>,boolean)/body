@@ -1,0 +1,45 @@
+{
+  if (sourceClasses.isEmpty()) {
+    return;
+  }
+  if (checkForCircularImports && this.importStack.contains(configClass)) {
+    this.problemReporter.error(new CircularImportProblem(configClass,this.importStack,configClass.getMetadata()));
+  }
+ else {
+    this.importStack.push(configClass);
+    AnnotationMetadata importingClassMetadata=configClass.getMetadata();
+    try {
+      for (      SourceClass candidate : sourceClasses) {
+        if (candidate.isAssignable(ImportSelector.class)) {
+          Class<?> candidateClass=candidate.loadClass();
+          ImportSelector selector=BeanUtils.instantiateClass(candidateClass,ImportSelector.class);
+          invokeAwareMethods(selector);
+          if (selector instanceof DeferredImportSelector) {
+            this.deferredImportSelectors.add(new DeferredImportSelectorHolder(configClass,(DeferredImportSelector)selector));
+          }
+ else {
+            String[] importClassNames=selector.selectImports(importingClassMetadata);
+            Collection<SourceClass> importSourceClasses=asSourceClasses(importClassNames);
+            processImports(configClass,importSourceClasses,false);
+          }
+        }
+ else         if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
+          Class<?> candidateClass=candidate.loadClass();
+          ImportBeanDefinitionRegistrar registrar=BeanUtils.instantiateClass(candidateClass,ImportBeanDefinitionRegistrar.class);
+          invokeAwareMethods(registrar);
+          configClass.addImportBeanDefinitionRegistrar(registrar);
+        }
+ else {
+          this.importStack.registerImport(importingClassMetadata.getClassName(),candidate.getMetadata().getClassName());
+          processConfigurationClass(candidate.asConfigClass(configClass));
+        }
+      }
+    }
+ catch (    ClassNotFoundException ex) {
+      throw new NestedIOException("Failed to load import candidate class",ex);
+    }
+ finally {
+      this.importStack.pop();
+    }
+  }
+}
