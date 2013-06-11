@@ -21,22 +21,22 @@
   Parser parser=new Parser(headerContent);
   StompCommand command=StompCommand.valueOf(parser.nextToken(LF).trim());
   Assert.notNull(command,"No command found");
-  StompHeaders stompHeaders=new StompHeaders(command);
-  stompHeaders.setSessionId(sessionId);
+  MultiValueMap<String,String> headers=new LinkedMultiValueMap<String,String>();
   while (parser.hasNext()) {
     String header=parser.nextToken(COLON);
     if (header != null) {
       if (parser.hasNext()) {
         String value=parser.nextToken(LF);
-        stompHeaders.getRawHeaders().put(header,value);
+        headers.add(header,value);
       }
  else {
         throw new StompConversionException("Parse exception for " + headerContent);
       }
     }
   }
+  StompHeaders stompHeaders=StompHeaders.fromParsedFrame(command,headers);
+  stompHeaders.setSessionId(sessionId);
   byte[] payload=new byte[totalLength - payloadIndex];
   System.arraycopy(byteContent,payloadIndex,payload,0,totalLength - payloadIndex);
-  stompHeaders.updateMessageHeaders();
-  return createMessage(command,stompHeaders.getMessageHeaders(),payload);
+  return createMessage(command,stompHeaders.toMessageHeaders(),payload);
 }

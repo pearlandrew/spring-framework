@@ -1,5 +1,5 @@
 {
-  PubSubHeaders headers=new PubSubHeaders(message.getHeaders(),true);
+  PubSubHeaders headers=PubSubHeaders.fromMessageHeaders(message.getHeaders());
   String destination=headers.getDestination();
   if (destination == null) {
     return true;
@@ -8,7 +8,7 @@
     for (    String pattern : this.disallowedDestinations) {
       if (this.pathMatcher.match(pattern,destination)) {
         if (logger.isTraceEnabled()) {
-          logger.trace("Skip notification: " + message);
+          logger.trace("Skip notification message id=" + message.getHeaders().getId());
         }
         return false;
       }
@@ -21,7 +21,7 @@
       }
     }
     if (logger.isTraceEnabled()) {
-      logger.trace("Skip notification: " + message);
+      logger.trace("Skip notification message id=" + message.getHeaders().getId());
     }
     return false;
   }

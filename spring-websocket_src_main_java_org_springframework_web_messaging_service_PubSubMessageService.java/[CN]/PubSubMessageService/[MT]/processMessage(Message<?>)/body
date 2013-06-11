@@ -3,7 +3,7 @@
     logger.debug("Message received: " + message);
   }
   try {
-    PubSubHeaders inHeaders=new PubSubHeaders(message.getHeaders(),true);
+    PubSubHeaders inHeaders=PubSubHeaders.fromMessageHeaders(message.getHeaders());
     byte[] payload=payloadConverter.convertToPayload(message.getPayload(),inHeaders.getContentType());
     message=new GenericMessage<byte[]>(payload,message.getHeaders());
     getEventBus().send(getPublishKey(inHeaders.getDestination()),message);

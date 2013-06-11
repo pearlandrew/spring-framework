@@ -2,14 +2,15 @@
   this.eventBus=eventBus;
   this.eventBus.registerConsumer(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY,new EventConsumer<Message<?>>(){
     @Override public void accept(    Message<?> message){
-      StompHeaders stompHeaders=new StompHeaders(message.getHeaders(),false);
-      if (stompHeaders.getProtocolMessageType() == null) {
-        stompHeaders.setProtocolMessageType(StompCommand.MESSAGE);
-      }
+      StompHeaders stompHeaders=StompHeaders.fromMessageHeaders(message.getHeaders());
+      stompHeaders.setStompCommandIfNotSet(StompCommand.MESSAGE);
       if (StompCommand.CONNECTED.equals(stompHeaders.getStompCommand())) {
         return;
       }
       String sessionId=stompHeaders.getSessionId();
+      if (sessionId == null) {
+        logger.error("Cannot send message without a session id: " + message);
+      }
       WebSocketSession session=getWebSocketSession(sessionId);
       byte[] payload;
       try {
@@ -21,7 +22,7 @@
         return;
       }
       try {
-        Map<String,Object> messageHeaders=stompHeaders.getMessageHeaders();
+        Map<String,Object> messageHeaders=stompHeaders.toMessageHeaders();
         Message<byte[]> byteMessage=new GenericMessage<byte[]>(payload,messageHeaders);
         byte[] bytes=getStompMessageConverter().fromMessage(byteMessage);
         session.sendMessage(new TextMessage(new String(bytes,Charset.forName("UTF-8"))));

@@ -1,15 +1,18 @@
 {
-  String destination=getRawHeaders().get(DESTINATION);
-  if (destination != null) {
-    setDestination(destination);
+  if (getExternalSourceHeaders().isEmpty()) {
+    return;
   }
-  String contentType=getRawHeaders().get(CONTENT_TYPE);
+  String destination=getHeaderValue(DESTINATION);
+  if (destination != null) {
+    super.setDestination(destination);
+  }
+  String contentType=getHeaderValue(CONTENT_TYPE);
   if (contentType != null) {
-    setContentType(MediaType.parseMediaType(contentType));
+    super.setContentType(MediaType.parseMediaType(contentType));
   }
   if (StompCommand.SUBSCRIBE.equals(getStompCommand())) {
-    if (getRawHeaders().get(ID) != null) {
-      super.setSubscriptionId(getRawHeaders().get(ID));
+    if (getHeaderValue(ID) != null) {
+      super.setSubscriptionId(getHeaderValue(ID));
     }
   }
 }
