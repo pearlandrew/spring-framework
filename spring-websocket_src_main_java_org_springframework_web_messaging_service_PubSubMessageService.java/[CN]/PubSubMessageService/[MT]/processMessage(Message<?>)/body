@@ -2,14 +2,11 @@
   if (logger.isDebugEnabled()) {
     logger.debug("Message received: " + message);
   }
-  Map<String,Object> headers=new HashMap<String,Object>();
-  headers.put("destination",message.getHeaders().get("destination"));
-  MediaType contentType=(MediaType)message.getHeaders().get("content-type");
-  headers.put("content-type",contentType);
   try {
-    byte[] payload=payloadConverter.convertToPayload(message.getPayload(),contentType);
-    message=new GenericMessage<byte[]>(payload,headers);
-    getEventBus().send(getPublishKey(message),message);
+    PubSubHeaders inHeaders=new PubSubHeaders(message.getHeaders(),true);
+    byte[] payload=payloadConverter.convertToPayload(message.getPayload(),inHeaders.getContentType());
+    message=new GenericMessage<byte[]>(payload,message.getHeaders());
+    getEventBus().send(getPublishKey(inHeaders.getDestination()),message);
   }
  catch (  Exception ex) {
     logger.error("Failed to publish " + message,ex);

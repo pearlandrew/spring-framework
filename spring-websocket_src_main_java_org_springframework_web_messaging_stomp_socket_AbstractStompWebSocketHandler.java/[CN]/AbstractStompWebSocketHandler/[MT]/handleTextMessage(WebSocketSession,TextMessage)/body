@@ -1,19 +1,10 @@
 {
-  StompSession stompSession=this.sessions.get(session.getId());
-  Assert.notNull(stompSession,"No STOMP session for WebSocket session id=" + session.getId());
   try {
-    StompMessage stompMessage=this.messageConverter.toStompMessage(message.getPayload());
-    stompMessage.setSessionId(stompSession.getId());
-    handleStompMessage(stompSession,stompMessage);
+    String payload=textMessage.getPayload();
+    Message<byte[]> message=this.stompMessageConverter.toMessage(payload,session.getId());
+    handleStompMessage(session,message);
   }
  catch (  Throwable error) {
-    StompHeaders headers=new StompHeaders();
-    headers.setMessage(error.getMessage());
-    StompMessage errorMessage=new StompMessage(StompCommand.ERROR,headers);
-    try {
-      stompSession.sendMessage(errorMessage);
-    }
- catch (    Throwable t) {
-    }
+    sendErrorMessage(session,error);
   }
 }

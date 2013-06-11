@@ -1,18 +1,20 @@
 {
-  String sessionId=(String)message.getHeaders().get("sessionId");
+  StompHeaders stompHeaders=new StompHeaders(message.getHeaders(),false);
+  String sessionId=stompHeaders.getSessionId();
   RelaySession session=RelayStompService.this.relaySessions.get(sessionId);
   Assert.notNull(session,"RelaySession not found");
   try {
-    StompHeaders stompHeaders=new StompHeaders();
-    this.stompHeaderMapper.fromMessageHeaders(message.getHeaders(),stompHeaders);
+    if (stompHeaders.getProtocolMessageType() == null) {
+      stompHeaders.setProtocolMessageType(StompCommand.SEND);
+    }
     MediaType contentType=stompHeaders.getContentType();
     byte[] payload=this.payloadConverter.convertToPayload(message.getPayload(),contentType);
-    StompMessage stompMessage=new StompMessage(command,stompHeaders,payload);
+    Message<byte[]> byteMessage=new GenericMessage<byte[]>(payload,stompHeaders.getMessageHeaders());
     if (logger.isTraceEnabled()) {
-      logger.trace("Forwarding: " + stompMessage);
+      logger.trace("Forwarding: " + byteMessage);
     }
-    byte[] bytesToWrite=this.stompMessageConverter.fromStompMessage(stompMessage);
-    session.getOutputStream().write(bytesToWrite);
+    byte[] bytes=this.stompMessageConverter.fromMessage(byteMessage);
+    session.getOutputStream().write(bytes);
     session.getOutputStream().flush();
   }
  catch (  Exception ex) {

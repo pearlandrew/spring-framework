@@ -1,3 +1,44 @@
 {
   this.eventBus=eventBus;
+  this.eventBus.registerConsumer(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY,new EventConsumer<Message<?>>(){
+    @Override public void accept(    Message<?> message){
+      StompHeaders stompHeaders=new StompHeaders(message.getHeaders(),false);
+      if (stompHeaders.getProtocolMessageType() == null) {
+        stompHeaders.setProtocolMessageType(StompCommand.MESSAGE);
+      }
+      if (StompCommand.CONNECTED.equals(stompHeaders.getStompCommand())) {
+        return;
+      }
+      String sessionId=stompHeaders.getSessionId();
+      WebSocketSession session=getWebSocketSession(sessionId);
+      byte[] payload;
+      try {
+        MediaType contentType=stompHeaders.getContentType();
+        payload=payloadConverter.convertToPayload(message.getPayload(),contentType);
+      }
+ catch (      Exception e) {
+        logger.error("Failed to send " + message,e);
+        return;
+      }
+      try {
+        Map<String,Object> messageHeaders=stompHeaders.getMessageHeaders();
+        Message<byte[]> byteMessage=new GenericMessage<byte[]>(payload,messageHeaders);
+        byte[] bytes=getStompMessageConverter().fromMessage(byteMessage);
+        session.sendMessage(new TextMessage(new String(bytes,Charset.forName("UTF-8"))));
+      }
+ catch (      Throwable t) {
+        sendErrorMessage(session,t);
+      }
+ finally {
+        if (StompCommand.ERROR.equals(stompHeaders.getStompCommand())) {
+          try {
+            session.close(CloseStatus.PROTOCOL_ERROR);
+          }
+ catch (          IOException e) {
+          }
+        }
+      }
+    }
+  }
+);
 }

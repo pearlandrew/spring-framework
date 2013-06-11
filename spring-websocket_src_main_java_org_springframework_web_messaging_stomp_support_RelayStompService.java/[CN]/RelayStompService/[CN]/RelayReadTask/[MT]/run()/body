@@ -8,19 +8,19 @@
       }
  else       if (b == 0x00) {
         byte[] bytes=out.toByteArray();
-        StompMessage message=RelayStompService.this.stompMessageConverter.toStompMessage(bytes);
-        getEventBus().send(this.replyTo,message);
+        Message<byte[]> message=stompMessageConverter.toMessage(bytes,sessionId);
+        getEventBus().send(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY,message);
         out.reset();
       }
  else {
         out.write(b);
       }
     }
-    logger.debug("Socket closed, STOMP session=" + stompSessionId);
+    logger.debug("Socket closed, STOMP session=" + sessionId);
     sendErrorMessage("Lost connection");
   }
  catch (  IOException e) {
     logger.error("Socket error: " + e.getMessage());
-    clearRelaySession(stompSessionId);
+    clearRelaySession(sessionId);
   }
 }

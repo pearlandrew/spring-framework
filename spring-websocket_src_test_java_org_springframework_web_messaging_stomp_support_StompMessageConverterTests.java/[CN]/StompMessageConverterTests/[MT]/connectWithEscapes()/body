@@ -1,0 +1,15 @@
+{
+  String accept="accept-version:1.1\n";
+  String host="ho\\c\\ns\\rt:st\\nomp.gi\\cthu\\b.org\n";
+  String frame="CONNECT\n" + accept + host+ "\n";
+  Message<byte[]> message=this.converter.toMessage(frame.getBytes("UTF-8"),"session-123");
+  assertEquals(0,message.getPayload().length);
+  MessageHeaders messageHeaders=message.getHeaders();
+  StompHeaders stompHeaders=new StompHeaders(messageHeaders,true);
+  assertEquals(Collections.singleton("1.1"),stompHeaders.getAcceptVersion());
+  assertEquals("st\nomp.gi:thu\\b.org",stompHeaders.getRawHeaders().get("ho:\ns\rt"));
+  String convertedBack=new String(this.converter.fromMessage(message),"UTF-8");
+  assertEquals("CONNECT\n",convertedBack.substring(0,8));
+  assertTrue(convertedBack.contains(accept));
+  assertTrue(convertedBack.contains(host));
+}

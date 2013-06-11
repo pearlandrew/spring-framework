@@ -2,10 +2,18 @@
   if (logger.isDebugEnabled()) {
     logger.debug("Subscribe " + message);
   }
-  final String replyKey=(String)message.getHeaders().getReplyChannel();
-  EventRegistration registration=getEventBus().registerConsumer(getPublishKey(message),new EventConsumer<Message<?>>(){
+  PubSubHeaders headers=new PubSubHeaders(message.getHeaders(),true);
+  final String subscriptionId=headers.getSubscriptionId();
+  EventRegistration registration=getEventBus().registerConsumer(getPublishKey(headers.getDestination()),new EventConsumer<Message<?>>(){
     @Override public void accept(    Message<?> message){
-      getEventBus().send(replyKey,message);
+      PubSubHeaders inHeaders=new PubSubHeaders(message.getHeaders(),true);
+      PubSubHeaders outHeaders=new PubSubHeaders();
+      outHeaders.setDestinations(inHeaders.getDestinations());
+      outHeaders.setContentType(inHeaders.getContentType());
+      outHeaders.setSubscriptionId(subscriptionId);
+      Object payload=message.getPayload();
+      message=new GenericMessage<Object>(payload,outHeaders.getMessageHeaders());
+      getEventBus().send(AbstractMessageService.SERVER_TO_CLIENT_MESSAGE_KEY,message);
     }
   }
 );

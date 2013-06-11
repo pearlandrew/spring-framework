@@ -1,0 +1,15 @@
+{
+  String accept="accept-version:1.2\n";
+  String host="host:github.org\n";
+  String test="CONNECT\r\n" + accept.replaceAll("\n","\r\n") + host.replaceAll("\n","\r\n")+ "\r\n";
+  Message<byte[]> message=this.converter.toMessage(test.getBytes("UTF-8"),"session-123");
+  assertEquals(0,message.getPayload().length);
+  MessageHeaders messageHeaders=message.getHeaders();
+  StompHeaders stompHeaders=new StompHeaders(messageHeaders,true);
+  assertEquals(Collections.singleton("1.2"),stompHeaders.getAcceptVersion());
+  assertEquals("github.org",stompHeaders.getRawHeaders().get("host"));
+  String convertedBack=new String(this.converter.fromMessage(message),"UTF-8");
+  assertEquals("CONNECT\n",convertedBack.substring(0,8));
+  assertTrue(convertedBack.contains(accept));
+  assertTrue(convertedBack.contains(host));
+}
