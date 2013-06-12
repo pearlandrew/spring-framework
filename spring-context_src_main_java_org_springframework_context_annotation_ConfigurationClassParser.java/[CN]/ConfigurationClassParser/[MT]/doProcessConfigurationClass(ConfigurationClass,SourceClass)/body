@@ -6,11 +6,11 @@
   }
   AnnotationAttributes componentScan=attributesFor(sourceClass.getMetadata(),ComponentScan.class);
   if (componentScan != null) {
-    if (!ConditionEvaluator.get(configClass.getMetadata(),false).shouldSkip(this.registry,this.environment)) {
+    if (!conditionEvaluator.shouldSkip(sourceClass.getMetadata(),ConfigurationPhase.REGISTER_BEAN)) {
       Set<BeanDefinitionHolder> scannedBeanDefinitions=this.componentScanParser.parse(componentScan,sourceClass.getMetadata().getClassName());
       for (      BeanDefinitionHolder holder : scannedBeanDefinitions) {
         if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(),this.metadataReaderFactory)) {
-          this.parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
+          parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
         }
       }
     }
