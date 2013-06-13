@@ -1,0 +1,25 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Subscribe " + message);
+  }
+  PubSubHeaders headers=PubSubHeaders.fromMessageHeaders(message.getHeaders());
+  final String subscriptionId=headers.getSubscriptionId();
+  Selector selector=new ObjectSelector<String>(getPublishKey(headers.getDestination()));
+  Registration<?> registration=this.reactor.on(selector,new Consumer<Event<Message<?>>>(){
+    @Override public void accept(    Event<Message<?>> event){
+      Message<?> message=event.getData();
+      PubSubHeaders inHeaders=PubSubHeaders.fromMessageHeaders(message.getHeaders());
+      PubSubHeaders outHeaders=PubSubHeaders.create();
+      outHeaders.setDestinations(inHeaders.getDestinations());
+      if (inHeaders.getContentType() != null) {
+        outHeaders.setContentType(inHeaders.getContentType());
+      }
+      outHeaders.setSubscriptionId(subscriptionId);
+      Object payload=message.getPayload();
+      message=new GenericMessage<Object>(payload,outHeaders.toMessageHeaders());
+      getClientChannel().send(message);
+    }
+  }
+);
+  addSubscription(headers.getSessionId(),registration);
+}

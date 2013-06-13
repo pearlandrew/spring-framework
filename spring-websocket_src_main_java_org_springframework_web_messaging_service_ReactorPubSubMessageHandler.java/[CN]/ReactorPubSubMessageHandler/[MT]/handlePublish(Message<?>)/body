@@ -1,0 +1,14 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Message received: " + message);
+  }
+  try {
+    PubSubHeaders inHeaders=PubSubHeaders.fromMessageHeaders(message.getHeaders());
+    byte[] payload=payloadConverter.convertToPayload(message.getPayload(),inHeaders.getContentType());
+    message=new GenericMessage<byte[]>(payload,message.getHeaders());
+    this.reactor.notify(getPublishKey(inHeaders.getDestination()),Event.wrap(message));
+  }
+ catch (  Exception ex) {
+    logger.error("Failed to publish " + message,ex);
+  }
+}

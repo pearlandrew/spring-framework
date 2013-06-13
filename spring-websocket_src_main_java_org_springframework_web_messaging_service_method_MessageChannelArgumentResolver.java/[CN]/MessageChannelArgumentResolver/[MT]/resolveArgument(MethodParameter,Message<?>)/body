@@ -2,10 +2,13 @@
   final String sessionId=PubSubHeaders.fromMessageHeaders(message.getHeaders()).getSessionId();
   return new MessageChannel(){
     @Override public boolean send(    Message<?> message){
+      return send(message,-1);
+    }
+    @Override public boolean send(    Message<?> message,    long timeout){
       PubSubHeaders headers=PubSubHeaders.fromMessageHeaders(message.getHeaders());
       headers.setSessionId(sessionId);
       message=new GenericMessage<Object>(message.getPayload(),headers.toMessageHeaders());
-      eventBus.send(AbstractMessageService.CLIENT_TO_SERVER_MESSAGE_KEY,message);
+      publishChannel.send(message);
       return true;
     }
   }
