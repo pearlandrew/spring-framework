@@ -1,10 +1,10 @@
 {
-  StompHeaders stompHeaders=StompHeaders.fromMessageHeaders(message.getHeaders());
-  stompHeaders.setStompCommandIfNotSet(StompCommand.MESSAGE);
-  if (StompCommand.CONNECTED.equals(stompHeaders.getStompCommand())) {
+  StompHeaders headers=StompHeaders.fromMessageHeaders(message.getHeaders());
+  headers.setStompCommandIfNotSet(StompCommand.MESSAGE);
+  if (StompCommand.CONNECTED.equals(headers.getStompCommand())) {
     return;
   }
-  String sessionId=stompHeaders.getSessionId();
+  String sessionId=headers.getSessionId();
   if (sessionId == null) {
     logger.error("No \"sessionId\" header in message: " + message);
   }
@@ -14,7 +14,7 @@
   }
   byte[] payload;
   try {
-    MediaType contentType=stompHeaders.getContentType();
+    MediaType contentType=headers.getContentType();
     payload=payloadConverter.convertToPayload(message.getPayload(),contentType);
   }
  catch (  Throwable t) {
@@ -22,8 +22,7 @@
     return;
   }
   try {
-    Map<String,Object> messageHeaders=stompHeaders.toMessageHeaders();
-    Message<byte[]> byteMessage=messageFactory.createMessage(payload,messageHeaders);
+    Message<byte[]> byteMessage=MessageBuilder.fromPayloadAndHeaders(payload,headers.toMessageHeaders()).build();
     byte[] bytes=getStompMessageConverter().fromMessage(byteMessage);
     session.sendMessage(new TextMessage(new String(bytes,Charset.forName("UTF-8"))));
   }
@@ -31,7 +30,7 @@
     sendErrorMessage(session,t);
   }
  finally {
-    if (StompCommand.ERROR.equals(stompHeaders.getStompCommand())) {
+    if (StompCommand.ERROR.equals(headers.getStompCommand())) {
       try {
         session.close(CloseStatus.PROTOCOL_ERROR);
       }

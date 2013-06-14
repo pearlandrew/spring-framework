@@ -7,7 +7,8 @@
     @SuppressWarnings("unchecked") @Override public boolean send(    Message<?> message,    long timeout){
       PubSubHeaders headers=PubSubHeaders.fromMessageHeaders(message.getHeaders());
       headers.setSessionId(sessionId);
-      publishChannel.send(messageFactory.createMessage(message.getPayload(),headers.toMessageHeaders()));
+      MessageBuilder<?> messageToSend=MessageBuilder.fromPayloadAndHeaders(message.getPayload(),headers.toMessageHeaders());
+      publishChannel.send(messageToSend.build());
       return true;
     }
   }

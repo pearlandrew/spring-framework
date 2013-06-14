@@ -1,8 +1,8 @@
 {
-  StompHeaders stompHeaders=StompHeaders.create(StompCommand.ERROR);
-  stompHeaders.setMessage(error.getMessage());
-  Message<byte[]> errorMessage=messageFactory.createMessage(new byte[0],stompHeaders.toMessageHeaders());
-  byte[] bytes=this.stompMessageConverter.fromMessage(errorMessage);
+  StompHeaders headers=StompHeaders.create(StompCommand.ERROR);
+  headers.setMessage(error.getMessage());
+  Message<byte[]> message=MessageBuilder.fromPayloadAndHeaders(EMPTY_PAYLOAD,headers.toMessageHeaders()).build();
+  byte[] bytes=this.stompMessageConverter.fromMessage(message);
   try {
     session.sendMessage(new TextMessage(new String(bytes,Charset.forName("UTF-8"))));
   }

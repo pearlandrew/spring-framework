@@ -3,23 +3,15 @@
     logger.debug("Subscribe " + message);
   }
   PubSubHeaders headers=PubSubHeaders.fromMessageHeaders(message.getHeaders());
-  final String subscriptionId=headers.getSubscriptionId();
-  Selector selector=new ObjectSelector<String>(getPublishKey(headers.getDestination()));
-  Registration<?> registration=this.reactor.on(selector,new Consumer<Event<Message<?>>>(){
-    @SuppressWarnings("unchecked") @Override public void accept(    Event<Message<?>> event){
-      Message<?> message=event.getData();
-      PubSubHeaders inHeaders=PubSubHeaders.fromMessageHeaders(message.getHeaders());
-      PubSubHeaders outHeaders=PubSubHeaders.create();
-      outHeaders.setDestinations(inHeaders.getDestinations());
-      if (inHeaders.getContentType() != null) {
-        outHeaders.setContentType(inHeaders.getContentType());
-      }
-      outHeaders.setSubscriptionId(subscriptionId);
-      Object payload=message.getPayload();
-      Message outMessage=messageFactory.createMessage(payload,outHeaders.toMessageHeaders());
-      getClientChannel().send(outMessage);
-    }
+  String subscriptionId=headers.getSubscriptionId();
+  BroadcastingConsumer consumer=new BroadcastingConsumer(subscriptionId);
+  String key=getPublishKey(headers.getDestination());
+  Registration<?> registration=this.reactor.on(new ObjectSelector<String>(key),consumer);
+  String sessionId=headers.getSessionId();
+  List<Registration<?>> list=this.subscriptionsBySession.get(sessionId);
+  if (list == null) {
+    list=new ArrayList<Registration<?>>();
+    this.subscriptionsBySession.put(sessionId,list);
   }
-);
-  addSubscription(headers.getSessionId(),registration);
+  list.add(registration);
 }

@@ -1,12 +1,12 @@
 {
-  StompHeaders stompHeaders=StompHeaders.fromMessageHeaders(message.getHeaders());
-  String sessionId=stompHeaders.getSessionId();
+  StompHeaders headers=StompHeaders.fromMessageHeaders(message.getHeaders());
+  String sessionId=headers.getSessionId();
   byte[] bytesToWrite;
   try {
-    stompHeaders.setStompCommandIfNotSet(StompCommand.SEND);
-    MediaType contentType=stompHeaders.getContentType();
+    headers.setStompCommandIfNotSet(StompCommand.SEND);
+    MediaType contentType=headers.getContentType();
     byte[] payload=this.payloadConverter.convertToPayload(message.getPayload(),contentType);
-    Message<byte[]> byteMessage=messageFactory.createMessage(payload,stompHeaders.toMessageHeaders());
+    Message<byte[]> byteMessage=MessageBuilder.fromPayloadAndHeaders(payload,headers.toMessageHeaders()).build();
     bytesToWrite=this.stompMessageConverter.fromMessage(byteMessage);
   }
  catch (  Throwable ex) {
@@ -17,7 +17,7 @@
   Assert.notNull(connection,"TCP connection to message broker not found, sessionId=" + sessionId);
   try {
     if (logger.isTraceEnabled()) {
-      logger.trace("Forwarding STOMP " + stompHeaders.getStompCommand() + " message");
+      logger.trace("Forwarding STOMP " + headers.getStompCommand() + " message");
     }
     connection.out().accept(new String(bytesToWrite,Charset.forName("UTF-8")));
   }

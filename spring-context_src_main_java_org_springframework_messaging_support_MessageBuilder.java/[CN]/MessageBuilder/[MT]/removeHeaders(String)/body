@@ -1,0 +1,22 @@
+{
+  List<String> toRemove=new ArrayList<String>();
+  for (  String pattern : headerPatterns) {
+    if (StringUtils.hasLength(pattern)) {
+      if (pattern.contains("*")) {
+        for (        String headerName : this.headers.keySet()) {
+          if (PatternMatchUtils.simpleMatch(pattern,headerName)) {
+            toRemove.add(headerName);
+          }
+        }
+      }
+ else {
+        toRemove.add(pattern);
+      }
+    }
+  }
+  for (  String headerName : toRemove) {
+    this.headers.remove(headerName);
+    putOrRemove(headerName,null);
+  }
+  return this;
+}
