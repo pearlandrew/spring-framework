@@ -1,22 +1,34 @@
 {
   StompHeaders stompHeaders=StompHeaders.fromMessageHeaders(message.getHeaders());
   String sessionId=stompHeaders.getSessionId();
-  RelaySession session=StompRelayPubSubMessageHandler.this.relaySessions.get(sessionId);
-  Assert.notNull(session,"RelaySession not found");
+  byte[] bytesToWrite;
   try {
     stompHeaders.setStompCommandIfNotSet(StompCommand.SEND);
     MediaType contentType=stompHeaders.getContentType();
     byte[] payload=this.payloadConverter.convertToPayload(message.getPayload(),contentType);
     Message<byte[]> byteMessage=new GenericMessage<byte[]>(payload,stompHeaders.toMessageHeaders());
+    bytesToWrite=this.stompMessageConverter.fromMessage(byteMessage);
+  }
+ catch (  Throwable ex) {
+    logger.error("Failed to forward message " + message,ex);
+    return;
+  }
+  TcpConnection<String,String> connection=getConnection(sessionId);
+  Assert.notNull(connection,"TCP connection to message broker not found, sessionId=" + sessionId);
+  try {
     if (logger.isTraceEnabled()) {
       logger.trace("Forwarding STOMP " + stompHeaders.getStompCommand() + " message");
     }
-    byte[] bytes=this.stompMessageConverter.fromMessage(byteMessage);
-    session.getOutputStream().write(bytes);
-    session.getOutputStream().flush();
+    connection.out().accept(new String(bytesToWrite,Charset.forName("UTF-8")));
   }
- catch (  Exception ex) {
-    logger.error("Couldn't forward message " + message,ex);
-    clearRelaySession(sessionId);
+ catch (  Throwable ex) {
+    logger.error("Could not get TCP connection " + sessionId,ex);
+    try {
+      if (connection != null) {
+        connection.close();
+      }
+    }
+ catch (    Throwable t) {
+    }
   }
 }
