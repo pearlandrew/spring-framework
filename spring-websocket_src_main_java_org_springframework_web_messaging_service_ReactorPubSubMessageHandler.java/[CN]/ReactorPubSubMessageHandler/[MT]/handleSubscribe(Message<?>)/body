@@ -6,7 +6,7 @@
   final String subscriptionId=headers.getSubscriptionId();
   Selector selector=new ObjectSelector<String>(getPublishKey(headers.getDestination()));
   Registration<?> registration=this.reactor.on(selector,new Consumer<Event<Message<?>>>(){
-    @Override public void accept(    Event<Message<?>> event){
+    @SuppressWarnings("unchecked") @Override public void accept(    Event<Message<?>> event){
       Message<?> message=event.getData();
       PubSubHeaders inHeaders=PubSubHeaders.fromMessageHeaders(message.getHeaders());
       PubSubHeaders outHeaders=PubSubHeaders.create();
@@ -16,8 +16,8 @@
       }
       outHeaders.setSubscriptionId(subscriptionId);
       Object payload=message.getPayload();
-      message=new GenericMessage<Object>(payload,outHeaders.toMessageHeaders());
-      getClientChannel().send(message);
+      Message outMessage=messageFactory.createMessage(payload,outHeaders.toMessageHeaders());
+      getClientChannel().send(outMessage);
     }
   }
 );
