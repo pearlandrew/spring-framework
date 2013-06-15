@@ -1,0 +1,20 @@
+{
+  PubSubChannelRegistry registry=new PubSubChannelRegistry(){
+    @Override public MessageChannel<Message<?>> getClientInputChannel(){
+      return clientInputChannel;
+    }
+    @Override public MessageChannel<Message<?>> getClientOutputChannel(){
+      return clientOutputChannel;
+    }
+    @Override public MessageChannel<Message<?>> getMessageBrokerChannel(){
+      return messageBrokerChannel;
+    }
+  }
+;
+  for (  MessageHandler<Message<?>> handler : this.messageHandlers) {
+    if (handler instanceof PubSubChannelRegistryAware) {
+      ((PubSubChannelRegistryAware)handler).setPubSubChannelRegistry(registry);
+    }
+  }
+  return registry;
+}

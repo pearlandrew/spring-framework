@@ -1,16 +1,5 @@
 {
+  Assert.notNull(this.messageBrokerChannel,"messageBrokerChannel is required");
   final String sessionId=PubSubHeaders.fromMessageHeaders(message.getHeaders()).getSessionId();
-  return new MessageChannel<Message<?>>(){
-    @Override public boolean send(    Message<?> message){
-      return send(message,-1);
-    }
-    @SuppressWarnings("unchecked") @Override public boolean send(    Message<?> message,    long timeout){
-      PubSubHeaders headers=PubSubHeaders.fromMessageHeaders(message.getHeaders());
-      headers.setSessionId(sessionId);
-      MessageBuilder<?> messageToSend=MessageBuilder.fromPayloadAndHeaders(message.getPayload(),headers.toMessageHeaders());
-      publishChannel.send(messageToSend.build());
-      return true;
-    }
-  }
-;
+  return new SessionMessageChannel(this.messageBrokerChannel,sessionId);
 }
