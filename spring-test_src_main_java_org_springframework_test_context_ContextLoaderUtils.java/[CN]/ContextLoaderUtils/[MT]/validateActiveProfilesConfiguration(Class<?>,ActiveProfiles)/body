@@ -1,0 +1,22 @@
+{
+  String[] valueProfiles=annotation.value();
+  String[] profiles=annotation.profiles();
+  Class<? extends ActiveProfilesResolver> resolverClass=annotation.resolver();
+  boolean valueDeclared=!ObjectUtils.isEmpty(valueProfiles);
+  boolean profilesDeclared=!ObjectUtils.isEmpty(profiles);
+  boolean resolverDeclared=!ActiveProfilesResolver.class.equals(resolverClass);
+  String msg=null;
+  if (valueDeclared && profilesDeclared) {
+    msg=String.format("Test class [%s] has been configured with @ActiveProfiles' 'value' [%s] " + "and 'profiles' [%s] attributes. Only one declaration of active bean " + "definition profiles is permitted per @ActiveProfiles annotation.",declaringClass.getName(),ObjectUtils.nullSafeToString(valueProfiles),ObjectUtils.nullSafeToString(profiles));
+  }
+ else   if (valueDeclared && resolverDeclared) {
+    msg=String.format("Test class [%s] has been configured with @ActiveProfiles' 'value' [%s] " + "and 'resolver' [%s] attributes. Only one source of active bean " + "definition profiles is permitted per @ActiveProfiles annotation, "+ "either declaritively or programmatically.",declaringClass.getName(),ObjectUtils.nullSafeToString(valueProfiles),resolverClass.getName());
+  }
+ else   if (profilesDeclared && resolverDeclared) {
+    msg=String.format("Test class [%s] has been configured with @ActiveProfiles' 'profiles' [%s] " + "and 'resolver' [%s] attributes. Only one source of active bean " + "definition profiles is permitted per @ActiveProfiles annotation, "+ "either declaritively or programmatically.",declaringClass.getName(),ObjectUtils.nullSafeToString(profiles),resolverClass.getName());
+  }
+  if (msg != null) {
+    logger.error(msg);
+    throw new IllegalStateException(msg);
+  }
+}
