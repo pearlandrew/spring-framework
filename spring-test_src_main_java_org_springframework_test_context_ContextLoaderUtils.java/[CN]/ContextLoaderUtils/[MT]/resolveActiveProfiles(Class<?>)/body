@@ -11,14 +11,32 @@
     if (logger.isTraceEnabled()) {
       logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].",annotation,declaringClass.getName()));
     }
+    validateActiveProfilesConfiguration(declaringClass,annotation);
     String[] profiles=annotation.profiles();
     String[] valueProfiles=annotation.value();
-    if (!ObjectUtils.isEmpty(valueProfiles) && !ObjectUtils.isEmpty(profiles)) {
-      String msg=String.format("Test class [%s] has been configured with @ActiveProfiles' 'value' [%s] " + "and 'profiles' [%s] attributes. Only one declaration of active bean " + "definition profiles is permitted per @ActiveProfiles annotation.",declaringClass.getName(),ObjectUtils.nullSafeToString(valueProfiles),ObjectUtils.nullSafeToString(profiles));
-      logger.error(msg);
-      throw new IllegalStateException(msg);
+    Class<? extends ActiveProfilesResolver> resolverClass=annotation.resolver();
+    boolean resolverDeclared=!ActiveProfilesResolver.class.equals(resolverClass);
+    boolean valueDeclared=!ObjectUtils.isEmpty(valueProfiles);
+    if (resolverDeclared) {
+      ActiveProfilesResolver resolver=null;
+      try {
+        resolver=instantiateClass(resolverClass,ActiveProfilesResolver.class);
+      }
+ catch (      Exception e) {
+        String msg=String.format("Could not instantiate ActiveProfilesResolver of " + "type [%s] for test class [%s].",resolverClass.getName(),declaringClass.getName());
+        logger.error(msg);
+        throw new IllegalStateException(msg,e);
+      }
+      if (resolver != null) {
+        profiles=resolver.resolve(declaringClass);
+        if (profiles == null) {
+          String msg=String.format("ActiveProfilesResolver [%s] returned a null array of bean definition profiles.",resolverClass.getName());
+          logger.error(msg);
+          throw new IllegalStateException(msg);
+        }
+      }
     }
- else     if (!ObjectUtils.isEmpty(valueProfiles)) {
+ else     if (valueDeclared) {
       profiles=valueProfiles;
     }
     for (    String profile : profiles) {
