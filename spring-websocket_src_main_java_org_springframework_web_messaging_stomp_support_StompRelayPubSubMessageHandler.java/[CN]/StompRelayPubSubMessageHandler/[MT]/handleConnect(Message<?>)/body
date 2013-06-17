@@ -1,26 +1,10 @@
 {
-  final String sessionId=(String)message.getHeaders().get(PubSubHeaders.SESSION_ID);
-  Promise<TcpConnection<String,String>> promise=this.tcpClient.open();
-  promise.onSuccess(new Consumer<TcpConnection<String,String>>(){
-    @Override public void accept(    TcpConnection<String,String> connection){
-      connections.put(sessionId,connection);
-      forwardMessage(message,StompCommand.CONNECT);
-    }
+  StompHeaders stompHeaders=StompHeaders.fromMessageHeaders(message.getHeaders());
+  String sessionId=stompHeaders.getSessionId();
+  if (sessionId == null) {
+    logger.error("No sessionId in message " + message);
+    return;
   }
-);
-  promise.consume(new Consumer<TcpConnection<String,String>>(){
-    @Override public void accept(    TcpConnection<String,String> connection){
-      connection.in().consume(new Consumer<String>(){
-        @Override public void accept(        String stompFrame){
-          if (stompFrame.isEmpty()) {
-            return;
-          }
-          Message<byte[]> message=stompMessageConverter.toMessage(stompFrame,sessionId);
-          clientChannel.send(message);
-        }
-      }
-);
-    }
-  }
-);
+  RelaySession relaySession=new RelaySession(message,stompHeaders);
+  this.relaySessions.put(sessionId,relaySession);
 }

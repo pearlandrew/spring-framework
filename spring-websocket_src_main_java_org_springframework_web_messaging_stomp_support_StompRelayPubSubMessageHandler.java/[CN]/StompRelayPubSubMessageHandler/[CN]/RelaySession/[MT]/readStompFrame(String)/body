@@ -1,0 +1,22 @@
+{
+  if (StringUtils.isEmpty(stompFrame)) {
+    return;
+  }
+  Message<byte[]> message=stompMessageConverter.toMessage(stompFrame,this.sessionId);
+  if (logger.isTraceEnabled()) {
+    logger.trace("Reading message " + message);
+  }
+  StompHeaders headers=StompHeaders.fromMessageHeaders(message.getHeaders());
+  if (StompCommand.CONNECTED == headers.getStompCommand()) {
+    this.isConnected.set(true);
+    flushMessages(promise.get());
+    return;
+  }
+  if (StompCommand.ERROR == headers.getStompCommand()) {
+    if (logger.isDebugEnabled()) {
+      logger.warn("STOMP ERROR: " + headers.getMessage() + ". Removing session: "+ this.sessionId);
+    }
+    relaySessions.remove(this.sessionId);
+  }
+  clientChannel.send(message);
+}

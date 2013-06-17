@@ -1,3 +1,11 @@
 {
-  forwardMessage(message,StompCommand.DISCONNECT);
+  StompHeaders stompHeaders=StompHeaders.fromMessageHeaders(message.getHeaders());
+  if (stompHeaders.getStompCommand() != null) {
+    forwardMessage(message,StompCommand.DISCONNECT);
+  }
+  String sessionId=stompHeaders.getSessionId();
+  if (sessionId == null) {
+    logger.error("No sessionId in message " + message);
+    return;
+  }
 }

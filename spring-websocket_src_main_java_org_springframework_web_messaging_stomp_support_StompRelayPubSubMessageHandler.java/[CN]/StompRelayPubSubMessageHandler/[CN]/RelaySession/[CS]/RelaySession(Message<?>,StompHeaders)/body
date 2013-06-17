@@ -1,0 +1,27 @@
+{
+  Assert.notNull(message,"message is required");
+  Assert.notNull(stompHeaders,"stompHeaders is required");
+  this.sessionId=stompHeaders.getSessionId();
+  this.promise=tcpClient.open();
+  this.promise.consume(new Consumer<TcpConnection<String,String>>(){
+    @Override public void accept(    TcpConnection<String,String> connection){
+      connection.in().consume(new Consumer<String>(){
+        @Override public void accept(        String stompFrame){
+          readStompFrame(stompFrame);
+        }
+      }
+);
+      stompHeaders.setHeartbeat(0,0);
+      forwardInternal(message,stompHeaders,connection);
+    }
+  }
+);
+  this.promise.onError(new Consumer<Throwable>(){
+    @Override public void accept(    Throwable ex){
+      relaySessions.remove(sessionId);
+      logger.error("Failed to connect to broker",ex);
+      sendError(sessionId,"Failed to connect to message broker " + ex.toString());
+    }
+  }
+);
+}
