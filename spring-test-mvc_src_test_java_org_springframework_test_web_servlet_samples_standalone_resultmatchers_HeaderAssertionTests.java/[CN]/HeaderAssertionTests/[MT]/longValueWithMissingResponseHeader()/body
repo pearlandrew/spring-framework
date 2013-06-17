@@ -1,0 +1,12 @@
+{
+  try {
+    this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE,currentTime)).andExpect(status().isNotModified()).andExpect(header().longValue(LAST_MODIFIED,99L));
+    fail(EXPECTED_ASSERTION_ERROR_MSG);
+  }
+ catch (  AssertionError e) {
+    if (EXPECTED_ASSERTION_ERROR_MSG.equals(e.getMessage())) {
+      throw e;
+    }
+    assertEquals("Response does not contain header " + LAST_MODIFIED,e.getMessage());
+  }
+}
