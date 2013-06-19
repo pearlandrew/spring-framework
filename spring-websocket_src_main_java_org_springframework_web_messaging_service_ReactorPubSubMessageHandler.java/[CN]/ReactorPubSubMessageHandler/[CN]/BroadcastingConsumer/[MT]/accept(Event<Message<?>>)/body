@@ -1,7 +1,7 @@
 {
   Message<?> sentMessage=event.getData();
-  PubSubHeaders clientHeaders=PubSubHeaders.fromMessageHeaders(sentMessage.getHeaders());
-  clientHeaders.setSubscriptionId(this.subscriptionId);
-  @SuppressWarnings("unchecked") M clientMessage=(M)MessageBuilder.fromPayloadAndHeaders(sentMessage.getPayload(),clientHeaders.toMessageHeaders()).build();
+  PubSubHeaderAccesssor headers=PubSubHeaderAccesssor.wrap(sentMessage);
+  headers.setSubscriptionId(this.subscriptionId);
+  @SuppressWarnings("unchecked") M clientMessage=(M)MessageBuilder.withPayload(sentMessage.getPayload()).copyHeaders(headers.toHeaders()).build();
   clientChannel.send(clientMessage);
 }

@@ -4,8 +4,7 @@
   String frame="CONNECT\n" + accept + host+ "\n";
   Message<byte[]> message=this.converter.toMessage(frame.getBytes("UTF-8"),"session-123");
   assertEquals(0,message.getPayload().length);
-  MessageHeaders messageHeaders=message.getHeaders();
-  StompHeaders stompHeaders=StompHeaders.fromMessageHeaders(messageHeaders);
+  StompHeaderAccessor stompHeaders=StompHeaderAccessor.wrap(message);
   assertEquals(Collections.singleton("1.1"),stompHeaders.getAcceptVersion());
   assertEquals("st\nomp.gi:thu\\b.org",stompHeaders.getExternalSourceHeaders().get("ho:\ns\rt").get(0));
   String convertedBack=new String(this.converter.fromMessage(message),"UTF-8");

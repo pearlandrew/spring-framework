@@ -1,6 +1,6 @@
 {
-  StompHeaders connectHeaders=StompHeaders.fromMessageHeaders(message.getHeaders());
-  StompHeaders connectedHeaders=StompHeaders.create(StompCommand.CONNECTED);
+  StompHeaderAccessor connectHeaders=StompHeaderAccessor.wrap(message);
+  StompHeaderAccessor connectedHeaders=StompHeaderAccessor.create(StompCommand.CONNECTED);
   Set<String> acceptVersions=connectHeaders.getAcceptVersion();
   if (acceptVersions.contains("1.2")) {
     connectedHeaders.setAcceptVersion("1.2");
@@ -14,7 +14,7 @@
     throw new StompConversionException("Unsupported version '" + acceptVersions + "'");
   }
   connectedHeaders.setHeartbeat(0,0);
-  @SuppressWarnings("unchecked") M connectedMessage=(M)MessageBuilder.fromPayloadAndHeaders(EMPTY_PAYLOAD,connectedHeaders.toMessageHeaders()).build();
+  @SuppressWarnings("unchecked") M connectedMessage=(M)MessageBuilder.withPayload(EMPTY_PAYLOAD).copyHeaders(connectedHeaders.toHeaders()).build();
   byte[] bytes=getStompMessageConverter().fromMessage(connectedMessage);
   session.sendMessage(new TextMessage(new String(bytes,Charset.forName("UTF-8"))));
 }

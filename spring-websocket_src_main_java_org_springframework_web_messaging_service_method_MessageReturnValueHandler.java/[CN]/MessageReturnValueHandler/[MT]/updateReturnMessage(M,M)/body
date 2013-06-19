@@ -1,14 +1,13 @@
 {
-  PubSubHeaders headers=PubSubHeaders.fromMessageHeaders(message.getHeaders());
+  PubSubHeaderAccesssor headers=PubSubHeaderAccesssor.wrap(message);
   String sessionId=headers.getSessionId();
   String subscriptionId=headers.getSubscriptionId();
   Assert.notNull(subscriptionId,"No subscription id: " + message);
-  PubSubHeaders returnHeaders=PubSubHeaders.fromMessageHeaders(returnMessage.getHeaders());
+  PubSubHeaderAccesssor returnHeaders=PubSubHeaderAccesssor.wrap(returnMessage);
   returnHeaders.setSessionId(sessionId);
   returnHeaders.setSubscriptionId(subscriptionId);
   if (returnHeaders.getDestination() == null) {
     returnHeaders.setDestination(headers.getDestination());
   }
-  Object payload=returnMessage.getPayload();
-  return createMessage(returnHeaders,payload);
+  return createMessage(returnHeaders,returnMessage.getPayload());
 }

@@ -1,0 +1,20 @@
+{
+  try {
+    headers.setStompCommandIfNotSet(StompCommand.SEND);
+    MediaType contentType=headers.getContentType();
+    byte[] payload=payloadConverter.convertToPayload(message.getPayload(),contentType);
+    @SuppressWarnings("unchecked") M byteMessage=(M)MessageBuilder.withPayload(payload).copyHeaders(headers.toHeaders()).build();
+    if (logger.isTraceEnabled()) {
+      logger.trace("Forwarding message " + byteMessage);
+    }
+    byte[] bytesToWrite=stompMessageConverter.fromMessage(byteMessage);
+    connection.send(new String(bytesToWrite,Charset.forName("UTF-8")));
+  }
+ catch (  Throwable ex) {
+    logger.error("Failed to forward message " + message,ex);
+    connection.close();
+    sendError(this.sessionId,"Failed to forward message " + message + ": "+ ex.getMessage());
+    return false;
+  }
+  return true;
+}

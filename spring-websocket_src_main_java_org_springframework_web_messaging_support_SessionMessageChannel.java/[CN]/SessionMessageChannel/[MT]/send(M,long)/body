@@ -1,7 +1,8 @@
 {
-  PubSubHeaders headers=PubSubHeaders.fromMessageHeaders(message.getHeaders());
+  PubSubHeaderAccesssor headers=PubSubHeaderAccesssor.wrap(message);
   headers.setSessionId(this.sessionId);
-  @SuppressWarnings("unchecked") M messageToSend=(M)MessageBuilder.fromPayloadAndHeaders(message.getPayload(),headers.toMessageHeaders()).build();
+  Object payload=message.getPayload();
+  @SuppressWarnings("unchecked") M messageToSend=(M)MessageBuilder.withPayload(payload).copyHeaders(headers.toHeaders()).build();
   this.delegate.send(messageToSend);
   return true;
 }

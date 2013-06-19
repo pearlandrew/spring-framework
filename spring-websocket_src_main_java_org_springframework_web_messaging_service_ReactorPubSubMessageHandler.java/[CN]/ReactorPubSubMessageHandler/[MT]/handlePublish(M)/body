@@ -3,9 +3,9 @@
     logger.debug("Message received: " + message);
   }
   try {
-    PubSubHeaders headers=PubSubHeaders.fromMessageHeaders(message.getHeaders());
+    PubSubHeaderAccesssor headers=PubSubHeaderAccesssor.wrap(message);
     byte[] payload=payloadConverter.convertToPayload(message.getPayload(),headers.getContentType());
-    @SuppressWarnings("unchecked") M m=(M)MessageBuilder.fromPayloadAndHeaders(payload,message.getHeaders()).build();
+    @SuppressWarnings("unchecked") M m=(M)MessageBuilder.withPayload(payload).copyHeaders(message.getHeaders()).build();
     this.reactor.notify(getPublishKey(headers.getDestination()),Event.wrap(m));
   }
  catch (  Exception ex) {

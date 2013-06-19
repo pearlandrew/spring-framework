@@ -1,7 +1,7 @@
 {
-  StompHeaders stompHeaders=StompHeaders.create(StompCommand.ERROR);
-  stompHeaders.setSessionId(sessionId);
-  stompHeaders.setMessage(errorText);
-  @SuppressWarnings("unchecked") M errorMessage=(M)MessageBuilder.fromPayloadAndHeaders(new byte[0],stompHeaders.toMessageHeaders()).build();
+  StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.ERROR);
+  headers.setSessionId(sessionId);
+  headers.setMessage(errorText);
+  @SuppressWarnings("unchecked") M errorMessage=(M)MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toHeaders()).build();
   clientChannel.send(errorMessage);
 }

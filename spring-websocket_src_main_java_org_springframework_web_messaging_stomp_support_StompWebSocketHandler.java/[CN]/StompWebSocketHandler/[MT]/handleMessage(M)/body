@@ -1,5 +1,5 @@
 {
-  StompHeaders headers=StompHeaders.fromMessageHeaders(message.getHeaders());
+  StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
   headers.setStompCommandIfNotSet(StompCommand.MESSAGE);
   if (StompCommand.CONNECTED.equals(headers.getStompCommand())) {
     return;
@@ -22,7 +22,7 @@
     return;
   }
   try {
-    @SuppressWarnings("unchecked") M byteMessage=(M)MessageBuilder.fromPayloadAndHeaders(payload,headers.toMessageHeaders()).build();
+    @SuppressWarnings("unchecked") M byteMessage=(M)MessageBuilder.withPayload(payload).copyHeaders(headers.toHeaders()).build();
     byte[] bytes=getStompMessageConverter().fromMessage(byteMessage);
     session.sendMessage(new TextMessage(new String(bytes,Charset.forName("UTF-8"))));
   }
