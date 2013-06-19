@@ -1,11 +1,12 @@
 {
-  if (!this.isConnected.get()) {
-    @SuppressWarnings("unchecked") M m=(M)MessageBuilder.fromPayloadAndHeaders(message.getPayload(),headers.toMessageHeaders()).build();
-    if (logger.isTraceEnabled()) {
-      logger.trace("Adding to queue message " + m + ", queue size="+ this.messageQueue.size());
+synchronized (this.monitor) {
+    if (!this.isConnected) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Adding to queue message " + message + ", queue size="+ this.messageQueue.size());
+      }
+      this.messageQueue.add(message);
+      return;
     }
-    this.messageQueue.add(m);
-    return;
   }
   TcpConnection<String,String> connection=this.promise.get();
   if (this.messageQueue.isEmpty()) {

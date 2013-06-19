@@ -8,8 +8,10 @@
   }
   StompHeaders headers=StompHeaders.fromMessageHeaders(message.getHeaders());
   if (StompCommand.CONNECTED == headers.getStompCommand()) {
-    this.isConnected.set(true);
-    flushMessages(promise.get());
+synchronized (this.monitor) {
+      this.isConnected=true;
+      flushMessages(promise.get());
+    }
     return;
   }
   if (StompCommand.ERROR == headers.getStompCommand()) {
