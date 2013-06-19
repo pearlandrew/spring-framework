@@ -1,10 +1,17 @@
 {
   StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
   headers.setStompCommandIfNotSet(command);
+  if (headers.getSessionId() == null && (StompCommand.SEND.equals(command))) {
+  }
   String sessionId=headers.getSessionId();
   if (sessionId == null) {
-    logger.error("No sessionId in message " + message);
-    return;
+    if (StompCommand.SEND.equals(command)) {
+      sessionId=STOMP_RELAY_SYSTEM_SESSION_ID;
+    }
+ else {
+      logger.error("No sessionId in message " + message);
+      return;
+    }
   }
   RelaySession session=this.relaySessions.get(sessionId);
   if (session == null) {
