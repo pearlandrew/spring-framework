@@ -9,6 +9,7 @@
   InvocableMessageHandlerMethod<M> invocableHandlerMethod=new InvocableMessageHandlerMethod<M>(handlerMethod);
   invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
   try {
+    MessageHolder.setMessage(message);
     Object value=invocableHandlerMethod.invoke(message);
     MethodParameter returnType=handlerMethod.getReturnType();
     if (void.class.equals(returnType.getParameterType())) {
@@ -18,5 +19,8 @@
   }
  catch (  Throwable e) {
     e.printStackTrace();
+  }
+ finally {
+    MessageHolder.reset();
   }
 }
