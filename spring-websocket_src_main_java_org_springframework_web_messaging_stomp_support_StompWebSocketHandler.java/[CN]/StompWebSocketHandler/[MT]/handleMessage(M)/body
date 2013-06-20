@@ -8,9 +8,21 @@
   if (sessionId == null) {
     logger.error("No \"sessionId\" header in message: " + message);
   }
-  WebSocketSession session=getWebSocketSession(sessionId);
+  SessionInfo sessionInfo=this.sessionInfos.get(sessionId);
+  WebSocketSession session=sessionInfo.getWebSocketSession();
   if (session == null) {
     logger.error("Session not found: " + message);
+  }
+  if (headers.getSubscriptionId() == null) {
+    String destination=headers.getDestination();
+    Set<String> subs=sessionInfo.getSubscriptionsForDestination(destination);
+    if (subs != null) {
+      headers.setSubscriptionId(subs.iterator().next());
+    }
+ else {
+      logger.error("No subscription id: " + message);
+      return;
+    }
   }
   byte[] payload;
   try {
