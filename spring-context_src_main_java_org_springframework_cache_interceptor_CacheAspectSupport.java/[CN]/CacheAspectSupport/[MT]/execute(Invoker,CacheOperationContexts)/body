@@ -1,0 +1,18 @@
+{
+  processCacheEvicts(contexts.get(CacheEvictOperation.class),true,ExpressionEvaluator.NO_RESULT);
+  List<CachePutRequest> cachePutRequests=new ArrayList<CachePutRequest>();
+  collectPutRequests(contexts.get(CachePutOperation.class),cachePutRequests,false);
+  collectPutRequests(contexts.get(CacheableOperation.class),cachePutRequests,true);
+  ValueWrapper result=null;
+  if (cachePutRequests.isEmpty()) {
+    result=findCachedResult(contexts.get(CacheableOperation.class));
+  }
+  if (result == null) {
+    result=new SimpleValueWrapper(invoker.invoke());
+  }
+  for (  CachePutRequest cachePutRequest : cachePutRequests) {
+    cachePutRequest.apply(result.get());
+  }
+  processCacheEvicts(contexts.get(CacheEvictOperation.class),false,result.get());
+  return result.get();
+}

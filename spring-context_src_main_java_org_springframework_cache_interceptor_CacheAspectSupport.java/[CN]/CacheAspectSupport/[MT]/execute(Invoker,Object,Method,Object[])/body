@@ -1,32 +1,10 @@
 {
-  if (!this.initialized) {
-    return invoker.invoke();
-  }
-  Class<?> targetClass=AopProxyUtils.ultimateTargetClass(target);
-  if (targetClass == null && target != null) {
-    targetClass=target.getClass();
-  }
-  final Collection<CacheOperation> cacheOp=getCacheOperationSource().getCacheOperations(method,targetClass);
-  if (!CollectionUtils.isEmpty(cacheOp)) {
-    Map<String,Collection<CacheOperationContext>> ops=createOperationContext(cacheOp,method,args,target,targetClass);
-    inspectBeforeCacheEvicts(ops.get(EVICT));
-    CacheStatus status=inspectCacheables(ops.get(CACHEABLE));
-    Object retVal=null;
-    Map<CacheOperationContext,Object> updates=inspectCacheUpdates(ops.get(UPDATE));
-    if (status != null) {
-      if (status.updateRequired) {
-        updates.putAll(status.cUpdates);
-      }
- else {
-        return status.retVal;
-      }
+  if (this.initialized) {
+    Class<?> targetClass=getTargetClass(target);
+    Collection<CacheOperation> operations=getCacheOperationSource().getCacheOperations(method,targetClass);
+    if (!CollectionUtils.isEmpty(operations)) {
+      return execute(invoker,new CacheOperationContexts(operations,method,args,target,targetClass));
     }
-    retVal=invoker.invoke();
-    inspectAfterCacheEvicts(ops.get(EVICT),retVal);
-    if (!updates.isEmpty()) {
-      update(updates,retVal);
-    }
-    return retVal;
   }
   return invoker.invoke();
 }
