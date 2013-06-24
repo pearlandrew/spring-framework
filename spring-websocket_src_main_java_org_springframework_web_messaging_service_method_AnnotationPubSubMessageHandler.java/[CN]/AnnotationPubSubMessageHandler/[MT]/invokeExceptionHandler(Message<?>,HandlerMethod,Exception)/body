@@ -1,0 +1,23 @@
+{
+  InvocableMessageHandlerMethod invocableHandlerMethod;
+  Class<?> beanType=handlerMethod.getBeanType();
+  MessageExceptionHandlerMethodResolver resolver=this.exceptionHandlerCache.get(beanType);
+  if (resolver == null) {
+    resolver=new MessageExceptionHandlerMethodResolver(beanType);
+    this.exceptionHandlerCache.put(beanType,resolver);
+  }
+  Method method=resolver.resolveMethod(ex);
+  if (method == null) {
+    logger.error("Unhandled exception",ex);
+    return;
+  }
+  invocableHandlerMethod=new InvocableMessageHandlerMethod(handlerMethod.getBean(),method);
+  invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
+  try {
+    invocableHandlerMethod.invoke(message,ex);
+  }
+ catch (  Throwable t) {
+    logger.error("Error while handling exception",t);
+    return;
+  }
+}

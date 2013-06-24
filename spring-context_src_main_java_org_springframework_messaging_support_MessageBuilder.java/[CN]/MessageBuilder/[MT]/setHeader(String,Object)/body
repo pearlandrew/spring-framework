@@ -1,7 +1,19 @@
 {
   Assert.isTrue(!this.isReadOnly(headerName),"The '" + headerName + "' header is read-only.");
-  if (StringUtils.hasLength(headerName)) {
-    putOrRemove(headerName,headerValue);
+  if (StringUtils.hasLength(headerName) && !headerName.equals(MessageHeaders.ID) && !headerName.equals(MessageHeaders.TIMESTAMP)) {
+    this.verifyType(headerName,headerValue);
+    if (headerValue == null) {
+      Object removedValue=this.headers.remove(headerName);
+      if (removedValue != null) {
+        this.modified=true;
+      }
+    }
+ else {
+      Object replacedValue=this.headers.put(headerName,headerValue);
+      if (!headerValue.equals(replacedValue)) {
+        this.modified=true;
+      }
+    }
   }
   return this;
 }

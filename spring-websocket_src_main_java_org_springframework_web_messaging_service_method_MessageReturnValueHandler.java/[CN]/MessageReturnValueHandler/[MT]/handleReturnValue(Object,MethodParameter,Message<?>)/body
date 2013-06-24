@@ -1,0 +1,16 @@
+{
+  Assert.notNull(this.clientChannel,"No clientChannel to send messages to");
+  if (message == null) {
+    return;
+  }
+  PubSubHeaderAccesssor headers=PubSubHeaderAccesssor.wrap(message);
+  Assert.notNull(headers.getSubscriptionId(),"No subscription id: " + message);
+  PubSubHeaderAccesssor returnHeaders=PubSubHeaderAccesssor.wrap(message);
+  returnHeaders.setSessionId(headers.getSessionId());
+  returnHeaders.setSubscriptionId(headers.getSubscriptionId());
+  if (returnHeaders.getDestination() == null) {
+    returnHeaders.setDestination(headers.getDestination());
+  }
+  Message<?> returnMessage=MessageBuilder.withPayload(message.getPayload()).copyHeaders(headers.toHeaders()).build();
+  this.clientChannel.send(returnMessage);
+}

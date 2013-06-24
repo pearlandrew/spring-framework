@@ -1,0 +1,29 @@
+{
+  PubSubHeaderAccesssor headers=PubSubHeaderAccesssor.wrap(message);
+  String destination=headers.getDestination();
+  HandlerMethod match=getHandlerMethod(destination,handlerMethods);
+  if (match == null) {
+    return;
+  }
+  HandlerMethod handlerMethod=match.createWithResolvedBean();
+  InvocableMessageHandlerMethod invocableHandlerMethod=new InvocableMessageHandlerMethod(handlerMethod);
+  invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
+  try {
+    MessageHolder.setMessage(message);
+    Object value=invocableHandlerMethod.invoke(message);
+    MethodParameter returnType=handlerMethod.getReturnType();
+    if (void.class.equals(returnType.getParameterType())) {
+      return;
+    }
+    this.returnValueHandlers.handleReturnValue(value,returnType,message);
+  }
+ catch (  Exception ex) {
+    invokeExceptionHandler(message,handlerMethod,ex);
+  }
+catch (  Throwable ex) {
+    ex.printStackTrace();
+  }
+ finally {
+    MessageHolder.reset();
+  }
+}

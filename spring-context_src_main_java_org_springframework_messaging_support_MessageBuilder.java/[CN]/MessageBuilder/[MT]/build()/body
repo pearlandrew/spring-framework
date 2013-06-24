@@ -1,13 +1,9 @@
 {
-  if (this.originalMessage != null && this.headers.equals(this.originalMessage.getHeaders()) && this.payload.equals(this.originalMessage.getPayload())) {
+  if (!this.modified && this.originalMessage != null) {
     return this.originalMessage;
   }
-  this.headers.remove(MessageHeaders.ID);
-  this.headers.remove(MessageHeaders.TIMESTAMP);
-  if (messageFactory == null) {
-    return new GenericMessage<T>(this.payload,this.headers);
+  if (this.payload instanceof Throwable) {
+    return (Message<T>)new ErrorMessage((Throwable)this.payload,this.headers);
   }
- else {
-    return messageFactory.createMessage(payload,headers);
-  }
+  return new GenericMessage<T>(this.payload,this.headers);
 }
