@@ -1,5 +1,5 @@
 {
-  MethodExecutor executorToUse=MethodReference.this.cachedExecutor;
+  MethodExecutor executorToUse=getCachedExecutor(this.argumentTypes);
   if (executorToUse != null) {
     try {
       return executorToUse.execute(this.evaluationContext,this.target,this.arguments);
@@ -9,8 +9,8 @@
       MethodReference.this.cachedExecutor=null;
     }
   }
-  executorToUse=findAccessorForMethod(MethodReference.this.name,getTypes(this.arguments),this.target,this.evaluationContext);
-  MethodReference.this.cachedExecutor=executorToUse;
+  executorToUse=findAccessorForMethod(MethodReference.this.name,argumentTypes,this.target,this.evaluationContext);
+  MethodReference.this.cachedExecutor=new CachedMethodExecutor(executorToUse,this.argumentTypes);
   try {
     return executorToUse.execute(this.evaluationContext,this.target,this.arguments);
   }
