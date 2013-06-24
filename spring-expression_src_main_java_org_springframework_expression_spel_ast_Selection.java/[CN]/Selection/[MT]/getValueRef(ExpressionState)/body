@@ -1,7 +1,7 @@
 {
   TypedValue op=state.getActiveContextObject();
   Object operand=op.getValue();
-  SpelNodeImpl selectionCriteria=children[0];
+  SpelNodeImpl selectionCriteria=this.children[0];
   if (operand instanceof Map) {
     Map<?,?> mapdata=(Map<?,?>)operand;
     Map<Object,Object> result=new HashMap<Object,Object>();
@@ -13,7 +13,7 @@
         Object o=selectionCriteria.getValueInternal(state).getValue();
         if (o instanceof Boolean) {
           if (((Boolean)o).booleanValue() == true) {
-            if (variant == FIRST) {
+            if (this.variant == FIRST) {
               result.put(entry.getKey(),entry.getValue());
               return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
             }
@@ -29,10 +29,10 @@
         state.popActiveContextObject();
       }
     }
-    if ((variant == FIRST || variant == LAST) && result.size() == 0) {
+    if ((this.variant == FIRST || this.variant == LAST) && result.size() == 0) {
       return new ValueRef.TypedValueHolderValueRef(new TypedValue(null),this);
     }
-    if (variant == LAST) {
+    if (this.variant == LAST) {
       Map<Object,Object> resultMap=new HashMap<Object,Object>();
       Object lastValue=result.get(lastKey);
       resultMap.put(lastKey,lastValue);
@@ -40,7 +40,7 @@
     }
     return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
   }
- else   if ((operand instanceof Collection) || ObjectUtils.isArray(operand)) {
+  if ((operand instanceof Collection) || ObjectUtils.isArray(operand)) {
     List<Object> data=new ArrayList<Object>();
     Collection<?> c=(operand instanceof Collection) ? (Collection<?>)operand : Arrays.asList(ObjectUtils.toObjectArray(operand));
     data.addAll(c);
@@ -53,7 +53,7 @@
         Object o=selectionCriteria.getValueInternal(state).getValue();
         if (o instanceof Boolean) {
           if (((Boolean)o).booleanValue() == true) {
-            if (variant == FIRST) {
+            if (this.variant == FIRST) {
               return new ValueRef.TypedValueHolderValueRef(new TypedValue(element),this);
             }
             result.add(element);
@@ -69,33 +69,25 @@
         state.popActiveContextObject();
       }
     }
-    if ((variant == FIRST || variant == LAST) && result.size() == 0) {
+    if ((this.variant == FIRST || this.variant == LAST) && result.size() == 0) {
       return ValueRef.NullValueRef.instance;
     }
-    if (variant == LAST) {
+    if (this.variant == LAST) {
       return new ValueRef.TypedValueHolderValueRef(new TypedValue(result.get(result.size() - 1)),this);
     }
     if (operand instanceof Collection) {
       return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
     }
- else {
-      Class<?> elementType=ClassUtils.resolvePrimitiveIfNecessary(op.getTypeDescriptor().getElementTypeDescriptor().getType());
-      Object resultArray=Array.newInstance(elementType,result.size());
-      System.arraycopy(result.toArray(),0,resultArray,0,result.size());
-      return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray),this);
-    }
+    Class<?> elementType=ClassUtils.resolvePrimitiveIfNecessary(op.getTypeDescriptor().getElementTypeDescriptor().getType());
+    Object resultArray=Array.newInstance(elementType,result.size());
+    System.arraycopy(result.toArray(),0,resultArray,0,result.size());
+    return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray),this);
   }
- else {
-    if (operand == null) {
-      if (nullSafe) {
-        return ValueRef.NullValueRef.instance;
-      }
- else {
-        throw new SpelEvaluationException(getStartPosition(),SpelMessage.INVALID_TYPE_FOR_SELECTION,"null");
-      }
+  if (operand == null) {
+    if (this.nullSafe) {
+      return ValueRef.NullValueRef.instance;
     }
- else {
-      throw new SpelEvaluationException(getStartPosition(),SpelMessage.INVALID_TYPE_FOR_SELECTION,operand.getClass().getName());
-    }
+    throw new SpelEvaluationException(getStartPosition(),SpelMessage.INVALID_TYPE_FOR_SELECTION,"null");
   }
+  throw new SpelEvaluationException(getStartPosition(),SpelMessage.INVALID_TYPE_FOR_SELECTION,operand.getClass().getName());
 }
