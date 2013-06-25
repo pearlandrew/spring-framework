@@ -1,0 +1,25 @@
+{
+  Map<String,List<String>> result=super.toNativeHeaderMap();
+  String destination=super.getDestination();
+  if (destination != null) {
+    result.put(DESTINATION,Arrays.asList(destination));
+  }
+  MediaType contentType=getContentType();
+  if (contentType != null) {
+    result.put(CONTENT_TYPE,Arrays.asList(contentType.toString()));
+  }
+  if (StompCommand.MESSAGE.equals(getStompCommand())) {
+    String subscriptionId=getSubscriptionId();
+    if (subscriptionId != null) {
+      result.put(SUBSCRIPTION,Arrays.asList(subscriptionId));
+    }
+ else {
+      logger.warn("STOMP MESSAGE frame should have a subscription: " + this.toString());
+    }
+    if ((getMessageId() == null)) {
+      String messageId=getSessionId() + "-" + messageIdCounter.getAndIncrement();
+      result.put(MESSAGE_ID,Arrays.asList(messageId));
+    }
+  }
+  return result;
+}
