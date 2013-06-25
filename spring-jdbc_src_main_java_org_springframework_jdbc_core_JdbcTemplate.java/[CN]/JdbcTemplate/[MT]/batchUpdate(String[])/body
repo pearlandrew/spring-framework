@@ -9,7 +9,7 @@ class BatchUpdateStatementCallback implements StatementCallback<int[]>, SqlProvi
       int[] rowsAffected=new int[sql.length];
       if (JdbcUtils.supportsBatchUpdates(stmt.getConnection())) {
         for (        String sqlStmt : sql) {
-          this.currSql=sqlStmt;
+          this.currSql=(StringUtils.isEmpty(this.currSql) ? sqlStmt : this.currSql + "; " + sqlStmt);
           stmt.addBatch(sqlStmt);
         }
         rowsAffected=stmt.executeBatch();
