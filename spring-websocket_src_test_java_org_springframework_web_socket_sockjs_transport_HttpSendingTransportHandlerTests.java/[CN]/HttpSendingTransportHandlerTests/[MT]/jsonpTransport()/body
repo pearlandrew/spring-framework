@@ -1,14 +1,14 @@
 {
   JsonpPollingTransportHandler transportHandler=new JsonpPollingTransportHandler();
-  transportHandler.setSockJsConfiguration(sockJsConfig);
-  PollingSockJsSession session=transportHandler.createSession("1",webSocketHandler);
-  transportHandler.handleRequest(request,response,webSocketHandler,session);
+  transportHandler.setSockJsConfiguration(this.sockJsConfig);
+  PollingSockJsSession session=transportHandler.createSession("1",this.webSocketHandler);
+  transportHandler.handleRequest(this.request,this.response,this.webSocketHandler,session);
   assertEquals(500,this.servletResponse.getStatus());
   assertEquals("\"callback\" parameter required",this.servletResponse.getContentAsString());
   resetRequestAndResponse();
   this.servletRequest.addParameter("c","callback");
-  transportHandler.handleRequest(request,response,webSocketHandler,session);
+  transportHandler.handleRequest(this.request,this.response,this.webSocketHandler,session);
   assertEquals("application/javascript;charset=UTF-8",this.response.getHeaders().getContentType().toString());
   assertFalse("Polling request should complete after open frame",this.servletRequest.isAsyncStarted());
-  verify(webSocketHandler).afterConnectionEstablished(session);
+  verify(this.webSocketHandler).afterConnectionEstablished(session);
 }
