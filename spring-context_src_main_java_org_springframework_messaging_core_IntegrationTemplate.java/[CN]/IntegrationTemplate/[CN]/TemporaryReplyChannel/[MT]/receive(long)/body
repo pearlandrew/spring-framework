@@ -1,0 +1,20 @@
+{
+  try {
+    if (this.receiveTimeout < 0) {
+      this.latch.await();
+      this.clientHasReceived=true;
+    }
+ else {
+      if (this.latch.await(this.receiveTimeout,TimeUnit.MILLISECONDS)) {
+        this.clientHasReceived=true;
+      }
+ else {
+        this.clientTimedOut=true;
+      }
+    }
+  }
+ catch (  InterruptedException e) {
+    Thread.currentThread().interrupt();
+  }
+  return this.message;
+}
