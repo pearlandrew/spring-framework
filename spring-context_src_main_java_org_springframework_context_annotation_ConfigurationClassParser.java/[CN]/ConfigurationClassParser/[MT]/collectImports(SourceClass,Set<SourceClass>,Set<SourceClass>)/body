@@ -1,0 +1,15 @@
+{
+  try {
+    if (visited.add(sourceClass)) {
+      for (      SourceClass annotation : sourceClass.getAnnotations()) {
+        if (!annotation.getMetadata().getClassName().startsWith("java") && !annotation.isAssignable(Import.class)) {
+          collectImports(annotation,imports,visited);
+        }
+      }
+      imports.addAll(sourceClass.getAnnotationAttributes(Import.class.getName(),"value"));
+    }
+  }
+ catch (  ClassNotFoundException ex) {
+    throw new NestedIOException("Unable to collect imports",ex);
+  }
+}

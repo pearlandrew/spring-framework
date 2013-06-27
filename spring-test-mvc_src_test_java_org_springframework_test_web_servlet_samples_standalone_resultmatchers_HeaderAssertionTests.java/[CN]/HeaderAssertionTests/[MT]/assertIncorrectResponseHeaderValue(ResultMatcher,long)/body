@@ -1,0 +1,14 @@
+{
+  try {
+    this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE,currentTime - (1000 * 60))).andExpect(resultMatcher);
+    fail(EXPECTED_ASSERTION_ERROR_MSG);
+  }
+ catch (  AssertionError e) {
+    if (EXPECTED_ASSERTION_ERROR_MSG.equals(e.getMessage())) {
+      throw e;
+    }
+    assertMessageContains(e,"Response header " + LAST_MODIFIED);
+    assertMessageContains(e,String.valueOf(unexpected));
+    assertMessageContains(e,String.valueOf(currentTime));
+  }
+}

@@ -1,26 +1,26 @@
 {
-  Class<?> targetObjectRuntimeClass=getObjectClass(targetObject);
+  Class<?> targetObjectRuntimeClass=getObjectClass(this.targetObject);
   try {
-    if (cachedReadName != null && cachedReadName.equals(name) && cachedReadTargetType != null && cachedReadTargetType.equals(targetObjectRuntimeClass)) {
-      return cachedReadAccessor.read(this.eContext,this.targetObject,this.name);
+    if (Indexer.this.cachedReadName != null && Indexer.this.cachedReadName.equals(this.name) && Indexer.this.cachedReadTargetType != null && Indexer.this.cachedReadTargetType.equals(targetObjectRuntimeClass)) {
+      return Indexer.this.cachedReadAccessor.read(this.evaluationContext,this.targetObject,this.name);
     }
-    List<PropertyAccessor> accessorsToTry=AstUtils.getPropertyAccessorsToTry(targetObjectRuntimeClass,eContext.getPropertyAccessors());
+    List<PropertyAccessor> accessorsToTry=AstUtils.getPropertyAccessorsToTry(targetObjectRuntimeClass,this.evaluationContext.getPropertyAccessors());
     if (accessorsToTry != null) {
       for (      PropertyAccessor accessor : accessorsToTry) {
-        if (accessor.canRead(this.eContext,this.targetObject,this.name)) {
+        if (accessor.canRead(this.evaluationContext,this.targetObject,this.name)) {
           if (accessor instanceof ReflectivePropertyAccessor) {
-            accessor=((ReflectivePropertyAccessor)accessor).createOptimalAccessor(this.eContext,this.targetObject,this.name);
+            accessor=((ReflectivePropertyAccessor)accessor).createOptimalAccessor(this.evaluationContext,this.targetObject,this.name);
           }
-          cachedReadAccessor=accessor;
-          cachedReadName=this.name;
-          cachedReadTargetType=targetObjectRuntimeClass;
-          return accessor.read(this.eContext,this.targetObject,this.name);
+          Indexer.this.cachedReadAccessor=accessor;
+          Indexer.this.cachedReadName=this.name;
+          Indexer.this.cachedReadTargetType=targetObjectRuntimeClass;
+          return accessor.read(this.evaluationContext,this.targetObject,this.name);
         }
       }
     }
   }
  catch (  AccessException ex) {
-    throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,this.td.toString());
+    throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,this.targetObjectTypeDescriptor.toString());
   }
-  throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,this.td.toString());
+  throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,this.targetObjectTypeDescriptor.toString());
 }

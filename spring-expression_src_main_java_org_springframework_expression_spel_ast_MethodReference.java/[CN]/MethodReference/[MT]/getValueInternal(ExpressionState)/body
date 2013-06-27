@@ -10,15 +10,16 @@
       state.popActiveContextObject();
     }
   }
+  List<TypeDescriptor> argumentTypes=getTypes(arguments);
   if (currentContext.getValue() == null) {
     if (this.nullSafe) {
       return TypedValue.NULL;
     }
  else {
-      throw new SpelEvaluationException(getStartPosition(),SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,FormatHelper.formatMethodForMessage(this.name,getTypes(arguments)));
+      throw new SpelEvaluationException(getStartPosition(),SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,FormatHelper.formatMethodForMessage(this.name,argumentTypes));
     }
   }
-  MethodExecutor executorToUse=this.cachedExecutor;
+  MethodExecutor executorToUse=getCachedExecutor(argumentTypes);
   if (executorToUse != null) {
     try {
       return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
@@ -28,8 +29,8 @@
       this.cachedExecutor=null;
     }
   }
-  executorToUse=findAccessorForMethod(this.name,getTypes(arguments),state);
-  this.cachedExecutor=executorToUse;
+  executorToUse=findAccessorForMethod(this.name,argumentTypes,state);
+  this.cachedExecutor=new CachedMethodExecutor(executorToUse,argumentTypes);
   try {
     return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
   }

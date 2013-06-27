@@ -1,5 +1,5 @@
 {
-  if (ConditionalAnnotationHelper.shouldSkip(configClass,this.registry,this.environment,this.beanNameGenerator)) {
+  if (conditionEvaluator.shouldSkip(configClass.getMetadata(),ConfigurationPhase.PARSE_CONFIGURATION)) {
     return;
   }
   if (this.configurationClasses.contains(configClass) && configClass.getBeanName() != null) {
@@ -10,10 +10,10 @@
       }
     }
   }
-  AnnotationMetadata metadata=configClass.getMetadata();
+  SourceClass sourceClass=asSourceClass(configClass);
   do {
-    metadata=doProcessConfigurationClass(configClass,metadata);
+    sourceClass=doProcessConfigurationClass(configClass,sourceClass);
   }
- while (metadata != null);
+ while (sourceClass != null);
   this.configurationClasses.add(configClass);
 }

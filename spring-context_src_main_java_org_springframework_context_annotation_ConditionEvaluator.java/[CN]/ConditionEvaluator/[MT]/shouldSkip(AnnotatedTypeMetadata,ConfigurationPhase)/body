@@ -1,0 +1,26 @@
+{
+  if (metadata == null || !metadata.isAnnotated(CONDITIONAL_ANNOTATION)) {
+    return false;
+  }
+  if (phase == null) {
+    if (metadata instanceof AnnotationMetadata && ConfigurationClassUtils.isConfigurationCandidate((AnnotationMetadata)metadata)) {
+      return shouldSkip(metadata,ConfigurationPhase.PARSE_CONFIGURATION);
+    }
+    return shouldSkip(metadata,ConfigurationPhase.REGISTER_BEAN);
+  }
+  for (  String[] conditionClasses : getConditionClasses(metadata)) {
+    for (    String conditionClass : conditionClasses) {
+      Condition condition=getCondition(conditionClass,context.getClassLoader());
+      ConfigurationPhase requiredPhase=null;
+      if (condition instanceof ConfigurationCondition) {
+        requiredPhase=((ConfigurationCondition)condition).getConfigurationPhase();
+      }
+      if (requiredPhase == null || requiredPhase == phase) {
+        if (!condition.matches(context,metadata)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
