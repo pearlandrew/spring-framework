@@ -1,0 +1,13 @@
+{
+  Assert.notNull(this.clientChannel,"No clientChannel to send messages to");
+  if (returnValue == null) {
+    return;
+  }
+  WebMessageHeaderAccesssor headers=WebMessageHeaderAccesssor.wrap(message);
+  WebMessageHeaderAccesssor returnHeaders=WebMessageHeaderAccesssor.create();
+  returnHeaders.setDestination(headers.getDestination());
+  returnHeaders.setSessionId(headers.getSessionId());
+  returnHeaders.setSubscriptionId(headers.getSubscriptionId());
+  Message<?> returnMessage=MessageBuilder.withPayload(returnValue).copyHeaders(returnHeaders.toMap()).build();
+  this.clientChannel.send(returnMessage);
+}
