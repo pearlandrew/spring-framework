@@ -1,6 +1,7 @@
 {
 synchronized (this.lifecycleMonitor) {
-    this.tcpClient=new TcpClient.Spec<String,String>(NettyTcpClient.class).using(new Environment()).codec(new DelimitedCodec<String,String>((byte)0,true,StandardCodecs.STRING_CODEC)).connect(this.relayHost,this.relayPort).get();
+    this.environment=new Environment();
+    this.tcpClient=new TcpClient.Spec<String,String>(NettyTcpClient.class).using(this.environment).codec(new DelimitedCodec<String,String>((byte)0,true,StandardCodecs.STRING_CODEC)).connect(this.relayHost,this.relayPort).get();
     StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.CONNECT);
     headers.setAcceptVersion("1.1,1.2");
     headers.setLogin(this.systemLogin);
