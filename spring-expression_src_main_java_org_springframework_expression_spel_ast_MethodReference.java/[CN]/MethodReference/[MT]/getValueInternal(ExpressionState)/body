@@ -1,43 +1,7 @@
 {
-  TypedValue currentContext=state.getActiveContextObject();
-  Object[] arguments=new Object[getChildCount()];
-  for (int i=0; i < arguments.length; i++) {
-    try {
-      state.pushActiveContextObject(state.getRootContextObject());
-      arguments[i]=this.children[i].getValueInternal(state).getValue();
-    }
-  finally {
-      state.popActiveContextObject();
-    }
-  }
-  TypedValue activeContextObject=state.getActiveContextObject();
-  TypeDescriptor target=(activeContextObject == null ? null : activeContextObject.getTypeDescriptor());
-  List<TypeDescriptor> argumentTypes=getTypes(arguments);
-  if (currentContext.getValue() == null) {
-    if (this.nullSafe) {
-      return TypedValue.NULL;
-    }
- else {
-      throw new SpelEvaluationException(getStartPosition(),SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,FormatHelper.formatMethodForMessage(this.name,argumentTypes));
-    }
-  }
-  MethodExecutor executorToUse=getCachedExecutor(target,argumentTypes);
-  if (executorToUse != null) {
-    try {
-      return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
-    }
- catch (    AccessException ae) {
-      throwSimpleExceptionIfPossible(state,ae);
-      this.cachedExecutor=null;
-    }
-  }
-  executorToUse=findAccessorForMethod(this.name,argumentTypes,state);
-  this.cachedExecutor=new CachedMethodExecutor(executorToUse,target,argumentTypes);
-  try {
-    return executorToUse.execute(state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
-  }
- catch (  AccessException ae) {
-    throwSimpleExceptionIfPossible(state,ae);
-    throw new SpelEvaluationException(getStartPosition(),ae,SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,this.name,state.getActiveContextObject().getValue().getClass().getName(),ae.getMessage());
-  }
+  EvaluationContext evaluationContext=state.getEvaluationContext();
+  Object value=state.getActiveContextObject().getValue();
+  TypeDescriptor targetType=state.getActiveContextObject().getTypeDescriptor();
+  Object[] arguments=getArguments(state);
+  return getValueInternal(evaluationContext,value,arguments,targetType);
 }
