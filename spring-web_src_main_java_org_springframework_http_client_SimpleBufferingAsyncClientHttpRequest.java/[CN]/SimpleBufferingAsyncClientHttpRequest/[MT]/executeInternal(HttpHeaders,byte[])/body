@@ -1,0 +1,21 @@
+{
+  return taskExecutor.submit(new Callable<ClientHttpResponse>(){
+    @Override public ClientHttpResponse call() throws Exception {
+      for (      Map.Entry<String,List<String>> entry : headers.entrySet()) {
+        String headerName=entry.getKey();
+        for (        String headerValue : entry.getValue()) {
+          connection.addRequestProperty(headerName,headerValue);
+        }
+      }
+      if (connection.getDoOutput() && outputStreaming) {
+        connection.setFixedLengthStreamingMode(bufferedOutput.length);
+      }
+      connection.connect();
+      if (connection.getDoOutput()) {
+        FileCopyUtils.copy(bufferedOutput,connection.getOutputStream());
+      }
+      return new SimpleClientHttpResponse(connection);
+    }
+  }
+);
+}

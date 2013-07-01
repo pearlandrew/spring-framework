@@ -1,0 +1,20 @@
+{
+  Assert.notNull(url,"'url' must not be null");
+  Assert.notNull(method,"'method' must not be null");
+  try {
+    AsyncClientHttpRequest request=createAsyncRequest(url,method);
+    if (requestCallback != null) {
+      requestCallback.doWithRequest(request);
+    }
+    Future<ClientHttpResponse> responseFuture=request.executeAsync();
+    if (responseExtractor != null) {
+      return new ResponseExtractorFuture<T>(method,url,responseFuture,responseExtractor);
+    }
+ else {
+      return (Future<T>)new VoidResponseFuture(method,url,responseFuture);
+    }
+  }
+ catch (  IOException ex) {
+    throw new ResourceAccessException("I/O error on " + method.name() + " request for \""+ url+ "\":"+ ex.getMessage(),ex);
+  }
+}
