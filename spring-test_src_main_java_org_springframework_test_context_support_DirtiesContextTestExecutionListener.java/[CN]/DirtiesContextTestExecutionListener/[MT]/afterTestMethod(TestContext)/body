@@ -4,15 +4,16 @@
   Method testMethod=testContext.getTestMethod();
   Assert.notNull(testMethod,"The test method of the supplied TestContext must not be null");
   final Class<DirtiesContext> annotationType=DirtiesContext.class;
-  boolean methodDirtiesContext=testMethod.isAnnotationPresent(annotationType);
-  boolean classDirtiesContext=testClass.isAnnotationPresent(annotationType);
-  DirtiesContext classDirtiesContextAnnotation=testClass.getAnnotation(annotationType);
+  DirtiesContext methodDirtiesContextAnnotation=findAnnotation(testMethod,annotationType);
+  boolean methodDirtiesContext=methodDirtiesContextAnnotation != null;
+  DirtiesContext classDirtiesContextAnnotation=findAnnotation(testClass,annotationType);
+  boolean classDirtiesContext=classDirtiesContextAnnotation != null;
   ClassMode classMode=classDirtiesContext ? classDirtiesContextAnnotation.classMode() : null;
   if (logger.isDebugEnabled()) {
     logger.debug("After test method: context [" + testContext + "], class dirties context ["+ classDirtiesContext+ "], class mode ["+ classMode+ "], method dirties context ["+ methodDirtiesContext+ "].");
   }
-  if (methodDirtiesContext || (classDirtiesContext && classMode == ClassMode.AFTER_EACH_TEST_METHOD)) {
-    HierarchyMode hierarchyMode=methodDirtiesContext ? testMethod.getAnnotation(annotationType).hierarchyMode() : classDirtiesContextAnnotation.hierarchyMode();
+  if (methodDirtiesContext || (classMode == ClassMode.AFTER_EACH_TEST_METHOD)) {
+    HierarchyMode hierarchyMode=methodDirtiesContext ? methodDirtiesContextAnnotation.hierarchyMode() : classDirtiesContextAnnotation.hierarchyMode();
     dirtyContext(testContext,hierarchyMode);
   }
 }
