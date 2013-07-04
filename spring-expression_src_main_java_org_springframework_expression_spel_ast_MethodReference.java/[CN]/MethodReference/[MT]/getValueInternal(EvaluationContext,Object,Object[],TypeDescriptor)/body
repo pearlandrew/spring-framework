@@ -1,0 +1,26 @@
+{
+  List<TypeDescriptor> argumentTypes=getArgumentTypes(arguments);
+  if (value == null) {
+    throwIfNotNullSafe(argumentTypes);
+    return TypedValue.NULL;
+  }
+  MethodExecutor executorToUse=getCachedExecutor(targetType,argumentTypes);
+  if (executorToUse != null) {
+    try {
+      return executorToUse.execute(evaluationContext,value,arguments);
+    }
+ catch (    AccessException ae) {
+      throwSimpleExceptionIfPossible(value,ae);
+      this.cachedExecutor=null;
+    }
+  }
+  executorToUse=findAccessorForMethod(this.name,argumentTypes,value,evaluationContext);
+  this.cachedExecutor=new CachedMethodExecutor(executorToUse,targetType,argumentTypes);
+  try {
+    return executorToUse.execute(evaluationContext,value,arguments);
+  }
+ catch (  AccessException ex) {
+    throwSimpleExceptionIfPossible(value,ex);
+    throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION,this.name,value.getClass().getName(),ex.getMessage());
+  }
+}

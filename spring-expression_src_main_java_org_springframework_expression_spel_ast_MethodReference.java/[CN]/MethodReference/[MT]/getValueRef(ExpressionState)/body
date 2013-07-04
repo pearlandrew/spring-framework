@@ -1,22 +1,8 @@
 {
-  TypedValue currentContext=state.getActiveContextObject();
-  Object[] arguments=new Object[getChildCount()];
-  for (int i=0; i < arguments.length; i++) {
-    try {
-      state.pushActiveContextObject(state.getRootContextObject());
-      arguments[i]=this.children[i].getValueInternal(state).getValue();
-    }
-  finally {
-      state.popActiveContextObject();
-    }
+  Object[] arguments=getArguments(state);
+  if (state.getActiveContextObject().getValue() == null) {
+    throwIfNotNullSafe(getArgumentTypes(arguments));
+    return ValueRef.NullValueRef.instance;
   }
-  if (currentContext.getValue() == null) {
-    if (this.nullSafe) {
-      return ValueRef.NullValueRef.instance;
-    }
- else {
-      throw new SpelEvaluationException(getStartPosition(),SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,FormatHelper.formatMethodForMessage(this.name,getTypes(arguments)));
-    }
-  }
-  return new MethodValueRef(state,state.getEvaluationContext(),state.getActiveContextObject().getValue(),arguments);
+  return new MethodValueRef(state);
 }
