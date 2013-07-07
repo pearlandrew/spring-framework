@@ -1,0 +1,11 @@
+{
+  String sessId="sess01";
+  List<String> subscriptionIds=Arrays.asList("subs01","subs02","subs03");
+  String dest="/foo";
+  for (  String subId : subscriptionIds) {
+    this.registry.addSubscription(subscribeMessage(sessId,subId,dest));
+  }
+  MultiValueMap<String,String> actual=this.registry.findSubscriptions(message(dest));
+  assertEquals("Expected one element " + actual,1,actual.size());
+  assertEquals(subscriptionIds,sort(actual.get(sessId)));
+}

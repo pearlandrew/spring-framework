@@ -7,21 +7,16 @@
   String sessionId=headers.getSessionId();
   if (sessionId == null) {
     logger.error("No \"sessionId\" header in message: " + message);
+    return;
   }
   WebSocketSession session=this.sessions.get(sessionId);
   if (session == null) {
-    logger.error("Session not found: " + message);
+    logger.error("WebSocketSession not found for sessionId=" + sessionId);
+    return;
   }
   if (headers.getSubscriptionId() == null) {
-    String destination=headers.getDestination();
-    Set<String> subs=this.subscriptionRegistry.getSessionSubscriptions(sessionId,destination);
-    if (!CollectionUtils.isEmpty(subs)) {
-      headers.setSubscriptionId(subs.iterator().next());
-    }
- else {
-      logger.error("No subscription id: " + message);
-      return;
-    }
+    logger.error("No subscription id: " + message);
+    return;
   }
   byte[] payload;
   try {
