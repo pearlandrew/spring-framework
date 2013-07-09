@@ -1,5 +1,5 @@
 {
-  HttpHeaders headers=outputMessage.getHeaders();
+  final HttpHeaders headers=outputMessage.getHeaders();
   if (headers.getContentType() == null) {
     if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
       contentType=getDefaultContentType(t);
@@ -14,6 +14,28 @@
       headers.setContentLength(contentLength);
     }
   }
-  writeInternal(t,outputMessage);
-  outputMessage.getBody().flush();
+  if (outputMessage instanceof StreamingHttpOutputMessage) {
+    StreamingHttpOutputMessage streamingOutputMessage=(StreamingHttpOutputMessage)outputMessage;
+    streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body(){
+      @Override public void writeTo(      final OutputStream outputStream) throws IOException {
+        writeInternal(t,new HttpOutputMessage(){
+          @Override public OutputStream getBody() throws IOException {
+            return outputStream;
+          }
+          @Override public HttpHeaders getHeaders(){
+            return headers;
+          }
+          @Override public Cookies getCookies(){
+            return null;
+          }
+        }
+);
+      }
+    }
+);
+  }
+ else {
+    writeInternal(t,outputMessage);
+    outputMessage.getBody().flush();
+  }
 }
