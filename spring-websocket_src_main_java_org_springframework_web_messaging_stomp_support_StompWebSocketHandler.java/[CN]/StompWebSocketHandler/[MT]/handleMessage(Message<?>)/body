@@ -6,30 +6,25 @@
   }
   String sessionId=headers.getSessionId();
   if (sessionId == null) {
-    logger.error("No \"sessionId\" header in message: " + message);
+    logger.error("Ignoring message, no sessionId header: " + message);
     return;
   }
   WebSocketSession session=this.sessions.get(sessionId);
   if (session == null) {
-    logger.error("WebSocketSession not found for sessionId=" + sessionId);
+    logger.error("Ignoring message, session not found: " + sessionId);
     return;
   }
   if (headers.getSubscriptionId() == null) {
-    logger.error("No subscription id: " + message);
+    logger.error("Ignoring message, no subscriptionId header: " + message);
     return;
   }
-  byte[] payload;
-  try {
-    MediaType contentType=headers.getContentType();
-    payload=payloadConverter.convertToPayload(message.getPayload(),contentType);
-  }
- catch (  Throwable t) {
-    logger.error("Failed to send " + message,t);
+  if (!(message.getPayload() instanceof byte[])) {
+    logger.error("Ignoring message, expected byte[] content: " + message);
     return;
   }
   try {
-    Message<?> byteMessage=MessageBuilder.withPayload(payload).copyHeaders(headers.toMap()).build();
-    byte[] bytes=getStompMessageConverter().fromMessage(byteMessage);
+    message=MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
+    byte[] bytes=this.stompMessageConverter.fromMessage(message);
     session.sendMessage(new TextMessage(new String(bytes,Charset.forName("UTF-8"))));
   }
  catch (  Throwable t) {

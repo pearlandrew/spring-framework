@@ -1,8 +1,6 @@
 {
   StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
   headers.setStompCommandIfNotSet(command);
-  if (headers.getSessionId() == null && (StompCommand.SEND.equals(command))) {
-  }
   String sessionId=headers.getSessionId();
   if (sessionId == null) {
     if (StompCommand.SEND.equals(command)) {
@@ -15,7 +13,7 @@
   }
   RelaySession session=this.relaySessions.get(sessionId);
   if (session == null) {
-    logger.warn("No relay session for " + sessionId + ". Message '"+ message+ "' cannot be forwarded");
+    logger.warn("Session id=" + sessionId + " not found. Message cannot be forwarded: "+ message);
     return;
   }
   session.forward(message,headers);

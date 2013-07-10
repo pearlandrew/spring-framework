@@ -1,0 +1,22 @@
+{
+  P payload;
+  try {
+    if (byte[].class.equals(this.defaultMessagePayloadClass)) {
+      ByteArrayOutputStream out=new ByteArrayOutputStream();
+      this.objectMapper.writeValue(out,object);
+      payload=(P)out.toByteArray();
+    }
+ else     if (String.class.equals(this.defaultMessagePayloadClass)) {
+      Writer writer=new StringWriter();
+      this.objectMapper.writeValue(writer,object);
+      payload=(P)writer.toString();
+    }
+ else {
+      throw new IllegalStateException("Unexpected payload class: " + defaultMessagePayloadClass);
+    }
+  }
+ catch (  IOException ex) {
+    throw new MessageConversionException("Could not write JSON: " + ex.getMessage(),ex);
+  }
+  return MessageBuilder.withPayload(payload).build();
+}
