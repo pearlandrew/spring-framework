@@ -1,0 +1,29 @@
+{
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
+  String destination=headers.getDestination();
+  if (destination == null) {
+    return true;
+  }
+  if (!this.disallowedDestinations.isEmpty()) {
+    for (    String pattern : this.disallowedDestinations) {
+      if (this.pathMatcher.match(pattern,destination)) {
+        if (logger.isTraceEnabled()) {
+          logger.trace("Skip message id=" + message.getHeaders().getId());
+        }
+        return false;
+      }
+    }
+  }
+  if (!this.allowedDestinations.isEmpty()) {
+    for (    String pattern : this.allowedDestinations) {
+      if (this.pathMatcher.match(pattern,destination)) {
+        return true;
+      }
+    }
+    if (logger.isTraceEnabled()) {
+      logger.trace("Skip message id=" + message.getHeaders().getId());
+    }
+    return false;
+  }
+  return true;
+}

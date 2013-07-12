@@ -1,0 +1,18 @@
+{
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
+  if (!SimpMessageType.UNSUBSCRIBE.equals(headers.getMessageType())) {
+    logger.error("Expected UNSUBSCRIBE message: " + message);
+    return;
+  }
+  String sessionId=headers.getSessionId();
+  if (sessionId == null) {
+    logger.error("Ignoring subscription. No sessionId in message: " + message);
+    return;
+  }
+  String subscriptionId=headers.getSubscriptionId();
+  if (subscriptionId == null) {
+    logger.error("Ignoring subscription. No subscriptionId in message: " + message);
+    return;
+  }
+  removeSubscriptionInternal(sessionId,subscriptionId,message);
+}
