@@ -2,7 +2,7 @@
   if (StringUtils.isEmpty(stompFrame)) {
     return;
   }
-  Message<?> message=stompMessageConverter.toMessage(stompFrame,this.sessionId);
+  Message<?> message=stompMessageConverter.toMessage(stompFrame);
   if (logger.isTraceEnabled()) {
     logger.trace("Reading message " + message);
   }
@@ -20,5 +20,7 @@ synchronized (this.monitor) {
     }
     relaySessions.remove(this.sessionId);
   }
+  headers.setSessionId(this.sessionId);
+  message=MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
   sendMessageToClient(message);
 }

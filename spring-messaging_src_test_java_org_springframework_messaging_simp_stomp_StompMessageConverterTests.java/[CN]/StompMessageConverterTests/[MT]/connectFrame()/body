@@ -2,15 +2,14 @@
   String accept="accept-version:1.1\n";
   String host="host:github.org\n";
   String frame="\n\n\nCONNECT\n" + accept + host+ "\n";
-  Message<byte[]> message=(Message<byte[]>)this.converter.toMessage(frame.getBytes("UTF-8"),"session-123");
+  Message<byte[]> message=(Message<byte[]>)this.converter.toMessage(frame.getBytes("UTF-8"));
   assertEquals(0,message.getPayload().length);
   MessageHeaders headers=message.getHeaders();
   StompHeaderAccessor stompHeaders=StompHeaderAccessor.wrap(message);
   Map<String,Object> map=stompHeaders.toMap();
-  assertEquals(6,map.size());
+  assertEquals(5,map.size());
   assertNotNull(map.get(MessageHeaders.ID));
   assertNotNull(map.get(MessageHeaders.TIMESTAMP));
-  assertNotNull(map.get(SimpMessageHeaderAccessor.SESSION_ID));
   assertNotNull(map.get(SimpMessageHeaderAccessor.NATIVE_HEADERS));
   assertNotNull(map.get(SimpMessageHeaderAccessor.MESSAGE_TYPE));
   assertNotNull(map.get(SimpMessageHeaderAccessor.PROTOCOL_MESSAGE_TYPE));
@@ -18,7 +17,6 @@
   assertEquals("github.org",stompHeaders.getHost());
   assertEquals(SimpMessageType.CONNECT,stompHeaders.getMessageType());
   assertEquals(StompCommand.CONNECT,stompHeaders.getStompCommand());
-  assertEquals("session-123",stompHeaders.getSessionId());
   assertNotNull(headers.get(MessageHeaders.ID));
   assertNotNull(headers.get(MessageHeaders.TIMESTAMP));
   String convertedBack=new String(this.converter.fromMessage(message),"UTF-8");

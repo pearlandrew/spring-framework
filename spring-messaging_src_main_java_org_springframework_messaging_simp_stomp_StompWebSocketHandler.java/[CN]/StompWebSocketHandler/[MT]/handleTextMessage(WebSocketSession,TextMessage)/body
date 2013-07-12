@@ -1,7 +1,10 @@
 {
   try {
     String payload=textMessage.getPayload();
-    Message<?> message=this.stompMessageConverter.toMessage(payload,session.getId());
+    Message<?> message=this.stompMessageConverter.toMessage(payload);
+    StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+    headers.setSessionId(session.getId());
+    headers.setUser(session.getPrincipal());
     if (logger.isTraceEnabled()) {
       logger.trace("Processing STOMP message: " + message);
     }
@@ -11,18 +14,7 @@
       if (SimpMessageType.CONNECT.equals(messageType)) {
         handleConnect(session,message);
       }
- else       if (SimpMessageType.MESSAGE.equals(messageType)) {
-        handlePublish(message);
-      }
- else       if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
-        handleSubscribe(message);
-      }
- else       if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
-        handleUnsubscribe(message);
-      }
- else       if (SimpMessageType.DISCONNECT.equals(messageType)) {
-        handleDisconnect(message);
-      }
+      message=MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
       this.outputChannel.send(message);
     }
  catch (    Throwable t) {
