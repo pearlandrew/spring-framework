@@ -1,0 +1,17 @@
+{
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
+  SimpMessageType messageType=headers.getMessageType();
+  if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
+    this.subscriptionRegistry.registerSubscription(message);
+  }
+ else   if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
+    this.subscriptionRegistry.unregisterSubscription(message);
+  }
+ else   if (SimpMessageType.MESSAGE.equals(messageType)) {
+    sendMessageToSubscribers(headers.getDestination(),message);
+  }
+ else   if (SimpMessageType.DISCONNECT.equals(messageType)) {
+    String sessionId=SimpMessageHeaderAccessor.wrap(message).getSessionId();
+    this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
+  }
+}

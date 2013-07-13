@@ -1,0 +1,20 @@
+{
+  try {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Forwarding message to STOMP broker, message id=" + message.getHeaders().getId());
+    }
+    byte[] bytes=stompMessageConverter.fromMessage(message);
+    connection.send(new String(bytes,Charset.forName("UTF-8")));
+  }
+ catch (  Throwable ex) {
+    logger.error("Forward failed message id=" + message.getHeaders().getId(),ex);
+    try {
+      connection.close();
+    }
+ catch (    Throwable t) {
+    }
+    sendError(this.sessionId,"Failed to forward message " + message + ": "+ ex.getMessage());
+    return false;
+  }
+  return true;
+}

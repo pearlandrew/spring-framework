@@ -1,7 +1,8 @@
 {
-  this.sessions.remove(session.getId());
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT);
-  headers.setSessionId(session.getId());
+  String sessionId=session.getId();
+  this.sessions.remove(sessionId);
+  StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.DISCONNECT);
+  headers.setSessionId(sessionId);
   Message<?> message=MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
   this.clientInputChannel.send(message);
 }

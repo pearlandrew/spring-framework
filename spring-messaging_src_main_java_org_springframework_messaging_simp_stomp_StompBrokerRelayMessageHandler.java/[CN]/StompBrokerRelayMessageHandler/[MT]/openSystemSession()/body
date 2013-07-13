@@ -1,0 +1,18 @@
+{
+  RelaySession session=new RelaySession(STOMP_RELAY_SYSTEM_SESSION_ID){
+    @Override protected void sendMessageToClient(    Message<?> message){
+    }
+  }
+;
+  this.relaySessions.put(STOMP_RELAY_SYSTEM_SESSION_ID,session);
+  StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.CONNECT);
+  headers.setAcceptVersion("1.1,1.2");
+  headers.setLogin(this.systemLogin);
+  headers.setPasscode(this.systemPasscode);
+  headers.setHeartbeat(0,0);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Sending STOMP CONNECT frame to initialize \"system\" TCP connection");
+  }
+  Message<?> message=MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
+  session.open(message);
+}
