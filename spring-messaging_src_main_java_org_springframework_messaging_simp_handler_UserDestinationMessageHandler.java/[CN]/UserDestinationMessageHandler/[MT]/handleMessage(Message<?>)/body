@@ -1,0 +1,27 @@
+{
+  if (!shouldHandle(message)) {
+    return;
+  }
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
+  String destination=headers.getDestination();
+  if (logger.isTraceEnabled()) {
+    logger.trace("Processing message to destination " + destination);
+  }
+  UserDestinationParser destinationParser=new UserDestinationParser(destination);
+  String user=destinationParser.getUser();
+  if (user == null) {
+    if (logger.isErrorEnabled()) {
+      logger.error("Ignoring message, expected destination \"" + this.prefix + "{userId}/**\": "+ destination);
+    }
+    return;
+  }
+  for (  String sessionId : this.userSessionResolver.resolveUserSessionIds(user)) {
+    String targetDestination=destinationParser.getTargetDestination(sessionId);
+    headers.setDestination(targetDestination);
+    message=MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
+    if (logger.isTraceEnabled()) {
+      logger.trace("Sending message to resolved target destination " + targetDestination);
+    }
+    this.messagingTemplate.send(targetDestination,message);
+  }
+}

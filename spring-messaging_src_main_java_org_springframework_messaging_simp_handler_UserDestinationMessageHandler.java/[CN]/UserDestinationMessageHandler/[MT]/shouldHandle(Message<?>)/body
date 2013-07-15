@@ -1,0 +1,18 @@
+{
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
+  SimpMessageType messageType=headers.getMessageType();
+  String destination=headers.getDestination();
+  if (!SimpMessageType.MESSAGE.equals(messageType)) {
+    return false;
+  }
+  if (!StringUtils.hasText(destination)) {
+    if (logger.isErrorEnabled()) {
+      logger.error("Ignoring message, no destination: " + headers);
+    }
+    return false;
+  }
+ else   if (!destination.startsWith(this.prefix)) {
+    return false;
+  }
+  return true;
+}
