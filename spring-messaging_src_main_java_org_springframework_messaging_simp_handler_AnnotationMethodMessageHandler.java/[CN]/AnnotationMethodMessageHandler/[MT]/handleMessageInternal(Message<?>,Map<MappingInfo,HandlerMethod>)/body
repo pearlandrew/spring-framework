@@ -9,21 +9,17 @@
   InvocableMessageHandlerMethod invocableHandlerMethod=new InvocableMessageHandlerMethod(handlerMethod);
   invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
   try {
-    MessageHolder.setMessage(message);
-    Object value=invocableHandlerMethod.invoke(message);
+    Object returnValue=invocableHandlerMethod.invoke(message);
     MethodParameter returnType=handlerMethod.getReturnType();
     if (void.class.equals(returnType.getParameterType())) {
       return;
     }
-    this.returnValueHandlers.handleReturnValue(value,returnType,message);
+    this.returnValueHandlers.handleReturnValue(returnValue,returnType,message);
   }
  catch (  Exception ex) {
     invokeExceptionHandler(message,handlerMethod,ex);
   }
 catch (  Throwable ex) {
     ex.printStackTrace();
-  }
- finally {
-    MessageHolder.reset();
   }
 }

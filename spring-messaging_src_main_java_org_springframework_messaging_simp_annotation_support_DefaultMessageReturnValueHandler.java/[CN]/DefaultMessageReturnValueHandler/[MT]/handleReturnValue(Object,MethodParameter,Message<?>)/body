@@ -1,0 +1,21 @@
+{
+  if (returnValue == null) {
+    return;
+  }
+  SimpMessageHeaderAccessor inputHeaders=SimpMessageHeaderAccessor.wrap(message);
+  Message<?> returnMessage=(returnValue instanceof Message) ? (Message<?>)returnValue : null;
+  Object returnPayload=(returnMessage != null) ? returnMessage.getPayload() : returnValue;
+  SimpMessageHeaderAccessor returnHeaders=(returnMessage != null) ? SimpMessageHeaderAccessor.wrap(returnMessage) : SimpMessageHeaderAccessor.create();
+  returnHeaders.setSessionId(inputHeaders.getSessionId());
+  returnHeaders.setSubscriptionId(inputHeaders.getSubscriptionId());
+  String destination=getDestination(message,returnType,inputHeaders,returnHeaders);
+  returnHeaders.setDestination(destination);
+  returnMessage=this.converter.toMessage(returnPayload);
+  returnMessage=MessageBuilder.fromMessage(returnMessage).copyHeaders(returnHeaders.toMap()).build();
+  if (destination.startsWith("/user/")) {
+    this.inboundChannel.send(returnMessage);
+  }
+ else {
+    this.outboundChannel.send(returnMessage);
+  }
+}

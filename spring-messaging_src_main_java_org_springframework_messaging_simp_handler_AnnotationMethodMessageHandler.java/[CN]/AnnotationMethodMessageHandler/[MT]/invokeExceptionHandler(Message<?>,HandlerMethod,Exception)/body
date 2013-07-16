@@ -1,5 +1,5 @@
 {
-  InvocableMessageHandlerMethod invocableHandlerMethod;
+  InvocableMessageHandlerMethod exceptionHandlerMethod;
   Class<?> beanType=handlerMethod.getBeanType();
   MessageExceptionHandlerMethodResolver resolver=this.exceptionHandlerCache.get(beanType);
   if (resolver == null) {
@@ -11,10 +11,15 @@
     logger.error("Unhandled exception",ex);
     return;
   }
-  invocableHandlerMethod=new InvocableMessageHandlerMethod(handlerMethod.getBean(),method);
-  invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
+  exceptionHandlerMethod=new InvocableMessageHandlerMethod(handlerMethod.getBean(),method);
+  exceptionHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
   try {
-    invocableHandlerMethod.invoke(message,ex);
+    Object returnValue=exceptionHandlerMethod.invoke(message,ex);
+    MethodParameter returnType=exceptionHandlerMethod.getReturnType();
+    if (void.class.equals(returnType.getParameterType())) {
+      return;
+    }
+    this.returnValueHandlers.handleReturnValue(returnValue,returnType,message);
   }
  catch (  Throwable t) {
     logger.error("Error while handling exception",t);

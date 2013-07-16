@@ -1,0 +1,19 @@
+{
+  ReplyTo annot=returnType.getMethodAnnotation(ReplyTo.class);
+  if (returnHeaders.getDestination() != null) {
+    return returnHeaders.getDestination();
+  }
+ else   if (annot != null) {
+    Principal user=inputHeaders.getUser();
+    if (user == null) {
+      throw new MissingSessionUserException(inputMessage);
+    }
+    return "/user/" + user.getName() + annot.value();
+  }
+ else   if (inputHeaders.getDestination() != null) {
+    return inputHeaders.getDestination();
+  }
+ else {
+    return null;
+  }
+}
