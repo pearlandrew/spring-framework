@@ -1,0 +1,17 @@
+{
+  when(this.messageChannel.send(any(Message.class))).thenReturn(true);
+  String sessionId="sess1";
+  Message<?> inputMessage=createInputMessage(sessionId,"sub1","/dest",null);
+  this.handler.handleReturnValue(payloadContent,this.replyToReturnType,inputMessage);
+  verify(this.messageChannel,times(2)).send(this.messageCaptor.capture());
+  Message<?> message=this.messageCaptor.getAllValues().get(0);
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
+  assertEquals(sessionId,headers.getSessionId());
+  assertNull(headers.getSubscriptionId());
+  assertEquals("/dest1",headers.getDestination());
+  message=this.messageCaptor.getAllValues().get(1);
+  headers=SimpMessageHeaderAccessor.wrap(message);
+  assertEquals(sessionId,headers.getSessionId());
+  assertNull(headers.getSubscriptionId());
+  assertEquals("/dest2",headers.getDestination());
+}

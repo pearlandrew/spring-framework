@@ -1,0 +1,14 @@
+{
+  MockitoAnnotations.initMocks(this);
+  Message<String> message=MessageBuilder.withPayload(payloadContent).build();
+  when(this.messageConverter.toMessage(payloadContent)).thenReturn(message);
+  SimpMessagingTemplate messagingTemplate=new SimpMessagingTemplate(this.messageChannel);
+  messagingTemplate.setConverter(this.messageConverter);
+  this.handler=new ReplyToMethodReturnValueHandler(messagingTemplate);
+  Method method=this.getClass().getDeclaredMethod("handleAndReplyTo");
+  this.replyToReturnType=new MethodParameter(method,-1);
+  method=this.getClass().getDeclaredMethod("handleAndReplyToUser");
+  this.replyToUserReturnType=new MethodParameter(method,-1);
+  method=this.getClass().getDeclaredMethod("handleWithMissingReplyTo");
+  this.missingReplyToReturnType=new MethodParameter(method,-1);
+}

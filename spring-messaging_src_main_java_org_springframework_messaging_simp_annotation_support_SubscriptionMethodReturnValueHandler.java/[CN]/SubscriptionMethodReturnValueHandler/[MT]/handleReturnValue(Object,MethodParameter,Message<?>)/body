@@ -1,0 +1,10 @@
+{
+  if (returnValue == null) {
+    return;
+  }
+  SimpMessageHeaderAccessor inputHeaders=SimpMessageHeaderAccessor.wrap(message);
+  String destination=inputHeaders.getDestination();
+  Assert.state(inputHeaders.getSubscriptionId() != null,"No subsriptiondId in input message. Add @ReplyTo or @ReplyToUser to method: " + returnType.getMethod());
+  MessagePostProcessor postProcessor=new InputHeaderCopyingPostProcessor(inputHeaders);
+  this.messagingTemplate.convertAndSend(destination,returnValue,postProcessor);
+}

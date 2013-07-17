@@ -1,0 +1,14 @@
+{
+  MockitoAnnotations.initMocks(this);
+  Message<String> message=MessageBuilder.withPayload(payloadContent).build();
+  when(this.messageConverter.toMessage(payloadContent)).thenReturn(message);
+  SimpMessagingTemplate messagingTemplate=new SimpMessagingTemplate(this.messageChannel);
+  messagingTemplate.setConverter(this.messageConverter);
+  this.handler=new SubscriptionMethodReturnValueHandler(messagingTemplate);
+  Method method=this.getClass().getDeclaredMethod("getData");
+  this.subscribeEventReturnType=new MethodParameter(method,-1);
+  method=this.getClass().getDeclaredMethod("getDataAndReplyTo");
+  this.subscribeEventReplyToReturnType=new MethodParameter(method,-1);
+  method=this.getClass().getDeclaredMethod("handle");
+  this.messageMappingReturnType=new MethodParameter(method,-1);
+}
