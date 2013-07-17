@@ -2,19 +2,17 @@
   try {
     String payload=textMessage.getPayload();
     Message<?> message=this.stompMessageConverter.toMessage(payload);
-    StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
-    headers.setSessionId(session.getId());
-    headers.setUser(session.getPrincipal());
     if (logger.isTraceEnabled()) {
       logger.trace("Processing STOMP message: " + message);
     }
     try {
-      StompHeaderAccessor stompHeaders=StompHeaderAccessor.wrap(message);
-      SimpMessageType messageType=stompHeaders.getMessageType();
-      if (SimpMessageType.CONNECT.equals(messageType)) {
+      StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+      headers.setSessionId(session.getId());
+      headers.setUser(session.getPrincipal());
+      message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
+      if (SimpMessageType.CONNECT.equals(headers.getMessageType())) {
         handleConnect(session,message);
       }
-      message=MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
       this.clientInputChannel.send(message);
     }
  catch (    Throwable t) {

@@ -1,7 +1,7 @@
 {
   StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
-  headers.setStompCommandIfNotSet(StompCommand.MESSAGE);
-  if (StompCommand.CONNECTED.equals(headers.getStompCommand())) {
+  headers.setCommandIfNotSet(StompCommand.MESSAGE);
+  if (StompCommand.CONNECTED.equals(headers.getCommand())) {
     return;
   }
   String sessionId=headers.getSessionId();
@@ -14,7 +14,7 @@
     logger.error("Ignoring message, sessionId not found: " + message);
     return;
   }
-  if (StompCommand.MESSAGE.equals(headers.getStompCommand()) && (headers.getSubscriptionId() == null)) {
+  if (StompCommand.MESSAGE.equals(headers.getCommand()) && (headers.getSubscriptionId() == null)) {
     logger.error("Ignoring message, no subscriptionId header: " + message);
     return;
   }
@@ -23,7 +23,7 @@
     return;
   }
   try {
-    message=MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
+    message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
     byte[] bytes=this.stompMessageConverter.fromMessage(message);
     session.sendMessage(new TextMessage(new String(bytes,Charset.forName("UTF-8"))));
   }
@@ -31,7 +31,7 @@
     sendErrorMessage(session,t);
   }
  finally {
-    if (StompCommand.ERROR.equals(headers.getStompCommand())) {
+    if (StompCommand.ERROR.equals(headers.getCommand())) {
       try {
         session.close(CloseStatus.PROTOCOL_ERROR);
       }

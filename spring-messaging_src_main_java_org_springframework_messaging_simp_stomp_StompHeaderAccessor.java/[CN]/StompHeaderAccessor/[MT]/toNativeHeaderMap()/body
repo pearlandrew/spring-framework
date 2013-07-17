@@ -2,23 +2,23 @@
   Map<String,List<String>> result=super.toNativeHeaderMap();
   String destination=super.getDestination();
   if (destination != null) {
-    result.put(DESTINATION,Arrays.asList(destination));
+    result.put(STOMP_DESTINATION_HEADER,Arrays.asList(destination));
   }
   MediaType contentType=getContentType();
   if (contentType != null) {
-    result.put(CONTENT_TYPE,Arrays.asList(contentType.toString()));
+    result.put(STOMP_CONTENT_TYPE_HEADER,Arrays.asList(contentType.toString()));
   }
-  if (StompCommand.MESSAGE.equals(getStompCommand())) {
+  if (StompCommand.MESSAGE.equals(getCommand())) {
     String subscriptionId=getSubscriptionId();
     if (subscriptionId != null) {
-      result.put(SUBSCRIPTION,Arrays.asList(subscriptionId));
+      result.put(STOMP_SUBSCRIPTION_HEADER,Arrays.asList(subscriptionId));
     }
  else {
       logger.warn("STOMP MESSAGE frame should have a subscription: " + this.toString());
     }
     if ((getMessageId() == null)) {
       String messageId=getSessionId() + "-" + messageIdCounter.getAndIncrement();
-      result.put(MESSAGE_ID,Arrays.asList(messageId));
+      result.put(STOMP_MESSAGE_ID_HEADER,Arrays.asList(messageId));
     }
   }
   return result;

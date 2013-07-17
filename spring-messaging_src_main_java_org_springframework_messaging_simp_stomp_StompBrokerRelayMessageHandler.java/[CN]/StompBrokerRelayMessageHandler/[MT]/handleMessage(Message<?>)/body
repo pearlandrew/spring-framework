@@ -2,7 +2,7 @@
   StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
   String sessionId=headers.getSessionId();
   String destination=headers.getDestination();
-  StompCommand command=headers.getStompCommand();
+  StompCommand command=headers.getCommand();
   SimpMessageType messageType=headers.getMessageType();
   if (!this.running) {
     if (logger.isTraceEnabled()) {
@@ -14,10 +14,10 @@
     sessionId=(sessionId == null) ? STOMP_RELAY_SYSTEM_SESSION_ID : sessionId;
     headers.setSessionId(sessionId);
     command=(command == null) ? StompCommand.SEND : command;
-    headers.setStompCommandIfNotSet(command);
-    message=MessageBuilder.fromMessage(message).copyHeaders(headers.toMap()).build();
+    headers.setCommandIfNotSet(command);
+    message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
   }
-  if (headers.getStompCommand() == null) {
+  if (headers.getCommand() == null) {
     logger.error("Ignoring message, no STOMP command: " + message);
     return;
   }

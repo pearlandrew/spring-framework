@@ -1,6 +1,9 @@
 {
   Assert.notNull(destination,"destination is required");
-  message=updateMessageHeaders(message,destination);
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
+  headers.setDestination(destination);
+  headers.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
+  message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
   long timeout=this.sendTimeout;
   boolean sent=(timeout >= 0) ? this.messageChannel.send(message,timeout) : this.messageChannel.send(message);
   if (!sent) {

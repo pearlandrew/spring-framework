@@ -2,7 +2,9 @@
   if (returnValue == null) {
     return;
   }
-  MessagePostProcessor postProcessor=new SessionHeaderPostProcessor(inputMessage);
+  SimpMessageHeaderAccessor inputHeaders=SimpMessageHeaderAccessor.wrap(inputMessage);
+  String sessionId=inputHeaders.getSessionId();
+  MessagePostProcessor postProcessor=new SessionHeaderPostProcessor(sessionId);
   ReplyTo replyTo=returnType.getMethodAnnotation(ReplyTo.class);
   if (replyTo != null) {
     for (    String destination : replyTo.value()) {
@@ -11,7 +13,10 @@
   }
   ReplyToUser replyToUser=returnType.getMethodAnnotation(ReplyToUser.class);
   if (replyToUser != null) {
-    String user=getUser(inputMessage).getName();
+    if (inputHeaders.getUser() == null) {
+      throw new MissingSessionUserException(inputMessage);
+    }
+    String user=inputHeaders.getUser().getName();
     for (    String destination : replyToUser.value()) {
       this.messagingTemplate.convertAndSendToUser(user,destination,returnValue,postProcessor);
     }
