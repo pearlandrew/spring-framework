@@ -2,20 +2,18 @@
   if (returnValue == null) {
     return;
   }
+  MessagePostProcessor postProcessor=new SessionHeaderPostProcessor(inputMessage);
   ReplyTo replyTo=returnType.getMethodAnnotation(ReplyTo.class);
-  ReplyToUser replyToUser=returnType.getMethodAnnotation(ReplyToUser.class);
-  List<String> destinations=new ArrayList<String>();
   if (replyTo != null) {
-    destinations.addAll(Arrays.asList(replyTo.value()));
-  }
-  if (replyToUser != null) {
-    Principal user=getUser(inputMessage);
-    for (    String destination : replyToUser.value()) {
-      destinations.add("/user/" + user.getName() + destination);
+    for (    String destination : replyTo.value()) {
+      this.messagingTemplate.convertAndSend(destination,returnValue,postProcessor);
     }
   }
-  MessagePostProcessor postProcessor=new SessionIdHeaderPostProcessor(inputMessage);
-  for (  String destination : destinations) {
-    this.messagingTemplate.convertAndSend(destination,returnValue,postProcessor);
+  ReplyToUser replyToUser=returnType.getMethodAnnotation(ReplyToUser.class);
+  if (replyToUser != null) {
+    String user=getUser(inputMessage).getName();
+    for (    String destination : replyToUser.value()) {
+      this.messagingTemplate.convertAndSendToUser(user,destination,returnValue,postProcessor);
+    }
   }
 }
