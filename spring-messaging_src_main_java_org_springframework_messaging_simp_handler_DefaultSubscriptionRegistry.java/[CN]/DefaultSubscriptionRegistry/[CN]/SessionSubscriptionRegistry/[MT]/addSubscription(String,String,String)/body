@@ -1,9 +1,14 @@
 {
   SessionSubscriptionInfo info=this.sessions.get(sessionId);
   if (info == null) {
-    info=new SessionSubscriptionInfo(sessionId);
-    this.sessions.put(sessionId,info);
+synchronized (this.monitor) {
+      info=this.sessions.get(sessionId);
+      if (info == null) {
+        info=new SessionSubscriptionInfo(sessionId);
+        this.sessions.put(sessionId,info);
+      }
+    }
   }
-  info.addSubscription(subscriptionId,destination);
+  info.addSubscription(destination,subscriptionId);
   return info;
 }
