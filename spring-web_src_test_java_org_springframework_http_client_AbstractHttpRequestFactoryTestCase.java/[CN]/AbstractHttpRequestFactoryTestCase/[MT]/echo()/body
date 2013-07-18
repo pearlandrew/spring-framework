@@ -6,9 +6,20 @@
   request.getHeaders().add(headerName,headerValue1);
   String headerValue2="value2";
   request.getHeaders().add(headerName,headerValue2);
-  byte[] body="Hello World".getBytes("UTF-8");
+  final byte[] body="Hello World".getBytes("UTF-8");
   request.getHeaders().setContentLength(body.length);
-  FileCopyUtils.copy(body,request.getBody());
+  if (request instanceof StreamingHttpOutputMessage) {
+    StreamingHttpOutputMessage streamingRequest=(StreamingHttpOutputMessage)request;
+    streamingRequest.setBody(new StreamingHttpOutputMessage.Body(){
+      @Override public void writeTo(      OutputStream outputStream) throws IOException {
+        StreamUtils.copy(body,outputStream);
+      }
+    }
+);
+  }
+ else {
+    StreamUtils.copy(body,request.getBody());
+  }
   ClientHttpResponse response=request.execute();
   try {
     assertEquals("Invalid status code",HttpStatus.OK,response.getStatusCode());
