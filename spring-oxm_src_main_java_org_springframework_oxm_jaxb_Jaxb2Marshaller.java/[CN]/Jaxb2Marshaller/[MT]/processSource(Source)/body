@@ -1,0 +1,32 @@
+{
+  if (StaxUtils.isStaxSource(source) || source instanceof DOMSource) {
+    return source;
+  }
+  XMLReader xmlReader=null;
+  InputSource inputSource=null;
+  if (source instanceof SAXSource) {
+    SAXSource saxSource=(SAXSource)source;
+    xmlReader=saxSource.getXMLReader();
+    inputSource=saxSource.getInputSource();
+  }
+ else   if (source instanceof StreamSource) {
+    StreamSource streamSource=(StreamSource)source;
+    if (streamSource.getInputStream() != null) {
+      inputSource=new InputSource(streamSource.getInputStream());
+    }
+ else     if (streamSource.getReader() != null) {
+      inputSource=new InputSource(streamSource.getReader());
+    }
+  }
+  try {
+    if (xmlReader == null) {
+      xmlReader=XMLReaderFactory.createXMLReader();
+    }
+    xmlReader.setFeature("http://xml.org/sax/features/external-general-entities",this.processExternalEntities);
+    return new SAXSource(xmlReader,inputSource);
+  }
+ catch (  SAXException ex) {
+    logger.warn("Processing of external entities could not be disabled",ex);
+    return source;
+  }
+}
