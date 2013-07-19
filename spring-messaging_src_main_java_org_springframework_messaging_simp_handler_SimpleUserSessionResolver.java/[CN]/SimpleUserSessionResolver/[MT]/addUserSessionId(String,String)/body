@@ -2,7 +2,10 @@
   Set<String> sessionIds=this.userSessionIds.get(user);
   if (sessionIds == null) {
     sessionIds=new CopyOnWriteArraySet<String>();
-    this.userSessionIds.put(user,sessionIds);
+    Set<String> value=this.userSessionIds.putIfAbsent(user,sessionIds);
+    if (value != null) {
+      sessionIds=value;
+    }
   }
   sessionIds.add(sessionId);
 }

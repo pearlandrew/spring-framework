@@ -1,12 +1,10 @@
 {
   SessionSubscriptionInfo info=this.sessions.get(sessionId);
   if (info == null) {
-synchronized (this.monitor) {
-      info=this.sessions.get(sessionId);
-      if (info == null) {
-        info=new SessionSubscriptionInfo(sessionId);
-        this.sessions.put(sessionId,info);
-      }
+    info=new SessionSubscriptionInfo(sessionId);
+    SessionSubscriptionInfo value=this.sessions.putIfAbsent(sessionId,info);
+    if (value != null) {
+      info=value;
     }
   }
   info.addSubscription(destination,subscriptionId);
