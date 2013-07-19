@@ -14,9 +14,14 @@
     throw new StompConversionException("Unsupported version '" + acceptVersions + "'");
   }
   connectedHeaders.setHeartbeat(0,0);
-  if (session.getPrincipal() != null) {
-    connectedHeaders.setNativeHeader(CONNECTED_USER_HEADER,session.getPrincipal().getName());
+  Principal principal=session.getPrincipal();
+  if (principal != null) {
+    connectedHeaders.setNativeHeader(CONNECTED_USER_HEADER,principal.getName());
     connectedHeaders.setNativeHeader(QUEUE_SUFFIX_HEADER,session.getId());
+    if (this.queueSuffixResolver != null) {
+      String suffix=session.getId();
+      this.queueSuffixResolver.addQueueSuffix(principal.getName(),session.getId(),suffix);
+    }
   }
   Message<?> connectedMessage=MessageBuilder.withPayloadAndHeaders(new byte[0],connectedHeaders).build();
   byte[] bytes=this.stompMessageConverter.fromMessage(connectedMessage);

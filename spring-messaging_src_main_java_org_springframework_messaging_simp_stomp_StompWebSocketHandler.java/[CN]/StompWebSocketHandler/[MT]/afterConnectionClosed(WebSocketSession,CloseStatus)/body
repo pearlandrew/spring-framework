@@ -1,11 +1,11 @@
 {
   String sessionId=session.getId();
   this.sessions.remove(sessionId);
-  if ((this.userSessionStore != null) && (session.getPrincipal() != null)) {
-    this.userSessionStore.removeUserSessionId(session.getPrincipal().getName(),sessionId);
+  if ((this.queueSuffixResolver != null) && (session.getPrincipal() != null)) {
+    this.queueSuffixResolver.removeQueueSuffix(session.getPrincipal().getName(),sessionId);
   }
   StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.DISCONNECT);
   headers.setSessionId(sessionId);
   Message<?> message=MessageBuilder.withPayloadAndHeaders(new byte[0],headers).build();
-  this.clientInputChannel.send(message);
+  this.dispatchChannel.send(message);
 }
