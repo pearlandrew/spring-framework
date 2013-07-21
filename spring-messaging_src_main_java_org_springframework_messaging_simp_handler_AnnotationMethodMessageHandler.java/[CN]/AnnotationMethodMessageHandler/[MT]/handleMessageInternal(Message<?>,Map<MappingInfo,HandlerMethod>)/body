@@ -1,9 +1,15 @@
 {
   SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
   String destination=headers.getDestination();
+  if (!checkDestinationPrefix(destination)) {
+    return;
+  }
   HandlerMethod match=getHandlerMethod(destination,handlerMethods);
   if (match == null) {
     return;
+  }
+  if (logger.isTraceEnabled()) {
+    logger.trace("Processing message: " + message);
   }
   HandlerMethod handlerMethod=match.createWithResolvedBean();
   InvocableHandlerMethod invocableHandlerMethod=new InvocableHandlerMethod(handlerMethod);

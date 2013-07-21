@@ -1,9 +1,13 @@
 {
-  if (!shouldHandle(message)) {
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
+  SimpMessageType messageType=headers.getMessageType();
+  String destination=headers.getDestination();
+  if (!SimpMessageType.MESSAGE.equals(messageType)) {
     return;
   }
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
-  String destination=headers.getDestination();
+  if (!checkDestination(destination)) {
+    return;
+  }
   if (logger.isTraceEnabled()) {
     logger.trace("Processing message to destination " + destination);
   }
@@ -11,7 +15,7 @@
   String user=destinationParser.getUser();
   if (user == null) {
     if (logger.isErrorEnabled()) {
-      logger.error("Ignoring message, expected destination \"" + this.prefix + "{userId}/**\": "+ destination);
+      logger.error("Ignoring message, expected destination pattern \"" + this.destinationPrefix + "{userId}/**\": "+ destination);
     }
     return;
   }

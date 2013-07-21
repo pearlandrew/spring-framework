@@ -1,6 +1,10 @@
 {
   SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
   SimpMessageType messageType=headers.getMessageType();
+  String destination=headers.getDestination();
+  if (!checkDestinationPrefix(destination)) {
+    return;
+  }
   if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
     preProcessMessage(message);
     this.subscriptionRegistry.registerSubscription(message);
