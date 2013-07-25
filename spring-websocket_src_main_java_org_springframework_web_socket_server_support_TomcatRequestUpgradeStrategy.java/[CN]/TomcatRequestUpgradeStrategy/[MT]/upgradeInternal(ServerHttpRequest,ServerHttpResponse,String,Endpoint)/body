@@ -17,7 +17,9 @@
  catch (  Exception ex) {
     throw new HandshakeFailureException("Failed to upgrade HttpServletRequest",ex);
   }
-  WsServerContainer serverContainer=WsServerContainer.getServerContainer();
+  String attribute="javax.websocket.server.ServerContainer";
+  ServletContext servletContext=servletRequest.getServletContext();
+  WsServerContainer serverContainer=(WsServerContainer)servletContext.getAttribute(attribute);
   ServerEndpointConfig endpointConfig=new ServerEndpointRegistration("/shouldntmatter",endpoint);
   upgradeHandler.preInit(endpoint,endpointConfig,serverContainer,webSocketRequest,selectedProtocol,Collections.<String,String>emptyMap(),servletRequest.isSecure());
 }
