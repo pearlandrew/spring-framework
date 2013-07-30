@@ -3,6 +3,15 @@
     logger.trace("Forwarding message to STOMP broker, message id=" + message.getHeaders().getId());
   }
   byte[] bytes=stompMessageConverter.fromMessage(message);
-  connection.send(new String(bytes,Charset.forName("UTF-8")));
+  connection.send(new String(bytes,Charset.forName("UTF-8")),new Consumer<Boolean>(){
+    @Override public void accept(    Boolean success){
+      if (!success) {
+        String sessionId=StompHeaderAccessor.wrap(message).getSessionId();
+        relaySessions.remove(sessionId);
+        sendError(sessionId,"Failed to relay message to broker");
+      }
+    }
+  }
+);
   return true;
 }
