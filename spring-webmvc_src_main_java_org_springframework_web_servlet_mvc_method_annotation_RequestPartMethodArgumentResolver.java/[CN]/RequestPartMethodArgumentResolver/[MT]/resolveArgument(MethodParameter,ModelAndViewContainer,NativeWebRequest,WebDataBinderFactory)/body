@@ -13,7 +13,12 @@
     arg=multipartRequest.getFiles(partName);
   }
  else   if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
+    assertIsMultipartRequest(servletRequest);
     arg=servletRequest.getPart(partName);
+  }
+ else   if (isPartCollection(parameter)) {
+    assertIsMultipartRequest(servletRequest);
+    arg=new ArrayList(servletRequest.getParts());
   }
  else {
     try {
