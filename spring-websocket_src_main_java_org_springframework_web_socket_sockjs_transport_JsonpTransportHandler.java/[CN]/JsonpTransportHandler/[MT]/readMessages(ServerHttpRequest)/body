@@ -1,11 +1,12 @@
 {
+  SockJsMessageCodec messageCodec=getSockJsConfig().getMessageCodecRequired();
   MediaType contentType=request.getHeaders().getContentType();
   if ((contentType != null) && MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
     MultiValueMap<String,String> map=this.formConverter.read(null,request);
     String d=map.getFirst("d");
-    return (StringUtils.hasText(d)) ? getObjectMapper().readValue(d,String[].class) : null;
+    return (StringUtils.hasText(d)) ? messageCodec.decode(d) : null;
   }
  else {
-    return getObjectMapper().readValue(request.getBody(),String[].class);
+    return messageCodec.decodeInputStream(request.getBody());
   }
 }
