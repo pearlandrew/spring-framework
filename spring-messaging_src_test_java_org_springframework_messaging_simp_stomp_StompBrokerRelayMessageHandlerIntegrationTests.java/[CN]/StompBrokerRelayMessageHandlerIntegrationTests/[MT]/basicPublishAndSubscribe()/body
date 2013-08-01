@@ -1,0 +1,27 @@
+{
+  int port=SocketUtils.findAvailableTcpPort();
+  TestStompBroker stompBroker=new TestStompBroker(port);
+  stompBroker.start();
+  String client1SessionId="abc123";
+  String client2SessionId="def456";
+  final CountDownLatch messageLatch=new CountDownLatch(1);
+  messageChannel.subscribe(new MessageHandler(){
+    @Override public void handleMessage(    Message<?> message) throws MessagingException {
+      StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+      if (headers.getCommand() == StompCommand.MESSAGE) {
+        messageLatch.countDown();
+      }
+    }
+  }
+);
+  relay.setRelayPort(port);
+  relay.start();
+  relay.handleMessage(createConnectMessage(client1SessionId));
+  relay.handleMessage(createConnectMessage(client2SessionId));
+  relay.handleMessage(createSubscribeMessage(client1SessionId,"/topic/test"));
+  stompBroker.awaitMessages(4);
+  relay.handleMessage(createSendMessage(client2SessionId,"/topic/test","fromClient2"));
+  assertTrue(messageLatch.await(30,TimeUnit.SECONDS));
+  this.relay.stop();
+  stompBroker.stop();
+}
