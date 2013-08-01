@@ -1,0 +1,54 @@
+{
+  TransportType transportType=TransportType.fromValue(transport);
+  if (transportType == null) {
+    logger.debug("Unknown transport type: " + transportType);
+    response.setStatusCode(HttpStatus.NOT_FOUND);
+    return;
+  }
+  TransportHandler transportHandler=this.transportHandlers.get(transportType);
+  if (transportHandler == null) {
+    logger.debug("Transport handler not found");
+    response.setStatusCode(HttpStatus.NOT_FOUND);
+    return;
+  }
+  HttpMethod supportedMethod=transportType.getHttpMethod();
+  if (!supportedMethod.equals(request.getMethod())) {
+    if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.supportsCors()) {
+      response.setStatusCode(HttpStatus.NO_CONTENT);
+      addCorsHeaders(request,response,HttpMethod.OPTIONS,supportedMethod);
+      addCacheHeaders(response);
+    }
+ else {
+      List<HttpMethod> supportedMethods=Arrays.asList(supportedMethod);
+      if (transportType.supportsCors()) {
+        supportedMethods.add(HttpMethod.OPTIONS);
+      }
+      sendMethodNotAllowed(response,supportedMethods);
+    }
+    return;
+  }
+  WebSocketSession session=this.sessions.get(sessionId);
+  if (session == null) {
+    if (transportHandler instanceof SockJsSessionFactory) {
+      SockJsSessionFactory sessionFactory=(SockJsSessionFactory)transportHandler;
+      session=createSockJsSession(sessionId,sessionFactory,wsHandler,request,response);
+    }
+  }
+  if (session == null) {
+    response.setStatusCode(HttpStatus.NOT_FOUND);
+    logger.warn("Session not found");
+    return;
+  }
+  if (transportType.sendsNoCacheInstruction()) {
+    addNoCacheHeaders(response);
+  }
+  if (transportType.setsJsessionId() && isJsessionIdCookieRequired()) {
+    Cookie cookie=request.getCookies().getCookie("JSESSIONID");
+    String jsid=(cookie != null) ? cookie.getValue() : "dummy";
+    response.getHeaders().set("Set-Cookie","JSESSIONID=" + jsid + ";path=/");
+  }
+  if (transportType.supportsCors()) {
+    addCorsHeaders(request,response);
+  }
+  transportHandler.handleRequest(request,response,wsHandler,session);
+}

@@ -1,0 +1,17 @@
+{
+  StubSockJsServiceConfig sockJsConfig=new StubSockJsServiceConfig();
+  this.servletRequest.setContent("[\"x\"]".getBytes("UTF-8"));
+  WebSocketHandler webSocketHandler=mock(WebSocketHandler.class);
+  TestSockJsSession session=new TestSockJsSession("1",sockJsConfig,webSocketHandler);
+  session.delegateConnectionEstablished();
+  doThrow(new Exception()).when(webSocketHandler).handleMessage(session,new TextMessage("x"));
+  try {
+    XhrTransportHandler transportHandler=new XhrTransportHandler();
+    transportHandler.setSockJsServiceConfiguration(sockJsConfig);
+    transportHandler.handleRequest(this.request,this.response,webSocketHandler,session);
+    fail("Expected exception");
+  }
+ catch (  SockJsProcessingException ex) {
+    assertEquals(CloseStatus.SERVER_ERROR,session.getStatus());
+  }
+}

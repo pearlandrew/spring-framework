@@ -1,0 +1,17 @@
+{
+  String payload=message.getPayload();
+  if (StringUtils.isEmpty(payload)) {
+    logger.trace("Ignoring empty message");
+    return;
+  }
+  String[] messages;
+  try {
+    messages=getSockJsServiceConfig().getMessageCodec().decode(payload);
+  }
+ catch (  IOException ex) {
+    logger.error("Broken data received. Terminating WebSocket connection abruptly",ex);
+    tryCloseWithSockJsTransportError(ex,CloseStatus.BAD_DATA);
+    return;
+  }
+  delegateMessages(messages);
+}

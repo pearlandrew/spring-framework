@@ -1,0 +1,37 @@
+{
+  String path=request.getURI().getPath();
+  if (!this.validSockJsPrefixes.isEmpty()) {
+    for (    String prefix : this.validSockJsPrefixes) {
+      int index=path.indexOf(prefix);
+      if (index != -1) {
+        this.knownSockJsPrefixes.add(path.substring(0,index + prefix.length()));
+        return path.substring(index + prefix.length());
+      }
+    }
+    return null;
+  }
+  if (path.endsWith("/info")) {
+    this.knownSockJsPrefixes.add(path.substring(0,path.length() - "/info".length()));
+    return "/info";
+  }
+  String match=null;
+  for (  String sockJsPath : this.knownSockJsPrefixes) {
+    if (path.startsWith(sockJsPath)) {
+      if ((match == null) || (match.length() < sockJsPath.length())) {
+        match=sockJsPath;
+      }
+    }
+  }
+  if (match != null) {
+    String result=path.substring(match.length());
+    Assert.isTrue(result.charAt(0) == '/',"Invalid SockJS path extracted from incoming path \"" + path + "\". The extracted SockJS path is \""+ result+ "\". It was extracted from these known SockJS prefixes "+ this.knownSockJsPrefixes+ ". Consider setting 'validSockJsPrefixes' on DefaultSockJsService.");
+    return result;
+  }
+  String pathNoSlash=path.endsWith("/") ? path.substring(0,path.length() - 1) : path;
+  String lastSegment=pathNoSlash.substring(pathNoSlash.lastIndexOf('/') + 1);
+  if (!isValidTransportType(lastSegment) && !lastSegment.startsWith("iframe")) {
+    this.knownSockJsPrefixes.add(path);
+    return "";
+  }
+  return null;
+}

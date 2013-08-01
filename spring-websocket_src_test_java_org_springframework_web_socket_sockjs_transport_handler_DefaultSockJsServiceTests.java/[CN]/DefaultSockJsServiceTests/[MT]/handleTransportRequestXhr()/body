@@ -1,0 +1,17 @@
+{
+  setRequest("POST","/a/server/session/xhr");
+  TaskScheduler taskScheduler=mock(TaskScheduler.class);
+  StubXhrTransportHandler xhrHandler=new StubXhrTransportHandler();
+  Set<TransportHandler> transportHandlers=Collections.<TransportHandler>singleton(xhrHandler);
+  WebSocketHandler webSocketHandler=mock(WebSocketHandler.class);
+  DefaultSockJsService service=new DefaultSockJsService(taskScheduler,transportHandlers);
+  service.handleTransportRequest(this.request,this.response,webSocketHandler,"123",TransportType.XHR.value());
+  assertEquals(200,this.servletResponse.getStatus());
+  assertNotNull(xhrHandler.session);
+  assertSame(webSocketHandler,xhrHandler.webSocketHandler);
+  verify(taskScheduler).scheduleAtFixedRate(any(Runnable.class),eq(service.getDisconnectDelay()));
+  assertEquals("no-store, no-cache, must-revalidate, max-age=0",this.response.getHeaders().getCacheControl());
+  assertEquals("JSESSIONID=dummy;path=/",this.response.getHeaders().getFirst("Set-Cookie"));
+  assertEquals("*",this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
+  assertEquals("true",this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
+}

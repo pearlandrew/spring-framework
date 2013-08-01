@@ -1,0 +1,16 @@
+{
+  this.servletRequest.setMethod("POST");
+  Set<TransportHandler> transportHandlers=new HashSet<>();
+  transportHandlers.add(new StubXhrTransportHandler());
+  transportHandlers.add(new StubXhrSendTransportHandler());
+  WebSocketHandler wsHandler=mock(WebSocketHandler.class);
+  DefaultSockJsService service=new DefaultSockJsService(mock(TaskScheduler.class),transportHandlers);
+  service.handleTransportRequest(this.request,this.response,wsHandler,"123",TransportType.XHR_SEND.value());
+  assertEquals(404,this.servletResponse.getStatus());
+  resetResponse();
+  service.handleTransportRequest(this.request,this.response,wsHandler,"123",TransportType.XHR.value());
+  assertEquals(200,this.servletResponse.getStatus());
+  resetResponse();
+  service.handleTransportRequest(this.request,this.response,wsHandler,"123",TransportType.XHR_SEND.value());
+  assertEquals(200,this.servletResponse.getStatus());
+}
