@@ -1,16 +1,15 @@
 {
-  this.servletRequest.setMethod("POST");
-  Set<TransportHandler> transportHandlers=new HashSet<>();
-  transportHandlers.add(new StubXhrTransportHandler());
-  transportHandlers.add(new StubXhrSendTransportHandler());
-  WebSocketHandler wsHandler=mock(WebSocketHandler.class);
-  DefaultSockJsService service=new DefaultSockJsService(mock(TaskScheduler.class),transportHandlers);
-  service.handleTransportRequest(this.request,this.response,wsHandler,"123",TransportType.XHR_SEND.value());
+  setRequest("POST",sessionUrlPrefix + "xhr_send");
+  this.service.handleRequest(this.request,this.response,this.wsHandler);
   assertEquals(404,this.servletResponse.getStatus());
   resetResponse();
-  service.handleTransportRequest(this.request,this.response,wsHandler,"123",TransportType.XHR.value());
+  setRequest("POST",sessionUrlPrefix + "xhr");
+  this.service.handleRequest(this.request,this.response,this.wsHandler);
   assertEquals(200,this.servletResponse.getStatus());
+  verify(this.xhrHandler).handleRequest(this.request,this.response,this.wsHandler,this.session);
   resetResponse();
-  service.handleTransportRequest(this.request,this.response,wsHandler,"123",TransportType.XHR_SEND.value());
+  setRequest("POST",sessionUrlPrefix + "xhr_send");
+  this.service.handleRequest(this.request,this.response,this.wsHandler);
   assertEquals(200,this.servletResponse.getStatus());
+  verify(this.xhrSendHandler).handleRequest(this.request,this.response,this.wsHandler,this.session);
 }

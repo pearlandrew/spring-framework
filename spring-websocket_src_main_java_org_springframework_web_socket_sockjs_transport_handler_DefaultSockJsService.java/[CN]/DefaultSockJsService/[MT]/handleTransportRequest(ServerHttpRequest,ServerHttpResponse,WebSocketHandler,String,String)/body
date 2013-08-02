@@ -42,10 +42,10 @@
   if (transportType.sendsNoCacheInstruction()) {
     addNoCacheHeaders(response);
   }
-  if (transportType.setsJsessionId() && isJsessionIdCookieRequired()) {
-    Cookie cookie=request.getCookies().getCookie("JSESSIONID");
-    String jsid=(cookie != null) ? cookie.getValue() : "dummy";
-    response.getHeaders().set("Set-Cookie","JSESSIONID=" + jsid + ";path=/");
+  if (transportType.sendsSessionCookie() && isDummySessionCookieEnabled()) {
+    Cookie cookie=request.getCookies().get("JSESSIONID");
+    String value=(cookie != null) ? cookie.getValue() : "dummy";
+    response.getHeaders().set("Set-Cookie","JSESSIONID=" + value + ";path=/");
   }
   if (transportType.supportsCors()) {
     addCorsHeaders(request,response);
