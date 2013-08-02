@@ -1,14 +1,16 @@
 {
-  Filter delegateToUse=null;
+  Filter delegateToUse=this.delegate;
+  if (delegateToUse == null) {
 synchronized (this.delegateMonitor) {
-    if (this.delegate == null) {
-      WebApplicationContext wac=findWebApplicationContext();
-      if (wac == null) {
-        throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
+      if (this.delegate == null) {
+        WebApplicationContext wac=findWebApplicationContext();
+        if (wac == null) {
+          throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
+        }
+        this.delegate=initDelegate(wac);
       }
-      this.delegate=initDelegate(wac);
+      delegateToUse=this.delegate;
     }
-    delegateToUse=this.delegate;
   }
   invokeDelegate(delegateToUse,request,response,filterChain);
 }
