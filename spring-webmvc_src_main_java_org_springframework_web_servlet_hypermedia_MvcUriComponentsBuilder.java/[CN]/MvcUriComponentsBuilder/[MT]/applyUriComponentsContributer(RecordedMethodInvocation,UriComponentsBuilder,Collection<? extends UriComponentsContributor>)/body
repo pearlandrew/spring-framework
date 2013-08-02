@@ -1,0 +1,16 @@
+{
+  if (contributors.isEmpty()) {
+    return builder;
+  }
+  MethodParameters parameters=new MethodParameters(invocation.getMethod());
+  Iterator<Object> parameterValues=Arrays.asList(invocation.getArguments()).iterator();
+  for (  MethodParameter parameter : parameters.getParameters()) {
+    Object parameterValue=parameterValues.next();
+    for (    UriComponentsContributor contributor : contributors) {
+      if (contributor.supportsParameter(parameter)) {
+        contributor.enhance(builder,parameter,parameterValue);
+      }
+    }
+  }
+  return builder;
+}
