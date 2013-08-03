@@ -1,17 +1,17 @@
 {
+  udpateRequest(request,response,frameFormat);
   try {
-    udpateRequest(request,response,frameFormat);
     writePrelude();
     writeFrame(SockJsFrame.openFrame());
   }
  catch (  Throwable t) {
-    tryCloseWithSockJsTransportError(t,null);
-    throw new SockJsProcessingException("Failed open SockJS session",t,getId());
+    tryCloseWithSockJsTransportError(t,CloseStatus.SERVER_ERROR);
+    throw new SockJsTransportFailureException("Failed to send \"open\" frame",getId(),t);
   }
   try {
     delegateConnectionEstablished();
   }
  catch (  Throwable t) {
-    ExceptionWebSocketHandlerDecorator.tryCloseWithError(this,t,logger);
+    throw new SockJsException("Unhandled exception from WebSocketHandler",getId(),t);
   }
 }

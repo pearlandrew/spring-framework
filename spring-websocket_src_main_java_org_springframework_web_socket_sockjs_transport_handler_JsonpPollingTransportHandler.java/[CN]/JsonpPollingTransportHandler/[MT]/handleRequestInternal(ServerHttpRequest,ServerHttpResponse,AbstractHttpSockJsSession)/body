@@ -8,7 +8,8 @@
     }
   }
  catch (  Throwable t) {
-    throw new SockJsProcessingException("Failed to send error to client",t,session.getId());
+    sockJsSession.tryCloseWithSockJsTransportError(t,CloseStatus.SERVER_ERROR);
+    throw new SockJsTransportFailureException("Failed to send error",sockJsSession.getId(),t);
   }
-  super.handleRequestInternal(request,response,session);
+  super.handleRequestInternal(request,response,sockJsSession);
 }

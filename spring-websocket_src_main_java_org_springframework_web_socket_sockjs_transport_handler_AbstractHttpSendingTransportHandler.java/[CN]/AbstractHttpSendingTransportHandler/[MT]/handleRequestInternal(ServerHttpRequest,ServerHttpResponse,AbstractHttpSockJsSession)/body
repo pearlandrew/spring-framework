@@ -8,13 +8,13 @@
     sockJsSession.setLongPollingRequest(request,response,getFrameFormat(request));
   }
  else {
+    logger.debug("another " + getTransportType() + " connection still open: "+ sockJsSession);
+    SockJsFrame frame=getFrameFormat(request).format(SockJsFrame.closeFrameAnotherConnectionOpen());
     try {
-      logger.debug("another " + getTransportType() + " connection still open: "+ sockJsSession);
-      SockJsFrame closeFrame=SockJsFrame.closeFrameAnotherConnectionOpen();
-      response.getBody().write(getFrameFormat(request).format(closeFrame).getContentBytes());
+      response.getBody().write(frame.getContentBytes());
     }
- catch (    IOException e) {
-      throw new SockJsProcessingException("Failed to send SockJS close frame",e,sockJsSession.getId());
+ catch (    IOException ex) {
+      throw new SockJsException("Failed to send " + frame,sockJsSession.getId(),ex);
     }
   }
 }

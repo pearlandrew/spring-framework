@@ -1,0 +1,31 @@
+{
+  String[] messages=null;
+  try {
+    messages=readMessages(request);
+  }
+ catch (  JsonMappingException ex) {
+    logger.error("Failed to read message: " + ex.getMessage());
+    handleReadError(response,"Payload expected.",sockJsSession.getId());
+    return;
+  }
+catch (  IOException ex) {
+    logger.error("Failed to read message: " + ex.getMessage());
+    handleReadError(response,"Broken JSON encoding.",sockJsSession.getId());
+    return;
+  }
+catch (  Throwable t) {
+    logger.error("Failed to read message: " + t.getMessage());
+    handleReadError(response,"Failed to read message(s)",sockJsSession.getId());
+    return;
+  }
+  if (messages == null) {
+    handleReadError(response,"Payload expected.",sockJsSession.getId());
+    return;
+  }
+  if (logger.isTraceEnabled()) {
+    logger.trace("Received message(s): " + Arrays.asList(messages));
+  }
+  response.setStatusCode(getResponseStatus());
+  response.getHeaders().setContentType(new MediaType("text","plain",Charset.forName("UTF-8")));
+  sockJsSession.delegateMessages(messages);
+}

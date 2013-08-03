@@ -1,22 +1,17 @@
 {
+  udpateRequest(request,response,frameFormat);
+  if (isClosed()) {
+    logger.debug("Connection already closed (but not removed yet)");
+    writeFrame(SockJsFrame.closeFrameGoAway());
+    return;
+  }
   try {
-    udpateRequest(request,response,frameFormat);
-    if (isClosed()) {
-      logger.debug("connection already closed");
-      try {
-        writeFrame(SockJsFrame.closeFrameGoAway());
-      }
- catch (      IOException ex) {
-        throw new SockJsProcessingException("Failed to send SockJS close frame",ex,getId());
-      }
-      return;
-    }
     this.asyncControl.start(-1);
     scheduleHeartbeat();
     tryFlushCache();
   }
  catch (  Throwable t) {
-    tryCloseWithSockJsTransportError(t,null);
-    throw new SockJsProcessingException("Failed to start long running request and flush messages",t,getId());
+    tryCloseWithSockJsTransportError(t,CloseStatus.SERVER_ERROR);
+    throw new SockJsTransportFailureException("Failed to flush messages",getId(),t);
   }
 }
