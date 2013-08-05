@@ -1,0 +1,44 @@
+{
+  if (!StringUtils.hasLength(mimeType)) {
+    throw new InvalidMimeTypeException(mimeType,"'mimeType' must not be empty");
+  }
+  String[] parts=StringUtils.tokenizeToStringArray(mimeType,";");
+  String fullType=parts[0].trim();
+  if (MimeType.WILDCARD_TYPE.equals(fullType)) {
+    fullType="*/*";
+  }
+  int subIndex=fullType.indexOf('/');
+  if (subIndex == -1) {
+    throw new InvalidMimeTypeException(mimeType,"does not contain '/'");
+  }
+  if (subIndex == fullType.length() - 1) {
+    throw new InvalidMimeTypeException(mimeType,"does not contain subtype after '/'");
+  }
+  String type=fullType.substring(0,subIndex);
+  String subtype=fullType.substring(subIndex + 1,fullType.length());
+  if (MimeType.WILDCARD_TYPE.equals(type) && !MimeType.WILDCARD_TYPE.equals(subtype)) {
+    throw new InvalidMimeTypeException(mimeType,"wildcard type is legal only in '*/*' (all mime types)");
+  }
+  Map<String,String> parameters=null;
+  if (parts.length > 1) {
+    parameters=new LinkedHashMap<String,String>(parts.length - 1);
+    for (int i=1; i < parts.length; i++) {
+      String parameter=parts[i];
+      int eqIndex=parameter.indexOf('=');
+      if (eqIndex != -1) {
+        String attribute=parameter.substring(0,eqIndex);
+        String value=parameter.substring(eqIndex + 1,parameter.length());
+        parameters.put(attribute,value);
+      }
+    }
+  }
+  try {
+    return new MimeType(type,subtype,parameters);
+  }
+ catch (  UnsupportedCharsetException ex) {
+    throw new InvalidMimeTypeException(mimeType,"unsupported charset '" + ex.getCharsetName() + "'");
+  }
+catch (  IllegalArgumentException ex) {
+    throw new InvalidMimeTypeException(mimeType,ex.getMessage());
+  }
+}

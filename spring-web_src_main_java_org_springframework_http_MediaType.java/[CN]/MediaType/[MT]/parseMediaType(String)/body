@@ -1,44 +1,15 @@
 {
-  if (!StringUtils.hasLength(mediaType)) {
-    throw new InvalidMediaTypeException(mediaType,"'mediaType' must not be empty");
+  MimeType type;
+  try {
+    type=MimeTypeUtils.parseMimeType(mediaType);
   }
-  String[] parts=StringUtils.tokenizeToStringArray(mediaType,";");
-  String fullType=parts[0].trim();
-  if (WILDCARD_TYPE.equals(fullType)) {
-    fullType="*/*";
-  }
-  int subIndex=fullType.indexOf('/');
-  if (subIndex == -1) {
-    throw new InvalidMediaTypeException(mediaType,"does not contain '/'");
-  }
-  if (subIndex == fullType.length() - 1) {
-    throw new InvalidMediaTypeException(mediaType,"does not contain subtype after '/'");
-  }
-  String type=fullType.substring(0,subIndex);
-  String subtype=fullType.substring(subIndex + 1,fullType.length());
-  if (WILDCARD_TYPE.equals(type) && !WILDCARD_TYPE.equals(subtype)) {
-    throw new InvalidMediaTypeException(mediaType,"wildcard type is legal only in '*/*' (all media types)");
-  }
-  Map<String,String> parameters=null;
-  if (parts.length > 1) {
-    parameters=new LinkedHashMap<String,String>(parts.length - 1);
-    for (int i=1; i < parts.length; i++) {
-      String parameter=parts[i];
-      int eqIndex=parameter.indexOf('=');
-      if (eqIndex != -1) {
-        String attribute=parameter.substring(0,eqIndex);
-        String value=parameter.substring(eqIndex + 1,parameter.length());
-        parameters.put(attribute,value);
-      }
-    }
+ catch (  InvalidMimeTypeException ex) {
+    throw new InvalidMediaTypeException(ex);
   }
   try {
-    return new MediaType(type,subtype,parameters);
+    return new MediaType(type.getType(),type.getSubtype(),type.getParameters());
   }
- catch (  UnsupportedCharsetException ex) {
-    throw new InvalidMediaTypeException(mediaType,"unsupported charset '" + ex.getCharsetName() + "'");
-  }
-catch (  IllegalArgumentException ex) {
+ catch (  IllegalArgumentException ex) {
     throw new InvalidMediaTypeException(mediaType,ex.getMessage());
   }
 }
