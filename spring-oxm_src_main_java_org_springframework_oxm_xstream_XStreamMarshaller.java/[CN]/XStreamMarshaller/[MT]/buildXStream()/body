@@ -1,5 +1,34 @@
 {
-  XStream xstream=new XStream(this.reflectionProvider,this.streamDriver,this.beanClassLoader,this.mapper,this.converterLookup,this.converterRegistry);
+  XStream xstream=new XStream(this.reflectionProvider,this.streamDriver,this.beanClassLoader,this.mapper,this.converterLookup,this.converterRegistry){
+    @Override protected MapperWrapper wrapMapper(    MapperWrapper next){
+      MapperWrapper mapperToWrap=next;
+      if (mapperWrappers != null) {
+        for (        Class<?> mapperWrapper : mapperWrappers) {
+          Assert.isAssignable(MapperWrapper.class,mapperWrapper);
+          Constructor<?> ctor;
+          try {
+            ctor=mapperWrapper.getConstructor(Mapper.class);
+          }
+ catch (          NoSuchMethodException ex) {
+            try {
+              ctor=mapperWrapper.getConstructor(MapperWrapper.class);
+            }
+ catch (            NoSuchMethodException ex2) {
+              throw new IllegalStateException("No appropriate MapperWrapper constructor found: " + mapperWrapper);
+            }
+          }
+          try {
+            mapperToWrap=(MapperWrapper)ctor.newInstance(mapperToWrap);
+          }
+ catch (          Exception ex) {
+            throw new IllegalStateException("Failed to construct MapperWrapper: " + mapperWrapper);
+          }
+        }
+      }
+      return mapperToWrap;
+    }
+  }
+;
   if (this.converters != null) {
     for (int i=0; i < this.converters.length; i++) {
       if (this.converters[i] instanceof Converter) {
@@ -39,7 +68,7 @@
         int idx=field.lastIndexOf('.');
         if (idx != -1) {
           String className=field.substring(0,idx);
-          Class clazz=ClassUtils.forName(className,this.beanClassLoader);
+          Class<?> clazz=ClassUtils.forName(className,this.beanClassLoader);
           String fieldName=field.substring(idx + 1);
           xstream.aliasField(alias,clazz,fieldName);
         }
@@ -64,7 +93,7 @@
           xstream.useAttributeFor((String)entry.getKey(),(Class)entry.getValue());
         }
  else {
-          throw new IllegalArgumentException("Invalid argument 'attributes'. 'useAttributesFor' property takes map of <String, Class>," + " when using a map key of type String");
+          throw new IllegalArgumentException("'useAttributesFor' takes Map<String, Class> when using a map key of type String");
         }
       }
  else       if (entry.getKey() instanceof Class) {
@@ -73,19 +102,19 @@
           xstream.useAttributeFor(key,(String)entry.getValue());
         }
  else         if (entry.getValue() instanceof List) {
-          List list=(List)entry.getValue();
-          for (          Object o : list) {
-            if (o instanceof String) {
-              xstream.useAttributeFor(key,(String)o);
+          List listValue=(List)entry.getValue();
+          for (          Object element : listValue) {
+            if (element instanceof String) {
+              xstream.useAttributeFor(key,(String)element);
             }
           }
         }
  else {
-          throw new IllegalArgumentException("Invalid argument 'attributes'. " + "'useAttributesFor' property takes either <Class, String> or <Class, List<String>> map," + " when using a map key of type Class");
+          throw new IllegalArgumentException("'useAttributesFor' property takes either Map<Class, String> " + "or Map<Class, List<String>> when using a map key of type Class");
         }
       }
  else {
-        throw new IllegalArgumentException("Invalid argument 'attributes. " + "'useAttributesFor' property takes either a map key of type String or Class");
+        throw new IllegalArgumentException("'useAttributesFor' property takes either a map key of type String or Class");
       }
     }
   }
