@@ -1,8 +1,5 @@
 {
-  XStream xstream=new XStream(null,this.streamDriver,this.beanClassLoader,this.mapper);
-  if (this.mode != null) {
-    xstream.setMode(this.mode);
-  }
+  XStream xstream=new XStream(this.reflectionProvider,this.streamDriver,this.beanClassLoader,this.mapper,this.converterLookup,this.converterRegistry);
   if (this.converters != null) {
     for (int i=0; i < this.converters.length; i++) {
       if (this.converters[i] instanceof Converter) {
@@ -15,6 +12,12 @@
         throw new IllegalArgumentException("Invalid ConverterMatcher [" + this.converters[i] + "]");
       }
     }
+  }
+  if (this.marshallingStrategy != null) {
+    xstream.setMarshallingStrategy(this.marshallingStrategy);
+  }
+  if (this.mode != null) {
+    xstream.setMode(this.mode);
   }
   try {
     if (this.aliases != null) {
@@ -54,8 +57,8 @@
       xstream.useAttributeFor(type);
     }
   }
-  if (this.useAttributesFor != null) {
-    for (    Map.Entry<?,?> entry : this.useAttributesFor.entrySet()) {
+  if (this.useAttributeFor != null) {
+    for (    Map.Entry<?,?> entry : this.useAttributeFor.entrySet()) {
       if (entry.getKey() instanceof String) {
         if (entry.getValue() instanceof Class) {
           xstream.useAttributeFor((String)entry.getKey(),(Class)entry.getValue());
