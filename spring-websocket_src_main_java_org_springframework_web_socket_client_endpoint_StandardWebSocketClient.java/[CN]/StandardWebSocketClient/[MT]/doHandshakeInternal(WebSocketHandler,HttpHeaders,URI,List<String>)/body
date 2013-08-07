@@ -1,19 +1,10 @@
 {
-  Assert.notNull(webSocketHandler,"webSocketHandler must not be null");
-  Assert.notNull(uri,"uri must not be null");
-  httpHeaders=(httpHeaders != null) ? httpHeaders : new HttpHeaders();
-  if (logger.isDebugEnabled()) {
-    logger.debug("Connecting to " + uri);
-  }
   StandardWebSocketSessionAdapter session=new StandardWebSocketSessionAdapter();
   session.setUri(uri);
   session.setRemoteHostName(uri.getHost());
   ClientEndpointConfig.Builder configBuidler=ClientEndpointConfig.Builder.create();
   configBuidler.configurator(new StandardWebSocketClientConfigurator(httpHeaders));
-  List<String> protocols=httpHeaders.getSecWebSocketProtocol();
-  if (!protocols.isEmpty()) {
-    configBuidler.preferredSubprotocols(protocols);
-  }
+  configBuidler.preferredSubprotocols(protocols);
   try {
     Endpoint endpoint=new StandardEndpointAdapter(webSocketHandler,session);
     this.webSocketContainer.connectToServer(endpoint,configBuidler.build(),uri);

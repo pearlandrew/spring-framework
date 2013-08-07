@@ -1,0 +1,20 @@
+{
+  Assert.notNull(webSocketHandler,"webSocketHandler must not be null");
+  Assert.notNull(uri,"uri must not be null");
+  if (logger.isDebugEnabled()) {
+    logger.debug("Connecting to " + uri);
+  }
+  HttpHeaders headersToUse=new HttpHeaders();
+  if (headers != null) {
+    for (    String header : headers.keySet()) {
+      if (!disallowedHeaders.contains(header.toLowerCase())) {
+        headersToUse.put(header,headers.get(header));
+      }
+    }
+  }
+  List<String> subProtocols=new ArrayList<String>();
+  if ((headers != null) && (headers.getSecWebSocketProtocol() != null)) {
+    subProtocols.addAll(headers.getSecWebSocketProtocol());
+  }
+  return doHandshakeInternal(webSocketHandler,headersToUse,uri,subProtocols);
+}

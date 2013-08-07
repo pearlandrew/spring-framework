@@ -1,15 +1,15 @@
 {
-  Assert.notNull(webSocketHandler,"webSocketHandler must not be null");
-  Assert.notNull(uri,"uri must not be null");
-  if (logger.isDebugEnabled()) {
-    logger.debug("Connecting to " + uri);
+  ClientUpgradeRequest request=new ClientUpgradeRequest();
+  request.setSubProtocols(protocols);
+  for (  String header : headers.keySet()) {
+    request.setHeader(header,headers.get(header));
   }
   JettyWebSocketSessionAdapter session=new JettyWebSocketSessionAdapter();
   session.setUri(uri);
   session.setRemoteHostName(uri.getHost());
   JettyWebSocketListenerAdapter listener=new JettyWebSocketListenerAdapter(webSocketHandler,session);
   try {
-    this.client.connect(listener,uri).get();
+    this.client.connect(listener,uri,request).get();
     return session;
   }
  catch (  Exception e) {
