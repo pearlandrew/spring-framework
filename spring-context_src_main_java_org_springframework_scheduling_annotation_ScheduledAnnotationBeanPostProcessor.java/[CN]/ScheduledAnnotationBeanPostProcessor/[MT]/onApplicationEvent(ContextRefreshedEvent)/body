@@ -2,17 +2,17 @@
   if (event.getApplicationContext() != this.applicationContext) {
     return;
   }
-  Map<String,SchedulingConfigurer> configurers=this.applicationContext.getBeansOfType(SchedulingConfigurer.class);
   if (this.scheduler != null) {
     this.registrar.setScheduler(this.scheduler);
   }
+  Map<String,SchedulingConfigurer> configurers=this.applicationContext.getBeansOfType(SchedulingConfigurer.class);
   for (  SchedulingConfigurer configurer : configurers.values()) {
     configurer.configureTasks(this.registrar);
   }
   if (this.registrar.hasTasks() && this.registrar.getScheduler() == null) {
     Map<String,? super Object> schedulers=new HashMap<String,Object>();
-    schedulers.putAll(applicationContext.getBeansOfType(TaskScheduler.class));
-    schedulers.putAll(applicationContext.getBeansOfType(ScheduledExecutorService.class));
+    schedulers.putAll(this.applicationContext.getBeansOfType(TaskScheduler.class));
+    schedulers.putAll(this.applicationContext.getBeansOfType(ScheduledExecutorService.class));
     if (schedulers.size() == 0) {
     }
  else     if (schedulers.size() == 1) {
