@@ -4,7 +4,9 @@
     @Override public void accept(    final TcpConnection<String,String> connection){
       connection.consume(new Consumer<String>(){
         @Override public void accept(        String stompFrame){
-          handleMessage(messageConverter.toMessage(stompFrame),connection);
+          if (!StringUtils.isEmpty(stompFrame)) {
+            handleMessage(messageConverter.toMessage(stompFrame),connection);
+          }
         }
       }
 );
@@ -12,4 +14,5 @@
   }
 ).get();
   this.tcpServer.start();
+  this.running=true;
 }

@@ -1,7 +1,4 @@
 {
-  int port=SocketUtils.findAvailableTcpPort();
-  TestStompBroker stompBroker=new TestStompBroker(port);
-  stompBroker.start();
   String sessionId="abc123";
   final CountDownLatch errorLatch=new CountDownLatch(1);
   messageChannel.subscribe(new MessageHandler(){
@@ -13,11 +10,14 @@
     }
   }
 );
-  relay.setRelayPort(port);
-  relay.start();
   relay.handleMessage(createConnectMessage(sessionId));
   stompBroker.awaitMessages(2);
+  assertEquals(1,brokerAvailabilityListener.availabilityEvents.size());
+  assertTrue(brokerAvailabilityListener.availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
   stompBroker.stop();
   relay.handleMessage(createSubscribeMessage(sessionId,"/topic/test/"));
   errorLatch.await(30,TimeUnit.SECONDS);
+  assertEquals(2,brokerAvailabilityListener.availabilityEvents.size());
+  assertTrue(brokerAvailabilityListener.availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
+  assertTrue(brokerAvailabilityListener.availabilityEvents.get(1) instanceof BrokerBecameUnavailableEvent);
 }
