@@ -1,12 +1,13 @@
 {
-  StandardWebSocketSessionAdapter session=new StandardWebSocketSessionAdapter();
-  session.setUri(uri);
-  session.setRemoteHostName(uri.getHost());
+  int port=getPort(uri);
+  InetSocketAddress localAddress=new InetSocketAddress(getLocalHost(),port);
+  InetSocketAddress remoteAddress=new InetSocketAddress(uri.getHost(),port);
+  StandardWebSocketSession session=new StandardWebSocketSession(headers,localAddress,remoteAddress);
   ClientEndpointConfig.Builder configBuidler=ClientEndpointConfig.Builder.create();
-  configBuidler.configurator(new StandardWebSocketClientConfigurator(httpHeaders));
+  configBuidler.configurator(new StandardWebSocketClientConfigurator(headers));
   configBuidler.preferredSubprotocols(protocols);
   try {
-    Endpoint endpoint=new StandardEndpointAdapter(webSocketHandler,session);
+    Endpoint endpoint=new StandardWebSocketHandlerAdapter(webSocketHandler,session);
     this.webSocketContainer.connectToServer(endpoint,configBuidler.build(),uri);
     return session;
   }

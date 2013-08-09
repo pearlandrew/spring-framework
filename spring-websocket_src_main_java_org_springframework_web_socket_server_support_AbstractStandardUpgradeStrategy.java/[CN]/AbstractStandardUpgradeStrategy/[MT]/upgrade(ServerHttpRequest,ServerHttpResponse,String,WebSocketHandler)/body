@@ -1,6 +1,8 @@
 {
-  StandardWebSocketSessionAdapter session=new StandardWebSocketSessionAdapter();
-  this.wsSessionInitializer.initialize(request,response,protocol,session);
-  StandardEndpointAdapter endpoint=new StandardEndpointAdapter(handler,session);
-  upgradeInternal(request,response,protocol,endpoint);
+  HttpHeaders headers=request.getHeaders();
+  InetSocketAddress localAddress=request.getLocalAddress();
+  InetSocketAddress remoteAddress=request.getRemoteAddress();
+  StandardWebSocketSession wsSession=new StandardWebSocketSession(headers,localAddress,remoteAddress);
+  StandardWebSocketHandlerAdapter endpoint=new StandardWebSocketHandlerAdapter(wsHandler,wsSession);
+  upgradeInternal(request,response,acceptedProtocol,endpoint);
 }

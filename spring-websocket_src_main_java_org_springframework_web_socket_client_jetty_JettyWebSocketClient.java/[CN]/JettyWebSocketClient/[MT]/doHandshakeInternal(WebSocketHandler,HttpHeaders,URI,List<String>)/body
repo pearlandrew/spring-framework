@@ -4,13 +4,11 @@
   for (  String header : headers.keySet()) {
     request.setHeader(header,headers.get(header));
   }
-  JettyWebSocketSessionAdapter session=new JettyWebSocketSessionAdapter();
-  session.setUri(uri);
-  session.setRemoteHostName(uri.getHost());
-  JettyWebSocketListenerAdapter listener=new JettyWebSocketListenerAdapter(webSocketHandler,session);
+  JettyWebSocketSession wsSession=new JettyWebSocketSession(null);
+  JettyWebSocketHandlerAdapter listener=new JettyWebSocketHandlerAdapter(wsHandler,wsSession);
   try {
     this.client.connect(listener,uri,request).get();
-    return session;
+    return wsSession;
   }
  catch (  Exception e) {
     throw new WebSocketConnectFailureException("Failed to connect to " + uri,e);
