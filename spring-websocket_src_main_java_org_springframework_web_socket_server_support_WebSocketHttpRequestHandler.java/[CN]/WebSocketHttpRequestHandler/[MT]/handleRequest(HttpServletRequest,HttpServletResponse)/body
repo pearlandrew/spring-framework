@@ -1,6 +1,27 @@
 {
-  ServerHttpRequest httpRequest=new ServletServerHttpRequest(request);
-  ServerHttpResponse httpResponse=new ServletServerHttpResponse(response);
-  this.handshakeHandler.doHandshake(httpRequest,httpResponse,this.webSocketHandler);
-  httpResponse.flush();
+  ServerHttpRequest request=new ServletServerHttpRequest(servletRequest);
+  ServerHttpResponse response=new ServletServerHttpResponse(servletResponse);
+  HandshakeInterceptorChain chain=new HandshakeInterceptorChain(this.interceptors,this.webSocketHandler);
+  HandshakeFailureException failure=null;
+  try {
+    Map<String,Object> attributes=new HashMap<String,Object>();
+    if (!chain.applyBeforeHandshake(request,response,attributes)) {
+      return;
+    }
+    this.handshakeHandler.doHandshake(request,response,this.webSocketHandler,attributes);
+    chain.applyAfterHandshake(request,response,null);
+  }
+ catch (  HandshakeFailureException ex) {
+    failure=ex;
+  }
+catch (  Throwable t) {
+    failure=new HandshakeFailureException("Uncaught failure for request " + request.getURI(),t);
+  }
+ finally {
+    if (failure != null) {
+      chain.applyAfterHandshake(request,response,failure);
+      throw failure;
+    }
+    response.flush();
+  }
 }

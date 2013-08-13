@@ -1,0 +1,17 @@
+{
+  ClientUpgradeRequest request=new ClientUpgradeRequest();
+  request.setSubProtocols(protocols);
+  for (  String header : headers.keySet()) {
+    request.setHeader(header,headers.get(header));
+  }
+  Principal user=getUser();
+  JettyWebSocketSession wsSession=new JettyWebSocketSession(user,handshakeAttributes);
+  JettyWebSocketHandlerAdapter listener=new JettyWebSocketHandlerAdapter(wsHandler,wsSession);
+  try {
+    this.client.connect(listener,uri,request).get();
+    return wsSession;
+  }
+ catch (  Exception e) {
+    throw new WebSocketConnectFailureException("Failed to connect to " + uri,e);
+  }
+}

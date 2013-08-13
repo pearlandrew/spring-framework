@@ -1,13 +1,33 @@
 {
-  if (isWebSocketEnabled()) {
-    TransportHandler transportHandler=this.transportHandlers.get(TransportType.WEBSOCKET);
-    if (transportHandler != null) {
-      if (transportHandler instanceof HandshakeHandler) {
-        ((HandshakeHandler)transportHandler).doHandshake(request,response,webSocketHandler);
-        return;
-      }
-    }
-    logger.warn("No handler for raw WebSocket messages");
+  if (!isWebSocketEnabled()) {
+    return;
   }
-  response.setStatusCode(HttpStatus.NOT_FOUND);
+  TransportHandler transportHandler=this.transportHandlers.get(TransportType.WEBSOCKET);
+  if ((transportHandler == null) || !(transportHandler instanceof HandshakeHandler)) {
+    logger.warn("No handler for raw WebSocket messages");
+    response.setStatusCode(HttpStatus.NOT_FOUND);
+    return;
+  }
+  HandshakeInterceptorChain chain=new HandshakeInterceptorChain(this.interceptors,wsHandler);
+  HandshakeFailureException failure=null;
+  try {
+    Map<String,Object> attributes=new HashMap<String,Object>();
+    if (!chain.applyBeforeHandshake(request,response,attributes)) {
+      return;
+    }
+    ((HandshakeHandler)transportHandler).doHandshake(request,response,wsHandler,attributes);
+    chain.applyAfterHandshake(request,response,null);
+  }
+ catch (  HandshakeFailureException ex) {
+    failure=ex;
+  }
+catch (  Throwable t) {
+    failure=new HandshakeFailureException("Uncaught failure for request " + request.getURI(),t);
+  }
+ finally {
+    if (failure != null) {
+      chain.applyAfterHandshake(request,response,failure);
+      throw failure;
+    }
+  }
 }

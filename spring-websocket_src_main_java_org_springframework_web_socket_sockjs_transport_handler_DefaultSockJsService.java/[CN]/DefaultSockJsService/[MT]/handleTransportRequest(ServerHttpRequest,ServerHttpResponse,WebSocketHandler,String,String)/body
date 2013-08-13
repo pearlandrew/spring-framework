@@ -27,28 +27,49 @@
     }
     return;
   }
-  WebSocketSession session=this.sessions.get(sessionId);
-  if (session == null) {
-    if (transportHandler instanceof SockJsSessionFactory) {
-      SockJsSessionFactory sessionFactory=(SockJsSessionFactory)transportHandler;
-      session=createSockJsSession(sessionId,sessionFactory,wsHandler,request,response);
+  HandshakeInterceptorChain chain=new HandshakeInterceptorChain(this.interceptors,wsHandler);
+  SockJsException failure=null;
+  try {
+    WebSocketSession session=this.sessions.get(sessionId);
+    if (session == null) {
+      if (transportHandler instanceof SockJsSessionFactory) {
+        Map<String,Object> attributes=new HashMap<String,Object>();
+        if (!chain.applyBeforeHandshake(request,response,attributes)) {
+          return;
+        }
+        SockJsSessionFactory sessionFactory=(SockJsSessionFactory)transportHandler;
+        session=createSockJsSession(sessionId,sessionFactory,wsHandler,attributes,request,response);
+      }
+ else {
+        response.setStatusCode(HttpStatus.NOT_FOUND);
+        logger.warn("Session not found");
+        return;
+      }
+    }
+    if (transportType.sendsNoCacheInstruction()) {
+      addNoCacheHeaders(response);
+    }
+    if (transportType.sendsSessionCookie() && isDummySessionCookieEnabled()) {
+      Cookie cookie=request.getCookies().get("JSESSIONID");
+      String value=(cookie != null) ? cookie.getValue() : "dummy";
+      response.getHeaders().set("Set-Cookie","JSESSIONID=" + value + ";path=/");
+    }
+    if (transportType.supportsCors()) {
+      addCorsHeaders(request,response);
+    }
+    transportHandler.handleRequest(request,response,wsHandler,session);
+    chain.applyAfterHandshake(request,response,null);
+  }
+ catch (  SockJsException ex) {
+    failure=ex;
+  }
+catch (  Throwable t) {
+    failure=new SockJsException("Uncaught failure for request " + request.getURI(),sessionId,t);
+  }
+ finally {
+    if (failure != null) {
+      chain.applyAfterHandshake(request,response,failure);
+      throw failure;
     }
   }
-  if (session == null) {
-    response.setStatusCode(HttpStatus.NOT_FOUND);
-    logger.warn("Session not found");
-    return;
-  }
-  if (transportType.sendsNoCacheInstruction()) {
-    addNoCacheHeaders(response);
-  }
-  if (transportType.sendsSessionCookie() && isDummySessionCookieEnabled()) {
-    Cookie cookie=request.getCookies().get("JSESSIONID");
-    String value=(cookie != null) ? cookie.getValue() : "dummy";
-    response.getHeaders().set("Set-Cookie","JSESSIONID=" + value + ";path=/");
-  }
-  if (transportType.supportsCors()) {
-    addCorsHeaders(request,response);
-  }
-  transportHandler.handleRequest(request,response,wsHandler,session);
 }
