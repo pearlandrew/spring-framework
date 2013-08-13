@@ -1,7 +1,9 @@
 {
   String body="<root>Hello World</root>";
   MockHttpOutputMessage outputMessage=new MockHttpOutputMessage();
+  Marshaller marshaller=mock(Marshaller.class);
+  doNothing().when(marshaller).marshal(eq(body),isA(Result.class));
+  MarshallingHttpMessageConverter converter=new MarshallingHttpMessageConverter(marshaller);
   converter.write(body,null,outputMessage);
   assertEquals("Invalid content-type",new MediaType("application","xml"),outputMessage.getHeaders().getContentType());
-  verify(marshaller).marshal(eq(body),isA(StreamResult.class));
 }
