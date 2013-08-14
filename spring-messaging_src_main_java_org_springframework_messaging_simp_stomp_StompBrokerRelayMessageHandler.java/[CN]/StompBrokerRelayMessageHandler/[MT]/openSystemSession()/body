@@ -2,6 +2,14 @@
   RelaySession session=new RelaySession(STOMP_RELAY_SYSTEM_SESSION_ID){
     @Override protected void sendMessageToClient(    Message<?> message){
     }
+    @Override protected Composable<TcpConnection<String,String>> openConnection(){
+      return tcpClient.open(new Reconnect(){
+        @Override public Tuple2<InetSocketAddress,Long> reconnect(        InetSocketAddress currentAddress,        int attempt){
+          return Tuple.of(currentAddress,5000L);
+        }
+      }
+);
+    }
   }
 ;
   this.relaySessions.put(STOMP_RELAY_SYSTEM_SESSION_ID,session);

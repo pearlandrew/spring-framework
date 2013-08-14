@@ -4,18 +4,17 @@ synchronized (this.monitor) {
       if (!this.isConnected) {
         this.messageQueue.add(message);
         if (logger.isTraceEnabled()) {
-          logger.trace("Not connected yet, message queued, queue size=" + this.messageQueue.size());
+          logger.trace("Not connected, message queued. Queue size=" + this.messageQueue.size());
         }
         return;
       }
     }
   }
-  TcpConnection<String,String> connection=this.promise.get();
   if (this.messageQueue.isEmpty()) {
-    forwardInternal(message,connection);
+    forwardInternal(message);
   }
  else {
     this.messageQueue.add(message);
-    flushMessages(connection);
+    flushMessages();
   }
 }

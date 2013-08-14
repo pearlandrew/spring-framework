@@ -1,7 +1,7 @@
 {
   String sessionId="abc123";
   final CountDownLatch errorLatch=new CountDownLatch(1);
-  messageChannel.subscribe(new MessageHandler(){
+  this.messageChannel.subscribe(new MessageHandler(){
     @Override public void handleMessage(    Message<?> message) throws MessagingException {
       StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
       if (headers.getCommand() == StompCommand.ERROR) {
@@ -10,13 +10,13 @@
     }
   }
 );
-  stompBroker.awaitMessages(1);
-  assertEquals(1,brokerAvailabilityListener.availabilityEvents.size());
-  assertTrue(brokerAvailabilityListener.availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
-  stompBroker.stop();
-  relay.handleMessage(createConnectMessage(sessionId));
+  this.stompBroker.awaitMessages(1);
+  List<BrokerAvailabilityEvent> availabilityEvents=this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
+  assertTrue(availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
+  this.stompBroker.stop();
+  this.relay.handleMessage(createConnectMessage(sessionId));
   errorLatch.await(30,TimeUnit.SECONDS);
-  assertEquals(2,brokerAvailabilityListener.availabilityEvents.size());
-  assertTrue(brokerAvailabilityListener.availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
-  assertTrue(brokerAvailabilityListener.availabilityEvents.get(1) instanceof BrokerBecameUnavailableEvent);
+  availabilityEvents=brokerAvailabilityListener.awaitAvailabilityEvents(2);
+  assertTrue(availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
+  assertTrue(availabilityEvents.get(1) instanceof BrokerBecameUnavailableEvent);
 }

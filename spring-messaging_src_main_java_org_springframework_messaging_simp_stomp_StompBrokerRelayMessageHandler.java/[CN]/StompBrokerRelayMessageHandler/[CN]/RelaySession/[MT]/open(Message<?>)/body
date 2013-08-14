@@ -1,19 +1,21 @@
 {
   Assert.notNull(message,"message is required");
-  this.promise=tcpClient.open();
-  this.promise.consume(new Consumer<TcpConnection<String,String>>(){
-    @Override public void accept(    TcpConnection<String,String> connection){
-      connection.in().consume(new Consumer<String>(){
+  Composable<TcpConnection<String,String>> connectionComposable=openConnection();
+  connectionComposable.consume(new Consumer<TcpConnection<String,String>>(){
+    @Override public void accept(    TcpConnection<String,String> newConnection){
+      isConnected=false;
+      connection=newConnection;
+      newConnection.in().consume(new Consumer<String>(){
         @Override public void accept(        String stompFrame){
           readStompFrame(stompFrame);
         }
       }
 );
-      forwardInternal(message,connection);
+      forwardInternal(message);
     }
   }
 );
-  this.promise.onError(new Consumer<Throwable>(){
+  connectionComposable.when(Throwable.class,new Consumer<Throwable>(){
     @Override public void accept(    Throwable ex){
       relaySessions.remove(sessionId);
       logger.error("Failed to connect to broker",ex);
