@@ -1,13 +1,13 @@
 {
   List<BrokerAvailabilityEvent> availabilityEvents=this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
-  assertTrue(availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
+  assertTrue(availabilityEvents.get(0).isBrokerAvailable());
   List<Message<?>> messages=this.stompBroker.awaitMessages(1);
   assertEquals(1,messages.size());
   assertStompCommand(messages.get(0),StompCommand.CONNECT);
   this.stompBroker.stop();
   this.relay.handleMessage(createSendMessage(null,"/topic/test","test"));
   availabilityEvents=this.brokerAvailabilityListener.awaitAvailabilityEvents(2);
-  assertTrue(availabilityEvents.get(1) instanceof BrokerBecameUnavailableEvent);
+  assertFalse(availabilityEvents.get(1).isBrokerAvailable());
   this.relay.handleMessage(createSendMessage(null,"/topic/test","test-again"));
   this.stompBroker.start();
   messages=this.stompBroker.awaitMessages(3);
@@ -15,5 +15,5 @@
   assertStompCommand(messages.get(1),StompCommand.CONNECT);
   assertStompCommandAndPayload(messages.get(2),StompCommand.SEND,"test-again");
   availabilityEvents=this.brokerAvailabilityListener.awaitAvailabilityEvents(3);
-  assertTrue(availabilityEvents.get(2) instanceof BrokerBecameAvailableEvent);
+  assertTrue(availabilityEvents.get(2).isBrokerAvailable());
 }

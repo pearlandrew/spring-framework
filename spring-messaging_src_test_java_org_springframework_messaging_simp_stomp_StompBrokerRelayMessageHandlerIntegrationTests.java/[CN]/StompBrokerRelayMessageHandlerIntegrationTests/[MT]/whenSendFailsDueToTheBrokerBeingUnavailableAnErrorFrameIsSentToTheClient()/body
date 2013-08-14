@@ -13,11 +13,11 @@
   this.relay.handleMessage(createConnectMessage(sessionId));
   this.stompBroker.awaitMessages(2);
   List<BrokerAvailabilityEvent> availabilityEvents=this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
-  assertTrue(availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
+  assertTrue(availabilityEvents.get(0).isBrokerAvailable());
   this.stompBroker.stop();
   this.relay.handleMessage(createSubscribeMessage(sessionId,"/topic/test/"));
   errorLatch.await(30,TimeUnit.SECONDS);
   availabilityEvents=this.brokerAvailabilityListener.awaitAvailabilityEvents(1);
-  assertTrue(availabilityEvents.get(0) instanceof BrokerBecameAvailableEvent);
-  assertTrue(availabilityEvents.get(1) instanceof BrokerBecameUnavailableEvent);
+  assertTrue(availabilityEvents.get(0).isBrokerAvailable());
+  assertFalse(availabilityEvents.get(1).isBrokerAvailable());
 }
