@@ -8,18 +8,19 @@
   if (contentType != null) {
     result.put(STOMP_CONTENT_TYPE_HEADER,Arrays.asList(contentType.toString()));
   }
-  if (StompCommand.MESSAGE.equals(getCommand())) {
+  if (getCommand().requiresSubscriptionId()) {
     String subscriptionId=getSubscriptionId();
     if (subscriptionId != null) {
-      result.put(STOMP_SUBSCRIPTION_HEADER,Arrays.asList(subscriptionId));
+      String name=StompCommand.MESSAGE.equals(getCommand()) ? STOMP_SUBSCRIPTION_HEADER : STOMP_ID_HEADER;
+      result.put(name,Arrays.asList(subscriptionId));
     }
  else {
-      logger.warn("STOMP MESSAGE frame should have a subscription: " + this.toString());
+      logger.warn(getCommand() + " frame should have a subscription: " + this.toString());
     }
-    if ((getMessageId() == null)) {
-      String messageId=getSessionId() + "-" + messageIdCounter.getAndIncrement();
-      result.put(STOMP_MESSAGE_ID_HEADER,Arrays.asList(messageId));
-    }
+  }
+  if (StompCommand.MESSAGE.equals(getCommand()) && ((getMessageId() == null))) {
+    String messageId=getSessionId() + "-" + messageIdCounter.getAndIncrement();
+    result.put(STOMP_MESSAGE_ID_HEADER,Arrays.asList(messageId));
   }
   return result;
 }

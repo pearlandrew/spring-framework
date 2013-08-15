@@ -1,0 +1,11 @@
+{
+  String sess1="sess1";
+  MessageExchange connect=MessageExchangeBuilder.connect(sess1).build();
+  this.relay.handleMessage(connect.message);
+  Thread.sleep(2000);
+  stopBrokerAndAwait();
+  MessageExchange subscribe=MessageExchangeBuilder.subscribe(sess1,"s1","/topic/a").andExpectError().build();
+  this.responseHandler.expect(subscribe);
+  this.relay.handleMessage(subscribe.message);
+  this.responseHandler.awaitAndAssert();
+}
