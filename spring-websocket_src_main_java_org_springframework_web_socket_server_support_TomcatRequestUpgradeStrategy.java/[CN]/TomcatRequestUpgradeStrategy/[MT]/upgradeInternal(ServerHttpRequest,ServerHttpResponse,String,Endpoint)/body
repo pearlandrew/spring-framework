@@ -1,25 +1,16 @@
 {
   Assert.isTrue(request instanceof ServletServerHttpRequest);
   HttpServletRequest servletRequest=((ServletServerHttpRequest)request).getServletRequest();
-  WsHttpUpgradeHandler upgradeHandler;
+  Assert.isTrue(response instanceof ServletServerHttpResponse);
+  HttpServletResponse servletResponse=((ServletServerHttpResponse)response).getServletResponse();
+  String path=servletRequest.getRequestURI();
+  Map<String,String> pathParams=Collections.<String,String>emptyMap();
+  ServerEndpointRegistration endpointConfig=new ServerEndpointRegistration(path,endpoint);
+  endpointConfig.setSubprotocols(Arrays.asList(acceptedProtocol));
   try {
-    upgradeHandler=servletRequest.upgrade(WsHttpUpgradeHandler.class);
-  }
- catch (  ServletException e) {
-    throw new HandshakeFailureException("Unable to create UpgardeHandler",e);
-  }
-  WsHandshakeRequest webSocketRequest=new WsHandshakeRequest(servletRequest);
-  try {
-    Method method=ReflectionUtils.findMethod(WsHandshakeRequest.class,"finished");
-    ReflectionUtils.makeAccessible(method);
-    method.invoke(webSocketRequest);
+    getContainer(servletRequest).doUpgrade(servletRequest,servletResponse,endpointConfig,pathParams);
   }
  catch (  Exception ex) {
     throw new HandshakeFailureException("Failed to upgrade HttpServletRequest",ex);
   }
-  String attribute="javax.websocket.server.ServerContainer";
-  ServletContext servletContext=servletRequest.getServletContext();
-  WsServerContainer serverContainer=(WsServerContainer)servletContext.getAttribute(attribute);
-  ServerEndpointConfig endpointConfig=new ServerEndpointRegistration("/shouldntmatter",endpoint);
-  upgradeHandler.preInit(endpoint,endpointConfig,serverContainer,webSocketRequest,acceptedProtocol,Collections.<String,String>emptyMap(),servletRequest.isSecure());
 }
