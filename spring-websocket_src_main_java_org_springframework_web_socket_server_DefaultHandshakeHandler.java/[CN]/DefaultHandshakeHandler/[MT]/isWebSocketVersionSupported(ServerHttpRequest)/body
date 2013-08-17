@@ -1,9 +1,16 @@
 {
-  String requestedVersion=request.getHeaders().getSecWebSocketVersion();
-  for (  String supportedVersion : getSupportedVerions()) {
-    if (supportedVersion.equals(requestedVersion)) {
+  String version=request.getHeaders().getSecWebSocketVersion();
+  String[] supportedVersions=getSupportedVerions();
+  if (logger.isDebugEnabled()) {
+    logger.debug("Requested version=" + version + ", supported="+ Arrays.toString(supportedVersions));
+  }
+  for (  String supportedVersion : supportedVersions) {
+    if (supportedVersion.trim().equals(version)) {
       return true;
     }
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("Version=" + version + " is not a supported version");
   }
   return false;
 }

@@ -1,5 +1,7 @@
 {
-  logger.debug("Starting handshake for " + request.getURI());
+  if (logger.isDebugEnabled()) {
+    logger.debug("Initiating handshake for " + request.getURI() + ", headers="+ request.getHeaders());
+  }
   if (!HttpMethod.GET.equals(request.getMethod())) {
     response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
     response.getHeaders().setAllow(Collections.singleton(HttpMethod.GET));
@@ -29,15 +31,8 @@
     return false;
   }
   String selectedProtocol=selectProtocol(request.getHeaders().getSecWebSocketProtocol());
-  logger.debug("Upgrading HTTP request");
-  response.setStatusCode(HttpStatus.SWITCHING_PROTOCOLS);
-  response.getHeaders().setUpgrade("WebSocket");
-  response.getHeaders().setConnection("Upgrade");
-  response.getHeaders().setSecWebSocketProtocol(selectedProtocol);
-  response.getHeaders().setSecWebSocketAccept(getWebSocketKeyHash(wsKey));
-  response.flush();
-  if (logger.isTraceEnabled()) {
-    logger.trace("Upgrading with " + webSocketHandler);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Upgrading request");
   }
   this.requestUpgradeStrategy.upgrade(request,response,selectedProtocol,webSocketHandler,attributes);
   return true;

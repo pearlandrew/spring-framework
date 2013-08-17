@@ -3,21 +3,18 @@
   HttpServletRequest servletRequest=((ServletServerHttpRequest)request).getServletRequest();
   Assert.isTrue(response instanceof ServletServerHttpResponse);
   HttpServletResponse servletResponse=((ServletServerHttpResponse)response).getServletResponse();
-  servletResponse=new AlreadyUpgradedResponseWrapper(servletResponse);
-  WebSocketApplication wsApp=createTyrusEndpoint(servletRequest,endpoint,selectedProtocol);
-  WebSocketEngine engine=WebSocketEngine.getEngine();
+  WebSocketApplication webSocketApplication=createTyrusEndpoint(servletRequest,endpoint,selectedProtocol);
+  WebSocketEngine webSocketEngine=WebSocketEngine.getEngine();
   try {
-    engine.register(wsApp);
+    webSocketEngine.register(webSocketApplication);
   }
  catch (  DeploymentException ex) {
     throw new HandshakeFailureException("Failed to deploy endpoint in GlassFish",ex);
   }
   try {
-    if (!performUpgrade(servletRequest,servletResponse,request.getHeaders(),wsApp)) {
-      throw new HandshakeFailureException("Failed to upgrade HttpServletRequest");
-    }
+    performUpgrade(servletRequest,servletResponse,request.getHeaders(),webSocketApplication);
   }
   finally {
-    engine.unregister(wsApp);
+    webSocketEngine.unregister(webSocketApplication);
   }
 }
