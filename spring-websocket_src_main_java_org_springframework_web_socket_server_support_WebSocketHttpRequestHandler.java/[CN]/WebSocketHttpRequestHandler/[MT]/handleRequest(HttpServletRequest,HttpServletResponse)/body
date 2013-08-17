@@ -1,15 +1,16 @@
 {
   ServerHttpRequest request=new ServletServerHttpRequest(servletRequest);
   ServerHttpResponse response=new ServletServerHttpResponse(servletResponse);
-  HandshakeInterceptorChain chain=new HandshakeInterceptorChain(this.interceptors,this.webSocketHandler);
+  HandshakeInterceptorChain chain=new HandshakeInterceptorChain(this.interceptors,this.wsHandler);
   HandshakeFailureException failure=null;
   try {
     Map<String,Object> attributes=new HashMap<String,Object>();
     if (!chain.applyBeforeHandshake(request,response,attributes)) {
       return;
     }
-    this.handshakeHandler.doHandshake(request,response,this.webSocketHandler,attributes);
+    this.handshakeHandler.doHandshake(request,response,this.wsHandler,attributes);
     chain.applyAfterHandshake(request,response,null);
+    response.close();
   }
  catch (  HandshakeFailureException ex) {
     failure=ex;
@@ -22,6 +23,5 @@ catch (  Throwable t) {
       chain.applyAfterHandshake(request,response,failure);
       throw failure;
     }
-    response.flush();
   }
 }
