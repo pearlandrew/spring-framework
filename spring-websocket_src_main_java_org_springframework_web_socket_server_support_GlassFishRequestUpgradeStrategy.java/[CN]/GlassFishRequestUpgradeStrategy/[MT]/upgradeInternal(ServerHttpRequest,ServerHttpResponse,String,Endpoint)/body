@@ -9,12 +9,15 @@
     webSocketEngine.register(webSocketApplication);
   }
  catch (  DeploymentException ex) {
-    throw new HandshakeFailureException("Failed to deploy endpoint in GlassFish",ex);
+    throw new HandshakeFailureException("Failed to configure endpoint in GlassFish",ex);
   }
   try {
     performUpgrade(servletRequest,servletResponse,request.getHeaders(),webSocketApplication);
   }
-  finally {
+ catch (  IOException ex) {
+    throw new HandshakeFailureException("Response update failed during upgrade to WebSocket, uri=" + request.getURI(),ex);
+  }
+ finally {
     webSocketEngine.unregister(webSocketApplication);
   }
 }

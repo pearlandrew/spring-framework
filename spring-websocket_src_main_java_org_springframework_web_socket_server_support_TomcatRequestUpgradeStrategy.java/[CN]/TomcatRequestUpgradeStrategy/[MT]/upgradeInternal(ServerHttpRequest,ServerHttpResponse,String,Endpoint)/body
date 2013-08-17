@@ -10,7 +10,10 @@
   try {
     getContainer(servletRequest).doUpgrade(servletRequest,servletResponse,endpointConfig,pathParams);
   }
- catch (  Exception ex) {
-    throw new HandshakeFailureException("Failed to upgrade HttpServletRequest",ex);
+ catch (  ServletException ex) {
+    throw new HandshakeFailureException("Servlet request failed to upgrade to WebSocket, uri=" + request.getURI(),ex);
+  }
+catch (  IOException ex) {
+    throw new HandshakeFailureException("Response update failed during upgrade to WebSocket, uri=" + request.getURI(),ex);
   }
 }

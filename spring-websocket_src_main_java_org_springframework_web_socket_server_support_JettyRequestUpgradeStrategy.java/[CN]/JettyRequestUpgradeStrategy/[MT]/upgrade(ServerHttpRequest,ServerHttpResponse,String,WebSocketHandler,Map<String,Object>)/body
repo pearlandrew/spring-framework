@@ -3,13 +3,17 @@
   HttpServletRequest servletRequest=((ServletServerHttpRequest)request).getServletRequest();
   Assert.isInstanceOf(ServletServerHttpResponse.class,response);
   HttpServletResponse servletResponse=((ServletServerHttpResponse)response).getServletResponse();
-  if (!this.factory.isUpgradeRequest(servletRequest,servletResponse)) {
-    throw new HandshakeFailureException("Not a WebSocket request");
+  Assert.isTrue(this.factory.isUpgradeRequest(servletRequest,servletResponse),"Not a WebSocket handshake");
+  JettyWebSocketSession session=new JettyWebSocketSession(request.getPrincipal(),attrs);
+  JettyWebSocketHandlerAdapter handlerAdapter=new JettyWebSocketHandlerAdapter(wsHandler,session);
+  try {
+    servletRequest.setAttribute(WS_HANDLER_ATTR_NAME,handlerAdapter);
+    this.factory.acceptWebSocket(servletRequest,servletResponse);
   }
-  JettyWebSocketSession wsSession=new JettyWebSocketSession(request.getPrincipal(),attrs);
-  JettyWebSocketHandlerAdapter wsListener=new JettyWebSocketHandlerAdapter(wsHandler,wsSession);
-  servletRequest.setAttribute(WEBSOCKET_LISTENER_ATTR_NAME,wsListener);
-  if (!this.factory.acceptWebSocket(servletRequest,servletResponse)) {
-    throw new HandshakeFailureException("WebSocket request not accepted by Jetty");
+ catch (  IOException ex) {
+    throw new HandshakeFailureException("Response update failed during upgrade to WebSocket, uri=" + request.getURI(),ex);
+  }
+ finally {
+    servletRequest.removeAttribute(WS_HANDLER_ATTR_NAME);
   }
 }
