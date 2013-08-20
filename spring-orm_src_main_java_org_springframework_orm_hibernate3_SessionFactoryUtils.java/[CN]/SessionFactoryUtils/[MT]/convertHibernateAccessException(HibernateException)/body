@@ -6,9 +6,17 @@
     SQLGrammarException jdbcEx=(SQLGrammarException)ex;
     return new InvalidDataAccessResourceUsageException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL()+ "]",ex);
   }
+  if (ex instanceof QueryTimeoutException) {
+    QueryTimeoutException jdbcEx=(QueryTimeoutException)ex;
+    return new org.springframework.dao.QueryTimeoutException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL()+ "]",ex);
+  }
   if (ex instanceof LockAcquisitionException) {
     LockAcquisitionException jdbcEx=(LockAcquisitionException)ex;
     return new CannotAcquireLockException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL()+ "]",ex);
+  }
+  if (ex instanceof PessimisticLockException) {
+    PessimisticLockException jdbcEx=(PessimisticLockException)ex;
+    return new PessimisticLockingFailureException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL()+ "]",ex);
   }
   if (ex instanceof ConstraintViolationException) {
     ConstraintViolationException jdbcEx=(ConstraintViolationException)ex;
@@ -53,6 +61,9 @@
   }
   if (ex instanceof StaleStateException) {
     return new HibernateOptimisticLockingFailureException((StaleStateException)ex);
+  }
+  if (ex instanceof OptimisticLockException) {
+    return new HibernateOptimisticLockingFailureException((OptimisticLockException)ex);
   }
   return new HibernateSystemException(ex);
 }
