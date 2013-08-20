@@ -1,0 +1,17 @@
+{
+  Assert.notNull(connectMessage,"connectMessage is required");
+  Composable<TcpConnection<String,String>> connectionComposable=openTcpConnection();
+  connectionComposable.consume(new Consumer<TcpConnection<String,String>>(){
+    @Override public void accept(    TcpConnection<String,String> connection){
+      handleTcpConnection(connection,connectMessage);
+    }
+  }
+);
+  connectionComposable.when(Throwable.class,new Consumer<Throwable>(){
+    @Override public void accept(    Throwable ex){
+      relaySessions.remove(sessionId);
+      handleTcpClientFailure("Failed to connect to message broker",ex);
+    }
+  }
+);
+}

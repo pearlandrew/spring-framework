@@ -5,7 +5,12 @@ synchronized (this.lifecycleMonitor) {
     }
     this.environment=new Environment();
     this.tcpClient=new TcpClientSpec<String,String>(NettyTcpClient.class).env(this.environment).codec(new DelimitedCodec<String,String>((byte)0,true,StandardCodecs.STRING_CODEC)).connect(this.relayHost,this.relayPort).get();
-    openSystemSession();
+    if (logger.isDebugEnabled()) {
+      logger.debug("Initializing \"system\" TCP connection");
+    }
+    SystemRelaySession session=new SystemRelaySession();
+    this.relaySessions.put(session.getId(),session);
+    session.connect();
     this.running=true;
   }
 }
