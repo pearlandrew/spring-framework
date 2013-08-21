@@ -1,7 +1,16 @@
 {
   Assert.hasText(attributeName,"attributeName must not be null or empty");
-  Object value=this.get(attributeName);
-  Assert.notNull(value,format("Attribute '%s' not found",attributeName));
-  Assert.isAssignable(expectedType,value.getClass(),format("Attribute '%s' is of type [%s], but [%s] was expected. Cause: ",attributeName,value.getClass().getSimpleName(),expectedType.getSimpleName()));
+  Object value=get(attributeName);
+  Assert.notNull(value,String.format("Attribute '%s' not found",attributeName));
+  if (!expectedType.isInstance(value)) {
+    if (expectedType.isArray() && expectedType.getComponentType().isInstance(value)) {
+      Object arrayValue=Array.newInstance(expectedType.getComponentType(),1);
+      Array.set(arrayValue,0,value);
+      value=arrayValue;
+    }
+ else {
+      throw new IllegalArgumentException(String.format("Attribute '%s' is of type [%s], but [%s] was expected. Cause: ",attributeName,value.getClass().getSimpleName(),expectedType.getSimpleName()));
+    }
+  }
   return (T)value;
 }

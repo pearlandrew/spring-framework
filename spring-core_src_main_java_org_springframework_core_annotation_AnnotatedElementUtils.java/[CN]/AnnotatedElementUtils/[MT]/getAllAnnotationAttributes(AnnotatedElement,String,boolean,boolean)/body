@@ -1,0 +1,25 @@
+{
+  final MultiValueMap<String,Object> attributes=new LinkedMultiValueMap<String,Object>();
+  process(element,annotationType,new Processor<Void>(){
+    @Override public Void process(    Annotation annotation,    int depth){
+      if (annotation.annotationType().getName().equals(annotationType)) {
+        for (        Map.Entry<String,Object> entry : AnnotationUtils.getAnnotationAttributes(annotation,classValuesAsString,nestedAnnotationsAsMap).entrySet()) {
+          attributes.add(entry.getKey(),entry.getValue());
+        }
+      }
+      return null;
+    }
+    @Override public void postProcess(    Annotation annotation,    Void result){
+      for (      String key : attributes.keySet()) {
+        if (!"value".equals(key)) {
+          Object value=AnnotationUtils.getValue(annotation,key);
+          if (value != null) {
+            attributes.add(key,value);
+          }
+        }
+      }
+    }
+  }
+);
+  return (attributes.isEmpty() ? null : attributes);
+}

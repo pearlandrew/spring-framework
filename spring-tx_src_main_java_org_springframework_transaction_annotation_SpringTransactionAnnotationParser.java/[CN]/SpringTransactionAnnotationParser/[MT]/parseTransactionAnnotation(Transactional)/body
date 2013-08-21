@@ -1,31 +1,3 @@
 {
-  RuleBasedTransactionAttribute rbta=new RuleBasedTransactionAttribute();
-  rbta.setPropagationBehavior(ann.propagation().value());
-  rbta.setIsolationLevel(ann.isolation().value());
-  rbta.setTimeout(ann.timeout());
-  rbta.setReadOnly(ann.readOnly());
-  rbta.setQualifier(ann.value());
-  ArrayList<RollbackRuleAttribute> rollBackRules=new ArrayList<RollbackRuleAttribute>();
-  Class[] rbf=ann.rollbackFor();
-  for (  Class rbRule : rbf) {
-    RollbackRuleAttribute rule=new RollbackRuleAttribute(rbRule);
-    rollBackRules.add(rule);
-  }
-  String[] rbfc=ann.rollbackForClassName();
-  for (  String rbRule : rbfc) {
-    RollbackRuleAttribute rule=new RollbackRuleAttribute(rbRule);
-    rollBackRules.add(rule);
-  }
-  Class[] nrbf=ann.noRollbackFor();
-  for (  Class rbRule : nrbf) {
-    NoRollbackRuleAttribute rule=new NoRollbackRuleAttribute(rbRule);
-    rollBackRules.add(rule);
-  }
-  String[] nrbfc=ann.noRollbackForClassName();
-  for (  String rbRule : nrbfc) {
-    NoRollbackRuleAttribute rule=new NoRollbackRuleAttribute(rbRule);
-    rollBackRules.add(rule);
-  }
-  rbta.getRollbackRules().addAll(rollBackRules);
-  return rbta;
+  return parseTransactionAnnotation(AnnotationUtils.getAnnotationAttributes(ann,false,false));
 }
