@@ -1,0 +1,20 @@
+{
+  WsHttpUpgradeHandler upgradeHandler;
+  try {
+    upgradeHandler=request.upgrade(WsHttpUpgradeHandler.class);
+  }
+ catch (  Exception e) {
+    throw new HandshakeFailureException("Unable to create UpgardeHandler",e);
+  }
+  WsHandshakeRequest webSocketRequest=new WsHandshakeRequest(request);
+  try {
+    Method method=ReflectionUtils.findMethod(WsHandshakeRequest.class,"finished");
+    ReflectionUtils.makeAccessible(method);
+    method.invoke(webSocketRequest);
+  }
+ catch (  Exception ex) {
+    throw new HandshakeFailureException("Failed to upgrade HttpServletRequest",ex);
+  }
+  ServerEndpointConfig endpointConfig=new ServerEndpointRegistration("/shouldntmatter",endpoint);
+  upgradeHandler.preInit(endpoint,endpointConfig,getContainer(request),webSocketRequest,protocol,Collections.<String,String>emptyMap(),request.isSecure());
+}

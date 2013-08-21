@@ -3,17 +3,10 @@
   HttpServletRequest servletRequest=((ServletServerHttpRequest)request).getServletRequest();
   Assert.isTrue(response instanceof ServletServerHttpResponse);
   HttpServletResponse servletResponse=((ServletServerHttpResponse)response).getServletResponse();
-  String path=servletRequest.getRequestURI();
-  Map<String,String> pathParams=Collections.<String,String>emptyMap();
-  ServerEndpointRegistration endpointConfig=new ServerEndpointRegistration(path,endpoint);
-  endpointConfig.setSubprotocols(Arrays.asList(acceptedProtocol));
-  try {
-    getContainer(servletRequest).doUpgrade(servletRequest,servletResponse,endpointConfig,pathParams);
+  if (hasDoUpgrade) {
+    doUpgrade(servletRequest,servletResponse,acceptedProtocol,endpoint);
   }
- catch (  ServletException ex) {
-    throw new HandshakeFailureException("Servlet request failed to upgrade to WebSocket, uri=" + request.getURI(),ex);
-  }
-catch (  IOException ex) {
-    throw new HandshakeFailureException("Response update failed during upgrade to WebSocket, uri=" + request.getURI(),ex);
+ else {
+    upgradeTomcat80RC1(servletRequest,acceptedProtocol,endpoint);
   }
 }
