@@ -1,0 +1,10 @@
+{
+  AnnotationConfigApplicationContext cxt=new AnnotationConfigApplicationContext();
+  cxt.register(TestWebSocketMessageBrokerConfiguration.class,SimpleBrokerConfigurer.class);
+  cxt.refresh();
+  SimpleUrlHandlerMapping hm=(SimpleUrlHandlerMapping)cxt.getBean(HandlerMapping.class);
+  Object actual=hm.getUrlMap().get("/e2/**");
+  assertNotNull(actual);
+  assertEquals(SockJsHttpRequestHandler.class,actual.getClass());
+  cxt.close();
+}

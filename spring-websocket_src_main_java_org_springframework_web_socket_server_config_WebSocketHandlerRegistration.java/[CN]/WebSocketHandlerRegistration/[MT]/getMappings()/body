@@ -1,0 +1,23 @@
+{
+  MultiValueMap<HttpRequestHandler,String> mappings=new LinkedMultiValueMap<HttpRequestHandler,String>();
+  if (getSockJsServiceRegistration() == null) {
+    HandshakeHandler handshakeHandler=createHandshakeHandler();
+    for (    WebSocketHandler handler : getHandlerMap().keySet()) {
+      for (      String path : getHandlerMap().get(handler)) {
+        WebSocketHttpRequestHandler httpHandler=new WebSocketHttpRequestHandler(handler,handshakeHandler);
+        httpHandler.setHandshakeInterceptors(getInterceptors());
+        mappings.add(httpHandler,path);
+      }
+    }
+  }
+ else {
+    SockJsService sockJsService=getSockJsServiceRegistration().getSockJsService(getAllPrefixes());
+    for (    WebSocketHandler handler : getHandlerMap().keySet()) {
+      for (      String path : getHandlerMap().get(handler)) {
+        SockJsHttpRequestHandler httpHandler=new SockJsHttpRequestHandler(sockJsService,handler);
+        mappings.add(httpHandler,path.endsWith("/") ? path + "**" : path + "/**");
+      }
+    }
+  }
+  return mappings;
+}

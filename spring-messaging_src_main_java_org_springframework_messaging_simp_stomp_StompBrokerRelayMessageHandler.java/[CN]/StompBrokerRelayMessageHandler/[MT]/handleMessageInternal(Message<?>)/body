@@ -1,0 +1,55 @@
+{
+  StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+  String sessionId=headers.getSessionId();
+  String destination=headers.getDestination();
+  StompCommand command=headers.getCommand();
+  SimpMessageType messageType=headers.getMessageType();
+  if (SimpMessageType.MESSAGE.equals(messageType)) {
+    sessionId=(sessionId == null) ? SystemRelaySession.ID : sessionId;
+    headers.setSessionId(sessionId);
+    command=(command == null) ? StompCommand.SEND : command;
+    headers.setCommandIfNotSet(command);
+    message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
+  }
+  if (headers.getCommand() == null) {
+    logger.error("No STOMP command, ignoring message: " + message);
+    return;
+  }
+  if (sessionId == null) {
+    logger.error("No sessionId, ignoring message: " + message);
+    return;
+  }
+  if (command.requiresDestination() && !checkDestinationPrefix(destination)) {
+    return;
+  }
+  try {
+    if (SimpMessageType.CONNECT.equals(messageType)) {
+      headers.setHeartbeat(0,0);
+      message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
+      RelaySession session=new RelaySession(sessionId);
+      this.relaySessions.put(sessionId,session);
+      session.connect(message);
+    }
+ else     if (SimpMessageType.DISCONNECT.equals(messageType)) {
+      RelaySession session=this.relaySessions.remove(sessionId);
+      if (session == null) {
+        if (logger.isTraceEnabled()) {
+          logger.trace("Session already removed, sessionId=" + sessionId);
+        }
+        return;
+      }
+      session.forward(message);
+    }
+ else {
+      RelaySession session=this.relaySessions.get(sessionId);
+      if (session == null) {
+        logger.warn("Session id=" + sessionId + " not found. Ignoring message: "+ message);
+        return;
+      }
+      session.forward(message);
+    }
+  }
+ catch (  Throwable t) {
+    logger.error("Failed to handle message " + message,t);
+  }
+}

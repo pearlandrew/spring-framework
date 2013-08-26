@@ -1,0 +1,23 @@
+{
+  SubProtocolHandler handler;
+  String protocol=session.getAcceptedProtocol();
+  if (!StringUtils.isEmpty(protocol)) {
+    handler=this.protocolHandlers.get(protocol);
+    Assert.state(handler != null,"No handler for sub-protocol '" + protocol + "', handlers="+ this.protocolHandlers);
+  }
+ else {
+    if (this.defaultProtocolHandler != null) {
+      handler=this.defaultProtocolHandler;
+    }
+ else {
+      Set<SubProtocolHandler> handlers=new HashSet<SubProtocolHandler>(this.protocolHandlers.values());
+      if (handlers.size() == 1) {
+        handler=handlers.iterator().next();
+      }
+ else {
+        throw new IllegalStateException("No sub-protocol was requested and a default sub-protocol handler was not configured");
+      }
+    }
+  }
+  return handler;
+}
