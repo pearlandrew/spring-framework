@@ -1,0 +1,25 @@
+{
+  Assert.state(getBeanFactory() instanceof DefaultListableBeanFactory,"BeanFactory needs to be a DefaultListableBeanFactory");
+  final DefaultListableBeanFactory beanFactory=(DefaultListableBeanFactory)getBeanFactory();
+  TargetSource ts=new TargetSource(){
+    @Override public Class<?> getTargetClass(){
+      return descriptor.getDependencyType();
+    }
+    @Override public boolean isStatic(){
+      return false;
+    }
+    @Override public Object getTarget(){
+      return beanFactory.doResolveDependency(descriptor,beanName,null,null);
+    }
+    @Override public void releaseTarget(    Object target){
+    }
+  }
+;
+  ProxyFactory pf=new ProxyFactory();
+  pf.setTargetSource(ts);
+  Class<?> dependencyType=descriptor.getDependencyType();
+  if (dependencyType.isInterface()) {
+    pf.addInterface(dependencyType);
+  }
+  return pf.getProxy(beanFactory.getBeanClassLoader());
+}

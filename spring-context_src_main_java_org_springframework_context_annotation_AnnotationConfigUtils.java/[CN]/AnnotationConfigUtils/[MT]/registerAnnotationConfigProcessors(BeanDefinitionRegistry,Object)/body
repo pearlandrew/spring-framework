@@ -1,4 +1,13 @@
 {
+  DefaultListableBeanFactory beanFactory=unwrapDefaultListableBeanFactory(registry);
+  if (beanFactory != null) {
+    if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {
+      beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+    }
+    if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {
+      beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
+    }
+  }
   Set<BeanDefinitionHolder> beanDefs=new LinkedHashSet<BeanDefinitionHolder>(4);
   if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
     RootBeanDefinition def=new RootBeanDefinition(ConfigurationClassPostProcessor.class);

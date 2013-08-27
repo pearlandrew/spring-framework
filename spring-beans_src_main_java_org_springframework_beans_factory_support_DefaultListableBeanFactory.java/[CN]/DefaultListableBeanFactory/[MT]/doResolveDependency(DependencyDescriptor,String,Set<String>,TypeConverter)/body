@@ -1,4 +1,5 @@
 {
+  Class<?> type=descriptor.getDependencyType();
   Object value=getAutowireCandidateResolver().getSuggestedValue(descriptor);
   if (value != null) {
     if (value instanceof String) {
@@ -22,7 +23,11 @@
       autowiredBeanNames.addAll(matchingBeans.keySet());
     }
     TypeConverter converter=(typeConverter != null ? typeConverter : getTypeConverter());
-    return converter.convertIfNecessary(matchingBeans.values(),type);
+    Object result=converter.convertIfNecessary(matchingBeans.values(),type);
+    if (this.dependencyComparator != null && result instanceof Object[]) {
+      Arrays.sort((Object[])result,this.dependencyComparator);
+    }
+    return result;
   }
  else   if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
     Class<?> elementType=descriptor.getCollectionType();
@@ -43,7 +48,11 @@
       autowiredBeanNames.addAll(matchingBeans.keySet());
     }
     TypeConverter converter=(typeConverter != null ? typeConverter : getTypeConverter());
-    return converter.convertIfNecessary(matchingBeans.values(),type);
+    Object result=converter.convertIfNecessary(matchingBeans.values(),type);
+    if (this.dependencyComparator != null && result instanceof List) {
+      Collections.sort((List)result,this.dependencyComparator);
+    }
+    return result;
   }
  else   if (Map.class.isAssignableFrom(type) && type.isInterface()) {
     Class<?> keyType=descriptor.getMapKeyType();

@@ -7,6 +7,10 @@
     return new DependencyProviderFactory().createDependencyProvider(descriptor,beanName);
   }
  else {
-    return doResolveDependency(descriptor,descriptor.getDependencyType(),beanName,autowiredBeanNames,typeConverter);
+    Object result=getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(descriptor,beanName);
+    if (result == null) {
+      result=doResolveDependency(descriptor,beanName,autowiredBeanNames,typeConverter);
+    }
+    return result;
   }
 }
