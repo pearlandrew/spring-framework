@@ -1,6 +1,14 @@
 {
-  if (this.source instanceof Class<?>) {
-    return asSourceClass(((Class<?>)this.source).getSuperclass());
+  if (!getMetadata().hasSuperClass()) {
+    return null;
   }
-  return asSourceClass(((MetadataReader)this.source).getClassMetadata().getSuperClassName());
+  try {
+    if (this.source instanceof Class<?>) {
+      return asSourceClass(((Class<?>)this.source).getSuperclass());
+    }
+    return asSourceClass(((MetadataReader)this.source).getClassMetadata().getSuperClassName());
+  }
+ catch (  ClassNotFoundException ex) {
+    throw new IllegalStateException(ex);
+  }
 }

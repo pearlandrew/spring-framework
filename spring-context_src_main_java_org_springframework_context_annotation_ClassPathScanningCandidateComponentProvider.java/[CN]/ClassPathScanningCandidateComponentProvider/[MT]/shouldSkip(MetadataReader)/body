@@ -1,0 +1,13 @@
+{
+  if (this.conditionEvaluator == null) {
+    this.conditionEvaluator=new ConditionEvaluator(getRegistry(),getEnvironment(),null,null,getResourceLoader());
+  }
+  while (metadataReader != null) {
+    AnnotationMetadata metadata=metadataReader.getAnnotationMetadata();
+    if (this.conditionEvaluator.shouldSkip(metadata)) {
+      return true;
+    }
+    metadataReader=(metadata.hasSuperClass() ? this.metadataReaderFactory.getMetadataReader(metadata.getSuperClassName()) : null);
+  }
+  return false;
+}
