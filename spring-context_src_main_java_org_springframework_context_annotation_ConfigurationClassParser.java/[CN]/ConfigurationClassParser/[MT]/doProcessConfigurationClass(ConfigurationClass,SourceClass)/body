@@ -6,7 +6,7 @@
   }
   AnnotationAttributes componentScan=AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(),ComponentScan.class);
   if (componentScan != null) {
-    if (!shouldSkip(sourceClass,ConfigurationPhase.REGISTER_BEAN)) {
+    if (!conditionEvaluator.shouldSkip(sourceClass.getMetadata(),ConfigurationPhase.REGISTER_BEAN)) {
       Set<BeanDefinitionHolder> scannedBeanDefinitions=this.componentScanParser.parse(componentScan,sourceClass.getMetadata().getClassName());
       for (      BeanDefinitionHolder holder : scannedBeanDefinitions) {
         if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(),this.metadataReaderFactory)) {
@@ -33,7 +33,12 @@
     String superclass=sourceClass.getMetadata().getSuperClassName();
     if (!this.knownSuperclasses.containsKey(superclass)) {
       this.knownSuperclasses.put(superclass,configClass);
-      return sourceClass.getSuperClass();
+      try {
+        return sourceClass.getSuperClass();
+      }
+ catch (      ClassNotFoundException ex) {
+        throw new IllegalStateException(ex);
+      }
     }
   }
   return null;
