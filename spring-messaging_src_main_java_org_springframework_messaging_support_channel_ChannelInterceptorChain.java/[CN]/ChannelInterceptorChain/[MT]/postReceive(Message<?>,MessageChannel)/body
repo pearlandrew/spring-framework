@@ -1,0 +1,15 @@
+{
+  if (message != null && logger.isTraceEnabled()) {
+    logger.trace("postReceive on channel '" + channel + "', message: "+ message);
+  }
+ else   if (logger.isTraceEnabled()) {
+    logger.trace("postReceive on channel '" + channel + "', message is null");
+  }
+  for (  ChannelInterceptor interceptor : this.interceptors) {
+    message=interceptor.postReceive(message,channel);
+    if (message == null) {
+      return null;
+    }
+  }
+  return message;
+}

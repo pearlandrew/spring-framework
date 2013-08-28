@@ -1,0 +1,21 @@
+{
+  final AbstractMessageChannel testChannel=new AbstractMessageChannel(){
+    @Override protected boolean sendInternal(    Message<?> message,    long timeout){
+      return false;
+    }
+  }
+;
+  final AtomicBoolean invoked=new AtomicBoolean(false);
+  testChannel.addInterceptor(new ChannelInterceptorAdapter(){
+    @Override public void postSend(    Message<?> message,    MessageChannel channel,    boolean sent){
+      assertNotNull(message);
+      assertNotNull(channel);
+      assertSame(testChannel,channel);
+      assertFalse(sent);
+      invoked.set(true);
+    }
+  }
+);
+  testChannel.send(MessageBuilder.withPayload("test").build());
+  assertTrue(invoked.get());
+}

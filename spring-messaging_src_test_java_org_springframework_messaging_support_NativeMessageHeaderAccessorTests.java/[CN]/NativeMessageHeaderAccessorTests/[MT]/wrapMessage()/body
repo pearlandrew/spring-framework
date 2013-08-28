@@ -1,0 +1,17 @@
+{
+  MultiValueMap<String,String> originalNativeHeaders=new LinkedMultiValueMap<>();
+  originalNativeHeaders.add("foo","bar");
+  originalNativeHeaders.add("bar","baz");
+  Map<String,Object> original=new HashMap<String,Object>();
+  original.put("a","b");
+  original.put(NativeMessageHeaderAccessor.NATIVE_HEADERS,originalNativeHeaders);
+  GenericMessage<String> message=new GenericMessage<>("p",original);
+  NativeMessageHeaderAccessor headers=new NativeMessageHeaderAccessor(message);
+  Map<String,Object> actual=headers.toMap();
+  assertEquals(4,actual.size());
+  assertNotNull(actual.get(MessageHeaders.ID));
+  assertNotNull(actual.get(MessageHeaders.TIMESTAMP));
+  assertEquals("b",actual.get("a"));
+  assertNotNull(actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS));
+  assertEquals(originalNativeHeaders,actual.get(NativeMessageHeaderAccessor.NATIVE_HEADERS));
+}
