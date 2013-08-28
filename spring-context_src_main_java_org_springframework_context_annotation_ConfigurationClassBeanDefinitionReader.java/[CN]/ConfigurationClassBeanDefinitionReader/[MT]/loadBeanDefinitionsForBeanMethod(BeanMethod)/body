@@ -23,14 +23,8 @@
   for (  String alias : names) {
     this.registry.registerAlias(beanName,alias);
   }
-  if (this.registry.containsBeanDefinition(beanName)) {
-    BeanDefinition existingBeanDef=registry.getBeanDefinition(beanName);
-    if (!(existingBeanDef instanceof ConfigurationClassBeanDefinition)) {
-      if (logger.isDebugEnabled()) {
-        logger.debug(String.format("Skipping loading bean definition for %s: a definition for bean " + "'%s' already exists. This is likely due to an override in XML.",beanMethod,beanName));
-      }
-      return;
-    }
+  if (isOverriddenByExistingDefinition(beanMethod,beanName)) {
+    return;
   }
   AnnotationConfigUtils.processCommonDefinitionAnnotations(beanDef,metadata);
   Autowire autowire=bean.getEnum("autowire");
@@ -62,5 +56,5 @@
   if (logger.isDebugEnabled()) {
     logger.debug(String.format("Registering bean definition for @Bean method %s.%s()",configClass.getMetadata().getClassName(),beanName));
   }
-  registry.registerBeanDefinition(beanName,beanDefToRegister);
+  this.registry.registerBeanDefinition(beanName,beanDefToRegister);
 }
