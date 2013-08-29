@@ -1,14 +1,14 @@
 {
   MultiValueMap<HttpRequestHandler,String> mappings=new LinkedMultiValueMap<HttpRequestHandler,String>();
-  if (getSockJsServiceRegistration() == null) {
-    HandshakeHandler handshakeHandler=createHandshakeHandler();
-    for (    String path : getPaths()) {
+  if (this.sockJsServiceRegistration == null) {
+    HandshakeHandler handshakeHandler=getOrCreateHandshakeHandler();
+    for (    String path : this.paths) {
       WebSocketHttpRequestHandler handler=new WebSocketHttpRequestHandler(this.wsHandler,handshakeHandler);
       mappings.add(handler,path);
     }
   }
  else {
-    SockJsService sockJsService=getSockJsServiceRegistration().getSockJsService();
+    SockJsService sockJsService=this.sockJsServiceRegistration.getSockJsService();
     for (    String path : this.paths) {
       SockJsHttpRequestHandler httpHandler=new SockJsHttpRequestHandler(sockJsService,this.wsHandler);
       mappings.add(httpHandler,path.endsWith("/") ? path + "**" : path + "/**");

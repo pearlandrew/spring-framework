@@ -1,0 +1,11 @@
+{
+  AnnotationConfigWebApplicationContext cxt=new AnnotationConfigWebApplicationContext();
+  cxt.register(TestWebSocketConfigurer.class,getUpgradeStrategyConfigClass());
+  this.server.init(cxt);
+  this.server.start();
+  WebSocketHandler clientHandler=Mockito.mock(WebSocketHandler.class);
+  WebSocketHandler serverHandler=cxt.getBean(WebSocketHandler.class);
+  this.webSocketClient.doHandshake(clientHandler,getWsBaseUrl() + "/sockjs/websocket");
+  verify(serverHandler).afterConnectionEstablished(any(WebSocketSession.class));
+  verify(clientHandler).afterConnectionEstablished(any(WebSocketSession.class));
+}

@@ -1,0 +1,24 @@
+{
+  AnnotationConfigWebApplicationContext cxt=new AnnotationConfigWebApplicationContext();
+  cxt.register(TestWebSocketMessageBrokerConfiguration.class,SimpleBrokerConfigurer.class);
+  cxt.register(getUpgradeStrategyConfigClass());
+  this.server.init(cxt);
+  this.server.start();
+  StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.SEND);
+  headers.setDestination("/app/foo");
+  Message<byte[]> message=MessageBuilder.withPayloadAndHeaders(new byte[0],headers).build();
+  byte[] bytes=new StompMessageConverter().fromMessage(message);
+  final TextMessage webSocketMessage=new TextMessage(new String(bytes));
+  WebSocketHandler clientHandler=new TextWebSocketHandlerAdapter(){
+    @Override public void afterConnectionEstablished(    WebSocketSession session) throws Exception {
+      session.sendMessage(webSocketMessage);
+    }
+  }
+;
+  TestController testController=cxt.getBean(TestController.class);
+  this.webSocketClient.doHandshake(clientHandler,getWsBaseUrl() + "/ws");
+  assertTrue(testController.latch.await(2,TimeUnit.SECONDS));
+  testController.latch=new CountDownLatch(1);
+  this.webSocketClient.doHandshake(clientHandler,getWsBaseUrl() + "/sockjs/websocket");
+  assertTrue(testController.latch.await(2,TimeUnit.SECONDS));
+}
