@@ -1,12 +1,31 @@
 {
-  HttpClient client=getHttpClient();
+  CloseableHttpClient client=getHttpClient();
   Assert.state(client != null,"Synchronous execution requires an HttpClient to be set");
   HttpUriRequest httpRequest=createHttpUriRequest(httpMethod,uri);
   postProcessHttpRequest(httpRequest);
+  HttpContext context=createHttpContext(httpMethod,uri);
+  if (context == null) {
+    context=HttpClientContext.create();
+  }
+  if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
+    RequestConfig config=null;
+    if (httpRequest instanceof Configurable) {
+      config=((Configurable)httpRequest).getConfig();
+    }
+    if (config == null) {
+      if (this.socketTimeout > 0 || this.connectTimeout > 0) {
+        config=RequestConfig.custom().setConnectTimeout(this.connectTimeout).setSocketTimeout(this.socketTimeout).build();
+      }
+ else {
+        config=RequestConfig.DEFAULT;
+      }
+    }
+    context.setAttribute(HttpClientContext.REQUEST_CONFIG,config);
+  }
   if (bufferRequestBody) {
-    return new HttpComponentsClientHttpRequest(client,httpRequest,createHttpContext(httpMethod,uri));
+    return new HttpComponentsClientHttpRequest(client,httpRequest,context);
   }
  else {
-    return new HttpComponentsStreamingClientHttpRequest(client,httpRequest,createHttpContext(httpMethod,uri));
+    return new HttpComponentsStreamingClientHttpRequest(client,httpRequest,context);
   }
 }
