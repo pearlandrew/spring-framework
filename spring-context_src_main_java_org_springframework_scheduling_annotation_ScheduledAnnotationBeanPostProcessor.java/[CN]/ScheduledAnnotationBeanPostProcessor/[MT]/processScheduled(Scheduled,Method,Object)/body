@@ -34,10 +34,22 @@ catch (      NoSuchMethodException ex) {
     if (!"".equals(cron)) {
       Assert.isTrue(initialDelay == -1,"'initialDelay' not supported for cron triggers");
       processedSchedule=true;
+      String zone=scheduled.zone();
       if (this.embeddedValueResolver != null) {
         cron=this.embeddedValueResolver.resolveStringValue(cron);
+        zone=this.embeddedValueResolver.resolveStringValue(zone);
       }
-      this.registrar.addCronTask(new CronTask(runnable,cron));
+      TimeZone timeZone;
+      if (!"".equals(zone)) {
+        timeZone=TimeZone.getTimeZone(zone);
+        if ("GMT".equals(timeZone.getID()) && !zone.startsWith("GMT")) {
+          throw new IllegalArgumentException("Invalid time zone id '" + zone + "'");
+        }
+      }
+ else {
+        timeZone=TimeZone.getDefault();
+      }
+      this.registrar.addCronTask(new CronTask(runnable,new CronTrigger(cron,timeZone)));
     }
     if (initialDelay < 0) {
       initialDelay=0;
