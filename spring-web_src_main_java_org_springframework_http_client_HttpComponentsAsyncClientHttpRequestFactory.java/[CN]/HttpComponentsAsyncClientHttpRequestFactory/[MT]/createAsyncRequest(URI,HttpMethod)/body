@@ -3,5 +3,19 @@
   startAsyncClient();
   HttpUriRequest httpRequest=createHttpUriRequest(httpMethod,uri);
   postProcessHttpRequest(httpRequest);
-  return new HttpComponentsAsyncClientHttpRequest(asyncClient,httpRequest,createHttpContext(httpMethod,uri));
+  HttpContext context=createHttpContext(httpMethod,uri);
+  if (context == null) {
+    context=HttpClientContext.create();
+  }
+  if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
+    RequestConfig config=null;
+    if (httpRequest instanceof Configurable) {
+      config=((Configurable)httpRequest).getConfig();
+    }
+    if (config == null) {
+      config=RequestConfig.DEFAULT;
+    }
+    context.setAttribute(HttpClientContext.REQUEST_CONFIG,config);
+  }
+  return new HttpComponentsAsyncClientHttpRequest(asyncClient,httpRequest,context);
 }
