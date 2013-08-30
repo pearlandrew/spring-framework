@@ -1,0 +1,16 @@
+{
+  try {
+    ByteArrayOutputStream baos=new ByteArrayOutputStream();
+    DataOutputStream output=new DataOutputStream(baos);
+    StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+    writeCommand(headers,output);
+    writeHeaders(headers,message,output);
+    output.write(LF);
+    writeBody(message,output);
+    output.write((byte)0);
+    return baos.toByteArray();
+  }
+ catch (  IOException e) {
+    throw new StompConversionException("Failed to encode STOMP frame",e);
+  }
+}

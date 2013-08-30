@@ -1,0 +1,17 @@
+{
+  if (logger.isTraceEnabled()) {
+    logger.trace("Reading message " + message);
+  }
+  StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+  if (StompCommand.CONNECTED == headers.getCommand()) {
+synchronized (this.monitor) {
+      this.stompConnection.setReady();
+      publishBrokerAvailableEvent();
+      flushMessages();
+    }
+    return;
+  }
+  headers.setSessionId(this.sessionId);
+  message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
+  sendMessageToClient(message);
+}

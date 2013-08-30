@@ -14,7 +14,7 @@
   assertEquals(new HashSet<>(Arrays.asList("1.1","1.0")),headers.getAcceptVersion());
   assertEquals(1,this.session.getSentMessages().size());
   textMessage=(TextMessage)this.session.getSentMessages().get(0);
-  Message<?> message=new StompMessageConverter().toMessage(textMessage.getPayload());
+  Message<?> message=new StompDecoder().decode(ByteBuffer.wrap(textMessage.getPayload().getBytes()));
   StompHeaderAccessor replyHeaders=StompHeaderAccessor.wrap(message);
   assertEquals(StompCommand.CONNECTED,replyHeaders.getCommand());
   assertEquals("1.1",replyHeaders.getVersion());

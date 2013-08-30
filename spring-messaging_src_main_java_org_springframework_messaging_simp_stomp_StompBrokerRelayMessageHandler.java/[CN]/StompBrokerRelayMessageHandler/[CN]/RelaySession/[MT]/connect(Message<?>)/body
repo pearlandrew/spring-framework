@@ -1,13 +1,13 @@
 {
   Assert.notNull(connectMessage,"connectMessage is required");
-  Composable<TcpConnection<String,String>> connectionComposable=openTcpConnection();
-  connectionComposable.consume(new Consumer<TcpConnection<String,String>>(){
-    @Override public void accept(    TcpConnection<String,String> connection){
+  Composable<TcpConnection<Message<byte[]>,Message<byte[]>>> promise=openTcpConnection();
+  promise.consume(new Consumer<TcpConnection<Message<byte[]>,Message<byte[]>>>(){
+    @Override public void accept(    TcpConnection<Message<byte[]>,Message<byte[]>> connection){
       handleTcpConnection(connection,connectMessage);
     }
   }
 );
-  connectionComposable.when(Throwable.class,new Consumer<Throwable>(){
+  promise.when(Throwable.class,new Consumer<Throwable>(){
     @Override public void accept(    Throwable ex){
       relaySessions.remove(sessionId);
       handleTcpClientFailure("Failed to connect to message broker",ex);

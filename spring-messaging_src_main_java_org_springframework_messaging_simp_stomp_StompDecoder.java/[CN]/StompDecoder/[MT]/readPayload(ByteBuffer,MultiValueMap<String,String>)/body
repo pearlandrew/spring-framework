@@ -1,0 +1,25 @@
+{
+  String contentLengthString=headers.getFirst("content-length");
+  if (contentLengthString != null) {
+    int contentLength=Integer.valueOf(contentLengthString);
+    byte[] payload=new byte[contentLength];
+    buffer.get(payload);
+    if (buffer.remaining() < 1 || buffer.get() != 0) {
+      throw new StompConversionException("Frame must be terminated with a null octect");
+    }
+    return payload;
+  }
+ else {
+    ByteArrayOutputStream payload=new ByteArrayOutputStream();
+    while (buffer.remaining() > 0) {
+      byte b=buffer.get();
+      if (b == 0) {
+        return payload.toByteArray();
+      }
+ else {
+        payload.write(b);
+      }
+    }
+  }
+  throw new StompConversionException("Frame must be terminated with a null octect");
+}
