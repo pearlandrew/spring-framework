@@ -1,0 +1,17 @@
+{
+  M mappings=createMappings();
+  if (this.sockJsServiceRegistration != null) {
+    SockJsService sockJsService=this.sockJsServiceRegistration.getSockJsService();
+    for (    String path : this.paths) {
+      String pathPattern=path.endsWith("/") ? path + "**" : path + "/**";
+      addSockJsServiceMapping(mappings,sockJsService,this.wsHandler,pathPattern);
+    }
+  }
+ else {
+    HandshakeHandler handshakeHandler=getOrCreateHandshakeHandler();
+    for (    String path : this.paths) {
+      addWebSocketHandlerMapping(mappings,this.wsHandler,handshakeHandler,path);
+    }
+  }
+  return mappings;
+}

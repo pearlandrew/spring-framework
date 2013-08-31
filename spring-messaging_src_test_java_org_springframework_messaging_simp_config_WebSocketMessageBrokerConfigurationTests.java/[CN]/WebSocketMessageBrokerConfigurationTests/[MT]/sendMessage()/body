@@ -1,9 +1,4 @@
 {
-  AnnotationConfigWebApplicationContext cxt=new AnnotationConfigWebApplicationContext();
-  cxt.register(TestWebSocketMessageBrokerConfiguration.class,SimpleBrokerConfigurer.class);
-  cxt.register(getUpgradeStrategyConfigClass());
-  this.server.init(cxt);
-  this.server.start();
   final TextMessage textMessage=StompTextMessageBuilder.create(StompCommand.SEND).headers("destination:/app/foo").build();
   WebSocketHandler clientHandler=new TextWebSocketHandlerAdapter(){
     @Override public void afterConnectionEstablished(    WebSocketSession session) throws Exception {
@@ -11,7 +6,7 @@
     }
   }
 ;
-  TestController testController=cxt.getBean(TestController.class);
+  TestController testController=this.wac.getBean(TestController.class);
   this.webSocketClient.doHandshake(clientHandler,getWsBaseUrl() + "/ws");
   assertTrue(testController.latch.await(2,TimeUnit.SECONDS));
   testController.latch=new CountDownLatch(1);

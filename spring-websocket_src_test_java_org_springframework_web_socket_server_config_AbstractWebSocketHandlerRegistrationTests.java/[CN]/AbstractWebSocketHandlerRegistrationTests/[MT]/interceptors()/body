@@ -1,0 +1,11 @@
+{
+  WebSocketHandler wsHandler=new TextWebSocketHandlerAdapter();
+  HttpSessionHandshakeInterceptor interceptor=new HttpSessionHandshakeInterceptor();
+  this.registration.addHandler(wsHandler,"/foo").addInterceptors(interceptor);
+  List<Mapping> mappings=this.registration.getMappings();
+  assertEquals(1,mappings.size());
+  Mapping m1=mappings.get(0);
+  assertEquals(wsHandler,m1.webSocketHandler);
+  assertEquals("/foo",m1.path);
+  assertArrayEquals(new HandshakeInterceptor[]{interceptor},m1.interceptors);
+}

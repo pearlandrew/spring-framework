@@ -1,0 +1,13 @@
+{
+  WebSocketHandler wsHandler=new TextWebSocketHandlerAdapter();
+  HandshakeHandler handshakeHandler=new DefaultHandshakeHandler();
+  this.registration.addHandler(wsHandler,"/foo").setHandshakeHandler(handshakeHandler).withSockJS();
+  List<Mapping> mappings=this.registration.getMappings();
+  assertEquals(1,mappings.size());
+  Mapping m1=mappings.get(0);
+  assertEquals(wsHandler,m1.webSocketHandler);
+  assertEquals("/foo/**",m1.path);
+  assertNotNull(m1.sockJsService);
+  WebSocketTransportHandler transportHandler=(WebSocketTransportHandler)m1.sockJsService.getTransportHandlers().get(TransportType.WEBSOCKET);
+  assertSame(handshakeHandler,transportHandler.getHandshakeHandler());
+}
