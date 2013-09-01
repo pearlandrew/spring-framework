@@ -1,10 +1,13 @@
 {
+  Class<?> upgradeStrategyConfigClass=upgradeStrategyConfigTypes.get(this.server.getClass());
+  Assert.notNull(upgradeStrategyConfigClass,"No UpgradeStrategyConfig class");
   this.wac=new AnnotationConfigWebApplicationContext();
   this.wac.register(getAnnotatedConfigClasses());
-  this.wac.register(upgradeStrategyConfigTypes.get(this.server.getClass()));
+  this.wac.register(upgradeStrategyConfigClass);
+  this.wac.refresh();
   if (this.webSocketClient instanceof Lifecycle) {
     ((Lifecycle)this.webSocketClient).start();
   }
-  this.server.init(this.wac);
+  this.server.deployConfig(this.wac);
   this.server.start();
 }

@@ -7,9 +7,11 @@
   }
 ;
   TestController testController=this.wac.getBean(TestController.class);
-  this.webSocketClient.doHandshake(clientHandler,getWsBaseUrl() + "/ws");
+  WebSocketSession session=this.webSocketClient.doHandshake(clientHandler,getWsBaseUrl() + "/ws");
   assertTrue(testController.latch.await(2,TimeUnit.SECONDS));
+  session.close();
   testController.latch=new CountDownLatch(1);
-  this.webSocketClient.doHandshake(clientHandler,getWsBaseUrl() + "/sockjs/websocket");
+  session=this.webSocketClient.doHandshake(clientHandler,getWsBaseUrl() + "/sockjs/websocket");
   assertTrue(testController.latch.await(2,TimeUnit.SECONDS));
+  session.close();
 }
