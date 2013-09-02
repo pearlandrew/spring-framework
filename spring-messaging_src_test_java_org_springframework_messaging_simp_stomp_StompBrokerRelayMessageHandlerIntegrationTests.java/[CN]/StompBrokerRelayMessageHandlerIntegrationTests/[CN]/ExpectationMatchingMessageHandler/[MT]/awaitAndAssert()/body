@@ -1,4 +1,10 @@
 {
-  boolean result=this.latch.await(10000,TimeUnit.MILLISECONDS);
-  assertTrue(getAsString(),result && this.unexpected.isEmpty());
+  long endTime=System.currentTimeMillis() + 10000;
+synchronized (this.monitor) {
+    while (!this.expected.isEmpty() && System.currentTimeMillis() < endTime) {
+      this.monitor.wait(500);
+    }
+    boolean result=this.expected.isEmpty();
+    assertTrue(getAsString(),result && this.unexpected.isEmpty());
+  }
 }

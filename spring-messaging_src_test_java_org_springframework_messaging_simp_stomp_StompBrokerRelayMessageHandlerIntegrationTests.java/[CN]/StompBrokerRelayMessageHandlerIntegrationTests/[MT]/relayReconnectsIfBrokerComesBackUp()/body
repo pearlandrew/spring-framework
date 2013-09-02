@@ -1,12 +1,21 @@
 {
   String sess1="sess1";
   MessageExchange conn1=MessageExchangeBuilder.connect(sess1).build();
+  this.responseHandler.expect(conn1);
   this.relay.handleMessage(conn1.message);
+  this.responseHandler.awaitAndAssert();
   String subs1="subs1";
   String destination="/topic/test";
   MessageExchange subscribe=MessageExchangeBuilder.subscribeWithReceipt(sess1,subs1,destination,"r1").build();
   this.responseHandler.expect(subscribe);
   this.relay.handleMessage(subscribe.message);
   this.responseHandler.awaitAndAssert();
+  this.responseHandler.expect(MessageExchangeBuilder.error(sess1).build());
   stopBrokerAndAwait();
+  this.responseHandler.awaitAndAssert();
+  this.eventPublisher.expect(true,false);
+  this.eventPublisher.awaitAndAssert();
+  this.eventPublisher.expect(true);
+  createAndStartBroker();
+  this.eventPublisher.awaitAndAssert();
 }

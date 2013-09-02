@@ -19,10 +19,12 @@
     headers.setSessionId(session.getId());
     headers.setUser(session.getPrincipal());
     message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
-    if (SimpMessageType.CONNECT.equals(headers.getMessageType())) {
+    if (this.handleConnect && SimpMessageType.CONNECT.equals(headers.getMessageType())) {
       handleConnect(session,message);
     }
-    outputChannel.send(message);
+ else {
+      outputChannel.send(message);
+    }
   }
  catch (  Throwable t) {
     logger.error("Terminating STOMP session due to failure to send message: ",t);

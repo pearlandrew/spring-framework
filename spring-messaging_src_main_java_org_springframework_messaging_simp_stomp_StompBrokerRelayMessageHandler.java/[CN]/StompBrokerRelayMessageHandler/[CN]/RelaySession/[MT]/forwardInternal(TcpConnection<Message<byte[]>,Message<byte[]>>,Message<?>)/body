@@ -3,6 +3,10 @@
   if (logger.isTraceEnabled()) {
     logger.trace("Forwarding to STOMP broker, message: " + message);
   }
+  StompCommand command=StompHeaderAccessor.wrap(message).getCommand();
+  if (command == StompCommand.DISCONNECT) {
+    this.stompConnection.setDisconnected();
+  }
   final Deferred<Boolean,Promise<Boolean>> deferred=new DeferredPromiseSpec<Boolean>().get();
   tcpConnection.send((Message<byte[]>)message,new Consumer<Boolean>(){
     @Override public void accept(    Boolean success){
@@ -17,7 +21,7 @@
       handleTcpClientFailure("Timed out waiting for message to be forwarded to the broker",null);
     }
  else     if (!success) {
-      if (StompHeaderAccessor.wrap(message).getCommand() != StompCommand.DISCONNECT) {
+      if (command != StompCommand.DISCONNECT) {
         handleTcpClientFailure("Failed to forward message to the broker",null);
       }
     }

@@ -1,8 +1,10 @@
 {
   if (event instanceof BrokerAvailabilityEvent) {
-    this.actual.add(((BrokerAvailabilityEvent)event).isBrokerAvailable());
-    if (this.actual.size() == this.expected.size()) {
-      this.latch.countDown();
+synchronized (this.monitor) {
+      this.actual.add(((BrokerAvailabilityEvent)event).isBrokerAvailable());
+      if (this.actual.size() == this.expected.size()) {
+        this.monitor.notifyAll();
+      }
     }
   }
 }

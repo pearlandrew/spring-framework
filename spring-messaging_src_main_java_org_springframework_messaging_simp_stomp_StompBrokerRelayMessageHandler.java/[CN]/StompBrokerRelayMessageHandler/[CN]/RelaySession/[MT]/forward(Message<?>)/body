@@ -1,20 +1,7 @@
 {
   if (!this.stompConnection.isReady()) {
-synchronized (this.monitor) {
-      if (!this.stompConnection.isReady()) {
-        this.messageQueue.add(message);
-        if (logger.isTraceEnabled()) {
-          logger.trace("Not connected, message queued. Queue size=" + this.messageQueue.size());
-        }
-        return;
-      }
-    }
+    logger.warn("Message sent to relay before it was CONNECTED. Discarding message: " + message);
+    return;
   }
-  if (this.messageQueue.isEmpty()) {
-    forwardInternal(message);
-  }
- else {
-    this.messageQueue.add(message);
-    flushMessages();
-  }
+  forwardInternal(message);
 }
