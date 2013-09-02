@@ -1,0 +1,25 @@
+{
+  long brokerReceiveInterval=headers.getHeartbeat()[1];
+  if (HEARTBEAT_SEND_INTERVAL > 0 && brokerReceiveInterval > 0) {
+    long interval=Math.max(HEARTBEAT_SEND_INTERVAL,brokerReceiveInterval);
+    stompConnection.connection.on().writeIdle(interval,new Runnable(){
+      @Override public void run(){
+        stompConnection.connection.send(MessageBuilder.withPayload(heartbeatPayload).build());
+      }
+    }
+);
+  }
+  long brokerSendInterval=headers.getHeartbeat()[0];
+  if (HEARTBEAT_RECEIVE_INTERVAL > 0 && brokerSendInterval > 0) {
+    final long interval=Math.max(HEARTBEAT_RECEIVE_INTERVAL,brokerSendInterval) * HEARTBEAT_RECEIVE_MULTIPLIER;
+    stompConnection.connection.on().readIdle(interval,new Runnable(){
+      @Override public void run(){
+        String message="Broker hearbeat missed: connection idle for more than " + interval + "ms";
+        logger.warn(message);
+        disconnected(message);
+      }
+    }
+);
+  }
+  super.connected(headers,stompConnection);
+}

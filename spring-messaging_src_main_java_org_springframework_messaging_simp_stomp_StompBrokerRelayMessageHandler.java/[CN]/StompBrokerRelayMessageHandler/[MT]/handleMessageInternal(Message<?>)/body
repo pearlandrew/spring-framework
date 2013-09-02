@@ -11,20 +11,15 @@
     headers.setCommandIfNotSet(command);
     message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
   }
-  if (headers.getCommand() == null) {
-    logger.error("No STOMP command, ignoring message: " + message);
-    return;
-  }
   if (sessionId == null) {
     logger.error("No sessionId, ignoring message: " + message);
     return;
   }
-  if (command.requiresDestination() && !checkDestinationPrefix(destination)) {
+  if (command != null && command.requiresDestination() && !checkDestinationPrefix(destination)) {
     return;
   }
   try {
     if (SimpMessageType.CONNECT.equals(messageType)) {
-      headers.setHeartbeat(0,0);
       message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
       RelaySession session=new RelaySession(sessionId);
       this.relaySessions.put(sessionId,session);

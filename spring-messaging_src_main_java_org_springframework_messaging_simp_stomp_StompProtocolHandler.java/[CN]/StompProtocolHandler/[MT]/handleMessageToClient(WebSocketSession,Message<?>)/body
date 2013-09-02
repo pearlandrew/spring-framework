@@ -1,8 +1,15 @@
 {
   StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
-  headers.setCommandIfNotSet(StompCommand.MESSAGE);
-  if (this.handleConnect && StompCommand.CONNECTED.equals(headers.getCommand())) {
-    return;
+  if (headers.getCommand() == null && SimpMessageType.MESSAGE == headers.getMessageType()) {
+    headers.setCommandIfNotSet(StompCommand.MESSAGE);
+  }
+  if (headers.getCommand() == StompCommand.CONNECTED) {
+    if (this.handleConnect) {
+      return;
+    }
+ else {
+      augmentConnectedHeaders(headers,session);
+    }
   }
   if (StompCommand.MESSAGE.equals(headers.getCommand()) && (headers.getSubscriptionId() == null)) {
     logger.error("Ignoring message, no subscriptionId header: " + message);

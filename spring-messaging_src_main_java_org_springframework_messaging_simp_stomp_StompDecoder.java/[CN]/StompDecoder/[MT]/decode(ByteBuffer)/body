@@ -4,9 +4,16 @@
   if (command.length() > 0) {
     MultiValueMap<String,String> headers=readHeaders(buffer);
     byte[] payload=readPayload(buffer,headers);
-    return MessageBuilder.withPayloadAndHeaders(payload,StompHeaderAccessor.create(StompCommand.valueOf(command),headers)).build();
+    Message<byte[]> decodedMessage=MessageBuilder.withPayloadAndHeaders(payload,StompHeaderAccessor.create(StompCommand.valueOf(command),headers)).build();
+    if (logger.isTraceEnabled()) {
+      logger.trace("Decoded " + decodedMessage);
+    }
+    return decodedMessage;
   }
  else {
-    return null;
+    if (logger.isTraceEnabled()) {
+      logger.trace("Decoded heartbeat");
+    }
+    return MessageBuilder.withPayload(HEARTBEAT_PAYLOAD).build();
   }
 }
