@@ -6,13 +6,8 @@
     if (requestCallback != null) {
       requestCallback.doWithRequest(request);
     }
-    Future<ClientHttpResponse> responseFuture=request.executeAsync();
-    if (responseExtractor != null) {
-      return new ResponseExtractorFuture<T>(method,url,responseFuture,responseExtractor);
-    }
- else {
-      return (Future<T>)new VoidResponseFuture(method,url,responseFuture);
-    }
+    ListenableFuture<ClientHttpResponse> responseFuture=request.executeAsync();
+    return new ResponseExtractorFuture<T>(method,url,responseFuture,responseExtractor);
   }
  catch (  IOException ex) {
     throw new ResourceAccessException("I/O error on " + method.name() + " request for \""+ url+ "\":"+ ex.getMessage(),ex);

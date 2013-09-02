@@ -1,0 +1,24 @@
+{
+synchronized (mutex) {
+switch (state) {
+case SUCCESS:
+      return (T)result;
+case FAILURE:
+    throw (ExecutionException)result;
+case NEW:
+  try {
+    T adapted=adapt(adapteeResult);
+    result=adapted;
+    state=State.SUCCESS;
+    return adapted;
+  }
+ catch (  ExecutionException ex) {
+    result=ex;
+    state=State.FAILURE;
+    throw ex;
+  }
+default :
+throw new IllegalStateException();
+}
+}
+}

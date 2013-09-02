@@ -1,0 +1,18 @@
+{
+  ListenableFuture<Void> future=template.execute(baseUrl + "/status/server",HttpMethod.GET,null,null);
+  future.addCallback(new ListenableFutureCallback<Void>(){
+    @Override public void onSuccess(    Void result){
+      fail("onSuccess not expected");
+    }
+    @Override public void onFailure(    Throwable t){
+      assertTrue(t instanceof HttpServerErrorException);
+      HttpServerErrorException ex=(HttpServerErrorException)t;
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,ex.getStatusCode());
+      assertNotNull(ex.getStatusText());
+      assertNotNull(ex.getResponseBodyAsString());
+    }
+  }
+);
+  while (!future.isDone()) {
+  }
+}
