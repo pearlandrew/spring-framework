@@ -5,20 +5,23 @@
   SimpMessageHeaderAccessor inputHeaders=SimpMessageHeaderAccessor.wrap(inputMessage);
   String sessionId=inputHeaders.getSessionId();
   MessagePostProcessor postProcessor=new SessionHeaderPostProcessor(sessionId);
-  ReplyTo replyTo=returnType.getMethodAnnotation(ReplyTo.class);
-  if (replyTo != null) {
-    for (    String destination : replyTo.value()) {
-      this.messagingTemplate.convertAndSend(destination,returnValue,postProcessor);
-    }
-  }
   ReplyToUser replyToUser=returnType.getMethodAnnotation(ReplyToUser.class);
   if (replyToUser != null) {
     if (inputHeaders.getUser() == null) {
       throw new MissingSessionUserException(inputMessage);
     }
     String user=inputHeaders.getUser().getName();
-    for (    String destination : replyToUser.value()) {
+    for (    String destination : getDestinations(replyToUser,inputHeaders.getDestination())) {
       this.messagingTemplate.convertAndSendToUser(user,destination,returnValue,postProcessor);
     }
+    return;
   }
+  ReplyTo replyTo=returnType.getMethodAnnotation(ReplyTo.class);
+  if (replyTo != null) {
+    for (    String destination : getDestinations(replyTo,inputHeaders.getDestination())) {
+      this.messagingTemplate.convertAndSend(destination,returnValue,postProcessor);
+    }
+    return;
+  }
+  this.messagingTemplate.convertAndSend(inputHeaders.getDestination(),returnValue,postProcessor);
 }

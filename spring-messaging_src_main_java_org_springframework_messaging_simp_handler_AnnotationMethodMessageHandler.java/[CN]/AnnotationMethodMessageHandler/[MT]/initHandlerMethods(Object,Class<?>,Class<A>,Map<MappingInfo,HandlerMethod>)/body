@@ -1,0 +1,22 @@
+{
+  Set<Method> methods=HandlerMethodSelector.selectMethods(handlerType,new MethodFilter(){
+    @Override public boolean matches(    Method method){
+      return AnnotationUtils.findAnnotation(method,annotationType) != null;
+    }
+  }
+);
+  for (  Method method : methods) {
+    A annotation=AnnotationUtils.findAnnotation(method,annotationType);
+    String[] destinations=(String[])AnnotationUtils.getValue(annotation);
+    MappingInfo mapping=new MappingInfo(destinations);
+    HandlerMethod newHandlerMethod=createHandlerMethod(handler,method);
+    HandlerMethod oldHandlerMethod=handlerMethods.get(mapping);
+    if (oldHandlerMethod != null && !oldHandlerMethod.equals(newHandlerMethod)) {
+      throw new IllegalStateException("Ambiguous mapping found. Cannot map '" + newHandlerMethod.getBean() + "' bean method \n"+ newHandlerMethod+ "\nto "+ mapping+ ": There is already '"+ oldHandlerMethod.getBean()+ "' bean method\n"+ oldHandlerMethod+ " mapped.");
+    }
+    handlerMethods.put(mapping,newHandlerMethod);
+    if (logger.isInfoEnabled()) {
+      logger.info("Mapped \"@" + annotationType.getSimpleName() + " "+ mapping+ "\" onto "+ newHandlerMethod);
+    }
+  }
+}

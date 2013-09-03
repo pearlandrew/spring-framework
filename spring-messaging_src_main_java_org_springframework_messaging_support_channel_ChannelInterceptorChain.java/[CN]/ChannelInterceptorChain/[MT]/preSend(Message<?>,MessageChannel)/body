@@ -1,11 +1,20 @@
 {
+  UUID originalId=message.getHeaders().getId();
   if (logger.isTraceEnabled()) {
-    logger.trace("preSend on channel '" + channel + "', message: "+ message);
+    logger.trace("preSend message id " + originalId);
   }
   for (  ChannelInterceptor interceptor : this.interceptors) {
     message=interceptor.preSend(message,channel);
     if (message == null) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("preSend returned null (precluding the send)");
+      }
       return null;
+    }
+  }
+  if (logger.isTraceEnabled()) {
+    if (!message.getHeaders().getId().equals(originalId)) {
+      logger.trace("preSend returned modified message " + message);
     }
   }
   return message;

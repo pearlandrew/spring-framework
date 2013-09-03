@@ -1,7 +1,11 @@
 {
   TextMessage message=create(StompCommand.SEND).headers("destination:/app/simple").build();
-  WebSocketSession session=doHandshake(new TestClientWebSocketHandler(message,0),"/ws");
+  WebSocketSession session=doHandshake(new TestClientWebSocketHandler(0,message),"/ws");
   SimpleController controller=this.wac.getBean(SimpleController.class);
-  assertTrue(controller.latch.await(2,TimeUnit.SECONDS));
-  session.close();
+  try {
+    assertTrue(controller.latch.await(2,TimeUnit.SECONDS));
+  }
+  finally {
+    session.close();
+  }
 }

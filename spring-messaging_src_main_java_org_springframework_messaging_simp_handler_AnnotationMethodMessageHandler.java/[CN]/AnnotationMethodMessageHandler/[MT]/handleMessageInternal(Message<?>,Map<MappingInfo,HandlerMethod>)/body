@@ -1,20 +1,28 @@
 {
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
-  String destination=headers.getDestination();
-  if (!checkDestinationPrefix(destination)) {
-    return;
-  }
-  HandlerMethod match=getHandlerMethod(destination,handlerMethods);
-  if (match == null) {
-    return;
-  }
   if (logger.isTraceEnabled()) {
-    logger.trace("Processing message: " + message);
+    logger.trace("Message " + message);
+  }
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
+  String lookupPath=getLookupPath(headers.getDestination());
+  if (lookupPath == null) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Ignoring message with destination " + headers.getDestination());
+    }
+    return;
+  }
+  HandlerMethod match=getHandlerMethod(lookupPath,handlerMethods);
+  if (match == null) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("No matching method, lookup path " + lookupPath);
+    }
+    return;
   }
   HandlerMethod handlerMethod=match.createWithResolvedBean();
   InvocableHandlerMethod invocableHandlerMethod=new InvocableHandlerMethod(handlerMethod);
   invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
   try {
+    headers.setDestination(lookupPath);
+    message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
     Object returnValue=invocableHandlerMethod.invoke(message);
     MethodParameter returnType=handlerMethod.getReturnType();
     if (void.class.equals(returnType.getParameterType())) {
