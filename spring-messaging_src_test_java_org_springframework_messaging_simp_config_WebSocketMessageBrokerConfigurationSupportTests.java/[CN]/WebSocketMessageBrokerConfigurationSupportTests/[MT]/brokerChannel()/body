@@ -1,0 +1,9 @@
+{
+  SubscribableChannel channel=this.cxtSimpleBroker.getBean("brokerChannel",SubscribableChannel.class);
+  ArgumentCaptor<MessageHandler> captor=ArgumentCaptor.forClass(MessageHandler.class);
+  verify(channel,times(2)).subscribe(captor.capture());
+  List<MessageHandler> values=captor.getAllValues();
+  assertEquals(2,values.size());
+  assertTrue(values.contains(cxtSimpleBroker.getBean(UserDestinationMessageHandler.class)));
+  assertTrue(values.contains(cxtSimpleBroker.getBean(SimpleBrokerMessageHandler.class)));
+}

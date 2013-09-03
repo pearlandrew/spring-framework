@@ -1,0 +1,23 @@
+{
+  SubscribableChannel channel=this.cxtSimpleBroker.getBean("webSocketResponseChannel",SubscribableChannel.class);
+  SimpleBrokerMessageHandler broker=this.cxtSimpleBroker.getBean(SimpleBrokerMessageHandler.class);
+  StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+  headers.setSessionId("sess1");
+  headers.setSubscriptionId("subs1");
+  headers.setDestination("/foo");
+  Message<?> message=MessageBuilder.withPayloadAndHeaders(new byte[0],headers).build();
+  broker.handleMessage(message);
+  headers=StompHeaderAccessor.create(StompCommand.SEND);
+  headers.setSessionId("sess1");
+  headers.setDestination("/foo");
+  message=MessageBuilder.withPayloadAndHeaders("bar".getBytes(),headers).build();
+  when(channel.send(any(Message.class))).thenReturn(true);
+  broker.handleMessage(message);
+  ArgumentCaptor<Message> captor=ArgumentCaptor.forClass(Message.class);
+  verify(channel).send(captor.capture());
+  message=captor.getValue();
+  headers=StompHeaderAccessor.wrap(message);
+  assertEquals(SimpMessageType.MESSAGE,headers.getMessageType());
+  assertEquals("/foo",headers.getDestination());
+  assertEquals("bar",new String((byte[])message.getPayload()));
+}

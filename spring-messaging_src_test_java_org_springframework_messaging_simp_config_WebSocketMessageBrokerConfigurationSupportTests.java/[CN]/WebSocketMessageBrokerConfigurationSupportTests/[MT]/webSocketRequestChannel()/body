@@ -1,0 +1,10 @@
+{
+  SubscribableChannel channel=this.cxtSimpleBroker.getBean("webSocketRequestChannel",SubscribableChannel.class);
+  ArgumentCaptor<MessageHandler> captor=ArgumentCaptor.forClass(MessageHandler.class);
+  verify(channel,times(3)).subscribe(captor.capture());
+  List<MessageHandler> values=captor.getAllValues();
+  assertEquals(3,values.size());
+  assertTrue(values.contains(cxtSimpleBroker.getBean(AnnotationMethodMessageHandler.class)));
+  assertTrue(values.contains(cxtSimpleBroker.getBean(UserDestinationMessageHandler.class)));
+  assertTrue(values.contains(cxtSimpleBroker.getBean(SimpleBrokerMessageHandler.class)));
+}

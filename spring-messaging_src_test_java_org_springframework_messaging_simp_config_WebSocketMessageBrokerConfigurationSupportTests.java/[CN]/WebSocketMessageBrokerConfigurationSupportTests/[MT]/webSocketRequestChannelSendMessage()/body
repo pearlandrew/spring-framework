@@ -1,0 +1,12 @@
+{
+  SubscribableChannel channel=this.cxtSimpleBroker.getBean("webSocketRequestChannel",SubscribableChannel.class);
+  SubProtocolWebSocketHandler webSocketHandler=this.cxtSimpleBroker.getBean(SubProtocolWebSocketHandler.class);
+  TextMessage textMessage=StompTextMessageBuilder.create(StompCommand.SEND).headers("destination:/foo").build();
+  webSocketHandler.handleMessage(new TestWebSocketSession(),textMessage);
+  ArgumentCaptor<Message> captor=ArgumentCaptor.forClass(Message.class);
+  verify(channel).send(captor.capture());
+  Message message=captor.getValue();
+  StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+  assertEquals(SimpMessageType.MESSAGE,headers.getMessageType());
+  assertEquals("/foo",headers.getDestination());
+}
