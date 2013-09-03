@@ -3,18 +3,18 @@
   if (jtaTransactionManager instanceof JtaTransactionManager) {
     boolean webspherePresent=ClassUtils.isPresent("com.ibm.wsspi.uow.UOWManager",getClass().getClassLoader());
     if (webspherePresent) {
-      getProperties().put(AvailableSettings.JTA_PLATFORM,new WebSphereExtendedJtaPlatform());
+      getProperties().put(AvailableSettings.JTA_PLATFORM,ConfigurableJtaPlatform.getJtaPlatformBasePackage() + "internal.WebSphereExtendedJtaPlatform");
     }
  else {
       JtaTransactionManager jtaTm=(JtaTransactionManager)jtaTransactionManager;
       if (jtaTm.getTransactionManager() == null) {
         throw new IllegalArgumentException("Can only apply JtaTransactionManager which has a TransactionManager reference set");
       }
-      getProperties().put(AvailableSettings.JTA_PLATFORM,new ConfigurableJtaPlatform(jtaTm.getTransactionManager(),jtaTm.getUserTransaction()));
+      getProperties().put(AvailableSettings.JTA_PLATFORM,new ConfigurableJtaPlatform(jtaTm.getTransactionManager(),jtaTm.getUserTransaction(),jtaTm.getTransactionSynchronizationRegistry()).getJtaPlatformProxy());
     }
   }
  else   if (jtaTransactionManager instanceof TransactionManager) {
-    getProperties().put(AvailableSettings.JTA_PLATFORM,new ConfigurableJtaPlatform((TransactionManager)jtaTransactionManager,null));
+    getProperties().put(AvailableSettings.JTA_PLATFORM,new ConfigurableJtaPlatform((TransactionManager)jtaTransactionManager,null,null).getJtaPlatformProxy());
   }
  else {
     throw new IllegalArgumentException("Unknown transaction manager type: " + jtaTransactionManager.getClass().getName());

@@ -1,6 +1,14 @@
 {
   this.sessionFactory=sessionFactory;
-  JtaPlatform jtaPlatform=sessionFactory.getServiceRegistry().getService(JtaPlatform.class);
-  TransactionManager transactionManager=jtaPlatform.retrieveTransactionManager();
-  this.jtaSessionContext=(transactionManager != null ? new SpringJtaSessionContext(sessionFactory) : null);
+  try {
+    Object jtaPlatform=sessionFactory.getServiceRegistry().getService(ConfigurableJtaPlatform.jtaPlatformClass);
+    Method rtmMethod=ConfigurableJtaPlatform.jtaPlatformClass.getMethod("retrieveTransactionManager");
+    Object transactionManager=ReflectionUtils.invokeMethod(rtmMethod,jtaPlatform);
+    if (transactionManager != null) {
+      this.jtaSessionContext=new SpringJtaSessionContext(sessionFactory);
+    }
+  }
+ catch (  Exception ex) {
+    throw new IllegalStateException("Could not introspect Hibernate JtaPlatform for SpringJtaSessionContext",ex);
+  }
 }
