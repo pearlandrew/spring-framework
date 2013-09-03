@@ -6,6 +6,9 @@
     }
  else {
       this.userTransaction=retrieveUserTransaction();
+      if (this.userTransaction == null && this.autodetectUserTransaction) {
+        this.userTransaction=findUserTransaction();
+      }
     }
   }
   if (this.transactionManager == null) {
@@ -14,13 +17,10 @@
     }
  else {
       this.transactionManager=retrieveTransactionManager();
+      if (this.transactionManager == null && this.autodetectTransactionManager) {
+        this.transactionManager=findTransactionManager(this.userTransaction);
+      }
     }
-  }
-  if (this.userTransaction == null && this.autodetectUserTransaction) {
-    this.userTransaction=findUserTransaction();
-  }
-  if (this.transactionManager == null && this.autodetectTransactionManager) {
-    this.transactionManager=findTransactionManager(this.userTransaction);
   }
   if (this.userTransaction == null && this.transactionManager != null) {
     this.userTransaction=buildUserTransaction(this.transactionManager);

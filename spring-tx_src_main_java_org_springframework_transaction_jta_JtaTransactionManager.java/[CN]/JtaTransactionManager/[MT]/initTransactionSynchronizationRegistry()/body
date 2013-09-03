@@ -1,11 +1,13 @@
 {
-  if (StringUtils.hasLength(this.transactionSynchronizationRegistryName)) {
-    this.transactionSynchronizationRegistry=lookupTransactionSynchronizationRegistry(this.transactionSynchronizationRegistryName);
-  }
+  if (this.transactionSynchronizationRegistry == null) {
+    if (StringUtils.hasLength(this.transactionSynchronizationRegistryName)) {
+      this.transactionSynchronizationRegistry=lookupTransactionSynchronizationRegistry(this.transactionSynchronizationRegistryName);
+    }
  else {
-    this.transactionSynchronizationRegistry=retrieveTransactionSynchronizationRegistry();
-    if (this.transactionSynchronizationRegistry == null) {
-      this.transactionSynchronizationRegistry=findTransactionSynchronizationRegistry(this.userTransaction,this.transactionManager);
+      this.transactionSynchronizationRegistry=retrieveTransactionSynchronizationRegistry();
+      if (this.transactionSynchronizationRegistry == null && this.autodetectTransactionSynchronizationRegistry) {
+        this.transactionSynchronizationRegistry=findTransactionSynchronizationRegistry(this.userTransaction,this.transactionManager);
+      }
     }
   }
   if (this.transactionSynchronizationRegistry != null) {
