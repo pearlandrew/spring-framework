@@ -1,0 +1,20 @@
+{
+  final String s="Hello World";
+  Callable<String> callable=new Callable<String>(){
+    @Override public String call() throws Exception {
+      return s;
+    }
+  }
+;
+  ListenableFutureTask<String> task=new ListenableFutureTask<String>(callable);
+  task.addCallback(new ListenableFutureCallback<String>(){
+    @Override public void onSuccess(    String result){
+      assertEquals(s,result);
+    }
+    @Override public void onFailure(    Throwable t){
+      fail(t.getMessage());
+    }
+  }
+);
+  task.run();
+}
