@@ -4,7 +4,7 @@
     throwIfNotNullSafe(argumentTypes);
     return TypedValue.NULL;
   }
-  MethodExecutor executorToUse=getCachedExecutor(targetType,argumentTypes);
+  MethodExecutor executorToUse=getCachedExecutor(value,targetType,argumentTypes);
   if (executorToUse != null) {
     try {
       return executorToUse.execute(evaluationContext,value,arguments);
@@ -15,7 +15,7 @@
     }
   }
   executorToUse=findAccessorForMethod(this.name,argumentTypes,value,evaluationContext);
-  this.cachedExecutor=new CachedMethodExecutor(executorToUse,targetType,argumentTypes);
+  this.cachedExecutor=new CachedMethodExecutor(executorToUse,(value instanceof Class ? (Class<?>)value : null),targetType,argumentTypes);
   try {
     return executorToUse.execute(evaluationContext,value,arguments);
   }
