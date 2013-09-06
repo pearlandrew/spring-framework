@@ -1,5 +1,17 @@
 {
-  Endpoint endpoint=(this.endpoint != null) ? this.endpoint : this.endpointProvider.getHandler();
-  ClientEndpointConfig endpointConfig=this.configBuilder.build();
-  this.session=getWebSocketContainer().connectToServer(endpoint,endpointConfig,getUri());
+  this.taskExecutor.execute(new Runnable(){
+    @Override public void run(){
+      try {
+        logger.info("Connecting to WebSocket at " + getUri());
+        Endpoint endpointToUse=(endpoint != null) ? endpoint : endpointProvider.getHandler();
+        ClientEndpointConfig endpointConfig=configBuilder.build();
+        session=getWebSocketContainer().connectToServer(endpointToUse,endpointConfig,getUri());
+        logger.info("Successfully connected");
+      }
+ catch (      Throwable ex) {
+        logger.error("Failed to connect",ex);
+      }
+    }
+  }
+);
 }

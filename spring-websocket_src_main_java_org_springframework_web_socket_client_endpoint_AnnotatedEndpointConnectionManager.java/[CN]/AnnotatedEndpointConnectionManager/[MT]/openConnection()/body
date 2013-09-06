@@ -1,4 +1,16 @@
 {
-  Object endpoint=(this.endpoint != null) ? this.endpoint : this.endpointProvider.getHandler();
-  this.session=this.webSocketContainer.connectToServer(endpoint,getUri());
+  this.taskExecutor.execute(new Runnable(){
+    @Override public void run(){
+      try {
+        logger.info("Connecting to WebSocket at " + getUri());
+        Object endpointToUse=(endpoint != null) ? endpoint : endpointProvider.getHandler();
+        session=webSocketContainer.connectToServer(endpointToUse,getUri());
+        logger.info("Successfully connected");
+      }
+ catch (      Throwable ex) {
+        logger.error("Failed to connect",ex);
+      }
+    }
+  }
+);
 }

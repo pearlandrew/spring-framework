@@ -1,3 +1,14 @@
 {
-  this.webSocketSession=this.client.doHandshake(this.webSocketHandler,this.headers,getUri());
+  logger.info("Connecting to WebSocket at " + getUri());
+  ListenableFuture<WebSocketSession> future=this.client.doHandshake(this.webSocketHandler,this.headers,getUri());
+  future.addCallback(new ListenableFutureCallback<WebSocketSession>(){
+    @Override public void onSuccess(    WebSocketSession result){
+      webSocketSession=result;
+      logger.info("Successfully connected");
+    }
+    @Override public void onFailure(    Throwable t){
+      logger.error("Failed to connect",t);
+    }
+  }
+);
 }
