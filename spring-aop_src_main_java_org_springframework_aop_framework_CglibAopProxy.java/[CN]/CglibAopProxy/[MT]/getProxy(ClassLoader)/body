@@ -24,23 +24,14 @@
     enhancer.setSuperclass(proxySuperClass);
     enhancer.setStrategy(new MemorySafeUndeclaredThrowableStrategy(UndeclaredThrowableException.class));
     enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
-    enhancer.setInterceptDuringConstruction(false);
     Callback[] callbacks=getCallbacks(rootClass);
-    enhancer.setCallbacks(callbacks);
-    enhancer.setCallbackFilter(new ProxyCallbackFilter(this.advised.getConfigurationOnlyCopy(),this.fixedInterceptorMap,this.fixedInterceptorOffset));
     Class<?>[] types=new Class[callbacks.length];
     for (int x=0; x < types.length; x++) {
       types[x]=callbacks[x].getClass();
     }
     enhancer.setCallbackTypes(types);
-    Object proxy;
-    if (this.constructorArgs != null) {
-      proxy=enhancer.create(this.constructorArgTypes,this.constructorArgs);
-    }
- else {
-      proxy=enhancer.create();
-    }
-    return proxy;
+    enhancer.setCallbackFilter(new ProxyCallbackFilter(this.advised.getConfigurationOnlyCopy(),this.fixedInterceptorMap,this.fixedInterceptorOffset));
+    return createProxyClassAndInstance(enhancer,callbacks);
   }
  catch (  CodeGenerationException ex) {
     throw new AopConfigException("Could not generate CGLIB subclass of class [" + this.advised.getTargetClass() + "]: "+ "Common causes of this problem include using a final class or a non-visible class",ex);
