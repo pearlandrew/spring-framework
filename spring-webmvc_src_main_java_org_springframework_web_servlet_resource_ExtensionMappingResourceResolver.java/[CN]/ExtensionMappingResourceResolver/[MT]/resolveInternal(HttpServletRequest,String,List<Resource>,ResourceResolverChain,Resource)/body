@@ -1,0 +1,26 @@
+{
+  if (resolved != null && !compareTimeStamp) {
+    return resolved;
+  }
+  for (  Resource location : locations) {
+    String baseFilename=StringUtils.getFilename(path);
+    try {
+      Resource basePath=location.createRelative(StringUtils.delete(path,baseFilename));
+      if (basePath.getFile().isDirectory()) {
+        for (        String fileName : basePath.getFile().list(new ExtensionFilter(baseFilename))) {
+          Resource matched=basePath.createRelative(fileName);
+          if (resolved == null || matched.lastModified() > resolved.lastModified()) {
+            return matched;
+          }
+ else {
+            return resolved;
+          }
+        }
+      }
+    }
+ catch (    IOException e) {
+      this.logger.trace("Error occurred locating resource based on file extension mapping",e);
+    }
+  }
+  return resolved;
+}
