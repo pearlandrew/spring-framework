@@ -3,5 +3,11 @@
     String requestUri=urlPathHelper.getRequestUri(request);
     pageNotFoundLogger.warn("No mapping found for HTTP request with URI [" + requestUri + "] in DispatcherServlet with name '"+ getServletName()+ "'");
   }
-  response.sendError(HttpServletResponse.SC_NOT_FOUND);
+  if (throwExceptionIfNoHandlerFound) {
+    ServletServerHttpRequest req=new ServletServerHttpRequest(request);
+    throw new NoHandlerFoundException(req.getMethod().name(),req.getServletRequest().getRequestURI(),req.getHeaders());
+  }
+ else {
+    response.sendError(HttpServletResponse.SC_NOT_FOUND);
+  }
 }
