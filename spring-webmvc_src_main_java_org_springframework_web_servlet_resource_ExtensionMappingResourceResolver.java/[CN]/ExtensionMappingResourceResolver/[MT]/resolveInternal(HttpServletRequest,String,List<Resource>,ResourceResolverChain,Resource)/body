@@ -1,26 +1,26 @@
 {
-  if (resolved != null && !compareTimeStamp) {
-    return resolved;
+  if ((resource != null) && !this.compareTimeStamp) {
+    return resource;
   }
   for (  Resource location : locations) {
     String baseFilename=StringUtils.getFilename(path);
     try {
       Resource basePath=location.createRelative(StringUtils.delete(path,baseFilename));
       if (basePath.getFile().isDirectory()) {
-        for (        String fileName : basePath.getFile().list(new ExtensionFilter(baseFilename))) {
+        for (        String fileName : basePath.getFile().list(new ExtensionFilenameFilter(baseFilename))) {
           Resource matched=basePath.createRelative(fileName);
-          if (resolved == null || matched.lastModified() > resolved.lastModified()) {
+          if ((resource == null) || (matched.lastModified() > resource.lastModified())) {
             return matched;
           }
  else {
-            return resolved;
+            return resource;
           }
         }
       }
     }
  catch (    IOException e) {
-      this.logger.trace("Error occurred locating resource based on file extension mapping",e);
+      logger.trace("Error occurred locating resource based on file extension mapping",e);
     }
   }
-  return resolved;
+  return resource;
 }
