@@ -6,7 +6,11 @@
     String scheme=m.group(1);
     builder.scheme((scheme != null) ? scheme.toLowerCase() : scheme);
     builder.userInfo(m.group(4));
-    builder.host(m.group(5));
+    String host=m.group(5);
+    if (StringUtils.hasLength(scheme) && !StringUtils.hasLength(host)) {
+      throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
+    }
+    builder.host(host);
     String port=m.group(7);
     if (StringUtils.hasLength(port)) {
       builder.port(Integer.parseInt(port));
