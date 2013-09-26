@@ -1,10 +1,10 @@
 {
   StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.ERROR);
   headers.setMessage(error.getMessage());
-  Message<?> message=MessageBuilder.withPayloadAndHeaders(new byte[0],headers).build();
-  byte[] bytes=this.stompMessageConverter.fromMessage(message);
+  Message<byte[]> message=MessageBuilder.withPayloadAndHeaders(new byte[0],headers).build();
+  String payload=new String(this.stompEncoder.encode(message),Charset.forName("UTF-8"));
   try {
-    session.sendMessage(new TextMessage(new String(bytes,Charset.forName("UTF-8"))));
+    session.sendMessage(new TextMessage(payload));
   }
  catch (  Throwable t) {
   }

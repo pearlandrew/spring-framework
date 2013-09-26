@@ -1,0 +1,35 @@
+{
+  Assert.isInstanceOf(byte[].class,message.getPayload(),"Message's payload must be a byte[]");
+  @SuppressWarnings("unchecked") Message<byte[]> byteMessage=(Message<byte[]>)message;
+  if (logger.isTraceEnabled()) {
+    logger.trace("Forwarding to STOMP broker, message: " + message);
+  }
+  StompCommand command=StompHeaderAccessor.wrap(message).getCommand();
+  if (command == StompCommand.DISCONNECT) {
+    this.stompConnection.setDisconnected();
+  }
+  final Deferred<Boolean,Promise<Boolean>> deferred=new DeferredPromiseSpec<Boolean>().get();
+  tcpConnection.send(byteMessage,new Consumer<Boolean>(){
+    @Override public void accept(    Boolean success){
+      deferred.accept(success);
+    }
+  }
+);
+  Boolean success=null;
+  try {
+    success=deferred.compose().await();
+    if (success == null) {
+      handleTcpClientFailure("Timed out waiting for message to be forwarded to the broker",null);
+    }
+ else     if (!success) {
+      if (command != StompCommand.DISCONNECT) {
+        handleTcpClientFailure("Failed to forward message to the broker",null);
+      }
+    }
+  }
+ catch (  InterruptedException ex) {
+    Thread.currentThread().interrupt();
+    handleTcpClientFailure("Interrupted while forwarding message to the broker",ex);
+  }
+  return (success != null) ? success : false;
+}

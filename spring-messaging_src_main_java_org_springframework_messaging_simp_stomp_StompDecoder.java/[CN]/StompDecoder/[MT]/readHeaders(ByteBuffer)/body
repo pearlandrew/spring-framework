@@ -1,0 +1,25 @@
+{
+  MultiValueMap<String,String> headers=new LinkedMultiValueMap<String,String>();
+  while (true) {
+    ByteArrayOutputStream headerStream=new ByteArrayOutputStream();
+    while (buffer.remaining() > 0 && !isEol(buffer)) {
+      headerStream.write(buffer.get());
+    }
+    if (headerStream.size() > 0) {
+      String header=new String(headerStream.toByteArray(),UTF8_CHARSET);
+      int colonIndex=header.indexOf(':');
+      if (colonIndex <= 0 || colonIndex == header.length() - 1) {
+        throw new StompConversionException("Illegal header: '" + header + "'. A header must be of the form <name>:<value");
+      }
+ else {
+        String headerName=unescape(header.substring(0,colonIndex));
+        String headerValue=unescape(header.substring(colonIndex + 1));
+        headers.add(headerName,headerValue);
+      }
+    }
+ else {
+      break;
+    }
+  }
+  return headers;
+}

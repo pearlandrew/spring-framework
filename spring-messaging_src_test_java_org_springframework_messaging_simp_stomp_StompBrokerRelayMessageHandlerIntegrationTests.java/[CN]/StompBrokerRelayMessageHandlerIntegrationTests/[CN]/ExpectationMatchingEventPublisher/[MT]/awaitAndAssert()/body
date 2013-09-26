@@ -1,8 +1,9 @@
 {
-  if (this.expected.size() == this.actual.size()) {
+synchronized (this.monitor) {
+    long endTime=System.currentTimeMillis() + 5000;
+    while (this.expected.size() != this.actual.size() && System.currentTimeMillis() < endTime) {
+      this.monitor.wait(500);
+    }
     assertEquals(this.expected,this.actual);
-  }
- else {
-    assertTrue("Expected=" + this.expected + ", actual="+ this.actual,this.latch.await(5,TimeUnit.SECONDS));
   }
 }

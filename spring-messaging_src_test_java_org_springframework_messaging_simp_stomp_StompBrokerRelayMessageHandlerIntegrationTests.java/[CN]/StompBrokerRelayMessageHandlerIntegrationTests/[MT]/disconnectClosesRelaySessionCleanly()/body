@@ -1,0 +1,12 @@
+{
+  String sess1="sess1";
+  MessageExchange conn1=MessageExchangeBuilder.connect(sess1).build();
+  this.responseHandler.expect(conn1);
+  this.relay.handleMessage(conn1.message);
+  this.responseHandler.awaitAndAssert();
+  StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.DISCONNECT);
+  headers.setSessionId(sess1);
+  this.relay.handleMessage(MessageBuilder.withPayloadAndHeaders(new byte[0],headers).build());
+  Thread.sleep(2000);
+  this.responseHandler.awaitAndAssert();
+}

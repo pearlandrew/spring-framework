@@ -14,16 +14,8 @@
     throw new StompConversionException("Unsupported version '" + acceptVersions + "'");
   }
   connectedHeaders.setHeartbeat(0,0);
-  Principal principal=session.getPrincipal();
-  if (principal != null) {
-    connectedHeaders.setNativeHeader(CONNECTED_USER_HEADER,principal.getName());
-    connectedHeaders.setNativeHeader(QUEUE_SUFFIX_HEADER,session.getId());
-    if (this.queueSuffixResolver != null) {
-      String suffix=session.getId();
-      this.queueSuffixResolver.addQueueSuffix(principal.getName(),session.getId(),suffix);
-    }
-  }
-  Message<?> connectedMessage=MessageBuilder.withPayloadAndHeaders(new byte[0],connectedHeaders).build();
-  byte[] bytes=this.stompMessageConverter.fromMessage(connectedMessage);
-  session.sendMessage(new TextMessage(new String(bytes,Charset.forName("UTF-8"))));
+  augmentConnectedHeaders(connectedHeaders,session);
+  Message<byte[]> connectedMessage=MessageBuilder.withPayloadAndHeaders(new byte[0],connectedHeaders).build();
+  String payload=new String(this.stompEncoder.encode(connectedMessage),Charset.forName("UTF-8"));
+  session.sendMessage(new TextMessage(payload));
 }

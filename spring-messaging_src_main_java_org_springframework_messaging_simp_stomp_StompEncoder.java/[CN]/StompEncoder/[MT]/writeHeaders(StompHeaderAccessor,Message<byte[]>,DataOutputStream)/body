@@ -1,0 +1,16 @@
+{
+  for (  Entry<String,List<String>> entry : headers.toStompHeaderMap().entrySet()) {
+    byte[] key=getUtf8BytesEscapingIfNecessary(entry.getKey(),headers);
+    for (    String value : entry.getValue()) {
+      output.write(key);
+      output.write(COLON);
+      output.write(getUtf8BytesEscapingIfNecessary(value,headers));
+      output.write(LF);
+    }
+  }
+  if (headers.getCommand() == StompCommand.SEND || headers.getCommand() == StompCommand.MESSAGE || headers.getCommand() == StompCommand.ERROR) {
+    output.write("content-length:".getBytes(UTF8_CHARSET));
+    output.write(Integer.toString(message.getPayload().length).getBytes(UTF8_CHARSET));
+    output.write(LF);
+  }
+}

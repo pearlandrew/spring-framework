@@ -1,10 +1,10 @@
 {
   this.environment=new Environment();
-  this.tcpClient=new TcpClientSpec<String,String>(NettyTcpClient.class).env(this.environment).codec(new DelimitedCodec<String,String>((byte)0,true,StandardCodecs.STRING_CODEC)).connect(this.relayHost,this.relayPort).get();
+  this.tcpClient=new TcpClientSpec<Message<byte[]>,Message<byte[]>>(NettyTcpClient.class).env(this.environment).codec(new StompCodec()).connect(this.relayHost,this.relayPort).get();
   if (logger.isDebugEnabled()) {
     logger.debug("Initializing \"system\" TCP connection");
   }
-  SystemRelaySession session=new SystemRelaySession();
+  SystemStompRelaySession session=new SystemStompRelaySession();
   this.relaySessions.put(session.getId(),session);
   session.connect();
 }
