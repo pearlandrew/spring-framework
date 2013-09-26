@@ -4,7 +4,10 @@
     long interval=Math.max(HEARTBEAT_SEND_INTERVAL,brokerReceiveInterval);
     stompConnection.connection.on().writeIdle(interval,new Runnable(){
       @Override public void run(){
-        stompConnection.connection.send(MessageBuilder.withPayload(heartbeatPayload).build());
+        TcpConnection<Message<byte[]>,Message<byte[]>> connection=stompConnection.connection;
+        if (connection != null) {
+          connection.send(MessageBuilder.withPayload(heartbeatPayload).build());
+        }
       }
     }
 );
