@@ -1,5 +1,6 @@
 {
   Assert.isInstanceOf(byte[].class,message.getPayload(),"Message's payload must be a byte[]");
+  @SuppressWarnings("unchecked") Message<byte[]> byteMessage=(Message<byte[]>)message;
   if (logger.isTraceEnabled()) {
     logger.trace("Forwarding to STOMP broker, message: " + message);
   }
@@ -8,7 +9,7 @@
     this.stompConnection.setDisconnected();
   }
   final Deferred<Boolean,Promise<Boolean>> deferred=new DeferredPromiseSpec<Boolean>().get();
-  tcpConnection.send((Message<byte[]>)message,new Consumer<Boolean>(){
+  tcpConnection.send(byteMessage,new Consumer<Boolean>(){
     @Override public void accept(    Boolean success){
       deferred.accept(success);
     }
