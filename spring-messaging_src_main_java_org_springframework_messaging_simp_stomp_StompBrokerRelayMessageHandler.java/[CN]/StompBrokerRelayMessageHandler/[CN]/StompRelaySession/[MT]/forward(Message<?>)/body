@@ -1,8 +1,10 @@
 {
   TcpConnection<Message<byte[]>,Message<byte[]>> tcpConnection=this.stompConnection.getReadyConnection();
   if (tcpConnection == null) {
-    logger.warn("Connection to STOMP broker is not active, discarding message: " + message);
-    return;
+    logger.warn("Connection to STOMP broker is not active");
+    handleForwardFailure(message);
   }
-  forwardInternal(tcpConnection,message);
+ else   if (!forwardInternal(tcpConnection,message)) {
+    handleForwardFailure(message);
+  }
 }

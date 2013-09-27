@@ -1,12 +1,17 @@
 {
   long brokerReceiveInterval=headers.getHeartbeat()[1];
-  if (HEARTBEAT_SEND_INTERVAL > 0 && brokerReceiveInterval > 0) {
+  if ((HEARTBEAT_SEND_INTERVAL > 0) && (brokerReceiveInterval > 0)) {
     long interval=Math.max(HEARTBEAT_SEND_INTERVAL,brokerReceiveInterval);
     stompConnection.connection.on().writeIdle(interval,new Runnable(){
       @Override public void run(){
-        TcpConnection<Message<byte[]>,Message<byte[]>> connection=stompConnection.connection;
-        if (connection != null) {
-          connection.send(MessageBuilder.withPayload(heartbeatPayload).build());
+        TcpConnection<Message<byte[]>,Message<byte[]>> tcpConn=stompConnection.connection;
+        if (tcpConn != null) {
+          tcpConn.send(MessageBuilder.withPayload(heartbeatPayload).build(),new Consumer<Boolean>(){
+            @Override public void accept(            Boolean t){
+              handleTcpClientFailure("Failed to send heartbeat to the broker",null);
+            }
+          }
+);
         }
       }
     }
@@ -18,7 +23,9 @@
     stompConnection.connection.on().readIdle(interval,new Runnable(){
       @Override public void run(){
         String message="Broker hearbeat missed: connection idle for more than " + interval + "ms";
-        logger.warn(message);
+        if (logger.isWarnEnabled()) {
+          logger.warn(message);
+        }
         disconnected(message);
       }
     }

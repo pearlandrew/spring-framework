@@ -18,33 +18,28 @@
   if (command != null && command.requiresDestination() && !checkDestinationPrefix(destination)) {
     return;
   }
-  try {
-    if (SimpMessageType.CONNECT.equals(messageType)) {
-      message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
-      StompRelaySession session=new StompRelaySession(sessionId);
-      this.relaySessions.put(sessionId,session);
-      session.connect(message);
-    }
- else     if (SimpMessageType.DISCONNECT.equals(messageType)) {
-      StompRelaySession session=this.relaySessions.remove(sessionId);
-      if (session == null) {
-        if (logger.isTraceEnabled()) {
-          logger.trace("Session already removed, sessionId=" + sessionId);
-        }
-        return;
-      }
-      session.forward(message);
-    }
- else {
-      StompRelaySession session=this.relaySessions.get(sessionId);
-      if (session == null) {
-        logger.warn("Session id=" + sessionId + " not found. Ignoring message: "+ message);
-        return;
-      }
-      session.forward(message);
-    }
+  if (SimpMessageType.CONNECT.equals(messageType)) {
+    message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
+    StompRelaySession session=new StompRelaySession(sessionId);
+    this.relaySessions.put(sessionId,session);
+    session.connect(message);
   }
- catch (  Throwable t) {
-    logger.error("Failed to handle message " + message,t);
+ else   if (SimpMessageType.DISCONNECT.equals(messageType)) {
+    StompRelaySession session=this.relaySessions.remove(sessionId);
+    if (session == null) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Session already removed, sessionId=" + sessionId);
+      }
+      return;
+    }
+    session.forward(message);
+  }
+ else {
+    StompRelaySession session=this.relaySessions.get(sessionId);
+    if (session == null) {
+      logger.warn("Session id=" + sessionId + " not found. Ignoring message: "+ message);
+      return;
+    }
+    session.forward(message);
   }
 }
