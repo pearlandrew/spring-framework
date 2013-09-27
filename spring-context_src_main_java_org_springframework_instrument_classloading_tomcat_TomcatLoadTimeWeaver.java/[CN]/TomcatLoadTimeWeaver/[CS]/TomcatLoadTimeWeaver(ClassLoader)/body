@@ -1,0 +1,25 @@
+{
+  Assert.notNull(classLoader,"ClassLoader must not be null");
+  this.classLoader=classLoader;
+  Class<?> instrumentableLoaderClass;
+  try {
+    instrumentableLoaderClass=classLoader.loadClass(INSTRUMENTABLE_LOADER_CLASS_NAME);
+    if (!instrumentableLoaderClass.isInstance(classLoader)) {
+      instrumentableLoaderClass=classLoader.getClass();
+    }
+  }
+ catch (  ClassNotFoundException ex) {
+    instrumentableLoaderClass=classLoader.getClass();
+  }
+  try {
+    this.addTransformerMethod=instrumentableLoaderClass.getMethod("addTransformer",ClassFileTransformer.class);
+    Method copyMethod=ClassUtils.getMethodIfAvailable(instrumentableLoaderClass,"copyWithoutTransformers");
+    if (copyMethod == null) {
+      copyMethod=instrumentableLoaderClass.getMethod("getThrowawayClassLoader");
+    }
+    this.copyMethod=copyMethod;
+  }
+ catch (  Exception ex) {
+    throw new IllegalStateException("Could not initialize TomcatLoadTimeWeaver because Tomcat API classes are not available",ex);
+  }
+}
