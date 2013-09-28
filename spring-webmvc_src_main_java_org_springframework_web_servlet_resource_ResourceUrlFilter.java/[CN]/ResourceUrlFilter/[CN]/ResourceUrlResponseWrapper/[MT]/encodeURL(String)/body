@@ -1,0 +1,15 @@
+{
+  if (url.startsWith(this.pathPrefix)) {
+    String relativeUrl=url.replaceFirst(this.pathPrefix,"");
+    if (!relativeUrl.startsWith("/")) {
+      relativeUrl="/" + relativeUrl;
+    }
+    for (    ResourceUrlGenerator generator : resourceUrlGenerators) {
+      String resourceUrl=generator.getResourceUrl(relativeUrl);
+      if (resourceUrl != null) {
+        return super.encodeURL(this.pathPrefix + resourceUrl);
+      }
+    }
+  }
+  return super.encodeURL(url);
+}

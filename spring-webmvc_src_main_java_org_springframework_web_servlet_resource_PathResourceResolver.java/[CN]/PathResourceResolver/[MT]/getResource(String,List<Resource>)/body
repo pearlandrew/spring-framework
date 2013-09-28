@@ -1,0 +1,23 @@
+{
+  for (  Resource location : locations) {
+    try {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Trying relative path [" + path + "] against base location: "+ location);
+      }
+      Resource resource=location.createRelative(path);
+      if (resource.exists() && resource.isReadable()) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Found matching resource: " + resource);
+        }
+        return resource;
+      }
+ else       if (logger.isTraceEnabled()) {
+        logger.trace("Relative resource doesn't exist or isn't readable: " + resource);
+      }
+    }
+ catch (    IOException ex) {
+      logger.debug("Failed to create relative resource - trying next resource location",ex);
+    }
+  }
+  return null;
+}

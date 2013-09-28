@@ -1,0 +1,19 @@
+{
+  this.resourceMappings.clear();
+  if (handlerMappings == null) {
+    return;
+  }
+  for (  SimpleUrlHandlerMapping handlerMapping : handlerMappings) {
+    PathMatcher pathMatcher=handlerMapping.getPathMatcher();
+    for (    Entry<String,?> entry : handlerMapping.getUrlMap().entrySet()) {
+      Object value=entry.getValue();
+      if (value instanceof ResourceHttpRequestHandler) {
+        ResourceHttpRequestHandler handler=(ResourceHttpRequestHandler)value;
+        String pattern=entry.getKey();
+        List<ResourceResolver> resolvers=handler.getResourceResolvers();
+        List<Resource> locations=handler.getLocations();
+        this.resourceMappings.add(new ResourceMapping(pattern,pathMatcher,resolvers,locations));
+      }
+    }
+  }
+}
