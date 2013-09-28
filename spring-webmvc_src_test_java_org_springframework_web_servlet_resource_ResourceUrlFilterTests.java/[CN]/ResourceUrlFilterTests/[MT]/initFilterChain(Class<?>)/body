@@ -1,0 +1,13 @@
+{
+  MockServletContext servletContext=new MockServletContext();
+  AnnotationConfigWebApplicationContext cxt=new AnnotationConfigWebApplicationContext();
+  cxt.setServletContext(servletContext);
+  cxt.register(configClass);
+  cxt.refresh();
+  servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,cxt);
+  ResourceUrlFilter filter=new ResourceUrlFilter();
+  filter.setServletContext(servletContext);
+  filter.initFilterBean();
+  this.servlet=new TestServlet();
+  this.filterChain=new MockFilterChain(servlet,filter);
+}
