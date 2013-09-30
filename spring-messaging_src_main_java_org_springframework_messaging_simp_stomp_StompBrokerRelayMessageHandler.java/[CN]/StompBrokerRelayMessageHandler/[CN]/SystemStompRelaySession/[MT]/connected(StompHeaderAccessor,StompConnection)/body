@@ -7,8 +7,10 @@
         TcpConnection<Message<byte[]>,Message<byte[]>> tcpConn=stompConnection.connection;
         if (tcpConn != null) {
           tcpConn.send(MessageBuilder.withPayload(heartbeatPayload).build(),new Consumer<Boolean>(){
-            @Override public void accept(            Boolean t){
-              handleTcpClientFailure("Failed to send heartbeat to the broker",null);
+            @Override public void accept(            Boolean result){
+              if (!result) {
+                handleTcpClientFailure("Failed to send heartbeat to the broker",null);
+              }
             }
           }
 );
