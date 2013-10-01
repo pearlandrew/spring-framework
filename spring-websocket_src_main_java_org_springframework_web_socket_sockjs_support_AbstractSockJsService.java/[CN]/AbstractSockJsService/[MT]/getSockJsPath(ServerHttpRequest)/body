@@ -4,14 +4,13 @@
     for (    String prefix : this.validSockJsPrefixes) {
       int index=path.lastIndexOf(prefix);
       if (index != -1) {
-        this.knownSockJsPrefixes.add(path.substring(0,index + prefix.length()));
         return path.substring(index + prefix.length());
       }
     }
     return null;
   }
   if (path.endsWith("/info")) {
-    this.knownSockJsPrefixes.add(path.substring(0,path.length() - "/info".length()));
+    addKnownSockJsPrefix(path.substring(0,path.length() - "/info".length()));
     return "/info";
   }
   String match=null;
@@ -30,7 +29,7 @@
   String pathNoSlash=path.endsWith("/") ? path.substring(0,path.length() - 1) : path;
   String lastSegment=pathNoSlash.substring(pathNoSlash.lastIndexOf('/') + 1);
   if (!isValidTransportType(lastSegment) && !lastSegment.startsWith("iframe")) {
-    this.knownSockJsPrefixes.add(path);
+    addKnownSockJsPrefix(path);
     return "";
   }
   return null;
