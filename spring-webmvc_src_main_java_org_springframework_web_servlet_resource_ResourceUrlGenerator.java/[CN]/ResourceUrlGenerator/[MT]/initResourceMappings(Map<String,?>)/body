@@ -1,0 +1,15 @@
+{
+  PathMatcher pathMatcher=new AntPathMatcher();
+  List<ResourceMapping> result=new ArrayList<ResourceMapping>();
+  for (  Entry<String,?> entry : handlerMap.entrySet()) {
+    Object value=entry.getValue();
+    if (value instanceof ResourceHttpRequestHandler) {
+      ResourceHttpRequestHandler handler=(ResourceHttpRequestHandler)value;
+      String pattern=entry.getKey();
+      List<ResourceResolver> resolvers=handler.getResourceResolvers();
+      List<Resource> locations=handler.getLocations();
+      result.add(new ResourceMapping(pattern,pathMatcher,resolvers,locations));
+    }
+  }
+  return result;
+}
