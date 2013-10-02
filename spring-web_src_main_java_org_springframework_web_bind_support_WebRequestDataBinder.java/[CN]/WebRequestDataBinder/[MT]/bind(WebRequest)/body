@@ -1,9 +1,13 @@
 {
   MutablePropertyValues mpvs=new MutablePropertyValues(request.getParameterMap());
-  if (request instanceof NativeWebRequest) {
+  if (isMultipartRequest(request) && (request instanceof NativeWebRequest)) {
     MultipartRequest multipartRequest=((NativeWebRequest)request).getNativeRequest(MultipartRequest.class);
     if (multipartRequest != null) {
       bindMultipart(multipartRequest.getMultiFileMap(),mpvs);
+    }
+ else     if (ClassUtils.hasMethod(HttpServletRequest.class,"getParts")) {
+      HttpServletRequest serlvetRequest=((NativeWebRequest)request).getNativeRequest(HttpServletRequest.class);
+      new Servlet3MultipartHelper().bindParts(serlvetRequest,mpvs);
     }
   }
   doBind(mpvs);
