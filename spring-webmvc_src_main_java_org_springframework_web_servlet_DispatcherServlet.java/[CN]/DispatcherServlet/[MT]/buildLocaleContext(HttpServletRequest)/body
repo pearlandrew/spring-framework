@@ -1,11 +1,13 @@
 {
-  return new LocaleContext(){
-    @Override public Locale getLocale(){
-      return localeResolver.resolveLocale(request);
-    }
-    @Override public String toString(){
-      return getLocale().toString();
-    }
+  if (this.localeResolver instanceof LocaleContextResolver) {
+    return ((LocaleContextResolver)this.localeResolver).resolveLocaleContext(request);
   }
+ else {
+    return new LocaleContext(){
+      @Override public Locale getLocale(){
+        return localeResolver.resolveLocale(request);
+      }
+    }
 ;
+  }
 }

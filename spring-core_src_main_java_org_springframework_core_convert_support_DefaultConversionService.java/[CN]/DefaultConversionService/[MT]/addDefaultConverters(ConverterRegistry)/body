@@ -1,6 +1,11 @@
 {
   addScalarConverters(converterRegistry);
   addCollectionConverters(converterRegistry);
-  addBinaryConverters(converterRegistry);
-  addFallbackConverters(converterRegistry);
+  converterRegistry.addConverter(new ByteBufferConverter((ConversionService)converterRegistry));
+  if (zoneIdAvailable) {
+    ZoneIdConverterRegistrar.registerZoneIdConverters(converterRegistry);
+  }
+  converterRegistry.addConverter(new ObjectToObjectConverter());
+  converterRegistry.addConverter(new IdToEntityConverter((ConversionService)converterRegistry));
+  converterRegistry.addConverter(new FallbackObjectToStringConverter());
 }

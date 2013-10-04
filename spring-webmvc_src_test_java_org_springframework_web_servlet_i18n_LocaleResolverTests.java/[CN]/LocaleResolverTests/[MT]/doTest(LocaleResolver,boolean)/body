@@ -1,0 +1,68 @@
+{
+  MockServletContext context=new MockServletContext();
+  MockHttpServletRequest request=new MockHttpServletRequest(context);
+  request.addPreferredLocale(Locale.UK);
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  Locale locale=localeResolver.resolveLocale(request);
+  assertEquals(locale,Locale.UK);
+  try {
+    localeResolver.setLocale(request,response,Locale.GERMANY);
+    if (!shouldSet)     fail("should not be able to set Locale");
+    locale=localeResolver.resolveLocale(request);
+    assertEquals(locale,Locale.GERMANY);
+  }
+ catch (  UnsupportedOperationException ex) {
+    if (shouldSet) {
+      fail("should be able to set Locale");
+    }
+  }
+  if (localeResolver instanceof LocaleContextResolver) {
+    LocaleContextResolver localeContextResolver=(LocaleContextResolver)localeResolver;
+    LocaleContext localeContext=localeContextResolver.resolveLocaleContext(request);
+    if (shouldSet) {
+      assertEquals(localeContext.getLocale(),Locale.GERMANY);
+    }
+ else {
+      assertEquals(localeContext.getLocale(),Locale.UK);
+    }
+    assertTrue(localeContext instanceof TimeZoneAwareLocaleContext);
+    assertNull(((TimeZoneAwareLocaleContext)localeContext).getTimeZone());
+    if (localeContextResolver instanceof AbstractLocaleContextResolver) {
+      ((AbstractLocaleContextResolver)localeContextResolver).setDefaultTimeZone(TimeZone.getTimeZone("GMT+1"));
+      assertEquals(((TimeZoneAwareLocaleContext)localeContext).getTimeZone(),TimeZone.getTimeZone("GMT+1"));
+    }
+    try {
+      localeContextResolver.setLocaleContext(request,response,new SimpleLocaleContext(Locale.US));
+      if (!shouldSet) {
+        fail("should not be able to set Locale");
+      }
+      localeContext=localeContextResolver.resolveLocaleContext(request);
+      assertEquals(localeContext.getLocale(),Locale.US);
+      if (localeContextResolver instanceof AbstractLocaleContextResolver) {
+        assertEquals(((TimeZoneAwareLocaleContext)localeContext).getTimeZone(),TimeZone.getTimeZone("GMT+1"));
+      }
+ else {
+        assertNull(((TimeZoneAwareLocaleContext)localeContext).getTimeZone());
+      }
+      localeContextResolver.setLocaleContext(request,response,new SimpleTimeZoneAwareLocaleContext(Locale.GERMANY,TimeZone.getTimeZone("GMT+2")));
+      localeContext=localeContextResolver.resolveLocaleContext(request);
+      assertEquals(localeContext.getLocale(),Locale.GERMANY);
+      assertTrue(localeContext instanceof TimeZoneAwareLocaleContext);
+      assertEquals(((TimeZoneAwareLocaleContext)localeContext).getTimeZone(),TimeZone.getTimeZone("GMT+2"));
+      localeContextResolver.setLocaleContext(request,response,new SimpleTimeZoneAwareLocaleContext(null,TimeZone.getTimeZone("GMT+3")));
+      localeContext=localeContextResolver.resolveLocaleContext(request);
+      assertEquals(localeContext.getLocale(),Locale.UK);
+      assertTrue(localeContext instanceof TimeZoneAwareLocaleContext);
+      assertEquals(((TimeZoneAwareLocaleContext)localeContext).getTimeZone(),TimeZone.getTimeZone("GMT+3"));
+      if (localeContextResolver instanceof AbstractLocaleContextResolver) {
+        ((AbstractLocaleContextResolver)localeContextResolver).setDefaultLocale(Locale.GERMANY);
+        assertEquals(localeContext.getLocale(),Locale.GERMANY);
+      }
+    }
+ catch (    UnsupportedOperationException ex) {
+      if (shouldSet) {
+        fail("should be able to set Locale");
+      }
+    }
+  }
+}

@@ -7,11 +7,21 @@
     this.webApplicationContext=RequestContextUtils.getWebApplicationContext(request,servletContext);
   }
   LocaleResolver localeResolver=RequestContextUtils.getLocaleResolver(request);
-  if (localeResolver != null) {
+  if (localeResolver instanceof LocaleContextResolver) {
+    LocaleContext localeContext=((LocaleContextResolver)localeResolver).resolveLocaleContext(request);
+    this.locale=localeContext.getLocale();
+    if (localeContext instanceof TimeZoneAwareLocaleContext) {
+      this.timeZone=((TimeZoneAwareLocaleContext)localeContext).getTimeZone();
+    }
+  }
+ else   if (localeResolver != null) {
     this.locale=localeResolver.resolveLocale(request);
   }
- else {
+  if (this.locale == null) {
     this.locale=getFallbackLocale();
+  }
+  if (this.timeZone == null) {
+    this.timeZone=getFallbackTimeZone();
   }
   this.defaultHtmlEscape=WebUtils.getDefaultHtmlEscape(this.webApplicationContext.getServletContext());
   this.urlPathHelper=new UrlPathHelper();

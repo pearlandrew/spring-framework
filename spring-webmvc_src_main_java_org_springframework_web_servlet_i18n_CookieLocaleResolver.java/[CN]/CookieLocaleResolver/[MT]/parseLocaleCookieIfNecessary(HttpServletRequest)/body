@@ -1,0 +1,26 @@
+{
+  if (request.getAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME) == null) {
+    Cookie cookie=WebUtils.getCookie(request,getCookieName());
+    Locale locale=null;
+    TimeZone timeZone=null;
+    if (cookie != null) {
+      String value=cookie.getValue();
+      String localePart=value;
+      String timeZonePart=null;
+      int spaceIndex=localePart.indexOf(' ');
+      if (spaceIndex != -1) {
+        localePart=value.substring(0,spaceIndex);
+        timeZonePart=value.substring(spaceIndex + 1);
+      }
+      locale=(!"-".equals(localePart) ? StringUtils.parseLocaleString(localePart) : null);
+      if (timeZonePart != null) {
+        timeZone=StringUtils.parseTimeZoneString(timeZonePart);
+      }
+      if (logger.isDebugEnabled()) {
+        logger.debug("Parsed cookie value [" + cookie.getValue() + "] into locale '"+ locale+ "'"+ (timeZone != null ? " and time zone '" + timeZone.getID() + "'" : ""));
+      }
+    }
+    request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME,(locale != null ? locale : determineDefaultLocale(request)));
+    request.setAttribute(TIME_ZONE_REQUEST_ATTRIBUTE_NAME,(timeZone != null ? timeZone : determineDefaultTimeZone(request)));
+  }
+}
