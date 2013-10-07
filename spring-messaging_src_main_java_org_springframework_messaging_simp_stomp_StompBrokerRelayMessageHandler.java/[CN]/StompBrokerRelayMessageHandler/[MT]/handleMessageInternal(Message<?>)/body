@@ -8,7 +8,7 @@
     sessionId=(sessionId == null) ? SystemStompRelaySession.ID : sessionId;
     headers.setSessionId(sessionId);
     headers.updateStompCommandAsClientMessage();
-    message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
+    message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
   }
   if (sessionId == null) {
     logger.error("No sessionId, ignoring message: " + message);
@@ -18,7 +18,7 @@
     return;
   }
   if (SimpMessageType.CONNECT.equals(messageType)) {
-    message=MessageBuilder.withPayloadAndHeaders(message.getPayload(),headers).build();
+    message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
     StompRelaySession session=new StompRelaySession(sessionId);
     this.relaySessions.put(sessionId,session);
     session.connect(message);
