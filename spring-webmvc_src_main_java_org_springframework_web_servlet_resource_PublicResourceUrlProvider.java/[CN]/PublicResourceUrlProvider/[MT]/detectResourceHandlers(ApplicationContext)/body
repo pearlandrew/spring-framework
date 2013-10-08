@@ -1,0 +1,16 @@
+{
+  logger.debug("Looking for resource handler mappings");
+  Map<String,SimpleUrlHandlerMapping> beans=applicationContext.getBeansOfType(SimpleUrlHandlerMapping.class);
+  for (  SimpleUrlHandlerMapping hm : beans.values()) {
+    for (    String pattern : hm.getUrlMap().keySet()) {
+      Object handler=hm.getUrlMap().get(pattern);
+      if (handler instanceof ResourceHttpRequestHandler) {
+        ResourceHttpRequestHandler resourceHandler=(ResourceHttpRequestHandler)handler;
+        if (logger.isDebugEnabled()) {
+          logger.debug("Found pattern=\"" + pattern + "\" mapped to locations "+ resourceHandler.getLocations()+ " with resolvers: "+ resourceHandler.getResourceResolvers());
+        }
+        this.handlerMap.put(pattern,resourceHandler);
+      }
+    }
+  }
+}

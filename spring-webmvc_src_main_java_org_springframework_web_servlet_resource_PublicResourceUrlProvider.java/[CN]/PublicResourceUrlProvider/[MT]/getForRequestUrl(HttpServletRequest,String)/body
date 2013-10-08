@@ -1,0 +1,16 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug("Checking requestURL=" + requestUrl);
+  }
+  String pathWithinMapping=(String)request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+  if (pathWithinMapping == null) {
+    logger.debug("Request attribute with lookup path not found, calculating instead.");
+    pathWithinMapping=getPathHelper().getLookupPathForRequest(request);
+  }
+  int index=getPathHelper().getRequestUri(request).indexOf(pathWithinMapping);
+  Assert.state(index > 0 && index < requestUrl.length(),"Failed to determine lookup path: " + requestUrl);
+  String prefix=requestUrl.substring(0,index);
+  String lookupPath=requestUrl.substring(index);
+  String resolvedPath=getForLookupPath(lookupPath);
+  return (resolvedPath != null) ? prefix + resolvedPath : null;
+}
