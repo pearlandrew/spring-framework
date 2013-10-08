@@ -5,22 +5,10 @@
   Map<String,HttpRequestHandler> urlMap=new LinkedHashMap<String,HttpRequestHandler>();
   for (  ResourceHandlerRegistration registration : registrations) {
     for (    String pathPattern : registration.getPathPatterns()) {
-      ResourceHttpRequestHandler handler=registration.getRequestHandler();
-      handler.setServletContext(servletContext);
-      handler.setApplicationContext(applicationContext);
-      if ((this.resourceResolvers != null) && (registration.getResourceResolvers() == null)) {
-        handler.setResourceResolvers(this.resourceResolvers);
-      }
-      if ((this.resourceTransformers != null) && (registration.getResourceTransformers() == null)) {
-        handler.setResourceTransformers(this.resourceTransformers);
-      }
-      try {
-        handler.afterPropertiesSet();
-      }
- catch (      Exception e) {
-        throw new BeanInitializationException("Failed to init ResourceHttpRequestHandler",e);
-      }
-      urlMap.put(pathPattern,handler);
+      ResourceHttpRequestHandler requestHandler=registration.getRequestHandler();
+      requestHandler.setServletContext(servletContext);
+      requestHandler.setApplicationContext(applicationContext);
+      urlMap.put(pathPattern,requestHandler);
     }
   }
   SimpleUrlHandlerMapping handlerMapping=new SimpleUrlHandlerMapping();
