@@ -1,6 +1,6 @@
 {
   Assert.notNull(type,"Type must not be null");
-  if (resolve() == null || type.resolve() == null) {
+  if (this == NONE || type == NONE) {
     return false;
   }
   if (isArray()) {
@@ -14,10 +14,10 @@
   if (ourBounds != null) {
     return ourBounds.isAssignableFrom(type);
   }
-  boolean rtn=resolve().isAssignableFrom(type.resolve());
-  rtn&=(!checkingGeneric || resolve().equals(type.resolve()));
+  boolean rtn=resolve(Object.class).isAssignableFrom(type.resolve(Object.class));
+  rtn&=(!checkingGeneric || resolve(Object.class).equals(type.resolve(Object.class)));
   for (int i=0; i < getGenerics().length; i++) {
-    rtn&=getGeneric(i).isAssignableFrom(type.as(resolve()).getGeneric(i),true);
+    rtn&=getGeneric(i).isAssignableFrom(type.as(resolve(Object.class)).getGeneric(i),true);
   }
   return rtn;
 }
