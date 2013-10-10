@@ -1,0 +1,12 @@
+{
+  this.converter.setSerializedPayloadClass(String.class);
+  Charset utf16=Charset.forName("UTF-16BE");
+  MimeType contentType=new MimeType("application","json",utf16);
+  Map<String,Object> map=new HashMap<>();
+  map.put(MessageHeaders.CONTENT_TYPE,contentType);
+  MessageHeaders headers=new MessageHeaders(map);
+  String payload="H\u00e9llo W\u00f6rld";
+  Message<?> message=this.converter.toMessage(payload,headers);
+  assertEquals("\"" + payload + "\"",message.getPayload());
+  assertEquals(contentType,message.getHeaders().get(MessageHeaders.CONTENT_TYPE));
+}

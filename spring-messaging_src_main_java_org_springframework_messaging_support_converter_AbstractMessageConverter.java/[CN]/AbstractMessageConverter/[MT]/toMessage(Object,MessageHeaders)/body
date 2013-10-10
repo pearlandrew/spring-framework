@@ -1,0 +1,15 @@
+{
+  if (!canConvertTo(payload,headers)) {
+    return null;
+  }
+  payload=convertToInternal(payload,headers);
+  MessageBuilder<?> builder=MessageBuilder.withPayload(payload);
+  if (headers != null) {
+    builder.copyHeaders(headers);
+  }
+  MimeType mimeType=getDefaultContentType(payload);
+  if (mimeType != null) {
+    builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE,mimeType);
+  }
+  return builder.build();
+}

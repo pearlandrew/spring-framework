@@ -1,0 +1,9 @@
+{
+  MessageHeaders messageHeaders=(headers != null) ? new MessageHeaders(headers) : null;
+  Message<?> requestMessage=getMessageConverter().toMessage(request,messageHeaders);
+  if (postProcessor != null) {
+    requestMessage=postProcessor.postProcessMessage(requestMessage);
+  }
+  Message<?> replyMessage=this.sendAndReceive(destination,requestMessage);
+  return (T)getMessageConverter().fromMessage(replyMessage,targetClass);
+}
