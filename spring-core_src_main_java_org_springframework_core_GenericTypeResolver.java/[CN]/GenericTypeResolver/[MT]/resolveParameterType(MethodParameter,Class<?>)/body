@@ -1,10 +1,7 @@
 {
-  Type genericType=getTargetType(methodParam);
+  Assert.notNull(methodParam,"MethodParameter must not be null");
   Assert.notNull(clazz,"Class must not be null");
-  Map<TypeVariable,Type> typeVariableMap=getTypeVariableMap(clazz);
-  Type rawType=getRawType(genericType,typeVariableMap);
-  Class<?> result=(rawType instanceof Class ? (Class)rawType : methodParam.getParameterType());
-  methodParam.setParameterType(result);
-  methodParam.typeVariableMap=typeVariableMap;
-  return result;
+  methodParam.resolveClass=clazz;
+  methodParam.setParameterType(ResolvableType.forMethodParameter(methodParam,clazz).resolve());
+  return methodParam.getParameterType();
 }

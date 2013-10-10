@@ -1,9 +1,5 @@
 {
-  Type resolvedType=getRawType(genericType,typeVariableMap);
-  if (resolvedType instanceof GenericArrayType) {
-    Type componentType=((GenericArrayType)resolvedType).getGenericComponentType();
-    Class<?> componentClass=resolveType(componentType,typeVariableMap);
-    resolvedType=Array.newInstance(componentClass,0).getClass();
-  }
-  return (resolvedType instanceof Class ? (Class)resolvedType : Object.class);
+  TypeVariableResolver variableResolver=new TypeVariableMapResolver(typeVariableMap);
+  Class<?> resolved=ResolvableType.forType(genericType,variableResolver).resolve();
+  return (resolved == null ? Object.class : resolved);
 }
