@@ -1,0 +1,21 @@
+{
+  Type resolved=null;
+  if (this.type instanceof ParameterizedType) {
+    resolved=((ParameterizedType)this.type).getRawType();
+  }
+ else   if (this.type instanceof WildcardType) {
+    resolved=resolveBounds(((WildcardType)this.type).getUpperBounds());
+    if (resolved == null) {
+      resolved=resolveBounds(((WildcardType)this.type).getLowerBounds());
+    }
+  }
+ else   if (this.type instanceof TypeVariable) {
+    if (this.variableResolver != null) {
+      resolved=this.variableResolver.resolveVariable((TypeVariable<?>)this.type);
+    }
+    if (resolved == null) {
+      resolved=resolveBounds(((TypeVariable<?>)this.type).getBounds());
+    }
+  }
+  return (resolved == null ? NONE : forType(resolved,this.variableResolver));
+}

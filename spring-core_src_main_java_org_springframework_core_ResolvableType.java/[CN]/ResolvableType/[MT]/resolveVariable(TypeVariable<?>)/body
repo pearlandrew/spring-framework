@@ -1,0 +1,27 @@
+{
+  Assert.notNull("Variable must not be null");
+  if (this.type instanceof ParameterizedType) {
+    ParameterizedType parameterizedType=(ParameterizedType)this.type;
+    Type owner=parameterizedType.getOwnerType();
+    if (parameterizedType.getRawType().equals(variable.getGenericDeclaration())) {
+      TypeVariable<?>[] variables=resolve().getTypeParameters();
+      for (int i=0; i < variables.length; i++) {
+        if (ObjectUtils.nullSafeEquals(variables[i].getName(),variable.getName())) {
+          return parameterizedType.getActualTypeArguments()[i];
+        }
+      }
+    }
+    Type resolved=null;
+    if (this.variableResolver != null) {
+      resolved=this.variableResolver.resolveVariable(variable);
+    }
+    if (resolved == null && owner != null) {
+      resolved=forType(owner,this.variableResolver).resolveVariable(variable);
+    }
+    return resolved;
+  }
+  if (this.type instanceof TypeVariable<?>) {
+    return resolveType().resolveVariable(variable);
+  }
+  return null;
+}

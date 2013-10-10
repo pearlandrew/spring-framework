@@ -1,0 +1,23 @@
+{
+  Assert.notNull(type,"Type must not be null");
+  if (resolve() == null || type.resolve() == null) {
+    return false;
+  }
+  if (isArray()) {
+    return (type.isArray() && getComponentType().isAssignableFrom(type.getComponentType()));
+  }
+  WildcardBounds ourBounds=WildcardBounds.get(this);
+  WildcardBounds typeBounds=WildcardBounds.get(type);
+  if (typeBounds != null) {
+    return (ourBounds != null && ourBounds.isSameKind(typeBounds) && ourBounds.isAssignableFrom(typeBounds.getBounds()));
+  }
+  if (ourBounds != null) {
+    return ourBounds.isAssignableFrom(type);
+  }
+  boolean rtn=resolve().isAssignableFrom(type.resolve());
+  rtn&=(!checkingGeneric || resolve().equals(type.resolve()));
+  for (int i=0; i < getGenerics().length; i++) {
+    rtn&=getGeneric(i).isAssignableFrom(type.as(resolve()).getGeneric(i),true);
+  }
+  return rtn;
+}

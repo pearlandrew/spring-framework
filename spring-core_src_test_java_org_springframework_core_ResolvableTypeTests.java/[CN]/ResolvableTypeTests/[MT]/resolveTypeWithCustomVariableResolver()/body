@@ -1,0 +1,11 @@
+{
+  TypeVariableResolver variableResolver=mock(TypeVariableResolver.class);
+  given(variableResolver.resolveVariable((TypeVariable<?>)anyObject())).willReturn(Long.class);
+  ResolvableType variable=ResolvableType.forType(Fields.class.getField("typeVariableType").getGenericType(),variableResolver);
+  ResolvableType parameterized=ResolvableType.forType(Fields.class.getField("parameterizedType").getGenericType(),variableResolver);
+  assertThat(variable.resolve(),equalTo((Class)Long.class));
+  assertThat(parameterized.resolve(),equalTo((Class)List.class));
+  assertThat(parameterized.resolveGeneric(),equalTo((Class)Long.class));
+  verify(variableResolver,atLeastOnce()).resolveVariable(this.typeVariableCaptor.capture());
+  assertThat(this.typeVariableCaptor.getValue().getName(),equalTo("T"));
+}
