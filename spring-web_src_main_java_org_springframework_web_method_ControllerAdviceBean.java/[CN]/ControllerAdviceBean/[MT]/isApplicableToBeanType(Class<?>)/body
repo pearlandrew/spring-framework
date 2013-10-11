@@ -1,0 +1,24 @@
+{
+  if (hasNoSelector()) {
+    return true;
+  }
+ else   if (beanType != null) {
+    String packageName=beanType.getPackage().getName();
+    for (    Package basePackage : this.basePackages) {
+      if (packageName.startsWith(basePackage.getName())) {
+        return true;
+      }
+    }
+    for (    Class<Annotation> annotationClass : this.annotations) {
+      if (AnnotationUtils.findAnnotation(beanType,annotationClass) != null) {
+        return true;
+      }
+    }
+    for (    Class<?> clazz : this.assignableTypes) {
+      if (ClassUtils.isAssignable(clazz,beanType)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
