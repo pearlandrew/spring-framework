@@ -1,0 +1,12 @@
+{
+  RequestBody body=bufferedOutput.length > 0 ? RequestBody.create(getContentType(headers),bufferedOutput) : null;
+  Request.Builder builder=new Request.Builder().url(this.uri.toURL()).method(this.method.name(),body);
+  for (  Map.Entry<String,List<String>> entry : headers.entrySet()) {
+    String headerName=entry.getKey();
+    for (    String headerValue : entry.getValue()) {
+      builder.addHeader(headerName,headerValue);
+    }
+  }
+  Request request=builder.build();
+  return new ListenableFutureCall(client.newCall(request));
+}
