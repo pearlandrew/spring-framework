@@ -1,9 +1,12 @@
 {
   initHandlerMethods();
+  ConfigurableBeanFactory beanFactory=(ClassUtils.isAssignableValue(ConfigurableApplicationContext.class,this.applicationContext)) ? ((ConfigurableApplicationContext)this.applicationContext).getBeanFactory() : null;
+  this.argumentResolvers.addResolver(new HeaderMethodArgumentResolver(this.conversionService,beanFactory));
+  this.argumentResolvers.addResolver(new HeadersMethodArgumentResolver());
   this.argumentResolvers.addResolver(new PrincipalMethodArgumentResolver());
   this.argumentResolvers.addResolver(new MessageMethodArgumentResolver());
   this.argumentResolvers.addResolvers(this.customArgumentResolvers);
-  this.argumentResolvers.addResolver(new MessageBodyMethodArgumentResolver(this.messageConverter));
+  this.argumentResolvers.addResolver(new PayloadArgumentResolver(this.messageConverter));
   this.returnValueHandlers.addHandler(new SendToMethodReturnValueHandler(this.brokerTemplate,true));
   this.returnValueHandlers.addHandler(new SubscriptionMethodReturnValueHandler(this.webSocketResponseTemplate));
   this.returnValueHandlers.addHandlers(this.customReturnValueHandlers);

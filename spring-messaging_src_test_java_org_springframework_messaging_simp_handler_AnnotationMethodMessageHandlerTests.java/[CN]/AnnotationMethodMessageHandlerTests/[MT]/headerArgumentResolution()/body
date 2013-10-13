@@ -1,0 +1,10 @@
+{
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.create();
+  headers.setDestination("/headers");
+  headers.setHeader("foo","bar");
+  Message<?> message=MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+  this.messageHandler.handleMessage(message);
+  assertEquals("headers",this.testController.method);
+  assertEquals("bar",this.testController.arguments.get("foo"));
+  assertEquals("bar",((Map<String,Object>)this.testController.arguments.get("headers")).get("foo"));
+}

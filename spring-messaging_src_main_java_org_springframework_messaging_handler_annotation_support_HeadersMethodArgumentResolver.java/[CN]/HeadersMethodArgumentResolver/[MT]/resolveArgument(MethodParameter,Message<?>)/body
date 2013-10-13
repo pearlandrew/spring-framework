@@ -1,0 +1,16 @@
+{
+  Class<?> paramType=parameter.getParameterType();
+  if (Map.class.isAssignableFrom(paramType)) {
+    return message.getHeaders();
+  }
+ else   if (MessageHeaderAccessor.class.equals(paramType)) {
+    return new MessageHeaderAccessor(message);
+  }
+ else   if (MessageHeaderAccessor.class.isAssignableFrom(paramType)) {
+    Method factoryMethod=ClassUtils.getMethod(paramType,"wrap",Message.class);
+    return ReflectionUtils.invokeMethod(factoryMethod,null,message);
+  }
+ else {
+    throw new IllegalStateException("Unexpected method parameter type " + paramType + "in method "+ parameter.getMethod()+ ". "+ "@Headers method arguments must be assignable to java.util.Map.");
+  }
+}

@@ -1,0 +1,14 @@
+{
+  Class<?> sourceClass=message.getPayload().getClass();
+  Class<?> targetClass=parameter.getParameterType();
+  if (ClassUtils.isAssignable(targetClass,sourceClass)) {
+    return message.getPayload();
+  }
+  Payload annot=parameter.getParameterAnnotation(Payload.class);
+  if (isEmptyPayload(message)) {
+    if ((annot != null) && !annot.required()) {
+      return null;
+    }
+  }
+  return this.converter.fromMessage(message,targetClass);
+}

@@ -1,0 +1,22 @@
+{
+  Class<?> paramType=parameter.getParameterType();
+  NamedValueInfo namedValueInfo=getNamedValueInfo(parameter);
+  Object value=resolveArgumentInternal(parameter,message,namedValueInfo.name);
+  if (value == null) {
+    if (namedValueInfo.defaultValue != null) {
+      value=resolveDefaultValue(namedValueInfo.defaultValue);
+    }
+ else     if (namedValueInfo.required) {
+      handleMissingValue(namedValueInfo.name,parameter,message);
+    }
+    value=handleNullValue(namedValueInfo.name,value,paramType);
+  }
+ else   if ("".equals(value) && (namedValueInfo.defaultValue != null)) {
+    value=resolveDefaultValue(namedValueInfo.defaultValue);
+  }
+  if (!ClassUtils.isAssignableValue(paramType,value)) {
+    value=this.conversionService.convert(value,TypeDescriptor.valueOf(value.getClass()),new TypeDescriptor(parameter));
+  }
+  handleResolvedValue(value,namedValueInfo.name,parameter,message);
+  return value;
+}
