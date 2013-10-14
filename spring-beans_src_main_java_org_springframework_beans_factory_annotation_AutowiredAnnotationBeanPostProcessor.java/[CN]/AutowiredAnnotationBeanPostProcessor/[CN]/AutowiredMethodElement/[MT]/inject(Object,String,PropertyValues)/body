@@ -16,9 +16,10 @@
       TypeConverter typeConverter=beanFactory.getTypeConverter();
       for (int i=0; i < arguments.length; i++) {
         MethodParameter methodParam=new MethodParameter(method,i);
-        GenericTypeResolver.resolveParameterType(methodParam,bean.getClass());
-        descriptors[i]=new DependencyDescriptor(methodParam,this.required);
-        Object arg=beanFactory.resolveDependency(descriptors[i],beanName,autowiredBeanNames,typeConverter);
+        DependencyDescriptor desc=new DependencyDescriptor(methodParam,this.required);
+        desc.setContainingClass(bean.getClass());
+        descriptors[i]=desc;
+        Object arg=beanFactory.resolveDependency(desc,beanName,autowiredBeanNames,typeConverter);
         if (arg == null && !this.required) {
           arguments=null;
           break;

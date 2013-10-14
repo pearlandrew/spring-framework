@@ -1,0 +1,16 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+  AutowiredAnnotationBeanPostProcessor bpp=new AutowiredAnnotationBeanPostProcessor();
+  bpp.setBeanFactory(bf);
+  bf.addBeanPostProcessor(bpp);
+  RootBeanDefinition bd=new RootBeanDefinition(RepositoryInjectionBean.class);
+  bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+  bf.registerBeanDefinition("annotatedBean",bd);
+  bf.registerBeanDefinition("configClass",new RootBeanDefinition(RepositoryConfiguration.class));
+  ConfigurationClassPostProcessor pp=new ConfigurationClassPostProcessor();
+  pp.postProcessBeanFactory(bf);
+  RepositoryInjectionBean bean=(RepositoryInjectionBean)bf.getBean("annotatedBean");
+  assertSame(bf.getBean("stringRepo"),bean.stringRepository);
+  assertSame(bf.getBean("integerRepo"),bean.integerRepository);
+}

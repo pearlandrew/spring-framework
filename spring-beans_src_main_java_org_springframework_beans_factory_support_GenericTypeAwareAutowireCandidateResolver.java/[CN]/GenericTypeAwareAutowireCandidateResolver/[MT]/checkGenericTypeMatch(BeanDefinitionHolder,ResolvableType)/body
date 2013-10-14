@@ -1,0 +1,25 @@
+{
+  if (dependencyType.getType() instanceof Class) {
+    return true;
+  }
+  RootBeanDefinition bd=(RootBeanDefinition)bdHolder.getBeanDefinition();
+  ResolvableType targetType=null;
+  if (bd.getResolvedFactoryMethod() != null) {
+    targetType=ResolvableType.forMethodReturnType(bd.getResolvedFactoryMethod());
+  }
+  if (targetType == null) {
+    if (this.beanFactory != null) {
+      Class<?> beanType=this.beanFactory.getType(bdHolder.getBeanName());
+      if (beanType != null) {
+        targetType=ResolvableType.forClass(ClassUtils.getUserClass(beanType));
+      }
+    }
+    if (targetType == null && bd.hasBeanClass() && bd.getFactoryMethodName() == null) {
+      Class<?> beanClass=bd.getBeanClass();
+      if (!FactoryBean.class.isAssignableFrom(beanClass)) {
+        targetType=ResolvableType.forClass(ClassUtils.getUserClass(beanClass));
+      }
+    }
+  }
+  return (targetType == null || dependencyType.isAssignableFrom(targetType));
+}
