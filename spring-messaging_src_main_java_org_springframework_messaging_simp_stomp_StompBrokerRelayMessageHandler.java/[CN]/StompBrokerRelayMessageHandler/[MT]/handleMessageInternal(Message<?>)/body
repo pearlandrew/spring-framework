@@ -7,14 +7,14 @@
   if (SimpMessageType.MESSAGE.equals(messageType)) {
     sessionId=(sessionId == null) ? SystemStompRelaySession.ID : sessionId;
     headers.setSessionId(sessionId);
-    headers.updateStompCommandAsClientMessage();
+    command=headers.updateStompCommandAsClientMessage();
     message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
   }
   if (sessionId == null) {
     logger.error("No sessionId, ignoring message: " + message);
     return;
   }
-  if (command != null && command.requiresDestination() && !checkDestinationPrefix(destination)) {
+  if ((command != null) && command.requiresDestination() && !checkDestinationPrefix(destination)) {
     return;
   }
   if (SimpMessageType.CONNECT.equals(messageType)) {
