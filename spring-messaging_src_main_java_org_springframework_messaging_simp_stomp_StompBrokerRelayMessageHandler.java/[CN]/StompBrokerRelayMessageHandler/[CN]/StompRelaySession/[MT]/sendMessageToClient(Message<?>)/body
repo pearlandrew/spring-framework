@@ -1,3 +1,13 @@
 {
-  messageChannel.send(message);
+  if (this.isRemoteClientSession) {
+    messageChannel.send(message);
+  }
+ else {
+    StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+    if (StompCommand.ERROR.equals(headers.getCommand())) {
+      if (logger.isErrorEnabled()) {
+        logger.error("STOMP ERROR on sessionId=" + this.sessionId + ": "+ message);
+      }
+    }
+  }
 }

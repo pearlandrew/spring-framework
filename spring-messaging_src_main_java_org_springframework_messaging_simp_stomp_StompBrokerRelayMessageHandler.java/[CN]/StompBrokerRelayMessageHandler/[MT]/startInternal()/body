@@ -4,7 +4,14 @@
   if (logger.isDebugEnabled()) {
     logger.debug("Initializing \"system\" TCP connection");
   }
+  StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.CONNECT);
+  headers.setAcceptVersion("1.1,1.2");
+  headers.setLogin(this.systemLogin);
+  headers.setPasscode(this.systemPasscode);
+  headers.setHeartbeat(this.systemHeartbeatSendInterval,this.systemHeartbeatReceiveInterval);
+  headers.setHost(getVirtualHost());
+  Message<?> message=MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
   SystemStompRelaySession session=new SystemStompRelaySession();
+  session.connect(message);
   this.relaySessions.put(session.getId(),session);
-  session.connect();
 }
