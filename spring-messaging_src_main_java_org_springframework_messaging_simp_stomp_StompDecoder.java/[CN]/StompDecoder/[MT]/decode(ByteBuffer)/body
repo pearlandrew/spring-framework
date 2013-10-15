@@ -5,7 +5,11 @@
   if (command.length() > 0) {
     MultiValueMap<String,String> headers=readHeaders(buffer);
     byte[] payload=readPayload(buffer,headers);
-    decodedMessage=MessageBuilder.withPayload(payload).setHeaders(StompHeaderAccessor.create(StompCommand.valueOf(command),headers)).build();
+    StompCommand stompCommand=StompCommand.valueOf(command);
+    if ((payload.length > 0) && (!stompCommand.isBodyAllowed())) {
+      throw new StompConversionException(stompCommand + " isn't allowed to have a body but has payload length=" + payload.length+ ", headers="+ headers);
+    }
+    decodedMessage=MessageBuilder.withPayload(payload).setHeaders(StompHeaderAccessor.create(stompCommand,headers)).build();
   }
  else {
     decodedMessage=MessageBuilder.withPayload(HEARTBEAT_PAYLOAD).setHeaders(StompHeaderAccessor.create(SimpMessageType.HEARTBEAT)).build();
