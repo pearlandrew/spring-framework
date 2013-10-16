@@ -10,18 +10,20 @@
     }
     return;
   }
-  HandlerMethod match=getHandlerMethod(lookupPath,handlerMethods);
+  MappingInfoMatch match=matchMappingInfo(lookupPath,handlerMethods);
   if (match == null) {
     if (logger.isTraceEnabled()) {
       logger.trace("No matching method, lookup path " + lookupPath);
     }
     return;
   }
-  HandlerMethod handlerMethod=match.createWithResolvedBean();
+  HandlerMethod handlerMethod=match.handlerMethod.createWithResolvedBean();
   InvocableHandlerMethod invocableHandlerMethod=new InvocableHandlerMethod(handlerMethod);
   invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
   try {
     headers.setDestination(lookupPath);
+    headers.setHeader(BEST_MATCHING_PATTERN_HEADER,match.mappingDestination);
+    headers.setHeader(PATH_TEMPLATE_VARIABLES_HEADER,pathMatcher.extractUriTemplateVariables(match.mappingDestination,lookupPath));
     message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
     Object returnValue=invocableHandlerMethod.invoke(message);
     MethodParameter returnType=handlerMethod.getReturnType();

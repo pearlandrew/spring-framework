@@ -1,0 +1,28 @@
+{
+  List<MappingInfoMatch> matches=new ArrayList<MappingInfoMatch>(4);
+  for (  MappingInfo key : handlerMethods.keySet()) {
+    for (    String mappingDestination : key.getDestinations()) {
+      if (this.pathMatcher.match(mappingDestination,destination)) {
+        matches.add(new MappingInfoMatch(mappingDestination,handlerMethods.get(key)));
+      }
+    }
+  }
+  if (!matches.isEmpty()) {
+    Comparator<MappingInfoMatch> comparator=getMappingInfoMatchComparator(destination,this.pathMatcher);
+    Collections.sort(matches,comparator);
+    if (logger.isTraceEnabled()) {
+      logger.trace("Found " + matches.size() + " matching mapping(s) for ["+ destination+ "] : "+ matches);
+    }
+    MappingInfoMatch bestMatch=matches.get(0);
+    if (matches.size() > 1) {
+      MappingInfoMatch secondBestMatch=matches.get(1);
+      if (comparator.compare(bestMatch,secondBestMatch) == 0) {
+        Method m1=bestMatch.handlerMethod.getMethod();
+        Method m2=secondBestMatch.handlerMethod.getMethod();
+        throw new IllegalStateException("Ambiguous handler methods mapped for Message destination '" + destination + "': {"+ m1+ ", "+ m2+ "}");
+      }
+    }
+    return bestMatch;
+  }
+  return null;
+}
