@@ -1,0 +1,57 @@
+{
+  if (PARENT.equals(property)) {
+    setParent(newValue);
+  }
+ else {
+    AbstractBeanDefinition bd=getBeanDefinition();
+    if (AUTOWIRE.equals(property)) {
+      if ("byName".equals(newValue)) {
+        bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME);
+      }
+ else       if ("byType".equals(newValue)) {
+        bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE);
+      }
+ else       if ("constructor".equals(newValue)) {
+        bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR);
+      }
+ else       if (Boolean.TRUE.equals(newValue)) {
+        bd.setAutowireMode(AutowireCapableBeanFactory.AUTOWIRE_BY_NAME);
+      }
+    }
+ else     if (CONSTRUCTOR_ARGS.equals(property) && newValue instanceof List) {
+      ConstructorArgumentValues cav=new ConstructorArgumentValues();
+      List args=(List)newValue;
+      for (      Object arg : args) {
+        cav.addGenericArgumentValue(arg);
+      }
+      bd.setConstructorArgumentValues(cav);
+    }
+ else     if (FACTORY_BEAN.equals(property)) {
+      if (newValue != null) {
+        bd.setFactoryBeanName(newValue.toString());
+      }
+    }
+ else     if (FACTORY_METHOD.equals(property)) {
+      if (newValue != null)       bd.setFactoryMethodName(newValue.toString());
+    }
+ else     if (INIT_METHOD.equals(property)) {
+      if (newValue != null) {
+        bd.setInitMethodName(newValue.toString());
+      }
+    }
+ else     if (DESTROY_METHOD.equals(property)) {
+      if (newValue != null) {
+        bd.setDestroyMethodName(newValue.toString());
+      }
+    }
+ else     if (SINGLETON.equals(property)) {
+      bd.setScope(Boolean.TRUE.equals(newValue) ? BeanDefinition.SCOPE_SINGLETON : BeanDefinition.SCOPE_PROTOTYPE);
+    }
+ else     if (this.definitionWrapper.isWritableProperty(property)) {
+      this.definitionWrapper.setPropertyValue(property,newValue);
+    }
+ else {
+      super.setProperty(property,newValue);
+    }
+  }
+}

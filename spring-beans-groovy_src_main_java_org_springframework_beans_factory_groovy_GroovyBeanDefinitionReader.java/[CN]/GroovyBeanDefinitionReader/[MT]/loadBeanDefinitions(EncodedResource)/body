@@ -1,0 +1,30 @@
+{
+  Closure beans=new Closure(this){
+    public Object call(    Object[] args){
+      invokeBeanDefiningClosure((Closure)args[0]);
+      return null;
+    }
+  }
+;
+  Binding binding=new Binding(){
+    @Override public void setVariable(    String name,    Object value){
+      if (currentBeanDefinition != null) {
+        applyPropertyToBeanDefinition(name,value);
+      }
+ else {
+        super.setVariable(name,value);
+      }
+    }
+  }
+;
+  binding.setVariable("beans",beans);
+  int countBefore=getRegistry().getBeanDefinitionCount();
+  try {
+    GroovyShell shell=new GroovyShell(getResourceLoader().getClassLoader(),binding);
+    shell.evaluate(encodedResource.getReader(),encodedResource.getResource().getFilename());
+  }
+ catch (  Throwable ex) {
+    throw new BeanDefinitionParsingException(new Problem("Error evaluating Groovy script: " + ex.getMessage(),new Location(encodedResource.getResource()),null,ex));
+  }
+  return getRegistry().getBeanDefinitionCount() - countBefore;
+}
