@@ -1,21 +1,23 @@
 {
-  Type resolved=null;
   if (this.type instanceof ParameterizedType) {
-    resolved=((ParameterizedType)this.type).getRawType();
+    return forType(((ParameterizedType)this.type).getRawType(),this.variableResolver);
   }
- else   if (this.type instanceof WildcardType) {
-    resolved=resolveBounds(((WildcardType)this.type).getUpperBounds());
+  if (this.type instanceof WildcardType) {
+    Type resolved=resolveBounds(((WildcardType)this.type).getUpperBounds());
     if (resolved == null) {
       resolved=resolveBounds(((WildcardType)this.type).getLowerBounds());
     }
+    return forType(resolved,this.variableResolver);
   }
- else   if (this.type instanceof TypeVariable) {
+  if (this.type instanceof TypeVariable) {
+    TypeVariable<?> variable=(TypeVariable<?>)this.type;
     if (this.variableResolver != null) {
-      resolved=this.variableResolver.resolveVariable((TypeVariable<?>)this.type);
+      ResolvableType resolved=this.variableResolver.resolveVariable(variable);
+      if (resolved != null) {
+        return resolved;
+      }
     }
-    if (resolved == null) {
-      resolved=resolveBounds(((TypeVariable<?>)this.type).getBounds());
-    }
+    return forType(resolveBounds(variable.getBounds()),this.variableResolver);
   }
-  return (resolved == null ? NONE : forType(resolved,this.variableResolver));
+  return NONE;
 }

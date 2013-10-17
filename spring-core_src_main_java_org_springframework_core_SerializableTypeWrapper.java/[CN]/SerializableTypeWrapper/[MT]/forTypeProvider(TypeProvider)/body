@@ -1,0 +1,15 @@
+{
+  Assert.notNull(provider,"Provider must not be null");
+  if (provider.getType() instanceof Serializable || provider.getType() == null) {
+    return provider.getType();
+  }
+  for (  Class<?> type : SUPPORTED_SERIALAZABLE_TYPES) {
+    if (type.isAssignableFrom(provider.getType().getClass())) {
+      ClassLoader classLoader=provider.getClass().getClassLoader();
+      Class<?>[] interfaces=new Class<?>[]{type,Serializable.class};
+      InvocationHandler handler=new TypeProxyInvocationHandler(provider);
+      return (Type)Proxy.newProxyInstance(classLoader,interfaces,handler);
+    }
+  }
+  throw new IllegalArgumentException("Unsupported Type class " + provider.getType().getClass().getName());
+}
