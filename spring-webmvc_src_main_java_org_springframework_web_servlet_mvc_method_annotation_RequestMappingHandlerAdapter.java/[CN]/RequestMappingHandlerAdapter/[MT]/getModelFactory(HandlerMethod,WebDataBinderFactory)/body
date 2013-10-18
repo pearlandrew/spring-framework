@@ -8,9 +8,11 @@
   }
   List<InvocableHandlerMethod> attrMethods=new ArrayList<InvocableHandlerMethod>();
   for (  Entry<ControllerAdviceBean,Set<Method>> entry : this.modelAttributeAdviceCache.entrySet()) {
-    Object bean=entry.getKey().resolveBean();
-    for (    Method method : entry.getValue()) {
-      attrMethods.add(createModelAttributeMethod(binderFactory,bean,method));
+    if (entry.getKey().isApplicableToBeanType(handlerType)) {
+      Object bean=entry.getKey().resolveBean();
+      for (      Method method : entry.getValue()) {
+        attrMethods.add(createModelAttributeMethod(binderFactory,bean,method));
+      }
     }
   }
   for (  Method method : methods) {

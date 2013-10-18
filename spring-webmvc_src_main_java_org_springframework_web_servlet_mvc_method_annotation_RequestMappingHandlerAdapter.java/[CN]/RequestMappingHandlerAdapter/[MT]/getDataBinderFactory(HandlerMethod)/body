@@ -7,9 +7,11 @@
   }
   List<InvocableHandlerMethod> initBinderMethods=new ArrayList<InvocableHandlerMethod>();
   for (  Entry<ControllerAdviceBean,Set<Method>> entry : this.initBinderAdviceCache.entrySet()) {
-    Object bean=entry.getKey().resolveBean();
-    for (    Method method : entry.getValue()) {
-      initBinderMethods.add(createInitBinderMethod(bean,method));
+    if (entry.getKey().isApplicableToBeanType(handlerType)) {
+      Object bean=entry.getKey().resolveBean();
+      for (      Method method : entry.getValue()) {
+        initBinderMethods.add(createInitBinderMethod(bean,method));
+      }
     }
   }
   for (  Method method : methods) {

@@ -1,0 +1,27 @@
+{
+  List<Package> basePackages=new ArrayList<Package>();
+  List<String> basePackageNames=new ArrayList<String>();
+  basePackageNames.addAll(Arrays.asList(annotation.value()));
+  basePackageNames.addAll(Arrays.asList(annotation.basePackages()));
+  for (  String pkgName : basePackageNames) {
+    if (StringUtils.hasText(pkgName)) {
+      Package pkg=Package.getPackage(pkgName);
+      if (pkg != null) {
+        basePackages.add(pkg);
+      }
+ else {
+        logger.warn("Package [" + pkgName + "] was not found, see ["+ beanType.getName()+ "]");
+      }
+    }
+  }
+  for (  Class<?> markerClass : annotation.basePackageClasses()) {
+    Package pack=markerClass.getPackage();
+    if (pack != null) {
+      basePackages.add(pack);
+    }
+ else {
+      logger.warn("Package was not found for class [" + markerClass.getName() + "], see ["+ beanType.getName()+ "]");
+    }
+  }
+  return basePackages;
+}

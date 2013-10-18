@@ -4,5 +4,11 @@
   Assert.isTrue(beanFactory.containsBean(beanName),"Bean factory [" + beanFactory + "] does not contain bean "+ "with name ["+ beanName+ "]");
   this.bean=beanName;
   this.beanFactory=beanFactory;
-  this.order=initOrderFromBeanType(this.beanFactory.getType(beanName));
+  Class<?> beanType=this.beanFactory.getType(beanName);
+  this.order=initOrderFromBeanType(beanType);
+  ControllerAdvice annotation=AnnotationUtils.findAnnotation(beanType,ControllerAdvice.class);
+  Assert.notNull(annotation,"BeanType [" + beanType.getName() + "] is not annotated @ControllerAdvice");
+  this.basePackages.addAll(initBasePackagesFromBeanType(beanType,annotation));
+  this.annotations.addAll(Arrays.asList(annotation.annotations()));
+  this.assignableTypes.addAll(Arrays.asList(annotation.assignableTypes()));
 }
