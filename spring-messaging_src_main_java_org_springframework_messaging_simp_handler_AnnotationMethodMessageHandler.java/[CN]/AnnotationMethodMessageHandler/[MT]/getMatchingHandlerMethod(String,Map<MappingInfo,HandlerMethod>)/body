@@ -1,21 +1,27 @@
 {
-  List<MappingInfoMatch> matches=new ArrayList<MappingInfoMatch>(4);
+  List<Match> matches=new ArrayList<Match>(4);
   for (  MappingInfo key : handlerMethods.keySet()) {
-    for (    String mappingDestination : key.getDestinations()) {
-      if (this.pathMatcher.match(mappingDestination,destination)) {
-        matches.add(new MappingInfoMatch(mappingDestination,handlerMethods.get(key)));
+    for (    String pattern : key.getDestinationPatterns()) {
+      if (this.pathMatcher.match(pattern,destination)) {
+        matches.add(new Match(pattern,handlerMethods.get(key)));
       }
     }
   }
-  if (!matches.isEmpty()) {
-    Comparator<MappingInfoMatch> comparator=getMappingInfoMatchComparator(destination,this.pathMatcher);
+  if (matches.isEmpty()) {
+    return null;
+  }
+ else   if (matches.size() == 1) {
+    return matches.get(0);
+  }
+ else {
+    Comparator<Match> comparator=getMatchComparator(destination,this.pathMatcher);
     Collections.sort(matches,comparator);
     if (logger.isTraceEnabled()) {
       logger.trace("Found " + matches.size() + " matching mapping(s) for ["+ destination+ "] : "+ matches);
     }
-    MappingInfoMatch bestMatch=matches.get(0);
+    Match bestMatch=matches.get(0);
     if (matches.size() > 1) {
-      MappingInfoMatch secondBestMatch=matches.get(1);
+      Match secondBestMatch=matches.get(1);
       if (comparator.compare(bestMatch,secondBestMatch) == 0) {
         Method m1=bestMatch.handlerMethod.getMethod();
         Method m2=secondBestMatch.handlerMethod.getMethod();
@@ -24,5 +30,4 @@
     }
     return bestMatch;
   }
-  return null;
 }

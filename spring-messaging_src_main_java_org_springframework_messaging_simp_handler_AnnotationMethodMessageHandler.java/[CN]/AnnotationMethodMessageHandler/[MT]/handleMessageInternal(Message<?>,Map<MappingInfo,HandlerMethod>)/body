@@ -3,27 +3,29 @@
     logger.trace("Message " + message);
   }
   SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
-  String lookupPath=getLookupPath(headers.getDestination());
-  if (lookupPath == null) {
+  String destinationToMatch=getDestinationToMatch(headers.getDestination());
+  if (destinationToMatch == null) {
     if (logger.isTraceEnabled()) {
-      logger.trace("Ignoring message with destination " + headers.getDestination());
+      logger.trace("Ignoring message with destination=" + headers.getDestination());
     }
     return;
   }
-  MappingInfoMatch match=matchMappingInfo(lookupPath,handlerMethods);
+  Match match=getMatchingHandlerMethod(destinationToMatch,handlerMethods);
   if (match == null) {
     if (logger.isTraceEnabled()) {
-      logger.trace("No matching method, lookup path " + lookupPath);
+      logger.trace("No matching handler method for destination=" + destinationToMatch);
     }
     return;
   }
-  HandlerMethod handlerMethod=match.handlerMethod.createWithResolvedBean();
+  String matchedPattern=match.getMatchedPattern();
+  HandlerMethod handlerMethod=match.getHandlerMethod().createWithResolvedBean();
   InvocableHandlerMethod invocableHandlerMethod=new InvocableHandlerMethod(handlerMethod);
   invocableHandlerMethod.setMessageMethodArgumentResolvers(this.argumentResolvers);
   try {
-    headers.setDestination(lookupPath);
-    headers.setHeader(BEST_MATCHING_PATTERN_HEADER,match.mappingDestination);
-    headers.setHeader(PATH_TEMPLATE_VARIABLES_HEADER,pathMatcher.extractUriTemplateVariables(match.mappingDestination,lookupPath));
+    headers.setDestination(destinationToMatch);
+    headers.setHeader(BEST_MATCHING_PATTERN_HEADER,matchedPattern);
+    Map<String,String> vars=this.pathMatcher.extractUriTemplateVariables(matchedPattern,destinationToMatch);
+    headers.setHeader(PATH_TEMPLATE_VARIABLES_HEADER,vars);
     message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
     Object returnValue=invocableHandlerMethod.invoke(message);
     MethodParameter returnType=handlerMethod.getReturnType();
