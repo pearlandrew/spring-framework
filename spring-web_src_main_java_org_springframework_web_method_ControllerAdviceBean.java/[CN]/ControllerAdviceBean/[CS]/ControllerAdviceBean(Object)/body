@@ -2,8 +2,11 @@
   Assert.notNull(bean,"'bean' must not be null");
   this.bean=bean;
   this.order=initOrderFromBean(bean);
-  this.basePackages.addAll(initBasePackagesFromBeanType(bean.getClass()));
-  this.annotations.addAll(initAnnotationsFromBeanType(bean.getClass()));
-  this.assignableTypes.addAll(initAssignableTypesFromBeanType(bean.getClass()));
+  Class<? extends Object> beanType=bean.getClass();
+  ControllerAdvice annotation=AnnotationUtils.findAnnotation(beanType,ControllerAdvice.class);
+  Assert.notNull(annotation,"BeanType [" + beanType.getName() + "] is not annotated @ControllerAdvice");
+  this.basePackages.addAll(initBasePackagesFromBeanType(beanType,annotation));
+  this.annotations.addAll(Arrays.asList(annotation.annotations()));
+  this.assignableTypes.addAll(Arrays.asList(annotation.assignableTypes()));
   this.beanFactory=null;
 }

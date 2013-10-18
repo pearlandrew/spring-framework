@@ -6,7 +6,9 @@
   this.beanFactory=beanFactory;
   Class<?> beanType=this.beanFactory.getType(beanName);
   this.order=initOrderFromBeanType(beanType);
-  this.basePackages.addAll(initBasePackagesFromBeanType(beanType));
-  this.annotations.addAll(initAnnotationsFromBeanType(beanType));
-  this.assignableTypes.addAll(initAssignableTypesFromBeanType(beanType));
+  ControllerAdvice annotation=AnnotationUtils.findAnnotation(beanType,ControllerAdvice.class);
+  Assert.notNull(annotation,"BeanType [" + beanType.getName() + "] is not annotated @ControllerAdvice");
+  this.basePackages.addAll(initBasePackagesFromBeanType(beanType,annotation));
+  this.annotations.addAll(Arrays.asList(annotation.annotations()));
+  this.assignableTypes.addAll(Arrays.asList(annotation.assignableTypes()));
 }

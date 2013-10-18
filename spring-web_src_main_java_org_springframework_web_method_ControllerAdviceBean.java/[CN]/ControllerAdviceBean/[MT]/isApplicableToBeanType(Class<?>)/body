@@ -1,21 +1,21 @@
 {
-  if (hasNoSelector()) {
+  if (!hasSelectors()) {
     return true;
   }
  else   if (beanType != null) {
-    String packageName=beanType.getPackage().getName();
-    for (    Package basePackage : this.basePackages) {
-      if (packageName.startsWith(basePackage.getName())) {
+    for (    Class<?> clazz : this.assignableTypes) {
+      if (ClassUtils.isAssignable(clazz,beanType)) {
         return true;
       }
     }
-    for (    Class<Annotation> annotationClass : this.annotations) {
+    for (    Class<? extends Annotation> annotationClass : this.annotations) {
       if (AnnotationUtils.findAnnotation(beanType,annotationClass) != null) {
         return true;
       }
     }
-    for (    Class<?> clazz : this.assignableTypes) {
-      if (ClassUtils.isAssignable(clazz,beanType)) {
+    String packageName=beanType.getPackage().getName();
+    for (    Package basePackage : this.basePackages) {
+      if (packageName.startsWith(basePackage.getName())) {
         return true;
       }
     }
