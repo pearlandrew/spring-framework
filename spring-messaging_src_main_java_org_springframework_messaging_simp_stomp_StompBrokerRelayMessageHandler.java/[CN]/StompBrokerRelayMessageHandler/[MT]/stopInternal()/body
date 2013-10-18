@@ -1,17 +1,16 @@
 {
-  for (  StompRelaySession session : this.relaySessions.values()) {
-    session.disconnect();
+  for (  StompConnectionHandler handler : this.connectionHandlers.values()) {
+    try {
+      handler.resetTcpConnection();
+    }
+ catch (    Throwable t) {
+      logger.error("Failed to close STOMP connection " + t.getMessage());
+    }
   }
   try {
-    this.tcpClient.close().await();
+    this.tcpClient.shutdown();
   }
  catch (  Throwable t) {
-    logger.error("Failed to close reactor TCP client",t);
-  }
-  try {
-    this.environment.shutdown();
-  }
- catch (  Throwable t) {
-    logger.error("Failed to shut down reactor Environment",t);
+    logger.error("Error while shutting down TCP client",t);
   }
 }

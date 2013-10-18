@@ -1,0 +1,12 @@
+{
+  if (logger.isTraceEnabled()) {
+    logger.trace("Reading message for sessionId=" + this.sessionId + ", "+ message);
+  }
+  StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+  if (StompCommand.CONNECTED == headers.getCommand()) {
+    afterStompConnected(headers);
+  }
+  headers.setSessionId(this.sessionId);
+  message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+  sendMessageToClient(message);
+}

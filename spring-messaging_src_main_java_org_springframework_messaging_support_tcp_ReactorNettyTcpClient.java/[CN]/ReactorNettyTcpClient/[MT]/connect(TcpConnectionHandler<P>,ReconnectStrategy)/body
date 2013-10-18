@@ -1,0 +1,38 @@
+{
+  Composable<TcpConnection<Message<P>,Message<P>>> composable;
+  if (reconnectStrategy != null) {
+    composable=this.tcpClient.open(new Reconnect(){
+      @Override public Tuple2<InetSocketAddress,Long> reconnect(      InetSocketAddress address,      int attempt){
+        return Tuple.of(address,reconnectStrategy.getTimeToNextAttempt(attempt));
+      }
+    }
+);
+  }
+ else {
+    composable=this.tcpClient.open();
+  }
+  composable.when(Throwable.class,new Consumer<Throwable>(){
+    @Override public void accept(    Throwable ex){
+      connectionHandler.afterConnectFailure(ex);
+    }
+  }
+);
+  composable.consume(new Consumer<TcpConnection<Message<P>,Message<P>>>(){
+    @Override public void accept(    TcpConnection<Message<P>,Message<P>> connection){
+      connection.on().close(new Runnable(){
+        @Override public void run(){
+          connectionHandler.afterConnectionClosed();
+        }
+      }
+);
+      connection.in().consume(new Consumer<Message<P>>(){
+        @Override public void accept(        Message<P> message){
+          connectionHandler.handleMessage(message);
+        }
+      }
+);
+      connectionHandler.afterConnected(new ReactorTcpConnection<P>(connection));
+    }
+  }
+);
+}

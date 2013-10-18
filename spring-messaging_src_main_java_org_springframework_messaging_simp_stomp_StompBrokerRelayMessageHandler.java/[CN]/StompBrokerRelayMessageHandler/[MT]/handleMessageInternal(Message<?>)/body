@@ -5,7 +5,7 @@
   StompCommand command=headers.getCommand();
   SimpMessageType messageType=headers.getMessageType();
   if (SimpMessageType.MESSAGE.equals(messageType)) {
-    sessionId=(sessionId == null) ? SystemStompRelaySession.ID : sessionId;
+    sessionId=(sessionId == null) ? SystemStompConnectionHandler.SESSION_ID : sessionId;
     headers.setSessionId(sessionId);
     command=headers.updateStompCommandAsClientMessage();
     message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
@@ -20,28 +20,27 @@
   if (SimpMessageType.CONNECT.equals(messageType)) {
     if (getVirtualHost() != null) {
       headers.setHost(getVirtualHost());
-      message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
     }
-    StompRelaySession session=new StompRelaySession(sessionId);
-    session.connect(message);
-    this.relaySessions.put(sessionId,session);
+    StompConnectionHandler handler=new StompConnectionHandler(sessionId,headers);
+    this.connectionHandlers.put(sessionId,handler);
+    this.tcpClient.connect(handler);
   }
  else   if (SimpMessageType.DISCONNECT.equals(messageType)) {
-    StompRelaySession session=this.relaySessions.remove(sessionId);
-    if (session == null) {
+    StompConnectionHandler handler=removeConnectionHandler(sessionId);
+    if (handler == null) {
       if (logger.isTraceEnabled()) {
-        logger.trace("Session already removed, sessionId=" + sessionId);
+        logger.trace("Connection already removed for sessionId=" + sessionId);
       }
       return;
     }
-    session.forward(message);
+    handler.forward(message);
   }
  else {
-    StompRelaySession session=this.relaySessions.get(sessionId);
-    if (session == null) {
-      logger.warn("Session id=" + sessionId + " not found. Ignoring message: "+ message);
+    StompConnectionHandler handler=this.connectionHandlers.get(sessionId);
+    if (handler == null) {
+      logger.warn("Connection for sessionId=" + sessionId + " not found. Ignoring message: "+ message);
       return;
     }
-    session.forward(message);
+    handler.forward(message);
   }
 }

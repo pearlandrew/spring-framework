@@ -1,0 +1,37 @@
+{
+  if (this.isRemoteClientSession) {
+    return;
+  }
+  long clientSendInterval=this.connectHeaders.getHeartbeat()[0];
+  long clientReceiveInterval=this.connectHeaders.getHeartbeat()[1];
+  long serverSendInterval=connectedHeaders.getHeartbeat()[0];
+  long serverReceiveInterval=connectedHeaders.getHeartbeat()[1];
+  if ((clientSendInterval > 0) && (serverReceiveInterval > 0)) {
+    long interval=Math.max(clientSendInterval,serverReceiveInterval);
+    this.tcpConnection.onWriteInactivity(new Runnable(){
+      @Override public void run(){
+        TcpConnection<byte[]> conn=tcpConnection;
+        if (conn != null) {
+          conn.send(HEARTBEAT_MESSAGE).addCallback(new ListenableFutureCallback<Boolean>(){
+            public void onFailure(            Throwable t){
+              handleTcpConnectionFailure("Failed to send heartbeat",null);
+            }
+            public void onSuccess(            Boolean result){
+            }
+          }
+);
+        }
+      }
+    }
+,interval);
+  }
+  if (clientReceiveInterval > 0 && serverSendInterval > 0) {
+    final long interval=Math.max(clientReceiveInterval,serverSendInterval) * HEARTBEAT_MULTIPLIER;
+    this.tcpConnection.onReadInactivity(new Runnable(){
+      @Override public void run(){
+        handleTcpConnectionFailure("No hearbeat from broker for more than " + interval + "ms, closing connection",null);
+      }
+    }
+,interval);
+  }
+}
