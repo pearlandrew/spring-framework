@@ -1,0 +1,20 @@
+{
+  Class<?> paramType=parameter.getParameterType();
+  if (Map.class.isAssignableFrom(paramType) || MultipartFile.class.equals(paramType) || "javax.servlet.http.Part".equals(paramType.getName())) {
+    return;
+  }
+  RequestParam annot=parameter.getParameterAnnotation(RequestParam.class);
+  String name=StringUtils.isEmpty(annot.value()) ? parameter.getParameterName() : annot.value();
+  if (value == null) {
+    builder.queryParam(name);
+  }
+ else   if (value instanceof Collection) {
+    for (    Object v : (Collection)value) {
+      v=formatUriValue(conversionService,TypeDescriptor.nested(parameter,1),v);
+      builder.queryParam(name,v);
+    }
+  }
+ else {
+    builder.queryParam(name,formatUriValue(conversionService,new TypeDescriptor(parameter),value));
+  }
+}

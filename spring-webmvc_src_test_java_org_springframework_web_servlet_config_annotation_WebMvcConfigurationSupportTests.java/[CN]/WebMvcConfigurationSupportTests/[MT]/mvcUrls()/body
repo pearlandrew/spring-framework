@@ -1,0 +1,12 @@
+{
+  RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(new MockHttpServletRequest()));
+  try {
+    DateTime now=DateTime.now();
+    MvcUrls mvcUrls=this.wac.getBean(MvcUrls.class);
+    UriComponents uriComponents=mvcUrls.linkToMethodOn(controller(TestController.class).methodWithTwoPathVariables(1,now));
+    assertEquals("/foo/1/bar/" + ISODateTimeFormat.date().print(now),uriComponents.getPath());
+  }
+  finally {
+    RequestContextHolder.resetRequestAttributes();
+  }
+}

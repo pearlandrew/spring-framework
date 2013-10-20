@@ -1,0 +1,19 @@
+{
+  if (this.contributors.isEmpty()) {
+    return builder.buildAndExpand(uriVars);
+  }
+  int paramCount=method.getParameters().length;
+  int argCount=argumentValues.length;
+  Assert.isTrue(paramCount == argCount,"Number of method parameters " + paramCount + " does not match number of argument values "+ argCount);
+  for (int i=0; i < paramCount; i++) {
+    MethodParameter param=new MethodParameter(method,i);
+    param.initParameterNameDiscovery(parameterNameDiscoverer);
+    for (    UriComponentsContributor c : this.contributors) {
+      if (c.supportsParameter(param)) {
+        c.contributeMethodArgument(param,argumentValues[i],builder,uriVars,this.conversionService);
+        break;
+      }
+    }
+  }
+  return builder.buildAndExpand(uriVars);
+}

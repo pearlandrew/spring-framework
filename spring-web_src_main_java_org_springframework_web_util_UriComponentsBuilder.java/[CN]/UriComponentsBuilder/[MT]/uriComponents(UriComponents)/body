@@ -1,0 +1,31 @@
+{
+  Assert.notNull(uriComponents,"'uriComponents' must not be null");
+  this.scheme=uriComponents.getScheme();
+  if (uriComponents instanceof OpaqueUriComponents) {
+    this.ssp=uriComponents.getSchemeSpecificPart();
+    resetHierarchicalComponents();
+  }
+ else {
+    if (uriComponents.getUserInfo() != null) {
+      this.userInfo=uriComponents.getUserInfo();
+    }
+    if (uriComponents.getHost() != null) {
+      this.host=uriComponents.getHost();
+    }
+    if (uriComponents.getPort() != -1) {
+      this.port=uriComponents.getPort();
+    }
+    if (StringUtils.hasLength(uriComponents.getPath())) {
+      this.pathBuilder=new CompositePathComponentBuilder(uriComponents.getPath());
+    }
+    if (!uriComponents.getQueryParams().isEmpty()) {
+      this.queryParams.clear();
+      this.queryParams.putAll(uriComponents.getQueryParams());
+    }
+    resetSchemeSpecificPart();
+  }
+  if (uriComponents.getFragment() != null) {
+    this.fragment=uriComponents.getFragment();
+  }
+  return this;
+}

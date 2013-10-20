@@ -1,5 +1,5 @@
 {
-  loadBeanDefinitions("mvc-config.xml",12);
+  loadBeanDefinitions("mvc-config.xml",13);
   RequestMappingHandlerMapping mapping=appContext.getBean(RequestMappingHandlerMapping.class);
   assertNotNull(mapping);
   assertEquals(0,mapping.getOrder());
@@ -29,4 +29,16 @@
   assertSame(appContext.getBean(ConversionService.class),request.getAttribute(ConversionService.class.getName()));
   adapter.handle(request,response,handlerMethod);
   assertTrue(handler.recordedValidationError);
+  RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(new MockHttpServletRequest()));
+  try {
+    Date now=new Date();
+    TestController testController=controller(TestController.class);
+    testController.testBind(now,null,null);
+    MvcUrls mvcUrls=this.appContext.getBean(MvcUrls.class);
+    UriComponents uriComponents=mvcUrls.linkToMethodOn(testController);
+    assertEquals("http://localhost/?date=2013-10-21",uriComponents.toUriString());
+  }
+  finally {
+    RequestContextHolder.resetRequestAttributes();
+  }
 }

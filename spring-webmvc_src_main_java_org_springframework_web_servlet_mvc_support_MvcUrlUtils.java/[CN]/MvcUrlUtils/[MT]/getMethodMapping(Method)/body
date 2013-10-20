@@ -1,0 +1,14 @@
+{
+  RequestMapping methodAnnot=AnnotationUtils.findAnnotation(method,RequestMapping.class);
+  Assert.notNull(methodAnnot,"No mappings on " + method.toGenericString());
+  PatternsRequestCondition condition=new PatternsRequestCondition(methodAnnot.value());
+  RequestMapping typeAnnot=AnnotationUtils.findAnnotation(method.getDeclaringClass(),RequestMapping.class);
+  if (typeAnnot != null) {
+    condition=new PatternsRequestCondition(typeAnnot.value()).combine(condition);
+  }
+  Set<String> patterns=condition.getPatterns();
+  if (patterns.size() > 1) {
+    logger.warn("Multiple mappings on " + method.toGenericString() + ", using the first one");
+  }
+  return (patterns.size() == 0) ? "/" : patterns.iterator().next();
+}

@@ -1,10 +1,7 @@
 {
-  StaticWebApplicationContext cxt=new StaticWebApplicationContext();
-  cxt.registerSingleton("/controller",TestController.class);
-  HttpServletRequest request=new MockHttpServletRequest("GET","/controller");
-  BeanNameUrlHandlerMapping handlerMapping=mvcConfiguration.beanNameHandlerMapping();
+  BeanNameUrlHandlerMapping handlerMapping=this.wac.getBean(BeanNameUrlHandlerMapping.class);
   assertEquals(2,handlerMapping.getOrder());
-  handlerMapping.setApplicationContext(cxt);
+  HttpServletRequest request=new MockHttpServletRequest("GET","/testController");
   HandlerExecutionChain chain=handlerMapping.getHandler(request);
   assertNotNull(chain.getInterceptors());
   assertEquals(2,chain.getInterceptors().length);
