@@ -3,9 +3,9 @@
     if (logger.isWarnEnabled()) {
       logger.warn("Connection to broker inactive or not ready, ignoring message=" + message);
     }
-    return new ListenableFutureTask<Boolean>(new Callable<Boolean>(){
-      @Override public Boolean call() throws Exception {
-        return Boolean.FALSE;
+    return new ListenableFutureTask<Void>(new Callable<Void>(){
+      @Override public Void call() throws Exception {
+        return null;
       }
     }
 );
@@ -13,9 +13,9 @@
   if (logger.isTraceEnabled()) {
     logger.trace("Forwarding message to broker: " + message);
   }
-  @SuppressWarnings("unchecked") ListenableFuture<Boolean> future=this.tcpConnection.send((Message<byte[]>)message);
-  future.addCallback(new ListenableFutureCallback<Boolean>(){
-    @Override public void onSuccess(    Boolean result){
+  @SuppressWarnings("unchecked") ListenableFuture<Void> future=this.tcpConnection.send((Message<byte[]>)message);
+  future.addCallback(new ListenableFutureCallback<Void>(){
+    @Override public void onSuccess(    Void result){
       StompCommand command=StompHeaderAccessor.wrap(message).getCommand();
       if (command == StompCommand.DISCONNECT) {
         resetTcpConnection();
