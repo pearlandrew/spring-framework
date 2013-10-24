@@ -1,0 +1,15 @@
+{
+  checkNativeSessionInitialized();
+  if (this.extensions == null) {
+    List<Extension> nativeExtensions=getNativeSession().getNegotiatedExtensions();
+    this.extensions=new ArrayList<WebSocketExtension>(nativeExtensions.size());
+    for (    Extension nativeExtension : nativeExtensions) {
+      Map<String,String> parameters=new HashMap<String,String>();
+      for (      Extension.Parameter param : nativeExtension.getParameters()) {
+        parameters.put(param.getName(),param.getValue());
+      }
+      this.extensions.add(new WebSocketExtension(nativeExtension.getName(),parameters));
+    }
+  }
+  return this.extensions;
+}

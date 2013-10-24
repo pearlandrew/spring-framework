@@ -39,6 +39,9 @@
   if (logger.isDebugEnabled()) {
     logger.debug("Upgrading request, sub-protocol=" + subProtocol);
   }
+  List<WebSocketExtension> requestedExtensions=WebSocketExtension.parseHeaders(request.getHeaders().getSecWebSocketExtensions());
+  List<WebSocketExtension> filteredExtensions=filterRequestedExtensions(requestedExtensions,this.requestUpgradeStrategy.getAvailableExtensions(request));
+  request.getHeaders().setSecWebSocketExtensions(WebSocketExtension.toStringList(filteredExtensions));
   this.requestUpgradeStrategy.upgrade(request,response,subProtocol,wsHandler,attributes);
   return true;
 }
