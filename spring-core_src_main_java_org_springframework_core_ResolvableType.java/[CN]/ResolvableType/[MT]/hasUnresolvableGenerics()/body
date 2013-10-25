@@ -1,0 +1,21 @@
+{
+  ResolvableType[] generics=getGenerics();
+  for (  ResolvableType generic : generics) {
+    if (generic.resolve() == null) {
+      return true;
+    }
+  }
+  Class<?> resolved=resolve();
+  Type[] ifcs=resolved.getGenericInterfaces();
+  for (  Type ifc : ifcs) {
+    if (ifc instanceof Class) {
+      if (forClass((Class)ifc).hasGenerics()) {
+        return true;
+      }
+    }
+  }
+  if (resolved.getGenericSuperclass() != null) {
+    return getSuperType().hasUnresolvableGenerics();
+  }
+  return false;
+}
