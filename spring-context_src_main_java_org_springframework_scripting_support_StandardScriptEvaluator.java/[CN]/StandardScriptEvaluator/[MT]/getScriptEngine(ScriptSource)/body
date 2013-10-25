@@ -1,0 +1,27 @@
+{
+  if (this.scriptEngineManager == null) {
+    this.scriptEngineManager=new ScriptEngineManager();
+  }
+  if (StringUtils.hasText(this.language)) {
+    ScriptEngine engine=this.scriptEngineManager.getEngineByName(this.language);
+    if (engine == null) {
+      throw new IllegalStateException("No matching engine found for language '" + this.language + "'");
+    }
+    return engine;
+  }
+ else   if (script instanceof ResourceScriptSource) {
+    Resource resource=((ResourceScriptSource)script).getResource();
+    String extension=StringUtils.getFilenameExtension(resource.getFilename());
+    if (extension == null) {
+      throw new IllegalStateException("No script language defined, and no file extension defined for resource: " + resource);
+    }
+    ScriptEngine engine=this.scriptEngineManager.getEngineByExtension(extension);
+    if (engine == null) {
+      throw new IllegalStateException("No matching engine found for file extension '" + extension + "'");
+    }
+    return engine;
+  }
+ else {
+    throw new IllegalStateException("No script language defined, and no resource associated with script: " + script);
+  }
+}

@@ -1,0 +1,18 @@
+{
+  try {
+    Interpreter interpreter=new Interpreter();
+    interpreter.setClassLoader(this.classLoader);
+    if (arguments != null) {
+      for (      Map.Entry<String,Object> entry : arguments.entrySet()) {
+        interpreter.set(entry.getKey(),entry.getValue());
+      }
+    }
+    return interpreter.eval(new StringReader(script.getScriptAsString()));
+  }
+ catch (  IOException ex) {
+    throw new ScriptCompilationException(script,"Cannot access script",ex);
+  }
+catch (  EvalError ex) {
+    throw new ScriptCompilationException(script,"Evaluation failure",ex);
+  }
+}
