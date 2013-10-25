@@ -1,0 +1,18 @@
+{
+  InvocableHandlerMethod invocable=new InvocableHandlerMethod(handlerMethod.createWithResolvedBean());
+  invocable.setMessageMethodArgumentResolvers(this.argumentResolvers);
+  try {
+    Object returnValue=invocable.invoke(message);
+    MethodParameter returnType=handlerMethod.getReturnType();
+    if (void.class.equals(returnType.getParameterType())) {
+      return;
+    }
+    this.returnValueHandlers.handleReturnValue(returnValue,returnType,message);
+  }
+ catch (  Exception ex) {
+    processHandlerMethodException(handlerMethod,ex,message);
+  }
+catch (  Throwable ex) {
+    logger.error("Error while processing message " + message,ex);
+  }
+}

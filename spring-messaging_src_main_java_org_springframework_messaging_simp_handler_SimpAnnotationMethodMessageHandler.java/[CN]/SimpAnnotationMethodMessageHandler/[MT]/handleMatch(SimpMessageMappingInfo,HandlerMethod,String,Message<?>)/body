@@ -1,0 +1,9 @@
+{
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
+  String matchedPattern=mapping.getDestinationConditions().getPatterns().iterator().next();
+  Map<String,String> vars=getPathMatcher().extractUriTemplateVariables(matchedPattern,lookupDestination);
+  headers.setDestination(lookupDestination);
+  headers.setHeader(PathVariableMethodArgumentResolver.PATH_TEMPLATE_VARIABLES_HEADER,vars);
+  message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+  super.handleMatch(mapping,handlerMethod,lookupDestination,message);
+}

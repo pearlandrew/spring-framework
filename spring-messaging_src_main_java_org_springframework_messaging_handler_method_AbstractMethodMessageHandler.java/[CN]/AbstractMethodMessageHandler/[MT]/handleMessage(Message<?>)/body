@@ -1,0 +1,15 @@
+{
+  String destination=getDestination(message);
+  String lookupDestination=getLookupDestination(destination);
+  if (lookupDestination == null) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Ignoring message with destination=" + destination);
+    }
+    return;
+  }
+  if (logger.isTraceEnabled()) {
+    logger.trace("Handling message " + message);
+  }
+  message=MessageBuilder.fromMessage(message).setHeader(LOOKUP_DESTINATION_HEADER,lookupDestination).build();
+  handleMessageInternal(message,lookupDestination);
+}

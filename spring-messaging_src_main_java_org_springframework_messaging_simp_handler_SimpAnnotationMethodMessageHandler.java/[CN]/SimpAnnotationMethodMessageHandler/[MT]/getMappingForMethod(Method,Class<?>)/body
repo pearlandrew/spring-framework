@@ -1,0 +1,21 @@
+{
+  MessageMapping messageMappingAnnot=AnnotationUtils.findAnnotation(method,MessageMapping.class);
+  if (messageMappingAnnot != null) {
+    SimpMessageMappingInfo result=createMessageMappingCondition(messageMappingAnnot);
+    MessageMapping typeAnnot=AnnotationUtils.findAnnotation(handlerType,MessageMapping.class);
+    if (typeAnnot != null) {
+      result=createMessageMappingCondition(typeAnnot).combine(result);
+    }
+    return result;
+  }
+  SubscribeEvent subsribeAnnot=AnnotationUtils.findAnnotation(method,SubscribeEvent.class);
+  if (subsribeAnnot != null) {
+    SimpMessageMappingInfo result=createSubscribeCondition(subsribeAnnot);
+    SubscribeEvent typeAnnot=AnnotationUtils.findAnnotation(handlerType,SubscribeEvent.class);
+    if (typeAnnot != null) {
+      result=createSubscribeCondition(typeAnnot).combine(result);
+    }
+    return result;
+  }
+  return null;
+}
