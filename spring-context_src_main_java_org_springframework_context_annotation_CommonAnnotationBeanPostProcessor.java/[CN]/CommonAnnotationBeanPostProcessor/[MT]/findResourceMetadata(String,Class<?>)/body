@@ -1,8 +1,9 @@
 {
-  InjectionMetadata metadata=this.injectionMetadataCache.get(beanName);
+  String cacheKey=(StringUtils.hasLength(beanName) ? beanName : clazz.getName());
+  InjectionMetadata metadata=this.injectionMetadataCache.get(cacheKey);
   if (metadata == null) {
 synchronized (this.injectionMetadataCache) {
-      metadata=this.injectionMetadataCache.get(beanName);
+      metadata=this.injectionMetadataCache.get(cacheKey);
       if (metadata == null) {
         LinkedList<InjectionMetadata.InjectedElement> elements=new LinkedList<InjectionMetadata.InjectedElement>();
         Class<?> targetClass=clazz;
@@ -74,7 +75,7 @@ synchronized (this.injectionMetadataCache) {
         }
  while (targetClass != null && targetClass != Object.class);
         metadata=new InjectionMetadata(clazz,elements);
-        this.injectionMetadataCache.put(beanName,metadata);
+        this.injectionMetadataCache.put(cacheKey,metadata);
       }
     }
   }
