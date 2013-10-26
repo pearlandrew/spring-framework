@@ -1,4 +1,7 @@
 {
-  Class<?>[] args=GenericTypeResolver.resolveTypeArguments(converter.getClass(),genericIfc);
-  return (args != null ? new GenericConverter.ConvertiblePair(args[0],args[1]) : null);
+  ResolvableType resolvableType=ResolvableType.forClass(converter.getClass()).as(genericIfc);
+  if (resolvableType.hasUnresolvableGenerics()) {
+    return null;
+  }
+  return new GenericConverter.ConvertiblePair(resolvableType.resolveGeneric(0),resolvableType.resolveGeneric(1));
 }
