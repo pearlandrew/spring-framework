@@ -1,0 +1,70 @@
+{
+  Class<?> preResolved=mbd.resolvedFactoryMethodReturnType;
+  if (preResolved != null) {
+    return preResolved;
+  }
+  Class<?> factoryClass;
+  boolean isStatic=true;
+  String factoryBeanName=mbd.getFactoryBeanName();
+  if (factoryBeanName != null) {
+    if (factoryBeanName.equals(beanName)) {
+      throw new BeanDefinitionStoreException(mbd.getResourceDescription(),beanName,"factory-bean reference points back to the same bean definition");
+    }
+    factoryClass=getType(factoryBeanName);
+    isStatic=false;
+  }
+ else {
+    factoryClass=resolveBeanClass(mbd,beanName,typesToMatch);
+  }
+  if (factoryClass == null) {
+    return null;
+  }
+  boolean cache=false;
+  int minNrOfArgs=mbd.getConstructorArgumentValues().getArgumentCount();
+  Method[] candidates=ReflectionUtils.getUniqueDeclaredMethods(factoryClass);
+  Set<Class<?>> returnTypes=new HashSet<Class<?>>(1);
+  for (  Method factoryMethod : candidates) {
+    if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic && factoryMethod.getName().equals(mbd.getFactoryMethodName()) && factoryMethod.getParameterTypes().length >= minNrOfArgs) {
+      TypeVariable<Method>[] declaredTypeVariables=factoryMethod.getTypeParameters();
+      if (declaredTypeVariables.length > 0) {
+        Class<?>[] paramTypes=factoryMethod.getParameterTypes();
+        String[] paramNames=null;
+        ParameterNameDiscoverer pnd=getParameterNameDiscoverer();
+        if (pnd != null) {
+          paramNames=pnd.getParameterNames(factoryMethod);
+        }
+        ConstructorArgumentValues cav=mbd.getConstructorArgumentValues();
+        Set<ConstructorArgumentValues.ValueHolder> usedValueHolders=new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
+        Object[] args=new Object[paramTypes.length];
+        for (int i=0; i < args.length; i++) {
+          ConstructorArgumentValues.ValueHolder valueHolder=cav.getArgumentValue(i,paramTypes[i],(paramNames != null ? paramNames[i] : null),usedValueHolders);
+          if (valueHolder == null) {
+            valueHolder=cav.getGenericArgumentValue(null,null,usedValueHolders);
+          }
+          if (valueHolder != null) {
+            args[i]=valueHolder.getValue();
+            usedValueHolders.add(valueHolder);
+          }
+        }
+        Class<?> returnType=AutowireUtils.resolveReturnTypeForFactoryMethod(factoryMethod,args,getBeanClassLoader());
+        if (returnType != null) {
+          cache=true;
+          returnTypes.add(returnType);
+        }
+      }
+ else {
+        returnTypes.add(factoryMethod.getReturnType());
+      }
+    }
+  }
+  if (returnTypes.size() == 1) {
+    Class<?> result=returnTypes.iterator().next();
+    if (cache) {
+      mbd.resolvedFactoryMethodReturnType=result;
+    }
+    return result;
+  }
+ else {
+    return null;
+  }
+}

@@ -1,6 +1,6 @@
 {
   ResolvableType dependencyType=descriptor.getResolvableType();
-  if (!dependencyType.hasGenerics()) {
+  if (dependencyType.getType() instanceof Class) {
     return true;
   }
   ResolvableType targetType=null;
@@ -8,8 +8,17 @@
   if (bdHolder.getBeanDefinition() instanceof RootBeanDefinition) {
     rbd=(RootBeanDefinition)bdHolder.getBeanDefinition();
   }
-  if (rbd != null && rbd.getResolvedFactoryMethod() != null) {
-    targetType=ResolvableType.forMethodReturnType(rbd.getResolvedFactoryMethod());
+  if (rbd != null && rbd.getFactoryMethodName() != null) {
+    Class<?> preResolved=rbd.resolvedFactoryMethodReturnType;
+    if (preResolved != null) {
+      targetType=ResolvableType.forClass(preResolved);
+    }
+ else {
+      Method resolvedFactoryMethod=rbd.getResolvedFactoryMethod();
+      if (resolvedFactoryMethod != null) {
+        targetType=ResolvableType.forMethodReturnType(resolvedFactoryMethod);
+      }
+    }
   }
   if (targetType == null) {
     if (this.beanFactory != null) {
