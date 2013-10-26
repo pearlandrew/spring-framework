@@ -4,10 +4,14 @@
     parser.parseExpression(expression,context);
     fail("Should have failed");
   }
- catch (  Exception e) {
-    if (!e.getMessage().equals(expectedMessage)) {
-      e.printStackTrace();
+ catch (  Exception ex) {
+    String message=ex.getMessage();
+    if (ex instanceof ExpressionException) {
+      message=((ExpressionException)ex).getSimpleMessage();
     }
-    assertEquals(expectedMessage,e.getMessage());
+    if (!message.equals(expectedMessage)) {
+      ex.printStackTrace();
+    }
+    assertThat(expectedMessage,equalTo(message));
   }
 }
