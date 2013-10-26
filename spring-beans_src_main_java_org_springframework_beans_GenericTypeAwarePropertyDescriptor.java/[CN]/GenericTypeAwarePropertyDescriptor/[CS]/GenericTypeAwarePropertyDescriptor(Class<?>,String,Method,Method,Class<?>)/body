@@ -5,7 +5,10 @@
   Method readMethodToUse=BridgeMethodResolver.findBridgedMethod(readMethod);
   Method writeMethodToUse=BridgeMethodResolver.findBridgedMethod(writeMethod);
   if (writeMethodToUse == null && readMethodToUse != null) {
-    writeMethodToUse=ClassUtils.getMethodIfAvailable(this.beanClass,"set" + StringUtils.capitalize(getName()),readMethodToUse.getReturnType());
+    Method candidate=ClassUtils.getMethodIfAvailable(this.beanClass,"set" + StringUtils.capitalize(getName()),(Class<?>[])null);
+    if (candidate != null && candidate.getParameterTypes().length == 1) {
+      writeMethodToUse=candidate;
+    }
   }
   this.readMethod=readMethodToUse;
   this.writeMethod=writeMethodToUse;
