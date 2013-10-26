@@ -1,0 +1,15 @@
+{
+  Method match=null;
+  for (  Method method : controllerType.getDeclaredMethods()) {
+    if ((method.getParameterCount() == argumentValues.length) && method.getName().equals(methodName)) {
+      if (match != null) {
+        throw new IllegalStateException("Found two methods named '" + methodName + "' having "+ argumentValues+ " arguments, controller "+ controllerType.getName());
+      }
+      match=method;
+    }
+  }
+  if (match == null) {
+    throw new IllegalArgumentException("No method '" + methodName + "' with "+ argumentValues.length+ " parameters found in "+ controllerType.getName());
+  }
+  return fromMethod(match,argumentValues);
+}

@@ -1,0 +1,17 @@
+{
+  if (getControllerMethod.equals(method)) {
+    return this.controllerMethod;
+  }
+ else   if (getArgumentValues.equals(method)) {
+    return this.argumentValues;
+  }
+ else   if (ReflectionUtils.isObjectMethod(method)) {
+    return ReflectionUtils.invokeMethod(method,obj,args);
+  }
+ else {
+    this.controllerMethod=method;
+    this.argumentValues=args;
+    Class<?> returnType=method.getReturnType();
+    return void.class.equals(returnType) ? null : returnType.cast(initProxy(returnType,this));
+  }
+}

@@ -1,0 +1,28 @@
+{
+  RequestAttributes requestAttributes=RequestContextHolder.getRequestAttributes();
+  if (requestAttributes == null) {
+    logger.debug("No request bound to the current thread: is DispatcherSerlvet used?");
+    return null;
+  }
+  HttpServletRequest request=((ServletRequestAttributes)requestAttributes).getRequest();
+  if (request == null) {
+    logger.debug("Request bound to current thread is not an HttpServletRequest");
+    return null;
+  }
+  ServletContext servletContext=request.getServletContext();
+  WebApplicationContext wac=WebApplicationContextUtils.getWebApplicationContext(servletContext);
+  if (wac == null) {
+    logger.debug("No WebApplicationContext found: no ContextLoaderListener registered?");
+    return null;
+  }
+  try {
+    String beanName=MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME;
+    return wac.getBean(beanName,CompositeUriComponentsContributor.class);
+  }
+ catch (  NoSuchBeanDefinitionException ex) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("No CompositeUriComponentsContributor bean with name '" + MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME + "'");
+    }
+    return null;
+  }
+}

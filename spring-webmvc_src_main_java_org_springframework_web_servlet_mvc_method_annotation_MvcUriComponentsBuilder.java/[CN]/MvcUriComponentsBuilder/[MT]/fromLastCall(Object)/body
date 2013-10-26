@@ -1,0 +1,12 @@
+{
+  Assert.isInstanceOf(MethodInvocationInfo.class,methodInvocationInfo);
+  MethodInvocationInfo info=(MethodInvocationInfo)methodInvocationInfo;
+  Method method=info.getControllerMethod();
+  Object[] argumentValues=info.getArgumentValues();
+  UriComponentsBuilder builder=ServletUriComponentsBuilder.newInstance().path(getMethodRequestMapping(method));
+  UriComponents uriComponents=applyContributors(builder,method,argumentValues);
+  String typeMapping=getTypeRequestMapping(method.getDeclaringClass());
+  String methodMapping=uriComponents.getPath();
+  String path=pathMatcher.combine(typeMapping,methodMapping);
+  return ServletUriComponentsBuilder.fromCurrentServletMapping().path(path).queryParams(uriComponents.getQueryParams());
+}
