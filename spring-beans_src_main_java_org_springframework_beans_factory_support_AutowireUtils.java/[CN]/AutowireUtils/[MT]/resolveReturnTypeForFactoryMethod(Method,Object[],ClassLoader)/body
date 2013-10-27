@@ -28,16 +28,25 @@
             if (arg instanceof Class) {
               return (Class<?>)arg;
             }
- else             if (arg instanceof String) {
-              try {
-                return classLoader.loadClass((String)arg);
-              }
- catch (              ClassNotFoundException ex) {
-                throw new IllegalStateException("Could not resolve specified class name argument [" + arg + "]",ex);
-              }
-            }
  else {
-              return method.getReturnType();
+              String className=null;
+              if (arg instanceof String) {
+                className=(String)arg;
+              }
+ else               if (arg instanceof TypedStringValue) {
+                className=((TypedStringValue)arg).getValue();
+              }
+              if (className != null) {
+                try {
+                  return classLoader.loadClass(className);
+                }
+ catch (                ClassNotFoundException ex) {
+                  throw new IllegalStateException("Could not resolve specified class name argument [" + arg + "]",ex);
+                }
+              }
+ else {
+                return method.getReturnType();
+              }
             }
           }
         }
