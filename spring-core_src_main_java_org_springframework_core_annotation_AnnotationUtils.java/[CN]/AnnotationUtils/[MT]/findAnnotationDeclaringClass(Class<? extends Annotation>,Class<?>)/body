@@ -3,5 +3,16 @@
   if (clazz == null || clazz.equals(Object.class)) {
     return null;
   }
-  return (isAnnotationDeclaredLocally(annotationType,clazz)) ? clazz : findAnnotationDeclaringClass(annotationType,clazz.getSuperclass());
+  if (isAnnotationDeclaredLocally(annotationType,clazz)) {
+    return clazz;
+  }
+  if (!Annotation.class.isAssignableFrom(clazz)) {
+    for (    Annotation stereotype : clazz.getAnnotations()) {
+      Class<?> declaringClass=findAnnotationDeclaringClass(annotationType,stereotype.annotationType());
+      if (declaringClass != null) {
+        return declaringClass;
+      }
+    }
+  }
+  return findAnnotationDeclaringClass(annotationType,clazz.getSuperclass());
 }
