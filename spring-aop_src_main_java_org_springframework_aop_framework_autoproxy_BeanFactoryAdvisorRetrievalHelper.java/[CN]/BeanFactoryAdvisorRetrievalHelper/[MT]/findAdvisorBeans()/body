@@ -12,22 +12,29 @@ synchronized (this) {
   }
   List<Advisor> advisors=new LinkedList<Advisor>();
   for (  String name : advisorNames) {
-    if (isEligibleBean(name) && !this.beanFactory.isCurrentlyInCreation(name)) {
-      try {
-        advisors.add(this.beanFactory.getBean(name,Advisor.class));
-      }
- catch (      BeanCreationException ex) {
-        Throwable rootCause=ex.getMostSpecificCause();
-        if (rootCause instanceof BeanCurrentlyInCreationException) {
-          BeanCreationException bce=(BeanCreationException)rootCause;
-          if (this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
-            if (logger.isDebugEnabled()) {
-              logger.debug("Ignoring currently created advisor '" + name + "': "+ ex.getMessage());
-            }
-            continue;
-          }
+    if (isEligibleBean(name)) {
+      if (this.beanFactory.isCurrentlyInCreation(name)) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Skipping currently created advisor '" + name + "'");
         }
-        throw ex;
+      }
+ else {
+        try {
+          advisors.add(this.beanFactory.getBean(name,Advisor.class));
+        }
+ catch (        BeanCreationException ex) {
+          Throwable rootCause=ex.getMostSpecificCause();
+          if (rootCause instanceof BeanCurrentlyInCreationException) {
+            BeanCreationException bce=(BeanCreationException)rootCause;
+            if (this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
+              if (logger.isDebugEnabled()) {
+                logger.debug("Skipping advisor '" + name + "' with dependency on currently created bean: "+ ex.getMessage());
+              }
+              continue;
+            }
+          }
+          throw ex;
+        }
       }
     }
   }
