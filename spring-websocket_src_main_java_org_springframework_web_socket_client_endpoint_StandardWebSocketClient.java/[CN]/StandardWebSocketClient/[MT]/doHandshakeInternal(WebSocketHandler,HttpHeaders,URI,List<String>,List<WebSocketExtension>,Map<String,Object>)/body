@@ -1,0 +1,18 @@
+{
+  int port=getPort(uri);
+  InetSocketAddress localAddress=new InetSocketAddress(getLocalHost(),port);
+  InetSocketAddress remoteAddress=new InetSocketAddress(uri.getHost(),port);
+  final StandardWebSocketSession session=new StandardWebSocketSession(headers,handshakeAttributes,localAddress,remoteAddress);
+  final ClientEndpointConfig.Builder configBuidler=ClientEndpointConfig.Builder.create();
+  configBuidler.configurator(new StandardWebSocketClientConfigurator(headers));
+  configBuidler.preferredSubprotocols(protocols);
+  configBuidler.extensions(adaptExtensions(extensions));
+  final Endpoint endpoint=new StandardWebSocketHandlerAdapter(webSocketHandler,session);
+  return this.taskExecutor.submitListenable(new Callable<WebSocketSession>(){
+    @Override public WebSocketSession call() throws Exception {
+      webSocketContainer.connectToServer(endpoint,configBuidler.build(),uri);
+      return session;
+    }
+  }
+);
+}

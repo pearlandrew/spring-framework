@@ -1,6 +1,7 @@
 {
+  WebSocketHttpHeaders headers=new WebSocketHttpHeaders(request.getHeaders());
   if (logger.isDebugEnabled()) {
-    logger.debug("Initiating handshake for " + request.getURI() + ", headers="+ request.getHeaders());
+    logger.debug("Initiating handshake for " + request.getURI() + ", headers="+ headers);
   }
   try {
     if (!HttpMethod.GET.equals(request.getMethod())) {
@@ -9,15 +10,15 @@
       logger.debug("Only HTTP GET is allowed, current method is " + request.getMethod());
       return false;
     }
-    if (!"WebSocket".equalsIgnoreCase(request.getHeaders().getUpgrade())) {
+    if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
       handleInvalidUpgradeHeader(request,response);
       return false;
     }
-    if (!request.getHeaders().getConnection().contains("Upgrade") && !request.getHeaders().getConnection().contains("upgrade")) {
+    if (!headers.getConnection().contains("Upgrade") && !headers.getConnection().contains("upgrade")) {
       handleInvalidConnectHeader(request,response);
       return false;
     }
-    if (!isWebSocketVersionSupported(request)) {
+    if (!isWebSocketVersionSupported(headers)) {
       handleWebSocketVersionNotSupported(request,response);
       return false;
     }
@@ -25,7 +26,7 @@
       response.setStatusCode(HttpStatus.FORBIDDEN);
       return false;
     }
-    String wsKey=request.getHeaders().getSecWebSocketKey();
+    String wsKey=headers.getSecWebSocketKey();
     if (wsKey == null) {
       logger.debug("Missing \"Sec-WebSocket-Key\" header");
       response.setStatusCode(HttpStatus.BAD_REQUEST);
@@ -35,13 +36,13 @@
  catch (  IOException ex) {
     throw new HandshakeFailureException("Response update failed during upgrade to WebSocket, uri=" + request.getURI(),ex);
   }
-  String subProtocol=selectProtocol(request.getHeaders().getSecWebSocketProtocol());
+  String subProtocol=selectProtocol(headers.getSecWebSocketProtocol());
+  List<WebSocketExtension> requested=headers.getSecWebSocketExtensions();
+  List<WebSocketExtension> supported=this.requestUpgradeStrategy.getSupportedExtensions(request);
+  List<WebSocketExtension> extensions=filterRequestedExtensions(request,requested,supported);
   if (logger.isDebugEnabled()) {
-    logger.debug("Upgrading request, sub-protocol=" + subProtocol);
+    logger.debug("Upgrading request, sub-protocol=" + subProtocol + ", extensions="+ extensions);
   }
-  List<WebSocketExtension> requestedExtensions=WebSocketExtension.parseHeaders(request.getHeaders().getSecWebSocketExtensions());
-  List<WebSocketExtension> filteredExtensions=filterRequestedExtensions(requestedExtensions,this.requestUpgradeStrategy.getAvailableExtensions(request));
-  request.getHeaders().setSecWebSocketExtensions(WebSocketExtension.toStringList(filteredExtensions));
-  this.requestUpgradeStrategy.upgrade(request,response,subProtocol,wsHandler,attributes);
+  this.requestUpgradeStrategy.upgrade(request,response,subProtocol,extensions,wsHandler,attributes);
   return true;
 }
