@@ -1,0 +1,21 @@
+{
+  final ClientUpgradeRequest request=new ClientUpgradeRequest();
+  request.setSubProtocols(protocols);
+  for (  WebSocketExtension e : extensions) {
+    request.addExtensions(new WebSocketExtension.WebSocketToJettyExtensionConfigAdapter(e));
+  }
+  for (  String header : headers.keySet()) {
+    request.setHeader(header,headers.get(header));
+  }
+  Principal user=getUser();
+  final JettyWebSocketSession wsSession=new JettyWebSocketSession(user,handshakeAttributes);
+  final JettyWebSocketHandlerAdapter listener=new JettyWebSocketHandlerAdapter(wsHandler,wsSession);
+  return this.taskExecutor.submitListenable(new Callable<WebSocketSession>(){
+    @Override public WebSocketSession call() throws Exception {
+      Future<Session> future=client.connect(listener,uri,request);
+      future.get();
+      return wsSession;
+    }
+  }
+);
+}

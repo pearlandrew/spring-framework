@@ -5,8 +5,13 @@
   ServletContextHandler handler=new ServletContextHandler();
   partsServlet=new PartsServlet();
   partListServlet=new PartListServlet();
-  handler.addServlet(new ServletHolder(partsServlet),"/parts");
-  handler.addServlet(new ServletHolder(partListServlet),"/partlist");
+  MultipartConfigElement multipartConfig=new MultipartConfigElement("");
+  ServletHolder holder=new ServletHolder(partsServlet);
+  holder.getRegistration().setMultipartConfig(multipartConfig);
+  handler.addServlet(holder,"/parts");
+  holder=new ServletHolder(partListServlet);
+  holder.getRegistration().setMultipartConfig(multipartConfig);
+  handler.addServlet(holder,"/partlist");
   jettyServer.setHandler(handler);
   jettyServer.start();
 }

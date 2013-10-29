@@ -1,0 +1,20 @@
+{
+  Assert.isInstanceOf(ServletServerHttpRequest.class,request);
+  HttpServletRequest servletRequest=((ServletServerHttpRequest)request).getServletRequest();
+  Assert.isInstanceOf(ServletServerHttpResponse.class,response);
+  HttpServletResponse servletResponse=((ServletServerHttpResponse)response).getServletResponse();
+  Assert.isTrue(this.factory.isUpgradeRequest(servletRequest,servletResponse),"Not a WebSocket handshake");
+  JettyWebSocketSession session=new JettyWebSocketSession(request.getPrincipal(),attributes);
+  JettyWebSocketHandlerAdapter handlerAdapter=new JettyWebSocketHandlerAdapter(wsHandler,session);
+  WebSocketHandlerContainer container=new WebSocketHandlerContainer(handlerAdapter,selectedProtocol,selectedExtensions);
+  try {
+    wsContainerHolder.set(container);
+    this.factory.acceptWebSocket(servletRequest,servletResponse);
+  }
+ catch (  IOException ex) {
+    throw new HandshakeFailureException("Response update failed during upgrade to WebSocket, uri=" + request.getURI(),ex);
+  }
+ finally {
+    wsContainerHolder.remove();
+  }
+}
