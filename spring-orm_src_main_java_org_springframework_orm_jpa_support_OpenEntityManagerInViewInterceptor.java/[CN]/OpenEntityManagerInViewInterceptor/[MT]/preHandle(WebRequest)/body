@@ -17,7 +17,9 @@
       EntityManager em=createEntityManager();
       EntityManagerHolder emHolder=new EntityManagerHolder(em);
       TransactionSynchronizationManager.bindResource(getEntityManagerFactory(),emHolder);
-      asyncManager.registerCallableInterceptor(participateAttributeName,new EntityManagerBindingCallableInterceptor(emHolder));
+      AsyncRequestInterceptor interceptor=new AsyncRequestInterceptor(getEntityManagerFactory(),emHolder);
+      asyncManager.registerCallableInterceptor(participateAttributeName,interceptor);
+      asyncManager.registerDeferredResultInterceptor(participateAttributeName,interceptor);
     }
  catch (    PersistenceException ex) {
       throw new DataAccessResourceFailureException("Could not create JPA EntityManager",ex);

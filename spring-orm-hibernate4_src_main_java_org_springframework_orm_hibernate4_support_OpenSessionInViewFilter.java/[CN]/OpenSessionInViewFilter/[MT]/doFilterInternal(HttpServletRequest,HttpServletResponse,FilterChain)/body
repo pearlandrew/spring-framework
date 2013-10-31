@@ -13,7 +13,9 @@
       Session session=openSession(sessionFactory);
       SessionHolder sessionHolder=new SessionHolder(session);
       TransactionSynchronizationManager.bindResource(sessionFactory,sessionHolder);
-      asyncManager.registerCallableInterceptor(key,new SessionBindingCallableInterceptor(sessionFactory,sessionHolder));
+      AsyncRequestInterceptor interceptor=new AsyncRequestInterceptor(sessionFactory,sessionHolder);
+      asyncManager.registerCallableInterceptor(key,interceptor);
+      asyncManager.registerDeferredResultInterceptor(key,interceptor);
     }
   }
   try {

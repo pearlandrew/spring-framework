@@ -11,8 +11,6 @@
   wac.getDefaultListableBeanFactory().registerSingleton("myEntityManagerFactory",factory2);
   wac.refresh();
   sc.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,wac);
-  MockHttpServletRequest request=new MockHttpServletRequest(sc);
-  MockHttpServletResponse response=new MockHttpServletResponse();
   MockFilterConfig filterConfig=new MockFilterConfig(wac.getServletContext(),"filter");
   MockFilterConfig filterConfig2=new MockFilterConfig(wac.getServletContext(),"filter2");
   filterConfig2.addInitParameter("entityManagerFactoryBeanName","myEntityManagerFactory");
@@ -41,7 +39,7 @@
   FilterChain filterChain3=new PassThroughFilterChain(filter2,filterChain2);
   AsyncWebRequest asyncWebRequest=mock(AsyncWebRequest.class);
   given(asyncWebRequest.isAsyncStarted()).willReturn(true);
-  WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
+  WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(this.request);
   asyncManager.setTaskExecutor(new SyncTaskExecutor());
   asyncManager.setAsyncWebRequest(asyncWebRequest);
   asyncManager.startCallableProcessing(new Callable<String>(){
@@ -52,7 +50,7 @@
 );
   assertFalse(TransactionSynchronizationManager.hasResource(factory));
   assertFalse(TransactionSynchronizationManager.hasResource(factory2));
-  filter2.doFilter(request,response,filterChain3);
+  filter2.doFilter(this.request,this.response,filterChain3);
   assertFalse(TransactionSynchronizationManager.hasResource(factory));
   assertFalse(TransactionSynchronizationManager.hasResource(factory2));
   assertEquals(1,count.get());
@@ -66,12 +64,12 @@
   given(asyncWebRequest.isAsyncStarted()).willReturn(false);
   assertFalse(TransactionSynchronizationManager.hasResource(factory));
   assertFalse(TransactionSynchronizationManager.hasResource(factory2));
-  filter.doFilter(request,response,filterChain3);
+  filter.doFilter(this.request,this.response,filterChain3);
   assertFalse(TransactionSynchronizationManager.hasResource(factory));
   assertFalse(TransactionSynchronizationManager.hasResource(factory2));
   assertEquals(2,count.get());
   assertEquals(2,count2.get());
-  verify(manager).close();
+  verify(this.manager).close();
   verify(manager2).close();
   wac.close();
 }

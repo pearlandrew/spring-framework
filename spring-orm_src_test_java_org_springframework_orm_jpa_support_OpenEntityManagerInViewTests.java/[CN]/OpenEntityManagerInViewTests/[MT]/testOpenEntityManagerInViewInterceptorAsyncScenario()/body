@@ -1,13 +1,11 @@
 {
   OpenEntityManagerInViewInterceptor interceptor=new OpenEntityManagerInViewInterceptor();
   interceptor.setEntityManagerFactory(factory);
-  MockServletContext sc=new MockServletContext();
-  MockHttpServletRequest request=new MockHttpServletRequest(sc);
-  ServletWebRequest webRequest=new ServletWebRequest(request);
-  interceptor.preHandle(webRequest);
+  given(factory.createEntityManager()).willReturn(this.manager);
+  interceptor.preHandle(this.webRequest);
   assertTrue(TransactionSynchronizationManager.hasResource(factory));
-  AsyncWebRequest asyncWebRequest=mock(AsyncWebRequest.class);
-  WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(webRequest);
+  AsyncWebRequest asyncWebRequest=new StandardServletAsyncWebRequest(this.request,this.response);
+  WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(this.webRequest);
   asyncManager.setTaskExecutor(new SyncTaskExecutor());
   asyncManager.setAsyncWebRequest(asyncWebRequest);
   asyncManager.startCallableProcessing(new Callable<String>(){
@@ -16,13 +14,9 @@
     }
   }
 );
-  verify(asyncWebRequest,times(2)).addCompletionHandler(any(Runnable.class));
-  verify(asyncWebRequest).addTimeoutHandler(any(Runnable.class));
-  verify(asyncWebRequest,times(2)).addCompletionHandler(any(Runnable.class));
-  verify(asyncWebRequest).startAsync();
-  interceptor.afterConcurrentHandlingStarted(webRequest);
+  interceptor.afterConcurrentHandlingStarted(this.webRequest);
   assertFalse(TransactionSynchronizationManager.hasResource(factory));
-  interceptor.preHandle(webRequest);
+  interceptor.preHandle(this.webRequest);
   assertTrue(TransactionSynchronizationManager.hasResource(factory));
   asyncManager.clearConcurrentResult();
   interceptor.preHandle(new ServletWebRequest(request));
@@ -34,10 +28,10 @@
   interceptor.preHandle(new ServletWebRequest(request));
   interceptor.postHandle(new ServletWebRequest(request),null);
   interceptor.afterCompletion(new ServletWebRequest(request),null);
-  interceptor.postHandle(webRequest,null);
+  interceptor.postHandle(this.webRequest,null);
   assertTrue(TransactionSynchronizationManager.hasResource(factory));
-  given(manager.isOpen()).willReturn(true);
-  interceptor.afterCompletion(webRequest,null);
+  given(this.manager.isOpen()).willReturn(true);
+  interceptor.afterCompletion(this.webRequest,null);
   assertFalse(TransactionSynchronizationManager.hasResource(factory));
-  verify(manager).close();
+  verify(this.manager).close();
 }

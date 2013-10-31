@@ -18,7 +18,9 @@
       applyFlushMode(session,false);
       SessionHolder sessionHolder=new SessionHolder(session);
       TransactionSynchronizationManager.bindResource(getSessionFactory(),sessionHolder);
-      asyncManager.registerCallableInterceptor(participateAttributeName,new SessionBindingCallableInterceptor(sessionHolder));
+      AsyncRequestInterceptor asyncRequestInterceptor=new AsyncRequestInterceptor(getSessionFactory(),sessionHolder);
+      asyncManager.registerCallableInterceptor(participateAttributeName,asyncRequestInterceptor);
+      asyncManager.registerDeferredResultInterceptor(participateAttributeName,asyncRequestInterceptor);
     }
  else {
       SessionFactoryUtils.initDeferredClose(getSessionFactory());

@@ -7,7 +7,7 @@
   given(session.getSessionFactory()).willReturn(sf);
   interceptor.preHandle(this.webRequest);
   assertTrue(TransactionSynchronizationManager.hasResource(sf));
-  AsyncWebRequest asyncWebRequest=mock(AsyncWebRequest.class);
+  AsyncWebRequest asyncWebRequest=new StandardServletAsyncWebRequest(this.request,this.response);
   WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(this.request);
   asyncManager.setTaskExecutor(new SyncTaskExecutor());
   asyncManager.setAsyncWebRequest(asyncWebRequest);
@@ -23,10 +23,9 @@
   assertTrue("Session not bound to async thread",TransactionSynchronizationManager.hasResource(sf));
   interceptor.postHandle(this.webRequest,null);
   assertTrue(TransactionSynchronizationManager.hasResource(sf));
+  verify(session,never()).close();
   interceptor.afterCompletion(this.webRequest,null);
   assertFalse(TransactionSynchronizationManager.hasResource(sf));
   verify(session).setFlushMode(FlushMode.MANUAL);
-  verify(asyncWebRequest,times(2)).addCompletionHandler(any(Runnable.class));
-  verify(asyncWebRequest).addTimeoutHandler(any(Runnable.class));
-  verify(asyncWebRequest).startAsync();
+  verify(session).close();
 }

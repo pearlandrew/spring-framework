@@ -19,8 +19,7 @@
     }
   }
 ;
-  AsyncWebRequest asyncWebRequest=mock(AsyncWebRequest.class);
-  given(asyncWebRequest.isAsyncStarted()).willReturn(true);
+  AsyncWebRequest asyncWebRequest=new StandardServletAsyncWebRequest(this.request,this.response);
   WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(this.request);
   asyncManager.setTaskExecutor(new SyncTaskExecutor());
   asyncManager.setAsyncWebRequest(asyncWebRequest);
@@ -34,13 +33,13 @@
   filter.doFilter(this.request,this.response,filterChain);
   assertFalse(TransactionSynchronizationManager.hasResource(sf));
   assertEquals(1,count.get());
+  verify(session,never()).close();
+  this.request.setAsyncStarted(false);
   assertFalse(TransactionSynchronizationManager.hasResource(sf));
   filter.doFilter(this.request,this.response,filterChain);
   assertFalse(TransactionSynchronizationManager.hasResource(sf));
   assertEquals(2,count.get());
   verify(session).setFlushMode(FlushMode.MANUAL);
-  verify(asyncWebRequest,times(2)).addCompletionHandler(any(Runnable.class));
-  verify(asyncWebRequest).addTimeoutHandler(any(Runnable.class));
-  verify(asyncWebRequest).startAsync();
+  verify(session).close();
   wac.close();
 }
