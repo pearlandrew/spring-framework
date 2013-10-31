@@ -1,6 +1,10 @@
 {
-  StringBuffer url=new StringBuffer(this.scheme);
-  url.append("://").append(this.serverName).append(':').append(this.serverPort);
-  url.append(getRequestURI());
+  StringBuffer url=new StringBuffer(this.scheme).append("://").append(this.serverName);
+  if (this.serverPort > 0 && (("http".equalsIgnoreCase(scheme) && this.serverPort != 80) || ("https".equalsIgnoreCase(scheme) && this.serverPort != 443))) {
+    url.append(':').append(this.serverPort);
+  }
+  if (StringUtils.hasText(getRequestURI())) {
+    url.append(getRequestURI());
+  }
   return url;
 }
