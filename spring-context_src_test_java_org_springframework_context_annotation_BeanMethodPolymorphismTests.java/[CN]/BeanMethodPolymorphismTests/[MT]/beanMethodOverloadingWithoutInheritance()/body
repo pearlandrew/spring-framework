@@ -1,13 +1,7 @@
 {
-@SuppressWarnings({"hiding"}) @Configuration class Config {
-    @Bean String aString(){
-      return "na";
-    }
-    @Bean String aString(    Integer dependency){
-      return "na";
-    }
-  }
-  this.thrown.expect(BeanDefinitionParsingException.class);
-  this.thrown.expectMessage("overloaded @Bean methods named 'aString'");
-  new AnnotationConfigApplicationContext(Config.class);
+  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+  ctx.register(ConfigWithOverloading.class);
+  ctx.setAllowBeanDefinitionOverriding(false);
+  ctx.refresh();
+  assertThat(ctx.getBean(String.class),equalTo("regular"));
 }
