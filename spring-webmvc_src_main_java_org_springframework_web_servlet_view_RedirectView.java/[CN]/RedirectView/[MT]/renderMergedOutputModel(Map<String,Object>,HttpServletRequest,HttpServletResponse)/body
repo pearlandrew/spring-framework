@@ -6,8 +6,11 @@
     UriComponents uriComponents=UriComponentsBuilder.fromUriString(targetUrl).build();
     flashMap.setTargetRequestPath(uriComponents.getPath());
     flashMap.addTargetRequestParams(uriComponents.getQueryParams());
+    FlashMapManager flashMapManager=RequestContextUtils.getFlashMapManager(request);
+    if (flashMapManager == null) {
+      throw new IllegalStateException("FlashMapManager not found despite output FlashMap having been set");
+    }
+    flashMapManager.saveOutputFlashMap(flashMap,request,response);
   }
-  FlashMapManager flashMapManager=RequestContextUtils.getFlashMapManager(request);
-  flashMapManager.saveOutputFlashMap(flashMap,request,response);
   sendRedirect(request,response,targetUrl,this.http10Compatible);
 }
