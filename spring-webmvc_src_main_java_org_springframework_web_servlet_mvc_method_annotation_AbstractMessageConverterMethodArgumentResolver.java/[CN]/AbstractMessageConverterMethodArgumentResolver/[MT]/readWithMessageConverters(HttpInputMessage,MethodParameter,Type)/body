@@ -1,5 +1,11 @@
 {
-  MediaType contentType=inputMessage.getHeaders().getContentType();
+  MediaType contentType;
+  try {
+    contentType=inputMessage.getHeaders().getContentType();
+  }
+ catch (  InvalidMediaTypeException ex) {
+    throw new HttpMediaTypeNotSupportedException(ex.getMessage());
+  }
   if (contentType == null) {
     contentType=MediaType.APPLICATION_OCTET_STREAM;
   }
