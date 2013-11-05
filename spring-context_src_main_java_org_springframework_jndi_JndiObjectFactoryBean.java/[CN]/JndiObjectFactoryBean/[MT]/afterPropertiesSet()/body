@@ -8,7 +8,13 @@
   }
  else {
     if (this.defaultObject != null && getExpectedType() != null && !getExpectedType().isInstance(this.defaultObject)) {
-      throw new IllegalArgumentException("Default object [" + this.defaultObject + "] of type ["+ this.defaultObject.getClass().getName()+ "] is not of expected type ["+ getExpectedType().getName()+ "]");
+      TypeConverter converter=(this.beanFactory != null ? this.beanFactory.getTypeConverter() : new SimpleTypeConverter());
+      try {
+        this.defaultObject=converter.convertIfNecessary(this.defaultObject,getExpectedType());
+      }
+ catch (      TypeMismatchException ex) {
+        throw new IllegalArgumentException("Default object [" + this.defaultObject + "] of type ["+ this.defaultObject.getClass().getName()+ "] is not of expected type ["+ getExpectedType().getName()+ "] and cannot be converted either",ex);
+      }
     }
     this.jndiObject=lookupWithFallback();
   }
