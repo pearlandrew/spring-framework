@@ -1,7 +1,7 @@
 {
   SubscribableChannel channel=this.cxtSimpleBroker.getBean("brokerChannel",SubscribableChannel.class);
   UserDestinationMessageHandler messageHandler=this.cxtSimpleBroker.getBean(UserDestinationMessageHandler.class);
-  this.cxtSimpleBroker.getBean(MutableUserQueueSuffixResolver.class).addQueueSuffix("joe","s1","s1");
+  this.cxtSimpleBroker.getBean(UserSessionRegistry.class).registerSessionId("joe","s1");
   StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.SEND);
   headers.setDestination("/user/joe/foo");
   Message<?> message=MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
@@ -12,5 +12,5 @@
   message=captor.getValue();
   headers=StompHeaderAccessor.wrap(message);
   assertEquals(SimpMessageType.MESSAGE,headers.getMessageType());
-  assertEquals("/foos1",headers.getDestination());
+  assertEquals("/foo-users1",headers.getDestination());
 }

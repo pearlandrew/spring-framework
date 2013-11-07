@@ -1,31 +1,18 @@
 {
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
-  SimpMessageType messageType=headers.getMessageType();
-  String destination=headers.getDestination();
-  if (!SimpMessageType.MESSAGE.equals(messageType)) {
-    return;
-  }
-  if (!checkDestination(destination)) {
-    return;
-  }
   if (logger.isTraceEnabled()) {
-    logger.trace("Processing message to destination " + destination);
+    logger.trace("Handling message " + message);
   }
-  UserDestinationParser destinationParser=new UserDestinationParser(destination);
-  String user=destinationParser.getUser();
-  if (user == null) {
-    if (logger.isErrorEnabled()) {
-      logger.error("Ignoring message, expected destination pattern \"" + this.destinationPrefix + "{userId}/**\": "+ destination);
-    }
+  Set<String> destinations=this.userDestinationResolver.resolveDestination(message);
+  if (CollectionUtils.isEmpty(destinations)) {
     return;
   }
-  for (  String sessionId : this.userQueueSuffixResolver.getUserQueueSuffixes(user)) {
-    String targetDestination=destinationParser.getTargetDestination(sessionId);
+  for (  String targetDestination : destinations) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Sending message to resolved user destination: " + targetDestination);
+    }
+    SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
     headers.setDestination(targetDestination);
     message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
-    if (logger.isTraceEnabled()) {
-      logger.trace("Sending message to resolved target destination " + targetDestination);
-    }
     this.messagingTemplate.send(targetDestination,message);
   }
 }
