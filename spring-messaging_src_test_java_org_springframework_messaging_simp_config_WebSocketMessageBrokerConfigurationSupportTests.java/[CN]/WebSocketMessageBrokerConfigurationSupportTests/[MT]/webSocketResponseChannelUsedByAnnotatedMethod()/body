@@ -1,16 +1,13 @@
 {
-  SubscribableChannel channel=this.cxtSimpleBroker.getBean("webSocketResponseChannel",SubscribableChannel.class);
+  TestChannel channel=this.cxtSimpleBroker.getBean("webSocketResponseChannel",TestChannel.class);
   SimpAnnotationMethodMessageHandler messageHandler=this.cxtSimpleBroker.getBean(SimpAnnotationMethodMessageHandler.class);
   StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
   headers.setSessionId("sess1");
   headers.setSubscriptionId("subs1");
   headers.setDestination("/foo");
   Message<?> message=MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
-  when(channel.send(any(Message.class))).thenReturn(true);
   messageHandler.handleMessage(message);
-  ArgumentCaptor<Message> captor=ArgumentCaptor.forClass(Message.class);
-  verify(channel).send(captor.capture());
-  message=captor.getValue();
+  message=channel.messages.get(0);
   headers=StompHeaderAccessor.wrap(message);
   assertEquals(SimpMessageType.MESSAGE,headers.getMessageType());
   assertEquals("/foo",headers.getDestination());
