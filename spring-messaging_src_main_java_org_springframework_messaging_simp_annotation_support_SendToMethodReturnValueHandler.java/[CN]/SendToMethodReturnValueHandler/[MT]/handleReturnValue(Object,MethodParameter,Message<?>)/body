@@ -11,17 +11,17 @@
       throw new MissingSessionUserException(inputMessage);
     }
     String user=inputHeaders.getUser().getName();
-    for (    String destination : getDestinations(sendToUser,inputHeaders.getDestination())) {
+    String[] destinations=getTargetDestinations(sendToUser,inputHeaders,this.defaultUserDestinationPrefix);
+    for (    String destination : destinations) {
       this.messagingTemplate.convertAndSendToUser(user,destination,returnValue,postProcessor);
     }
     return;
   }
-  SendTo sendTo=returnType.getMethodAnnotation(SendTo.class);
-  if (sendTo != null) {
-    for (    String destination : getDestinations(sendTo,inputHeaders.getDestination())) {
+ else {
+    SendTo sendTo=returnType.getMethodAnnotation(SendTo.class);
+    String[] destinations=getTargetDestinations(sendTo,inputHeaders,this.defaultDestinationPrefix);
+    for (    String destination : getTargetDestinations(sendTo,inputHeaders,this.defaultDestinationPrefix)) {
       this.messagingTemplate.convertAndSend(destination,returnValue,postProcessor);
     }
-    return;
   }
-  this.messagingTemplate.convertAndSend(inputHeaders.getDestination(),returnValue,postProcessor);
 }
