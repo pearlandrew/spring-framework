@@ -1,5 +1,12 @@
 {
-  for (  Entry<String,List<String>> entry : headers.toStompHeaderMap().entrySet()) {
+  Map<String,List<String>> stompHeaders=headers.toStompHeaderMap();
+  if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+    logger.trace("Encoded heartbeat");
+  }
+ else   if (logger.isDebugEnabled()) {
+    logger.debug("Encoded STOMP command=" + headers.getCommand() + " headers="+ stompHeaders);
+  }
+  for (  Entry<String,List<String>> entry : stompHeaders.entrySet()) {
     byte[] key=getUtf8BytesEscapingIfNecessary(entry.getKey(),headers);
     for (    String value : entry.getValue()) {
       output.write(key);
@@ -8,7 +15,7 @@
       output.write(LF);
     }
   }
-  if (headers.getCommand() == StompCommand.SEND || headers.getCommand() == StompCommand.MESSAGE || headers.getCommand() == StompCommand.ERROR) {
+  if ((headers.getCommand() == StompCommand.SEND) || (headers.getCommand() == StompCommand.MESSAGE) || (headers.getCommand() == StompCommand.ERROR)) {
     output.write("content-length:".getBytes(UTF8_CHARSET));
     output.write(Integer.toString(message.getPayload().length).getBytes(UTF8_CHARSET));
     output.write(LF);

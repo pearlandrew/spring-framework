@@ -1,8 +1,11 @@
 {
-  if (logger.isTraceEnabled()) {
-    logger.trace("Reading message for sessionId=" + this.sessionId + ", "+ message);
-  }
   StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+  if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+    logger.trace("Received broker heartbeat");
+  }
+ else   if (logger.isDebugEnabled()) {
+    logger.debug("Received broker message in session=" + this.sessionId);
+  }
   if (StompCommand.CONNECTED == headers.getCommand()) {
     afterStompConnected(headers);
   }

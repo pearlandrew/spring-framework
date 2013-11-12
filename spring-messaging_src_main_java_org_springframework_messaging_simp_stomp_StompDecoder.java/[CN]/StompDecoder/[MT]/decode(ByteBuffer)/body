@@ -10,12 +10,15 @@
       throw new StompConversionException(stompCommand + " isn't allowed to have a body but has payload length=" + payload.length+ ", headers="+ headers);
     }
     decodedMessage=MessageBuilder.withPayload(payload).setHeaders(StompHeaderAccessor.create(stompCommand,headers)).build();
+    if (logger.isDebugEnabled()) {
+      logger.debug("Decoded " + decodedMessage);
+    }
   }
  else {
     decodedMessage=MessageBuilder.withPayload(HEARTBEAT_PAYLOAD).setHeaders(StompHeaderAccessor.create(SimpMessageType.HEARTBEAT)).build();
-  }
-  if (logger.isTraceEnabled()) {
-    logger.trace("Decoded " + decodedMessage);
+    if (logger.isTraceEnabled()) {
+      logger.trace("Decoded heartbeat");
+    }
   }
   return decodedMessage;
 }

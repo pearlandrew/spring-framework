@@ -1,7 +1,7 @@
 {
   if (!this.isStompConnected) {
     if (logger.isWarnEnabled()) {
-      logger.warn("Connection to broker inactive or not ready, ignoring message=" + message);
+      logger.warn("Connection to broker inactive or not ready. Ignoring message");
     }
     return new ListenableFutureTask<Void>(new Callable<Void>(){
       @Override public Void call() throws Exception {
@@ -10,8 +10,14 @@
     }
 );
   }
-  if (logger.isTraceEnabled()) {
-    logger.trace("Forwarding message to broker: " + message);
+  if (logger.isDebugEnabled()) {
+    StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+    if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+      logger.trace("Forwarding heartbeat to broker");
+    }
+ else {
+      logger.debug("Forwarding message to broker");
+    }
   }
   @SuppressWarnings("unchecked") ListenableFuture<Void> future=this.tcpConnection.send((Message<byte[]>)message);
   future.addCallback(new ListenableFutureCallback<Void>(){

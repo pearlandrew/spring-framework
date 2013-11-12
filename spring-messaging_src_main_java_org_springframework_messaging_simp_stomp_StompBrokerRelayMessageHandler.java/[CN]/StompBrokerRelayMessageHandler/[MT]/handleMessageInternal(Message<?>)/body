@@ -11,13 +11,19 @@
     message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
   }
   if (sessionId == null) {
-    logger.error("No sessionId, ignoring message: " + message);
+    if (logger.isWarnEnabled()) {
+      logger.warn("No sessionId, ignoring message: " + message);
+    }
     return;
   }
   if ((command != null) && command.requiresDestination() && !checkDestinationPrefix(destination)) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Ignoring message to destination=" + destination);
+    }
     return;
   }
   if (SimpMessageType.CONNECT.equals(messageType)) {
+    logger.debug("Processing CONNECT in session=" + sessionId);
     if (getVirtualHost() != null) {
       headers.setHost(getVirtualHost());
     }
@@ -38,7 +44,7 @@
  else {
     StompConnectionHandler handler=this.connectionHandlers.get(sessionId);
     if (handler == null) {
-      logger.warn("Connection for sessionId=" + sessionId + " not found. Ignoring message: "+ message);
+      logger.warn("Connection for sessionId=" + sessionId + " not found. Ignoring message");
       return;
     }
     handler.forward(message);
