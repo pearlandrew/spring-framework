@@ -1,17 +1,26 @@
 {
   skipLeadingEol(buffer);
-  Message<byte[]> decodedMessage;
+  Message<byte[]> decodedMessage=null;
+  buffer.mark();
   String command=readCommand(buffer);
   if (command.length() > 0) {
     MultiValueMap<String,String> headers=readHeaders(buffer);
     byte[] payload=readPayload(buffer,headers);
-    StompCommand stompCommand=StompCommand.valueOf(command);
-    if ((payload.length > 0) && (!stompCommand.isBodyAllowed())) {
-      throw new StompConversionException(stompCommand + " isn't allowed to have a body but has payload length=" + payload.length+ ", headers="+ headers);
+    if (payload != null) {
+      StompCommand stompCommand=StompCommand.valueOf(command);
+      if ((payload.length > 0) && (!stompCommand.isBodyAllowed())) {
+        throw new StompConversionException(stompCommand + " isn't allowed to have a body but has payload length=" + payload.length+ ", headers="+ headers);
+      }
+      decodedMessage=MessageBuilder.withPayload(payload).setHeaders(StompHeaderAccessor.create(stompCommand,headers)).build();
+      if (logger.isDebugEnabled()) {
+        logger.debug("Decoded " + decodedMessage);
+      }
     }
-    decodedMessage=MessageBuilder.withPayload(payload).setHeaders(StompHeaderAccessor.create(stompCommand,headers)).build();
-    if (logger.isDebugEnabled()) {
-      logger.debug("Decoded " + decodedMessage);
+ else {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Received incomplete frame. Resetting buffer");
+      }
+      buffer.reset();
     }
   }
  else {

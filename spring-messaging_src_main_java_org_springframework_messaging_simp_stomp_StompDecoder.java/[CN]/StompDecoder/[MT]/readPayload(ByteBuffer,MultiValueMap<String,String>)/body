@@ -3,9 +3,14 @@
   if (contentLengthString != null) {
     int contentLength=Integer.valueOf(contentLengthString);
     byte[] payload=new byte[contentLength];
-    buffer.get(payload);
-    if (buffer.remaining() < 1 || buffer.get() != 0) {
-      throw new StompConversionException("Frame must be terminated with a null octect");
+    if (buffer.remaining() > contentLength) {
+      buffer.get(payload);
+      if (buffer.get() != 0) {
+        throw new StompConversionException("Frame must be terminated with a null octet");
+      }
+    }
+ else {
+      return null;
     }
     return payload;
   }
@@ -21,5 +26,5 @@
       }
     }
   }
-  throw new StompConversionException("Frame must be terminated with a null octect");
+  return null;
 }
