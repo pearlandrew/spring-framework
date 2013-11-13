@@ -2,17 +2,17 @@
   String contentLengthString=headers.getFirst("content-length");
   if (contentLengthString != null) {
     int contentLength=Integer.valueOf(contentLengthString);
-    byte[] payload=new byte[contentLength];
     if (buffer.remaining() > contentLength) {
+      byte[] payload=new byte[contentLength];
       buffer.get(payload);
       if (buffer.get() != 0) {
         throw new StompConversionException("Frame must be terminated with a null octet");
       }
+      return payload;
     }
  else {
       return null;
     }
-    return payload;
   }
  else {
     ByteArrayOutputStream payload=new ByteArrayOutputStream();
