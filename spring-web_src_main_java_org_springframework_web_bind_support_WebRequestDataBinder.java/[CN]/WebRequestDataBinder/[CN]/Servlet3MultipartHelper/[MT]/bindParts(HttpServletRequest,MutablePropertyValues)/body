@@ -1,7 +1,19 @@
 {
   try {
+    MultiValueMap<String,Part> map=new LinkedMultiValueMap<String,Part>();
     for (    Part part : request.getParts()) {
-      mpvs.add(part.getName(),part);
+      map.add(part.getName(),part);
+    }
+    for (    Map.Entry<String,List<Part>> entry : map.entrySet()) {
+      if (entry.getValue().size() == 1) {
+        Part part=entry.getValue().get(0);
+        if (this.bindEmptyMultipartFiles || part.getSize() > 0) {
+          mpvs.add(entry.getKey(),part);
+        }
+      }
+ else {
+        mpvs.add(entry.getKey(),entry.getValue());
+      }
     }
   }
  catch (  IOException ex) {
