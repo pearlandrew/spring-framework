@@ -25,10 +25,14 @@ synchronized (this.defaultRetriever) {
     if (!listenerBeans.isEmpty()) {
       BeanFactory beanFactory=getBeanFactory();
       for (      String listenerBeanName : listenerBeans) {
-        ApplicationListener listener=beanFactory.getBean(listenerBeanName,ApplicationListener.class);
-        if (!allListeners.contains(listener) && supportsEvent(listener,eventType,sourceType)) {
-          retriever.applicationListenerBeans.add(listenerBeanName);
-          allListeners.add(listener);
+        try {
+          ApplicationListener listener=beanFactory.getBean(listenerBeanName,ApplicationListener.class);
+          if (!allListeners.contains(listener) && supportsEvent(listener,eventType,sourceType)) {
+            retriever.applicationListenerBeans.add(listenerBeanName);
+            allListeners.add(listener);
+          }
+        }
+ catch (        NoSuchBeanDefinitionException ex) {
         }
       }
     }
