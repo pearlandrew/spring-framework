@@ -5,10 +5,8 @@
   AnnotationDescriptor<ContextConfiguration> descriptor=findAnnotationDescriptor(testClass,annotationType);
   Assert.notNull(descriptor,String.format("Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",annotationType.getName(),testClass.getName()));
   while (descriptor != null) {
-    Class<?> rootDeclaringClass=descriptor.getDeclaringClass();
-    Class<?> declaringClass=(descriptor.getStereotype() != null) ? descriptor.getStereotypeType() : rootDeclaringClass;
-    convertContextConfigToConfigAttributesAndAddToList(descriptor.getAnnotation(),declaringClass,attributesList);
-    descriptor=findAnnotationDescriptor(rootDeclaringClass.getSuperclass(),annotationType);
+    convertAnnotationAttributesToConfigAttributesAndAddToList(descriptor.getAnnotationAttributes(),descriptor.getDeclaringClass(),attributesList);
+    descriptor=findAnnotationDescriptor(descriptor.getRootDeclaringClass().getSuperclass(),annotationType);
   }
   return attributesList;
 }

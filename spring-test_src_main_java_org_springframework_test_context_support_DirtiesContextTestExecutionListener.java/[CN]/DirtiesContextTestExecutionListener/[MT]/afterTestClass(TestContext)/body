@@ -1,14 +1,14 @@
 {
   Class<?> testClass=testContext.getTestClass();
   Assert.notNull(testClass,"The test class of the supplied TestContext must not be null");
-  final Class<DirtiesContext> annotationType=DirtiesContext.class;
-  DirtiesContext dirtiesContextAnnotation=findAnnotation(testClass,annotationType);
-  boolean dirtiesContext=dirtiesContextAnnotation != null;
+  final String annotationType=DirtiesContext.class.getName();
+  AnnotationAttributes annAttrs=AnnotatedElementUtils.getAnnotationAttributes(testClass,annotationType);
+  boolean dirtiesContext=annAttrs != null;
   if (logger.isDebugEnabled()) {
-    logger.debug("After test class: context [" + testContext + "], dirtiesContext ["+ dirtiesContext+ "].");
+    logger.debug(String.format("After test class: context %s, dirtiesContext [%s].",testContext,dirtiesContext));
   }
   if (dirtiesContext) {
-    HierarchyMode hierarchyMode=dirtiesContextAnnotation.hierarchyMode();
+    HierarchyMode hierarchyMode=annAttrs.<HierarchyMode>getEnum("hierarchyMode");
     dirtyContext(testContext,hierarchyMode);
   }
 }

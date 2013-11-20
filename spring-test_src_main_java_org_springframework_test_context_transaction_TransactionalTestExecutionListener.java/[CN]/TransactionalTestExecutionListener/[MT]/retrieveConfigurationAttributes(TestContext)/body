@@ -1,15 +1,15 @@
 {
   if (this.configurationAttributes == null) {
     Class<?> clazz=testContext.getTestClass();
-    TransactionConfiguration config=findAnnotation(clazz,TransactionConfiguration.class);
+    AnnotationAttributes annAttrs=AnnotatedElementUtils.getAnnotationAttributes(clazz,TransactionConfiguration.class.getName());
     if (logger.isDebugEnabled()) {
-      logger.debug("Retrieved @TransactionConfiguration [" + config + "] for test class ["+ clazz+ "]");
+      logger.debug(String.format("Retrieved @TransactionConfiguration attributes [%s] for test class [%s].",annAttrs,clazz));
     }
     String transactionManagerName;
     boolean defaultRollback;
-    if (config != null) {
-      transactionManagerName=config.transactionManager();
-      defaultRollback=config.defaultRollback();
+    if (annAttrs != null) {
+      transactionManagerName=annAttrs.getString("transactionManager");
+      defaultRollback=annAttrs.getBoolean("defaultRollback");
     }
  else {
       transactionManagerName=DEFAULT_TRANSACTION_MANAGER_NAME;
@@ -17,7 +17,7 @@
     }
     TransactionConfigurationAttributes configAttributes=new TransactionConfigurationAttributes(transactionManagerName,defaultRollback);
     if (logger.isDebugEnabled()) {
-      logger.debug("Retrieved TransactionConfigurationAttributes " + configAttributes + " for class ["+ clazz+ "]");
+      logger.debug(String.format("Retrieved TransactionConfigurationAttributes %s for class [%s].",configAttributes,clazz));
     }
     this.configurationAttributes=configAttributes;
   }

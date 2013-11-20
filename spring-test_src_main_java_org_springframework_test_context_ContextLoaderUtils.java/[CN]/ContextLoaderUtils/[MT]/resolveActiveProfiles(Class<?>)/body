@@ -7,16 +7,15 @@
   }
   final Set<String> activeProfiles=new HashSet<String>();
   while (descriptor != null) {
-    Class<?> rootDeclaringClass=descriptor.getDeclaringClass();
-    Class<?> declaringClass=(descriptor.getStereotype() != null) ? descriptor.getStereotypeType() : rootDeclaringClass;
-    ActiveProfiles annotation=descriptor.getAnnotation();
+    Class<?> declaringClass=descriptor.getDeclaringClass();
+    AnnotationAttributes annAttrs=descriptor.getAnnotationAttributes();
     if (logger.isTraceEnabled()) {
-      logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].",annotation,declaringClass.getName()));
+      logger.trace(String.format("Retrieved @ActiveProfiles attributes [%s] for declaring class [%s].",annAttrs,declaringClass.getName()));
     }
-    validateActiveProfilesConfiguration(declaringClass,annotation);
-    String[] profiles=annotation.profiles();
-    String[] valueProfiles=annotation.value();
-    Class<? extends ActiveProfilesResolver> resolverClass=annotation.resolver();
+    validateActiveProfilesConfiguration(declaringClass,annAttrs);
+    String[] profiles=annAttrs.getStringArray("profiles");
+    String[] valueProfiles=annAttrs.getStringArray("value");
+    Class<? extends ActiveProfilesResolver> resolverClass=annAttrs.getClass("resolver");
     boolean resolverDeclared=!ActiveProfilesResolver.class.equals(resolverClass);
     boolean valueDeclared=!ObjectUtils.isEmpty(valueProfiles);
     if (resolverDeclared) {
@@ -44,7 +43,7 @@
         activeProfiles.add(profile.trim());
       }
     }
-    descriptor=annotation.inheritProfiles() ? findAnnotationDescriptor(rootDeclaringClass.getSuperclass(),annotationType) : null;
+    descriptor=annAttrs.getBoolean("inheritProfiles") ? findAnnotationDescriptor(descriptor.getRootDeclaringClass().getSuperclass(),annotationType) : null;
   }
   return StringUtils.toStringArray(activeProfiles);
 }
