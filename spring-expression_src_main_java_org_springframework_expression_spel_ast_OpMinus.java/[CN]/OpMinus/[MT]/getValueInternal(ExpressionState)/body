@@ -5,6 +5,10 @@
     Object operand=leftOp.getValueInternal(state).getValue();
     if (operand instanceof Number) {
       Number n=(Number)operand;
+      if (operand instanceof BigDecimal) {
+        BigDecimal bdn=(BigDecimal)n;
+        return new TypedValue(bdn.negate());
+      }
       if (operand instanceof Double) {
         return new TypedValue(0 - n.doubleValue());
       }
@@ -21,18 +25,23 @@
   Object left=leftOp.getValueInternal(state).getValue();
   Object right=rightOp.getValueInternal(state).getValue();
   if (left instanceof Number && right instanceof Number) {
-    Number op1=(Number)left;
-    Number op2=(Number)right;
-    if (op1 instanceof Double || op2 instanceof Double) {
-      return new TypedValue(op1.doubleValue() - op2.doubleValue());
+    Number leftNumber=(Number)left;
+    Number rightNumber=(Number)right;
+    if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
+      BigDecimal leftBigDecimal=NumberUtils.convertNumberToTargetClass(leftNumber,BigDecimal.class);
+      BigDecimal rightBigDecimal=NumberUtils.convertNumberToTargetClass(rightNumber,BigDecimal.class);
+      return new TypedValue(leftBigDecimal.subtract(rightBigDecimal));
     }
-    if (op1 instanceof Float || op2 instanceof Float) {
-      return new TypedValue(op1.floatValue() - op2.floatValue());
+    if (leftNumber instanceof Double || rightNumber instanceof Double) {
+      return new TypedValue(leftNumber.doubleValue() - rightNumber.doubleValue());
     }
-    if (op1 instanceof Long || op2 instanceof Long) {
-      return new TypedValue(op1.longValue() - op2.longValue());
+    if (leftNumber instanceof Float || rightNumber instanceof Float) {
+      return new TypedValue(leftNumber.floatValue() - rightNumber.floatValue());
     }
-    return new TypedValue(op1.intValue() - op2.intValue());
+    if (leftNumber instanceof Long || rightNumber instanceof Long) {
+      return new TypedValue(leftNumber.longValue() - rightNumber.longValue());
+    }
+    return new TypedValue(leftNumber.intValue() - rightNumber.intValue());
   }
  else   if (left instanceof String && right instanceof Integer && ((String)left).length() == 1) {
     String theString=(String)left;

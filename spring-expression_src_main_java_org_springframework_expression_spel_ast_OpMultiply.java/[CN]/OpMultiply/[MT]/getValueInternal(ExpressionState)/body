@@ -1,9 +1,14 @@
 {
-  Object operandOne=getLeftOperand().getValueInternal(state).getValue();
-  Object operandTwo=getRightOperand().getValueInternal(state).getValue();
-  if (operandOne instanceof Number && operandTwo instanceof Number) {
-    Number leftNumber=(Number)operandOne;
-    Number rightNumber=(Number)operandTwo;
+  Object leftOperand=getLeftOperand().getValueInternal(state).getValue();
+  Object rightOperand=getRightOperand().getValueInternal(state).getValue();
+  if (leftOperand instanceof Number && rightOperand instanceof Number) {
+    Number leftNumber=(Number)leftOperand;
+    Number rightNumber=(Number)rightOperand;
+    if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
+      BigDecimal leftBigDecimal=NumberUtils.convertNumberToTargetClass(leftNumber,BigDecimal.class);
+      BigDecimal rightBigDecimal=NumberUtils.convertNumberToTargetClass(rightNumber,BigDecimal.class);
+      return new TypedValue(leftBigDecimal.multiply(rightBigDecimal));
+    }
     if (leftNumber instanceof Double || rightNumber instanceof Double) {
       return new TypedValue(leftNumber.doubleValue() * rightNumber.doubleValue());
     }
@@ -15,13 +20,13 @@
     }
     return new TypedValue(leftNumber.intValue() * rightNumber.intValue());
   }
- else   if (operandOne instanceof String && operandTwo instanceof Integer) {
-    int repeats=(Integer)operandTwo;
+ else   if (leftOperand instanceof String && rightOperand instanceof Integer) {
+    int repeats=(Integer)rightOperand;
     StringBuilder result=new StringBuilder();
     for (int i=0; i < repeats; i++) {
-      result.append(operandOne);
+      result.append(leftOperand);
     }
     return new TypedValue(result.toString());
   }
-  return state.operate(Operation.MULTIPLY,operandOne,operandTwo);
+  return state.operate(Operation.MULTIPLY,leftOperand,rightOperand);
 }
