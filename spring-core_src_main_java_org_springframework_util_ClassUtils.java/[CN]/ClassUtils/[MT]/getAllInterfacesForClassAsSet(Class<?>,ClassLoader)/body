@@ -1,0 +1,15 @@
+{
+  Assert.notNull(clazz,"Class must not be null");
+  if (clazz.isInterface() && isVisible(clazz,classLoader)) {
+    return Collections.<Class<?>>singleton(clazz);
+  }
+  Set<Class<?>> interfaces=new LinkedHashSet<Class<?>>();
+  while (clazz != null) {
+    Class<?>[] ifcs=clazz.getInterfaces();
+    for (    Class<?> ifc : ifcs) {
+      interfaces.addAll(getAllInterfacesForClassAsSet(ifc,classLoader));
+    }
+    clazz=clazz.getSuperclass();
+  }
+  return interfaces;
+}

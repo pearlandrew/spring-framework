@@ -9,14 +9,14 @@
   }
  else {
     retriever=new ListenerRetriever(true);
-    LinkedList<ApplicationListener> allListeners=new LinkedList<ApplicationListener>();
-    Set<ApplicationListener> listeners;
+    LinkedList<ApplicationListener<?>> allListeners=new LinkedList<ApplicationListener<?>>();
+    Set<ApplicationListener<?>> listeners;
     Set<String> listenerBeans;
 synchronized (this.defaultRetriever) {
-      listeners=new LinkedHashSet<ApplicationListener>(this.defaultRetriever.applicationListeners);
+      listeners=new LinkedHashSet<ApplicationListener<?>>(this.defaultRetriever.applicationListeners);
       listenerBeans=new LinkedHashSet<String>(this.defaultRetriever.applicationListenerBeans);
     }
-    for (    ApplicationListener listener : listeners) {
+    for (    ApplicationListener<?> listener : listeners) {
       if (supportsEvent(listener,eventType,sourceType)) {
         retriever.applicationListeners.add(listener);
         allListeners.add(listener);
@@ -26,7 +26,7 @@ synchronized (this.defaultRetriever) {
       BeanFactory beanFactory=getBeanFactory();
       for (      String listenerBeanName : listenerBeans) {
         try {
-          ApplicationListener listener=beanFactory.getBean(listenerBeanName,ApplicationListener.class);
+          ApplicationListener<?> listener=beanFactory.getBean(listenerBeanName,ApplicationListener.class);
           if (!allListeners.contains(listener) && supportsEvent(listener,eventType,sourceType)) {
             retriever.applicationListenerBeans.add(listenerBeanName);
             allListeners.add(listener);

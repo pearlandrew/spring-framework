@@ -15,7 +15,7 @@
     Class<?> requestType=requestBody.getClass();
     HttpHeaders requestHeaders=requestEntity.getHeaders();
     MediaType requestContentType=requestHeaders.getContentType();
-    for (    HttpMessageConverter messageConverter : getMessageConverters()) {
+    for (    HttpMessageConverter<?> messageConverter : getMessageConverters()) {
       if (messageConverter.canWrite(requestType,requestContentType)) {
         if (!requestHeaders.isEmpty()) {
           httpRequest.getHeaders().putAll(requestHeaders);
@@ -28,7 +28,7 @@
             logger.debug("Writing [" + requestBody + "] using ["+ messageConverter+ "]");
           }
         }
-        messageConverter.write(requestBody,requestContentType,httpRequest);
+        ((HttpMessageConverter<Object>)messageConverter).write(requestBody,requestContentType,httpRequest);
         return;
       }
     }

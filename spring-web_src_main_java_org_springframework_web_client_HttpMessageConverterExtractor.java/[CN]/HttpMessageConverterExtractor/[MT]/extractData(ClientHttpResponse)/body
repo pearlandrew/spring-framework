@@ -3,9 +3,9 @@
     return null;
   }
   MediaType contentType=getContentType(response);
-  for (  HttpMessageConverter messageConverter : this.messageConverters) {
+  for (  HttpMessageConverter<?> messageConverter : this.messageConverters) {
     if (messageConverter instanceof GenericHttpMessageConverter) {
-      GenericHttpMessageConverter genericMessageConverter=(GenericHttpMessageConverter)messageConverter;
+      GenericHttpMessageConverter<?> genericMessageConverter=(GenericHttpMessageConverter<?>)messageConverter;
       if (genericMessageConverter.canRead(this.responseType,null,contentType)) {
         if (logger.isDebugEnabled()) {
           logger.debug("Reading [" + this.responseType + "] as \""+ contentType+ "\" using ["+ messageConverter+ "]");
@@ -18,7 +18,7 @@
         if (logger.isDebugEnabled()) {
           logger.debug("Reading [" + this.responseClass.getName() + "] as \""+ contentType+ "\" using ["+ messageConverter+ "]");
         }
-        return (T)messageConverter.read(this.responseClass,response);
+        return (T)messageConverter.read((Class)this.responseClass,response);
       }
     }
   }

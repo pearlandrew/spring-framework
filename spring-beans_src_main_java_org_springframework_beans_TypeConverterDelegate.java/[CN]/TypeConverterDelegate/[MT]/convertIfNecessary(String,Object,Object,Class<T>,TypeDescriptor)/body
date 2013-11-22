@@ -40,11 +40,11 @@
         return (T)convertToTypedArray(convertedValue,propertyName,requiredType.getComponentType());
       }
  else       if (convertedValue instanceof Collection) {
-        convertedValue=convertToTypedCollection((Collection)convertedValue,propertyName,requiredType,typeDescriptor);
+        convertedValue=convertToTypedCollection((Collection<?>)convertedValue,propertyName,requiredType,typeDescriptor);
         standardConversion=true;
       }
  else       if (convertedValue instanceof Map) {
-        convertedValue=convertToTypedMap((Map)convertedValue,propertyName,requiredType,typeDescriptor);
+        convertedValue=convertToTypedMap((Map<?,?>)convertedValue,propertyName,requiredType,typeDescriptor);
         standardConversion=true;
       }
       if (convertedValue.getClass().isArray() && Array.getLength(convertedValue) == 1) {
@@ -57,8 +57,8 @@
  else       if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
         if (firstAttemptEx == null && !requiredType.isInterface() && !requiredType.isEnum()) {
           try {
-            Constructor strCtor=requiredType.getConstructor(String.class);
-            return (T)BeanUtils.instantiateClass(strCtor,convertedValue);
+            Constructor<T> strCtor=requiredType.getConstructor(String.class);
+            return BeanUtils.instantiateClass(strCtor,convertedValue);
           }
  catch (          NoSuchMethodException ex) {
             if (logger.isTraceEnabled()) {
