@@ -1,0 +1,10 @@
+{
+  TestChannel channel=this.config.getBean("clientInboundChannel",TestChannel.class);
+  SubProtocolWebSocketHandler webSocketHandler=this.config.getBean(SubProtocolWebSocketHandler.class);
+  TextMessage textMessage=StompTextMessageBuilder.create(StompCommand.SEND).headers("destination:/foo").build();
+  webSocketHandler.handleMessage(new TestWebSocketSession(),textMessage);
+  Message<?> message=channel.messages.get(0);
+  StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+  assertEquals(SimpMessageType.MESSAGE,headers.getMessageType());
+  assertEquals("/foo",headers.getDestination());
+}

@@ -1,0 +1,12 @@
+{
+  DefaultHandshakeHandler handshakeHandler=new DefaultHandshakeHandler();
+  WebMvcStompWebSocketEndpointRegistration registration=new WebMvcStompWebSocketEndpointRegistration(new String[]{"/foo"},this.wsHandler,Collections.<String>emptySet(),this.scheduler);
+  registration.setHandshakeHandler(handshakeHandler);
+  MultiValueMap<HttpRequestHandler,String> mappings=registration.getMappings();
+  assertEquals(1,mappings.size());
+  Map.Entry<HttpRequestHandler,List<String>> entry=mappings.entrySet().iterator().next();
+  assertEquals(Arrays.asList("/foo"),entry.getValue());
+  WebSocketHttpRequestHandler requestHandler=(WebSocketHttpRequestHandler)entry.getKey();
+  assertNotNull(requestHandler.getWebSocketHandler());
+  assertSame(handshakeHandler,requestHandler.getHandshakeHandler());
+}
