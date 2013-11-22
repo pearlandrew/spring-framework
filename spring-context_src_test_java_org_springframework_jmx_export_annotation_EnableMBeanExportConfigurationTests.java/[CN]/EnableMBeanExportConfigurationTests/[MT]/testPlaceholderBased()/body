@@ -1,0 +1,18 @@
+{
+  MockEnvironment env=new MockEnvironment();
+  env.setProperty("serverName","server");
+  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
+  ctx.setEnvironment(env);
+  ctx.register(PlaceholderBasedConfiguration.class);
+  ctx.refresh();
+  try {
+    MBeanServer server=(MBeanServer)ctx.getBean("server");
+    ObjectName oname=ObjectNameManager.getInstance("bean:name=testBean4");
+    assertNotNull(server.getObjectInstance(oname));
+    String name=(String)server.getAttribute(oname,"Name");
+    assertEquals("Invalid name returned","TEST",name);
+  }
+  finally {
+    ctx.close();
+  }
+}
