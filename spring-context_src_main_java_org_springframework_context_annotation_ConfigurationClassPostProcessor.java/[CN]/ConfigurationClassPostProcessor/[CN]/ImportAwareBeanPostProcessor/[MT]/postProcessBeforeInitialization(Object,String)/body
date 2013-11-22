@@ -1,17 +1,9 @@
 {
   if (bean instanceof ImportAware) {
     ImportRegistry importRegistry=this.beanFactory.getBean(IMPORT_REGISTRY_BEAN_NAME,ImportRegistry.class);
-    String importingClass=importRegistry.getImportingClassFor(bean.getClass().getSuperclass().getName());
+    AnnotationMetadata importingClass=importRegistry.getImportingClassFor(bean.getClass().getSuperclass().getName());
     if (importingClass != null) {
-      try {
-        AnnotationMetadata metadata=new SimpleMetadataReaderFactory().getMetadataReader(importingClass).getAnnotationMetadata();
-        ((ImportAware)bean).setImportMetadata(metadata);
-      }
- catch (      IOException ex) {
-        throw new IllegalStateException(ex);
-      }
-    }
- else {
+      ((ImportAware)bean).setImportMetadata(importingClass);
     }
   }
   return bean;
