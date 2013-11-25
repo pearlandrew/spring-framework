@@ -1,15 +1,14 @@
 {
-  this.handshakeHandler.setSupportedProtocols("stomp","mqtt");
   when(this.upgradeStrategy.getSupportedVersions()).thenReturn(new String[]{"13"});
-  WebSocketHttpHeaders headers=new WebSocketHttpHeaders(this.request.getHeaders());
   this.servletRequest.setMethod("GET");
+  WebSocketHttpHeaders headers=new WebSocketHttpHeaders(this.request.getHeaders());
   headers.setUpgrade("WebSocket");
   headers.setConnection("Upgrade");
   headers.setSecWebSocketVersion("13");
   headers.setSecWebSocketKey("82/ZS2YHjEnUN97HLL8tbw==");
-  headers.setSecWebSocketProtocol("STOMP");
-  WebSocketHandler handler=new TextWebSocketHandlerAdapter();
+  headers.setSecWebSocketProtocol("v11.stomp");
+  WebSocketHandler handler=new SubProtocolCapableHandler("v12.stomp","v11.stomp");
   Map<String,Object> attributes=Collections.<String,Object>emptyMap();
   this.handshakeHandler.doHandshake(this.request,this.response,handler,attributes);
-  verify(this.upgradeStrategy).upgrade(this.request,this.response,"STOMP",Collections.<WebSocketExtension>emptyList(),handler,attributes);
+  verify(this.upgradeStrategy).upgrade(this.request,this.response,"v11.stomp",Collections.<WebSocketExtension>emptyList(),handler,attributes);
 }

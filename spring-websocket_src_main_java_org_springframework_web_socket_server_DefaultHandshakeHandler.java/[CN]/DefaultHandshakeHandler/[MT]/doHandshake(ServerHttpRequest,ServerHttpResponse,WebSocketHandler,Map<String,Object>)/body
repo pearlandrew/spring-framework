@@ -36,7 +36,10 @@
  catch (  IOException ex) {
     throw new HandshakeFailureException("Response update failed during upgrade to WebSocket, uri=" + request.getURI(),ex);
   }
-  String subProtocol=selectProtocol(headers.getSecWebSocketProtocol());
+  String subProtocol=selectProtocol(headers.getSecWebSocketProtocol(),wsHandler);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Selected sub-protocol: '" + subProtocol + "'");
+  }
   List<WebSocketExtension> requested=headers.getSecWebSocketExtensions();
   List<WebSocketExtension> supported=this.requestUpgradeStrategy.getSupportedExtensions(request);
   List<WebSocketExtension> extensions=filterRequestedExtensions(request,requested,supported);
