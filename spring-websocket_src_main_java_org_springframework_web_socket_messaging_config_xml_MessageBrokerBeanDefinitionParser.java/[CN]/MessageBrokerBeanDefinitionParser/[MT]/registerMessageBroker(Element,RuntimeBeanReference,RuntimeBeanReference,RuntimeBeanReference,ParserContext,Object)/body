@@ -1,0 +1,49 @@
+{
+  Element simpleBrokerElem=DomUtils.getChildElementByTagName(messageBrokerElement,"simple-broker");
+  Element brokerRelayElem=DomUtils.getChildElementByTagName(messageBrokerElement,"stomp-broker-relay");
+  ConstructorArgumentValues cavs=new ConstructorArgumentValues();
+  cavs.addIndexedArgumentValue(0,clientInChannelDef);
+  cavs.addIndexedArgumentValue(1,clientOutChannelDef);
+  cavs.addIndexedArgumentValue(2,brokerChannelDef);
+  if (simpleBrokerElem != null) {
+    String prefix=simpleBrokerElem.getAttribute("prefix");
+    cavs.addIndexedArgumentValue(3,Arrays.asList(prefix.split(",")));
+    RootBeanDefinition brokerDef=new RootBeanDefinition(SimpleBrokerMessageHandler.class,cavs,null);
+    registerBeanDef(brokerDef,parserCxt,source);
+  }
+ else   if (brokerRelayElem != null) {
+    String prefix=brokerRelayElem.getAttribute("prefix");
+    cavs.addIndexedArgumentValue(3,Arrays.asList(prefix.split(",")));
+    MutablePropertyValues mpvs=new MutablePropertyValues();
+    String relayHost=brokerRelayElem.getAttribute("relay-host");
+    if (!relayHost.isEmpty()) {
+      mpvs.add("relayHost",relayHost);
+    }
+    String relayPort=brokerRelayElem.getAttribute("relay-port");
+    if (!relayPort.isEmpty()) {
+      mpvs.add("relayPort",Integer.valueOf(relayPort));
+    }
+    String systemLogin=brokerRelayElem.getAttribute("system-login");
+    if (!systemLogin.isEmpty()) {
+      mpvs.add("systemLogin",systemLogin);
+    }
+    String systemPasscode=brokerRelayElem.getAttribute("system-passcode");
+    if (!systemPasscode.isEmpty()) {
+      mpvs.add("systemPasscode",systemPasscode);
+    }
+    String systemHeartbeatSendInterval=brokerRelayElem.getAttribute("system-heartbeat-send-interval");
+    if (!systemHeartbeatSendInterval.isEmpty()) {
+      mpvs.add("systemHeartbeatSendInterval",Long.parseLong(systemHeartbeatSendInterval));
+    }
+    String systemHeartbeatReceiveInterval=brokerRelayElem.getAttribute("system-heartbeat-receive-interval");
+    if (!systemHeartbeatReceiveInterval.isEmpty()) {
+      mpvs.add("systemHeartbeatReceiveInterval",Long.parseLong(systemHeartbeatReceiveInterval));
+    }
+    String virtualHost=brokerRelayElem.getAttribute("virtual-host");
+    if (!virtualHost.isEmpty()) {
+      mpvs.add("virtualHost",virtualHost);
+    }
+    RootBeanDefinition messageBrokerDef=new RootBeanDefinition(StompBrokerRelayMessageHandler.class,cavs,mpvs);
+    registerBeanDef(messageBrokerDef,parserCxt,source);
+  }
+}

@@ -1,0 +1,27 @@
+{
+  Object source=parserCxt.extractSource(element);
+  CompositeComponentDefinition compDefinition=new CompositeComponentDefinition(element.getTagName(),source);
+  parserCxt.pushContainingComponent(compDefinition);
+  String orderAttribute=element.getAttribute("order");
+  int order=orderAttribute.isEmpty() ? DEFAULT_MAPPING_ORDER : Integer.valueOf(orderAttribute);
+  RootBeanDefinition handlerMappingDef=new RootBeanDefinition(SimpleUrlHandlerMapping.class);
+  handlerMappingDef.setSource(source);
+  handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  handlerMappingDef.getPropertyValues().add("order",order);
+  String handlerMappingName=parserCxt.getReaderContext().registerWithGeneratedName(handlerMappingDef);
+  RuntimeBeanReference handshakeHandler=WebSocketNamespaceUtils.registerHandshakeHandler(element,parserCxt,source);
+  Element interceptorsElement=DomUtils.getChildElementByTagName(element,"handshake-interceptors");
+  ManagedList<?> interceptors=WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement,parserCxt);
+  RuntimeBeanReference sockJsServiceRef=WebSocketNamespaceUtils.registerSockJsService(element,SOCK_JS_SCHEDULER_NAME,parserCxt,source);
+  HandlerMappingStrategy strategy=createHandlerMappingStrategy(sockJsServiceRef,handshakeHandler,interceptors);
+  List<Element> mappingElements=DomUtils.getChildElementsByTagName(element,"mapping");
+  ManagedMap<String,Object> urlMap=new ManagedMap<String,Object>();
+  urlMap.setSource(source);
+  for (  Element mappingElement : mappingElements) {
+    urlMap.putAll(strategy.createMappings(mappingElement,parserCxt));
+  }
+  handlerMappingDef.getPropertyValues().add("urlMap",urlMap);
+  parserCxt.registerComponent(new BeanComponentDefinition(handlerMappingDef,handlerMappingName));
+  parserCxt.popAndRegisterContainingComponent();
+  return null;
+}

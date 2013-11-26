@@ -1,0 +1,45 @@
+{
+  Object source=parserCxt.extractSource(element);
+  CompositeComponentDefinition compDefinition=new CompositeComponentDefinition(element.getTagName(),source);
+  parserCxt.pushContainingComponent(compDefinition);
+  String orderAttribute=element.getAttribute("order");
+  int order=orderAttribute.isEmpty() ? DEFAULT_MAPPING_ORDER : Integer.valueOf(orderAttribute);
+  ManagedMap<String,Object> urlMap=new ManagedMap<String,Object>();
+  urlMap.setSource(source);
+  RootBeanDefinition handlerMappingDef=new RootBeanDefinition(SimpleUrlHandlerMapping.class);
+  handlerMappingDef.getPropertyValues().add("order",order);
+  handlerMappingDef.getPropertyValues().add("urlMap",urlMap);
+  String channelName="clientInboundChannel";
+  Element channelElem=DomUtils.getChildElementByTagName(element,"client-inbound-channel");
+  RuntimeBeanReference clientInChannel=getMessageChannel(channelName,channelElem,parserCxt,source);
+  channelName="clientOutboundChannel";
+  channelElem=DomUtils.getChildElementByTagName(element,"client-outbound-channel");
+  RuntimeBeanReference clientOutChannel=getMessageChannel(channelName,channelElem,parserCxt,source);
+  RootBeanDefinition userSessionRegistryDef=new RootBeanDefinition(DefaultUserSessionRegistry.class);
+  String userSessionRegistryName=registerBeanDef(userSessionRegistryDef,parserCxt,source);
+  RuntimeBeanReference userSessionRegistry=new RuntimeBeanReference(userSessionRegistryName);
+  RuntimeBeanReference subProtocolWebSocketHandler=registerSubProtocolWebSocketHandler(clientInChannel,clientOutChannel,userSessionRegistry,parserCxt,source);
+  List<Element> stompEndpointElements=DomUtils.getChildElementsByTagName(element,"stomp-endpoint");
+  for (  Element stompEndpointElement : stompEndpointElements) {
+    RuntimeBeanReference requestHandler=registerHttpRequestHandler(stompEndpointElement,subProtocolWebSocketHandler,parserCxt,source);
+    List<String> paths=Arrays.asList(stompEndpointElement.getAttribute("path").split(","));
+    for (    String path : paths) {
+      if (DomUtils.getChildElementByTagName(stompEndpointElement,"sockjs") != null) {
+        path=path.endsWith("/") ? path + "**" : path + "/**";
+      }
+      urlMap.put(path,requestHandler);
+    }
+  }
+  registerBeanDef(handlerMappingDef,parserCxt,source);
+  channelName="brokerChannel";
+  channelElem=DomUtils.getChildElementByTagName(element,"broker-channel");
+  RuntimeBeanReference brokerChannel=getMessageChannel(channelName,channelElem,parserCxt,source);
+  registerMessageBroker(element,clientInChannel,clientOutChannel,brokerChannel,parserCxt,source);
+  RuntimeBeanReference messageConverter=registerBrokerMessageConverter(parserCxt,source);
+  RuntimeBeanReference messagingTemplate=registerBrokerMessagingTemplate(element,brokerChannel,messageConverter,parserCxt,source);
+  registerAnnotationMethodMessageHandler(element,clientInChannel,clientOutChannel,messageConverter,messagingTemplate,parserCxt,source);
+  RuntimeBeanReference userDestinationResolver=registerUserDestinationResolver(element,userSessionRegistryDef,parserCxt,source);
+  registerUserDestinationMessageHandler(clientInChannel,clientOutChannel,brokerChannel,userDestinationResolver,parserCxt,source);
+  parserCxt.popAndRegisterContainingComponent();
+  return null;
+}

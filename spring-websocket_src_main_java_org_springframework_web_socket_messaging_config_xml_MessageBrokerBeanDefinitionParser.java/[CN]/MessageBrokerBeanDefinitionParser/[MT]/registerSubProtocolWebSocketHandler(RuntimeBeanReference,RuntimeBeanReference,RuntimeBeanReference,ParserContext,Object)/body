@@ -1,0 +1,12 @@
+{
+  RootBeanDefinition stompHandlerDef=new RootBeanDefinition(StompSubProtocolHandler.class);
+  stompHandlerDef.getPropertyValues().add("userSessionRegistry",userSessionRegistry);
+  registerBeanDef(stompHandlerDef,parserCxt,source);
+  ConstructorArgumentValues cavs=new ConstructorArgumentValues();
+  cavs.addIndexedArgumentValue(0,clientInChannel);
+  cavs.addIndexedArgumentValue(1,clientOutChannel);
+  RootBeanDefinition subProtocolWshDef=new RootBeanDefinition(SubProtocolWebSocketHandler.class,cavs,null);
+  subProtocolWshDef.getPropertyValues().addPropertyValue("protocolHandlers",stompHandlerDef);
+  String subProtocolWshName=registerBeanDef(subProtocolWshDef,parserCxt,source);
+  return new RuntimeBeanReference(subProtocolWshName);
+}

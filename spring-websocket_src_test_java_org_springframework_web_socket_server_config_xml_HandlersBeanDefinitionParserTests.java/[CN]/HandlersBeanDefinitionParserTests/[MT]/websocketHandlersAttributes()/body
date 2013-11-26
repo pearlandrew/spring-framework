@@ -1,0 +1,26 @@
+{
+  loadBeanDefinitions("websocket-config-handlers-attributes.xml");
+  HandlerMapping handlerMapping=appContext.getBean(HandlerMapping.class);
+  assertNotNull(handlerMapping);
+  assertTrue(handlerMapping instanceof SimpleUrlHandlerMapping);
+  SimpleUrlHandlerMapping urlHandlerMapping=(SimpleUrlHandlerMapping)handlerMapping;
+  assertEquals(2,urlHandlerMapping.getOrder());
+  WebSocketHttpRequestHandler handler=(WebSocketHttpRequestHandler)urlHandlerMapping.getUrlMap().get("/foo");
+  assertNotNull(handler);
+  checkDelegateHandlerType(handler.getWebSocketHandler(),FooWebSocketHandler.class);
+  HandshakeHandler handshakeHandler=(HandshakeHandler)new DirectFieldAccessor(handler).getPropertyValue("handshakeHandler");
+  assertNotNull(handshakeHandler);
+  assertTrue(handshakeHandler instanceof TestHandshakeHandler);
+  List<HandshakeInterceptor> handshakeInterceptorList=(List<HandshakeInterceptor>)new DirectFieldAccessor(handler).getPropertyValue("interceptors");
+  assertNotNull(handshakeInterceptorList);
+  assertThat(handshakeInterceptorList,Matchers.contains(Matchers.instanceOf(FooTestInterceptor.class),Matchers.instanceOf(BarTestInterceptor.class)));
+  handler=(WebSocketHttpRequestHandler)urlHandlerMapping.getUrlMap().get("/test");
+  assertNotNull(handler);
+  checkDelegateHandlerType(handler.getWebSocketHandler(),TestWebSocketHandler.class);
+  handshakeHandler=(HandshakeHandler)new DirectFieldAccessor(handler).getPropertyValue("handshakeHandler");
+  assertNotNull(handshakeHandler);
+  assertTrue(handshakeHandler instanceof TestHandshakeHandler);
+  handshakeInterceptorList=(List<HandshakeInterceptor>)new DirectFieldAccessor(handler).getPropertyValue("interceptors");
+  assertNotNull(handshakeInterceptorList);
+  assertThat(handshakeInterceptorList,Matchers.contains(Matchers.instanceOf(FooTestInterceptor.class),Matchers.instanceOf(BarTestInterceptor.class)));
+}

@@ -1,0 +1,43 @@
+{
+  RootBeanDefinition executorDef=null;
+  if (channelElement != null) {
+    Element executor=DomUtils.getChildElementByTagName(channelElement,"executor");
+    if (executor != null) {
+      executorDef=new RootBeanDefinition(ThreadPoolTaskExecutor.class);
+      String attrValue=executor.getAttribute("core-pool-size");
+      if (!StringUtils.isEmpty(attrValue)) {
+        executorDef.getPropertyValues().add("corePoolSize",attrValue);
+      }
+      attrValue=executor.getAttribute("max-pool-size");
+      if (!StringUtils.isEmpty(attrValue)) {
+        executorDef.getPropertyValues().add("maxPoolSize",attrValue);
+      }
+      attrValue=executor.getAttribute("keep-alive-seconds");
+      if (!StringUtils.isEmpty(attrValue)) {
+        executorDef.getPropertyValues().add("keepAliveSeconds",attrValue);
+      }
+      attrValue=executor.getAttribute("queue-capacity");
+      if (!StringUtils.isEmpty(attrValue)) {
+        executorDef.getPropertyValues().add("queueCapacity",attrValue);
+      }
+    }
+  }
+ else   if (!channelName.equals("brokerChannel")) {
+    executorDef=new RootBeanDefinition(ThreadPoolTaskExecutor.class);
+  }
+  ConstructorArgumentValues values=new ConstructorArgumentValues();
+  if (executorDef != null) {
+    executorDef.getPropertyValues().add("threadNamePrefix",channelName + "-");
+    String executorName=channelName + "Executor";
+    registerBeanDefByName(executorName,executorDef,parserCxt,source);
+    values.addIndexedArgumentValue(0,new RuntimeBeanReference(executorName));
+  }
+  RootBeanDefinition channelDef=new RootBeanDefinition(ExecutorSubscribableChannel.class,values,null);
+  if (channelElement != null) {
+    Element interceptorsElement=DomUtils.getChildElementByTagName(channelElement,"interceptors");
+    ManagedList<?> interceptorList=WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement,parserCxt);
+    channelDef.getPropertyValues().add("interceptors",interceptorList);
+  }
+  registerBeanDefByName(channelName,channelDef,parserCxt,source);
+  return new RuntimeBeanReference(channelName);
+}

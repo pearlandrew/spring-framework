@@ -1,0 +1,72 @@
+{
+  Element sockJsElement=DomUtils.getChildElementByTagName(element,"sockjs");
+  if (sockJsElement != null) {
+    ConstructorArgumentValues cavs=new ConstructorArgumentValues();
+    String customTaskSchedulerName=sockJsElement.getAttribute("task-scheduler");
+    if (!customTaskSchedulerName.isEmpty()) {
+      cavs.addIndexedArgumentValue(0,new RuntimeBeanReference(customTaskSchedulerName));
+    }
+ else {
+      cavs.addIndexedArgumentValue(0,registerSockJsTaskScheduler(sockJsSchedulerName,parserContext,source));
+    }
+    Element transportHandlersElement=DomUtils.getChildElementByTagName(sockJsElement,"transport-handlers");
+    boolean registerDefaults=true;
+    if (transportHandlersElement != null) {
+      String registerDefaultsAttribute=transportHandlersElement.getAttribute("register-defaults");
+      registerDefaults=!registerDefaultsAttribute.equals("false");
+    }
+    ManagedList<?> transportHandlersList=parseBeanSubElements(transportHandlersElement,parserContext);
+    if (registerDefaults) {
+      cavs.addIndexedArgumentValue(1,Collections.emptyList());
+      if (transportHandlersList.isEmpty()) {
+        cavs.addIndexedArgumentValue(2,new ConstructorArgumentValues.ValueHolder(null));
+      }
+ else {
+        cavs.addIndexedArgumentValue(2,transportHandlersList);
+      }
+    }
+ else {
+      if (transportHandlersList.isEmpty()) {
+        cavs.addIndexedArgumentValue(1,new ConstructorArgumentValues.ValueHolder(null));
+      }
+ else {
+        cavs.addIndexedArgumentValue(1,transportHandlersList);
+      }
+      cavs.addIndexedArgumentValue(2,new ConstructorArgumentValues.ValueHolder(null));
+    }
+    RootBeanDefinition sockJsServiceDef=new RootBeanDefinition(DefaultSockJsService.class,cavs,null);
+    sockJsServiceDef.setSource(source);
+    String attrValue=sockJsElement.getAttribute("name");
+    if (!attrValue.isEmpty()) {
+      sockJsServiceDef.getPropertyValues().add("name",attrValue);
+    }
+    attrValue=sockJsElement.getAttribute("websocket-enabled");
+    if (!attrValue.isEmpty()) {
+      sockJsServiceDef.getPropertyValues().add("webSocketsEnabled",Boolean.valueOf(attrValue));
+    }
+    attrValue=sockJsElement.getAttribute("session-cookie-needed");
+    if (!attrValue.isEmpty()) {
+      sockJsServiceDef.getPropertyValues().add("sessionCookieNeeded",Boolean.valueOf(attrValue));
+    }
+    attrValue=sockJsElement.getAttribute("stream-bytes-limit");
+    if (!attrValue.isEmpty()) {
+      sockJsServiceDef.getPropertyValues().add("streamBytesLimit",Integer.valueOf(attrValue));
+    }
+    attrValue=sockJsElement.getAttribute("disconnect-delay");
+    if (!attrValue.isEmpty()) {
+      sockJsServiceDef.getPropertyValues().add("disconnectDelay",Long.valueOf(attrValue));
+    }
+    attrValue=sockJsElement.getAttribute("http-message-cache-size");
+    if (!attrValue.isEmpty()) {
+      sockJsServiceDef.getPropertyValues().add("httpMessageCacheSize",Integer.valueOf(attrValue));
+    }
+    attrValue=sockJsElement.getAttribute("heartbeat-time");
+    if (!attrValue.isEmpty()) {
+      sockJsServiceDef.getPropertyValues().add("heartbeatTime",Long.valueOf(attrValue));
+    }
+    sockJsServiceDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    String sockJsServiceName=parserContext.getReaderContext().registerWithGeneratedName(sockJsServiceDef);
+    return new RuntimeBeanReference(sockJsServiceName);
+  }
+  return null;
+}

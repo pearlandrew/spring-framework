@@ -1,0 +1,21 @@
+{
+  ManagedMap<String,Object> urlMap=new ManagedMap<String,Object>();
+  Object source=parserContext.extractSource(mappingElement);
+  List<String> mappings=Arrays.asList(mappingElement.getAttribute("path").split(","));
+  RuntimeBeanReference webSocketHandlerReference=new RuntimeBeanReference(mappingElement.getAttribute("handler"));
+  ConstructorArgumentValues cavs=new ConstructorArgumentValues();
+  cavs.addIndexedArgumentValue(0,webSocketHandlerReference);
+  if (this.handshakeHandlerReference != null) {
+    cavs.addIndexedArgumentValue(1,this.handshakeHandlerReference);
+  }
+  RootBeanDefinition requestHandlerDef=new RootBeanDefinition(WebSocketHttpRequestHandler.class,cavs,null);
+  requestHandlerDef.setSource(source);
+  requestHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+  requestHandlerDef.getPropertyValues().add("handshakeInterceptors",this.interceptorsList);
+  String requestHandlerName=parserContext.getReaderContext().registerWithGeneratedName(requestHandlerDef);
+  RuntimeBeanReference requestHandlerRef=new RuntimeBeanReference(requestHandlerName);
+  for (  String mapping : mappings) {
+    urlMap.put(mapping,requestHandlerRef);
+  }
+  return urlMap;
+}
