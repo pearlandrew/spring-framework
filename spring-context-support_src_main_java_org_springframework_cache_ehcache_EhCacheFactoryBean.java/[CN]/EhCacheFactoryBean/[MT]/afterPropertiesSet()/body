@@ -10,41 +10,43 @@
     }
     this.cacheManager=CacheManager.getInstance();
   }
-  Ehcache rawCache;
-  boolean cacheExists=this.cacheManager.cacheExists(cacheName);
-  if (cacheExists) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Using existing EhCache cache region '" + cacheName + "'");
+synchronized (this.cacheManager) {
+    Ehcache rawCache;
+    boolean cacheExists=this.cacheManager.cacheExists(cacheName);
+    if (cacheExists) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Using existing EhCache cache region '" + cacheName + "'");
+      }
+      rawCache=this.cacheManager.getEhcache(cacheName);
     }
-    rawCache=this.cacheManager.getEhcache(cacheName);
-  }
  else {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Creating new EhCache cache region '" + cacheName + "'");
+      if (logger.isDebugEnabled()) {
+        logger.debug("Creating new EhCache cache region '" + cacheName + "'");
+      }
+      rawCache=createCache();
+      rawCache.setBootstrapCacheLoader(this.bootstrapCacheLoader);
     }
-    rawCache=createCache();
-    rawCache.setBootstrapCacheLoader(this.bootstrapCacheLoader);
-  }
-  if (this.cacheEventListeners != null) {
-    for (    CacheEventListener listener : this.cacheEventListeners) {
-      rawCache.getCacheEventNotificationService().registerListener(listener);
+    if (this.cacheEventListeners != null) {
+      for (      CacheEventListener listener : this.cacheEventListeners) {
+        rawCache.getCacheEventNotificationService().registerListener(listener);
+      }
     }
+    if (this.statisticsEnabled) {
+      rawCache.setStatisticsEnabled(true);
+    }
+    if (this.sampledStatisticsEnabled) {
+      rawCache.setSampledStatisticsEnabled(true);
+    }
+    if (this.disabled) {
+      rawCache.setDisabled(true);
+    }
+    if (!cacheExists) {
+      this.cacheManager.addCache(rawCache);
+    }
+    Ehcache decoratedCache=decorateCache(rawCache);
+    if (decoratedCache != rawCache) {
+      this.cacheManager.replaceCacheWithDecoratedCache(rawCache,decoratedCache);
+    }
+    this.cache=decoratedCache;
   }
-  if (this.statisticsEnabled) {
-    rawCache.setStatisticsEnabled(true);
-  }
-  if (this.sampledStatisticsEnabled) {
-    rawCache.setSampledStatisticsEnabled(true);
-  }
-  if (this.disabled) {
-    rawCache.setDisabled(true);
-  }
-  if (!cacheExists) {
-    this.cacheManager.addCache(rawCache);
-  }
-  Ehcache decoratedCache=decorateCache(rawCache);
-  if (decoratedCache != rawCache) {
-    this.cacheManager.replaceCacheWithDecoratedCache(rawCache,decoratedCache);
-  }
-  this.cache=decoratedCache;
 }
