@@ -1,7 +1,13 @@
 {
-  PropertyDescriptor pd=getCachedIntrospectionResults().getPropertyDescriptor(propertyName);
+  CachedIntrospectionResults cachedIntrospectionResults=getCachedIntrospectionResults();
+  PropertyDescriptor pd=cachedIntrospectionResults.getPropertyDescriptor(propertyName);
+  TypeDescriptor td=cachedIntrospectionResults.getTypeDescriptor(pd);
   if (pd == null) {
     throw new InvalidPropertyException(getRootClass(),this.nestedPath + propertyName,"No property '" + propertyName + "' found");
   }
-  return convertForProperty(propertyName,null,value,pd);
+  if (td == null) {
+    td=new TypeDescriptor(property(pd));
+    cachedIntrospectionResults.putTypeDescriptor(pd,td);
+  }
+  return convertForProperty(propertyName,null,value,pd,td);
 }
