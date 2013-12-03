@@ -7,14 +7,16 @@
     throw new HandshakeFailureException("Unable to create UpgradeHandler",ex);
   }
   Connection connection=createConnection(upgradeHandler,response);
-  RequestContext wsRequest=RequestContext.Builder.create().requestURI(URI.create(wsApp.getPath())).requestPath(wsApp.getPath()).userPrincipal(request.getUserPrincipal()).connection(connection).secure(request.isSecure()).build();
+  RequestContext requestContext=RequestContext.Builder.create().requestURI(URI.create(wsApp.getPath())).requestPath(wsApp.getPath()).userPrincipal(request.getUserPrincipal()).connection(connection).secure(request.isSecure()).build();
   for (  String header : headers.keySet()) {
-    wsRequest.getHeaders().put(header,headers.get(header));
+    requestContext.getHeaders().put(header,headers.get(header));
   }
-  return WebSocketEngine.getEngine().upgrade(connection,wsRequest,new WebSocketEngine.WebSocketHolderListener(){
+  boolean upgraded=WebSocketEngine.getEngine().upgrade(connection,requestContext,new WebSocketEngine.WebSocketHolderListener(){
     @Override public void onWebSocketHolder(    WebSocketEngine.WebSocketHolder webSocketHolder){
       upgradeHandler.setWebSocketHolder(webSocketHolder);
     }
   }
 );
+  response.flushBuffer();
+  return upgraded;
 }
