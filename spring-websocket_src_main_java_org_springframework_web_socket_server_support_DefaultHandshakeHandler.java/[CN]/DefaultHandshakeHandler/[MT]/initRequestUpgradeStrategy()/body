@@ -1,27 +1,22 @@
 {
   String className;
-  if (tomcatWsPresent) {
-    className="org.springframework.web.socket.server.support.TomcatRequestUpgradeStrategy";
+  if (jettyWsPresent) {
+    className="org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy";
   }
- else   if (jettyWsPresent) {
-    className="org.springframework.web.socket.server.support.JettyRequestUpgradeStrategy";
+ else   if (tomcatWsPresent) {
+    className="org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy";
   }
  else   if (glassFishWsPresent) {
-    if (glassFish40WsPresent) {
-      className="org.springframework.web.socket.server.support.GlassFish40RequestUpgradeStrategy";
-    }
- else {
-      className="org.springframework.web.socket.server.support.GlassFishRequestUpgradeStrategy";
-    }
+    className="org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy";
   }
  else {
-    throw new IllegalStateException("No suitable " + RequestUpgradeStrategy.class.getSimpleName());
+    throw new IllegalStateException("No suitable default RequestUpgradeStrategy found");
   }
   try {
     Class<?> clazz=ClassUtils.forName(className,DefaultHandshakeHandler.class.getClassLoader());
     return (RequestUpgradeStrategy)BeanUtils.instantiateClass(clazz.getConstructor());
   }
- catch (  Throwable t) {
-    throw new IllegalStateException("Failed to instantiate " + className,t);
+ catch (  Throwable ex) {
+    throw new IllegalStateException("Failed to instantiate RequestUpgradeStrategy: " + className,ex);
   }
 }

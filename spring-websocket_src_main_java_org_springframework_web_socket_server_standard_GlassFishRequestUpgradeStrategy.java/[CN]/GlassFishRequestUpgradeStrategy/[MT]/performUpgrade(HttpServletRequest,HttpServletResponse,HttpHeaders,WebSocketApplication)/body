@@ -1,0 +1,20 @@
+{
+  final TyrusHttpUpgradeHandler upgradeHandler;
+  try {
+    upgradeHandler=request.upgrade(TyrusHttpUpgradeHandler.class);
+  }
+ catch (  ServletException ex) {
+    throw new HandshakeFailureException("Unable to create UpgradeHandler",ex);
+  }
+  Connection connection=createConnection(upgradeHandler,response);
+  RequestContext wsRequest=RequestContext.Builder.create().requestURI(URI.create(wsApp.getPath())).requestPath(wsApp.getPath()).connection(connection).secure(request.isSecure()).build();
+  for (  String header : headers.keySet()) {
+    wsRequest.getHeaders().put(header,headers.get(header));
+  }
+  return WebSocketEngine.getEngine().upgrade(connection,wsRequest,new WebSocketEngine.WebSocketHolderListener(){
+    @Override public void onWebSocketHolder(    WebSocketEngine.WebSocketHolder webSocketHolder){
+      upgradeHandler.setWebSocketHolder(webSocketHolder);
+    }
+  }
+);
+}
