@@ -31,6 +31,9 @@ synchronized (this.cacheManager) {
         rawCache.getCacheEventNotificationService().registerListener(listener);
       }
     }
+    if (!cacheExists) {
+      this.cacheManager.addCache(rawCache);
+    }
     if (this.statisticsEnabled) {
       rawCache.setStatisticsEnabled(true);
     }
@@ -39,9 +42,6 @@ synchronized (this.cacheManager) {
     }
     if (this.disabled) {
       rawCache.setDisabled(true);
-    }
-    if (!cacheExists) {
-      this.cacheManager.addCache(rawCache);
     }
     Ehcache decoratedCache=decorateCache(rawCache);
     if (decoratedCache != rawCache) {
