@@ -1,20 +1,20 @@
 {
   try {
-    if (this.receiveTimeout < 0) {
-      this.latch.await();
-      this.clientHasReceived=true;
+    if (GenericMessagingTemplate.this.receiveTimeout < 0) {
+      this.replyLatch.await();
+      this.hasReceived=true;
     }
  else {
-      if (this.latch.await(this.receiveTimeout,TimeUnit.MILLISECONDS)) {
-        this.clientHasReceived=true;
+      if (this.replyLatch.await(GenericMessagingTemplate.this.receiveTimeout,TimeUnit.MILLISECONDS)) {
+        this.hasReceived=true;
       }
  else {
-        this.clientTimedOut=true;
+        this.hasTimedOut=true;
       }
     }
   }
  catch (  InterruptedException e) {
     Thread.currentThread().interrupt();
   }
-  return this.message;
+  return this.replyMessage;
 }

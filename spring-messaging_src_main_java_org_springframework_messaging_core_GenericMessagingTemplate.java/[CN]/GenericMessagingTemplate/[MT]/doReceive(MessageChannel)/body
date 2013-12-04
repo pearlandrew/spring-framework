@@ -1,10 +1,10 @@
 {
-  Assert.state(destination instanceof PollableChannel,"The 'destination' must be a PollableChannel for receive operations.");
-  Assert.notNull(destination,"channel must not be null");
+  Assert.notNull(channel,"'channel' is required");
+  Assert.state(channel instanceof PollableChannel,"A PollableChannel is required to receive messages.");
   long timeout=this.receiveTimeout;
-  Message<?> message=(timeout >= 0) ? ((PollableChannel)destination).receive(timeout) : ((PollableChannel)destination).receive();
-  if (message == null && this.logger.isTraceEnabled()) {
-    this.logger.trace("failed to receive message from channel '" + destination + "' within timeout: "+ timeout);
+  Message<?> message=(timeout >= 0) ? ((PollableChannel)channel).receive(timeout) : ((PollableChannel)channel).receive();
+  if ((message == null) && this.logger.isTraceEnabled()) {
+    this.logger.trace("Failed to receive message from channel '" + channel + "' within timeout: "+ timeout);
   }
-  return (Message<P>)message;
+  return message;
 }

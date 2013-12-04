@@ -1,0 +1,28 @@
+{
+  final CountDownLatch latch=new CountDownLatch(1);
+  this.template.setReceiveTimeout(1);
+  this.template.setThrowExceptionOnLateReply(true);
+  SubscribableChannel channel=new ExecutorSubscribableChannel(this.executor);
+  channel.subscribe(new MessageHandler(){
+    @Override public void handleMessage(    Message<?> message) throws MessagingException {
+      try {
+        Thread.sleep(500);
+        MessageChannel replyChannel=(MessageChannel)message.getHeaders().getReplyChannel();
+        replyChannel.send(new GenericMessage<String>("response"));
+        fail("Expected exception");
+      }
+ catch (      InterruptedException e) {
+        fail("Unexpected exception " + e.getMessage());
+      }
+catch (      MessageDeliveryException ex) {
+        assertEquals("Reply message received but the receiving thread has already received a reply",ex.getMessage());
+      }
+ finally {
+        latch.countDown();
+      }
+    }
+  }
+);
+  assertNull(this.template.convertSendAndReceive(channel,"request",String.class));
+  assertTrue(latch.await(1000,TimeUnit.MILLISECONDS));
+}

@@ -1,22 +1,22 @@
 {
-  this.message=message;
-  this.latch.countDown();
-  if (this.clientTimedOut || this.clientHasReceived || this.clientWontReceive) {
-    String exceptionMessage="";
-    if (this.clientTimedOut) {
-      exceptionMessage="Reply message being sent, but the receiving thread has already timed out";
-    }
- else     if (this.clientHasReceived) {
-      exceptionMessage="Reply message being sent, but the receiving thread has already received a reply";
-    }
- else     if (this.clientWontReceive) {
-      exceptionMessage="Reply message being sent, but the receiving thread has already caught an exception and won't receive";
-    }
+  this.replyMessage=message;
+  this.replyLatch.countDown();
+  String errorDescription=null;
+  if (this.hasTimedOut) {
+    errorDescription="Reply message received but the receiving thread has exited due to a timeout";
+  }
+ else   if (this.hasReceived) {
+    errorDescription="Reply message received but the receiving thread has already received a reply";
+  }
+ else   if (this.hasSendFailed) {
+    errorDescription="Reply message received but the receiving thread has exited due to " + "an exception while sending the request message";
+  }
+  if (errorDescription != null) {
     if (logger.isWarnEnabled()) {
-      logger.warn(exceptionMessage + ":" + message);
+      logger.warn(errorDescription + ":" + message);
     }
-    if (this.throwExceptionOnLateReply) {
-      throw new MessageDeliveryException(message,exceptionMessage);
+    if (GenericMessagingTemplate.this.throwExceptionOnLateReply) {
+      throw new MessageDeliveryException(message,errorDescription);
     }
   }
   return true;
