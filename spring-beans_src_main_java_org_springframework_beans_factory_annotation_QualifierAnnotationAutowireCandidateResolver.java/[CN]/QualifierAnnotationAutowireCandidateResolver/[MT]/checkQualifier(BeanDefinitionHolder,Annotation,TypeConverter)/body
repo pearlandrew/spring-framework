@@ -6,10 +6,12 @@
     qualifier=bd.getQualifier(ClassUtils.getShortName(type));
   }
   if (qualifier == null) {
-    Annotation targetAnnotation=null;
-    Method resolvedFactoryMethod=bd.getResolvedFactoryMethod();
-    if (resolvedFactoryMethod != null) {
-      targetAnnotation=AnnotationUtils.getAnnotation(resolvedFactoryMethod,type);
+    Annotation targetAnnotation=getFactoryMethodAnnotation(bd,type);
+    if (targetAnnotation == null) {
+      RootBeanDefinition dbd=getResolvedDecoratedDefinition(bd);
+      if (dbd != null) {
+        targetAnnotation=getFactoryMethodAnnotation(dbd,type);
+      }
     }
     if (targetAnnotation == null) {
       if (getBeanFactory() != null) {

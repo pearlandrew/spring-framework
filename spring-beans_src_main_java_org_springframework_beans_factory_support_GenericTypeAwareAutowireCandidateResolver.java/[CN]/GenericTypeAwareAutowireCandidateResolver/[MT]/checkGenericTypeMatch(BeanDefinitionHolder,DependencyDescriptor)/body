@@ -8,17 +8,12 @@
   if (bdHolder.getBeanDefinition() instanceof RootBeanDefinition) {
     rbd=(RootBeanDefinition)bdHolder.getBeanDefinition();
   }
-  if (rbd != null && rbd.getFactoryMethodName() != null) {
-    Class<?> preResolved=rbd.resolvedFactoryMethodReturnType;
-    if (preResolved != null) {
-      targetType=ResolvableType.forClass(preResolved);
-    }
- else {
-      Method resolvedFactoryMethod=rbd.getResolvedFactoryMethod();
-      if (resolvedFactoryMethod != null) {
-        if (descriptor.getDependencyType().isAssignableFrom(resolvedFactoryMethod.getReturnType())) {
-          targetType=ResolvableType.forMethodReturnType(resolvedFactoryMethod);
-        }
+  if (rbd != null) {
+    targetType=getReturnTypeForFactoryMethod(rbd,descriptor);
+    if (targetType == null) {
+      RootBeanDefinition dbd=getResolvedDecoratedDefinition(rbd);
+      if (dbd != null) {
+        targetType=getReturnTypeForFactoryMethod(dbd,descriptor);
       }
     }
   }
