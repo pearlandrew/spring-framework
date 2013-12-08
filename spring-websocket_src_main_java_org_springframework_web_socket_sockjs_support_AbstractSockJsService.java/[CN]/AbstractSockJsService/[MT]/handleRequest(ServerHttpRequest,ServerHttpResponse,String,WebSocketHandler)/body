@@ -1,15 +1,21 @@
 {
   if (sockJsPath == null) {
-    logger.warn("No SockJS path provided, URI=\"" + request.getURI());
+    if (logger.isWarnEnabled()) {
+      logger.warn("No SockJS path provided, URI=\"" + request.getURI());
+    }
     response.setStatusCode(HttpStatus.NOT_FOUND);
     return;
   }
-  logger.debug(request.getMethod() + " with SockJS path [" + sockJsPath+ "]");
+  if (logger.isDebugEnabled()) {
+    logger.debug(request.getMethod() + " with SockJS path [" + sockJsPath+ "]");
+  }
   try {
     request.getHeaders();
   }
  catch (  InvalidMediaTypeException ex) {
-    logger.warn("Invalid media type ignored: " + ex.getMediaType());
+    if (logger.isWarnEnabled()) {
+      logger.warn("Invalid media type ignored: " + ex.getMediaType());
+    }
   }
   try {
     if (sockJsPath.equals("") || sockJsPath.equals("/")) {
@@ -23,12 +29,16 @@
       this.iframeHandler.handle(request,response);
     }
  else     if (sockJsPath.equals("/websocket")) {
-      handleRawWebSocketRequest(request,response,wsHandler);
+      if (isWebSocketEnabled()) {
+        handleRawWebSocketRequest(request,response,wsHandler);
+      }
     }
  else {
       String[] pathSegments=StringUtils.tokenizeToStringArray(sockJsPath.substring(1),"/");
       if (pathSegments.length != 3) {
-        logger.warn("Expected \"/{server}/{session}/{transport}\" but got \"" + sockJsPath + "\"");
+        if (logger.isWarnEnabled()) {
+          logger.warn("Expected \"/{server}/{session}/{transport}\" but got \"" + sockJsPath + "\"");
+        }
         response.setStatusCode(HttpStatus.NOT_FOUND);
         return;
       }

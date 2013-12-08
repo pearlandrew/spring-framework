@@ -24,18 +24,18 @@
     message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
     byte[] bytes=this.stompEncoder.encode((Message<byte[]>)message);
 synchronized (session) {
-      session.sendMessage(new TextMessage(new String(bytes,Charset.forName("UTF-8"))));
+      session.sendMessage(new TextMessage(new String(bytes,UTF8_CHARSET)));
     }
   }
- catch (  Throwable t) {
-    sendErrorMessage(session,t);
+ catch (  Throwable ex) {
+    sendErrorMessage(session,ex);
   }
  finally {
     if (StompCommand.ERROR.equals(headers.getCommand())) {
       try {
         session.close(CloseStatus.PROTOCOL_ERROR);
       }
- catch (      IOException e) {
+ catch (      IOException ex) {
       }
     }
   }

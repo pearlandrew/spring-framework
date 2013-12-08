@@ -1,3 +1,9 @@
 {
-  return new DefaultSockJsService(this.taskScheduler,this.transportHandlers,this.transportHandlerOverrides.toArray(new TransportHandler[this.transportHandlerOverrides.size()]));
+  if (!this.transportHandlers.isEmpty()) {
+    Assert.state(this.transportHandlerOverrides.isEmpty(),"Specify either TransportHandlers or TransportHandler overrides, not both");
+    return new TransportHandlingSockJsService(this.taskScheduler,this.transportHandlers);
+  }
+ else {
+    return new DefaultSockJsService(this.taskScheduler,this.transportHandlerOverrides);
+  }
 }

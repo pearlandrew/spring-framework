@@ -1,20 +1,20 @@
 {
-  String[] messages=null;
+  String[] messages;
   try {
     messages=readMessages(request);
   }
  catch (  JsonMappingException ex) {
-    logger.error("Failed to read message: " + ex.getMessage());
+    logger.error("Failed to read message",ex);
     handleReadError(response,"Payload expected.",sockJsSession.getId());
     return;
   }
 catch (  IOException ex) {
-    logger.error("Failed to read message: " + ex.getMessage());
+    logger.error("Failed to read message",ex);
     handleReadError(response,"Broken JSON encoding.",sockJsSession.getId());
     return;
   }
-catch (  Throwable t) {
-    logger.error("Failed to read message: " + t.getMessage());
+catch (  Throwable ex) {
+    logger.error("Failed to read message",ex);
     handleReadError(response,"Failed to read message(s)",sockJsSession.getId());
     return;
   }
@@ -26,6 +26,6 @@ catch (  Throwable t) {
     logger.trace("Received message(s): " + Arrays.asList(messages));
   }
   response.setStatusCode(getResponseStatus());
-  response.getHeaders().setContentType(new MediaType("text","plain",Charset.forName("UTF-8")));
+  response.getHeaders().setContentType(new MediaType("text","plain",UTF8_CHARSET));
   sockJsSession.delegateMessages(messages);
 }

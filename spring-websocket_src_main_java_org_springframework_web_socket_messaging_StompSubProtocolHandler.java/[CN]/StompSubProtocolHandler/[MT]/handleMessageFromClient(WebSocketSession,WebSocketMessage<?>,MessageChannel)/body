@@ -3,29 +3,31 @@
   try {
     Assert.isInstanceOf(TextMessage.class,webSocketMessage);
     String payload=((TextMessage)webSocketMessage).getPayload();
-    ByteBuffer byteBuffer=ByteBuffer.wrap(payload.getBytes(Charset.forName("UTF-8")));
+    ByteBuffer byteBuffer=ByteBuffer.wrap(payload.getBytes(UTF8_CHARSET));
     message=this.stompDecoder.decode(byteBuffer);
   }
- catch (  Throwable error) {
-    logger.error("Failed to parse STOMP frame, WebSocket message payload: ",error);
-    sendErrorMessage(session,error);
+ catch (  Throwable ex) {
+    logger.error("Failed to parse STOMP frame, WebSocket message payload",ex);
+    sendErrorMessage(session,ex);
     return;
   }
   try {
     StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
-    if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
-      logger.trace("Received heartbeat from client session=" + session.getId());
-    }
+    if (logger.isTraceEnabled()) {
+      if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+        logger.trace("Received heartbeat from client session=" + session.getId());
+      }
  else {
-      logger.trace("Received message from client session=" + session.getId());
+        logger.trace("Received message from client session=" + session.getId());
+      }
     }
     headers.setSessionId(session.getId());
     headers.setUser(session.getPrincipal());
     message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
     outputChannel.send(message);
   }
- catch (  Throwable t) {
-    logger.error("Terminating STOMP session due to failure to send message: ",t);
-    sendErrorMessage(session,t);
+ catch (  Throwable ex) {
+    logger.error("Terminating STOMP session due to failure to send message",ex);
+    sendErrorMessage(session,ex);
   }
 }

@@ -1,0 +1,21 @@
+{
+  loadBeanDefinitions("websocket-config-handlers-sockjs-attributes.xml");
+  SimpleUrlHandlerMapping handlerMapping=appContext.getBean(SimpleUrlHandlerMapping.class);
+  assertNotNull(handlerMapping);
+  SockJsHttpRequestHandler handler=(SockJsHttpRequestHandler)handlerMapping.getUrlMap().get("/test/**");
+  assertNotNull(handler);
+  checkDelegateHandlerType(handler.getWebSocketHandler(),TestWebSocketHandler.class);
+  SockJsService sockJsService=handler.getSockJsService();
+  assertNotNull(sockJsService);
+  assertThat(sockJsService,Matchers.instanceOf(TransportHandlingSockJsService.class));
+  TransportHandlingSockJsService defaultSockJsService=(TransportHandlingSockJsService)sockJsService;
+  assertThat(defaultSockJsService.getTaskScheduler(),Matchers.instanceOf(TestTaskScheduler.class));
+  assertThat(defaultSockJsService.getTransportHandlers().values(),Matchers.containsInAnyOrder(Matchers.instanceOf(XhrPollingTransportHandler.class),Matchers.instanceOf(XhrStreamingTransportHandler.class)));
+  assertEquals("testSockJsService",defaultSockJsService.getName());
+  assertFalse(defaultSockJsService.isWebSocketEnabled());
+  assertFalse(defaultSockJsService.isSessionCookieNeeded());
+  assertEquals(2048,defaultSockJsService.getStreamBytesLimit());
+  assertEquals(256,defaultSockJsService.getDisconnectDelay());
+  assertEquals(1024,defaultSockJsService.getHttpMessageCacheSize());
+  assertEquals(20,defaultSockJsService.getHeartbeatTime());
+}

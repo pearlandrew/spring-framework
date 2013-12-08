@@ -1,0 +1,22 @@
+{
+  updateRequest(request,response,frameFormat);
+  try {
+    writePrelude();
+    writeFrame(SockJsFrame.openFrame());
+  }
+ catch (  Throwable ex) {
+    tryCloseWithSockJsTransportError(ex,CloseStatus.SERVER_ERROR);
+    throw new SockJsTransportFailureException("Failed to send \"open\" frame",getId(),ex);
+  }
+  this.uri=request.getURI();
+  this.handshakeHeaders=request.getHeaders();
+  this.principal=request.getPrincipal();
+  this.localAddress=request.getLocalAddress();
+  this.remoteAddress=request.getRemoteAddress();
+  try {
+    delegateConnectionEstablished();
+  }
+ catch (  Throwable ex) {
+    throw new SockJsException("Unhandled exception from WebSocketHandler",getId(),ex);
+  }
+}
