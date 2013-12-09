@@ -19,10 +19,10 @@
   if (factoryClass == null) {
     return null;
   }
+  Class<?> commonType=null;
   boolean cache=false;
   int minNrOfArgs=mbd.getConstructorArgumentValues().getArgumentCount();
   Method[] candidates=ReflectionUtils.getUniqueDeclaredMethods(factoryClass);
-  Set<Class<?>> returnTypes=new HashSet<Class<?>>(1);
   for (  Method factoryMethod : candidates) {
     if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic && factoryMethod.getName().equals(mbd.getFactoryMethodName()) && factoryMethod.getParameterTypes().length >= minNrOfArgs) {
       if (factoryMethod.getTypeParameters().length > 0) {
@@ -49,7 +49,7 @@
           Class<?> returnType=AutowireUtils.resolveReturnTypeForFactoryMethod(factoryMethod,args,getBeanClassLoader());
           if (returnType != null) {
             cache=true;
-            returnTypes.add(returnType);
+            commonType=ClassUtils.determineCommonAncestor(returnType,commonType);
           }
         }
  catch (        Throwable ex) {
@@ -59,16 +59,15 @@
         }
       }
  else {
-        returnTypes.add(factoryMethod.getReturnType());
+        commonType=ClassUtils.determineCommonAncestor(factoryMethod.getReturnType(),commonType);
       }
     }
   }
-  if (returnTypes.size() == 1) {
-    Class<?> result=returnTypes.iterator().next();
+  if (commonType != null) {
     if (cache) {
-      mbd.resolvedFactoryMethodReturnType=result;
+      mbd.resolvedFactoryMethodReturnType=commonType;
     }
-    return result;
+    return commonType;
   }
  else {
     return null;
