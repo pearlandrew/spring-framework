@@ -8,10 +8,7 @@ class Holder {
   if (factoryBeanName != null && factoryMethodName != null) {
     BeanDefinition fbDef=getBeanDefinition(factoryBeanName);
     if (fbDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition)fbDef).hasBeanClass()) {
-      Class<?> fbClass=((AbstractBeanDefinition)fbDef).getBeanClass();
-      if (ClassUtils.isCglibProxyClass(fbClass)) {
-        fbClass=fbClass.getSuperclass();
-      }
+      Class<?> fbClass=ClassUtils.getUserClass(((AbstractBeanDefinition)fbDef).getBeanClass());
       ReflectionUtils.doWithMethods(fbClass,new ReflectionUtils.MethodCallback(){
         @Override public void doWith(        Method method) throws IllegalArgumentException, IllegalAccessException {
           if (method.getName().equals(factoryMethodName) && FactoryBean.class.isAssignableFrom(method.getReturnType())) {
