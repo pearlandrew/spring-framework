@@ -1,12 +1,14 @@
 {
+  StatementCreatorUtils.driversWithNoSupportForGetParameterType.clear();
   Connection con=mock(Connection.class);
-  DatabaseMetaData metaData=mock(DatabaseMetaData.class);
+  DatabaseMetaData dbmd=mock(DatabaseMetaData.class);
   given(preparedStatement.getConnection()).willReturn(con);
-  given(con.getMetaData()).willReturn(metaData);
-  given(metaData.getDatabaseProductName()).willReturn("Informix Dynamic Server");
-  given(metaData.getDriverName()).willReturn("Informix Driver");
+  given(con.getMetaData()).willReturn(dbmd);
+  given(dbmd.getDatabaseProductName()).willReturn("Informix Dynamic Server");
+  given(dbmd.getDriverName()).willReturn("Informix Driver");
   StatementCreatorUtils.setParameterValue(preparedStatement,1,SqlTypeValue.TYPE_UNKNOWN,null,null);
-  verify(metaData).getDatabaseProductName();
-  verify(metaData).getDriverName();
+  verify(dbmd).getDatabaseProductName();
+  verify(dbmd).getDriverName();
   verify(preparedStatement).setObject(1,null);
+  assertEquals(1,StatementCreatorUtils.driversWithNoSupportForGetParameterType.size());
 }
