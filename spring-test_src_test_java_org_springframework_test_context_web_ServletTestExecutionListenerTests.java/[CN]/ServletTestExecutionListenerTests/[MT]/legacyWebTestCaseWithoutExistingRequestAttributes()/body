@@ -1,0 +1,16 @@
+{
+  Mockito.<Class<?>>when(testContext.getTestClass()).thenReturn(LegacyWebTestCase.class);
+  RequestContextHolder.resetRequestAttributes();
+  assertAttributesNotAvailable();
+  listener.beforeTestClass(testContext);
+  listener.prepareTestInstance(testContext);
+  assertAttributesNotAvailable();
+  verify(testContext,times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE,Boolean.TRUE);
+  when(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).thenReturn(null);
+  listener.beforeTestMethod(testContext);
+  assertAttributesNotAvailable();
+  verify(testContext,times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE,Boolean.TRUE);
+  listener.afterTestMethod(testContext);
+  verify(testContext,times(1)).removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
+  assertAttributesNotAvailable();
+}
