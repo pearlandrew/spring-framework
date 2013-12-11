@@ -6,7 +6,23 @@
     if (this.cacheManagerName != null) {
       configuration.setName(this.cacheManagerName);
     }
-    this.cacheManager=(this.shared ? CacheManager.create(configuration) : new CacheManager(configuration));
+    if (this.shared) {
+      this.cacheManager=CacheManager.create(configuration);
+    }
+ else     if (this.acceptExisting) {
+synchronized (CacheManager.class) {
+        this.cacheManager=CacheManager.getCacheManager(this.cacheManagerName);
+        if (this.cacheManager == null) {
+          this.cacheManager=new CacheManager(configuration);
+        }
+ else {
+          this.locallyManaged=false;
+        }
+      }
+    }
+ else {
+      this.cacheManager=new CacheManager(configuration);
+    }
   }
   finally {
     if (is != null) {
