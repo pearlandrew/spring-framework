@@ -1,5 +1,5 @@
 {
-  if (notAnnotatedWithWebAppConfiguration(testContext)) {
+  if (notAnnotatedWithWebAppConfiguration(testContext) || alreadyPopulatedRequestContextHolder(testContext)) {
     return;
   }
   ApplicationContext context=testContext.getApplicationContext();
@@ -15,6 +15,7 @@
     MockHttpServletResponse response=new MockHttpServletResponse();
     ServletWebRequest servletWebRequest=new ServletWebRequest(request,response);
     RequestContextHolder.setRequestAttributes(servletWebRequest);
+    testContext.setAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE,Boolean.TRUE);
     testContext.setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE,Boolean.TRUE);
     if (wac instanceof ConfigurableApplicationContext) {
       @SuppressWarnings("resource") ConfigurableApplicationContext configurableApplicationContext=(ConfigurableApplicationContext)wac;
