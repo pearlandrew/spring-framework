@@ -1,8 +1,10 @@
 {
-  Method[] methods=proxySuperClass.getMethods();
-  for (  Method method : methods) {
-    if (!Object.class.equals(method.getDeclaringClass()) && Modifier.isFinal(method.getModifiers())) {
-      logger.warn("Unable to proxy method [" + method + "] because it is final: "+ "All calls to this method via a proxy will be routed directly to the proxy.");
+  if (logger.isWarnEnabled()) {
+    Method[] methods=proxySuperClass.getMethods();
+    for (    Method method : methods) {
+      if (!Object.class.equals(method.getDeclaringClass()) && !Modifier.isStatic(method.getModifiers()) && Modifier.isFinal(method.getModifiers())) {
+        logger.warn("Unable to proxy method [" + method + "] because it is final: "+ "All calls to this method via a proxy will be routed directly to the proxy.");
+      }
     }
   }
 }
