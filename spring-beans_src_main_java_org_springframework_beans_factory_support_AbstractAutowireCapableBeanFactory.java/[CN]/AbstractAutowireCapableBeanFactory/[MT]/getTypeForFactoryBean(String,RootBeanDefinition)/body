@@ -5,21 +5,26 @@ class Holder {
   final Holder objectType=new Holder();
   String factoryBeanName=mbd.getFactoryBeanName();
   final String factoryMethodName=mbd.getFactoryMethodName();
-  if (factoryBeanName != null && factoryMethodName != null) {
-    BeanDefinition fbDef=getBeanDefinition(factoryBeanName);
-    if (fbDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition)fbDef).hasBeanClass()) {
-      Class<?> fbClass=ClassUtils.getUserClass(((AbstractBeanDefinition)fbDef).getBeanClass());
-      ReflectionUtils.doWithMethods(fbClass,new ReflectionUtils.MethodCallback(){
-        @Override public void doWith(        Method method) throws IllegalArgumentException, IllegalAccessException {
-          if (method.getName().equals(factoryMethodName) && FactoryBean.class.isAssignableFrom(method.getReturnType())) {
-            objectType.value=GenericTypeResolver.resolveReturnTypeArgument(method,FactoryBean.class);
+  if (factoryBeanName != null) {
+    if (factoryMethodName != null) {
+      BeanDefinition fbDef=getBeanDefinition(factoryBeanName);
+      if (fbDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition)fbDef).hasBeanClass()) {
+        Class<?> fbClass=ClassUtils.getUserClass(((AbstractBeanDefinition)fbDef).getBeanClass());
+        ReflectionUtils.doWithMethods(fbClass,new ReflectionUtils.MethodCallback(){
+          @Override public void doWith(          Method method) throws IllegalArgumentException, IllegalAccessException {
+            if (method.getName().equals(factoryMethodName) && FactoryBean.class.isAssignableFrom(method.getReturnType())) {
+              objectType.value=GenericTypeResolver.resolveReturnTypeArgument(method,FactoryBean.class);
+            }
           }
         }
-      }
 );
-      if (objectType.value != null) {
-        return objectType.value;
+        if (objectType.value != null) {
+          return objectType.value;
+        }
       }
+    }
+    if (!isBeanEligibleForMetadataCaching(factoryBeanName)) {
+      return null;
     }
   }
   FactoryBean<?> fb=(mbd.isSingleton() ? getSingletonFactoryBeanForTypeCheck(beanName,mbd) : getNonSingletonFactoryBeanForTypeCheck(beanName,mbd));
