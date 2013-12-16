@@ -18,7 +18,7 @@ catch (      NoSuchMethodException ex) {
     String errorMessage="Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
     long initialDelay=scheduled.initialDelay();
     String initialDelayString=scheduled.initialDelayString();
-    if (!"".equals(initialDelayString)) {
+    if (StringUtils.hasText(initialDelayString)) {
       Assert.isTrue(initialDelay < 0,"Specify 'initialDelay' or 'initialDelayString', not both");
       if (this.embeddedValueResolver != null) {
         initialDelayString=this.embeddedValueResolver.resolveStringValue(initialDelayString);
@@ -31,7 +31,7 @@ catch (      NoSuchMethodException ex) {
       }
     }
     String cron=scheduled.cron();
-    if (!"".equals(cron)) {
+    if (StringUtils.hasText(cron)) {
       Assert.isTrue(initialDelay == -1,"'initialDelay' not supported for cron triggers");
       processedSchedule=true;
       String zone=scheduled.zone();
@@ -40,7 +40,7 @@ catch (      NoSuchMethodException ex) {
         zone=this.embeddedValueResolver.resolveStringValue(zone);
       }
       TimeZone timeZone;
-      if (!"".equals(zone)) {
+      if (StringUtils.hasText(zone)) {
         timeZone=StringUtils.parseTimeZoneString(zone);
       }
  else {
@@ -58,7 +58,7 @@ catch (      NoSuchMethodException ex) {
       this.registrar.addFixedDelayTask(new IntervalTask(runnable,fixedDelay,initialDelay));
     }
     String fixedDelayString=scheduled.fixedDelayString();
-    if (!"".equals(fixedDelayString)) {
+    if (StringUtils.hasText(fixedDelayString)) {
       Assert.isTrue(!processedSchedule,errorMessage);
       processedSchedule=true;
       if (this.embeddedValueResolver != null) {
@@ -79,7 +79,7 @@ catch (      NoSuchMethodException ex) {
       this.registrar.addFixedRateTask(new IntervalTask(runnable,fixedRate,initialDelay));
     }
     String fixedRateString=scheduled.fixedRateString();
-    if (!"".equals(fixedRateString)) {
+    if (StringUtils.hasText(fixedRateString)) {
       Assert.isTrue(!processedSchedule,errorMessage);
       processedSchedule=true;
       if (this.embeddedValueResolver != null) {
