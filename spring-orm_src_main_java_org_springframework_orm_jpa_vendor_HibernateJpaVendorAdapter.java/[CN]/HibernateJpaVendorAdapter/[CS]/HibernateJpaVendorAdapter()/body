@@ -1,0 +1,23 @@
+{
+  PersistenceProvider providerToUse;
+  Class<? extends EntityManagerFactory> emfIfcToUse;
+  Class<? extends EntityManager> emIfcToUse;
+  try {
+    ClassLoader cl=HibernateJpaVendorAdapter.class.getClassLoader();
+    Class<?> hibernatePersistenceProviderClass=cl.loadClass("org.hibernate.jpa.HibernatePersistenceProvider");
+    providerToUse=(PersistenceProvider)hibernatePersistenceProviderClass.newInstance();
+    emfIfcToUse=(Class<? extends EntityManagerFactory>)cl.loadClass("org.hibernate.jpa.HibernateEntityManagerFactory");
+    emIfcToUse=(Class<? extends EntityManager>)cl.loadClass("org.hibernate.jpa.HibernateEntityManager");
+  }
+ catch (  ClassNotFoundException ex) {
+    providerToUse=new HibernatePersistence();
+    emfIfcToUse=HibernateEntityManagerFactory.class;
+    emIfcToUse=HibernateEntityManager.class;
+  }
+catch (  Exception ex) {
+    throw new IllegalStateException("Found HibernatePersistenceProvider but could not instantiate it",ex);
+  }
+  this.persistenceProvider=providerToUse;
+  this.entityManagerFactoryInterface=emfIfcToUse;
+  this.entityManagerInterface=emIfcToUse;
+}
