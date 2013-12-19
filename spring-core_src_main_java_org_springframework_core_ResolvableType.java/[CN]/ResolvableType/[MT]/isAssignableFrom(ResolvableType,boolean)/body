@@ -14,10 +14,44 @@
   if (ourBounds != null) {
     return ourBounds.isAssignableFrom(type);
   }
-  boolean rtn=resolve(Object.class).isAssignableFrom(type.resolve(Object.class));
-  rtn&=(!checkingGeneric || resolve(Object.class).equals(type.resolve(Object.class)));
-  for (int i=0; i < getGenerics().length; i++) {
-    rtn&=getGeneric(i).isAssignableFrom(type.as(resolve(Object.class)).getGeneric(i),true);
+  boolean checkGenerics=true;
+  Class<?> ourResolved=null;
+  if (this.type instanceof TypeVariable) {
+    TypeVariable<?> variable=(TypeVariable<?>)this.type;
+    if (this.variableResolver != null) {
+      ResolvableType resolved=this.variableResolver.resolveVariable(variable);
+      if (resolved != null) {
+        ourResolved=resolved.resolve();
+      }
+    }
+    if (ourResolved == null) {
+      if (type.variableResolver != null) {
+        ResolvableType resolved=type.variableResolver.resolveVariable(variable);
+        if (resolved != null) {
+          ourResolved=resolved.resolve();
+          checkGenerics=false;
+        }
+      }
+    }
   }
-  return rtn;
+  if (ourResolved == null) {
+    ourResolved=resolve(Object.class);
+  }
+  Class<?> typeResolved=type.resolve(Object.class);
+  if (checkingGeneric ? !ourResolved.equals(typeResolved) : !ourResolved.isAssignableFrom(typeResolved)) {
+    return false;
+  }
+  if (checkGenerics) {
+    ResolvableType[] ourGenerics=getGenerics();
+    ResolvableType[] typeGenerics=type.as(ourResolved).getGenerics();
+    if (ourGenerics.length != typeGenerics.length) {
+      return false;
+    }
+    for (int i=0; i < ourGenerics.length; i++) {
+      if (!ourGenerics[i].isAssignableFrom(typeGenerics[i],true)) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
