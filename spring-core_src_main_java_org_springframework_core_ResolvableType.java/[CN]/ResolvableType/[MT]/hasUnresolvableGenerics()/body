@@ -1,6 +1,10 @@
 {
-  for (  Class<?> generic : resolveGenerics()) {
-    if (generic == null) {
+  if (this == NONE) {
+    return false;
+  }
+  ResolvableType[] generics=getGenerics();
+  for (  ResolvableType generic : generics) {
+    if (generic.isUnresolvableTypeVariable()) {
       return true;
     }
   }
@@ -13,9 +17,7 @@
         }
       }
     }
-    if (resolved.getGenericSuperclass() != null) {
-      return getSuperType().hasUnresolvableGenerics();
-    }
+    return getSuperType().hasUnresolvableGenerics();
   }
   return false;
 }
