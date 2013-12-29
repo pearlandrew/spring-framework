@@ -5,20 +5,26 @@
   if (this.dateFormat != null) {
     this.objectMapper.setDateFormat(this.dateFormat);
   }
+  if (this.annotationIntrospector != null) {
+    this.objectMapper.setAnnotationIntrospector(this.annotationIntrospector);
+  }
+  if (this.serializationInclusion != null) {
+    this.objectMapper.setSerializationInclusion(this.serializationInclusion);
+  }
   if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
     SimpleModule module=new SimpleModule();
     addSerializers(module);
     addDeserializers(module);
     this.objectMapper.registerModule(module);
   }
-  if (this.annotationIntrospector != null) {
-    this.objectMapper.setAnnotationIntrospector(this.annotationIntrospector);
-  }
   for (  Object feature : this.features.keySet()) {
     configureFeature(feature,this.features.get(feature));
   }
-  if (this.serializationInclusion != null) {
-    this.objectMapper.setSerializationInclusion(this.serializationInclusion);
+  if (this.findModules) {
+    this.objectMapper.registerModules(ObjectMapper.findModules(this.beanClassLoader));
+  }
+ else {
+    registerWellKnownModulesIfAvailable();
   }
   if (!this.modules.isEmpty()) {
     this.objectMapper.registerModules(this.modules);
