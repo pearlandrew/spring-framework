@@ -2,6 +2,17 @@
   if (targetClass == null) {
     return false;
   }
-  JavaType type=this.objectMapper.constructType(targetClass);
-  return (this.objectMapper.canDeserialize(type) && supportsMimeType(message.getHeaders()));
+  JavaType javaType=this.objectMapper.constructType(targetClass);
+  if (!jackson23Available || !logger.isWarnEnabled()) {
+    return (this.objectMapper.canDeserialize(javaType) && supportsMimeType(message.getHeaders()));
+  }
+  AtomicReference<Throwable> causeRef=new AtomicReference<Throwable>();
+  if (this.objectMapper.canDeserialize(javaType,causeRef) && supportsMimeType(message.getHeaders())) {
+    return true;
+  }
+  Throwable cause=causeRef.get();
+  if (cause != null) {
+    logger.warn("Failed to evaluate deserialization for type: " + javaType);
+  }
+  return false;
 }

@@ -1,3 +1,14 @@
 {
-  return (this.objectMapper.canSerialize(clazz) && canWrite(mediaType));
+  if (!jackson23Available || !logger.isWarnEnabled()) {
+    return (this.objectMapper.canSerialize(clazz) && canWrite(mediaType));
+  }
+  AtomicReference<Throwable> causeRef=new AtomicReference<Throwable>();
+  if (this.objectMapper.canSerialize(clazz,causeRef) && canWrite(mediaType)) {
+    return true;
+  }
+  Throwable cause=causeRef.get();
+  if (cause != null) {
+    logger.warn("Failed to evaluate serialization for type: " + clazz);
+  }
+  return false;
 }

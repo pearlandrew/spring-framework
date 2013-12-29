@@ -1,3 +1,14 @@
 {
-  return (this.objectMapper.canSerialize(payload.getClass()) && supportsMimeType(headers));
+  if (!jackson23Available || !logger.isWarnEnabled()) {
+    return (this.objectMapper.canSerialize(payload.getClass()) && supportsMimeType(headers));
+  }
+  AtomicReference<Throwable> causeRef=new AtomicReference<Throwable>();
+  if (this.objectMapper.canSerialize(payload.getClass(),causeRef) && supportsMimeType(headers)) {
+    return true;
+  }
+  Throwable cause=causeRef.get();
+  if (cause != null) {
+    logger.warn("Failed to evaluate serialization for type: " + payload.getClass());
+  }
+  return false;
 }

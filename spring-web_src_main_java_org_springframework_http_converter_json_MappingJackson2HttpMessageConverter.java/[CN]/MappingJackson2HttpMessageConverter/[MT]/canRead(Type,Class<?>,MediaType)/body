@@ -1,4 +1,15 @@
 {
   JavaType javaType=getJavaType(type,contextClass);
-  return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
+  if (!jackson23Available || !logger.isWarnEnabled()) {
+    return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
+  }
+  AtomicReference<Throwable> causeRef=new AtomicReference<Throwable>();
+  if (this.objectMapper.canDeserialize(javaType,causeRef) && canRead(mediaType)) {
+    return true;
+  }
+  Throwable cause=causeRef.get();
+  if (cause != null) {
+    logger.warn("Failed to evaluate deserialization for type: " + javaType);
+  }
+  return false;
 }
