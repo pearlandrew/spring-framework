@@ -1,0 +1,26 @@
+{
+  Validator validator=getValidator();
+  if (validator == null) {
+    if (this.applicationContext.containsBean(MVC_VALIDATOR_NAME)) {
+      validator=this.applicationContext.getBean(MVC_VALIDATOR_NAME,Validator.class);
+    }
+ else     if (ClassUtils.isPresent("javax.validation.Validator",getClass().getClassLoader())) {
+      Class<?> clazz;
+      try {
+        String className="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
+        clazz=ClassUtils.forName(className,AbstractMessageBrokerConfiguration.class.getClassLoader());
+      }
+ catch (      ClassNotFoundException e) {
+        throw new BeanInitializationException("Could not find default validator",e);
+      }
+catch (      LinkageError e) {
+        throw new BeanInitializationException("Could not find default validator",e);
+      }
+      validator=(Validator)BeanUtils.instantiate(clazz);
+    }
+ else {
+      validator=noopValidator;
+    }
+  }
+  return validator;
+}

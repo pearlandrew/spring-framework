@@ -1,0 +1,20 @@
+{
+  Annotation[] annotations=parameter.getParameterAnnotations();
+  for (  Annotation annot : annotations) {
+    if (annot.annotationType().getSimpleName().startsWith("Valid")) {
+      BeanPropertyBindingResult bindingResult=new BeanPropertyBindingResult(target,parameter.getParameterName());
+      Object hints=AnnotationUtils.getValue(annot);
+      Object[] validationHints=hints instanceof Object[] ? (Object[])hints : new Object[]{hints};
+      if (!ObjectUtils.isEmpty(validationHints) && this.validator instanceof SmartValidator) {
+        ((SmartValidator)this.validator).validate(target,bindingResult,validationHints);
+      }
+ else       if (this.validator != null) {
+        this.validator.validate(target,bindingResult);
+      }
+      if (bindingResult.hasErrors()) {
+        throw new MethodArgumentNotValidException(message,parameter,bindingResult);
+      }
+      break;
+    }
+  }
+}
