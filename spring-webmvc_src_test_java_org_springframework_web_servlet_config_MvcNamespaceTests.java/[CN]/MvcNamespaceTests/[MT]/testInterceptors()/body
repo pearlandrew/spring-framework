@@ -1,5 +1,5 @@
 {
-  loadBeanDefinitions("mvc-config-interceptors.xml",18);
+  loadBeanDefinitions("mvc-config-interceptors.xml",20);
   RequestMappingHandlerMapping mapping=appContext.getBean(RequestMappingHandlerMapping.class);
   assertNotNull(mapping);
   mapping.setDefaultHandler(handlerMethod);
@@ -8,11 +8,12 @@
   request.addParameter("locale","en");
   request.addParameter("theme","green");
   HandlerExecutionChain chain=mapping.getHandler(request);
-  assertEquals(4,chain.getInterceptors().length);
+  assertEquals(5,chain.getInterceptors().length);
   assertTrue(chain.getInterceptors()[0] instanceof ConversionServiceExposingInterceptor);
   assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
   assertTrue(chain.getInterceptors()[2] instanceof WebRequestHandlerInterceptorAdapter);
   assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
+  assertTrue(chain.getInterceptors()[4] instanceof UserRoleAuthorizationInterceptor);
   request.setRequestURI("/admin/users");
   chain=mapping.getHandler(request);
   assertEquals(3,chain.getInterceptors().length);
