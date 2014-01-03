@@ -1,11 +1,9 @@
 {
   ExecutorService executor=getScheduledExecutor();
   try {
-    Callable<T> taskToUse=task;
-    if (this.errorHandler != null) {
-      taskToUse=new DelegatingErrorHandlingCallable<T>(task,this.errorHandler);
-    }
-    return executor.submit(taskToUse);
+    ListenableFutureTask<T> future=new ListenableFutureTask<T>(task);
+    executor.execute(errorHandlingTask(future,false));
+    return future;
   }
  catch (  RejectedExecutionException ex) {
     throw new TaskRejectedException("Executor [" + executor + "] did not accept task: "+ task,ex);
