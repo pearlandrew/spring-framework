@@ -1,5 +1,5 @@
 {
-  @SuppressWarnings("rawtypes") Configuration configuration=(this.providerClass != null ? Validation.byProvider(this.providerClass).configure() : Validation.byDefaultProvider().configure());
+  @SuppressWarnings({"rawtypes","unchecked"}) Configuration<?> configuration=(this.providerClass != null ? Validation.byProvider(this.providerClass).configure() : Validation.byDefaultProvider().configure());
   MessageInterpolator targetInterpolator=this.messageInterpolator;
   if (targetInterpolator == null) {
     targetInterpolator=configuration.getDefaultMessageInterpolator();
@@ -15,7 +15,9 @@
   if (targetConstraintValidatorFactory != null) {
     configuration.constraintValidatorFactory(targetConstraintValidatorFactory);
   }
-  configureParameterNameProviderIfPossible(configuration);
+  if (this.parameterNameDiscoverer != null) {
+    configureParameterNameProviderIfPossible(configuration);
+  }
   if (this.mappingLocations != null) {
     for (    Resource location : this.mappingLocations) {
       try {
