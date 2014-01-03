@@ -9,8 +9,12 @@
   handlerMappingDef.getPropertyValues().add("order",0);
   handlerMappingDef.getPropertyValues().add("contentNegotiationManager",contentNegotiationManager);
   String methodMappingName=parserContext.getReaderContext().registerWithGeneratedName(handlerMappingDef);
-  if (element.hasAttribute("enable-matrix-variables") || element.hasAttribute("enableMatrixVariables")) {
-    Boolean enableMatrixVariables=Boolean.valueOf(element.getAttribute(element.hasAttribute("enable-matrix-variables") ? "enable-matrix-variables" : "enableMatrixVariables"));
+  if (element.hasAttribute("enable-matrix-variables")) {
+    Boolean enableMatrixVariables=Boolean.valueOf(element.getAttribute("enable-matrix-variables"));
+    handlerMappingDef.getPropertyValues().add("removeSemicolonContent",!enableMatrixVariables);
+  }
+ else   if (element.hasAttribute("enableMatrixVariables")) {
+    Boolean enableMatrixVariables=Boolean.valueOf(element.getAttribute("enableMatrixVariables"));
     handlerMappingDef.getPropertyValues().add("removeSemicolonContent",!enableMatrixVariables);
   }
   RuntimeBeanReference conversionService=getConversionService(element,source,parserContext);
@@ -23,7 +27,7 @@
   bindingDef.getPropertyValues().add("validator",validator);
   bindingDef.getPropertyValues().add("messageCodesResolver",messageCodesResolver);
   ManagedList<?> messageConverters=getMessageConverters(element,source,parserContext);
-  ManagedList<?> argumentResolvers=getArgumentResolvers(element,source,parserContext);
+  ManagedList<?> argumentResolvers=getArgumentResolvers(element,parserContext);
   ManagedList<?> returnValueHandlers=getReturnValueHandlers(element,source,parserContext);
   String asyncTimeout=getAsyncTimeout(element,source,parserContext);
   RuntimeBeanReference asyncExecutor=getAsyncExecutor(element,source,parserContext);
@@ -35,8 +39,12 @@
   handlerAdapterDef.getPropertyValues().add("contentNegotiationManager",contentNegotiationManager);
   handlerAdapterDef.getPropertyValues().add("webBindingInitializer",bindingDef);
   handlerAdapterDef.getPropertyValues().add("messageConverters",messageConverters);
-  if (element.hasAttribute("ignore-default-model-on-redirect") || element.hasAttribute("ignoreDefaultModelOnRedirect")) {
-    Boolean ignoreDefaultModel=Boolean.valueOf(element.getAttribute(element.hasAttribute("ignore-default-model-on-redirect") ? "ignore-default-model-on-redirect" : "ignoreDefaultModelOnRedirect"));
+  if (element.hasAttribute("ignore-default-model-on-redirect")) {
+    Boolean ignoreDefaultModel=Boolean.valueOf(element.getAttribute("ignore-default-model-on-redirect"));
+    handlerAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect",ignoreDefaultModel);
+  }
+ else   if (element.hasAttribute("ignoreDefaultModelOnRedirect")) {
+    Boolean ignoreDefaultModel=Boolean.valueOf(element.getAttribute("ignoreDefaultModelOnRedirect"));
     handlerAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect",ignoreDefaultModel);
   }
   if (argumentResolvers != null) {
