@@ -11,6 +11,8 @@
     }
     @Override public void shutdown(){
     }
+    public void initialize(){
+    }
   }
 );
   DataSource nonTxDataSource=SchedulerFactoryBean.getConfigTimeNonTransactionalDataSource();
@@ -22,18 +24,20 @@
     }
     @Override public void shutdown(){
     }
+    public void initialize(){
+    }
   }
 );
   try {
-    String productName=JdbcUtils.extractDatabaseMetaData(dataSource,"getDatabaseProductName").toString();
+    String productName=JdbcUtils.extractDatabaseMetaData(this.dataSource,"getDatabaseProductName").toString();
     productName=JdbcUtils.commonDatabaseName(productName);
     if (productName != null && productName.toLowerCase().contains("hsql")) {
       setUseDBLocks(false);
       setLockHandler(new SimpleSemaphore());
     }
   }
- catch (  MetaDataAccessException e) {
-    logWarnIfNonZero(1,"Could not detect database type.  Assuming locks can be taken.");
+ catch (  MetaDataAccessException ex) {
+    logWarnIfNonZero(1,"Could not detect database type. Assuming locks can be taken.");
   }
   super.initialize(loadHelper,signaler);
 }
