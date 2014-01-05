@@ -1,21 +1,21 @@
 {
   Resource[] resources;
   try {
-    resources=resolver.getResources(path);
+    resources=this.resolver.getResources(path);
   }
- catch (  IOException e) {
+ catch (  IOException ex) {
     return Collections.<ApplicationResource>emptyList();
   }
   Collection<ApplicationResource> resourceList=new ArrayList<ApplicationResource>();
-  if (resources != null && resources.length > 0) {
-    for (int i=0; i < resources.length; i++) {
+  if (!ObjectUtils.isEmpty(resources)) {
+    for (    Resource resource : resources) {
       URL url;
       try {
-        url=resources[i].getURL();
+        url=resource.getURL();
         resourceList.add(new URLApplicationResource(url.toExternalForm(),url));
       }
- catch (      IOException e) {
-        throw new IllegalArgumentException("no URL for " + resources[i].toString(),e);
+ catch (      IOException ex) {
+        throw new IllegalArgumentException("No URL for " + resource.toString(),ex);
       }
     }
   }
