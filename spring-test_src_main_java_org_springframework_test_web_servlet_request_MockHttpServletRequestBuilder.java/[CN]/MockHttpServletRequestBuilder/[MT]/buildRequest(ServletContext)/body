@@ -44,10 +44,10 @@
     request.addPreferredLocale(this.locale);
   }
   request.setCharacterEncoding(this.characterEncoding);
-  request.setUserPrincipal(this.principal);
   if (this.secure != null) {
     request.setSecure(this.secure);
   }
+  request.setUserPrincipal(this.principal);
   for (  String name : this.attributes.keySet()) {
     request.setAttribute(name,this.attributes.get(name));
   }
@@ -63,7 +63,9 @@
   flashMapManager.saveOutputFlashMap(flashMap,request,new MockHttpServletResponse());
   for (  RequestPostProcessor postProcessor : this.postProcessors) {
     request=postProcessor.postProcessRequest(request);
-    Assert.notNull(request,"Post-processor [" + postProcessor.getClass().getName() + "] returned null");
+    if (request == null) {
+      throw new IllegalStateException("Post-processor [" + postProcessor.getClass().getName() + "] returned null");
+    }
   }
   request.setAsyncSupported(true);
   return request;
