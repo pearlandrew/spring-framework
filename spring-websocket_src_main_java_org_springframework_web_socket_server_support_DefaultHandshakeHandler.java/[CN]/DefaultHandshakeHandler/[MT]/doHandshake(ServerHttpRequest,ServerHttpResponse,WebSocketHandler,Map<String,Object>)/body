@@ -43,9 +43,10 @@
   List<WebSocketExtension> requested=headers.getSecWebSocketExtensions();
   List<WebSocketExtension> supported=this.requestUpgradeStrategy.getSupportedExtensions(request);
   List<WebSocketExtension> extensions=filterRequestedExtensions(request,requested,supported);
+  Principal user=determineUser(request,wsHandler,attributes);
   if (logger.isDebugEnabled()) {
     logger.debug("Upgrading request, sub-protocol=" + subProtocol + ", extensions="+ extensions);
   }
-  this.requestUpgradeStrategy.upgrade(request,response,subProtocol,extensions,wsHandler,attributes);
+  this.requestUpgradeStrategy.upgrade(request,response,subProtocol,extensions,user,wsHandler,attributes);
   return true;
 }
