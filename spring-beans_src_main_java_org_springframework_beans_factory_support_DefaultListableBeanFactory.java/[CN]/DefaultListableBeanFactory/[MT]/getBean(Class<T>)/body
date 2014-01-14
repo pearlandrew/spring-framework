@@ -16,20 +16,19 @@
     return getBean(beanNames[0],requiredType);
   }
  else   if (beanNames.length > 1) {
-    T primaryBean=null;
+    Map<String,Object> candidates=new HashMap<String,Object>();
     for (    String beanName : beanNames) {
-      T beanInstance=getBean(beanName,requiredType);
-      if (isPrimary(beanName,beanInstance)) {
-        if (primaryBean != null) {
-          throw new NoUniqueBeanDefinitionException(requiredType,beanNames.length,"more than one 'primary' bean found of required type: " + Arrays.asList(beanNames));
-        }
-        primaryBean=beanInstance;
-      }
+      candidates.put(beanName,getBean(beanName,requiredType));
     }
-    if (primaryBean != null) {
-      return primaryBean;
+    String primaryCandidate=determinePrimaryCandidate(candidates,requiredType);
+    if (primaryCandidate != null) {
+      return getBean(primaryCandidate,requiredType);
     }
-    throw new NoUniqueBeanDefinitionException(requiredType,beanNames);
+    String priorityCandidate=determineHighestPriorityCandidate(candidates,requiredType);
+    if (priorityCandidate != null) {
+      return getBean(priorityCandidate,requiredType);
+    }
+    throw new NoUniqueBeanDefinitionException(requiredType,candidates.keySet());
   }
  else   if (getParentBeanFactory() != null) {
     return getParentBeanFactory().getBean(requiredType);
