@@ -1,16 +1,13 @@
 {
+  String globalClassNames=getServletContext().getInitParameter(ContextLoader.GLOBAL_INITIALIZER_CLASSES_PARAM);
+  if (globalClassNames != null) {
+    for (    String className : StringUtils.tokenizeToStringArray(globalClassNames,INIT_PARAM_DELIMITERS)) {
+      this.contextInitializers.add(loadInitializer(className,wac));
+    }
+  }
   if (this.contextInitializerClasses != null) {
-    String[] initializerClassNames=StringUtils.tokenizeToStringArray(this.contextInitializerClasses,INIT_PARAM_DELIMITERS);
-    for (    String initializerClassName : initializerClassNames) {
-      ApplicationContextInitializer<ConfigurableApplicationContext> initializer;
-      try {
-        Class<?> initializerClass=ClassUtils.forName(initializerClassName,wac.getClassLoader());
-        initializer=BeanUtils.instantiateClass(initializerClass,ApplicationContextInitializer.class);
-      }
- catch (      Exception ex) {
-        throw new IllegalArgumentException(String.format("Could not instantiate class [%s] specified via " + "'contextInitializerClasses' init-param",initializerClassName),ex);
-      }
-      this.contextInitializers.add(initializer);
+    for (    String className : StringUtils.tokenizeToStringArray(this.contextInitializerClasses,INIT_PARAM_DELIMITERS)) {
+      this.contextInitializers.add(loadInitializer(className,wac));
     }
   }
   AnnotationAwareOrderComparator.sort(this.contextInitializers);

@@ -9,9 +9,13 @@
     }
   }
   wac.setServletContext(sc);
-  String initParameter=sc.getInitParameter(CONFIG_LOCATION_PARAM);
-  if (initParameter != null) {
-    wac.setConfigLocation(initParameter);
+  String configLocationParam=sc.getInitParameter(CONFIG_LOCATION_PARAM);
+  if (configLocationParam != null) {
+    wac.setConfigLocation(configLocationParam);
+  }
+  ConfigurableEnvironment env=wac.getEnvironment();
+  if (env instanceof ConfigurableWebEnvironment) {
+    ((ConfigurableWebEnvironment)env).initPropertySources(sc,null);
   }
   customizeContext(sc,wac);
   wac.refresh();
