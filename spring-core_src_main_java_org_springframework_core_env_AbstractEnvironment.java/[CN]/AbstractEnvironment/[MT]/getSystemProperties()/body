@@ -1,17 +1,16 @@
 {
-  Map systemProperties;
   try {
-    systemProperties=System.getProperties();
+    return (Map)System.getProperties();
   }
  catch (  AccessControlException ex) {
-    systemProperties=new ReadOnlySystemAttributesMap(){
+    return (Map)new ReadOnlySystemAttributesMap(){
       @Override protected String getSystemAttribute(      String propertyName){
         try {
           return System.getProperty(propertyName);
         }
  catch (        AccessControlException ex) {
           if (logger.isInfoEnabled()) {
-            logger.info(format("Caught AccessControlException when " + "accessing system property [%s]; its value will be " + "returned [null]. Reason: %s",propertyName,ex.getMessage()));
+            logger.info(format("Caught AccessControlException when accessing system " + "property [%s]; its value will be returned [null]. Reason: %s",propertyName,ex.getMessage()));
           }
           return null;
         }
@@ -19,5 +18,4 @@
     }
 ;
   }
-  return systemProperties;
 }

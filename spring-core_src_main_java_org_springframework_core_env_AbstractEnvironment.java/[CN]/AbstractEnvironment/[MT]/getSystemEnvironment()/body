@@ -1,17 +1,26 @@
 {
-  Map<String,?> systemEnvironment;
   try {
-    systemEnvironment=System.getenv();
+    if ("true".equalsIgnoreCase(System.getProperty(IGNORE_GETENV_PROPERTY_NAME))) {
+      return Collections.emptyMap();
+    }
+  }
+ catch (  Throwable ex) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Could not obtain system property '" + IGNORE_GETENV_PROPERTY_NAME + "': "+ ex);
+    }
+  }
+  try {
+    return (Map)System.getenv();
   }
  catch (  AccessControlException ex) {
-    systemEnvironment=new ReadOnlySystemAttributesMap(){
+    return (Map)new ReadOnlySystemAttributesMap(){
       @Override protected String getSystemAttribute(      String variableName){
         try {
           return System.getenv(variableName);
         }
  catch (        AccessControlException ex) {
           if (logger.isInfoEnabled()) {
-            logger.info(format("Caught AccessControlException when " + "accessing system environment variable [%s]; its " + "value will be returned [null]. Reason: %s",variableName,ex.getMessage()));
+            logger.info(format("Caught AccessControlException when accessing system " + "environment variable [%s]; its value will be returned [null]. Reason: %s",variableName,ex.getMessage()));
           }
           return null;
         }
@@ -19,5 +28,4 @@
     }
 ;
   }
-  return (Map<String,Object>)systemEnvironment;
 }
