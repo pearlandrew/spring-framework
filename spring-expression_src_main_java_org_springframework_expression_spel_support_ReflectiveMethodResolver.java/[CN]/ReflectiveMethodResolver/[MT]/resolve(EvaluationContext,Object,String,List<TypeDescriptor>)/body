@@ -24,7 +24,6 @@
     Set<Method> methodsToIterate=new LinkedHashSet<Method>(methods);
     Method closeMatch=null;
     int closeMatchDistance=Integer.MAX_VALUE;
-    int[] argsToConvert=null;
     Method matchRequiringConversion=null;
     boolean multipleOptions=false;
     for (    Method method : methodsToIterate) {
@@ -42,10 +41,10 @@
           matchInfo=ReflectionHelper.compareArguments(paramDescriptors,argumentTypes,typeConverter);
         }
         if (matchInfo != null) {
-          if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.EXACT) {
+          if (matchInfo.isExactMatch()) {
             return new ReflectiveMethodExecutor(method);
           }
- else           if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE) {
+ else           if (matchInfo.isCloseMatch()) {
             if (!this.useDistance) {
               closeMatch=method;
             }
@@ -57,7 +56,7 @@
               }
             }
           }
- else           if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.REQUIRES_CONVERSION) {
+ else           if (matchInfo.isMatchRequiringConversion()) {
             if (matchRequiringConversion != null) {
               multipleOptions=true;
             }

@@ -1,7 +1,7 @@
 {
   int parameterCount=requiredParameterTypes.length;
   int argumentCount=args.length;
-  if (parameterCount != args.length || requiredParameterTypes[parameterCount - 1] != (args[argumentCount - 1] == null ? null : args[argumentCount - 1].getClass())) {
+  if (parameterCount != args.length || requiredParameterTypes[parameterCount - 1] != (args[argumentCount - 1] != null ? args[argumentCount - 1].getClass() : null)) {
     int arraySize=0;
     if (argumentCount >= parameterCount) {
       arraySize=argumentCount - (parameterCount - 1);
@@ -9,69 +9,11 @@
     Object[] newArgs=new Object[parameterCount];
     System.arraycopy(args,0,newArgs,0,newArgs.length - 1);
     Class<?> componentType=requiredParameterTypes[parameterCount - 1].getComponentType();
-    if (componentType.isPrimitive()) {
-      if (componentType == Integer.TYPE) {
-        int[] repackagedArguments=(int[])Array.newInstance(componentType,arraySize);
-        for (int i=0; i < arraySize; i++) {
-          repackagedArguments[i]=((Integer)args[parameterCount + i - 1]).intValue();
-        }
-        newArgs[newArgs.length - 1]=repackagedArguments;
-      }
- else       if (componentType == Float.TYPE) {
-        float[] repackagedArguments=(float[])Array.newInstance(componentType,arraySize);
-        for (int i=0; i < arraySize; i++) {
-          repackagedArguments[i]=((Float)args[parameterCount + i - 1]).floatValue();
-        }
-        newArgs[newArgs.length - 1]=repackagedArguments;
-      }
- else       if (componentType == Double.TYPE) {
-        double[] repackagedArguments=(double[])Array.newInstance(componentType,arraySize);
-        for (int i=0; i < arraySize; i++) {
-          repackagedArguments[i]=((Double)args[parameterCount + i - 1]).doubleValue();
-        }
-        newArgs[newArgs.length - 1]=repackagedArguments;
-      }
- else       if (componentType == Short.TYPE) {
-        short[] repackagedArguments=(short[])Array.newInstance(componentType,arraySize);
-        for (int i=0; i < arraySize; i++) {
-          repackagedArguments[i]=((Short)args[parameterCount + i - 1]).shortValue();
-        }
-        newArgs[newArgs.length - 1]=repackagedArguments;
-      }
- else       if (componentType == Character.TYPE) {
-        char[] repackagedArguments=(char[])Array.newInstance(componentType,arraySize);
-        for (int i=0; i < arraySize; i++) {
-          repackagedArguments[i]=((Character)args[parameterCount + i - 1]).charValue();
-        }
-        newArgs[newArgs.length - 1]=repackagedArguments;
-      }
- else       if (componentType == Byte.TYPE) {
-        byte[] repackagedArguments=(byte[])Array.newInstance(componentType,arraySize);
-        for (int i=0; i < arraySize; i++) {
-          repackagedArguments[i]=((Byte)args[parameterCount + i - 1]).byteValue();
-        }
-        newArgs[newArgs.length - 1]=repackagedArguments;
-      }
- else       if (componentType == Boolean.TYPE) {
-        boolean[] repackagedArguments=(boolean[])Array.newInstance(componentType,arraySize);
-        for (int i=0; i < arraySize; i++) {
-          repackagedArguments[i]=((Boolean)args[parameterCount + i - 1]).booleanValue();
-        }
-        newArgs[newArgs.length - 1]=repackagedArguments;
-      }
- else       if (componentType == Long.TYPE) {
-        long[] repackagedArguments=(long[])Array.newInstance(componentType,arraySize);
-        for (int i=0; i < arraySize; i++) {
-          repackagedArguments[i]=((Long)args[parameterCount + i - 1]).longValue();
-        }
-        newArgs[newArgs.length - 1]=repackagedArguments;
-      }
+    Object repackagedArgs=Array.newInstance(componentType,arraySize);
+    for (int i=0; i < arraySize; i++) {
+      Array.set(repackagedArgs,i,args[parameterCount - 1 + i]);
     }
- else {
-      Object[] repackagedArguments=(Object[])Array.newInstance(componentType,arraySize);
-      System.arraycopy(args,parameterCount - 1,repackagedArguments,0,arraySize);
-      newArgs[newArgs.length - 1]=repackagedArguments;
-    }
+    newArgs[newArgs.length - 1]=repackagedArgs;
     return newArgs;
   }
   return args;
