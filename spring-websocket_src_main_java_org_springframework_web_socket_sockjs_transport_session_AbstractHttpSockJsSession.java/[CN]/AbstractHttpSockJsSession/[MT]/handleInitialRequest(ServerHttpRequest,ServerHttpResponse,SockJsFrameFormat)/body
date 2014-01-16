@@ -1,5 +1,10 @@
 {
-  updateRequest(request,response,frameFormat);
+  initRequest(request,response,frameFormat);
+  this.uri=request.getURI();
+  this.handshakeHeaders=request.getHeaders();
+  this.principal=request.getPrincipal();
+  this.localAddress=request.getLocalAddress();
+  this.remoteAddress=request.getRemoteAddress();
   try {
     writePrelude();
     writeFrame(SockJsFrame.openFrame());
@@ -8,11 +13,6 @@
     tryCloseWithSockJsTransportError(ex,CloseStatus.SERVER_ERROR);
     throw new SockJsTransportFailureException("Failed to send \"open\" frame",getId(),ex);
   }
-  this.uri=request.getURI();
-  this.handshakeHeaders=request.getHeaders();
-  this.principal=request.getPrincipal();
-  this.localAddress=request.getLocalAddress();
-  this.remoteAddress=request.getRemoteAddress();
   try {
     delegateConnectionEstablished();
   }
