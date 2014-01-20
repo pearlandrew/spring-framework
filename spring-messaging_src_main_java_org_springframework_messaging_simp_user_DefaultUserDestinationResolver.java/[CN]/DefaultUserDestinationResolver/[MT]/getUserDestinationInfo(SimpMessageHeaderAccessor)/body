@@ -2,6 +2,7 @@
   String destination=headers.getDestination();
   String targetUser;
   String targetDestination;
+  Set<String> sessionIds;
   Principal user=headers.getUser();
   SimpMessageType messageType=headers.getMessageType();
   if (SimpMessageType.SUBSCRIBE.equals(messageType) || SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
@@ -9,11 +10,16 @@
       return null;
     }
     if (user == null) {
-      logger.warn("Ignoring message, no user information");
+      logger.error("Ignoring message, no user info available");
+      return null;
+    }
+    if (headers.getSessionId() == null) {
+      logger.error("Ignoring message, no session id available");
       return null;
     }
     targetUser=user.getName();
     targetDestination=destination.substring(this.destinationPrefix.length() - 1);
+    sessionIds=Collections.singleton(headers.getSessionId());
   }
  else   if (SimpMessageType.MESSAGE.equals(messageType)) {
     if (!checkDestination(destination,this.destinationPrefix)) {
@@ -24,6 +30,7 @@
     Assert.isTrue(endIndex > 0,"Expected destination pattern \"/user/{userId}/**\"");
     targetUser=destination.substring(startIndex,endIndex);
     targetDestination=destination.substring(endIndex);
+    sessionIds=this.userSessionRegistry.getSessionIds(targetUser);
   }
  else {
     if (logger.isTraceEnabled()) {
@@ -31,5 +38,5 @@
     }
     return null;
   }
-  return new UserDestinationInfo(targetUser,targetDestination);
+  return new UserDestinationInfo(targetUser,targetDestination,sessionIds);
 }
