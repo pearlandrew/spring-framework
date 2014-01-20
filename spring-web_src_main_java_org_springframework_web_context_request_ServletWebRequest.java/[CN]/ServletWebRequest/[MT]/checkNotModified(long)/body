@@ -1,28 +1,12 @@
 {
   HttpServletResponse response=getResponse();
-  if (lastModifiedTimestamp >= 0 && !this.notModified && (response == null || !response.containsHeader(HEADER_LAST_MODIFIED))) {
-    long ifModifiedSince=-1;
-    try {
-      ifModifiedSince=getRequest().getDateHeader(HEADER_IF_MODIFIED_SINCE);
-    }
- catch (    IllegalArgumentException ex) {
-      String headerValue=getRequest().getHeader(HEADER_IF_MODIFIED_SINCE);
-      int separatorIndex=headerValue.indexOf(';');
-      if (separatorIndex != -1) {
-        String datePart=headerValue.substring(0,separatorIndex);
-        try {
-          ifModifiedSince=Date.parse(datePart);
+  if (lastModifiedTimestamp >= 0 && !this.notModified) {
+    if (response == null || !response.containsHeader(HEADER_LAST_MODIFIED)) {
+      this.notModified=isTimeStampNotModified(lastModifiedTimestamp);
+      if (response != null) {
+        if (this.notModified && supportsNotModifiedStatus()) {
+          response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
         }
- catch (        IllegalArgumentException ex2) {
-        }
-      }
-    }
-    this.notModified=(ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
-    if (response != null) {
-      if (this.notModified && supportsNotModifiedStatus()) {
-        response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-      }
- else {
         response.setDateHeader(HEADER_LAST_MODIFIED,lastModifiedTimestamp);
       }
     }

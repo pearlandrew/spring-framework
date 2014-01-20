@@ -1,0 +1,11 @@
+{
+  String currentETag="\"Foo\"";
+  String oldEtag="\"Bar\"";
+  servletRequest.addHeader("If-None-Match",oldEtag);
+  long currentTime=new Date().getTime();
+  servletRequest.addHeader("If-Modified-Since",currentTime);
+  assertFalse(request.checkNotModified(currentETag,currentTime));
+  assertEquals(200,servletResponse.getStatus());
+  assertEquals(currentETag,servletResponse.getHeader("ETag"));
+  assertEquals("" + currentTime,servletResponse.getHeader("Last-Modified"));
+}
