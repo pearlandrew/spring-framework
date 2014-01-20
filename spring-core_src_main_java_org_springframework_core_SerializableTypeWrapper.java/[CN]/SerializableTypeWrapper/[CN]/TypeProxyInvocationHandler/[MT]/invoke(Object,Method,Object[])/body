@@ -1,4 +1,14 @@
 {
+  if (GET_TYPE_PROVIDER_METHOD.equals(method)) {
+    return this.provider;
+  }
+  if (EQUALS_METHOD.equals(method)) {
+    Object other=args[0];
+    while (other instanceof SerializableTypeProxy) {
+      other=((SerializableTypeProxy)other).getTypeProvider().getType();
+    }
+    return this.provider.getType().equals(other);
+  }
   if (Type.class.equals(method.getReturnType()) && args == null) {
     return forTypeProvider(new MethodInvokeTypeProvider(this.provider,method,-1));
   }
