@@ -1,8 +1,7 @@
 {
   AbstractExcelView excelView=new AbstractExcelView(){
-    @Override protected void buildExcelDocument(    Map model,    HSSFWorkbook wb,    HttpServletRequest request,    HttpServletResponse response) throws Exception {
-      HSSFSheet sheet=wb.createSheet();
-      wb.setSheetName(0,"Test Sheet");
+    @Override protected void buildExcelDocument(    Map<String,Object> model,    HSSFWorkbook wb,    HttpServletRequest request,    HttpServletResponse response) throws Exception {
+      HSSFSheet sheet=wb.createSheet("Test Sheet");
       HSSFCell cell=getCell(sheet,2,4);
       cell.setCellValue("Test Value");
       cell=getCell(sheet,2,3);
@@ -14,12 +13,12 @@
     }
   }
 ;
-  excelView.render(new HashMap(),request,response);
+  excelView.render(new HashMap<String,Object>(),request,response);
   POIFSFileSystem poiFs=new POIFSFileSystem(new ByteArrayInputStream(response.getContentAsByteArray()));
   HSSFWorkbook wb=new HSSFWorkbook(poiFs);
   assertEquals("Test Sheet",wb.getSheetName(0));
   HSSFSheet sheet=wb.getSheet("Test Sheet");
   HSSFRow row=sheet.getRow(2);
-  HSSFCell cell=row.getCell((short)4);
+  HSSFCell cell=row.getCell(4);
   assertEquals("Test Value",cell.getStringCellValue());
 }

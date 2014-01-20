@@ -1,7 +1,7 @@
 {
   request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE,newDummyLocaleResolver("nl","nl"));
   AbstractExcelView excelView=new AbstractExcelView(){
-    @Override protected void buildExcelDocument(    Map model,    HSSFWorkbook wb,    HttpServletRequest request,    HttpServletResponse response) throws Exception {
+    @Override protected void buildExcelDocument(    Map<String,Object> model,    HSSFWorkbook wb,    HttpServletRequest request,    HttpServletResponse response) throws Exception {
       HSSFSheet sheet=wb.getSheet("Sheet1");
       HSSFCell cell=getCell(sheet,2,4);
       cell.setCellValue("Test Value");
@@ -16,11 +16,11 @@
 ;
   excelView.setApplicationContext(webAppCtx);
   excelView.setUrl("template");
-  excelView.render(new HashMap(),request,response);
+  excelView.render(new HashMap<String,Object>(),request,response);
   POIFSFileSystem poiFs=new POIFSFileSystem(new ByteArrayInputStream(response.getContentAsByteArray()));
   HSSFWorkbook wb=new HSSFWorkbook(poiFs);
   HSSFSheet sheet=wb.getSheet("Sheet1");
   HSSFRow row=sheet.getRow(0);
-  HSSFCell cell=row.getCell((short)0);
+  HSSFCell cell=row.getCell(0);
   assertEquals("Test Template",cell.getStringCellValue());
 }
