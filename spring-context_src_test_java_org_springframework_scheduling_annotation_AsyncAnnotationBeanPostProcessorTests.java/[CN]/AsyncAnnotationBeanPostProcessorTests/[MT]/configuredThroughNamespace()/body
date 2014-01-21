@@ -7,5 +7,11 @@
   testBean.await(3000);
   Thread asyncThread=testBean.getThread();
   assertTrue(asyncThread.getName().startsWith("testExecutor"));
+  TestableAsyncUncaughtExceptionHandler exceptionHandler=(TestableAsyncUncaughtExceptionHandler)context.getBean("exceptionHandler");
+  assertFalse("handler should not have been called yet",exceptionHandler.isCalled());
+  testBean.failWithVoid();
+  exceptionHandler.await(3000);
+  Method m=ReflectionUtils.findMethod(TestBean.class,"failWithVoid");
+  exceptionHandler.assertCalledWith(m,UnsupportedOperationException.class);
   context.close();
 }

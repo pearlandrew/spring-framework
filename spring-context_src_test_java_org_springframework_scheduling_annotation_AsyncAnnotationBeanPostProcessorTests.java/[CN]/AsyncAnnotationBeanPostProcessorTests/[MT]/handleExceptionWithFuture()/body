@@ -1,0 +1,14 @@
+{
+  ConfigurableApplicationContext context=initContext(new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
+  ITestBean testBean=context.getBean("target",ITestBean.class);
+  final Future<Object> result=testBean.failWithFuture();
+  try {
+    result.get();
+  }
+ catch (  InterruptedException e) {
+    fail("Should not have failed with InterruptedException");
+  }
+catch (  ExecutionException e) {
+    assertEquals("Wrong exception cause",UnsupportedOperationException.class,e.getCause().getClass());
+  }
+}
