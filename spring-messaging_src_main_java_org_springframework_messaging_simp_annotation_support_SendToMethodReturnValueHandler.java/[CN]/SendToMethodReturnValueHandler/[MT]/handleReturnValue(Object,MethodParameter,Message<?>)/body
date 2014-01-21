@@ -7,13 +7,17 @@
   MessagePostProcessor postProcessor=new SessionHeaderPostProcessor(sessionId);
   SendToUser sendToUser=returnType.getMethodAnnotation(SendToUser.class);
   if (sendToUser != null) {
-    if (inputHeaders.getUser() == null) {
+    Principal principal=inputHeaders.getUser();
+    if (principal == null) {
       throw new MissingSessionUserException(inputMessage);
     }
-    String user=inputHeaders.getUser().getName();
+    String userName=principal.getName();
+    if (principal instanceof DestinationUserNameProvider) {
+      userName=((DestinationUserNameProvider)principal).getDestinationUserName();
+    }
     String[] destinations=getTargetDestinations(sendToUser,inputHeaders,this.defaultUserDestinationPrefix);
     for (    String destination : destinations) {
-      this.messagingTemplate.convertAndSendToUser(user,destination,returnValue,postProcessor);
+      this.messagingTemplate.convertAndSendToUser(userName,destination,returnValue,postProcessor);
     }
     return;
   }
