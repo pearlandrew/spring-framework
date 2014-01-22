@@ -1,0 +1,11 @@
+{
+  Method method=this.testController.getClass().getMethod("bestMatch");
+  this.messageHandler.registerHandlerMethod(this.testController,method,"/bestmatch/{foo}/path");
+  method=this.testController.getClass().getMethod("secondBestMatch");
+  this.messageHandler.registerHandlerMethod(this.testController,method,"/bestmatch/*/*");
+  MessageHeaderAccessor headers=new MessageHeaderAccessor();
+  headers.setHeader(DESTINATION_HEADER,"/test/bestmatch/bar/path");
+  Message<?> message=MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+  this.messageHandler.handleMessage(message);
+  assertEquals("bestMatch",this.testController.method);
+}
