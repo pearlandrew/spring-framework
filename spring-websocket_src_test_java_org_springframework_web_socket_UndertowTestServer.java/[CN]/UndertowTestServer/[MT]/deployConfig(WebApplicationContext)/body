@@ -1,12 +1,12 @@
 {
   DispatcherServletInstanceFactory servletFactory=new DispatcherServletInstanceFactory(cxt);
-  DeploymentInfo servletBuilder=deployment().setClassLoader(UndertowTestServer.class.getClassLoader()).setDeploymentName("underow-websocket-test").setContextPath("/").addServlet(servlet("DispatcherServlet",DispatcherServlet.class,servletFactory).addMapping("/")).addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME,new WebSocketDeploymentInfo());
+  DeploymentInfo servletBuilder=deployment().setClassLoader(UndertowTestServer.class.getClassLoader()).setDeploymentName("undertow-websocket-test").setContextPath("/").addServlet(servlet("DispatcherServlet",DispatcherServlet.class,servletFactory).addMapping("/")).addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME,new WebSocketDeploymentInfo());
   this.manager=defaultContainer().addDeployment(servletBuilder);
   this.manager.deploy();
   try {
     this.server=Undertow.builder().addListener(this.port,"localhost").setHandler(this.manager.start()).build();
   }
- catch (  ServletException e) {
-    throw new IllegalStateException(e);
+ catch (  ServletException ex) {
+    throw new IllegalStateException(ex);
   }
 }
