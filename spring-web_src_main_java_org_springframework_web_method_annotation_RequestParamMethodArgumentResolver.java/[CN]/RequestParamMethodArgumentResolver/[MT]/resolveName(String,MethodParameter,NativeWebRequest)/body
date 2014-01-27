@@ -12,6 +12,11 @@
     Assert.notNull(multipartRequest,"Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
     arg=multipartRequest.getFiles(name);
   }
+ else   if (isMultipartFileArray(parameter)) {
+    assertIsMultipartRequest(servletRequest);
+    Assert.notNull(multipartRequest,"Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
+    arg=multipartRequest.getFiles(name).toArray(new MultipartFile[0]);
+  }
  else   if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
     assertIsMultipartRequest(servletRequest);
     arg=servletRequest.getPart(name);
@@ -19,6 +24,10 @@
  else   if (isPartCollection(parameter)) {
     assertIsMultipartRequest(servletRequest);
     arg=new ArrayList<Object>(servletRequest.getParts());
+  }
+ else   if (isPartArray(parameter)) {
+    assertIsMultipartRequest(servletRequest);
+    arg=RequestPartResolver.resolvePart(servletRequest);
   }
  else {
     arg=null;
