@@ -10,17 +10,30 @@
     target=getScheduler();
     quartz2=false;
   }
+  Class<?> targetClass=target.getClass();
   try {
     if (this.schedulerListeners != null) {
-      Method addSchedulerListener=target.getClass().getMethod("addSchedulerListener",SchedulerListener.class);
+      Method addSchedulerListener=targetClass.getMethod("addSchedulerListener",SchedulerListener.class);
       for (      SchedulerListener listener : this.schedulerListeners) {
         ReflectionUtils.invokeMethod(addSchedulerListener,target,listener);
       }
     }
     if (this.globalJobListeners != null) {
-      Method addJobListener=target.getClass().getMethod((quartz2 ? "addJobListener" : "addGlobalJobListener"),JobListener.class);
+      Method addJobListener;
+      if (quartz2) {
+        addJobListener=targetClass.getMethod("addJobListener",JobListener.class,List.class);
+      }
+ else {
+        addJobListener=targetClass.getMethod("addGlobalJobListener",JobListener.class);
+      }
       for (      JobListener listener : this.globalJobListeners) {
-        ReflectionUtils.invokeMethod(addJobListener,target,listener);
+        if (quartz2) {
+          List<?> emptyMatchers=new LinkedList<Object>();
+          ReflectionUtils.invokeMethod(addJobListener,target,listener,emptyMatchers);
+        }
+ else {
+          ReflectionUtils.invokeMethod(addJobListener,target,listener);
+        }
       }
     }
     if (this.jobListeners != null) {
@@ -32,9 +45,21 @@
       }
     }
     if (this.globalTriggerListeners != null) {
-      Method addTriggerListener=target.getClass().getMethod((quartz2 ? "addTriggerListener" : "addGlobalTriggerListener"),TriggerListener.class);
+      Method addTriggerListener;
+      if (quartz2) {
+        addTriggerListener=targetClass.getMethod("addTriggerListener",TriggerListener.class,List.class);
+      }
+ else {
+        addTriggerListener=targetClass.getMethod("addGlobalTriggerListener",TriggerListener.class);
+      }
       for (      TriggerListener listener : this.globalTriggerListeners) {
-        ReflectionUtils.invokeMethod(addTriggerListener,target,listener);
+        if (quartz2) {
+          List<?> emptyMatchers=new LinkedList<Object>();
+          ReflectionUtils.invokeMethod(addTriggerListener,target,listener,emptyMatchers);
+        }
+ else {
+          ReflectionUtils.invokeMethod(addTriggerListener,target,listener);
+        }
       }
     }
     if (this.triggerListeners != null) {
