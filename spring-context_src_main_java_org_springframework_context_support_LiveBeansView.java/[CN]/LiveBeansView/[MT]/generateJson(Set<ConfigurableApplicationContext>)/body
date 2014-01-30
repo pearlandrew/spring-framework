@@ -12,10 +12,13 @@
     result.append("\"beans\": [\n");
     ConfigurableListableBeanFactory bf=context.getBeanFactory();
     String[] beanNames=bf.getBeanDefinitionNames();
-    for (int i=0; i < beanNames.length; i++) {
-      String beanName=beanNames[i];
+    boolean elementAppended=false;
+    for (    String beanName : beanNames) {
       BeanDefinition bd=bf.getBeanDefinition(beanName);
-      if (bd.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE && (!bd.isLazyInit() || bf.containsSingleton(beanName))) {
+      if (isBeanEligible(beanName,bd,bf)) {
+        if (elementAppended) {
+          result.append(",\n");
+        }
         result.append("{\n\"bean\": \"").append(beanName).append("\",\n");
         String scope=bd.getScope();
         if (!StringUtils.hasText(scope)) {
@@ -41,9 +44,7 @@
           result.append("\"");
         }
         result.append("]\n}");
-        if (i < beanNames.length - 1) {
-          result.append(",\n");
-        }
+        elementAppended=true;
       }
     }
     result.append("]\n");
