@@ -1,11 +1,13 @@
 {
-  if (isNullOrCaptureAllPattern(pattern1) && isNullOrCaptureAllPattern(pattern2)) {
+  boolean pattern1NullCaptureAll=isNullOrCaptureAllPattern(pattern1);
+  boolean pattern2NullCaptureAll=isNullOrCaptureAllPattern(pattern2);
+  if (pattern1NullCaptureAll && pattern2NullCaptureAll) {
     return 0;
   }
- else   if (isNullOrCaptureAllPattern(pattern1)) {
+ else   if (pattern1NullCaptureAll) {
     return 1;
   }
- else   if (isNullOrCaptureAllPattern(pattern2)) {
+ else   if (pattern2NullCaptureAll) {
     return -1;
   }
   boolean pattern1EqualsPath=pattern1.equals(path);
@@ -19,12 +21,16 @@
  else   if (pattern2EqualsPath) {
     return 1;
   }
-  int wildCardCount1=getWildCardCount(pattern1);
-  int wildCardCount2=getWildCardCount(pattern2);
-  int bracketCount1=StringUtils.countOccurrencesOf(pattern1,"{");
-  int bracketCount2=StringUtils.countOccurrencesOf(pattern2,"{");
-  int totalCount1=wildCardCount1 + bracketCount1;
-  int totalCount2=wildCardCount2 + bracketCount2;
+  PatternElements pattern1Elements=new PatternElements(pattern1);
+  PatternElements pattern2Elements=new PatternElements(pattern2);
+  if (pattern1Elements.endsWithCatchAll && pattern2Elements.catchAllCount == 0) {
+    return 1;
+  }
+ else   if (pattern2Elements.endsWithCatchAll && pattern1Elements.catchAllCount == 0) {
+    return -1;
+  }
+  int totalCount1=pattern1Elements.bracketCount + pattern1Elements.wildcardsCount;
+  int totalCount2=pattern2Elements.bracketCount + pattern2Elements.wildcardsCount;
   if (totalCount1 != totalCount2) {
     return totalCount1 - totalCount2;
   }
@@ -33,16 +39,16 @@
   if (pattern1Length != pattern2Length) {
     return pattern2Length - pattern1Length;
   }
-  if (wildCardCount1 < wildCardCount2) {
+  if (pattern1Elements.wildcardsCount < pattern2Elements.wildcardsCount) {
     return -1;
   }
- else   if (wildCardCount2 < wildCardCount1) {
+ else   if (pattern2Elements.wildcardsCount < pattern1Elements.wildcardsCount) {
     return 1;
   }
-  if (bracketCount1 < bracketCount2) {
+  if (pattern1Elements.bracketCount < pattern2Elements.bracketCount) {
     return -1;
   }
- else   if (bracketCount2 < bracketCount1) {
+ else   if (pattern2Elements.bracketCount < pattern1Elements.bracketCount) {
     return 1;
   }
   return 0;
