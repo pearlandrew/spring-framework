@@ -2,7 +2,7 @@
   this.requestContext=requestContext;
   this.path=path;
   this.htmlEscape=htmlEscape;
-  String beanName=null;
+  String beanName;
   int dotPos=path.indexOf('.');
   if (dotPos == -1) {
     beanName=path;
@@ -30,6 +30,9 @@
           this.actualValue=this.bindingResult.getRawFieldValue(this.expression);
           this.editor=this.bindingResult.findEditor(this.expression,null);
         }
+ else {
+          this.actualValue=this.value;
+        }
       }
     }
  else {
@@ -44,8 +47,9 @@
     }
     if (this.expression != null && !"*".equals(this.expression) && !this.expression.endsWith("*")) {
       BeanWrapper bw=PropertyAccessorFactory.forBeanPropertyAccess(target);
-      this.valueType=bw.getPropertyType(this.expression);
       this.value=bw.getPropertyValue(this.expression);
+      this.valueType=bw.getPropertyType(this.expression);
+      this.actualValue=this.value;
     }
     this.errorCodes=new String[0];
     this.errorMessages=new String[0];
