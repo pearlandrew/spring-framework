@@ -1,12 +1,16 @@
 {
-  ServletRequestAttributes attributes=(ServletRequestAttributes)requestEvent.getServletRequest().getAttribute(REQUEST_ATTRIBUTES_ATTRIBUTE);
-  ServletRequestAttributes threadAttributes=(ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+  ServletRequestAttributes attributes=null;
+  Object reqAttr=requestEvent.getServletRequest().getAttribute(REQUEST_ATTRIBUTES_ATTRIBUTE);
+  if (reqAttr instanceof ServletRequestAttributes) {
+    attributes=(ServletRequestAttributes)reqAttr;
+  }
+  RequestAttributes threadAttributes=RequestContextHolder.getRequestAttributes();
   if (threadAttributes != null) {
-    if (attributes == null) {
-      attributes=threadAttributes;
-    }
     LocaleContextHolder.resetLocaleContext();
     RequestContextHolder.resetRequestAttributes();
+    if (attributes == null && threadAttributes instanceof ServletRequestAttributes) {
+      attributes=(ServletRequestAttributes)threadAttributes;
+    }
   }
   if (attributes != null) {
     attributes.requestCompleted();
