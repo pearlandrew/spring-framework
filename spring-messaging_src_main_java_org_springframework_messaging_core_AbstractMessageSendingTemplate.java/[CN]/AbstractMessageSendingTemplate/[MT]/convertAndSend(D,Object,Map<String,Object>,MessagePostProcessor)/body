@@ -1,6 +1,10 @@
 {
   MessageHeaders messageHeaders=(headers != null) ? new MessageHeaders(headers) : null;
   Message<?> message=this.converter.toMessage(payload,messageHeaders);
+  if (message == null) {
+    String payloadType=(payload != null) ? payload.getClass().getName() : null;
+    throw new MessageConversionException("Unable to convert payload type '" + payloadType + "', Content-Type="+ messageHeaders.get(MessageHeaders.CONTENT_TYPE)+ ", converter="+ this.converter,null);
+  }
   if (postProcessor != null) {
     message=postProcessor.postProcessMessage(message);
   }
