@@ -16,7 +16,13 @@
       this.port=uriComponents.getPort();
     }
     if (StringUtils.hasLength(uriComponents.getPath())) {
-      this.pathBuilder=new CompositePathComponentBuilder(uriComponents.getPath());
+      List<String> segments=uriComponents.getPathSegments();
+      if (segments.isEmpty()) {
+        this.pathBuilder.addPath(uriComponents.getPath());
+      }
+ else {
+        this.pathBuilder.addPathSegments(segments.toArray(new String[segments.size()]));
+      }
     }
     if (!uriComponents.getQueryParams().isEmpty()) {
       this.queryParams.clear();
