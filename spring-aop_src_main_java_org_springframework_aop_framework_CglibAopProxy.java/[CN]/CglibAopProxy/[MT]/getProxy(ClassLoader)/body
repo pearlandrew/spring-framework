@@ -22,15 +22,16 @@
       }
     }
     enhancer.setSuperclass(proxySuperClass);
-    enhancer.setStrategy(new MemorySafeUndeclaredThrowableStrategy(UndeclaredThrowableException.class));
     enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
+    enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+    enhancer.setStrategy(new UndeclaredThrowableStrategy(UndeclaredThrowableException.class));
     Callback[] callbacks=getCallbacks(rootClass);
     Class<?>[] types=new Class<?>[callbacks.length];
     for (int x=0; x < types.length; x++) {
       types[x]=callbacks[x].getClass();
     }
-    enhancer.setCallbackTypes(types);
     enhancer.setCallbackFilter(new ProxyCallbackFilter(this.advised.getConfigurationOnlyCopy(),this.fixedInterceptorMap,this.fixedInterceptorOffset));
+    enhancer.setCallbackTypes(types);
     return createProxyClassAndInstance(enhancer,callbacks);
   }
  catch (  CodeGenerationException ex) {
