@@ -7,6 +7,15 @@
   }
  else {
     String pathInfo=request.getPathInfo();
-    return (pathInfo != null ? pathInfo : servletPath);
+    if (pathInfo != null) {
+      return pathInfo;
+    }
+    if (this.urlDecode == false) {
+      path=getRemainingPath(decodeInternal(request,pathWithinApp),servletPath,false);
+      if (path != null) {
+        return pathWithinApp;
+      }
+    }
+    return servletPath;
   }
 }
