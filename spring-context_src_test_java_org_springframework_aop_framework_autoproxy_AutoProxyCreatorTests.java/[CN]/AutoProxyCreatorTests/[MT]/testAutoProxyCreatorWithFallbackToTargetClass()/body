@@ -1,6 +1,6 @@
 {
   StaticApplicationContext sac=new StaticApplicationContext();
-  sac.registerSingleton("testAutoProxyCreator",TestAutoProxyCreator.class);
+  sac.registerSingleton("testAutoProxyCreator",FallbackTestAutoProxyCreator.class);
   sac.registerSingleton("noInterfaces",NoInterfaces.class);
   sac.registerSingleton("containerCallbackInterfacesOnly",ContainerCallbackInterfacesOnly.class);
   sac.registerSingleton("singletonNoInterceptor",TestBean.class);
@@ -16,9 +16,9 @@
   assertFalse(AopUtils.isCglibProxy(messageSource));
   assertTrue(AopUtils.isCglibProxy(noInterfaces));
   assertTrue(AopUtils.isCglibProxy(containerCallbackInterfacesOnly));
-  assertTrue(AopUtils.isCglibProxy(singletonNoInterceptor));
-  assertTrue(AopUtils.isCglibProxy(singletonToBeProxied));
-  assertTrue(AopUtils.isCglibProxy(prototypeToBeProxied));
+  assertFalse(AopUtils.isCglibProxy(singletonNoInterceptor));
+  assertFalse(AopUtils.isCglibProxy(singletonToBeProxied));
+  assertFalse(AopUtils.isCglibProxy(prototypeToBeProxied));
   TestAutoProxyCreator tapc=(TestAutoProxyCreator)sac.getBean("testAutoProxyCreator");
   assertEquals(0,tapc.testInterceptor.nrOfInvocations);
   singletonNoInterceptor.getName();

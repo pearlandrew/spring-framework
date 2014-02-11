@@ -1,10 +1,12 @@
 {
   ProxyFactory proxyFactory=new ProxyFactory();
   proxyFactory.copyFrom(this);
-  if (!shouldProxyTargetClass(beanClass,beanName)) {
-    Class<?>[] targetInterfaces=ClassUtils.getAllInterfacesForClass(beanClass,this.proxyClassLoader);
-    for (    Class<?> targetInterface : targetInterfaces) {
-      proxyFactory.addInterface(targetInterface);
+  if (!proxyFactory.isProxyTargetClass()) {
+    if (shouldProxyTargetClass(beanClass,beanName)) {
+      proxyFactory.setProxyTargetClass(true);
+    }
+ else {
+      evaluateProxyInterfaces(beanClass,proxyFactory);
     }
   }
   Advisor[] advisors=buildAdvisors(beanName,specificInterceptors);

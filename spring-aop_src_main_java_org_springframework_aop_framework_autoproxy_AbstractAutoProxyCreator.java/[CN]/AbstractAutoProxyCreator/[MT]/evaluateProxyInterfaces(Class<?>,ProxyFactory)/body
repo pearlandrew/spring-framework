@@ -1,0 +1,18 @@
+{
+  Class<?>[] targetInterfaces=ClassUtils.getAllInterfacesForClass(beanClass,this.proxyClassLoader);
+  boolean hasReasonableProxyInterface=false;
+  for (  Class<?> ifc : targetInterfaces) {
+    if (!isConfigurationCallbackInterface(ifc) && ifc.getMethods().length > 0) {
+      hasReasonableProxyInterface=true;
+      break;
+    }
+  }
+  if (hasReasonableProxyInterface) {
+    for (    Class<?> ifc : targetInterfaces) {
+      proxyFactory.addInterface(ifc);
+    }
+  }
+ else {
+    proxyFactory.setProxyTargetClass(true);
+  }
+}
