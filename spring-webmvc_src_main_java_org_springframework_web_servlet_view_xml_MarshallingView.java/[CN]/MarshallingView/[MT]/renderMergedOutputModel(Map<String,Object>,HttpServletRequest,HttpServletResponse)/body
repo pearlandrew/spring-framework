@@ -1,11 +1,11 @@
 {
   Object toBeMarshalled=locateToBeMarshalled(model);
   if (toBeMarshalled == null) {
-    throw new ServletException("Unable to locate object to be marshalled in model: " + model);
+    throw new IllegalStateException("Unable to locate object to be marshalled in model: " + model);
   }
   ByteArrayOutputStream bos=new ByteArrayOutputStream(2048);
-  marshaller.marshal(toBeMarshalled,new StreamResult(bos));
+  this.marshaller.marshal(toBeMarshalled,new StreamResult(bos));
   setResponseContentType(request,response);
   response.setContentLength(bos.size());
-  FileCopyUtils.copy(bos.toByteArray(),response.getOutputStream());
+  StreamUtils.copy(bos.toByteArray(),response.getOutputStream());
 }

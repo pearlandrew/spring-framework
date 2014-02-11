@@ -1,17 +1,17 @@
 {
   if (this.modelKey != null) {
-    Object o=model.get(this.modelKey);
-    if (o == null) {
-      throw new ServletException("Model contains no object with key [" + modelKey + "]");
+    Object obj=model.get(this.modelKey);
+    if (obj == null) {
+      throw new IllegalStateException("Model contains no object with key [" + this.modelKey + "]");
     }
-    if (!this.marshaller.supports(o.getClass())) {
-      throw new ServletException("Model object [" + o + "] retrieved via key ["+ modelKey+ "] is not supported by the Marshaller");
+    if (!this.marshaller.supports(obj.getClass())) {
+      throw new IllegalStateException("Model object [" + obj + "] retrieved via key ["+ this.modelKey+ "] is not supported by the Marshaller");
     }
-    return o;
+    return obj;
   }
-  for (  Object o : model.values()) {
-    if (o != null && this.marshaller.supports(o.getClass())) {
-      return o;
+  for (  Object obj : model.values()) {
+    if (obj != null && this.marshaller.supports(obj.getClass())) {
+      return obj;
     }
   }
   return null;
