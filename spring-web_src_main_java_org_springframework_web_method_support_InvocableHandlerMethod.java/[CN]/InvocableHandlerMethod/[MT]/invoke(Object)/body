@@ -1,14 +1,14 @@
 {
-  ReflectionUtils.makeAccessible(this.getBridgedMethod());
+  ReflectionUtils.makeAccessible(getBridgedMethod());
   try {
-    assertTargetBean(getBridgedMethod(),getBean(),args);
     return getBridgedMethod().invoke(getBean(),args);
   }
- catch (  IllegalArgumentException e) {
-    throw new IllegalArgumentException(getInvocationErrorMessage(e.getMessage(),args),e);
+ catch (  IllegalArgumentException ex) {
+    assertTargetBean(getBridgedMethod(),getBean(),args);
+    throw new IllegalStateException(getInvocationErrorMessage(ex.getMessage(),args),ex);
   }
-catch (  InvocationTargetException e) {
-    Throwable targetException=e.getTargetException();
+catch (  InvocationTargetException ex) {
+    Throwable targetException=ex.getTargetException();
     if (targetException instanceof RuntimeException) {
       throw (RuntimeException)targetException;
     }
