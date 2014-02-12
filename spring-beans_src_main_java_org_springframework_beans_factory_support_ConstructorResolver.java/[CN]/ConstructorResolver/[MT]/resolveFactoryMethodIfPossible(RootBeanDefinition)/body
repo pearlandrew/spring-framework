@@ -1,16 +1,19 @@
 {
   Class<?> factoryClass;
+  boolean isStatic;
   if (mbd.getFactoryBeanName() != null) {
     factoryClass=this.beanFactory.getType(mbd.getFactoryBeanName());
+    isStatic=false;
   }
  else {
     factoryClass=mbd.getBeanClass();
+    isStatic=true;
   }
   factoryClass=ClassUtils.getUserClass(factoryClass);
-  Method[] candidates=ReflectionUtils.getAllDeclaredMethods(factoryClass);
+  Method[] candidates=getCandidateMethods(factoryClass,mbd);
   Method uniqueCandidate=null;
   for (  Method candidate : candidates) {
-    if (mbd.isFactoryMethod(candidate)) {
+    if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
       if (uniqueCandidate == null) {
         uniqueCandidate=candidate;
       }

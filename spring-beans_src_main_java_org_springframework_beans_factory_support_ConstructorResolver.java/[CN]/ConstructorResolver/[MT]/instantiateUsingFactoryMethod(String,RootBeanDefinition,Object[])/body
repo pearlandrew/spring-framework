@@ -47,22 +47,10 @@ synchronized (mbd.constructorArgumentLock) {
   }
   if (factoryMethodToUse == null || argsToUse == null) {
     factoryClass=ClassUtils.getUserClass(factoryClass);
-    Method[] rawCandidates;
-    final Class<?> factoryClazz=factoryClass;
-    if (System.getSecurityManager() != null) {
-      rawCandidates=AccessController.doPrivileged(new PrivilegedAction<Method[]>(){
-        @Override public Method[] run(){
-          return (mbd.isNonPublicAccessAllowed() ? ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
-        }
-      }
-);
-    }
- else {
-      rawCandidates=(mbd.isNonPublicAccessAllowed() ? ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
-    }
+    Method[] rawCandidates=getCandidateMethods(factoryClass,mbd);
     List<Method> candidateSet=new ArrayList<Method>();
     for (    Method candidate : rawCandidates) {
-      if (Modifier.isStatic(candidate.getModifiers()) == isStatic && candidate.getName().equals(mbd.getFactoryMethodName()) && mbd.isFactoryMethod(candidate)) {
+      if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
         candidateSet.add(candidate);
       }
     }
