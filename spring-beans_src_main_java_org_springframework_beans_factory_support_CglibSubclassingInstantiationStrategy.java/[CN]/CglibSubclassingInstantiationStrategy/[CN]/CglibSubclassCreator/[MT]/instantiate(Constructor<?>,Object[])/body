@@ -1,8 +1,19 @@
 {
-  Enhancer enhancer=new Enhancer();
-  enhancer.setSuperclass(this.beanDefinition.getBeanClass());
-  enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-  enhancer.setCallbackFilter(new CallbackFilterImpl());
-  enhancer.setCallbacks(new Callback[]{NoOp.INSTANCE,new LookupOverrideMethodInterceptor(),new ReplaceOverrideMethodInterceptor()});
-  return (ctor != null ? enhancer.create(ctor.getParameterTypes(),args) : enhancer.create());
+  Class<?> subclass=createEnhancedSubclass(this.beanDefinition);
+  Object instance;
+  if (ctor == null) {
+    instance=BeanUtils.instantiate(subclass);
+  }
+ else {
+    try {
+      Constructor<?> enhancedSubclassConstructor=subclass.getConstructor(ctor.getParameterTypes());
+      instance=enhancedSubclassConstructor.newInstance(args);
+    }
+ catch (    Exception e) {
+      throw new BeanInstantiationException(this.beanDefinition.getBeanClass(),String.format("Failed to invoke construcor for CGLIB enhanced subclass [%s]",subclass.getName()),e);
+    }
+  }
+  Factory factory=(Factory)instance;
+  factory.setCallbacks(new Callback[]{NoOp.INSTANCE,new LookupOverrideMethodInterceptor(beanDefinition,owner),new ReplaceOverrideMethodInterceptor(beanDefinition,owner)});
+  return instance;
 }
