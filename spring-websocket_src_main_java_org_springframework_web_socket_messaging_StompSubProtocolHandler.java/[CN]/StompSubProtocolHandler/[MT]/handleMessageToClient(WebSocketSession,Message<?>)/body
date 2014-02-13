@@ -12,9 +12,15 @@
   if (headers.getCommand() == StompCommand.CONNECTED) {
     afterStompSessionConnected(headers,session);
   }
-  if (StompCommand.MESSAGE.equals(headers.getCommand()) && (headers.getSubscriptionId() == null)) {
-    logger.error("Ignoring message, no subscriptionId header: " + message);
-    return;
+  if (StompCommand.MESSAGE.equals(headers.getCommand())) {
+    if (headers.getSubscriptionId() == null) {
+      logger.error("Ignoring message, no subscriptionId header: " + message);
+      return;
+    }
+    String header=UserDestinationMessageHandler.SUBSCRIBE_DESTINATION;
+    if (message.getHeaders().containsKey(header)) {
+      headers.setDestination((String)message.getHeaders().get(header));
+    }
   }
   if (!(message.getPayload() instanceof byte[])) {
     logger.error("Ignoring message, expected byte[] content: " + message);

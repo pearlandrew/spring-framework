@@ -1,7 +1,16 @@
 {
-  Set<String> destinations=this.userDestinationResolver.resolveDestination(message);
-  if (CollectionUtils.isEmpty(destinations)) {
+  UserDestinationResult result=this.userDestinationResolver.resolveDestination(message);
+  if (result == null) {
     return;
+  }
+  Set<String> destinations=result.getTargetDestinations();
+  if (destinations.isEmpty()) {
+    return;
+  }
+  SimpMessageHeaderAccessor headerAccessor=SimpMessageHeaderAccessor.wrap(message);
+  if (SimpMessageType.MESSAGE.equals(headerAccessor.getMessageType())) {
+    headerAccessor.setHeader(SUBSCRIBE_DESTINATION,result.getSubscribeDestination());
+    message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headerAccessor).build();
   }
   for (  String targetDestination : destinations) {
     if (logger.isDebugEnabled()) {

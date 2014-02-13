@@ -1,6 +1,10 @@
 {
-  Message<?> message=createMessage(SimpMessageType.SUBSCRIBE,this.user,SESSION_ID,"/user/queue/foo");
-  Set<String> actual=this.resolver.resolveDestination(message);
-  assertEquals(1,actual.size());
-  assertEquals("/queue/foo-user123",actual.iterator().next());
+  String sourceDestination="/user/queue/foo";
+  Message<?> message=createMessage(SimpMessageType.SUBSCRIBE,this.user,SESSION_ID,sourceDestination);
+  UserDestinationResult actual=this.resolver.resolveDestination(message);
+  assertEquals(sourceDestination,actual.getSourceDestination());
+  assertEquals(1,actual.getTargetDestinations().size());
+  assertEquals("/queue/foo-user123",actual.getTargetDestinations().iterator().next());
+  assertEquals(sourceDestination,actual.getSubscribeDestination());
+  assertEquals(this.user.getName(),actual.getUser());
 }
