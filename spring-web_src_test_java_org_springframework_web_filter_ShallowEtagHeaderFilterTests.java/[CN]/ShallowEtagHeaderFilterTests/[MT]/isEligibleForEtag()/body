@@ -3,4 +3,9 @@
   MockHttpServletResponse response=new MockHttpServletResponse();
   assertTrue(filter.isEligibleForEtag(request,response,200,new byte[0]));
   assertFalse(filter.isEligibleForEtag(request,response,300,new byte[0]));
+  request=new MockHttpServletRequest("POST","/hotels");
+  assertFalse(filter.isEligibleForEtag(request,response,200,new byte[0]));
+  request=new MockHttpServletRequest("POST","/hotels");
+  request.addHeader("Cache-Control","must-revalidate, no-store");
+  assertFalse(filter.isEligibleForEtag(request,response,200,new byte[0]));
 }
