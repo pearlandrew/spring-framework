@@ -15,6 +15,13 @@
   }
  else {
     String requestUri=getRequestContext().getRequestUri();
+    String encoding=pageContext.getResponse().getCharacterEncoding();
+    try {
+      requestUri=UriUtils.encodePath(requestUri,encoding);
+    }
+ catch (    UnsupportedEncodingException e) {
+      throw new JspException(e);
+    }
     ServletResponse response=this.pageContext.getResponse();
     if (response instanceof HttpServletResponse) {
       requestUri=((HttpServletResponse)response).encodeURL(requestUri);
