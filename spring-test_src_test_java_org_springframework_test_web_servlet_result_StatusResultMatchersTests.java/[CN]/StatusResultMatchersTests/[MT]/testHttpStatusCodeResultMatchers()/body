@@ -1,15 +1,13 @@
 {
-  StatusResultMatchers resultMatchers=new StatusResultMatchers();
   List<AssertionError> failures=new ArrayList<AssertionError>();
   for (  HttpStatus status : HttpStatus.values()) {
     MockHttpServletResponse response=new MockHttpServletResponse();
     response.setStatus(status.value());
-    String methodName=statusToMethodName(status);
-    Method method=StatusResultMatchers.class.getMethod(methodName);
+    MvcResult mvcResult=new StubMvcResult(request,null,null,null,null,null,response);
     try {
-      ResultMatcher matcher=(ResultMatcher)ReflectionUtils.invokeMethod(method,resultMatchers);
+      Method method=getMethodForHttpStatus(status);
+      ResultMatcher matcher=(ResultMatcher)ReflectionUtils.invokeMethod(method,this.matchers);
       try {
-        MvcResult mvcResult=new StubMvcResult(new MockHttpServletRequest(),null,null,null,null,null,response);
         matcher.match(mvcResult);
       }
  catch (      AssertionError error) {
@@ -17,7 +15,7 @@
       }
     }
  catch (    Exception ex) {
-      throw new Exception("Failed to obtain ResultMatcher: " + method.toString(),ex);
+      throw new Exception("Failed to obtain ResultMatcher for status " + status,ex);
     }
   }
   if (!failures.isEmpty()) {
