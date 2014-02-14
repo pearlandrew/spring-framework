@@ -1,14 +1,21 @@
 {
   Class<?> handlerType=(handler instanceof String ? getApplicationContext().getType((String)handler) : handler.getClass());
+  final Map<Method,T> mappings=new IdentityHashMap<Method,T>();
   final Class<?> userType=ClassUtils.getUserClass(handlerType);
   Set<Method> methods=HandlerMethodSelector.selectMethods(userType,new MethodFilter(){
     @Override public boolean matches(    Method method){
-      return getMappingForMethod(method,userType) != null;
+      T mapping=getMappingForMethod(method,userType);
+      if (mapping != null) {
+        mappings.put(method,mapping);
+        return true;
+      }
+ else {
+        return false;
+      }
     }
   }
 );
   for (  Method method : methods) {
-    T mapping=getMappingForMethod(method,userType);
-    registerHandlerMethod(handler,method,mapping);
+    registerHandlerMethod(handler,method,mappings.get(method));
   }
 }
