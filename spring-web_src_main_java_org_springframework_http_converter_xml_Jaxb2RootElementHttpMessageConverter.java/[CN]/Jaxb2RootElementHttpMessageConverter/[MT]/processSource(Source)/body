@@ -1,0 +1,19 @@
+{
+  if (source instanceof StreamSource) {
+    StreamSource streamSource=(StreamSource)source;
+    InputSource inputSource=new InputSource(streamSource.getInputStream());
+    try {
+      XMLReader xmlReader=XMLReaderFactory.createXMLReader();
+      String featureName="http://xml.org/sax/features/external-general-entities";
+      xmlReader.setFeature(featureName,this.processExternalEntities);
+      return new SAXSource(xmlReader,inputSource);
+    }
+ catch (    SAXException ex) {
+      logger.warn("Processing of external entities could not be disabled",ex);
+      return source;
+    }
+  }
+ else {
+    return source;
+  }
+}

@@ -1,0 +1,18 @@
+{
+  final AtomicReference<XMLReader> result=new AtomicReference<XMLReader>();
+  CastorMarshaller marshaller=new CastorMarshaller(){
+    @Override protected Object unmarshalSaxReader(    XMLReader xmlReader,    InputSource inputSource){
+      result.set(xmlReader);
+      return null;
+    }
+  }
+;
+  marshaller.unmarshal(new SAXSource(new InputSource("1")));
+  assertNotNull(result.get());
+  assertEquals(false,result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
+  result.set(null);
+  marshaller.setProcessExternalEntities(true);
+  marshaller.unmarshal(new SAXSource(new InputSource("1")));
+  assertNotNull(result.get());
+  assertEquals(true,result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
+}
