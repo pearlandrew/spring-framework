@@ -1,0 +1,43 @@
+{
+  Assert.notNull(testClass,"Class must not be null");
+  final Set<String> activeProfiles=new HashSet<String>();
+  Class<ActiveProfiles> annotationType=ActiveProfiles.class;
+  AnnotationDescriptor<ActiveProfiles> descriptor=findAnnotationDescriptor(testClass,annotationType);
+  if (descriptor == null) {
+    if (logger.isDebugEnabled()) {
+      logger.debug(String.format("Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",annotationType.getName(),testClass.getName()));
+    }
+  }
+ else {
+    Class<?> rootDeclaringClass=descriptor.getRootDeclaringClass();
+    Class<?> declaringClass=descriptor.getDeclaringClass();
+    AnnotationAttributes annAttrs=descriptor.getAnnotationAttributes();
+    if (logger.isTraceEnabled()) {
+      logger.trace(String.format("Retrieved @ActiveProfiles attributes [%s] for declaring class [%s].",annAttrs,declaringClass.getName()));
+    }
+    Class<? extends ActiveProfilesResolver> resolverClass=annAttrs.getClass("resolver");
+    if (!ActiveProfilesResolver.class.equals(resolverClass)) {
+      String msg=String.format("Configuration error for test class [%s]: %s cannot be used " + "in conjunction with custom resolver [%s].",rootDeclaringClass.getName(),getClass().getSimpleName(),resolverClass.getName());
+      logger.error(msg);
+      throw new IllegalStateException(msg);
+    }
+    String[] profiles=annAttrs.getStringArray("profiles");
+    String[] valueProfiles=annAttrs.getStringArray("value");
+    boolean valueDeclared=!ObjectUtils.isEmpty(valueProfiles);
+    boolean profilesDeclared=!ObjectUtils.isEmpty(profiles);
+    if (valueDeclared && profilesDeclared) {
+      String msg=String.format("Class [%s] has been configured with @ActiveProfiles' 'value' [%s] " + "and 'profiles' [%s] attributes. Only one declaration of active bean " + "definition profiles is permitted per @ActiveProfiles annotation.",declaringClass.getName(),ObjectUtils.nullSafeToString(valueProfiles),ObjectUtils.nullSafeToString(profiles));
+      logger.error(msg);
+      throw new IllegalStateException(msg);
+    }
+    if (valueDeclared) {
+      profiles=valueProfiles;
+    }
+    for (    String profile : profiles) {
+      if (StringUtils.hasText(profile)) {
+        activeProfiles.add(profile.trim());
+      }
+    }
+  }
+  return StringUtils.toStringArray(activeProfiles);
+}

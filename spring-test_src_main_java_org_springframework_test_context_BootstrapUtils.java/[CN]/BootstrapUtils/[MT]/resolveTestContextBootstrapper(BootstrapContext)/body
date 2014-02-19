@@ -1,0 +1,22 @@
+{
+  Class<?> testClass=bootstrapContext.getTestClass();
+  Class<? extends TestContextBootstrapper> clazz=null;
+  try {
+    BootstrapWith bootstrapWith=findAnnotation(testClass,BootstrapWith.class);
+    if (bootstrapWith != null && !TestContextBootstrapper.class.equals(bootstrapWith.value())) {
+      clazz=bootstrapWith.value();
+    }
+ else {
+      clazz=(Class<? extends TestContextBootstrapper>)ClassUtils.forName(DEFAULT_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME,BootstrapUtils.class.getClassLoader());
+    }
+    if (logger.isDebugEnabled()) {
+      logger.debug(String.format("Instantiating TestContextBootstrapper from class [%s]",clazz.getName()));
+    }
+    TestContextBootstrapper testContextBootstrapper=instantiateClass(clazz,TestContextBootstrapper.class);
+    testContextBootstrapper.setBootstrapContext(bootstrapContext);
+    return testContextBootstrapper;
+  }
+ catch (  Throwable t) {
+    throw new IllegalStateException("Could not load TestContextBootstrapper [" + clazz + "]. Specify @BootstrapWith's 'value' attribute "+ "or make the default bootstrapper class available.",t);
+  }
+}
