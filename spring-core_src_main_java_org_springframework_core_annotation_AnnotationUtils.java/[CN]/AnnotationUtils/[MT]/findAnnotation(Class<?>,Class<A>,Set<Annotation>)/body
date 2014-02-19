@@ -1,0 +1,27 @@
+{
+  Assert.notNull(clazz,"Class must not be null");
+  A annotation=clazz.getAnnotation(annotationType);
+  if (annotation != null) {
+    return annotation;
+  }
+  for (  Class<?> ifc : clazz.getInterfaces()) {
+    annotation=findAnnotation(ifc,annotationType,visitedAnnotations);
+    if (annotation != null) {
+      return annotation;
+    }
+  }
+  for (  Annotation ann : clazz.getAnnotations()) {
+    if (!visitedAnnotations.contains(ann)) {
+      visitedAnnotations.add(ann);
+      annotation=findAnnotation(ann.annotationType(),annotationType,visitedAnnotations);
+      if (annotation != null) {
+        return annotation;
+      }
+    }
+  }
+  Class<?> superclass=clazz.getSuperclass();
+  if (superclass == null || superclass.equals(Object.class)) {
+    return null;
+  }
+  return findAnnotation(superclass,annotationType,visitedAnnotations);
+}
