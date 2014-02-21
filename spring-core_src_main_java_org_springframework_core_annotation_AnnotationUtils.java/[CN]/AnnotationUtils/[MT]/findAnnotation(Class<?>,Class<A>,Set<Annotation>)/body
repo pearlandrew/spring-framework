@@ -5,15 +5,14 @@
     return annotation;
   }
   for (  Class<?> ifc : clazz.getInterfaces()) {
-    annotation=findAnnotation(ifc,annotationType,visitedAnnotations);
+    annotation=findAnnotation(ifc,annotationType,visited);
     if (annotation != null) {
       return annotation;
     }
   }
   for (  Annotation ann : clazz.getAnnotations()) {
-    if (!visitedAnnotations.contains(ann)) {
-      visitedAnnotations.add(ann);
-      annotation=findAnnotation(ann.annotationType(),annotationType,visitedAnnotations);
+    if (visited.add(ann)) {
+      annotation=findAnnotation(ann.annotationType(),annotationType,visited);
       if (annotation != null) {
         return annotation;
       }
@@ -23,5 +22,5 @@
   if (superclass == null || superclass.equals(Object.class)) {
     return null;
   }
-  return findAnnotation(superclass,annotationType,visitedAnnotations);
+  return findAnnotation(superclass,annotationType,visited);
 }
