@@ -1,0 +1,23 @@
+{
+  CacheKeyInvocationContext<CachePut> invocationContext=createCacheKeyInvocationContext(context);
+  CachePutOperation operation=context.getOperation();
+  final boolean earlyPut=operation.isEarlyPut();
+  final Object value=invocationContext.getValueParameter().getValue();
+  if (earlyPut) {
+    cacheValue(context,value);
+  }
+  try {
+    Object result=invoker.invoke();
+    if (!earlyPut) {
+      cacheValue(context,value);
+    }
+    return result;
+  }
+ catch (  CacheOperationInvoker.ThrowableWrapper t) {
+    Throwable ex=t.getOriginal();
+    if (!earlyPut && operation.getExceptionTypeFilter().match(ex.getClass())) {
+      cacheValue(context,value);
+    }
+    throw t;
+  }
+}

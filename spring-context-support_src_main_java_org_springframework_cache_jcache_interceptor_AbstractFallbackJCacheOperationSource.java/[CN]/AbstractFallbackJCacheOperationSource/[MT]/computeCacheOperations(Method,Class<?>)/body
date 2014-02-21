@@ -1,0 +1,18 @@
+{
+  if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
+    return null;
+  }
+  Method specificMethod=ClassUtils.getMostSpecificMethod(method,targetClass);
+  specificMethod=BridgeMethodResolver.findBridgedMethod(specificMethod);
+  JCacheOperation<?> operation=findCacheOperation(specificMethod,targetClass);
+  if (operation != null) {
+    return operation;
+  }
+  if (specificMethod != method) {
+    operation=findCacheOperation(method,targetClass);
+    if (operation != null) {
+      return operation;
+    }
+  }
+  return null;
+}

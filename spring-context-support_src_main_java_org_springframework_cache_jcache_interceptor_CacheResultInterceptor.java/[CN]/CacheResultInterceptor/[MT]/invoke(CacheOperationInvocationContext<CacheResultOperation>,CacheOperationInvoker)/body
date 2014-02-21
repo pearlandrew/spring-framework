@@ -1,0 +1,25 @@
+{
+  CacheResultOperation operation=context.getOperation();
+  final Object cacheKey=generateKey(context);
+  Cache cache=resolveCache(context);
+  Cache exceptionCache=resolveExceptionCache(context);
+  if (!operation.isAlwaysInvoked()) {
+    Cache.ValueWrapper cachedValue=cache.get(cacheKey);
+    if (cachedValue != null) {
+      return cachedValue.get();
+    }
+    checkForCachedException(exceptionCache,cacheKey);
+  }
+  try {
+    Object invocationResult=invoker.invoke();
+    if (invocationResult != null) {
+      cache.put(cacheKey,invocationResult);
+    }
+    return invocationResult;
+  }
+ catch (  CacheOperationInvoker.ThrowableWrapper t) {
+    Throwable original=t.getOriginal();
+    cacheException(exceptionCache,operation.getExceptionTypeFilter(),cacheKey,original);
+    throw t;
+  }
+}

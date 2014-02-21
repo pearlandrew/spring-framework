@@ -1,0 +1,17 @@
+{
+  Object cacheKey=new MethodCacheKey(method,targetClass);
+  JCacheOperation<?> cached=this.cache.get(cacheKey);
+  if (cached != null) {
+    return cached;
+  }
+ else {
+    JCacheOperation<?> operation=computeCacheOperations(method,targetClass);
+    if (operation != null) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Adding cacheable method '" + method.getName() + "' with operation: "+ operation);
+      }
+      this.cache.put(cacheKey,operation);
+    }
+    return operation;
+  }
+}
