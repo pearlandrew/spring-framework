@@ -7,6 +7,7 @@
   }
   final Set<String> activeProfiles=new HashSet<String>();
   while (descriptor != null) {
+    Class<?> rootDeclaringClass=descriptor.getRootDeclaringClass();
     Class<?> declaringClass=descriptor.getDeclaringClass();
     AnnotationAttributes annAttrs=descriptor.getAnnotationAttributes();
     if (logger.isTraceEnabled()) {
@@ -24,11 +25,11 @@
         resolver=instantiateClass(resolverClass,ActiveProfilesResolver.class);
       }
  catch (      Exception e) {
-        String msg=String.format("Could not instantiate ActiveProfilesResolver of " + "type [%s] for test class [%s].",resolverClass.getName(),declaringClass.getName());
+        String msg=String.format("Could not instantiate ActiveProfilesResolver of " + "type [%s] for test class [%s].",resolverClass.getName(),rootDeclaringClass.getName());
         logger.error(msg);
         throw new IllegalStateException(msg,e);
       }
-      profiles=resolver.resolve(declaringClass);
+      profiles=resolver.resolve(rootDeclaringClass);
       if (profiles == null) {
         String msg=String.format("ActiveProfilesResolver [%s] returned a null array of bean definition profiles.",resolverClass.getName());
         logger.error(msg);
@@ -43,7 +44,7 @@
         activeProfiles.add(profile.trim());
       }
     }
-    descriptor=annAttrs.getBoolean("inheritProfiles") ? findAnnotationDescriptor(descriptor.getRootDeclaringClass().getSuperclass(),annotationType) : null;
+    descriptor=annAttrs.getBoolean("inheritProfiles") ? findAnnotationDescriptor(rootDeclaringClass.getSuperclass(),annotationType) : null;
   }
   return StringUtils.toStringArray(activeProfiles);
 }
