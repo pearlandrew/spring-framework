@@ -1,0 +1,18 @@
+{
+  Assert.notNull(annotationType,"Annotation type must not be null");
+  if (clazz == null || clazz.equals(Object.class)) {
+    return null;
+  }
+  if (isAnnotationDeclaredLocally(annotationType,clazz)) {
+    return new AnnotationDescriptor<T>(clazz,clazz.getAnnotation(annotationType));
+  }
+  for (  Annotation composedAnnotation : clazz.getDeclaredAnnotations()) {
+    if (visited.add(composedAnnotation)) {
+      AnnotationDescriptor<T> descriptor=findAnnotationDescriptor(composedAnnotation.annotationType(),visited,annotationType);
+      if (descriptor != null) {
+        return new AnnotationDescriptor<T>(clazz,descriptor.getDeclaringClass(),composedAnnotation,descriptor.getAnnotation());
+      }
+    }
+  }
+  return findAnnotationDescriptor(clazz.getSuperclass(),visited,annotationType);
+}

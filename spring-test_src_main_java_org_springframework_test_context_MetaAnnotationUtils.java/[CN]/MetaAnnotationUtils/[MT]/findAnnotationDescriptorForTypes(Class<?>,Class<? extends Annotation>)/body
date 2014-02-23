@@ -1,22 +1,3 @@
 {
-  assertNonEmptyAnnotationTypeArray(annotationTypes,"The list of annotation types must not be empty");
-  if (clazz == null || clazz.equals(Object.class)) {
-    return null;
-  }
-  for (  Class<? extends Annotation> annotationType : annotationTypes) {
-    if (isAnnotationDeclaredLocally(annotationType,clazz)) {
-      return new UntypedAnnotationDescriptor(clazz,clazz.getAnnotation(annotationType));
-    }
-  }
-  if (!Annotation.class.isAssignableFrom(clazz)) {
-    for (    Annotation composedAnnotation : clazz.getAnnotations()) {
-      for (      Class<? extends Annotation> annotationType : annotationTypes) {
-        Annotation annotation=composedAnnotation.annotationType().getAnnotation(annotationType);
-        if (annotation != null) {
-          return new UntypedAnnotationDescriptor(clazz,composedAnnotation,annotation);
-        }
-      }
-    }
-  }
-  return findAnnotationDescriptorForTypes(clazz.getSuperclass(),annotationTypes);
+  return findAnnotationDescriptorForTypes(clazz,new HashSet<Annotation>(),annotationTypes);
 }
