@@ -14,10 +14,12 @@
       }
     }
     for (    Annotation annotation : element.getAnnotations()) {
-      T result=doProcess(annotation.annotationType(),annotationType,processor,visited,depth);
-      if (result != null) {
-        processor.postProcess(annotation,result);
-        return result;
+      if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
+        T result=doProcess(annotation.annotationType(),annotationType,processor,visited,depth);
+        if (result != null) {
+          processor.postProcess(annotation,result);
+          return result;
+        }
       }
     }
   }
