@@ -1,7 +1,15 @@
 {
-  MimeType mimeType=null;
-  if (headers != null) {
-    mimeType=headers.get(MessageHeaders.CONTENT_TYPE,MimeType.class);
+  if (headers == null || headers.get(MessageHeaders.CONTENT_TYPE) == null) {
+    return this.defaultMimeType;
   }
-  return (mimeType != null) ? mimeType : this.defaultMimeType;
+  Object value=headers.get(MessageHeaders.CONTENT_TYPE);
+  if (value instanceof MimeType) {
+    return (MimeType)value;
+  }
+ else   if (value instanceof String) {
+    return MimeType.valueOf((String)value);
+  }
+ else {
+    throw new IllegalArgumentException("Unknown type for contentType header value: " + value.getClass());
+  }
 }
