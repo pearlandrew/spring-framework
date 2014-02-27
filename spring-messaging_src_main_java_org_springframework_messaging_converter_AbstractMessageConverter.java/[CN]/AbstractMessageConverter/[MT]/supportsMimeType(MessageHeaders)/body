@@ -1,10 +1,15 @@
 {
-  MimeType mimeType=getMimeType(headers);
-  if (mimeType == null) {
-    return true;
-  }
   if (getSupportedMimeTypes().isEmpty()) {
     return true;
+  }
+  MimeType mimeType=getMimeType(headers);
+  if (mimeType == null) {
+    if (isStrictContentTypeMatch()) {
+      return false;
+    }
+ else {
+      return true;
+    }
   }
   for (  MimeType supported : getSupportedMimeTypes()) {
     if (supported.getType().equals(mimeType.getType()) && supported.getSubtype().equals(mimeType.getSubtype())) {
