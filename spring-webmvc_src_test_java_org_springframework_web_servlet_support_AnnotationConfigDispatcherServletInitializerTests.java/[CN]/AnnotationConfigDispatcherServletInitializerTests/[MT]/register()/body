@@ -14,9 +14,13 @@
   assertEquals(1,servletRegistration.getLoadOnStartup());
   assertEquals(ROLE_NAME,servletRegistration.getRunAsRole());
   assertTrue(servletRegistration.isAsyncSupported());
-  assertEquals(1,filterRegistrations.size());
-  assertNotNull(filterRegistrations.get(FILTER_NAME));
-  MockFilterRegistration filterRegistration=filterRegistrations.get(FILTER_NAME);
-  assertTrue(filterRegistration.isAsyncSupported());
-  assertEquals(EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD,DispatcherType.INCLUDE,DispatcherType.ASYNC),filterRegistration.getMappings().get(SERVLET_NAME));
+  assertEquals(4,filterRegistrations.size());
+  assertNotNull(filterRegistrations.get("hiddenHttpMethodFilter"));
+  assertNotNull(filterRegistrations.get("delegatingFilterProxy"));
+  assertNotNull(filterRegistrations.get("delegatingFilterProxy#0"));
+  assertNotNull(filterRegistrations.get("delegatingFilterProxy#1"));
+  for (  MockFilterRegistration filterRegistration : filterRegistrations.values()) {
+    assertTrue(filterRegistration.isAsyncSupported());
+    assertEquals(EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD,DispatcherType.INCLUDE,DispatcherType.ASYNC),filterRegistration.getMappings().get(SERVLET_NAME));
+  }
 }
