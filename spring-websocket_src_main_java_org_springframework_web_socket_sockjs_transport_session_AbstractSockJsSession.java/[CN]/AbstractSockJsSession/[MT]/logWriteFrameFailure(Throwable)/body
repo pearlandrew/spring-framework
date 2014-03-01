@@ -1,0 +1,16 @@
+{
+  @SuppressWarnings("serial") NestedCheckedException nestedException=new NestedCheckedException("",failure){
+  }
+;
+  if ("Broken pipe".equalsIgnoreCase(nestedException.getMostSpecificCause().getMessage()) || disconnectedClientExceptions.contains(failure.getClass().getSimpleName())) {
+    if (disconnectedClientLogger.isTraceEnabled()) {
+      disconnectedClientLogger.trace("Looks like the client has gone away",failure);
+    }
+ else     if (disconnectedClientLogger.isDebugEnabled()) {
+      disconnectedClientLogger.debug("Looks like the client has gone away: " + nestedException.getMessage() + " (For full stack trace, raise '"+ DISCONNECTED_CLIENT_LOG_CATEGORY+ "' log category at TRACE level)");
+    }
+  }
+ else {
+    logger.error("Terminating connection after failure to send message to client.",failure);
+  }
+}
