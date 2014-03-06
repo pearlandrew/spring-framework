@@ -14,6 +14,7 @@
   if (ourBounds != null) {
     return ourBounds.isAssignableFrom(type);
   }
+  boolean exactMatch=checkingGeneric;
   boolean checkGenerics=true;
   Class<?> ourResolved=null;
   if (this.type instanceof TypeVariable) {
@@ -33,12 +34,15 @@
         }
       }
     }
+    if (ourResolved == null) {
+      exactMatch=false;
+    }
   }
   if (ourResolved == null) {
     ourResolved=resolve(Object.class);
   }
   Class<?> typeResolved=type.resolve(Object.class);
-  if (checkingGeneric ? !ourResolved.equals(typeResolved) : !ClassUtils.isAssignable(ourResolved,typeResolved)) {
+  if (exactMatch ? !ourResolved.equals(typeResolved) : !ClassUtils.isAssignable(ourResolved,typeResolved)) {
     return false;
   }
   if (checkGenerics) {
