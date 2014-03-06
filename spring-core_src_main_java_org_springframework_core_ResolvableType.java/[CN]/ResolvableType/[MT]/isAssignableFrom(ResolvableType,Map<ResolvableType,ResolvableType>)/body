@@ -6,6 +6,9 @@
   if (isArray()) {
     return (type.isArray() && getComponentType().isAssignableFrom(type.getComponentType()));
   }
+  if (matchedBefore != null && matchedBefore.get(this) == type) {
+    return true;
+  }
   WildcardBounds ourBounds=WildcardBounds.get(this);
   WildcardBounds typeBounds=WildcardBounds.get(type);
   if (typeBounds != null) {
@@ -14,7 +17,7 @@
   if (ourBounds != null) {
     return ourBounds.isAssignableFrom(type);
   }
-  boolean exactMatch=checkingGeneric;
+  boolean exactMatch=(matchedBefore != null);
   boolean checkGenerics=true;
   Class<?> ourResolved=null;
   if (this.type instanceof TypeVariable) {
@@ -51,8 +54,12 @@
     if (ourGenerics.length != typeGenerics.length) {
       return false;
     }
+    if (matchedBefore == null) {
+      matchedBefore=new IdentityHashMap<ResolvableType,ResolvableType>(1);
+    }
+    matchedBefore.put(this,type);
     for (int i=0; i < ourGenerics.length; i++) {
-      if (!ourGenerics[i].isAssignableFrom(typeGenerics[i],true)) {
+      if (!ourGenerics[i].isAssignableFrom(typeGenerics[i],matchedBefore)) {
         return false;
       }
     }
