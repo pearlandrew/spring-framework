@@ -1,5 +1,26 @@
 {
-  for (  Resource script : this.scripts) {
-    executeSqlScript(connection,applyEncodingIfNecessary(script),this.continueOnError,this.ignoreFailedDrops);
+  Statement statement=null;
+  try {
+    statement=connection.createStatement();
+    final Statement stmt=statement;
+    for (    Resource script : this.scripts) {
+      ScriptUtils.executeSqlScript(new ScriptStatementExecutor(){
+        @Override public int executeScriptStatement(        String statement) throws DataAccessException {
+          try {
+            stmt.execute(statement);
+            return stmt.getUpdateCount();
+          }
+ catch (          SQLException e) {
+            throw new UncategorizedSQLException(getClass().getName(),statement,e);
+          }
+        }
+      }
+,applyEncodingIfNecessary(script),this.continueOnError,this.ignoreFailedDrops,this.commentPrefix,this.separator,this.blockCommentStartDelimiter,this.blockCommentEndDelimiter);
+    }
+  }
+  finally {
+    if (statement != null) {
+      statement.close();
+    }
   }
 }
