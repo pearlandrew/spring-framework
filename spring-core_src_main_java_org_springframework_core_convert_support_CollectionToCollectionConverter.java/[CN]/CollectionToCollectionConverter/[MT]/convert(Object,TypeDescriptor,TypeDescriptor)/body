@@ -2,20 +2,22 @@
   if (source == null) {
     return null;
   }
-  boolean copyRequired=!targetType.getType().isInstance(source);
   Collection<?> sourceCollection=(Collection<?>)source;
+  boolean copyRequired=!targetType.getType().isInstance(source);
   if (!copyRequired && sourceCollection.isEmpty()) {
-    return sourceCollection;
+    return source;
+  }
+  TypeDescriptor elementDesc=targetType.getElementTypeDescriptor();
+  if (elementDesc == null && !copyRequired) {
+    return source;
   }
   Collection<Object> target=CollectionFactory.createCollection(targetType.getType(),sourceCollection.size());
-  if (targetType.getElementTypeDescriptor() == null) {
-    for (    Object element : sourceCollection) {
-      target.add(element);
-    }
+  if (elementDesc == null) {
+    target.addAll(sourceCollection);
   }
  else {
     for (    Object sourceElement : sourceCollection) {
-      Object targetElement=this.conversionService.convert(sourceElement,sourceType.elementTypeDescriptor(sourceElement),targetType.getElementTypeDescriptor());
+      Object targetElement=this.conversionService.convert(sourceElement,sourceType.elementTypeDescriptor(sourceElement),elementDesc);
       target.add(targetElement);
       if (sourceElement != targetElement) {
         copyRequired=true;
