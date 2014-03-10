@@ -2,6 +2,17 @@
   if (logger.isErrorEnabled()) {
     logger.error(errorMessage + ", sessionId=" + this.sessionId,ex);
   }
-  resetTcpConnection();
-  sendStompErrorToClient(errorMessage);
+  try {
+    sendStompErrorToClient(errorMessage);
+  }
+  finally {
+    try {
+      clearConnection();
+    }
+ catch (    Throwable t) {
+      if (logger.isErrorEnabled()) {
+        logger.error("Failed to close connection: " + t.getMessage());
+      }
+    }
+  }
 }

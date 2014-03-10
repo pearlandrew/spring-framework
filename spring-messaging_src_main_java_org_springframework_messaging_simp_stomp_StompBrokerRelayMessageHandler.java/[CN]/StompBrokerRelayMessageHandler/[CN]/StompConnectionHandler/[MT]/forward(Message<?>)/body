@@ -1,14 +1,11 @@
 {
   if (!this.isStompConnected) {
-    if (logger.isWarnEnabled()) {
-      logger.warn("Connection to broker inactive or not ready. Ignoring message");
+    if (this.isRemoteClientSession) {
+      throw new IllegalStateException("Unexpected client message " + message + (this.tcpConnection != null ? "before STOMP CONNECTED frame" : "after TCP connection closed"));
     }
-    return new ListenableFutureTask<Void>(new Callable<Void>(){
-      @Override public Void call() throws Exception {
-        return null;
-      }
+ else {
+      throw new IllegalStateException("Cannot forward messages on system connection " + (this.tcpConnection != null ? "before STOMP CONNECTED frame" : "while inactive") + ". Try listening for BrokerAvailabilityEvent ApplicationContext events.");
     }
-);
   }
   if (logger.isDebugEnabled()) {
     StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
@@ -24,7 +21,7 @@
     @Override public void onSuccess(    Void result){
       StompCommand command=StompHeaderAccessor.wrap(message).getCommand();
       if (command == StompCommand.DISCONNECT) {
-        resetTcpConnection();
+        clearConnection();
       }
     }
     @Override public void onFailure(    Throwable t){

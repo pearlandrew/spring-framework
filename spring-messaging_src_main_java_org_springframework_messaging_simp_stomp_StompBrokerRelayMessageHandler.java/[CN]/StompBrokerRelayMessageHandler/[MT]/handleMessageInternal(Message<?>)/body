@@ -34,7 +34,7 @@
     this.tcpClient.connect(handler);
   }
  else   if (SimpMessageType.DISCONNECT.equals(messageType)) {
-    StompConnectionHandler handler=removeConnectionHandler(sessionId);
+    StompConnectionHandler handler=this.connectionHandlers.get(sessionId);
     if (handler == null) {
       if (logger.isTraceEnabled()) {
         logger.trace("Connection already removed for sessionId=" + sessionId);
@@ -46,7 +46,9 @@
  else {
     StompConnectionHandler handler=this.connectionHandlers.get(sessionId);
     if (handler == null) {
-      logger.warn("Connection for sessionId=" + sessionId + " not found. Ignoring message");
+      if (logger.isWarnEnabled()) {
+        logger.warn("Connection for sessionId=" + sessionId + " not found. Ignoring message");
+      }
       return;
     }
     handler.forward(message);
