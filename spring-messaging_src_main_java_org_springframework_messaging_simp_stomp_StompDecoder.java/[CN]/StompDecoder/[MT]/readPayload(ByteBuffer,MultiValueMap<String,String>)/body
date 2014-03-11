@@ -1,7 +1,15 @@
 {
-  String contentLengthString=headers.getFirst("content-length");
-  if (contentLengthString != null) {
-    int contentLength=Integer.valueOf(contentLengthString);
+  Integer contentLength=null;
+  if (headers.containsKey("content-length")) {
+    String rawContentLength=headers.getFirst("content-length");
+    try {
+      contentLength=Integer.valueOf(rawContentLength);
+    }
+ catch (    NumberFormatException ex) {
+      logger.warn("Ignoring invalid content-length header value: '" + rawContentLength + "'");
+    }
+  }
+  if (contentLength != null && contentLength >= 0) {
     if (buffer.remaining() > contentLength) {
       byte[] payload=new byte[contentLength];
       buffer.get(payload);
