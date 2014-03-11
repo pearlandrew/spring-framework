@@ -1,0 +1,69 @@
+{
+  Assert.hasText(script,"script must not be null or empty");
+  Assert.notNull(delimiter,"delimiter must not be null");
+  Assert.hasText(commentPrefix,"commentPrefix must not be null or empty");
+  Assert.hasText(blockCommentStartDelimiter,"blockCommentStartDelimiter must not be null or empty");
+  Assert.hasText(blockCommentEndDelimiter,"blockCommentEndDelimiter must not be null or empty");
+  StringBuilder sb=new StringBuilder();
+  boolean inLiteral=false;
+  boolean inEscape=false;
+  char[] content=script.toCharArray();
+  for (int i=0; i < script.length(); i++) {
+    char c=content[i];
+    if (inEscape) {
+      inEscape=false;
+      sb.append(c);
+      continue;
+    }
+    if (c == '\\') {
+      inEscape=true;
+      sb.append(c);
+      continue;
+    }
+    if (c == '\'') {
+      inLiteral=!inLiteral;
+    }
+    if (!inLiteral) {
+      if (script.startsWith(delimiter,i)) {
+        if (sb.length() > 0) {
+          statements.add(sb.toString());
+          sb=new StringBuilder();
+        }
+        i+=delimiter.length() - 1;
+        continue;
+      }
+ else       if (script.startsWith(commentPrefix,i)) {
+        int indexOfNextNewline=script.indexOf("\n",i);
+        if (indexOfNextNewline > i) {
+          i=indexOfNextNewline;
+          continue;
+        }
+ else {
+          break;
+        }
+      }
+ else       if (script.startsWith(blockCommentStartDelimiter,i)) {
+        int indexOfCommentEnd=script.indexOf(blockCommentEndDelimiter,i);
+        if (indexOfCommentEnd > i) {
+          i=indexOfCommentEnd + blockCommentEndDelimiter.length() - 1;
+          continue;
+        }
+ else {
+          throw new ScriptParseException(String.format("Missing block comment end delimiter [%s].",blockCommentEndDelimiter),resource);
+        }
+      }
+ else       if (c == ' ' || c == '\n' || c == '\t') {
+        if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
+          c=' ';
+        }
+ else {
+          continue;
+        }
+      }
+    }
+    sb.append(c);
+  }
+  if (StringUtils.hasText(sb)) {
+    statements.add(sb.toString());
+  }
+}
