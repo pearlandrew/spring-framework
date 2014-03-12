@@ -1,0 +1,53 @@
+{
+  MutablePropertyValues propertyValues=new MutablePropertyValues();
+  if (containerEle.hasAttribute(RESOURCE_ADAPTER_ATTRIBUTE)) {
+    String resourceAdapterBeanName=containerEle.getAttribute(RESOURCE_ADAPTER_ATTRIBUTE);
+    if (!StringUtils.hasText(resourceAdapterBeanName)) {
+      parserContext.getReaderContext().error("Listener container 'resource-adapter' attribute contains empty value.",containerEle);
+    }
+ else {
+      propertyValues.add("resourceAdapter",new RuntimeBeanReference(resourceAdapterBeanName));
+    }
+  }
+  String activationSpecFactoryBeanName=containerEle.getAttribute(ACTIVATION_SPEC_FACTORY_ATTRIBUTE);
+  String destinationResolverBeanName=containerEle.getAttribute(DESTINATION_RESOLVER_ATTRIBUTE);
+  if (StringUtils.hasText(activationSpecFactoryBeanName)) {
+    if (StringUtils.hasText(destinationResolverBeanName)) {
+      parserContext.getReaderContext().error("Specify either 'activation-spec-factory' or " + "'destination-resolver', not both. If you define a dedicated JmsActivationSpecFactory bean, " + "specify the custom DestinationResolver there (if possible).",containerEle);
+    }
+    propertyValues.add("activationSpecFactory",new RuntimeBeanReference(activationSpecFactoryBeanName));
+  }
+  if (StringUtils.hasText(destinationResolverBeanName)) {
+    propertyValues.add("destinationResolver",new RuntimeBeanReference(destinationResolverBeanName));
+  }
+  String transactionManagerBeanName=containerEle.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE);
+  if (StringUtils.hasText(transactionManagerBeanName)) {
+    propertyValues.add("transactionManager",new RuntimeBeanReference(transactionManagerBeanName));
+  }
+  RootBeanDefinition configDef=new RootBeanDefinition();
+  configDef.setSource(parserContext.extractSource(configDef));
+  configDef.setBeanClassName("org.springframework.jms.listener.endpoint.JmsActivationSpecConfig");
+  Integer acknowledgeMode=parseAcknowledgeMode(containerEle,parserContext);
+  if (acknowledgeMode != null) {
+    configDef.getPropertyValues().add("acknowledgeMode",acknowledgeMode);
+  }
+  String concurrency=containerEle.getAttribute(CONCURRENCY_ATTRIBUTE);
+  if (StringUtils.hasText(concurrency)) {
+    configDef.getPropertyValues().add("concurrency",concurrency);
+  }
+  String prefetch=containerEle.getAttribute(PREFETCH_ATTRIBUTE);
+  if (StringUtils.hasText(prefetch)) {
+    configDef.getPropertyValues().add("prefetchSize",new Integer(prefetch));
+  }
+  if (containerEle.hasAttribute(MESSAGE_CONVERTER_ATTRIBUTE)) {
+    String messageConverter=containerEle.getAttribute(MESSAGE_CONVERTER_ATTRIBUTE);
+    if (!StringUtils.hasText(messageConverter)) {
+      parserContext.getReaderContext().error("listener container 'message-converter' attribute contains empty value.",containerEle);
+    }
+ else {
+      configDef.getPropertyValues().add("messageConverter",new RuntimeBeanReference(messageConverter));
+    }
+  }
+  propertyValues.add("activationSpecConfig",configDef);
+  return propertyValues;
+}

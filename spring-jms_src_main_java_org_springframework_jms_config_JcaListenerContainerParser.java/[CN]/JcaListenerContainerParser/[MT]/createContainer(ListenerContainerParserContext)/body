@@ -1,0 +1,13 @@
+{
+  RootBeanDefinition containerDef=new RootBeanDefinition();
+  containerDef.setSource(context.getSource());
+  containerDef.setBeanClassName("org.springframework.jms.listener.endpoint.JmsMessageEndpointManager");
+  containerDef.getPropertyValues().addPropertyValues(context.getContainerValues());
+  BeanDefinition activationSpec=getActivationSpecConfigBeanDefinition(context.getContainerValues());
+  parseListenerConfiguration(context.getListenerElement(),context.getParserContext(),activationSpec);
+  String phase=context.getContainerElement().getAttribute(PHASE_ATTRIBUTE);
+  if (StringUtils.hasText(phase)) {
+    containerDef.getPropertyValues().add("phase",phase);
+  }
+  return containerDef;
+}

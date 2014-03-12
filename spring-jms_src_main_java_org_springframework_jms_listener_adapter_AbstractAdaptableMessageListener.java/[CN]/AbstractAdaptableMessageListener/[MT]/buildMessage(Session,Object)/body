@@ -1,0 +1,20 @@
+{
+  MessageConverter converter=getMessageConverter();
+  if (converter != null) {
+    if (result instanceof org.springframework.messaging.Message) {
+      org.springframework.messaging.Message<?> message=(org.springframework.messaging.Message<?>)result;
+      Message reply=converter.toMessage(message.getPayload(),session);
+      getHeaderMapper().fromHeaders(message.getHeaders(),reply);
+      return reply;
+    }
+ else {
+      return converter.toMessage(result,session);
+    }
+  }
+ else {
+    if (!(result instanceof Message)) {
+      throw new MessageConversionException("No MessageConverter specified - cannot handle message [" + result + "]");
+    }
+    return (Message)result;
+  }
+}

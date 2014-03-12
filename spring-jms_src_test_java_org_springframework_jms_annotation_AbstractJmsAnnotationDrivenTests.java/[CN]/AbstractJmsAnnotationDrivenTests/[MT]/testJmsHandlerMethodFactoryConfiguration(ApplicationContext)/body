@@ -1,0 +1,9 @@
+{
+  JmsListenerContainerTestFactory simpleFactory=context.getBean("defaultFactory",JmsListenerContainerTestFactory.class);
+  assertEquals(1,simpleFactory.getContainers().size());
+  MethodJmsListenerEndpoint endpoint=(MethodJmsListenerEndpoint)simpleFactory.getContainers().get(0).getEndpoint();
+  SimpleMessageListenerContainer container=new SimpleMessageListenerContainer();
+  endpoint.setupMessageContainer(container);
+  MessagingMessageListenerAdapter listener=(MessagingMessageListenerAdapter)container.getMessageListener();
+  listener.onMessage(new StubTextMessage("failValidation"),mock(Session.class));
+}

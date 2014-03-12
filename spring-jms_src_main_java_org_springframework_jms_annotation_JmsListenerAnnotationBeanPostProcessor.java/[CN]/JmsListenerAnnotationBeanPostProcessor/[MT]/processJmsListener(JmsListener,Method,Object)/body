@@ -1,0 +1,40 @@
+{
+  if (AopUtils.isJdkDynamicProxy(bean)) {
+    try {
+      method=bean.getClass().getMethod(method.getName(),method.getParameterTypes());
+    }
+ catch (    SecurityException ex) {
+      ReflectionUtils.handleReflectionException(ex);
+    }
+catch (    NoSuchMethodException ex) {
+      throw new IllegalStateException(String.format("@JmsListener method '%s' found on bean target class '%s', " + "but not found in any interface(s) for bean JDK proxy. Either " + "pull the method up to an interface or switch to subclass (CGLIB) "+ "proxies by setting proxy-target-class/proxyTargetClass "+ "attribute to 'true'",method.getName(),method.getDeclaringClass().getSimpleName()));
+    }
+  }
+  MethodJmsListenerEndpoint endpoint=new MethodJmsListenerEndpoint();
+  endpoint.setBean(bean);
+  endpoint.setMethod(method);
+  endpoint.setJmsHandlerMethodFactory(jmsHandlerMethodFactory);
+  endpoint.setId(getEndpointId(jmsListener));
+  endpoint.setDestination(jmsListener.destination());
+  endpoint.setQueue(jmsListener.queue());
+  if (StringUtils.hasText(jmsListener.selector())) {
+    endpoint.setSelector(jmsListener.selector());
+  }
+  if (StringUtils.hasText(jmsListener.subscription())) {
+    endpoint.setSubscription(jmsListener.subscription());
+  }
+  if (StringUtils.hasText(jmsListener.responseDestination())) {
+    endpoint.setResponseDestination(jmsListener.responseDestination());
+  }
+  JmsListenerContainerFactory<?> factory=null;
+  String containerFactoryBeanName=jmsListener.containerFactory();
+  if (StringUtils.hasText(containerFactoryBeanName)) {
+    try {
+      factory=applicationContext.getBean(containerFactoryBeanName,JmsListenerContainerFactory.class);
+    }
+ catch (    NoSuchBeanDefinitionException e) {
+      throw new BeanInitializationException("Could not register jms listener endpoint on [" + method + "], no "+ JmsListenerContainerFactory.class.getSimpleName()+ " with id '"+ containerFactoryBeanName+ "' was found in the application context",e);
+    }
+  }
+  registrar.registerEndpoint(endpoint,factory);
+}

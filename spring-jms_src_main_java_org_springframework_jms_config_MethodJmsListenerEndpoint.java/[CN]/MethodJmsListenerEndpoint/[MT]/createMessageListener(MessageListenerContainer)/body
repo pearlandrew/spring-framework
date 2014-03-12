@@ -1,0 +1,20 @@
+{
+  Assert.state(jmsHandlerMethodFactory != null,"Could not create message listener, message listener factory not set.");
+  MessagingMessageListenerAdapter messageListener=new MessagingMessageListenerAdapter();
+  InvocableHandlerMethod invocableHandlerMethod=jmsHandlerMethodFactory.createInvocableHandlerMethod(getBean(),getMethod());
+  messageListener.setHandlerMethod(invocableHandlerMethod);
+  String responseDestination=getResponseDestination();
+  if (responseDestination != null) {
+    if (isQueue()) {
+      messageListener.setDefaultResponseQueueName(responseDestination);
+    }
+ else {
+      messageListener.setDefaultResponseTopicName(responseDestination);
+    }
+  }
+  MessageConverter messageConverter=container.getMessageConverter();
+  if (messageConverter != null) {
+    messageListener.setMessageConverter(messageConverter);
+  }
+  return messageListener;
+}

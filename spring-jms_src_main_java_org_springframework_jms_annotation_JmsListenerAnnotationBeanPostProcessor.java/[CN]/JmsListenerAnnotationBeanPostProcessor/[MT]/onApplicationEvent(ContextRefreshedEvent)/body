@@ -1,0 +1,28 @@
+{
+  if (event.getApplicationContext() != this.applicationContext) {
+    return;
+  }
+  Map<String,JmsListenerConfigurer> instances=this.applicationContext.getBeansOfType(JmsListenerConfigurer.class);
+  for (  JmsListenerConfigurer configurer : instances.values()) {
+    configurer.configureJmsListeners(registrar);
+  }
+  if (registrar.getEndpointRegistry() == null) {
+    if (endpointRegistry == null) {
+      endpointRegistry=applicationContext.getBean(AnnotationConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME,JmsListenerEndpointRegistry.class);
+    }
+    registrar.setEndpointRegistry(endpointRegistry);
+  }
+  if (registrar.getDefaultContainerFactory() == null && defaultContainerFactory != null) {
+    registrar.setDefaultContainerFactory(defaultContainerFactory);
+  }
+  JmsHandlerMethodFactory handlerMethodFactory=registrar.getJmsHandlerMethodFactory();
+  if (handlerMethodFactory != null) {
+    this.jmsHandlerMethodFactory.setJmsHandlerMethodFactory(handlerMethodFactory);
+  }
+  try {
+    registrar.afterPropertiesSet();
+  }
+ catch (  Exception e) {
+    throw new BeanInitializationException(e.getMessage(),e);
+  }
+}

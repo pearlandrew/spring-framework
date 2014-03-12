@@ -1,0 +1,11 @@
+{
+  String methodName="validatePayload";
+  DefaultJmsHandlerMethodFactory customFactory=new DefaultJmsHandlerMethodFactory();
+  customFactory.setValidator(testValidator("invalid value"));
+  initializeFactory(customFactory);
+  Method method=getListenerMethod(methodName,String.class);
+  MessagingMessageListenerAdapter listener=createInstance(customFactory,method);
+  Session session=mock(Session.class);
+  listener.onMessage(createSimpleJmsTextMessage("test"),session);
+  assertListenerMethodInvocation(sample,methodName);
+}

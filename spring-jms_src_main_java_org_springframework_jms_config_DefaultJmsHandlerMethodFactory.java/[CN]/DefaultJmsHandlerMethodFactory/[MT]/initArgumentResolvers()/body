@@ -1,0 +1,10 @@
+{
+  ConfigurableBeanFactory beanFactory=(ClassUtils.isAssignableValue(ConfigurableApplicationContext.class,applicationContext)) ? ((ConfigurableApplicationContext)applicationContext).getBeanFactory() : null;
+  List<HandlerMethodArgumentResolver> resolvers=new ArrayList<HandlerMethodArgumentResolver>();
+  resolvers.add(new HeaderMethodArgumentResolver(getConversionService(),beanFactory));
+  resolvers.add(new HeadersMethodArgumentResolver());
+  resolvers.add(new MessageMethodArgumentResolver());
+  resolvers.addAll(getCustomArgumentResolvers());
+  resolvers.add(new PayloadArgumentResolver(getMessageConverter(),getValidator()));
+  return resolvers;
+}

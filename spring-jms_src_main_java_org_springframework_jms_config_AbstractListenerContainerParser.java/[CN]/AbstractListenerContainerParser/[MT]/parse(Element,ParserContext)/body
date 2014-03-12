@@ -1,13 +1,16 @@
 {
   CompositeComponentDefinition compositeDef=new CompositeComponentDefinition(element.getTagName(),parserContext.extractSource(element));
   parserContext.pushContainingComponent(compositeDef);
+  PropertyValues containerValues=parseProperties(element,parserContext);
+  parseContainerFactory(element,parserContext,containerValues);
   NodeList childNodes=element.getChildNodes();
   for (int i=0; i < childNodes.getLength(); i++) {
     Node child=childNodes.item(i);
     if (child.getNodeType() == Node.ELEMENT_NODE) {
       String localName=parserContext.getDelegate().getLocalName(child);
       if (LISTENER_ELEMENT.equals(localName)) {
-        parseListener((Element)child,element,parserContext);
+        ListenerContainerParserContext context=new ListenerContainerParserContext(element,(Element)child,containerValues,parserContext);
+        parseListener(context);
       }
     }
   }
