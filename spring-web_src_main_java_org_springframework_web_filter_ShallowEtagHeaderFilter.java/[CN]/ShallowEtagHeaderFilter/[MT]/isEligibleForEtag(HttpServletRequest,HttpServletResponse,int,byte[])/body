@@ -1,3 +1,9 @@
 {
-  return (responseStatusCode >= 200 && responseStatusCode < 300) && HttpMethod.GET.name().equals(request.getMethod()) && (response.getHeader(HEADER_CACHE_CONTROL) == null || !response.getHeader(HEADER_CACHE_CONTROL).contains(DIRECTIVE_NO_STORE));
+  if (responseStatusCode >= 200 && responseStatusCode < 300 && HttpMethod.GET.name().equals(request.getMethod())) {
+    String cacheControl=response.getHeader(HEADER_CACHE_CONTROL);
+    if (cacheControl == null || !cacheControl.contains(DIRECTIVE_NO_STORE)) {
+      return true;
+    }
+  }
+  return false;
 }
