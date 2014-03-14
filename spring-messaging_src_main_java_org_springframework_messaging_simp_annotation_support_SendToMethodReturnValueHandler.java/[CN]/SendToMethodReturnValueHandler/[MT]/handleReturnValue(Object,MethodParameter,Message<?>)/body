@@ -1,23 +1,2 @@
 {
-  if (returnValue == null) {
-    return;
-  }
-  MessageHeaders headers=message.getHeaders();
-  String sessionId=SimpMessageHeaderAccessor.getSessionId(headers);
-  SendToUser sendToUser=returnType.getMethodAnnotation(SendToUser.class);
-  if (sendToUser != null) {
-    String user=getUserName(message,headers);
-    String[] destinations=getTargetDestinations(sendToUser,message,this.defaultUserDestinationPrefix);
-    for (    String destination : destinations) {
-      this.messagingTemplate.convertAndSendToUser(user,destination,returnValue,createHeaders(sessionId));
-    }
-    return;
-  }
- else {
-    SendTo sendTo=returnType.getMethodAnnotation(SendTo.class);
-    String[] destinations=getTargetDestinations(sendTo,message,this.defaultDestinationPrefix);
-    for (    String destination : destinations) {
-      this.messagingTemplate.convertAndSend(destination,returnValue,createHeaders(sessionId));
-    }
-  }
 }
