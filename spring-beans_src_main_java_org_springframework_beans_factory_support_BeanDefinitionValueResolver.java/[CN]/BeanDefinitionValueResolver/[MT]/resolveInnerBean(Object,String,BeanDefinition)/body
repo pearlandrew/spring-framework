@@ -2,13 +2,16 @@
   RootBeanDefinition mbd=null;
   try {
     mbd=this.beanFactory.getMergedBeanDefinition(innerBeanName,innerBd,this.beanDefinition);
-    String actualInnerBeanName=adaptInnerBeanName(innerBeanName);
+    String actualInnerBeanName=innerBeanName;
+    if (mbd.isSingleton()) {
+      actualInnerBeanName=adaptInnerBeanName(innerBeanName);
+    }
     this.beanFactory.registerContainedBean(actualInnerBeanName,this.beanName);
     String[] dependsOn=mbd.getDependsOn();
     if (dependsOn != null) {
       for (      String dependsOnBean : dependsOn) {
-        this.beanFactory.getBean(dependsOnBean);
         this.beanFactory.registerDependentBean(dependsOnBean,actualInnerBeanName);
+        this.beanFactory.getBean(dependsOnBean);
       }
     }
     Object innerBean=this.beanFactory.createBean(actualInnerBeanName,mbd,null);
