@@ -1,6 +1,15 @@
 {
   StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
   String sessionId=headers.getSessionId();
+  if (!isBrokerAvailable()) {
+    if (sessionId == null || sessionId == SystemStompConnectionHandler.SESSION_ID) {
+      throw new MessageDeliveryException("Message broker is not active.");
+    }
+    if (logger.isTraceEnabled()) {
+      logger.trace("Message broker is not active. Ignoring message id=" + message.getHeaders().getId());
+    }
+    return;
+  }
   String destination=headers.getDestination();
   StompCommand command=headers.getCommand();
   SimpMessageType messageType=headers.getMessageType();
@@ -22,8 +31,13 @@
     }
     return;
   }
+  if (logger.isTraceEnabled()) {
+    logger.trace("Processing message=" + message);
+  }
   if (SimpMessageType.CONNECT.equals(messageType)) {
-    logger.debug("Processing CONNECT in session=" + sessionId + ", number of connections="+ this.connectionHandlers.size());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Processing CONNECT (total connected=" + this.connectionHandlers.size() + ")");
+    }
     headers.setLogin(this.clientLogin);
     headers.setPasscode(this.clientPasscode);
     if (getVirtualHost() != null) {
@@ -37,7 +51,7 @@
     StompConnectionHandler handler=this.connectionHandlers.get(sessionId);
     if (handler == null) {
       if (logger.isTraceEnabled()) {
-        logger.trace("Connection already removed for sessionId=" + sessionId);
+        logger.trace("Connection already removed for sessionId '" + sessionId + "'");
       }
       return;
     }
@@ -47,7 +61,7 @@
     StompConnectionHandler handler=this.connectionHandlers.get(sessionId);
     if (handler == null) {
       if (logger.isWarnEnabled()) {
-        logger.warn("Connection for sessionId=" + sessionId + " not found. Ignoring message");
+        logger.warn("Connection for sessionId '" + sessionId + "' not found. Ignoring message");
       }
       return;
     }

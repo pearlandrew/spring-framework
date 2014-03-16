@@ -1,5 +1,11 @@
 {
   this.tcpClient=new StubTcpOperations();
-  this.brokerRelay=new StompBrokerRelayMessageHandler(new StubMessageChannel(),new StubMessageChannel(),new StubMessageChannel(),Arrays.asList("/topic"));
+  this.brokerRelay=new StompBrokerRelayMessageHandler(new StubMessageChannel(),new StubMessageChannel(),new StubMessageChannel(),Arrays.asList("/topic")){
+    @Override protected void startInternal(){
+      publishBrokerAvailableEvent();
+      super.startInternal();
+    }
+  }
+;
   this.brokerRelay.setTcpClient(this.tcpClient);
 }
