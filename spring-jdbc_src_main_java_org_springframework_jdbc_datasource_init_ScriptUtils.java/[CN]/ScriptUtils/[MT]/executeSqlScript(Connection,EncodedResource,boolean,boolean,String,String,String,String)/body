@@ -1,58 +1,66 @@
 {
-  if (logger.isInfoEnabled()) {
-    logger.info("Executing SQL script from " + resource);
-  }
-  long startTime=System.currentTimeMillis();
-  List<String> statements=new LinkedList<String>();
-  String script;
   try {
-    script=readScript(resource,commentPrefix,separator);
-  }
- catch (  IOException ex) {
-    throw new CannotReadScriptException(resource,ex);
-  }
-  if (separator == null) {
-    separator=DEFAULT_STATEMENT_SEPARATOR;
-  }
-  if (!containsSqlScriptDelimiters(script,separator)) {
-    separator=FALLBACK_STATEMENT_SEPARATOR;
-  }
-  splitSqlScript(resource,script,separator,commentPrefix,blockCommentStartDelimiter,blockCommentEndDelimiter,statements);
-  int lineNumber=0;
-  Statement stmt=connection.createStatement();
-  try {
-    for (    String statement : statements) {
-      lineNumber++;
-      try {
-        stmt.execute(statement);
-        int rowsAffected=stmt.getUpdateCount();
-        if (logger.isDebugEnabled()) {
-          logger.debug(rowsAffected + " returned as updateCount for SQL: " + statement);
-        }
-      }
- catch (      SQLException ex) {
-        boolean dropStatement=StringUtils.startsWithIgnoreCase(statement.trim(),"drop");
-        if (continueOnError || (dropStatement && ignoreFailedDrops)) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Executing SQL script from " + resource);
+    }
+    long startTime=System.currentTimeMillis();
+    List<String> statements=new LinkedList<String>();
+    String script;
+    try {
+      script=readScript(resource,commentPrefix,separator);
+    }
+ catch (    IOException ex) {
+      throw new CannotReadScriptException(resource,ex);
+    }
+    if (separator == null) {
+      separator=DEFAULT_STATEMENT_SEPARATOR;
+    }
+    if (!containsSqlScriptDelimiters(script,separator)) {
+      separator=FALLBACK_STATEMENT_SEPARATOR;
+    }
+    splitSqlScript(resource,script,separator,commentPrefix,blockCommentStartDelimiter,blockCommentEndDelimiter,statements);
+    int lineNumber=0;
+    Statement stmt=connection.createStatement();
+    try {
+      for (      String statement : statements) {
+        lineNumber++;
+        try {
+          stmt.execute(statement);
+          int rowsAffected=stmt.getUpdateCount();
           if (logger.isDebugEnabled()) {
-            logger.debug("Failed to execute SQL script statement at line " + lineNumber + " of resource "+ resource+ ": "+ statement,ex);
+            logger.debug(rowsAffected + " returned as updateCount for SQL: " + statement);
           }
         }
+ catch (        SQLException ex) {
+          boolean dropStatement=StringUtils.startsWithIgnoreCase(statement.trim(),"drop");
+          if (continueOnError || (dropStatement && ignoreFailedDrops)) {
+            if (logger.isDebugEnabled()) {
+              logger.debug("Failed to execute SQL script statement at line " + lineNumber + " of resource "+ resource+ ": "+ statement,ex);
+            }
+          }
  else {
-          throw new ScriptStatementFailedException(statement,lineNumber,resource,ex);
+            throw new ScriptStatementFailedException(statement,lineNumber,resource,ex);
+          }
         }
       }
     }
-  }
   finally {
-    try {
-      stmt.close();
+      try {
+        stmt.close();
+      }
+ catch (      Throwable ex) {
+        logger.debug("Could not close JDBC Statement",ex);
+      }
     }
- catch (    Throwable ex) {
-      logger.debug("Could not close JDBC Statement",ex);
+    long elapsedTime=System.currentTimeMillis() - startTime;
+    if (logger.isInfoEnabled()) {
+      logger.info("Executed SQL script from " + resource + " in "+ elapsedTime+ " ms.");
     }
   }
-  long elapsedTime=System.currentTimeMillis() - startTime;
-  if (logger.isInfoEnabled()) {
-    logger.info("Executed SQL script from " + resource + " in "+ elapsedTime+ " ms.");
+ catch (  Exception ex) {
+    if (ex instanceof ScriptException) {
+      throw (ScriptException)ex;
+    }
+    throw new UncategorizedScriptException("Failed to execute database script from resource [" + resource + "]",ex);
   }
 }
