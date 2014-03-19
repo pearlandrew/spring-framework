@@ -1,0 +1,26 @@
+{
+  List<AnnotationAttributes> attributesList=attributeMap.get(annotationType);
+  if (attributesList == null || attributesList.isEmpty()) {
+    return null;
+  }
+  AnnotationAttributes results=attributesList.get(0);
+  Set<String> supportedAttributeNames=results.keySet();
+  List<String> annotationTypes=new ArrayList<String>(attributeMap.keySet());
+  Collections.reverse(annotationTypes);
+  for (  String currentAnnotationType : annotationTypes) {
+    if (!currentAnnotationType.startsWith("java.lang.annotation")) {
+      for (      String attributeName : supportedAttributeNames) {
+        if (!VALUE.equals(attributeName)) {
+          List<AnnotationAttributes> currentAttributes=attributeMap.get(currentAnnotationType);
+          if (currentAttributes != null && !currentAttributes.isEmpty()) {
+            Object value=currentAttributes.get(0).get(attributeName);
+            if (value != null) {
+              results.put(attributeName,value);
+            }
+          }
+        }
+      }
+    }
+  }
+  return results;
+}
