@@ -8,11 +8,19 @@
   configBuidler.preferredSubprotocols(protocols);
   configBuidler.extensions(adaptExtensions(extensions));
   final Endpoint endpoint=new StandardWebSocketHandlerAdapter(webSocketHandler,session);
-  return this.taskExecutor.submitListenable(new Callable<WebSocketSession>(){
+  Callable<WebSocketSession> connectTask=new Callable<WebSocketSession>(){
     @Override public WebSocketSession call() throws Exception {
       webSocketContainer.connectToServer(endpoint,configBuidler.build(),uri);
       return session;
     }
   }
-);
+;
+  if (this.taskExecutor != null) {
+    return this.taskExecutor.submitListenable(connectTask);
+  }
+ else {
+    ListenableFutureTask<WebSocketSession> task=new ListenableFutureTask<WebSocketSession>(connectTask);
+    task.run();
+    return task;
+  }
 }

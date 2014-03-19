@@ -10,12 +10,20 @@
   Principal user=getUser();
   final JettyWebSocketSession wsSession=new JettyWebSocketSession(handshakeAttributes,user);
   final JettyWebSocketHandlerAdapter listener=new JettyWebSocketHandlerAdapter(wsHandler,wsSession);
-  return this.taskExecutor.submitListenable(new Callable<WebSocketSession>(){
+  Callable<WebSocketSession> connectTask=new Callable<WebSocketSession>(){
     @Override public WebSocketSession call() throws Exception {
       Future<Session> future=client.connect(listener,uri,request);
       future.get();
       return wsSession;
     }
   }
-);
+;
+  if (this.taskExecutor != null) {
+    return this.taskExecutor.submitListenable(connectTask);
+  }
+ else {
+    ListenableFutureTask<WebSocketSession> task=new ListenableFutureTask<WebSocketSession>(connectTask);
+    task.run();
+    return task;
+  }
 }
