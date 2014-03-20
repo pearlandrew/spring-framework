@@ -1,6 +1,15 @@
 {
-  TaskExecutorRegistration r=getBrokerRegistry().getBrokerChannelRegistration().getTaskExecutorRegistration();
-  ThreadPoolTaskExecutor executor=(r != null) ? r.getTaskExecutor() : new ThreadPoolTaskExecutor();
+  ChannelRegistration reg=getBrokerRegistry().getBrokerChannelRegistration();
+  ThreadPoolTaskExecutor executor;
+  if (reg.hasTaskExecutor()) {
+    executor=reg.taskExecutor().getTaskExecutor();
+  }
+ else {
+    executor=new ThreadPoolTaskExecutor();
+    executor.setCorePoolSize(0);
+    executor.setMaxPoolSize(1);
+    executor.setQueueCapacity(0);
+  }
   executor.setThreadNamePrefix("brokerChannel-");
   return executor;
 }

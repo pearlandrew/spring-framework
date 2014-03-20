@@ -1,14 +1,6 @@
 {
-  ChannelRegistration r=getBrokerRegistry().getBrokerChannelRegistration();
-  ExecutorSubscribableChannel channel;
-  if (r.hasTaskExecutor()) {
-    channel=new ExecutorSubscribableChannel();
-  }
- else {
-    channel=new ExecutorSubscribableChannel(brokerChannelExecutor());
-  }
-  if (r.hasInterceptors()) {
-    channel.setInterceptors(r.getInterceptors());
-  }
+  ChannelRegistration reg=getBrokerRegistry().getBrokerChannelRegistration();
+  ExecutorSubscribableChannel channel=reg.hasTaskExecutor() ? new ExecutorSubscribableChannel(brokerChannelExecutor()) : new ExecutorSubscribableChannel();
+  channel.setInterceptors(reg.getInterceptors());
   return channel;
 }
