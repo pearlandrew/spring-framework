@@ -1,15 +1,18 @@
 {
   char[] c=context.buffer;
-  int access=readUnsignedShort(u);
-  String name=readUTF8(u + 2,c);
-  String desc=readUTF8(u + 4,c);
+  context.access=readUnsignedShort(u);
+  context.name=readUTF8(u + 2,c);
+  context.desc=readUTF8(u + 4,c);
   u+=6;
   int code=0;
   int exception=0;
   String[] exceptions=null;
   String signature=null;
+  int methodParameters=0;
   int anns=0;
   int ianns=0;
+  int tanns=0;
+  int itanns=0;
   int dann=0;
   int mpanns=0;
   int impanns=0;
@@ -34,25 +37,34 @@
       signature=readUTF8(u + 8,c);
     }
  else     if ("Deprecated".equals(attrName)) {
-      access|=Opcodes.ACC_DEPRECATED;
+      context.access|=Opcodes.ACC_DEPRECATED;
     }
  else     if (ANNOTATIONS && "RuntimeVisibleAnnotations".equals(attrName)) {
       anns=u + 8;
+    }
+ else     if (ANNOTATIONS && "RuntimeVisibleTypeAnnotations".equals(attrName)) {
+      tanns=u + 8;
     }
  else     if (ANNOTATIONS && "AnnotationDefault".equals(attrName)) {
       dann=u + 8;
     }
  else     if ("Synthetic".equals(attrName)) {
-      access|=Opcodes.ACC_SYNTHETIC | ClassWriter.ACC_SYNTHETIC_ATTRIBUTE;
+      context.access|=Opcodes.ACC_SYNTHETIC | ClassWriter.ACC_SYNTHETIC_ATTRIBUTE;
     }
  else     if (ANNOTATIONS && "RuntimeInvisibleAnnotations".equals(attrName)) {
       ianns=u + 8;
+    }
+ else     if (ANNOTATIONS && "RuntimeInvisibleTypeAnnotations".equals(attrName)) {
+      itanns=u + 8;
     }
  else     if (ANNOTATIONS && "RuntimeVisibleParameterAnnotations".equals(attrName)) {
       mpanns=u + 8;
     }
  else     if (ANNOTATIONS && "RuntimeInvisibleParameterAnnotations".equals(attrName)) {
       impanns=u + 8;
+    }
+ else     if ("MethodParameters".equals(attrName)) {
+      methodParameters=u + 8;
     }
  else {
       Attribute attr=readAttribute(context.attrs,attrName,u + 8,readInt(u + 4),c,-1,null);
@@ -64,7 +76,7 @@
     u+=6 + readInt(u + 4);
   }
   u+=2;
-  MethodVisitor mv=classVisitor.visitMethod(access,name,desc,signature,exceptions);
+  MethodVisitor mv=classVisitor.visitMethod(context.access,context.name,context.desc,signature,exceptions);
   if (mv == null) {
     return u;
   }
@@ -92,6 +104,11 @@
       }
     }
   }
+  if (methodParameters != 0) {
+    for (int i=b[methodParameters] & 0xFF, v=methodParameters + 1; i > 0; --i, v=v + 4) {
+      mv.visitParameter(readUTF8(v,c),readUnsignedShort(v + 2));
+    }
+  }
   if (ANNOTATIONS && dann != 0) {
     AnnotationVisitor dv=mv.visitAnnotationDefault();
     readAnnotationValue(dann,c,null,dv);
@@ -109,11 +126,23 @@
       v=readAnnotationValues(v + 2,c,true,mv.visitAnnotation(readUTF8(v,c),false));
     }
   }
+  if (ANNOTATIONS && tanns != 0) {
+    for (int i=readUnsignedShort(tanns), v=tanns + 2; i > 0; --i) {
+      v=readAnnotationTarget(context,v);
+      v=readAnnotationValues(v + 2,c,true,mv.visitTypeAnnotation(context.typeRef,context.typePath,readUTF8(v,c),true));
+    }
+  }
+  if (ANNOTATIONS && itanns != 0) {
+    for (int i=readUnsignedShort(itanns), v=itanns + 2; i > 0; --i) {
+      v=readAnnotationTarget(context,v);
+      v=readAnnotationValues(v + 2,c,true,mv.visitTypeAnnotation(context.typeRef,context.typePath,readUTF8(v,c),false));
+    }
+  }
   if (ANNOTATIONS && mpanns != 0) {
-    readParameterAnnotations(mpanns,desc,c,true,mv);
+    readParameterAnnotations(mv,context,mpanns,true);
   }
   if (ANNOTATIONS && impanns != 0) {
-    readParameterAnnotations(impanns,desc,c,false,mv);
+    readParameterAnnotations(mv,context,impanns,false);
   }
   while (attributes != null) {
     Attribute attr=attributes.next;
@@ -122,9 +151,6 @@
     attributes=attr;
   }
   if (code != 0) {
-    context.access=access;
-    context.name=name;
-    context.desc=desc;
     mv.visitCode();
     readCode(mv,context,code);
   }

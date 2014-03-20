@@ -22,6 +22,8 @@
   String enclosingDesc=null;
   int anns=0;
   int ianns=0;
+  int tanns=0;
+  int itanns=0;
   int innerClasses=0;
   Attribute attributes=null;
   u=getAttributes();
@@ -47,6 +49,9 @@
  else     if (ANNOTATIONS && "RuntimeVisibleAnnotations".equals(attrName)) {
       anns=u + 8;
     }
+ else     if (ANNOTATIONS && "RuntimeVisibleTypeAnnotations".equals(attrName)) {
+      tanns=u + 8;
+    }
  else     if ("Deprecated".equals(attrName)) {
       access|=Opcodes.ACC_DEPRECATED;
     }
@@ -59,6 +64,9 @@
     }
  else     if (ANNOTATIONS && "RuntimeInvisibleAnnotations".equals(attrName)) {
       ianns=u + 8;
+    }
+ else     if (ANNOTATIONS && "RuntimeInvisibleTypeAnnotations".equals(attrName)) {
+      itanns=u + 8;
     }
  else     if ("BootstrapMethods".equals(attrName)) {
       int[] bootstrapMethods=new int[readUnsignedShort(u + 8)];
@@ -92,6 +100,18 @@
   if (ANNOTATIONS && ianns != 0) {
     for (int i=readUnsignedShort(ianns), v=ianns + 2; i > 0; --i) {
       v=readAnnotationValues(v + 2,c,true,classVisitor.visitAnnotation(readUTF8(v,c),false));
+    }
+  }
+  if (ANNOTATIONS && tanns != 0) {
+    for (int i=readUnsignedShort(tanns), v=tanns + 2; i > 0; --i) {
+      v=readAnnotationTarget(context,v);
+      v=readAnnotationValues(v + 2,c,true,classVisitor.visitTypeAnnotation(context.typeRef,context.typePath,readUTF8(v,c),true));
+    }
+  }
+  if (ANNOTATIONS && itanns != 0) {
+    for (int i=readUnsignedShort(itanns), v=itanns + 2; i > 0; --i) {
+      v=readAnnotationTarget(context,v);
+      v=readAnnotationValues(v + 2,c,true,classVisitor.visitTypeAnnotation(context.typeRef,context.typePath,readUTF8(v,c),false));
     }
   }
   while (attributes != null) {

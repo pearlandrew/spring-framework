@@ -24,6 +24,9 @@
   if (ClassReader.SIGNATURES && signature != null) {
     ++attributeCount;
   }
+  if (methodParameters != null) {
+    ++attributeCount;
+  }
   if (ClassReader.ANNOTATIONS && annd != null) {
     ++attributeCount;
   }
@@ -31,6 +34,12 @@
     ++attributeCount;
   }
   if (ClassReader.ANNOTATIONS && ianns != null) {
+    ++attributeCount;
+  }
+  if (ClassReader.ANNOTATIONS && tanns != null) {
+    ++attributeCount;
+  }
+  if (ClassReader.ANNOTATIONS && itanns != null) {
     ++attributeCount;
   }
   if (ClassReader.ANNOTATIONS && panns != null) {
@@ -56,6 +65,12 @@
     }
     if (stackMap != null) {
       size+=8 + stackMap.length;
+    }
+    if (ClassReader.ANNOTATIONS && ctanns != null) {
+      size+=8 + ctanns.getSize();
+    }
+    if (ClassReader.ANNOTATIONS && ictanns != null) {
+      size+=8 + ictanns.getSize();
     }
     if (cattrs != null) {
       size+=cattrs.getSize(cw,code.data,code.length,maxStack,maxLocals);
@@ -84,6 +99,12 @@
     if (stackMap != null) {
       ++attributeCount;
     }
+    if (ClassReader.ANNOTATIONS && ctanns != null) {
+      ++attributeCount;
+    }
+    if (ClassReader.ANNOTATIONS && ictanns != null) {
+      ++attributeCount;
+    }
     if (cattrs != null) {
       attributeCount+=cattrs.getCount();
     }
@@ -109,6 +130,14 @@
       out.putInt(stackMap.length + 2).putShort(frameCount);
       out.putByteArray(stackMap.data,0,stackMap.length);
     }
+    if (ClassReader.ANNOTATIONS && ctanns != null) {
+      out.putShort(cw.newUTF8("RuntimeVisibleTypeAnnotations"));
+      ctanns.put(out);
+    }
+    if (ClassReader.ANNOTATIONS && ictanns != null) {
+      out.putShort(cw.newUTF8("RuntimeInvisibleTypeAnnotations"));
+      ictanns.put(out);
+    }
     if (cattrs != null) {
       cattrs.put(cw,code.data,code.length,maxLocals,maxStack,out);
     }
@@ -131,6 +160,11 @@
   if (ClassReader.SIGNATURES && signature != null) {
     out.putShort(cw.newUTF8("Signature")).putInt(2).putShort(cw.newUTF8(signature));
   }
+  if (methodParameters != null) {
+    out.putShort(cw.newUTF8("MethodParameters"));
+    out.putInt(methodParameters.length + 1).putByte(methodParametersCount);
+    out.putByteArray(methodParameters.data,0,methodParameters.length);
+  }
   if (ClassReader.ANNOTATIONS && annd != null) {
     out.putShort(cw.newUTF8("AnnotationDefault"));
     out.putInt(annd.length);
@@ -143,6 +177,14 @@
   if (ClassReader.ANNOTATIONS && ianns != null) {
     out.putShort(cw.newUTF8("RuntimeInvisibleAnnotations"));
     ianns.put(out);
+  }
+  if (ClassReader.ANNOTATIONS && tanns != null) {
+    out.putShort(cw.newUTF8("RuntimeVisibleTypeAnnotations"));
+    tanns.put(out);
+  }
+  if (ClassReader.ANNOTATIONS && itanns != null) {
+    out.putShort(cw.newUTF8("RuntimeInvisibleTypeAnnotations"));
+    itanns.put(out);
   }
   if (ClassReader.ANNOTATIONS && panns != null) {
     out.putShort(cw.newUTF8("RuntimeVisibleParameterAnnotations"));

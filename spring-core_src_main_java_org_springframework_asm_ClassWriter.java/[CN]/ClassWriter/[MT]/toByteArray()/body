@@ -35,7 +35,7 @@
   }
   if (sourceDebug != null) {
     ++attributeCount;
-    size+=sourceDebug.length + 4;
+    size+=sourceDebug.length + 6;
     newUTF8("SourceDebugExtension");
   }
   if (enclosingMethodOwner != 0) {
@@ -69,6 +69,16 @@
     ++attributeCount;
     size+=8 + ianns.getSize();
     newUTF8("RuntimeInvisibleAnnotations");
+  }
+  if (ClassReader.ANNOTATIONS && tanns != null) {
+    ++attributeCount;
+    size+=8 + tanns.getSize();
+    newUTF8("RuntimeVisibleTypeAnnotations");
+  }
+  if (ClassReader.ANNOTATIONS && itanns != null) {
+    ++attributeCount;
+    size+=8 + itanns.getSize();
+    newUTF8("RuntimeInvisibleTypeAnnotations");
   }
   if (attrs != null) {
     attributeCount+=attrs.getCount();
@@ -109,9 +119,9 @@
     out.putShort(newUTF8("SourceFile")).putInt(2).putShort(sourceFile);
   }
   if (sourceDebug != null) {
-    int len=sourceDebug.length - 2;
+    int len=sourceDebug.length;
     out.putShort(newUTF8("SourceDebugExtension")).putInt(len);
-    out.putByteArray(sourceDebug.data,2,len);
+    out.putByteArray(sourceDebug.data,0,len);
   }
   if (enclosingMethodOwner != 0) {
     out.putShort(newUTF8("EnclosingMethod")).putInt(4);
@@ -137,6 +147,14 @@
   if (ClassReader.ANNOTATIONS && ianns != null) {
     out.putShort(newUTF8("RuntimeInvisibleAnnotations"));
     ianns.put(out);
+  }
+  if (ClassReader.ANNOTATIONS && tanns != null) {
+    out.putShort(newUTF8("RuntimeVisibleTypeAnnotations"));
+    tanns.put(out);
+  }
+  if (ClassReader.ANNOTATIONS && itanns != null) {
+    out.putShort(newUTF8("RuntimeInvisibleTypeAnnotations"));
+    itanns.put(out);
   }
   if (attrs != null) {
     attrs.put(this,null,0,-1,-1,out);

@@ -7,6 +7,8 @@
   String signature=null;
   int anns=0;
   int ianns=0;
+  int tanns=0;
+  int itanns=0;
   Object value=null;
   Attribute attributes=null;
   for (int i=readUnsignedShort(u); i > 0; --i) {
@@ -27,8 +29,14 @@
  else     if (ANNOTATIONS && "RuntimeVisibleAnnotations".equals(attrName)) {
       anns=u + 8;
     }
+ else     if (ANNOTATIONS && "RuntimeVisibleTypeAnnotations".equals(attrName)) {
+      tanns=u + 8;
+    }
  else     if (ANNOTATIONS && "RuntimeInvisibleAnnotations".equals(attrName)) {
       ianns=u + 8;
+    }
+ else     if (ANNOTATIONS && "RuntimeInvisibleTypeAnnotations".equals(attrName)) {
+      itanns=u + 8;
     }
  else {
       Attribute attr=readAttribute(context.attrs,attrName,u + 8,readInt(u + 4),c,-1,null);
@@ -52,6 +60,18 @@
   if (ANNOTATIONS && ianns != 0) {
     for (int i=readUnsignedShort(ianns), v=ianns + 2; i > 0; --i) {
       v=readAnnotationValues(v + 2,c,true,fv.visitAnnotation(readUTF8(v,c),false));
+    }
+  }
+  if (ANNOTATIONS && tanns != 0) {
+    for (int i=readUnsignedShort(tanns), v=tanns + 2; i > 0; --i) {
+      v=readAnnotationTarget(context,v);
+      v=readAnnotationValues(v + 2,c,true,fv.visitTypeAnnotation(context.typeRef,context.typePath,readUTF8(v,c),true));
+    }
+  }
+  if (ANNOTATIONS && itanns != 0) {
+    for (int i=readUnsignedShort(itanns), v=itanns + 2; i > 0; --i) {
+      v=readAnnotationTarget(context,v);
+      v=readAnnotationValues(v + 2,c,true,fv.visitTypeAnnotation(context.typeRef,context.typePath,readUTF8(v,c),false));
     }
   }
   while (attributes != null) {
