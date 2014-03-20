@@ -3,11 +3,11 @@
   Throwable decodeFailure=null;
   try {
     Assert.isInstanceOf(TextMessage.class,webSocketMessage);
-    String payload=((TextMessage)webSocketMessage).getPayload();
-    ByteBuffer byteBuffer=ByteBuffer.wrap(payload.getBytes(UTF8_CHARSET));
+    TextMessage textMessage=(TextMessage)webSocketMessage;
+    ByteBuffer byteBuffer=ByteBuffer.wrap(textMessage.asBytes());
     message=this.stompDecoder.decode(byteBuffer);
     if (message == null) {
-      decodeFailure=new IllegalStateException("Not a valid STOMP frame: " + payload);
+      decodeFailure=new IllegalStateException("Not a valid STOMP frame: " + textMessage.getPayload());
     }
   }
  catch (  Throwable ex) {
