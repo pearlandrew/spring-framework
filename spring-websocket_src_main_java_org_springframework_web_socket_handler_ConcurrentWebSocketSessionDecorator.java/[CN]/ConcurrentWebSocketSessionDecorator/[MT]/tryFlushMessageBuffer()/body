@@ -1,0 +1,22 @@
+{
+  if (this.lock.tryLock()) {
+    try {
+      while (true) {
+        WebSocketMessage<?> messageToSend=this.buffer.poll();
+        if (messageToSend == null) {
+          break;
+        }
+        this.bufferSize.addAndGet(messageToSend.getPayloadLength() * -1);
+        this.sendStartTime=System.currentTimeMillis();
+        getDelegate().sendMessage(messageToSend);
+        this.sendStartTime=0;
+      }
+    }
+  finally {
+      this.sendStartTime=0;
+      lock.unlock();
+    }
+    return true;
+  }
+  return false;
+}
