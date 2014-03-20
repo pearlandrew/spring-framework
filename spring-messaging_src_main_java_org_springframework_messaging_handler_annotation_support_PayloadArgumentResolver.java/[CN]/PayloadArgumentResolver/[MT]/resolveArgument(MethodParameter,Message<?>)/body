@@ -1,19 +1,19 @@
 {
-  Class<?> sourceClass=message.getPayload().getClass();
-  Class<?> targetClass=parameter.getParameterType();
-  if (ClassUtils.isAssignable(targetClass,sourceClass)) {
-    return message.getPayload();
-  }
   Payload annot=parameter.getParameterAnnotation(Payload.class);
-  if (isEmptyPayload(message)) {
-    if ((annot != null) && !annot.required()) {
-      return null;
-    }
-  }
   if ((annot != null) && StringUtils.hasText(annot.value())) {
     throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver.");
   }
-  Object target=this.converter.fromMessage(message,targetClass);
-  validate(message,parameter,target);
+  Object target=getTargetPayload(parameter,message);
+  if (annot != null && isEmptyPayload(target)) {
+    if (annot.required()) {
+      throw new MethodArgumentNotValidException(message,createPayloadRequiredExceptionMessage(parameter,target));
+    }
+ else {
+      return null;
+    }
+  }
+  if (annot != null) {
+    validate(message,parameter,target);
+  }
   return target;
 }
