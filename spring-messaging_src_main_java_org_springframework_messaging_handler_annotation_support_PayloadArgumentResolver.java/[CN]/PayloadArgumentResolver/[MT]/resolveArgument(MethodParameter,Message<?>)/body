@@ -1,19 +1,23 @@
 {
-  Payload annot=parameter.getParameterAnnotation(Payload.class);
+  Payload annot=param.getParameterAnnotation(Payload.class);
   if ((annot != null) && StringUtils.hasText(annot.value())) {
     throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver.");
   }
-  Object target=getTargetPayload(parameter,message);
-  if (annot != null && isEmptyPayload(target)) {
-    if (annot.required()) {
-      throw new MethodArgumentNotValidException(message,createPayloadRequiredExceptionMessage(parameter,target));
+  Object target=getTargetPayload(param,message);
+  if (isEmptyPayload(target)) {
+    if (annot == null || annot.required()) {
+      String paramName=param.getParameterName();
+      paramName=(paramName == null ? "Arg" + param.getParameterIndex() : paramName);
+      BindingResult bindingResult=new BeanPropertyBindingResult(target,paramName);
+      bindingResult.addError(new ObjectError(paramName,"@Payload param is required"));
+      throw new MethodArgumentNotValidException(message,param,bindingResult);
     }
  else {
       return null;
     }
   }
   if (annot != null) {
-    validate(message,parameter,target);
+    validate(message,param,target);
   }
   return target;
 }
