@@ -1,14 +1,8 @@
 {
   return new Function<Buffer,Message<byte[]>>(){
     @Override public Message<byte[]> apply(    Buffer buffer){
-      while (buffer.remaining() > 0) {
-        Message<byte[]> message=DECODER.decode(buffer.byteBuffer());
-        if (message != null) {
-          next.accept(message);
-        }
- else {
-          break;
-        }
+      for (      Message<byte[]> message : DECODER.decode(buffer.byteBuffer())) {
+        next.accept(message);
       }
       return null;
     }

@@ -10,8 +10,8 @@
   verifyNoMoreInteractions(this.channel);
   assertEquals(1,this.session.getSentMessages().size());
   TextMessage textMessage=(TextMessage)this.session.getSentMessages().get(0);
-  Message<?> message=new StompDecoder().decode(ByteBuffer.wrap(textMessage.getPayload().getBytes()));
-  StompHeaderAccessor replyHeaders=StompHeaderAccessor.wrap(message);
+  List<Message<byte[]>> message=new StompDecoder().decode(ByteBuffer.wrap(textMessage.getPayload().getBytes()));
+  StompHeaderAccessor replyHeaders=StompHeaderAccessor.wrap(message.get(0));
   assertEquals(StompCommand.CONNECTED,replyHeaders.getCommand());
   assertEquals("1.1",replyHeaders.getVersion());
   assertArrayEquals(new long[]{0,0},replyHeaders.getHeartbeat());

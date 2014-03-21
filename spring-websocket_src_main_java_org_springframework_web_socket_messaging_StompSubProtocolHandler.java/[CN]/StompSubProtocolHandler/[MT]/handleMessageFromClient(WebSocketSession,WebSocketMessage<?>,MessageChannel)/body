@@ -1,41 +1,44 @@
 {
-  Message<?> message=null;
-  Throwable decodeFailure=null;
+  List<Message<byte[]>> messages=null;
   try {
     Assert.isInstanceOf(TextMessage.class,webSocketMessage);
     TextMessage textMessage=(TextMessage)webSocketMessage;
     ByteBuffer byteBuffer=ByteBuffer.wrap(textMessage.asBytes());
-    message=this.stompDecoder.decode(byteBuffer);
-    if (message == null) {
-      decodeFailure=new IllegalStateException("Not a valid STOMP frame: " + textMessage.getPayload());
+    BufferingStompDecoder decoder=this.decoders.get(session.getId());
+    if (decoder == null) {
+      throw new IllegalStateException("No decoder for session id '" + session.getId() + "'");
+    }
+    messages=decoder.decode(byteBuffer);
+    if (messages.isEmpty()) {
+      logger.debug("Incomplete STOMP frame content received," + "buffered=" + decoder.getBufferSize() + ", buffer size limit="+ decoder.getBufferSizeLimit());
+      return;
     }
   }
  catch (  Throwable ex) {
-    decodeFailure=ex;
-  }
-  if (decodeFailure != null) {
-    logger.error("Failed to parse WebSocket message as STOMP frame",decodeFailure);
-    sendErrorMessage(session,decodeFailure);
+    logger.error("Failed to parse WebSocket message to STOMP frame(s)",ex);
+    sendErrorMessage(session,ex);
     return;
   }
-  try {
-    StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
-    if (logger.isTraceEnabled()) {
-      if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
-        logger.trace("Received heartbeat from client session=" + session.getId());
-      }
+  for (  Message<byte[]> message : messages) {
+    try {
+      StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+      if (logger.isTraceEnabled()) {
+        if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+          logger.trace("Received heartbeat from client session=" + session.getId());
+        }
  else {
-        logger.trace("Received message from client session=" + session.getId());
+          logger.trace("Received message from client session=" + session.getId());
+        }
       }
+      headers.setSessionId(session.getId());
+      headers.setSessionAttributes(session.getAttributes());
+      headers.setUser(session.getPrincipal());
+      message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+      outputChannel.send(message);
     }
-    headers.setSessionId(session.getId());
-    headers.setSessionAttributes(session.getAttributes());
-    headers.setUser(session.getPrincipal());
-    message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
-    outputChannel.send(message);
-  }
- catch (  Throwable ex) {
-    logger.error("Terminating STOMP session due to failure to send message",ex);
-    sendErrorMessage(session,ex);
+ catch (    Throwable ex) {
+      logger.error("Terminating STOMP session due to failure to send message",ex);
+      sendErrorMessage(session,ex);
+    }
   }
 }

@@ -1,0 +1,33 @@
+{
+  Message<byte[]> decodedMessage=null;
+  skipLeadingEol(buffer);
+  buffer.mark();
+  String command=readCommand(buffer);
+  if (command.length() > 0) {
+    readHeaders(buffer,headers);
+    byte[] payload=readPayload(buffer,headers);
+    if (payload != null) {
+      StompCommand stompCommand=StompCommand.valueOf(command);
+      if ((payload.length > 0) && (!stompCommand.isBodyAllowed())) {
+        throw new StompConversionException(stompCommand + " shouldn't have but " + "has a payload with length="+ payload.length+ ", headers="+ headers);
+      }
+      decodedMessage=MessageBuilder.withPayload(payload).setHeaders(StompHeaderAccessor.create(stompCommand,headers)).build();
+      if (logger.isDebugEnabled()) {
+        logger.debug("Decoded " + decodedMessage);
+      }
+    }
+ else {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Received incomplete frame. Resetting buffer.");
+      }
+      buffer.reset();
+    }
+  }
+ else {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Decoded heartbeat");
+    }
+    decodedMessage=MessageBuilder.withPayload(HEARTBEAT_PAYLOAD).setHeaders(StompHeaderAccessor.create(SimpMessageType.HEARTBEAT)).build();
+  }
+  return decodedMessage;
+}

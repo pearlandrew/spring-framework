@@ -1,0 +1,15 @@
+{
+  this.chunks.add(newData);
+  checkBufferLimits();
+  if (getExpectedContentLength() != null && getBufferSize() < this.expectedContentLength) {
+    return Collections.<Message<byte[]>>emptyList();
+  }
+  ByteBuffer buffer=assembleChunksAndReset();
+  MultiValueMap<String,String> headers=new LinkedMultiValueMap<String,String>();
+  List<Message<byte[]>> messages=decode(buffer,headers);
+  if (buffer.hasRemaining()) {
+    this.chunks.add(buffer);
+    this.expectedContentLength=getContentLength(headers);
+  }
+  return messages;
+}
