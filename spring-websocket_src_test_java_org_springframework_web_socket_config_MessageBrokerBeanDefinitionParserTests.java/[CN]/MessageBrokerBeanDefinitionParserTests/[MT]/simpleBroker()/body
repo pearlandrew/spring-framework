@@ -10,6 +10,9 @@
   assertNotNull(httpRequestHandler);
   assertThat(httpRequestHandler,Matchers.instanceOf(WebSocketHttpRequestHandler.class));
   WebSocketHttpRequestHandler wsHttpRequestHandler=(WebSocketHttpRequestHandler)httpRequestHandler;
+  HandshakeHandler handshakeHandler=(HandshakeHandler)new DirectFieldAccessor(wsHttpRequestHandler).getPropertyValue("handshakeHandler");
+  assertNotNull(handshakeHandler);
+  assertTrue(handshakeHandler instanceof TestHandshakeHandler);
   WebSocketHandler wsHandler=unwrapWebSocketHandler(wsHttpRequestHandler.getWebSocketHandler());
   assertNotNull(wsHandler);
   assertThat(wsHandler,Matchers.instanceOf(SubProtocolWebSocketHandler.class));
@@ -25,6 +28,11 @@
   assertNotNull(wsHandler);
   assertThat(wsHandler,Matchers.instanceOf(SubProtocolWebSocketHandler.class));
   assertNotNull(sockJsHttpRequestHandler.getSockJsService());
+  assertThat(sockJsHttpRequestHandler.getSockJsService(),Matchers.instanceOf(DefaultSockJsService.class));
+  DefaultSockJsService defaultSockJsService=(DefaultSockJsService)sockJsHttpRequestHandler.getSockJsService();
+  WebSocketTransportHandler wsTransportHandler=(WebSocketTransportHandler)defaultSockJsService.getTransportHandlers().get(TransportType.WEBSOCKET);
+  assertNotNull(wsTransportHandler.getHandshakeHandler());
+  assertThat(wsTransportHandler.getHandshakeHandler(),Matchers.instanceOf(TestHandshakeHandler.class));
   UserSessionRegistry userSessionRegistry=this.appContext.getBean(UserSessionRegistry.class);
   assertNotNull(userSessionRegistry);
   UserDestinationResolver userDestResolver=this.appContext.getBean(UserDestinationResolver.class);

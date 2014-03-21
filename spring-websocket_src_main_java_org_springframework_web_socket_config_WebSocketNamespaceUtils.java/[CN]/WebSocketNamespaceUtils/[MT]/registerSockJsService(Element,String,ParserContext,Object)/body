@@ -1,6 +1,7 @@
 {
   Element sockJsElement=DomUtils.getChildElementByTagName(element,"sockjs");
   if (sockJsElement != null) {
+    Element handshakeHandlerElement=DomUtils.getChildElementByTagName(element,"handshake-handler");
     RootBeanDefinition sockJsServiceDef=new RootBeanDefinition(DefaultSockJsService.class);
     sockJsServiceDef.setSource(source);
     Object scheduler;
@@ -20,6 +21,13 @@
       }
       ManagedList<?> transportHandlersList=parseBeanSubElements(transportHandlersElement,parserContext);
       sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(1,transportHandlersList);
+    }
+ else     if (handshakeHandlerElement != null) {
+      RuntimeBeanReference handshakeHandlerRef=new RuntimeBeanReference(handshakeHandlerElement.getAttribute("ref"));
+      RootBeanDefinition wsTransportHandler=new RootBeanDefinition(WebSocketTransportHandler.class);
+      wsTransportHandler.setSource(source);
+      wsTransportHandler.getConstructorArgumentValues().addIndexedArgumentValue(0,handshakeHandlerRef);
+      sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(1,wsTransportHandler);
     }
     String attrValue=sockJsElement.getAttribute("name");
     if (!attrValue.isEmpty()) {
