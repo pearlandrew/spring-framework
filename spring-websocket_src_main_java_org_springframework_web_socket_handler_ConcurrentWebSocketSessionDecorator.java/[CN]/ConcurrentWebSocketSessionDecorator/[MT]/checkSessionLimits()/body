@@ -1,13 +1,15 @@
 {
-  if (logger.isDebugEnabled()) {
-    logger.debug("Another send already in progress, session id '" + getId() + "'"+ ", in-progress send time "+ getInProgressSendTime()+ " (ms), "+ ", buffer size "+ this.bufferSize+ " bytes");
-  }
-  if (getInProgressSendTime() > this.sendTimeLimit) {
-    logError("A message could not be sent due to a timeout");
-    getDelegate().close();
-  }
- else   if (this.bufferSize.get() > this.bufferSizeLimit) {
-    logError("The total send buffer byte count '" + this.bufferSize.get() + "' for session '"+ getId()+ "' exceeds the allowed limit '"+ this.bufferSizeLimit+ "'");
-    getDelegate().close();
+  if (this.closeLock.tryLock() && !this.sessionLimitExceeded) {
+    try {
+      if (getTimeSinceSendStarted() > this.sendTimeLimit) {
+        sessionLimitReached("Message send time " + getTimeSinceSendStarted() + " (ms) exceeded the allowed limit "+ this.sendTimeLimit);
+      }
+ else       if (this.bufferSize.get() > this.bufferSizeLimit) {
+        sessionLimitReached("The send buffer size " + this.bufferSize.get() + " bytes for "+ "session '"+ getId()+ " exceeded the allowed limit "+ this.bufferSizeLimit);
+      }
+    }
+  finally {
+      this.closeLock.unlock();
+    }
   }
 }

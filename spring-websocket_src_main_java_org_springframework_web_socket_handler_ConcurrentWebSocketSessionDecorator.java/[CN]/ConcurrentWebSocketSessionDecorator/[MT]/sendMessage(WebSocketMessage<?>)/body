@@ -1,8 +1,14 @@
 {
+  if (this.sessionLimitExceeded) {
+    return;
+  }
   this.buffer.add(message);
   this.bufferSize.addAndGet(message.getPayloadLength());
   do {
     if (!tryFlushMessageBuffer()) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Another send already in progress, session id '" + getId() + "'"+ ", in-progress send time "+ getTimeSinceSendStarted()+ " (ms)"+ ", buffer size "+ this.bufferSize+ " bytes");
+      }
       checkSessionLimits();
       break;
     }

@@ -1,5 +1,5 @@
 {
-  if (this.lock.tryLock()) {
+  if (this.flushLock.tryLock() && !this.sessionLimitExceeded) {
     try {
       while (true) {
         WebSocketMessage<?> messageToSend=this.buffer.poll();
@@ -14,7 +14,7 @@
     }
   finally {
       this.sendStartTime=0;
-      lock.unlock();
+      flushLock.unlock();
     }
     return true;
   }
