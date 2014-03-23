@@ -1,11 +1,13 @@
 {
-  if (this.closeLock.tryLock() && !this.sessionLimitExceeded) {
+  if (this.closeLock.tryLock() && !this.limitExceeded) {
     try {
       if (getTimeSinceSendStarted() > this.sendTimeLimit) {
-        sessionLimitReached("Message send time " + getTimeSinceSendStarted() + " (ms) exceeded the allowed limit "+ this.sendTimeLimit);
+        String errorMessage="Message send time " + getTimeSinceSendStarted() + " (ms) exceeded the allowed limit "+ this.sendTimeLimit;
+        sessionLimitReached(errorMessage,CloseStatus.SESSION_NOT_RELIABLE);
       }
  else       if (this.bufferSize.get() > this.bufferSizeLimit) {
-        sessionLimitReached("The send buffer size " + this.bufferSize.get() + " bytes for "+ "session '"+ getId()+ " exceeded the allowed limit "+ this.bufferSizeLimit);
+        String errorMessage="The send buffer size " + this.bufferSize.get() + " bytes for "+ "session '"+ getId()+ " exceeded the allowed limit "+ this.bufferSizeLimit;
+        sessionLimitReached(errorMessage,(getTimeSinceSendStarted() >= 10000 ? CloseStatus.SESSION_NOT_RELIABLE : null));
       }
     }
   finally {
