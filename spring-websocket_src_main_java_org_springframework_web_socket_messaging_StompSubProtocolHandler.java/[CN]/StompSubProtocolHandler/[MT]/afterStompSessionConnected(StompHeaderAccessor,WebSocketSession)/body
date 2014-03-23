@@ -7,4 +7,12 @@
       this.userSessionRegistry.registerSessionId(userName,session.getId());
     }
   }
+  long[] heartbeat=headers.getHeartbeat();
+  if (heartbeat[1] > 0) {
+    session=WebSocketSessionDecorator.unwrap(session);
+    if (session instanceof SockJsSession) {
+      logger.debug("STOMP heartbeats negotiated, disabling SockJS heartbeats.");
+      ((SockJsSession)session).disableHeartbeat();
+    }
+  }
 }
