@@ -1,9 +1,6 @@
 {
   RootBeanDefinition stompHandlerDef=new RootBeanDefinition(StompSubProtocolHandler.class);
   stompHandlerDef.getPropertyValues().add("userSessionRegistry",userSessionRegistry);
-  if (messageBufferSizeLimit != null) {
-    stompHandlerDef.getPropertyValues().add("messageBufferSizeLimit",messageBufferSizeLimit);
-  }
   registerBeanDef(stompHandlerDef,parserCxt,source);
   ConstructorArgumentValues cavs=new ConstructorArgumentValues();
   cavs.addIndexedArgumentValue(0,clientInChannel);
@@ -11,5 +8,20 @@
   RootBeanDefinition subProtocolWshDef=new RootBeanDefinition(SubProtocolWebSocketHandler.class,cavs,null);
   subProtocolWshDef.getPropertyValues().addPropertyValue("protocolHandlers",stompHandlerDef);
   String subProtocolWshName=registerBeanDef(subProtocolWshDef,parserCxt,source);
+  Element transportElem=DomUtils.getChildElementByTagName(element,"transport");
+  if (transportElem != null) {
+    String messageSize=transportElem.getAttribute("message-size");
+    if (messageSize != null) {
+      stompHandlerDef.getPropertyValues().add("messageSizeLimit",messageSize);
+    }
+    String sendTimeLimit=transportElem.getAttribute("send-timeout");
+    if (sendTimeLimit != null) {
+      subProtocolWshDef.getPropertyValues().add("sendTimeLimit",sendTimeLimit);
+    }
+    String sendBufferSizeLimit=transportElem.getAttribute("send-buffer-size");
+    if (sendBufferSizeLimit != null) {
+      subProtocolWshDef.getPropertyValues().add("sendBufferSizeLimit",sendBufferSizeLimit);
+    }
+  }
   return new RuntimeBeanReference(subProtocolWshName);
 }

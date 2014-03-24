@@ -1,9 +1,10 @@
 {
   SubProtocolWebSocketHandler subProtocolWebSocketHandler=this.config.getBean("subProtocolWebSocketHandler",SubProtocolWebSocketHandler.class);
+  assertEquals(1024 * 1024,subProtocolWebSocketHandler.getSendBufferSizeLimit());
+  assertEquals(25 * 1000,subProtocolWebSocketHandler.getSendTimeLimit());
   List<SubProtocolHandler> protocolHandlers=subProtocolWebSocketHandler.getProtocolHandlers();
   for (  SubProtocolHandler protocolHandler : protocolHandlers) {
     assertTrue(protocolHandler instanceof StompSubProtocolHandler);
-    DirectFieldAccessor protocolHandlerFieldAccessor=new DirectFieldAccessor(protocolHandler);
-    assertEquals(123,protocolHandlerFieldAccessor.getPropertyValue("messageBufferSizeLimit"));
+    assertEquals(128 * 1024,((StompSubProtocolHandler)protocolHandler).getMessageSizeLimit());
   }
 }
