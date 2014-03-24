@@ -1,0 +1,22 @@
+{
+  Assert.notNull(webSocketHandler,"'webSocketHandler' is required ");
+  Assert.notNull(transportRegistration,"'transportRegistration' is required");
+  Assert.notNull(userSessionRegistry,"'userSessionRegistry' is required");
+  this.webSocketHandler=webSocketHandler;
+  this.subProtocolWebSocketHandler=unwrapSubProtocolWebSocketHandler(webSocketHandler);
+  if (transportRegistration.getSendTimeLimit() != null) {
+    this.subProtocolWebSocketHandler.setSendTimeLimit(transportRegistration.getSendTimeLimit());
+  }
+  if (transportRegistration.getSendBufferSizeLimit() != null) {
+    this.subProtocolWebSocketHandler.setSendBufferSizeLimit(transportRegistration.getSendBufferSizeLimit());
+  }
+  this.stompHandler=new StompSubProtocolHandler();
+  this.stompHandler.setUserSessionRegistry(userSessionRegistry);
+  if (transportRegistration.getMessageBufferSizeLimit() != null) {
+    this.stompHandler.setMessageBufferSizeLimit(transportRegistration.getMessageBufferSizeLimit());
+  }
+  this.sockJsScheduler=defaultSockJsTaskScheduler;
+  if (brokerRegistry.getMessageBufferSizeLimit() != null) {
+    this.stompHandler.setMessageBufferSizeLimit(brokerRegistry.getMessageBufferSizeLimit());
+  }
+}
