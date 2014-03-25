@@ -1,0 +1,12 @@
+{
+  AnnotationConfigApplicationContext context=new AnnotationConfigApplicationContext(Spr11595Config.class);
+  Spr11595Service bean=context.getBean(Spr11595Service.class);
+  Cache cache=context.getBean("cache",Cache.class);
+  String key="1";
+  Object result=bean.getNeverCache("1");
+  verify(cache,times(0)).get(key);
+  Object cachedResult=bean.getNeverCache("1");
+  assertNotSame(result,cachedResult);
+  verify(cache,times(0)).get(key);
+  context.close();
+}
