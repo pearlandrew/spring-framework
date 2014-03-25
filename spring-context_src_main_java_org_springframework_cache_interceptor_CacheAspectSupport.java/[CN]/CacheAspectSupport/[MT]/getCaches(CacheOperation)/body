@@ -3,7 +3,9 @@
   Collection<Cache> caches=new ArrayList<Cache>(cacheNames.size());
   for (  String cacheName : cacheNames) {
     Cache cache=this.cacheManager.getCache(cacheName);
-    Assert.notNull(cache,"Cannot find cache named '" + cacheName + "' for "+ operation);
+    if (cache == null) {
+      throw new IllegalArgumentException("Cannot find cache named '" + cacheName + "' for "+ operation);
+    }
     caches.add(cache);
   }
   return caches;
