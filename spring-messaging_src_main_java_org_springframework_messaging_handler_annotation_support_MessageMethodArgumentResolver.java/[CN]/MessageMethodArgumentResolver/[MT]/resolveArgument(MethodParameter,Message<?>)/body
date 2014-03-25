@@ -1,10 +1,12 @@
 {
-  if (!parameter.getParameterType().isAssignableFrom(message.getClass())) {
-    throw new MethodArgumentTypeMismatchException(message,"Could not resolve Message parameter: invalid message type:" + "expected [" + message.getClass().getName() + "] but got ["+ parameter.getParameterType().getName()+ "]");
+  Class<?> paramType=parameter.getParameterType();
+  if (!paramType.isAssignableFrom(message.getClass())) {
+    throw new MethodArgumentTypeMismatchException(message,parameter,"The actual message type [" + message.getClass().getName() + "] "+ "does not match the expected type ["+ paramType.getName()+ "]");
   }
-  Class<?> effectivePayloadType=getPayloadType(parameter);
-  if (effectivePayloadType != null && !effectivePayloadType.isInstance(message.getPayload())) {
-    throw new MethodArgumentTypeMismatchException(message,"Could not resolve Message parameter: invalid payload type: " + "expected [" + effectivePayloadType.getName() + "] but got ["+ message.getPayload().getClass().getName()+ "]");
+  Class<?> expectedPayloadType=getPayloadType(parameter);
+  Object payload=message.getPayload();
+  if (expectedPayloadType != null && !expectedPayloadType.isInstance(payload)) {
+    throw new MethodArgumentTypeMismatchException(message,parameter,"The expected Message<?> payload type [" + expectedPayloadType.getClass().getName() + "] does not match the actual payload type ["+ payload.getClass().getName()+ "]");
   }
   return message;
 }
