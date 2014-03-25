@@ -34,8 +34,8 @@
       headers.setSessionAttributes(session.getAttributes());
       headers.setUser(session.getPrincipal());
       message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
-      if (SimpMessageType.CONNECT.equals(headers.getMessageType()) && this.eventPublisher != null) {
-        this.eventPublisher.publishEvent(new SessionConnectEvent(this,message));
+      if (this.eventPublisher != null && StompCommand.CONNECT.equals(headers.getMessageType())) {
+        publishEvent(new SessionConnectEvent(this,message));
       }
       outputChannel.send(message);
     }
