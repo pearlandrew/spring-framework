@@ -28,6 +28,9 @@
   }
   try {
     message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+    if (headers.getCommand() == StompCommand.CONNECTED && this.eventPublisher != null) {
+      this.eventPublisher.publishEvent(new SessionConnectedEvent(this,(Message<byte[]>)message));
+    }
     byte[] bytes=this.stompEncoder.encode((Message<byte[]>)message);
     TextMessage textMessage=new TextMessage(bytes);
     session.sendMessage(textMessage);
