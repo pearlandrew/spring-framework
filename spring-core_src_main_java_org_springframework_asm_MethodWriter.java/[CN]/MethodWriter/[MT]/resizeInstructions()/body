@@ -244,30 +244,25 @@ u+=4;
 break;
 }
 }
-if (frameCount > 0) {
 if (compute == FRAMES) {
-frameCount=0;
-stackMap=null;
-previousFrame=null;
-frame=null;
-Frame f=new Frame();
-f.owner=labels;
-Type[] args=Type.getArgumentTypes(descriptor);
-f.initInputFrame(cw,access,args,maxLocals);
-visitFrame(f);
 Label l=labels;
 while (l != null) {
 u=l.position - 3;
-if ((l.status & Label.STORE) != 0 || (u >= 0 && resize[u])) {
-getNewOffset(allIndexes,allSizes,l);
-visitFrame(l.frame);
+if (u >= 0 && resize[u]) {
+l.status|=Label.TARGET;
 }
+getNewOffset(allIndexes,allSizes,l);
 l=l.successor;
 }
+for (i=0; i < cw.typeTable.length; ++i) {
+Item item=cw.typeTable[i];
+if (item != null && item.type == ClassWriter.TYPE_UNINIT) {
+item.intVal=getNewOffset(allIndexes,allSizes,0,item.intVal);
 }
- else {
+}
+}
+ else if (frameCount > 0) {
 cw.invalidFrames=true;
-}
 }
 Handler h=firstHandler;
 while (h != null) {
