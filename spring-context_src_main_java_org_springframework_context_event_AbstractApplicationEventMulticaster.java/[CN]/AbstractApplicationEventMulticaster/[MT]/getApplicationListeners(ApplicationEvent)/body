@@ -40,7 +40,9 @@ synchronized (this.defaultRetriever) {
       }
     }
     OrderComparator.sort(allListeners);
-    this.retrieverCache.put(cacheKey,retriever);
+    if (this.beanClassLoader == null || (ClassUtils.isCacheSafe(eventType,this.beanClassLoader) && (sourceType == null || ClassUtils.isCacheSafe(sourceType,this.beanClassLoader)))) {
+      this.retrieverCache.put(cacheKey,retriever);
+    }
     return allListeners;
   }
 }
