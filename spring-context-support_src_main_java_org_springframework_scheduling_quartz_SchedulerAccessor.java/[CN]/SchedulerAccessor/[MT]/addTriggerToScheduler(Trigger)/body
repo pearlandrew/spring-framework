@@ -1,7 +1,7 @@
 {
-  boolean triggerExists=triggerExists(trigger);
+  boolean triggerExists=(getScheduler().getTrigger(trigger.getKey()) != null);
   if (!triggerExists || this.overwriteExistingJobs) {
-    JobDetail jobDetail=findJobDetail(trigger);
+    JobDetail jobDetail=(JobDetail)trigger.getJobDataMap().remove("jobDetail");
     if (jobDetail != null) {
       if (!this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
         this.jobDetails.add(jobDetail);
@@ -16,12 +16,12 @@
           logger.debug("Unexpectedly found existing trigger, assumably due to cluster race condition: " + ex.getMessage() + " - can safely be ignored");
         }
         if (this.overwriteExistingJobs) {
-          rescheduleJob(trigger);
+          getScheduler().rescheduleJob(trigger.getKey(),trigger);
         }
       }
     }
  else {
-      rescheduleJob(trigger);
+      getScheduler().rescheduleJob(trigger.getKey(),trigger);
     }
     return true;
   }

@@ -11,22 +11,13 @@
     }
     getJobDataMap().put(this.applicationContextJobDataKey,this.applicationContext);
   }
-  Class<?> jobDetailClass;
-  try {
-    jobDetailClass=getClass().getClassLoader().loadClass("org.quartz.impl.JobDetailImpl");
-  }
- catch (  ClassNotFoundException ex) {
-    jobDetailClass=JobDetail.class;
-  }
-  BeanWrapper bw=new BeanWrapperImpl(jobDetailClass);
-  MutablePropertyValues pvs=new MutablePropertyValues();
-  pvs.add("name",this.name);
-  pvs.add("group",this.group);
-  pvs.add("jobClass",this.jobClass);
-  pvs.add("jobDataMap",this.jobDataMap);
-  pvs.add("durability",this.durability);
-  pvs.add("requestsRecovery",this.requestsRecovery);
-  pvs.add("description",this.description);
-  bw.setPropertyValues(pvs);
-  this.jobDetail=(JobDetail)bw.getWrappedInstance();
+  JobDetailImpl jdi=new JobDetailImpl();
+  jdi.setName(this.name);
+  jdi.setGroup(this.group);
+  jdi.setJobClass((Class)this.jobClass);
+  jdi.setJobDataMap(this.jobDataMap);
+  jdi.setDurability(this.durability);
+  jdi.setRequestsRecovery(this.requestsRecovery);
+  jdi.setDescription(this.description);
+  this.jobDetail=jdi;
 }
