@@ -2,5 +2,13 @@
 synchronized (this.lifecycleMonitor) {
     this.running=false;
     this.clientOutboundChannel.unsubscribe(this);
+    for (    WebSocketSession session : this.sessions.values()) {
+      try {
+        session.close(CloseStatus.GOING_AWAY);
+      }
+ catch (      Throwable t) {
+        logger.error("Failed to close session id '" + session.getId() + "': "+ t.getMessage());
+      }
+    }
   }
 }

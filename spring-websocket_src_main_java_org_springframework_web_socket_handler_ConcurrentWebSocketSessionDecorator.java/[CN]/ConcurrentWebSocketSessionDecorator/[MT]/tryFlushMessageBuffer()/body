@@ -1,9 +1,9 @@
 {
-  if (this.flushLock.tryLock() && !this.limitExceeded) {
+  if (this.flushLock.tryLock()) {
     try {
       while (true) {
         WebSocketMessage<?> messageToSend=this.buffer.poll();
-        if (messageToSend == null) {
+        if (messageToSend == null || isDisabled()) {
           break;
         }
         this.bufferSize.addAndGet(messageToSend.getPayloadLength() * -1);
