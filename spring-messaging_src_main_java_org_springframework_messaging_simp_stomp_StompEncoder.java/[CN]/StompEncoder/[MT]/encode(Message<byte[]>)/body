@@ -1,13 +1,15 @@
 {
   try {
-    ByteArrayOutputStream baos=new ByteArrayOutputStream(256);
+    ByteArrayOutputStream baos=new ByteArrayOutputStream(128 + message.getPayload().length);
     DataOutputStream output=new DataOutputStream(baos);
     StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
-    if (isHeartbeat(headers)) {
+    if (SimpMessageType.HEARTBEAT == headers.getMessageType()) {
+      logger.trace("Encoded heartbeat");
       output.write(message.getPayload());
     }
  else {
-      writeCommand(headers,output);
+      output.write(headers.getCommand().toString().getBytes(UTF8_CHARSET));
+      output.write(LF);
       writeHeaders(headers,message,output);
       output.write(LF);
       writeBody(message,output);
