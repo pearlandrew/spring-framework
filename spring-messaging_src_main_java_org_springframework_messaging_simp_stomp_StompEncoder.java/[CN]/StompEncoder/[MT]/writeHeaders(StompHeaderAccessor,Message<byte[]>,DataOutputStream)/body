@@ -6,18 +6,20 @@
  else   if (logger.isDebugEnabled()) {
     logger.debug("Encoded STOMP command=" + headers.getCommand() + " headers="+ stompHeaders);
   }
+  boolean escapeHeaders=shouldEscapeHeaders(headers);
   for (  Entry<String,List<String>> entry : stompHeaders.entrySet()) {
-    byte[] key=getUtf8BytesEscapingIfNecessary(entry.getKey(),headers);
+    byte[] key=toUtf8Bytes(entry.getKey(),escapeHeaders);
     for (    String value : entry.getValue()) {
       output.write(key);
       output.write(COLON);
-      output.write(getUtf8BytesEscapingIfNecessary(value,headers));
+      output.write(toUtf8Bytes(value,escapeHeaders));
       output.write(LF);
     }
   }
   if ((headers.getCommand() == StompCommand.SEND) || (headers.getCommand() == StompCommand.MESSAGE) || (headers.getCommand() == StompCommand.ERROR)) {
+    int contentLength=message.getPayload().length;
     output.write("content-length:".getBytes(UTF8_CHARSET));
-    output.write(Integer.toString(message.getPayload().length).getBytes(UTF8_CHARSET));
+    output.write(Integer.toString(contentLength).getBytes(UTF8_CHARSET));
     output.write(LF);
   }
 }

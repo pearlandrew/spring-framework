@@ -1,3 +1,28 @@
 {
-  return input.replaceAll("\\\\n","\n").replaceAll("\\\\r","\r").replaceAll("\\\\c",":").replaceAll("\\\\\\\\","\\\\");
+  StringBuilder sb=new StringBuilder();
+  int pos=0;
+  int index=inString.indexOf("\\");
+  while (index >= 0) {
+    sb.append(inString.substring(pos,index));
+    Character c=inString.charAt(index + 1);
+    if (c == 'r') {
+      sb.append('\r');
+    }
+ else     if (c == 'n') {
+      sb.append('\n');
+    }
+ else     if (c == 'c') {
+      sb.append(':');
+    }
+ else     if (c == '\\') {
+      sb.append('\\');
+    }
+ else {
+      throw new StompConversionException("Illegal escape sequence at index " + index + ": "+ inString);
+    }
+    pos=index + 2;
+    index=inString.indexOf("\\",pos);
+  }
+  sb.append(inString.substring(pos));
+  return sb.toString();
 }
