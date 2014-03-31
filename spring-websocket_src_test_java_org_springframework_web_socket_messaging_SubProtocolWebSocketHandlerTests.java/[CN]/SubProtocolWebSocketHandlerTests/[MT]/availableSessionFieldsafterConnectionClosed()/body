@@ -1,0 +1,13 @@
+{
+  this.webSocketHandler.setDefaultProtocolHandler(stompHandler);
+  when(nativeSession.getId()).thenReturn("1");
+  when(nativeSession.getUserPrincipal()).thenReturn(new TestPrincipal("test"));
+  when(nativeSession.getNegotiatedSubprotocol()).thenReturn("v12.sToMp");
+  StandardWebSocketSession standardWebsocketSession=new StandardWebSocketSession(null,null,null,null);
+  standardWebsocketSession.initializeNativeSession(this.nativeSession);
+  this.webSocketHandler.afterConnectionEstablished(standardWebsocketSession);
+  standardWebsocketSession.close(CloseStatus.NORMAL);
+  this.webSocketHandler.afterConnectionClosed(standardWebsocketSession,CloseStatus.NORMAL);
+  assertEquals("v12.sToMp",standardWebsocketSession.getAcceptedProtocol());
+  assertNotNull(standardWebsocketSession.getPrincipal());
+}
