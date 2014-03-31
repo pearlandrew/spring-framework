@@ -1,0 +1,15 @@
+{
+  this.lock.writeLock().lock();
+  try {
+    if (this.state.equals(State.INITIALIZED)) {
+      this.value=value;
+      this.state=State.COMPLETED;
+      this.latch.countDown();
+      return true;
+    }
+  }
+  finally {
+    this.lock.writeLock().unlock();
+  }
+  return false;
+}
