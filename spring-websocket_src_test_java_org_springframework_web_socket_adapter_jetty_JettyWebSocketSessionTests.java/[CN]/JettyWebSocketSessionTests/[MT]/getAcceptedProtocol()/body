@@ -1,0 +1,15 @@
+{
+  String protocol="foo";
+  UpgradeRequest request=Mockito.mock(UpgradeRequest.class);
+  when(request.getUserPrincipal()).thenReturn(null);
+  UpgradeResponse response=Mockito.mock(UpgradeResponse.class);
+  when(response.getAcceptedSubProtocol()).thenReturn(protocol);
+  Session nativeSession=Mockito.mock(Session.class);
+  when(nativeSession.getUpgradeRequest()).thenReturn(request);
+  when(nativeSession.getUpgradeResponse()).thenReturn(response);
+  JettyWebSocketSession session=new JettyWebSocketSession(attributes);
+  session.initializeNativeSession(nativeSession);
+  reset(nativeSession);
+  assertSame(protocol,session.getAcceptedProtocol());
+  verifyNoMoreInteractions(nativeSession);
+}
