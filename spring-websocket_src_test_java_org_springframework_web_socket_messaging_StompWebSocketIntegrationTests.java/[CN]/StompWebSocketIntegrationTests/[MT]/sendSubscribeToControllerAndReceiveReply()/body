@@ -1,0 +1,14 @@
+{
+  TextMessage message=create(StompCommand.SUBSCRIBE).headers("id:subs1","destination:/app/number").build();
+  TestClientWebSocketHandler clientHandler=new TestClientWebSocketHandler(1,message);
+  WebSocketSession session=doHandshake(clientHandler,"/ws").get();
+  try {
+    assertTrue(clientHandler.latch.await(2,TimeUnit.SECONDS));
+    String payload=clientHandler.actual.get(0).getPayload();
+    assertTrue("Expected STOMP destination=/app/number, got " + payload,payload.contains("destination:/app/number"));
+    assertTrue("Expected STOMP Payload=42, got " + payload,payload.contains("42"));
+  }
+  finally {
+    session.close();
+  }
+}
