@@ -1,13 +1,14 @@
 {
+  TcpConnection<byte[]> conn=this.tcpConnection;
   if (!this.isStompConnected) {
     if (this.isRemoteClientSession) {
-      if (StompCommand.DISCONNECT.equals(StompHeaderAccessor.wrap(message).getCommand())) {
-        return EMPTY_TASK;
+      if (logger.isTraceEnabled()) {
+        logger.trace("Ignoring client message received " + message + (conn != null ? "before CONNECTED frame" : "after TCP connection closed"));
       }
-      throw new IllegalStateException("Unexpected client message " + message + (this.tcpConnection != null ? "before STOMP CONNECTED frame" : "after TCP connection closed"));
+      return EMPTY_TASK;
     }
  else {
-      throw new IllegalStateException("Cannot forward messages on system connection " + (this.tcpConnection != null ? "before STOMP CONNECTED frame" : "while inactive") + ". Try listening for BrokerAvailabilityEvent ApplicationContext events.");
+      throw new IllegalStateException("Cannot forward messages on system connection " + (conn != null ? "before STOMP CONNECTED frame" : "while inactive") + ". Try listening for BrokerAvailabilityEvent ApplicationContext events.");
     }
   }
   if (logger.isDebugEnabled()) {
@@ -19,7 +20,7 @@
       logger.debug("Forwarding message to broker");
     }
   }
-  @SuppressWarnings("unchecked") ListenableFuture<Void> future=this.tcpConnection.send((Message<byte[]>)message);
+  ListenableFuture<Void> future=conn.send((Message<byte[]>)message);
   future.addCallback(new ListenableFutureCallback<Void>(){
     @Override public void onSuccess(    Void result){
       StompCommand command=StompHeaderAccessor.wrap(message).getCommand();
@@ -28,7 +29,11 @@
       }
     }
     @Override public void onFailure(    Throwable t){
-      handleTcpConnectionFailure("Failed to send message " + message,t);
+      if (tcpConnection == null) {
+      }
+ else {
+        handleTcpConnectionFailure("Failed to send message " + message,t);
+      }
     }
   }
 );
