@@ -1,0 +1,32 @@
+{
+  while (true) {
+    ByteArrayOutputStream headerStream=new ByteArrayOutputStream(256);
+    while (buffer.remaining() > 0 && !tryConsumeEndOfLine(buffer)) {
+      headerStream.write(buffer.get());
+    }
+    if (headerStream.size() > 0) {
+      String header=new String(headerStream.toByteArray(),UTF8_CHARSET);
+      int colonIndex=header.indexOf(':');
+      if ((colonIndex <= 0) || (colonIndex == header.length() - 1)) {
+        if (buffer.remaining() > 0) {
+          throw new StompConversionException("Illegal header: '" + header + "'. A header must be of the form <name>:<value>");
+        }
+      }
+ else {
+        String headerName=unescape(header.substring(0,colonIndex));
+        String headerValue=unescape(header.substring(colonIndex + 1));
+        try {
+          headerAccessor.addNativeHeader(headerName,headerValue);
+        }
+ catch (        InvalidMimeTypeException ex) {
+          if (buffer.remaining() > 0) {
+            throw ex;
+          }
+        }
+      }
+    }
+ else {
+      break;
+    }
+  }
+}

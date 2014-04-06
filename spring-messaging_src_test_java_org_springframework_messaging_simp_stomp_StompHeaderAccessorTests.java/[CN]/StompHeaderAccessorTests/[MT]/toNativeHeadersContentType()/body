@@ -1,6 +1,8 @@
 {
-  Message<byte[]> message=MessageBuilder.withPayload(new byte[0]).setHeader(MessageHeaders.CONTENT_TYPE,MimeTypeUtils.APPLICATION_ATOM_XML).build();
-  StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
-  Map<String,List<String>> map=headers.toNativeHeaderMap();
+  SimpMessageHeaderAccessor simpHeaderAccessor=SimpMessageHeaderAccessor.create();
+  simpHeaderAccessor.setContentType(MimeTypeUtils.APPLICATION_ATOM_XML);
+  Message<byte[]> message=MessageBuilder.createMessage(new byte[0],simpHeaderAccessor.getMessageHeaders());
+  StompHeaderAccessor stompHeaderAccessor=StompHeaderAccessor.wrap(message);
+  Map<String,List<String>> map=stompHeaderAccessor.toNativeHeaderMap();
   assertEquals("application/atom+xml",map.get(StompHeaderAccessor.STOMP_CONTENT_TYPE_HEADER).get(0));
 }

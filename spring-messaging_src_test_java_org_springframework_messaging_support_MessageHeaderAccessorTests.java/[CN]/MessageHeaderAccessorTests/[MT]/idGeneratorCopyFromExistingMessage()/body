@@ -1,0 +1,13 @@
+{
+  final UUID id=new UUID(0L,23L);
+  MessageHeaderAccessor accessor=new MessageHeaderAccessor();
+  accessor.setIdGenerator(new IdGenerator(){
+    @Override public UUID generateId(){
+      return id;
+    }
+  }
+);
+  Message<?> message=MessageBuilder.createMessage("payload",accessor.getMessageHeaders());
+  MessageHeaderAccessor secondAccessor=new MessageHeaderAccessor(message);
+  assertSame(id,secondAccessor.getMessageHeaders().getId());
+}
