@@ -1,0 +1,9 @@
+{
+  @SuppressWarnings("unchecked") ApplicationListener<ApplicationEvent> listener=mock(ApplicationListener.class);
+  ApplicationEvent evt=new ContextClosedEvent(new StaticApplicationContext());
+  SimpleApplicationEventMulticaster smc=new SimpleApplicationEventMulticaster();
+  smc.setErrorHandler(TaskUtils.LOG_AND_SUPPRESS_ERROR_HANDLER);
+  smc.addApplicationListener(listener);
+  doThrow(new RuntimeException()).when(listener).onApplicationEvent(evt);
+  smc.multicastEvent(evt);
+}
