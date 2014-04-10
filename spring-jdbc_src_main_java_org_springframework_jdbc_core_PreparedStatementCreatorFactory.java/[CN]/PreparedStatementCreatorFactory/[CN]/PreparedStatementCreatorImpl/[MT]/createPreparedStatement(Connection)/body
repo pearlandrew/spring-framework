@@ -1,16 +1,11 @@
 {
   PreparedStatement ps;
   if (generatedKeysColumnNames != null || returnGeneratedKeys) {
-    try {
-      if (generatedKeysColumnNames != null) {
-        ps=con.prepareStatement(this.actualSql,generatedKeysColumnNames);
-      }
- else {
-        ps=con.prepareStatement(this.actualSql,PreparedStatement.RETURN_GENERATED_KEYS);
-      }
+    if (generatedKeysColumnNames != null) {
+      ps=con.prepareStatement(this.actualSql,generatedKeysColumnNames);
     }
- catch (    AbstractMethodError err) {
-      throw new InvalidDataAccessResourceUsageException("Your JDBC driver is not compliant with JDBC 3.0 - " + "it does not support retrieval of auto-generated keys",err);
+ else {
+      ps=con.prepareStatement(this.actualSql,PreparedStatement.RETURN_GENERATED_KEYS);
     }
   }
  else   if (resultSetType == ResultSet.TYPE_FORWARD_ONLY && !updatableResults) {
