@@ -21,20 +21,20 @@
   }
   for (  Message<byte[]> message : messages) {
     try {
-      StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
+      StompHeaderAccessor headerAccessor=MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
       if (logger.isTraceEnabled()) {
-        if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+        if (headerAccessor.isHeartbeat()) {
           logger.trace("Received heartbeat from client session=" + session.getId());
         }
  else {
           logger.trace("Received message from client session=" + session.getId());
         }
       }
-      headers.setSessionId(session.getId());
-      headers.setSessionAttributes(session.getAttributes());
-      headers.setUser(session.getPrincipal());
-      message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
-      if (this.eventPublisher != null && StompCommand.CONNECT.equals(headers.getCommand())) {
+      headerAccessor.setSessionId(session.getId());
+      headerAccessor.setSessionAttributes(session.getAttributes());
+      headerAccessor.setUser(session.getPrincipal());
+      headerAccessor.setImmutable();
+      if (this.eventPublisher != null && StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
         publishEvent(new SessionConnectEvent(this,message));
       }
       outputChannel.send(message);

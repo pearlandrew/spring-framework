@@ -2,20 +2,20 @@
   if (returnValue == null) {
     return;
   }
-  SimpMessageHeaderAccessor inputHeaders=SimpMessageHeaderAccessor.wrap(inputMessage);
-  String sessionId=inputHeaders.getSessionId();
+  MessageHeaders headers=message.getHeaders();
+  String sessionId=SimpMessageHeaderAccessor.getSessionId(headers);
   MessagePostProcessor postProcessor=new SessionHeaderPostProcessor(sessionId);
   SendToUser sendToUser=returnType.getMethodAnnotation(SendToUser.class);
   if (sendToUser != null) {
-    Principal principal=inputHeaders.getUser();
+    Principal principal=SimpMessageHeaderAccessor.getUser(headers);
     if (principal == null) {
-      throw new MissingSessionUserException(inputMessage);
+      throw new MissingSessionUserException(message);
     }
     String userName=principal.getName();
     if (principal instanceof DestinationUserNameProvider) {
       userName=((DestinationUserNameProvider)principal).getDestinationUserName();
     }
-    String[] destinations=getTargetDestinations(sendToUser,inputHeaders,this.defaultUserDestinationPrefix);
+    String[] destinations=getTargetDestinations(sendToUser,message,this.defaultUserDestinationPrefix);
     for (    String destination : destinations) {
       this.messagingTemplate.convertAndSendToUser(userName,destination,returnValue,postProcessor);
     }
@@ -23,7 +23,7 @@
   }
  else {
     SendTo sendTo=returnType.getMethodAnnotation(SendTo.class);
-    String[] destinations=getTargetDestinations(sendTo,inputHeaders,this.defaultDestinationPrefix);
+    String[] destinations=getTargetDestinations(sendTo,message,this.defaultDestinationPrefix);
     for (    String destination : destinations) {
       this.messagingTemplate.convertAndSend(destination,returnValue,postProcessor);
     }

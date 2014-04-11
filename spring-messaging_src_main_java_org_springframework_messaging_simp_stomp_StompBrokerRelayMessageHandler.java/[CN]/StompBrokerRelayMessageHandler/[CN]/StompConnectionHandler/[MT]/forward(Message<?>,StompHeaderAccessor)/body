@@ -12,19 +12,20 @@
     }
   }
   if (logger.isDebugEnabled()) {
-    StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
-    if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+    if (headerAccessor.isHeartbeat()) {
       logger.trace("Forwarding heartbeat to broker");
     }
  else {
       logger.debug("Forwarding message to broker");
     }
   }
+  if (headerAccessor.isMutable() && headerAccessor.isModified()) {
+    message=MessageBuilder.createMessage(message.getPayload(),headerAccessor.getMessageHeaders());
+  }
   ListenableFuture<Void> future=conn.send((Message<byte[]>)message);
   future.addCallback(new ListenableFutureCallback<Void>(){
     @Override public void onSuccess(    Void result){
-      StompCommand command=StompHeaderAccessor.wrap(message).getCommand();
-      if (command == StompCommand.DISCONNECT) {
+      if (headerAccessor.getCommand() == StompCommand.DISCONNECT) {
         clearConnection();
       }
     }
@@ -32,7 +33,7 @@
       if (tcpConnection == null) {
       }
  else {
-        handleTcpConnectionFailure("Failed to send message " + message,t);
+        handleTcpConnectionFailure("Failed to send message " + headerAccessor,t);
       }
     }
   }

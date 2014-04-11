@@ -1,11 +1,12 @@
 {
-  String destination=headers.getDestination();
+  MessageHeaders headers=message.getHeaders();
+  SimpMessageType messageType=SimpMessageHeaderAccessor.getMessageType(headers);
+  String destination=SimpMessageHeaderAccessor.getDestination(headers);
+  Principal principal=SimpMessageHeaderAccessor.getUser(headers);
   String destinationWithoutPrefix;
   String subscribeDestination;
   String user;
   Set<String> sessionIds;
-  Principal principal=headers.getUser();
-  SimpMessageType messageType=headers.getMessageType();
   if (SimpMessageType.SUBSCRIBE.equals(messageType) || SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
     if (!checkDestination(destination,this.destinationPrefix)) {
       return null;
@@ -14,14 +15,15 @@
       logger.error("Ignoring message, no principal info available");
       return null;
     }
-    if (headers.getSessionId() == null) {
+    String sessionId=SimpMessageHeaderAccessor.getSessionId(headers);
+    if (sessionId == null) {
       logger.error("Ignoring message, no session id available");
       return null;
     }
     destinationWithoutPrefix=destination.substring(this.destinationPrefix.length() - 1);
     subscribeDestination=destination;
     user=principal.getName();
-    sessionIds=Collections.singleton(headers.getSessionId());
+    sessionIds=Collections.singleton(sessionId);
   }
  else   if (SimpMessageType.MESSAGE.equals(messageType)) {
     if (!checkDestination(destination,this.destinationPrefix)) {

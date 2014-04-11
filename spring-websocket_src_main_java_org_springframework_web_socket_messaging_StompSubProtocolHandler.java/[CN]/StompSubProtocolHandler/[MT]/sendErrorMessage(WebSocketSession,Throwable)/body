@@ -1,8 +1,7 @@
 {
-  StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.ERROR);
-  headers.setMessage(error.getMessage());
-  Message<byte[]> message=MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
-  byte[] bytes=this.stompEncoder.encode(message);
+  StompHeaderAccessor headerAccessor=StompHeaderAccessor.create(StompCommand.ERROR);
+  headerAccessor.setMessage(error.getMessage());
+  byte[] bytes=this.stompEncoder.encode(headerAccessor.getMessageHeaders(),EMPTY_PAYLOAD);
   try {
     session.sendMessage(new TextMessage(bytes));
   }

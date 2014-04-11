@@ -1,17 +1,18 @@
 {
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
-  if (!SimpMessageType.MESSAGE.equals(headers.getMessageType())) {
-    logger.trace("Ignoring message type " + headers.getMessageType());
+  MessageHeaders headers=message.getHeaders();
+  SimpMessageType type=SimpMessageHeaderAccessor.getMessageType(headers);
+  if (!SimpMessageType.MESSAGE.equals(type)) {
+    logger.trace("Ignoring message type " + type);
     return null;
   }
-  String destination=headers.getDestination();
+  String destination=SimpMessageHeaderAccessor.getDestination(headers);
   if (destination == null) {
     logger.trace("Ignoring message, no destination");
     return null;
   }
   MultiValueMap<String,String> result=findSubscriptionsInternal(destination,message);
   if (logger.isTraceEnabled()) {
-    logger.trace("Found " + result.size() + " subscriptions for destination="+ headers.getDestination());
+    logger.trace("Found " + result.size() + " subscriptions for destination="+ destination);
   }
   return result;
 }

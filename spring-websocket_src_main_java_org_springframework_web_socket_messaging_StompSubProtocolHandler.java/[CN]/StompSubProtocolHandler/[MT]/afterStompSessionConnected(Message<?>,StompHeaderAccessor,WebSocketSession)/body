@@ -1,13 +1,14 @@
 {
   Principal principal=session.getPrincipal();
   if (principal != null) {
-    headers.setNativeHeader(CONNECTED_USER_HEADER,principal.getName());
+    headerAccessor=toMutableAccessor(headerAccessor,message);
+    headerAccessor.setNativeHeader(CONNECTED_USER_HEADER,principal.getName());
     if (this.userSessionRegistry != null) {
       String userName=resolveNameForUserSessionRegistry(principal);
       this.userSessionRegistry.registerSessionId(userName,session.getId());
     }
   }
-  long[] heartbeat=headers.getHeartbeat();
+  long[] heartbeat=headerAccessor.getHeartbeat();
   if (heartbeat[1] > 0) {
     session=WebSocketSessionDecorator.unwrap(session);
     if (session instanceof SockJsSession) {
@@ -15,4 +16,5 @@
       ((SockJsSession)session).disableHeartbeat();
     }
   }
+  return headerAccessor;
 }
