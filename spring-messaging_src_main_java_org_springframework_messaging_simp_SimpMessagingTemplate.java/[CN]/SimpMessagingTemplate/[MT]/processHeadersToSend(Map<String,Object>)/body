@@ -1,18 +1,22 @@
 {
   if (headers == null) {
-    return null;
+    SimpMessageHeaderAccessor headerAccessor=SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+    headerAccessor.setLeaveMutable(true);
+    return headerAccessor.getMessageHeaders();
   }
- else   if (headers.containsKey(NativeMessageHeaderAccessor.NATIVE_HEADERS)) {
+  if (headers.containsKey(NativeMessageHeaderAccessor.NATIVE_HEADERS)) {
     return headers;
   }
- else {
-    MultiValueMap<String,String> nativeHeaders=new LinkedMultiValueMap<String,String>(headers.size());
-    for (    String key : headers.keySet()) {
-      Object value=headers.get(key);
-      nativeHeaders.set(key,(value != null ? value.toString() : null));
+  if (headers instanceof MessageHeaders) {
+    SimpMessageHeaderAccessor accessor=MessageHeaderAccessor.getAccessor((MessageHeaders)headers,SimpMessageHeaderAccessor.class);
+    if (accessor != null) {
+      return headers;
     }
-    headers=new HashMap<String,Object>(1);
-    headers.put(NativeMessageHeaderAccessor.NATIVE_HEADERS,nativeHeaders);
-    return headers;
   }
+  SimpMessageHeaderAccessor headerAccessor=SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+  for (  String key : headers.keySet()) {
+    Object value=headers.get(key);
+    headerAccessor.setNativeHeader(key,(value != null ? value.toString() : null));
+  }
+  return headerAccessor.getMessageHeaders();
 }

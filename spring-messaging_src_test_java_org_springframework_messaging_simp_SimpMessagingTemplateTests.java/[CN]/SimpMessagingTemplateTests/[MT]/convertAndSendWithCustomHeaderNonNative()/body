@@ -4,8 +4,8 @@
   headers.put(NativeMessageHeaderAccessor.NATIVE_HEADERS,new LinkedMultiValueMap<String,String>());
   this.messagingTemplate.convertAndSend("/foo","data",headers);
   List<Message<byte[]>> messages=this.messageChannel.getMessages();
-  Message<byte[]> message=messages.get(0);
-  SimpMessageHeaderAccessor resultHeaders=SimpMessageHeaderAccessor.wrap(message);
-  assertEquals("value",resultHeaders.toMap().get("key"));
-  assertNull(resultHeaders.getNativeHeader("key"));
+  SimpMessageHeaderAccessor headerAccessor=MessageHeaderAccessor.getAccessor(messages.get(0),SimpMessageHeaderAccessor.class);
+  assertNotNull(headerAccessor);
+  assertEquals("value",headerAccessor.toMap().get("key"));
+  assertNull(headerAccessor.getNativeHeader("key"));
 }

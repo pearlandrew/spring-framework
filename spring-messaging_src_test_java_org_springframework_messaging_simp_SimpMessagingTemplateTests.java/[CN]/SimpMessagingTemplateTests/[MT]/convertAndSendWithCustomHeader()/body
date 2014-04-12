@@ -2,8 +2,8 @@
   Map<String,Object> headers=Collections.<String,Object>singletonMap("key","value");
   this.messagingTemplate.convertAndSend("/foo","data",headers);
   List<Message<byte[]>> messages=this.messageChannel.getMessages();
-  Message<byte[]> message=messages.get(0);
-  SimpMessageHeaderAccessor resultHeaders=SimpMessageHeaderAccessor.wrap(message);
-  assertNull(resultHeaders.toMap().get("key"));
-  assertEquals(Arrays.asList("value"),resultHeaders.getNativeHeader("key"));
+  SimpMessageHeaderAccessor headerAccessor=MessageHeaderAccessor.getAccessor(messages.get(0),SimpMessageHeaderAccessor.class);
+  assertNotNull(headerAccessor);
+  assertNull(headerAccessor.toMap().get("key"));
+  assertEquals(Arrays.asList("value"),headerAccessor.getNativeHeader("key"));
 }

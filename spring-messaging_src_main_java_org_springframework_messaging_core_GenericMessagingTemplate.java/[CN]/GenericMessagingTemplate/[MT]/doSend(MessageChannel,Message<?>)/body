@@ -1,5 +1,9 @@
 {
   Assert.notNull(channel,"channel must not be null");
+  MessageHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(message,MessageHeaderAccessor.class);
+  if (accessor != null && accessor.isMutable()) {
+    accessor.setImmutable();
+  }
   long timeout=this.sendTimeout;
   boolean sent=(timeout >= 0) ? channel.send(message,timeout) : channel.send(message);
   if (!sent) {

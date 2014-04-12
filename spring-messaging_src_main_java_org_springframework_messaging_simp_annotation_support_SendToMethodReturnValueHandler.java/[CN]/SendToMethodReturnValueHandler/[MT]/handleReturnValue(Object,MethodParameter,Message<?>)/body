@@ -4,20 +4,12 @@
   }
   MessageHeaders headers=message.getHeaders();
   String sessionId=SimpMessageHeaderAccessor.getSessionId(headers);
-  MessagePostProcessor postProcessor=new SessionHeaderPostProcessor(sessionId);
   SendToUser sendToUser=returnType.getMethodAnnotation(SendToUser.class);
   if (sendToUser != null) {
-    Principal principal=SimpMessageHeaderAccessor.getUser(headers);
-    if (principal == null) {
-      throw new MissingSessionUserException(message);
-    }
-    String userName=principal.getName();
-    if (principal instanceof DestinationUserNameProvider) {
-      userName=((DestinationUserNameProvider)principal).getDestinationUserName();
-    }
+    String user=getUserName(message,headers);
     String[] destinations=getTargetDestinations(sendToUser,message,this.defaultUserDestinationPrefix);
     for (    String destination : destinations) {
-      this.messagingTemplate.convertAndSendToUser(userName,destination,returnValue,postProcessor);
+      this.messagingTemplate.convertAndSendToUser(user,destination,returnValue,createHeaders(sessionId));
     }
     return;
   }
@@ -25,7 +17,7 @@
     SendTo sendTo=returnType.getMethodAnnotation(SendTo.class);
     String[] destinations=getTargetDestinations(sendTo,message,this.defaultDestinationPrefix);
     for (    String destination : destinations) {
-      this.messagingTemplate.convertAndSend(destination,returnValue,postProcessor);
+      this.messagingTemplate.convertAndSend(destination,returnValue,createHeaders(sessionId));
     }
   }
 }

@@ -1,2 +1,22 @@
 {
+  MessageHeaders messageHeaders=null;
+  headers=processHeadersToSend(headers);
+  if (headers != null) {
+    if (headers instanceof MessageHeaders) {
+      messageHeaders=(MessageHeaders)headers;
+    }
+ else {
+      messageHeaders=new MessageHeaders(headers);
+    }
+  }
+  Message<?> message=this.converter.toMessage(payload,messageHeaders);
+  if (message == null) {
+    String payloadType=(payload != null) ? payload.getClass().getName() : null;
+    Object contentType=(messageHeaders != null) ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null;
+    throw new MessageConversionException("Unable to convert payload type '" + payloadType + "', Content-Type="+ contentType+ ", converter="+ this.converter,null);
+  }
+  if (postProcessor != null) {
+    message=postProcessor.postProcessMessage(message);
+  }
+  this.send(destination,message);
 }

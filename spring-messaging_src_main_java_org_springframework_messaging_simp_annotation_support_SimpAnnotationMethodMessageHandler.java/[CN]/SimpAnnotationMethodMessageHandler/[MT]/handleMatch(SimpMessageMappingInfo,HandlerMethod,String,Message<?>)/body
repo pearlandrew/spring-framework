@@ -2,9 +2,9 @@
   String matchedPattern=mapping.getDestinationConditions().getPatterns().iterator().next();
   Map<String,String> vars=getPathMatcher().extractUriTemplateVariables(matchedPattern,lookupDestination);
   if (!CollectionUtils.isEmpty(vars)) {
-    SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
-    headers.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER,vars);
-    message=MessageBuilder.createMessage(message.getPayload(),headers.getMessageHeaders());
+    MessageHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(message,MessageHeaderAccessor.class);
+    Assert.state(accessor != null && accessor.isMutable());
+    accessor.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER,vars);
   }
   super.handleMatch(mapping,handlerMethod,lookupDestination,message);
 }
