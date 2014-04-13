@@ -5,16 +5,17 @@
   }
   for (  String sessionId : subscriptions.keySet()) {
     for (    String subscriptionId : subscriptions.get(sessionId)) {
-      SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
-      headers.setSessionId(sessionId);
-      headers.setSubscriptionId(subscriptionId);
+      SimpMessageHeaderAccessor headerAccessor=SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+      headerAccessor.setSessionId(sessionId);
+      headerAccessor.setSubscriptionId(subscriptionId);
+      headerAccessor.copyHeadersIfAbsent(message.getHeaders());
       Object payload=message.getPayload();
-      Message<?> clientMessage=MessageBuilder.withPayload(payload).setHeaders(headers).build();
+      Message<?> reply=MessageBuilder.createMessage(payload,headerAccessor.getMessageHeaders());
       try {
-        this.clientOutboundChannel.send(clientMessage);
+        this.clientOutboundChannel.send(reply);
       }
  catch (      Throwable ex) {
-        logger.error("Failed to send message to destination=" + destination + ", sessionId="+ sessionId+ ", subscriptionId="+ subscriptionId,ex);
+        logger.error("Failed to send message=" + message,ex);
       }
     }
   }

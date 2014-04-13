@@ -1,5 +1,5 @@
 {
-  UUID originalId=message.getHeaders().getId();
+  Message<?> originalMessage=message;
   for (  ChannelInterceptor interceptor : this.interceptors) {
     message=interceptor.preSend(message,channel);
     if (message == null) {
@@ -10,8 +10,8 @@
     }
   }
   if (logger.isDebugEnabled()) {
-    if (!message.getHeaders().getId().equals(originalId)) {
-      logger.debug("preSend returned modified message, new message id=" + message.getHeaders().getId());
+    if (message != originalMessage) {
+      logger.debug("preSend returned modified message, new message=" + message);
     }
   }
   return message;

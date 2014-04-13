@@ -3,11 +3,12 @@
   String sessionId="sess1";
   TestUser user=new TestUser();
   Message<?> inputMessage=createInputMessage(sessionId,"sub1","/app","/dest",user);
-  this.handler.handleReturnValue(payloadContent,this.sendToUserDefaultDestReturnType,inputMessage);
+  this.handler.handleReturnValue(PAYLOAD,this.sendToUserDefaultDestReturnType,inputMessage);
   verify(this.messageChannel,times(1)).send(this.messageCaptor.capture());
   Message<?> message=this.messageCaptor.getAllValues().get(0);
   SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
   assertEquals(sessionId,headers.getSessionId());
-  assertNull(headers.getSubscriptionId());
   assertEquals("/user/" + user.getName() + "/queue/dest",headers.getDestination());
+  assertEquals(MIME_TYPE,headers.getContentType());
+  assertNull("Subscription id should not be copied",headers.getSubscriptionId());
 }

@@ -1,9 +1,15 @@
 {
   Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()),"Unexpected message type " + getMessage());
-  if ((getCommand() == null) || getCommand().equals(StompCommand.SEND)) {
+  StompCommand command=getCommand();
+  if ((command == null) || StompCommand.SEND.equals(command)) {
     setHeader(COMMAND_HEADER,StompCommand.MESSAGE);
   }
- else   if (!getCommand().equals(StompCommand.MESSAGE)) {
-    throw new IllegalStateException("Unexpected STOMP command " + getCommand());
+ else   if (!StompCommand.MESSAGE.equals(command)) {
+    throw new IllegalStateException("Unexpected STOMP command " + command);
+  }
+  trySetStompHeaderForSubscriptionId();
+  if (getMessageId() == null) {
+    String messageId=getSessionId() + "-" + messageIdCounter.getAndIncrement();
+    setNativeHeader(STOMP_MESSAGE_ID_HEADER,messageId);
   }
 }

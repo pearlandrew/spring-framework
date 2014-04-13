@@ -1,15 +1,15 @@
 {
-  StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
-  if (SimpMessageType.HEARTBEAT.equals(headers.getMessageType())) {
+  StompHeaderAccessor headerAccessor=MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
+  if (headerAccessor.isHeartbeat()) {
     logger.trace("Received broker heartbeat");
   }
  else   if (logger.isDebugEnabled()) {
     logger.debug("Received message from broker in session '" + this.sessionId + "'");
   }
-  if (StompCommand.CONNECTED == headers.getCommand()) {
-    afterStompConnected(headers);
+  if (StompCommand.CONNECTED == headerAccessor.getCommand()) {
+    afterStompConnected(headerAccessor);
   }
-  headers.setSessionId(this.sessionId);
-  message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
+  headerAccessor.setSessionId(this.sessionId);
+  headerAccessor.setImmutable();
   sendMessageToClient(message);
 }

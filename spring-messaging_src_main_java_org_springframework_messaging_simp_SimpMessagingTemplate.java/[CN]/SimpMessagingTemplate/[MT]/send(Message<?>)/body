@@ -1,6 +1,9 @@
 {
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
-  String destination=headers.getDestination();
-  destination=(destination != null) ? destination : getRequiredDefaultDestination();
-  doSend(destination,message);
+  Assert.notNull(message,"'message' is required");
+  String destination=SimpMessageHeaderAccessor.getDestination(message.getHeaders());
+  if (destination != null) {
+    sendInternal(message);
+    return;
+  }
+  doSend(getRequiredDefaultDestination(),message);
 }

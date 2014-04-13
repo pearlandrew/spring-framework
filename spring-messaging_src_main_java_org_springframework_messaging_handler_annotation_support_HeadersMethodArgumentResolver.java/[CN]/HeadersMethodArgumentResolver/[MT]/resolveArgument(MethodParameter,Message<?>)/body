@@ -4,11 +4,19 @@
     return message.getHeaders();
   }
  else   if (MessageHeaderAccessor.class.equals(paramType)) {
-    return new MessageHeaderAccessor(message);
+    MessageHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(message,MessageHeaderAccessor.class);
+    return (accessor != null ? accessor : new MessageHeaderAccessor(message));
   }
  else   if (MessageHeaderAccessor.class.isAssignableFrom(paramType)) {
-    Method factoryMethod=ClassUtils.getMethod(paramType,"wrap",Message.class);
-    return ReflectionUtils.invokeMethod(factoryMethod,null,message);
+    MessageHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(message,MessageHeaderAccessor.class);
+    if (accessor != null && paramType.isAssignableFrom(accessor.getClass())) {
+      return accessor;
+    }
+ else {
+      Method method=ReflectionUtils.findMethod(paramType,"wrap",Message.class);
+      Assert.notNull(method,"Cannot create accessor of type " + paramType + " for message "+ message);
+      return ReflectionUtils.invokeMethod(method,null,message);
+    }
   }
  else {
     throw new IllegalStateException("Unexpected method parameter type " + paramType + "in method "+ parameter.getMethod()+ ". "+ "@Headers method arguments must be assignable to java.util.Map.");

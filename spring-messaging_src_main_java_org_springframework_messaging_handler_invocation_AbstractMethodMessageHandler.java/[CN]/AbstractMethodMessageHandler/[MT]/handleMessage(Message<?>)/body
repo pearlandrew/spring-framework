@@ -14,6 +14,10 @@
   if (logger.isDebugEnabled()) {
     logger.debug("Handling message, lookupDestination=" + lookupDestination);
   }
-  message=MessageBuilder.fromMessage(message).setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,lookupDestination).build();
+  MessageHeaderAccessor headerAccessor=MessageHeaderAccessor.getMutableAccessor(message);
+  headerAccessor.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,lookupDestination);
+  headerAccessor.setLeaveMutable(true);
+  message=MessageBuilder.createMessage(message.getPayload(),headerAccessor.getMessageHeaders());
   handleMessageInternal(message,lookupDestination);
+  headerAccessor.setImmutable();
 }

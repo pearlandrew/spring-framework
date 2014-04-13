@@ -1,3 +1,13 @@
 {
-  this.originalHeaders=(message != null) ? message.getHeaders() : null;
+  if (message != null) {
+    this.headers=new MutableMessageHeaders(message.getHeaders());
+    MessageHeaderAccessor accessor=getAccessor(message,MessageHeaderAccessor.class);
+    if (accessor != null) {
+      this.idGenerator=accessor.idGenerator;
+      this.enableTimestamp=accessor.enableTimestamp;
+    }
+  }
+ else {
+    this.headers=new MutableMessageHeaders();
+  }
 }

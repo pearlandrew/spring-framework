@@ -1,13 +1,13 @@
 {
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.create();
-  headers.setSessionId(sessId);
-  headers.setSubscriptionId(subsId);
+  SimpMessageHeaderAccessor headerAccessor=SimpMessageHeaderAccessor.create();
+  headerAccessor.setSessionId(sessId);
+  headerAccessor.setSubscriptionId(subsId);
   if (destination != null && destinationPrefix != null) {
-    headers.setDestination(destinationPrefix + destination);
-    headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,destination);
+    headerAccessor.setDestination(destinationPrefix + destination);
+    headerAccessor.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,destination);
   }
   if (principal != null) {
-    headers.setUser(principal);
+    headerAccessor.setUser(principal);
   }
-  return MessageBuilder.withPayload(new byte[0]).copyHeaders(headers.toMap()).build();
+  return MessageBuilder.createMessage(new byte[0],headerAccessor.getMessageHeaders());
 }

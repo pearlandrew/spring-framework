@@ -1,0 +1,36 @@
+{
+  Integer contentLength;
+  try {
+    contentLength=headerAccessor.getContentLength();
+  }
+ catch (  NumberFormatException ex) {
+    logger.warn("Ignoring invalid content-length: '" + headerAccessor);
+    contentLength=null;
+  }
+  if (contentLength != null && contentLength >= 0) {
+    if (buffer.remaining() > contentLength) {
+      byte[] payload=new byte[contentLength];
+      buffer.get(payload);
+      if (buffer.get() != 0) {
+        throw new StompConversionException("Frame must be terminated with a null octet");
+      }
+      return payload;
+    }
+ else {
+      return null;
+    }
+  }
+ else {
+    ByteArrayOutputStream payload=new ByteArrayOutputStream(256);
+    while (buffer.remaining() > 0) {
+      byte b=buffer.get();
+      if (b == 0) {
+        return payload.toByteArray();
+      }
+ else {
+        payload.write(b);
+      }
+    }
+  }
+  return null;
+}

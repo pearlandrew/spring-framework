@@ -1,0 +1,29 @@
+{
+  @SuppressWarnings("unchecked") Map<String,List<String>> nativeHeaders=(Map<String,List<String>>)headers.get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Encoding STOMP " + command + ", headers="+ nativeHeaders);
+  }
+  if (nativeHeaders == null) {
+    return;
+  }
+  boolean shouldEscape=(command != StompCommand.CONNECT && command != StompCommand.CONNECTED);
+  for (  Entry<String,List<String>> entry : nativeHeaders.entrySet()) {
+    byte[] key=encodeHeaderString(entry.getKey(),shouldEscape);
+    List<String> values=entry.getValue();
+    if (StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(entry.getKey())) {
+      values=Arrays.asList(StompHeaderAccessor.getPasscode(headers));
+    }
+    for (    String value : values) {
+      output.write(key);
+      output.write(COLON);
+      output.write(encodeHeaderString(value,shouldEscape));
+      output.write(LF);
+    }
+  }
+  if (command.requiresContentLength()) {
+    int contentLength=payload.length;
+    output.write("content-length:".getBytes(StompDecoder.UTF8_CHARSET));
+    output.write(Integer.toString(contentLength).getBytes(StompDecoder.UTF8_CHARSET));
+    output.write(LF);
+  }
+}

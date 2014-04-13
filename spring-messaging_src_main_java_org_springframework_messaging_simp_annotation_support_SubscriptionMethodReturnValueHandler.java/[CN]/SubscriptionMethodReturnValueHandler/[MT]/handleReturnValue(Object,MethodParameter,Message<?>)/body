@@ -2,11 +2,10 @@
   if (returnValue == null) {
     return;
   }
-  SimpMessageHeaderAccessor inputHeaders=SimpMessageHeaderAccessor.wrap(message);
-  String sessionId=inputHeaders.getSessionId();
-  String subscriptionId=inputHeaders.getSubscriptionId();
-  String destination=inputHeaders.getDestination();
-  Assert.state(inputHeaders.getSubscriptionId() != null,"No subsriptiondId in input message to method " + returnType.getMethod());
-  MessagePostProcessor postProcessor=new SubscriptionHeaderPostProcessor(sessionId,subscriptionId);
-  this.messagingTemplate.convertAndSend(destination,returnValue,postProcessor);
+  MessageHeaders headers=message.getHeaders();
+  String destination=SimpMessageHeaderAccessor.getDestination(headers);
+  String sessionId=SimpMessageHeaderAccessor.getSessionId(headers);
+  String subscriptionId=SimpMessageHeaderAccessor.getSubscriptionId(headers);
+  Assert.state(subscriptionId != null,"No subscriptionId in message=" + message + ", method="+ returnType.getMethod());
+  this.messagingTemplate.convertAndSend(destination,returnValue,createHeaders(sessionId,subscriptionId));
 }

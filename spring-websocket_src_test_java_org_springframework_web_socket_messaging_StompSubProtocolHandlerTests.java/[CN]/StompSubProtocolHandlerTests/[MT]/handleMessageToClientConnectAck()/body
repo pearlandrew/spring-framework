@@ -1,11 +1,11 @@
 {
   StompHeaderAccessor connectHeaders=StompHeaderAccessor.create(StompCommand.CONNECT);
   connectHeaders.setHeartbeat(10000,10000);
-  connectHeaders.setNativeHeader(StompHeaderAccessor.STOMP_ACCEPT_VERSION_HEADER,"1.0,1.1");
-  Message<?> connectMessage=MessageBuilder.withPayload(new byte[0]).setHeaders(connectHeaders).build();
+  connectHeaders.setAcceptVersion("1.0,1.1");
+  Message<?> connectMessage=MessageBuilder.createMessage(EMPTY_PAYLOAD,connectHeaders.getMessageHeaders());
   SimpMessageHeaderAccessor connectAckHeaders=SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
   connectAckHeaders.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER,connectMessage);
-  Message<byte[]> connectAckMessage=MessageBuilder.withPayload(new byte[0]).setHeaders(connectAckHeaders).build();
+  Message<byte[]> connectAckMessage=MessageBuilder.createMessage(EMPTY_PAYLOAD,connectAckHeaders.getMessageHeaders());
   this.protocolHandler.handleMessageToClient(this.session,connectAckMessage);
   verifyNoMoreInteractions(this.channel);
   assertEquals(1,this.session.getSentMessages().size());

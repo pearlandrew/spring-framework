@@ -1,0 +1,26 @@
+{
+  Assert.notNull(headers,"'headers' is required");
+  Assert.notNull(payload,"'payload' is required");
+  try {
+    ByteArrayOutputStream baos=new ByteArrayOutputStream(128 + payload.length);
+    DataOutputStream output=new DataOutputStream(baos);
+    if (SimpMessageType.HEARTBEAT.equals(SimpMessageHeaderAccessor.getMessageType(headers))) {
+      logger.trace("Encoded heartbeat");
+      output.write(StompDecoder.HEARTBEAT_PAYLOAD);
+    }
+ else {
+      StompCommand command=StompHeaderAccessor.getCommand(headers);
+      Assert.notNull(command,"Missing STOMP command: " + headers);
+      output.write(command.toString().getBytes(StompDecoder.UTF8_CHARSET));
+      output.write(LF);
+      writeHeaders(command,headers,payload,output);
+      output.write(LF);
+      writeBody(payload,output);
+      output.write((byte)0);
+    }
+    return baos.toByteArray();
+  }
+ catch (  IOException e) {
+    throw new StompConversionException("Failed to encode STOMP frame",e);
+  }
+}

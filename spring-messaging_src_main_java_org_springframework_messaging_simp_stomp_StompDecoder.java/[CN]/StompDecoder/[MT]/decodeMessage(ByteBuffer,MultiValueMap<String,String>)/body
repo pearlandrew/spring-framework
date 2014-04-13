@@ -4,14 +4,21 @@
   buffer.mark();
   String command=readCommand(buffer);
   if (command.length() > 0) {
-    readHeaders(buffer,headers);
-    byte[] payload=readPayload(buffer,headers);
-    if (payload != null) {
+    StompHeaderAccessor headerAccessor=null;
+    byte[] payload=null;
+    if (buffer.remaining() > 0) {
       StompCommand stompCommand=StompCommand.valueOf(command);
-      if ((payload.length > 0) && (!stompCommand.isBodyAllowed())) {
-        throw new StompConversionException(stompCommand + " shouldn't have but " + "has a payload with length="+ payload.length+ ", headers="+ headers);
+      headerAccessor=StompHeaderAccessor.create(stompCommand);
+      readHeaders(buffer,headerAccessor);
+      payload=readPayload(buffer,headerAccessor);
+    }
+    if (payload != null) {
+      if ((payload.length > 0) && (!headerAccessor.getCommand().isBodyAllowed())) {
+        throw new StompConversionException(headerAccessor.getCommand() + " shouldn't have a payload: length=" + payload.length+ ", headers="+ headers);
       }
-      decodedMessage=MessageBuilder.withPayload(payload).setHeaders(StompHeaderAccessor.create(stompCommand,headers)).build();
+      headerAccessor.updateSimpMessageHeadersFromStompHeaders();
+      headerAccessor.setLeaveMutable(true);
+      decodedMessage=MessageBuilder.createMessage(payload,headerAccessor.getMessageHeaders());
       if (logger.isDebugEnabled()) {
         logger.debug("Decoded " + decodedMessage);
       }
@@ -20,6 +27,13 @@
       if (logger.isTraceEnabled()) {
         logger.trace("Received incomplete frame. Resetting buffer.");
       }
+      if (headers != null && headerAccessor != null) {
+        String name=NativeMessageHeaderAccessor.NATIVE_HEADERS;
+        @SuppressWarnings("unchecked") MultiValueMap<String,String> map=(MultiValueMap<String,String>)headerAccessor.getHeader(name);
+        if (map != null) {
+          headers.putAll(map);
+        }
+      }
       buffer.reset();
     }
   }
@@ -27,7 +41,9 @@
     if (logger.isTraceEnabled()) {
       logger.trace("Decoded heartbeat");
     }
-    decodedMessage=MessageBuilder.withPayload(HEARTBEAT_PAYLOAD).setHeaders(StompHeaderAccessor.create(SimpMessageType.HEARTBEAT)).build();
+    StompHeaderAccessor headerAccessor=StompHeaderAccessor.createForHeartbeat();
+    headerAccessor.setLeaveMutable(true);
+    decodedMessage=MessageBuilder.createMessage(HEARTBEAT_PAYLOAD,headerAccessor.getMessageHeaders());
   }
   return decodedMessage;
 }

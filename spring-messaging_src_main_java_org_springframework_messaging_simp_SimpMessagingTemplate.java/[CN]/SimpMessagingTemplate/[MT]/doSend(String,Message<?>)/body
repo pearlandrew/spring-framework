@@ -1,12 +1,23 @@
 {
   Assert.notNull(destination,"Destination must not be null");
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
-  headers.setDestination(destination);
-  headers.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
-  message=MessageBuilder.withPayload(message.getPayload()).setHeaders(headers).build();
-  long timeout=this.sendTimeout;
-  boolean sent=(timeout >= 0) ? this.messageChannel.send(message,timeout) : this.messageChannel.send(message);
-  if (!sent) {
-    throw new MessageDeliveryException(message,"failed to send message to destination '" + destination + "' within timeout: "+ timeout);
+  SimpMessageHeaderAccessor simpAccessor=MessageHeaderAccessor.getAccessor(message,SimpMessageHeaderAccessor.class);
+  if (simpAccessor != null) {
+    if (simpAccessor.isMutable()) {
+      simpAccessor.setDestination(destination);
+      simpAccessor.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
+      simpAccessor.setImmutable();
+      sendInternal(message);
+      return;
+    }
+ else {
+      simpAccessor=(SimpMessageHeaderAccessor)MessageHeaderAccessor.getMutableAccessor(message);
+    }
   }
+ else {
+    simpAccessor=SimpMessageHeaderAccessor.wrap(message);
+  }
+  simpAccessor.setDestination(destination);
+  simpAccessor.setMessageTypeIfNotSet(SimpMessageType.MESSAGE);
+  message=MessageBuilder.createMessage(message.getPayload(),simpAccessor.getMessageHeaders());
+  sendInternal(message);
 }

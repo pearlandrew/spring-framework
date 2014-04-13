@@ -1,0 +1,20 @@
+{
+  Principal principal=session.getPrincipal();
+  if (principal != null) {
+    headerAccessor=toMutableAccessor(headerAccessor,message);
+    headerAccessor.setNativeHeader(CONNECTED_USER_HEADER,principal.getName());
+    if (this.userSessionRegistry != null) {
+      String userName=resolveNameForUserSessionRegistry(principal);
+      this.userSessionRegistry.registerSessionId(userName,session.getId());
+    }
+  }
+  long[] heartbeat=headerAccessor.getHeartbeat();
+  if (heartbeat[1] > 0) {
+    session=WebSocketSessionDecorator.unwrap(session);
+    if (session instanceof SockJsSession) {
+      logger.debug("STOMP heartbeats negotiated, disabling SockJS heartbeats.");
+      ((SockJsSession)session).disableHeartbeat();
+    }
+  }
+  return headerAccessor;
+}
