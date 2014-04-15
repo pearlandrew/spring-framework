@@ -1,9 +1,12 @@
 {
   if (this.isRemoteClientSession) {
-    StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.ERROR);
-    headers.setSessionId(this.sessionId);
-    headers.setMessage(errorText);
-    Message<?> errorMessage=MessageBuilder.createMessage(EMPTY_PAYLOAD,headers.getMessageHeaders());
+    StompHeaderAccessor headerAccessor=StompHeaderAccessor.create(StompCommand.ERROR);
+    if (getHeaderInitializer() != null) {
+      getHeaderInitializer().initHeaders(headerAccessor);
+    }
+    headerAccessor.setSessionId(this.sessionId);
+    headerAccessor.setMessage(errorText);
+    Message<?> errorMessage=MessageBuilder.createMessage(EMPTY_PAYLOAD,headerAccessor.getMessageHeaders());
     sendMessageToClient(errorMessage);
   }
 }

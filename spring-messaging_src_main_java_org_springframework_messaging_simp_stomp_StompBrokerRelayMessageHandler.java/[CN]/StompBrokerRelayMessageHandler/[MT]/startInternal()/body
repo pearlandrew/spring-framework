@@ -2,7 +2,10 @@
   this.clientInboundChannel.subscribe(this);
   this.brokerChannel.subscribe(this);
   if (this.tcpClient == null) {
-    this.tcpClient=new StompTcpClientFactory().create(this.relayHost,this.relayPort);
+    StompDecoder decoder=new StompDecoder();
+    decoder.setHeaderInitializer(getHeaderInitializer());
+    StompCodec codec=new StompCodec(new StompEncoder(),decoder);
+    this.tcpClient=new StompTcpClientFactory().create(this.relayHost,this.relayPort,codec);
   }
   if (logger.isDebugEnabled()) {
     logger.debug("Initializing \"system\" connection");

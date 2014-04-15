@@ -1,8 +1,14 @@
 {
   List<HandlerMethodReturnValueHandler> handlers=new ArrayList<HandlerMethodReturnValueHandler>();
-  handlers.add(new SendToMethodReturnValueHandler(this.brokerTemplate,true));
-  handlers.add(new SubscriptionMethodReturnValueHandler(this.clientMessagingTemplate));
+  SendToMethodReturnValueHandler sth=new SendToMethodReturnValueHandler(this.brokerTemplate,true);
+  sth.setHeaderInitializer(this.headerInitializer);
+  handlers.add(sth);
+  SubscriptionMethodReturnValueHandler sh=new SubscriptionMethodReturnValueHandler(this.clientMessagingTemplate);
+  sh.setHeaderInitializer(this.headerInitializer);
+  handlers.add(sh);
   handlers.addAll(getCustomReturnValueHandlers());
-  handlers.add(new SendToMethodReturnValueHandler(this.brokerTemplate,false));
+  sth=new SendToMethodReturnValueHandler(this.brokerTemplate,false);
+  sth.setHeaderInitializer(this.headerInitializer);
+  handlers.add(sth);
   return handlers;
 }

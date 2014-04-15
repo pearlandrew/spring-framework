@@ -9,6 +9,9 @@
   }
   if (SimpMessageType.MESSAGE.equals(SimpMessageHeaderAccessor.getMessageType(message.getHeaders()))) {
     SimpMessageHeaderAccessor headerAccessor=SimpMessageHeaderAccessor.wrap(message);
+    if (getHeaderInitializer() != null) {
+      getHeaderInitializer().initHeaders(headerAccessor);
+    }
     headerAccessor.setHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION,result.getSubscribeDestination());
     message=MessageBuilder.createMessage(message.getPayload(),headerAccessor.getMessageHeaders());
   }

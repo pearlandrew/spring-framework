@@ -9,6 +9,7 @@
     if (buffer.remaining() > 0) {
       StompCommand stompCommand=StompCommand.valueOf(command);
       headerAccessor=StompHeaderAccessor.create(stompCommand);
+      initHeaders(headerAccessor);
       readHeaders(buffer,headerAccessor);
       payload=readPayload(buffer,headerAccessor);
     }
@@ -42,6 +43,7 @@
       logger.trace("Decoded heartbeat");
     }
     StompHeaderAccessor headerAccessor=StompHeaderAccessor.createForHeartbeat();
+    initHeaders(headerAccessor);
     headerAccessor.setLeaveMutable(true);
     decodedMessage=MessageBuilder.createMessage(HEARTBEAT_PAYLOAD,headerAccessor.getMessageHeaders());
   }

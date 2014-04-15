@@ -8,9 +8,12 @@
   if (logger.isDebugEnabled()) {
     logger.debug("WebSocket session ended, sending DISCONNECT message to broker");
   }
-  StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.DISCONNECT);
-  headers.setSessionId(session.getId());
-  Message<?> message=MessageBuilder.createMessage(EMPTY_PAYLOAD,headers.getMessageHeaders());
+  StompHeaderAccessor headerAccessor=StompHeaderAccessor.create(StompCommand.DISCONNECT);
+  if (getHeaderInitializer() != null) {
+    getHeaderInitializer().initHeaders(headerAccessor);
+  }
+  headerAccessor.setSessionId(session.getId());
+  Message<?> message=MessageBuilder.createMessage(EMPTY_PAYLOAD,headerAccessor.getMessageHeaders());
   if (this.eventPublisher != null) {
     publishEvent(new SessionDisconnectEvent(this,session.getId(),closeStatus));
   }
