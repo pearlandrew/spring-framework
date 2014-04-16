@@ -1,0 +1,17 @@
+{
+  if (!Object.class.equals(proxySuperClass)) {
+    Method[] methods=proxySuperClass.getDeclaredMethods();
+    for (    Method method : methods) {
+      int mod=method.getModifiers();
+      if (!Modifier.isStatic(mod)) {
+        if (Modifier.isFinal(mod)) {
+          logger.info("Unable to proxy method [" + method + "] because it is final: "+ "All calls to this method via a proxy will NOT be routed to the target instance.");
+        }
+ else         if (!Modifier.isPublic(mod) && !Modifier.isProtected(mod) && !Modifier.isPrivate(mod)&& proxyClassLoader != null && proxySuperClass.getClassLoader() != proxyClassLoader) {
+          logger.info("Unable to proxy method [" + method + "] because it is package-visible "+ "across different ClassLoaders: All calls to this method via a proxy will "+ "NOT be routed to the target instance.");
+        }
+      }
+    }
+    doValidateClass(proxySuperClass.getSuperclass(),proxyClassLoader);
+  }
+}
