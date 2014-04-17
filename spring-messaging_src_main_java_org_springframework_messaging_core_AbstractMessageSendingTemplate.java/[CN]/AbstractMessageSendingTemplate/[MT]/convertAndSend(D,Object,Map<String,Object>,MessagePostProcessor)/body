@@ -1,22 +1,22 @@
 {
   MessageHeaders messageHeaders=null;
-  headers=processHeadersToSend(headers);
-  if (headers != null) {
-    if (headers instanceof MessageHeaders) {
-      messageHeaders=(MessageHeaders)headers;
+  Map<String,Object> headersToUse=processHeadersToSend(headers);
+  if (headersToUse != null) {
+    if (headersToUse instanceof MessageHeaders) {
+      messageHeaders=(MessageHeaders)headersToUse;
     }
  else {
-      messageHeaders=new MessageHeaders(headers);
+      messageHeaders=new MessageHeaders(headersToUse);
     }
   }
-  Message<?> message=this.converter.toMessage(payload,messageHeaders);
+  Message<?> message=getMessageConverter().toMessage(payload,messageHeaders);
   if (message == null) {
-    String payloadType=(payload != null) ? payload.getClass().getName() : null;
-    Object contentType=(messageHeaders != null) ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null;
-    throw new MessageConversionException("Unable to convert payload type '" + payloadType + "', Content-Type="+ contentType+ ", converter="+ this.converter,null);
+    String payloadType=(payload != null ? payload.getClass().getName() : null);
+    Object contentType=(messageHeaders != null ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null);
+    throw new MessageConversionException("Unable to convert payload with type='" + payloadType + "', contentType='"+ contentType+ "', converter=["+ getMessageConverter()+ "]");
   }
   if (postProcessor != null) {
     message=postProcessor.postProcessMessage(message);
   }
-  this.send(destination,message);
+  send(destination,message);
 }

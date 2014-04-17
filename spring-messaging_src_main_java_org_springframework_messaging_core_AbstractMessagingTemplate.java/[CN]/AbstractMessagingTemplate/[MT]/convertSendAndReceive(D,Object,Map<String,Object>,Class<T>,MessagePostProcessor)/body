@@ -1,13 +1,14 @@
 {
-  MessageHeaders messageHeaders=(headers != null) ? new MessageHeaders(headers) : null;
+  MessageHeaders messageHeaders=(headers != null ? new MessageHeaders(headers) : null);
   Message<?> requestMessage=getMessageConverter().toMessage(request,messageHeaders);
   if (requestMessage == null) {
-    String payloadType=(request != null) ? request.getClass().getName() : null;
-    throw new MessageConversionException("Unable to convert payload type '" + payloadType + "', Content-Type="+ messageHeaders.get(MessageHeaders.CONTENT_TYPE)+ ", converter="+ getMessageConverter(),null);
+    String payloadType=(request != null ? request.getClass().getName() : null);
+    Object contentType=(messageHeaders != null ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null);
+    throw new MessageConversionException("Unable to convert payload with type '" + payloadType + "', contentType='"+ contentType+ "', converter=["+ getMessageConverter()+ "]");
   }
   if (postProcessor != null) {
     requestMessage=postProcessor.postProcessMessage(requestMessage);
   }
-  Message<?> replyMessage=this.sendAndReceive(destination,requestMessage);
-  return (replyMessage != null) ? (T)getMessageConverter().fromMessage(replyMessage,targetClass) : null;
+  Message<?> replyMessage=sendAndReceive(destination,requestMessage);
+  return (replyMessage != null ? (T)getMessageConverter().fromMessage(replyMessage,targetClass) : null);
 }
