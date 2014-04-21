@@ -18,8 +18,17 @@
     }
     return (leftNumber.intValue() == rightNumber.intValue());
   }
-  if (left != null && (left instanceof Comparable)) {
-    return (state.getTypeComparator().compare(left,right) == 0);
+  if (left instanceof CharSequence && right instanceof CharSequence) {
+    return left.toString().equals(right.toString());
   }
-  return ObjectUtils.nullSafeEquals(left,right);
+  if (ObjectUtils.nullSafeEquals(left,right)) {
+    return true;
+  }
+  if (left instanceof Comparable && right instanceof Comparable) {
+    Class<?> ancestor=ClassUtils.determineCommonAncestor(left.getClass(),right.getClass());
+    if (ancestor != null && Comparable.class.isAssignableFrom(ancestor)) {
+      return (state.getTypeComparator().compare(left,right) == 0);
+    }
+  }
+  return false;
 }
