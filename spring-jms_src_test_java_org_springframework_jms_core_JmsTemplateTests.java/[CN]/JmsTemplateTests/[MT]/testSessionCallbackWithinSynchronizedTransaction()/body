@@ -4,15 +4,15 @@
   template.setConnectionFactory(scf);
   TransactionSynchronizationManager.initSynchronization();
   try {
-    template.execute(new SessionCallback(){
-      @Override public Object doInJms(      Session session) throws JMSException {
+    template.execute(new SessionCallback<Void>(){
+      @Override public Void doInJms(      Session session) throws JMSException {
         session.getTransacted();
         return null;
       }
     }
 );
-    template.execute(new SessionCallback(){
-      @Override public Object doInJms(      Session session) throws JMSException {
+    template.execute(new SessionCallback<Void>(){
+      @Override public Void doInJms(      Session session) throws JMSException {
         session.getTransacted();
         return null;
       }
@@ -26,9 +26,9 @@
     tas.getTransacted();
     tas.close();
     tac.close();
-    List synchs=TransactionSynchronizationManager.getSynchronizations();
+    List<TransactionSynchronization> synchs=TransactionSynchronizationManager.getSynchronizations();
     assertEquals(1,synchs.size());
-    TransactionSynchronization synch=(TransactionSynchronization)synchs.get(0);
+    TransactionSynchronization synch=synchs.get(0);
     synch.beforeCommit(false);
     synch.beforeCompletion();
     synch.afterCommit();

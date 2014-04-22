@@ -9,10 +9,10 @@
   given(connection.createSession(this.container.isSessionTransacted(),this.container.getSessionAcknowledgeMode())).willReturn(session);
   final ConnectionFactory connectionFactory=mock(ConnectionFactory.class);
   given(connectionFactory.createConnection()).willReturn(connection);
-  final HashSet failure=new HashSet();
+  final Set<String> failure=new HashSet<String>(1);
   this.container.setConnectionFactory(connectionFactory);
   this.container.setDestinationName(DESTINATION_NAME);
-  this.container.setMessageListener(new SessionAwareMessageListener(){
+  this.container.setMessageListener(new SessionAwareMessageListener<Message>(){
     @Override public void onMessage(    Message message,    Session sess){
       try {
         assertSame(sess,session);
