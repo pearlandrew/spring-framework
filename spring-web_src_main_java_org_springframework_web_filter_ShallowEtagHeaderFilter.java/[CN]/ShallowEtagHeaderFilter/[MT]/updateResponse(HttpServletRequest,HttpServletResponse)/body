@@ -1,30 +1,41 @@
 {
   ShallowEtagResponseWrapper responseWrapper=WebUtils.getNativeResponse(response,ShallowEtagResponseWrapper.class);
   Assert.notNull(responseWrapper,"ShallowEtagResponseWrapper not found");
-  response=(HttpServletResponse)responseWrapper.getResponse();
-  byte[] body=responseWrapper.toByteArray();
+  HttpServletResponse rawResponse=(HttpServletResponse)responseWrapper.getResponse();
   int statusCode=responseWrapper.getStatusCode();
-  if (isEligibleForEtag(request,responseWrapper,statusCode,body)) {
+  byte[] body=responseWrapper.toByteArray();
+  if (rawResponse.isCommitted()) {
+    if (body.length > 0) {
+      StreamUtils.copy(body,rawResponse.getOutputStream());
+    }
+  }
+ else   if (isEligibleForEtag(request,responseWrapper,statusCode,body)) {
     String responseETag=generateETagHeaderValue(body);
-    response.setHeader(HEADER_ETAG,responseETag);
+    rawResponse.setHeader(HEADER_ETAG,responseETag);
     String requestETag=request.getHeader(HEADER_IF_NONE_MATCH);
     if (responseETag.equals(requestETag)) {
       if (logger.isTraceEnabled()) {
         logger.trace("ETag [" + responseETag + "] equal to If-None-Match, sending 304");
       }
-      response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+      rawResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
     }
  else {
       if (logger.isTraceEnabled()) {
         logger.trace("ETag [" + responseETag + "] not equal to If-None-Match ["+ requestETag+ "], sending normal response");
       }
-      copyBodyToResponse(body,response);
+      if (body.length > 0) {
+        rawResponse.setContentLength(body.length);
+        StreamUtils.copy(body,rawResponse.getOutputStream());
+      }
     }
   }
  else {
     if (logger.isTraceEnabled()) {
       logger.trace("Response with status code [" + statusCode + "] not eligible for ETag");
     }
-    copyBodyToResponse(body,response);
+    if (body.length > 0) {
+      rawResponse.setContentLength(body.length);
+      StreamUtils.copy(body,rawResponse.getOutputStream());
+    }
   }
 }
