@@ -22,19 +22,19 @@
     Class<?> elementClass=forName(elementName,classLoader);
     return Array.newInstance(elementClass,0).getClass();
   }
-  ClassLoader classLoaderToUse=classLoader;
-  if (classLoaderToUse == null) {
-    classLoaderToUse=getDefaultClassLoader();
+  ClassLoader clToUse=classLoader;
+  if (clToUse == null) {
+    clToUse=getDefaultClassLoader();
   }
   try {
-    return classLoaderToUse.loadClass(name);
+    return (clToUse != null ? clToUse.loadClass(name) : Class.forName(name));
   }
  catch (  ClassNotFoundException ex) {
     int lastDotIndex=name.lastIndexOf('.');
     if (lastDotIndex != -1) {
       String innerClassName=name.substring(0,lastDotIndex) + '$' + name.substring(lastDotIndex + 1);
       try {
-        return classLoaderToUse.loadClass(innerClassName);
+        return (clToUse != null ? clToUse.loadClass(innerClassName) : Class.forName(innerClassName));
       }
  catch (      ClassNotFoundException ex2) {
       }

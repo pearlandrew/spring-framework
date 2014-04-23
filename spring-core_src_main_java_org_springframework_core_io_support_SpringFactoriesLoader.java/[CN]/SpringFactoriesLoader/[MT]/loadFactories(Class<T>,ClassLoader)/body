@@ -1,15 +1,16 @@
 {
   Assert.notNull(factoryClass,"'factoryClass' must not be null");
-  if (classLoader == null) {
-    classLoader=SpringFactoriesLoader.class.getClassLoader();
+  ClassLoader classLoaderToUse=classLoader;
+  if (classLoaderToUse == null) {
+    classLoaderToUse=SpringFactoriesLoader.class.getClassLoader();
   }
-  List<String> factoryNames=loadFactoryNames(factoryClass,classLoader);
+  List<String> factoryNames=loadFactoryNames(factoryClass,classLoaderToUse);
   if (logger.isTraceEnabled()) {
     logger.trace("Loaded [" + factoryClass.getName() + "] names: "+ factoryNames);
   }
   List<T> result=new ArrayList<T>(factoryNames.size());
   for (  String factoryName : factoryNames) {
-    result.add(instantiateFactory(factoryName,factoryClass,classLoader));
+    result.add(instantiateFactory(factoryName,factoryClass,classLoaderToUse));
   }
   OrderComparator.sort(result);
   return result;
