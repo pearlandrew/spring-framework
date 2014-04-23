@@ -1,6 +1,6 @@
 {
-  if (logger.isDebugEnabled()) {
-    logger.debug("Checking lookup path: " + lookupPath);
+  if (logger.isTraceEnabled()) {
+    logger.trace("Getting resource URL for lookupPath=" + lookupPath);
   }
   for (  String pattern : this.handlerMap.keySet()) {
     if (!getPathMatcher().match(pattern,lookupPath)) {
@@ -8,8 +8,8 @@
     }
     String pathWithinMapping=getPathMatcher().extractPathWithinPattern(pattern,lookupPath);
     String pathMapping=lookupPath.substring(0,lookupPath.indexOf(pathWithinMapping));
-    if (logger.isDebugEnabled()) {
-      logger.debug("Found matching resource mapping=\"" + pattern + "\", "+ "resource URL path=\""+ pathWithinMapping+ "\"");
+    if (logger.isTraceEnabled()) {
+      logger.trace("Invoking ResourceResolverChain for URL pattern=\"" + pattern + "\"");
     }
     ResourceHttpRequestHandler handler=this.handlerMap.get(pattern);
     ResourceResolverChain chain=handler.createResourceResolverChain();
@@ -17,8 +17,8 @@
     if (resolved == null) {
       throw new IllegalStateException("Failed to get public resource URL path for " + pathWithinMapping);
     }
-    if (logger.isDebugEnabled()) {
-      logger.debug("Returning public resource URL path=\"" + resolved + "\"");
+    if (logger.isTraceEnabled()) {
+      logger.trace("Resolved public resource URL path=\"" + resolved + "\"");
     }
     return pathMapping + resolved;
   }
