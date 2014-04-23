@@ -23,11 +23,14 @@
         v=(t & DIM) | OBJECT | cw.getMergedType(t & BASE_VALUE,u & BASE_VALUE);
       }
  else {
-        v=OBJECT | cw.addType("java/lang/Object");
+        int vdim=ELEMENT_OF + (u & DIM);
+        v=vdim | OBJECT | cw.addType("java/lang/Object");
       }
     }
  else     if ((t & BASE_KIND) == OBJECT || (t & DIM) != 0) {
-      v=OBJECT | cw.addType("java/lang/Object");
+      int tdim=(((t & DIM) == 0 || (t & BASE_KIND) == OBJECT) ? 0 : ELEMENT_OF) + (t & DIM);
+      int udim=(((u & DIM) == 0 || (u & BASE_KIND) == OBJECT) ? 0 : ELEMENT_OF) + (u & DIM);
+      v=Math.min(tdim,udim) | OBJECT | cw.addType("java/lang/Object");
     }
  else {
       v=TOP;
