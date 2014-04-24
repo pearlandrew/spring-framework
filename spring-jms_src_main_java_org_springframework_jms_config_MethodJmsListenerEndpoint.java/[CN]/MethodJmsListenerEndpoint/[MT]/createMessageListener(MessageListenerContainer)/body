@@ -1,10 +1,10 @@
 {
   Assert.state(jmsHandlerMethodFactory != null,"Could not create message listener, message listener factory not set.");
-  MessagingMessageListenerAdapter messageListener=new MessagingMessageListenerAdapter();
+  MessagingMessageListenerAdapter messageListener=createMessageListenerInstance();
   InvocableHandlerMethod invocableHandlerMethod=jmsHandlerMethodFactory.createInvocableHandlerMethod(getBean(),getMethod());
   messageListener.setHandlerMethod(invocableHandlerMethod);
-  String responseDestination=getResponseDestination();
-  if (responseDestination != null) {
+  String responseDestination=getDefaultResponseDestination();
+  if (StringUtils.hasText(responseDestination)) {
     if (isQueue()) {
       messageListener.setDefaultResponseQueueName(responseDestination);
     }
