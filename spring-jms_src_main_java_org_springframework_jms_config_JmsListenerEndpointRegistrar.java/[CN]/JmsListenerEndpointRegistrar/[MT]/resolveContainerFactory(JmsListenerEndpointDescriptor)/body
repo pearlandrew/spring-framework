@@ -2,8 +2,12 @@
   if (descriptor.containerFactory != null) {
     return descriptor.containerFactory;
   }
- else   if (defaultContainerFactory != null) {
-    return defaultContainerFactory;
+ else   if (this.containerFactory != null) {
+    return this.containerFactory;
+  }
+ else   if (this.containerFactoryBeanName != null) {
+    this.containerFactory=applicationContext.getBean(this.containerFactoryBeanName,JmsListenerContainerFactory.class);
+    return this.containerFactory;
   }
  else {
     throw new IllegalStateException("Could not resolve the " + JmsListenerContainerFactory.class.getSimpleName() + " to use for ["+ descriptor.endpoint+ "] no factory was given and no default is set.");

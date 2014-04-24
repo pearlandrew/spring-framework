@@ -6,14 +6,15 @@
   for (  JmsListenerConfigurer configurer : instances.values()) {
     configurer.configureJmsListeners(registrar);
   }
+  registrar.setApplicationContext(this.applicationContext);
   if (registrar.getEndpointRegistry() == null) {
     if (endpointRegistry == null) {
       endpointRegistry=applicationContext.getBean(AnnotationConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME,JmsListenerEndpointRegistry.class);
     }
     registrar.setEndpointRegistry(endpointRegistry);
   }
-  if (registrar.getDefaultContainerFactory() == null && defaultContainerFactory != null) {
-    registrar.setDefaultContainerFactory(defaultContainerFactory);
+  if (this.containerFactoryBeanName != null) {
+    registrar.setContainerFactoryBeanName(this.containerFactoryBeanName);
   }
   JmsHandlerMethodFactory handlerMethodFactory=registrar.getJmsHandlerMethodFactory();
   if (handlerMethodFactory != null) {
