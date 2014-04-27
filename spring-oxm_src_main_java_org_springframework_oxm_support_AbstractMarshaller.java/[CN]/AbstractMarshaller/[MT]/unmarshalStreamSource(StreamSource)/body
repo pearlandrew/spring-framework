@@ -1,11 +1,23 @@
 {
   if (streamSource.getInputStream() != null) {
-    return unmarshalInputStream(streamSource.getInputStream());
+    if (isProcessExternalEntities()) {
+      return unmarshalInputStream(streamSource.getInputStream());
+    }
+ else {
+      InputSource inputSource=new InputSource(streamSource.getInputStream());
+      inputSource.setEncoding(getDefaultEncoding());
+      return unmarshalSaxSource(new SAXSource(inputSource));
+    }
   }
  else   if (streamSource.getReader() != null) {
-    return unmarshalReader(streamSource.getReader());
+    if (isProcessExternalEntities()) {
+      return unmarshalReader(streamSource.getReader());
+    }
+ else {
+      return unmarshalSaxSource(new SAXSource(new InputSource(streamSource.getReader())));
+    }
   }
  else {
-    throw new IllegalArgumentException("StreamSource contains neither InputStream nor Reader");
+    return unmarshalSaxSource(new SAXSource(new InputSource(streamSource.getSystemId())));
   }
 }
