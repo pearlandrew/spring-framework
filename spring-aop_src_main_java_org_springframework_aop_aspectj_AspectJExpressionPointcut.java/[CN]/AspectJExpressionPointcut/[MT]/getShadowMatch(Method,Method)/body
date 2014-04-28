@@ -2,41 +2,46 @@
   ShadowMatch shadowMatch=this.shadowMatchCache.get(targetMethod);
   if (shadowMatch == null) {
 synchronized (this.shadowMatchCache) {
+      PointcutExpression fallbackExpression=null;
       Method methodToMatch=targetMethod;
-      PointcutExpression fallbackPointcutExpression=null;
-      shadowMatch=this.shadowMatchCache.get(methodToMatch);
+      shadowMatch=this.shadowMatchCache.get(targetMethod);
       if (shadowMatch == null) {
         try {
-          shadowMatch=this.pointcutExpression.matchesMethodExecution(targetMethod);
+          shadowMatch=this.pointcutExpression.matchesMethodExecution(methodToMatch);
         }
- catch (        ReflectionWorld.ReflectionWorldException ex) {
+ catch (        ReflectionWorldException ex) {
           try {
-            fallbackPointcutExpression=getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
-            shadowMatch=fallbackPointcutExpression.matchesMethodExecution(methodToMatch);
-          }
- catch (          ReflectionWorld.ReflectionWorldException ex2) {
-            if (targetMethod == originalMethod) {
-              shadowMatch=new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO,null,null,null);
+            fallbackExpression=getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
+            if (fallbackExpression != null) {
+              shadowMatch=fallbackExpression.matchesMethodExecution(methodToMatch);
             }
- else {
-              try {
-                shadowMatch=this.pointcutExpression.matchesMethodExecution(originalMethod);
+          }
+ catch (          ReflectionWorldException ex2) {
+            fallbackExpression=null;
+          }
+        }
+        if (shadowMatch == null && targetMethod != originalMethod) {
+          methodToMatch=originalMethod;
+          try {
+            shadowMatch=this.pointcutExpression.matchesMethodExecution(methodToMatch);
+          }
+ catch (          ReflectionWorldException ex3) {
+            try {
+              fallbackExpression=getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
+              if (fallbackExpression != null) {
+                shadowMatch=fallbackExpression.matchesMethodExecution(methodToMatch);
               }
- catch (              ReflectionWorld.ReflectionWorldException ex3) {
-                methodToMatch=originalMethod;
-                fallbackPointcutExpression=getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
-                try {
-                  shadowMatch=fallbackPointcutExpression.matchesMethodExecution(methodToMatch);
-                }
- catch (                ReflectionWorld.ReflectionWorldException ex4) {
-                  shadowMatch=new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO,null,null,null);
-                }
-              }
+            }
+ catch (            ReflectionWorldException ex4) {
+              fallbackExpression=null;
             }
           }
         }
-        if (shadowMatch.maybeMatches() && fallbackPointcutExpression != null) {
-          shadowMatch=new DefensiveShadowMatch(shadowMatch,fallbackPointcutExpression.matchesMethodExecution(methodToMatch));
+        if (shadowMatch == null) {
+          shadowMatch=new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO,null,null,null);
+        }
+ else         if (shadowMatch.maybeMatches() && fallbackExpression != null) {
+          shadowMatch=new DefensiveShadowMatch(shadowMatch,fallbackExpression.matchesMethodExecution(methodToMatch));
         }
         this.shadowMatchCache.put(targetMethod,shadowMatch);
       }

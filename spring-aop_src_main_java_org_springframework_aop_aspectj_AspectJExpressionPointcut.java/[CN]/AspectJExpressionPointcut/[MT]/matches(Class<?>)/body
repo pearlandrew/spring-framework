@@ -1,20 +1,19 @@
 {
   checkReadyToMatch();
   try {
-    return this.pointcutExpression.couldMatchJoinPointsInType(targetClass);
-  }
- catch (  ReflectionWorldException rwe) {
-    logger.debug("PointcutExpression matching rejected target class",rwe);
     try {
-      return getFallbackPointcutExpression(targetClass).couldMatchJoinPointsInType(targetClass);
+      return this.pointcutExpression.couldMatchJoinPointsInType(targetClass);
     }
- catch (    BCException bce) {
-      logger.debug("Fallback PointcutExpression matching rejected target class",bce);
-      return false;
+ catch (    ReflectionWorldException ex) {
+      logger.debug("PointcutExpression matching rejected target class - trying fallback expression",ex);
+      PointcutExpression fallbackExpression=getFallbackPointcutExpression(targetClass);
+      if (fallbackExpression != null) {
+        return fallbackExpression.couldMatchJoinPointsInType(targetClass);
+      }
     }
   }
-catch (  BCException ex) {
+ catch (  BCException ex) {
     logger.debug("PointcutExpression matching rejected target class",ex);
-    return false;
   }
+  return false;
 }
