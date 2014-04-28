@@ -7,14 +7,10 @@
   }
   for (  String location : locations) {
     try {
-      Resource resource=this.resourceLoader.getResource(this.environment.resolveRequiredPlaceholders(location));
-      if (!StringUtils.hasText(name) || this.propertySources.containsKey(name)) {
-        ResourcePropertySource ps=new ResourcePropertySource(resource);
-        this.propertySources.add((StringUtils.hasText(name) ? name : ps.getName()),ps);
-      }
- else {
-        this.propertySources.add(name,new ResourcePropertySource(name,resource));
-      }
+      String resolvedLocation=this.environment.resolveRequiredPlaceholders(location);
+      Resource resource=this.resourceLoader.getResource(resolvedLocation);
+      ResourcePropertySource ps=new ResourcePropertySource(resource);
+      this.propertySources.add((StringUtils.hasText(name) ? name : ps.getName()),ps);
     }
  catch (    IllegalArgumentException ex) {
       if (!ignoreResourceNotFound) {
