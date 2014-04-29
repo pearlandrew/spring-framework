@@ -1,0 +1,17 @@
+{
+synchronized (this.cache) {
+    for (    String cachedDestination : this.cache.keySet()) {
+      if (getPathMatcher().match(destination,cachedDestination)) {
+        MultiValueMap<String,String> subscriptions=this.cache.get(cachedDestination);
+        List<String> subsIds=subscriptions.get(sessionId);
+        subsIds.remove(subsId);
+        if (subsIds.isEmpty()) {
+          subscriptions.remove(sessionId);
+        }
+        if (subscriptions.isEmpty()) {
+          this.cache.remove(cachedDestination);
+        }
+      }
+    }
+  }
+}

@@ -1,22 +1,20 @@
 {
-  MultiValueMap<String,String> result;
-  if (this.destinationCache.isCachedDestination(destination)) {
-    result=this.destinationCache.getSubscriptions(destination);
+  MultiValueMap<String,String> result=this.destinationCache.getSubscriptions(destination);
+  if (result != null) {
+    return result;
   }
- else {
-    result=new LinkedMultiValueMap<String,String>();
-    for (    SessionSubscriptionInfo info : this.subscriptionRegistry.getAllSubscriptions()) {
-      for (      String destinationPattern : info.getDestinations()) {
-        if (this.pathMatcher.match(destinationPattern,destination)) {
-          for (          String subscriptionId : info.getSubscriptions(destinationPattern)) {
-            result.add(info.sessionId,subscriptionId);
-          }
+  result=new LinkedMultiValueMap<String,String>();
+  for (  SessionSubscriptionInfo info : this.subscriptionRegistry.getAllSubscriptions()) {
+    for (    String destinationPattern : info.getDestinations()) {
+      if (this.pathMatcher.match(destinationPattern,destination)) {
+        for (        String subscriptionId : info.getSubscriptions(destinationPattern)) {
+          result.add(info.sessionId,subscriptionId);
         }
       }
     }
-    if (!result.isEmpty()) {
-      this.destinationCache.addSubscriptions(destination,result);
-    }
+  }
+  if (!result.isEmpty()) {
+    this.destinationCache.addSubscriptions(destination,result);
   }
   return result;
 }
