@@ -15,10 +15,14 @@
     }
   }
   if (isEligible(bean,beanName)) {
-    ProxyFactory proxyFactory=new ProxyFactory(bean);
+    ProxyFactory proxyFactory=new ProxyFactory();
     proxyFactory.copyFrom(this);
+    proxyFactory.setTarget(bean);
+    if (!proxyFactory.isProxyTargetClass()) {
+      evaluateProxyInterfaces(bean.getClass(),proxyFactory);
+    }
     proxyFactory.addAdvisor(this.advisor);
-    return proxyFactory.getProxy(this.beanClassLoader);
+    return proxyFactory.getProxy(getProxyClassLoader());
   }
   return bean;
 }
