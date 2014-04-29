@@ -1,5 +1,15 @@
 {
-  for (  String destination : info.getDestinations()) {
-    unmapFromDestination(destination,info);
+synchronized (this.monitor) {
+    for (    String destination : info.getDestinations()) {
+      for (      String cachedDestination : this.subscriptionsByDestination.keySet()) {
+        if (this.pathMatcher.match(destination,cachedDestination)) {
+          MultiValueMap<String,String> map=this.subscriptionsByDestination.get(cachedDestination);
+          map.remove(info.getSessionId());
+          if (map.isEmpty()) {
+            this.subscriptionsByDestination.remove(cachedDestination);
+          }
+        }
+      }
+    }
   }
 }

@@ -1,6 +1,9 @@
 {
-  MultiValueMap<String,String> result=this.destinationCache.getSubscriptions(destination);
-  if (result.isEmpty()) {
+  MultiValueMap<String,String> result;
+  if (this.destinationCache.isCachedDestination(destination)) {
+    result=this.destinationCache.getSubscriptions(destination);
+  }
+ else {
     result=new LinkedMultiValueMap<String,String>();
     for (    SessionSubscriptionInfo info : this.subscriptionRegistry.getAllSubscriptions()) {
       for (      String destinationPattern : info.getDestinations()) {
@@ -10,6 +13,9 @@
           }
         }
       }
+    }
+    if (!result.isEmpty()) {
+      this.destinationCache.addSubscriptions(destination,result);
     }
   }
   return result;
