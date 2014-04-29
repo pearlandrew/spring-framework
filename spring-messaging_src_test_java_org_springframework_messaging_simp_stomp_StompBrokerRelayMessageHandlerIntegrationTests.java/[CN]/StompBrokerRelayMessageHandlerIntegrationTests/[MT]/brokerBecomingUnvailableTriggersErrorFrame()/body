@@ -1,10 +1,9 @@
 {
   String sess1="sess1";
   MessageExchange connect=MessageExchangeBuilder.connect(sess1).build();
-  this.responseHandler.expect(connect);
   this.relay.handleMessage(connect.message);
-  this.responseHandler.awaitAndAssert();
-  this.responseHandler.expect(MessageExchangeBuilder.error(sess1).build());
+  this.responseHandler.expectMessages(connect);
+  MessageExchange error=MessageExchangeBuilder.error(sess1).build();
   stopActiveMqBrokerAndAwait();
-  this.responseHandler.awaitAndAssert();
+  this.responseHandler.expectMessages(error);
 }
