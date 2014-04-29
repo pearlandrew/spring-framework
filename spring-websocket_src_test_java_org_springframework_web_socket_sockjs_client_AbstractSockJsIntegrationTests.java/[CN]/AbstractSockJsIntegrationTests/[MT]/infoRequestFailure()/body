@@ -1,0 +1,14 @@
+{
+  TestClientHandler handler=new TestClientHandler();
+  this.errorFilter.responseStatusMap.put("/info",500);
+  CountDownLatch latch=new CountDownLatch(1);
+  createSockJsClient(getWebSocketTransport()).doHandshake(handler,this.baseUrl + "/echo").addCallback(new ListenableFutureCallback<WebSocketSession>(){
+    @Override public void onSuccess(    WebSocketSession result){
+    }
+    @Override public void onFailure(    Throwable t){
+      latch.countDown();
+    }
+  }
+);
+  assertTrue(latch.await(5000,TimeUnit.MILLISECONDS));
+}

@@ -1,0 +1,19 @@
+{
+  TestClientHandler clientHandler=new TestClientHandler();
+  createSockJsClient(transport).doHandshake(clientHandler,this.baseUrl + "/test").get();
+  TestServerHandler serverHandler=this.wac.getBean(TestServerHandler.class);
+  assertNotNull("afterConnectionEstablished should have been called",clientHandler.session);
+  serverHandler.awaitSession(5000);
+  TextMessage message=new TextMessage("message1");
+  serverHandler.session.sendMessage(message);
+  clientHandler.awaitMessage(message,5000);
+  CloseStatus expected=new CloseStatus(3500,"Oops");
+  serverHandler.session.close(expected);
+  CloseStatus actual=clientHandler.awaitCloseStatus(5000);
+  if (transport instanceof XhrTransport) {
+    assertThat(actual,Matchers.anyOf(equalTo(expected),equalTo(new CloseStatus(3000,"Go away!"))));
+  }
+ else {
+    assertEquals(expected,actual);
+  }
+}

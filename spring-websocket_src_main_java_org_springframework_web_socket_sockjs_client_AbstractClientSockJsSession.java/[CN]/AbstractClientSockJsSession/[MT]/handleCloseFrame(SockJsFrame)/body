@@ -1,0 +1,18 @@
+{
+  CloseStatus closeStatus=CloseStatus.NO_STATUS_CODE;
+  try {
+    String[] data=getMessageCodec().decode(frame.getFrameData());
+    if (data.length == 2) {
+      closeStatus=new CloseStatus(Integer.valueOf(data[0]),data[1]);
+    }
+    if (logger.isInfoEnabled()) {
+      logger.info("Processing SockJS close frame with " + closeStatus + " in "+ this);
+    }
+  }
+ catch (  IOException ex) {
+    if (logger.isErrorEnabled()) {
+      logger.error("Failed to decode data for " + frame + " in "+ this,ex);
+    }
+  }
+  closeInternal(closeStatus);
+}

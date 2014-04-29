@@ -1,0 +1,20 @@
+{
+  final SettableListenableFuture<WebSocketSession> future=new SettableListenableFuture<WebSocketSession>();
+  WebSocketClientSockJsSession session=new WebSocketClientSockJsSession(request,handler,future);
+  handler=new ClientSockJsWebSocketHandler(session);
+  request.addTimeoutTask(session.getTimeoutTask());
+  URI url=request.getTransportUrl();
+  WebSocketHttpHeaders headers=new WebSocketHttpHeaders(request.getHandshakeHeaders());
+  if (logger.isDebugEnabled()) {
+    logger.debug("Opening WebSocket connection, url=" + url);
+  }
+  this.webSocketClient.doHandshake(handler,headers,url).addCallback(new ListenableFutureCallback<WebSocketSession>(){
+    @Override public void onSuccess(    WebSocketSession webSocketSession){
+    }
+    @Override public void onFailure(    Throwable t){
+      future.setException(t);
+    }
+  }
+);
+  return future;
+}

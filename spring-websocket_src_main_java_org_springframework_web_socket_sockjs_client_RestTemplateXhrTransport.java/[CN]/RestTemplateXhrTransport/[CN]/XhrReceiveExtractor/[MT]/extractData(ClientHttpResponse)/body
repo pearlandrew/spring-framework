@@ -1,0 +1,36 @@
+{
+  if (!HttpStatus.OK.equals(response.getStatusCode())) {
+    throw new HttpServerErrorException(response.getStatusCode());
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug("XHR receive headers: " + response.getHeaders());
+  }
+  InputStream is=response.getBody();
+  ByteArrayOutputStream os=new ByteArrayOutputStream();
+  while (true) {
+    if (this.sockJsSession.isDisconnected()) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("SockJS sockJsSession closed. Closing ClientHttpResponse.");
+      }
+      response.close();
+      break;
+    }
+    int b=is.read();
+    if (b == -1) {
+      if (os.size() > 0) {
+        handleFrame(os);
+      }
+      if (logger.isDebugEnabled()) {
+        logger.debug("XHR receive completed");
+      }
+      break;
+    }
+    if (b == '\n') {
+      handleFrame(os);
+    }
+ else {
+      os.write(b);
+    }
+  }
+  return null;
+}

@@ -1,0 +1,33 @@
+{
+  if (!isOpen()) {
+    if (logger.isWarnEnabled()) {
+      logger.warn("Ignoring received message due to state=" + this.state + " in "+ this);
+    }
+    return;
+  }
+  String[] messages;
+  try {
+    messages=getMessageCodec().decode(frame.getFrameData());
+  }
+ catch (  IOException ex) {
+    if (logger.isErrorEnabled()) {
+      logger.error("Failed to decode data for SockJS \"message\" frame: " + frame + " in "+ this,ex);
+    }
+    closeInternal(CloseStatus.BAD_DATA);
+    return;
+  }
+  if (logger.isTraceEnabled()) {
+    logger.trace("Processing SockJS message frame " + frame.getContent() + " in "+ this);
+  }
+  for (  String message : messages) {
+    try {
+      if (isOpen()) {
+        this.webSocketHandler.handleMessage(this,new TextMessage(message));
+      }
+    }
+ catch (    Throwable ex) {
+      Class<?> type=this.webSocketHandler.getClass();
+      logger.error(type + ".handleMessage threw an exception on " + frame+ " in "+ this,ex);
+    }
+  }
+}

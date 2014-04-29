@@ -1,0 +1,25 @@
+{
+  HttpHeaders handshakeHeaders=new HttpHeaders();
+  handshakeHeaders.setOrigin("foo");
+  TransportRequest request=mock(TransportRequest.class);
+  when(request.getSockJsUrlInfo()).thenReturn(new SockJsUrlInfo(new URI("http://example.com")));
+  when(request.getHandshakeHeaders()).thenReturn(handshakeHeaders);
+  HttpHeaders requestHeaders=new HttpHeaders();
+  requestHeaders.set("foo","bar");
+  TestXhrTransport transport=new TestXhrTransport();
+  transport.setRequestHeaders(requestHeaders);
+  WebSocketHandler handler=mock(WebSocketHandler.class);
+  transport.connect(request,handler);
+  ArgumentCaptor<Runnable> captor=ArgumentCaptor.forClass(Runnable.class);
+  verify(request).getSockJsUrlInfo();
+  verify(request).addTimeoutTask(captor.capture());
+  verify(request).getTransportUrl();
+  verify(request).getHandshakeHeaders();
+  verifyNoMoreInteractions(request);
+  assertEquals(2,transport.actualHandshakeHeaders.size());
+  assertEquals("foo",transport.actualHandshakeHeaders.getOrigin());
+  assertEquals("bar",transport.actualHandshakeHeaders.getFirst("foo"));
+  assertFalse(transport.actualSession.isDisconnected());
+  captor.getValue().run();
+  assertTrue(transport.actualSession.isDisconnected());
+}
