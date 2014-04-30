@@ -1,9 +1,10 @@
 {
-synchronized (this.cache) {
-    for (    String cachedDestination : this.cache.keySet()) {
+synchronized (this.updateCache) {
+    for (    String cachedDestination : this.updateCache.keySet()) {
       if (getPathMatcher().match(destination,cachedDestination)) {
-        MultiValueMap<String,String> subscriptions=this.cache.get(cachedDestination);
-        subscriptions.add(sessionId,subsId);
+        MultiValueMap<String,String> subs=this.updateCache.get(cachedDestination);
+        subs.add(sessionId,subsId);
+        this.accessCache.put(cachedDestination,new LinkedMultiValueMap<String,String>(subs));
       }
     }
   }

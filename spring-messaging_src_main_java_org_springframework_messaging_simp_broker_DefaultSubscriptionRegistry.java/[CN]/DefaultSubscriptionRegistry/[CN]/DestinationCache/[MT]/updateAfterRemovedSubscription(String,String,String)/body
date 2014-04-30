@@ -1,15 +1,19 @@
 {
-synchronized (this.cache) {
-    for (    String cachedDestination : this.cache.keySet()) {
+synchronized (this.updateCache) {
+    for (    String cachedDestination : this.updateCache.keySet()) {
       if (getPathMatcher().match(destination,cachedDestination)) {
-        MultiValueMap<String,String> subscriptions=this.cache.get(cachedDestination);
-        List<String> subsIds=subscriptions.get(sessionId);
+        MultiValueMap<String,String> subs=this.updateCache.get(cachedDestination);
+        List<String> subsIds=subs.get(sessionId);
         subsIds.remove(subsId);
         if (subsIds.isEmpty()) {
-          subscriptions.remove(sessionId);
+          subs.remove(sessionId);
         }
-        if (subscriptions.isEmpty()) {
-          this.cache.remove(cachedDestination);
+        if (subs.isEmpty()) {
+          this.updateCache.remove(cachedDestination);
+          this.accessCache.remove(cachedDestination);
+        }
+ else {
+          this.accessCache.put(cachedDestination,new LinkedMultiValueMap<String,String>(subs));
         }
       }
     }
