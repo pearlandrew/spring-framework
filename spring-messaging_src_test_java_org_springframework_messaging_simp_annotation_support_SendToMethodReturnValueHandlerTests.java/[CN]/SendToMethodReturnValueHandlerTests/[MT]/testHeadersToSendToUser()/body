@@ -4,11 +4,6 @@
   SimpMessageSendingOperations messagingTemplate=Mockito.mock(SimpMessageSendingOperations.class);
   SendToMethodReturnValueHandler handler=new SendToMethodReturnValueHandler(messagingTemplate,false);
   handler.handleReturnValue(PAYLOAD,this.sendToUserDefaultDestReturnType,inputMessage);
-  ArgumentCaptor<MessageHeaders> captor=ArgumentCaptor.forClass(MessageHeaders.class);
-  verify(messagingTemplate).convertAndSendToUser(eq("joe"),eq("/queue/dest"),eq(PAYLOAD),captor.capture());
-  SimpMessageHeaderAccessor headerAccessor=MessageHeaderAccessor.getAccessor(captor.getValue(),SimpMessageHeaderAccessor.class);
-  assertNotNull(headerAccessor);
-  assertTrue(headerAccessor.isMutable());
-  assertEquals("sess1",headerAccessor.getSessionId());
-  assertNull("Subscription id should not be copied",headerAccessor.getSubscriptionId());
+  verify(messagingTemplate).convertAndSendToUser(eq("joe"),eq("/queue/dest"),eq(PAYLOAD));
+  verifyNoMoreInteractions(messagingTemplate);
 }
