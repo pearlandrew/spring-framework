@@ -1,11 +1,9 @@
 {
-  if (Map.class.isAssignableFrom(parameter.getParameterType())) {
+  if (Map.class.isAssignableFrom(param.getParameterType())) {
     return;
   }
-  PathVariable annot=parameter.getParameterAnnotation(PathVariable.class);
-  String name=StringUtils.isEmpty(annot.value()) ? parameter.getParameterName() : annot.value();
-  if (conversionService != null) {
-    value=conversionService.convert(value,new TypeDescriptor(parameter),STRING_TYPE_DESCRIPTOR);
-  }
+  PathVariable annot=param.getParameterAnnotation(PathVariable.class);
+  String name=(StringUtils.isEmpty(annot.value()) ? param.getParameterName() : annot.value());
+  value=formatUriValue(cs,new TypeDescriptor(param),value);
   uriVariables.put(name,value);
 }
