@@ -1,6 +1,11 @@
 {
-  HttpInputMessage inputMessage=createInputMessage(webRequest);
+  ServletServerHttpRequest inputMessage=createInputMessage(webRequest);
   Type paramType=getHttpEntityType(parameter);
   Object body=readWithMessageConverters(webRequest,parameter,paramType);
-  return new HttpEntity<Object>(body,inputMessage.getHeaders());
+  if (RequestEntity.class.equals(parameter.getParameterType())) {
+    return new RequestEntity<Object>(body,inputMessage.getHeaders(),inputMessage.getMethod(),inputMessage.getURI());
+  }
+ else {
+    return new HttpEntity<Object>(body,inputMessage.getHeaders());
+  }
 }
