@@ -12,17 +12,13 @@
     if (!checkDestination(destination,this.destinationPrefix)) {
       return null;
     }
-    if (principal == null) {
-      logger.error("Ignoring message, no principal info available");
-      return null;
-    }
     if (sessionId == null) {
       logger.error("Ignoring message, no session id available");
       return null;
     }
     destinationWithoutPrefix=destination.substring(this.destinationPrefix.length() - 1);
     subscribeDestination=destination;
-    user=principal.getName();
+    user=(principal != null ? principal.getName() : null);
     sessionIds=Collections.singleton(sessionId);
   }
  else   if (SimpMessageType.MESSAGE.equals(messageType)) {
@@ -31,11 +27,12 @@
     }
     int startIndex=this.destinationPrefix.length();
     int endIndex=destination.indexOf('/',startIndex);
-    Assert.isTrue(endIndex > 0,"Expected destination pattern \"/principal/{userId}/**\"");
+    Assert.isTrue(endIndex > 0,"Expected destination pattern \"/user/{userId}/**\"");
     destinationWithoutPrefix=destination.substring(endIndex);
     subscribeDestination=this.destinationPrefix.substring(0,startIndex - 1) + destinationWithoutPrefix;
     user=destination.substring(startIndex,endIndex);
     user=StringUtils.replace(user,"%2F","/");
+    user=user.equals(sessionId) ? null : user;
     sessionIds=(sessionId != null ? Collections.singleton(sessionId) : this.userSessionRegistry.getSessionIds(user));
   }
  else {

@@ -6,10 +6,18 @@
   String sessionId=SimpMessageHeaderAccessor.getSessionId(headers);
   SendToUser sendToUser=returnType.getMethodAnnotation(SendToUser.class);
   if (sendToUser != null) {
+    boolean broadcast=sendToUser.broadcast();
     String user=getUserName(message,headers);
+    if (user == null) {
+      if (sessionId == null) {
+        throw new MissingSessionUserException(message);
+      }
+      user=sessionId;
+      broadcast=false;
+    }
     String[] destinations=getTargetDestinations(sendToUser,message,this.defaultUserDestinationPrefix);
     for (    String destination : destinations) {
-      if (sendToUser.broadcast()) {
+      if (broadcast) {
         this.messagingTemplate.convertAndSendToUser(user,destination,returnValue);
       }
  else {

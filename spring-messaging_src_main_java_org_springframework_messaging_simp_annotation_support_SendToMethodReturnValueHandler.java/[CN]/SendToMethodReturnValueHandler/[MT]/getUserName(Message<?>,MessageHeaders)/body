@@ -1,10 +1,7 @@
 {
   Principal principal=SimpMessageHeaderAccessor.getUser(headers);
-  if (principal == null) {
-    throw new MissingSessionUserException(message);
+  if (principal != null) {
+    return (principal instanceof DestinationUserNameProvider ? ((DestinationUserNameProvider)principal).getDestinationUserName() : principal.getName());
   }
-  if (principal instanceof DestinationUserNameProvider) {
-    return ((DestinationUserNameProvider)principal).getDestinationUserName();
-  }
-  return principal.getName();
+  return null;
 }
