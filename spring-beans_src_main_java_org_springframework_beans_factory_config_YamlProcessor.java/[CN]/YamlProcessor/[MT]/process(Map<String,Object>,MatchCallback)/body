@@ -1,0 +1,32 @@
+{
+  Properties properties=new Properties();
+  assignProperties(properties,map,null);
+  if (this.documentMatchers.isEmpty()) {
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug("Merging document (no matchers set)" + map);
+    }
+    callback.process(properties,map);
+    return true;
+  }
+  MatchStatus result=MatchStatus.ABSTAIN;
+  for (  DocumentMatcher matcher : this.documentMatchers) {
+    MatchStatus match=matcher.matches(properties);
+    result=MatchStatus.getMostSpecific(match,result);
+    if (match == MatchStatus.FOUND) {
+      if (this.logger.isDebugEnabled()) {
+        this.logger.debug("Matched document with document matcher: " + properties);
+      }
+      callback.process(properties,map);
+      return true;
+    }
+  }
+  if (result == MatchStatus.ABSTAIN && this.matchDefault) {
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug("Matched document with default matcher: " + map);
+    }
+    callback.process(properties,map);
+    return true;
+  }
+  this.logger.debug("Unmatched document");
+  return false;
+}

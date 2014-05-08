@@ -1,0 +1,23 @@
+{
+  int count=0;
+  try {
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug("Loading from YAML: " + resource);
+    }
+    for (    Object object : yaml.loadAll(resource.getInputStream())) {
+      if (object != null && process(asMap(object),callback)) {
+        count++;
+        if (this.resolutionMethod == ResolutionMethod.FIRST_FOUND) {
+          break;
+        }
+      }
+    }
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug("Loaded " + count + " document"+ (count > 1 ? "s" : "")+ " from YAML resource: "+ resource);
+    }
+  }
+ catch (  IOException ex) {
+    handleProcessError(resource,ex);
+  }
+  return count > 0;
+}
