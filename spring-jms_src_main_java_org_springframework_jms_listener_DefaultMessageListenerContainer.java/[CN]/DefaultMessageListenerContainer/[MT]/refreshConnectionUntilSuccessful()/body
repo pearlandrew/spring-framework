@@ -1,4 +1,5 @@
 {
+  BackOffExecution execution=backOff.start();
   while (isRunning()) {
     try {
       if (sharedConnectionEnabled()) {
@@ -9,7 +10,6 @@
         JmsUtils.closeConnection(con);
       }
       logger.info("Successfully refreshed JMS Connection");
-      backOff.reset();
       break;
     }
  catch (    Exception ex) {
@@ -19,7 +19,7 @@
       StringBuilder msg=new StringBuilder();
       msg.append("Could not refresh JMS Connection for destination '");
       msg.append(getDestinationDescription()).append("' - retrying using ");
-      msg.append(this.backOff).append(". Cause: ");
+      msg.append(execution).append(". Cause: ");
       msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException)ex) : ex.getMessage());
       if (logger.isDebugEnabled()) {
         logger.error(msg,ex);
@@ -28,7 +28,7 @@
         logger.error(msg);
       }
     }
-    if (!applyBackOffTime()) {
+    if (!applyBackOffTime(execution)) {
       stop();
     }
   }
