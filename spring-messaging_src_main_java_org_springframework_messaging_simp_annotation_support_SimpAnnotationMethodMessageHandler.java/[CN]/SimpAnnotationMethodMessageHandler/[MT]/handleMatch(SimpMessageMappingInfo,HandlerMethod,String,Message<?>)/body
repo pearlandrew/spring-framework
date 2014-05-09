@@ -6,5 +6,11 @@
     Assert.state(accessor != null && accessor.isMutable());
     accessor.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER,vars);
   }
-  super.handleMatch(mapping,handlerMethod,lookupDestination,message);
+  try {
+    SimpAttributesContextHolder.setAttributesFromMessage(message);
+    super.handleMatch(mapping,handlerMethod,lookupDestination,message);
+  }
+  finally {
+    SimpAttributesContextHolder.resetAttributes();
+  }
 }

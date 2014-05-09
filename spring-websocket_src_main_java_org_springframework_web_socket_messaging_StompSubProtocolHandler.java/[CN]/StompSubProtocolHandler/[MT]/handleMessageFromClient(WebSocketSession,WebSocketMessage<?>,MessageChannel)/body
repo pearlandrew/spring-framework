@@ -37,7 +37,13 @@
       if (this.eventPublisher != null && StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
         publishEvent(new SessionConnectEvent(this,message));
       }
-      outputChannel.send(message);
+      try {
+        SimpAttributesContextHolder.setAttributesFromMessage(message);
+        outputChannel.send(message);
+      }
+  finally {
+        SimpAttributesContextHolder.resetAttributes();
+      }
     }
  catch (    Throwable ex) {
       logger.error("Terminating STOMP session due to failure to send message",ex);

@@ -5,17 +5,20 @@
     String userName=resolveNameForUserSessionRegistry(principal);
     this.userSessionRegistry.unregisterSessionId(userName,session.getId());
   }
-  if (logger.isDebugEnabled()) {
-    logger.debug("WebSocket session ended, sending DISCONNECT message to broker");
-  }
-  StompHeaderAccessor headerAccessor=StompHeaderAccessor.create(StompCommand.DISCONNECT);
-  if (getHeaderInitializer() != null) {
-    getHeaderInitializer().initHeaders(headerAccessor);
-  }
-  headerAccessor.setSessionId(session.getId());
-  Message<?> message=MessageBuilder.createMessage(EMPTY_PAYLOAD,headerAccessor.getMessageHeaders());
   if (this.eventPublisher != null) {
     publishEvent(new SessionDisconnectEvent(this,session.getId(),closeStatus));
   }
-  outputChannel.send(message);
+  Message<?> message=createDisconnectMessage(session);
+  SimpAttributes simpAttributes=SimpAttributes.fromMessage(message);
+  try {
+    if (logger.isDebugEnabled()) {
+      logger.debug("WebSocket session ended, sending DISCONNECT message to broker");
+    }
+    SimpAttributesContextHolder.setAttributes(simpAttributes);
+    outputChannel.send(message);
+  }
+  finally {
+    SimpAttributesContextHolder.resetAttributes();
+    simpAttributes.sessionCompleted();
+  }
 }

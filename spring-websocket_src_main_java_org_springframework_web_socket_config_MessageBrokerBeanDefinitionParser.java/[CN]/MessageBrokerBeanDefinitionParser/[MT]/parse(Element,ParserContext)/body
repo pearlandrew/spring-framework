@@ -43,6 +43,10 @@
   registerAnnotationMethodMessageHandler(element,clientInChannel,clientOutChannel,messageConverter,messagingTemplate,parserCxt,source);
   RuntimeBeanReference userDestinationResolver=registerUserDestinationResolver(element,userSessionRegistry,parserCxt,source);
   registerUserDestinationMessageHandler(clientInChannel,clientOutChannel,brokerChannel,userDestinationResolver,parserCxt,source);
+  Map<String,Object> scopeMap=Collections.<String,Object>singletonMap("websocket",new SimpSessionScope());
+  RootBeanDefinition scopeConfigurerDef=new RootBeanDefinition(CustomScopeConfigurer.class);
+  scopeConfigurerDef.getPropertyValues().add("scopes",scopeMap);
+  registerBeanDefByName("webSocketScopeConfigurer",scopeConfigurerDef,parserCxt,source);
   parserCxt.popAndRegisterContainingComponent();
   return null;
 }

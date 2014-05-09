@@ -1,0 +1,15 @@
+{
+  SimpAttributes simpAttributes=SimpAttributesContextHolder.currentAttributes();
+  Object value=simpAttributes.getAttribute(name);
+  if (value != null) {
+    return value;
+  }
+synchronized (simpAttributes.getSessionMutex()) {
+    value=simpAttributes.getAttribute(name);
+    if (value == null) {
+      value=objectFactory.getObject();
+      simpAttributes.setAttribute(name,value);
+    }
+    return value;
+  }
+}
