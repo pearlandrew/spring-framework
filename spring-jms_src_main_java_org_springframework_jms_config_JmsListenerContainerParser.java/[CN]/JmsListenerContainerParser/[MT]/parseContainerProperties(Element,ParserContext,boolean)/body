@@ -76,10 +76,18 @@
       propertyValues.add("receiveTimeout",receiveTimeout);
     }
   }
-  String recoveryInterval=containerEle.getAttribute(RECOVERY_INTERVAL_ATTRIBUTE);
-  if (StringUtils.hasText(recoveryInterval)) {
+  String backOffBeanName=containerEle.getAttribute(BACK_OFF_ATTRIBUTE);
+  if (StringUtils.hasText(backOffBeanName)) {
     if (!isSimpleContainer) {
-      propertyValues.add("recoveryInterval",recoveryInterval);
+      propertyValues.add("backOff",new RuntimeBeanReference(backOffBeanName));
+    }
+  }
+ else {
+    String recoveryInterval=containerEle.getAttribute(RECOVERY_INTERVAL_ATTRIBUTE);
+    if (StringUtils.hasText(recoveryInterval)) {
+      if (!isSimpleContainer) {
+        propertyValues.add("recoveryInterval",recoveryInterval);
+      }
     }
   }
   return propertyValues;
