@@ -30,6 +30,16 @@
   if (selectedMediaType != null) {
     selectedMediaType=selectedMediaType.removeQualityValue();
     for (    HttpMessageConverter<?> messageConverter : this.messageConverters) {
+      if (messageConverter instanceof MethodParameterHttpMessageConverter) {
+        MethodParameterHttpMessageConverter<T> c=(MethodParameterHttpMessageConverter<T>)messageConverter;
+        if (c.canWrite(returnValueClass,selectedMediaType,returnType)) {
+          c.write(returnValue,selectedMediaType,outputMessage,returnType);
+          if (logger.isDebugEnabled()) {
+            logger.debug("Written [" + returnValue + "] as \""+ selectedMediaType+ "\" using ["+ messageConverter+ "]");
+          }
+          return;
+        }
+      }
       if (messageConverter.canWrite(returnValueClass,selectedMediaType)) {
         ((HttpMessageConverter<T>)messageConverter).write(returnValue,selectedMediaType,outputMessage);
         if (logger.isDebugEnabled()) {

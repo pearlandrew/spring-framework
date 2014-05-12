@@ -1,7 +1,12 @@
 {
   OutputStream stream=(this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream());
   Object value=filterModel(model);
-  writeContent(stream,value,this.jsonPrefix);
+  if (model.containsKey(JsonView.class.getName())) {
+    writeContent(stream,value,this.jsonPrefix,model);
+  }
+ else {
+    writeContent(stream,value,this.jsonPrefix);
+  }
   if (this.updateContentLength) {
     writeToResponse(response,(ByteArrayOutputStream)stream);
   }

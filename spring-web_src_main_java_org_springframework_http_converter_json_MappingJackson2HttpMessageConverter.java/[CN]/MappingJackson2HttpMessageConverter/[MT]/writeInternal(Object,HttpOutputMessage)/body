@@ -8,7 +8,15 @@
     if (this.jsonPrefix != null) {
       jsonGenerator.writeRaw(this.jsonPrefix);
     }
-    this.objectMapper.writeValue(jsonGenerator,object);
+    if (object instanceof MappingJacksonValueHolder) {
+      MappingJacksonValueHolder valueHolder=(MappingJacksonValueHolder)object;
+      object=valueHolder.getValue();
+      Class<?> serializationView=valueHolder.getSerializationView();
+      this.objectMapper.writerWithView(serializationView).writeValue(jsonGenerator,object);
+    }
+ else {
+      this.objectMapper.writeValue(jsonGenerator,object);
+    }
   }
  catch (  JsonProcessingException ex) {
     throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(),ex);
