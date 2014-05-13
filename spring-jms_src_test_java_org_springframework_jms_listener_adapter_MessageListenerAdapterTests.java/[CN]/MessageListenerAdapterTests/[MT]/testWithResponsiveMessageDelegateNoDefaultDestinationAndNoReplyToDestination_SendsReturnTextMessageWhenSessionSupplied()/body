@@ -15,9 +15,10 @@
 ;
   try {
     adapter.onMessage(sentTextMessage,session);
-    fail("expected InvalidDestinationException");
+    fail("expected CouldNotSendReplyException with InvalidDestinationException");
   }
- catch (  InvalidDestinationException ex) {
+ catch (  ReplyFailureException ex) {
+    assertEquals(InvalidDestinationException.class,ex.getCause().getClass());
   }
   verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
   verify(delegate).handleMessage(sentTextMessage);

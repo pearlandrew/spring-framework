@@ -19,9 +19,10 @@
 ;
   try {
     adapter.onMessage(sentTextMessage,session);
-    fail("expected JMSException");
+    fail("expected CouldNotSendReplyException with JMSException");
   }
- catch (  JMSException ex) {
+ catch (  ReplyFailureException ex) {
+    assertEquals(JMSException.class,ex.getCause().getClass());
   }
   verify(responseTextMessage).setJMSCorrelationID(CORRELATION_ID);
   verify(messageProducer).close();

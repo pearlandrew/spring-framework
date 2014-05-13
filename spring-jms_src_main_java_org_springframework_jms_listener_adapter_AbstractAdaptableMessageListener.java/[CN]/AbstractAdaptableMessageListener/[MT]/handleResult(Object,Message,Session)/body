@@ -3,10 +3,15 @@
     if (logger.isDebugEnabled()) {
       logger.debug("Listener method returned result [" + result + "] - generating response message for it");
     }
-    Message response=buildMessage(session,result);
-    postProcessResponse(request,response);
-    Destination destination=getResponseDestination(request,response,session);
-    sendResponse(session,destination,response);
+    try {
+      Message response=buildMessage(session,result);
+      postProcessResponse(request,response);
+      Destination destination=getResponseDestination(request,response,session);
+      sendResponse(session,destination,response);
+    }
+ catch (    Exception e) {
+      throw new ReplyFailureException("Failed to send reply with payload '" + result + "'",e);
+    }
   }
  else {
     if (logger.isWarnEnabled()) {

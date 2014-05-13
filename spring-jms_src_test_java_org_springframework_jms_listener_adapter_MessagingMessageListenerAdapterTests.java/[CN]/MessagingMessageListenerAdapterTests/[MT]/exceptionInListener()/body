@@ -1,0 +1,16 @@
+{
+  javax.jms.Message message=new StubTextMessage("foo");
+  Session session=mock(Session.class);
+  MessagingMessageListenerAdapter listener=getSimpleInstance("fail",String.class);
+  try {
+    listener.onMessage(message,session);
+    fail("Should have thrown an exception");
+  }
+ catch (  JMSException e) {
+    fail("Should not have thrown a JMS exception");
+  }
+catch (  ListenerExecutionFailedException e) {
+    assertEquals(IllegalArgumentException.class,e.getCause().getClass());
+    assertEquals("Expected test exception",e.getCause().getMessage());
+  }
+}

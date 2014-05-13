@@ -1,7 +1,12 @@
 {
-  MessageConverter converter=getMessageConverter();
-  if (converter != null) {
-    return converter.fromMessage(message);
+  try {
+    MessageConverter converter=getMessageConverter();
+    if (converter != null) {
+      return converter.fromMessage(message);
+    }
+    return message;
   }
-  return message;
+ catch (  JMSException e) {
+    throw new MessageConversionException("Could not unmarshal message",e);
+  }
 }
