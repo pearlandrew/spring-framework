@@ -1,0 +1,26 @@
+{
+  if (gsonBuilder == null) {
+    this.gsonBuilder=new GsonBuilder();
+  }
+  if (this.prettyPrint != null && this.prettyPrint) {
+    this.gsonBuilder=this.gsonBuilder.setPrettyPrinting();
+  }
+  if (this.serializeNulls != null && this.serializeNulls) {
+    this.gsonBuilder=this.gsonBuilder.serializeNulls();
+  }
+  if (this.disableHtmlEscaping != null && this.disableHtmlEscaping) {
+    this.gsonBuilder=this.gsonBuilder.disableHtmlEscaping();
+  }
+  if (this.dateFormat != null) {
+    this.gsonBuilder.setDateFormat(this.dateFormat.toPattern());
+  }
+  if (base64Present) {
+    if (this.base64EncodeByteArrays != null && this.base64EncodeByteArrays) {
+      this.gsonBuilder.registerTypeHierarchyAdapter(byte[].class,new GsonBase64ByteArrayJsonTypeAdapter());
+    }
+  }
+ else   if (logger.isDebugEnabled()) {
+    logger.debug("org.apache.commons.codec.binary.Base64 is not available on the class path. Gson Base64 encoding is disabled.");
+  }
+  this.gson=this.gsonBuilder.create();
+}

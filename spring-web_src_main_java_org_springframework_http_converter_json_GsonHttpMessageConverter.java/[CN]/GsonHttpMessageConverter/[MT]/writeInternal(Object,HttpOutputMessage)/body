@@ -1,0 +1,14 @@
+{
+  Charset charset=getCharset(outputMessage.getHeaders());
+  OutputStreamWriter writer=new OutputStreamWriter(outputMessage.getBody(),charset);
+  try {
+    if (this.jsonPrefix != null) {
+      writer.append(this.jsonPrefix);
+    }
+    gson.toJson(o,writer);
+    writer.close();
+  }
+ catch (  JsonIOException ex) {
+    throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(),ex);
+  }
+}
