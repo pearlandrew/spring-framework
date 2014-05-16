@@ -10,8 +10,17 @@ catch (    javax.jms.IllegalStateException ex) {
         try {
           Method getDataSourceMethod=this.connectionFactory.getClass().getMethod("getDataSource");
           Object ds=ReflectionUtils.invokeMethod(getDataSourceMethod,this.connectionFactory);
-          if (ds != null && TransactionSynchronizationManager.hasResource(ds)) {
-            return;
+          while (ds != null) {
+            if (TransactionSynchronizationManager.hasResource(ds)) {
+              return;
+            }
+            try {
+              Method getTargetDataSourceMethod=ds.getClass().getMethod("getTargetDataSource");
+              ds=ReflectionUtils.invokeMethod(getTargetDataSourceMethod,ds);
+            }
+ catch (            NoSuchMethodException nsme) {
+              ds=null;
+            }
           }
         }
  catch (        Throwable ex2) {
