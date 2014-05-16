@@ -2,11 +2,20 @@
   if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(),ConfigurationPhase.PARSE_CONFIGURATION)) {
     return;
   }
-  if (this.configurationClasses.contains(configClass) && configClass.getBeanName() != null) {
-    this.configurationClasses.remove(configClass);
-    for (Iterator<ConfigurationClass> it=this.knownSuperclasses.values().iterator(); it.hasNext(); ) {
-      if (configClass.equals(it.next())) {
-        it.remove();
+  ConfigurationClass existingClass=this.configurationClasses.get(configClass);
+  if (existingClass != null) {
+    if (configClass.isImported()) {
+      if (existingClass.isImported()) {
+        existingClass.mergeImportedBy(configClass);
+      }
+      return;
+    }
+ else {
+      this.configurationClasses.remove(configClass);
+      for (Iterator<ConfigurationClass> it=this.knownSuperclasses.values().iterator(); it.hasNext(); ) {
+        if (configClass.equals(it.next())) {
+          it.remove();
+        }
       }
     }
   }
@@ -15,5 +24,5 @@
     sourceClass=doProcessConfigurationClass(configClass,sourceClass);
   }
  while (sourceClass != null);
-  this.configurationClasses.add(configClass);
+  this.configurationClasses.put(configClass,configClass);
 }

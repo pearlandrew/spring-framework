@@ -2,7 +2,13 @@
   Boolean skip=this.skipped.get(configClass);
   if (skip == null) {
     if (configClass.isImported()) {
-      if (shouldSkip(configClass.getImportedBy())) {
+      boolean allSkipped=true;
+      for (      ConfigurationClass importedBy : configClass.getImportedBy()) {
+        if (!shouldSkip(importedBy)) {
+          allSkipped=false;
+        }
+      }
+      if (allSkipped) {
         skip=true;
       }
     }
