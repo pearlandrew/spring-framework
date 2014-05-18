@@ -1,0 +1,20 @@
+{
+  try {
+    Collection<Part> parts=request.getParts();
+    this.multipartParameterNames=new LinkedHashSet<String>(parts.size());
+    MultiValueMap<String,MultipartFile> files=new LinkedMultiValueMap<String,MultipartFile>(parts.size());
+    for (    Part part : parts) {
+      String filename=extractFilename(part.getHeader(CONTENT_DISPOSITION));
+      if (filename != null) {
+        files.add(part.getName(),new StandardMultipartFile(part,filename));
+      }
+ else {
+        this.multipartParameterNames.add(part.getName());
+      }
+    }
+    setMultipartFiles(files);
+  }
+ catch (  Exception ex) {
+    throw new MultipartException("Could not parse multipart servlet request",ex);
+  }
+}
