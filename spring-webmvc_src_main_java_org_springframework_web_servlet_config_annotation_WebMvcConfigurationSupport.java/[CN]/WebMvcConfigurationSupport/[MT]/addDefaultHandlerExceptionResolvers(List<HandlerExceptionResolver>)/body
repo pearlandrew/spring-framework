@@ -3,6 +3,10 @@
   exceptionHandlerExceptionResolver.setApplicationContext(this.applicationContext);
   exceptionHandlerExceptionResolver.setContentNegotiationManager(mvcContentNegotiationManager());
   exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
+  if (jackson2Present) {
+    ResponseBodyInterceptor interceptor=new JsonViewResponseBodyInterceptor();
+    exceptionHandlerExceptionResolver.setResponseBodyInterceptors(Arrays.asList(interceptor));
+  }
   exceptionHandlerExceptionResolver.afterPropertiesSet();
   exceptionResolvers.add(exceptionHandlerExceptionResolver);
   exceptionResolvers.add(new ResponseStatusExceptionResolver());
