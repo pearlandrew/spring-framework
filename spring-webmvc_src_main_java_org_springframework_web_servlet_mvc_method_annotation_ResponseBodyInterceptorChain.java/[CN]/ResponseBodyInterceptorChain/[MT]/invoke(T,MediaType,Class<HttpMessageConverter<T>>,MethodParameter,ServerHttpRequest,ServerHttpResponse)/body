@@ -1,0 +1,22 @@
+{
+  if (this.interceptors != null) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Invoking ResponseBody interceptor chain for body=" + body);
+    }
+    for (    Object interceptor : this.interceptors) {
+      if (interceptor instanceof ControllerAdviceBean) {
+        ControllerAdviceBean adviceBean=(ControllerAdviceBean)interceptor;
+        if (!adviceBean.isApplicableToBeanType(returnType.getContainingClass())) {
+          continue;
+        }
+        interceptor=adviceBean.resolveBean();
+      }
+      Assert.state(interceptor instanceof ResponseBodyInterceptor);
+      body=((ResponseBodyInterceptor)interceptor).beforeBodyWrite(body,contentType,converterType,returnType,request,response);
+    }
+    if (logger.isDebugEnabled()) {
+      logger.debug("After interceptor chain body=" + body);
+    }
+  }
+  return body;
+}

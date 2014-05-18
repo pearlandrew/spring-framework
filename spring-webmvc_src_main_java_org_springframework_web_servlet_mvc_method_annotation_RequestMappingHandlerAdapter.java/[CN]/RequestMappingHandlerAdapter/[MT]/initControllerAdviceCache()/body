@@ -2,8 +2,8 @@
   if (getApplicationContext() == null) {
     return;
   }
-  if (logger.isDebugEnabled()) {
-    logger.debug("Looking for controller advice: " + getApplicationContext());
+  if (logger.isInfoEnabled()) {
+    logger.info("Looking for @ControllerAdvice: " + getApplicationContext());
   }
   List<ControllerAdviceBean> beans=ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
   Collections.sort(beans,new OrderComparator());
@@ -17,6 +17,10 @@
     if (!binderMethods.isEmpty()) {
       this.initBinderAdviceCache.put(bean,binderMethods);
       logger.info("Detected @InitBinder methods in " + bean);
+    }
+    if (ResponseBodyInterceptor.class.isAssignableFrom(bean.getBeanType())) {
+      this.responseBodyInterceptors.add(bean);
+      logger.info("Detected ResponseBodyInterceptor implementation in " + bean);
     }
   }
 }
