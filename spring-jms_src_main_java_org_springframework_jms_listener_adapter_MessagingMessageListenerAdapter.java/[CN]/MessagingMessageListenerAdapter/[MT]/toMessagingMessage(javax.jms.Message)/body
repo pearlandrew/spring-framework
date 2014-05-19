@@ -1,6 +1,8 @@
 {
-  Map<String,Object> mappedHeaders=getHeaderMapper().toHeaders(jmsMessage);
-  Object convertedObject=extractMessage(jmsMessage);
-  MessageBuilder<Object> builder=(convertedObject instanceof org.springframework.messaging.Message) ? MessageBuilder.fromMessage((org.springframework.messaging.Message<Object>)convertedObject) : MessageBuilder.withPayload(convertedObject);
-  return builder.copyHeadersIfAbsent(mappedHeaders).build();
+  try {
+    return (Message<?>)getMessagingMessageConverter().fromMessage(jmsMessage);
+  }
+ catch (  JMSException e) {
+    throw new MessageConversionException("Could not unmarshal message",e);
+  }
 }

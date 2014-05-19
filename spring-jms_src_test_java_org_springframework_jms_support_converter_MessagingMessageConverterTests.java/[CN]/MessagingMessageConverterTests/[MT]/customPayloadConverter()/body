@@ -1,0 +1,12 @@
+{
+  TextMessage jmsMsg=new StubTextMessage("1224");
+  converter.setPayloadConverter(new SimpleMessageConverter(){
+    @Override public Object fromMessage(    javax.jms.Message message) throws JMSException, MessageConversionException {
+      TextMessage textMessage=(TextMessage)message;
+      return Long.parseLong(textMessage.getText());
+    }
+  }
+);
+  Message<?> msg=(Message<?>)converter.fromMessage(jmsMsg);
+  assertEquals(1224L,msg.getPayload());
+}

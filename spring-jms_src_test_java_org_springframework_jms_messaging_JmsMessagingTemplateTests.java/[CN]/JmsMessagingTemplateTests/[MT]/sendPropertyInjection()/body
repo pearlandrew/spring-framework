@@ -1,0 +1,10 @@
+{
+  JmsMessagingTemplate t=new JmsMessagingTemplate();
+  t.setJmsTemplate(jmsTemplate);
+  t.setDefaultDestinationName("myQueue");
+  t.afterPropertiesSet();
+  Message<String> message=createTextMessage();
+  t.send(message);
+  verify(jmsTemplate).send(eq("myQueue"),messageCreator.capture());
+  assertTextMessage(messageCreator.getValue());
+}

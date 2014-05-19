@@ -1,0 +1,13 @@
+{
+  messagingTemplate.setJmsMessageConverter(new SimpleMessageConverter(){
+    @Override public javax.jms.Message toMessage(    Object object,    Session session) throws JMSException, MessageConversionException {
+      throw new MessageConversionException("Test exception");
+    }
+  }
+);
+  messagingTemplate.convertAndSend("myQueue","msg to convert");
+  verify(jmsTemplate).send(eq("myQueue"),messageCreator.capture());
+  thrown.expect(MessageConversionException.class);
+  thrown.expectMessage("Test exception");
+  messageCreator.getValue().createMessage(mock(Session.class));
+}
