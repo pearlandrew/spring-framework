@@ -19,9 +19,7 @@
       Class<? extends TestExecutionListener>[] valueListenerClasses=(Class<? extends TestExecutionListener>[])annAttrs.getClassArray("value");
       Class<? extends TestExecutionListener>[] listenerClasses=(Class<? extends TestExecutionListener>[])annAttrs.getClassArray("listeners");
       if (!ObjectUtils.isEmpty(valueListenerClasses) && !ObjectUtils.isEmpty(listenerClasses)) {
-        String msg=String.format("Class [%s] has been configured with @TestExecutionListeners' 'value' [%s] " + "and 'listeners' [%s] attributes. Use one or the other, but not both.",declaringClass,ObjectUtils.nullSafeToString(valueListenerClasses),ObjectUtils.nullSafeToString(listenerClasses));
-        logger.error(msg);
-        throw new IllegalStateException(msg);
+        throw new IllegalStateException(String.format("Class [%s] has been configured with @TestExecutionListeners' 'value' [%s]" + " and 'listeners' [%s] attributes. Use one or the other, but not both.",declaringClass,ObjectUtils.nullSafeToString(valueListenerClasses),ObjectUtils.nullSafeToString(listenerClasses)));
       }
  else       if (!ObjectUtils.isEmpty(valueListenerClasses)) {
         listenerClasses=valueListenerClasses;
@@ -34,12 +32,21 @@
   }
   List<TestExecutionListener> listeners=new ArrayList<TestExecutionListener>(classesList.size());
   for (  Class<? extends TestExecutionListener> listenerClass : classesList) {
+    NoClassDefFoundError ncdfe=null;
     try {
       listeners.add(BeanUtils.instantiateClass(listenerClass));
     }
  catch (    NoClassDefFoundError err) {
+      ncdfe=err;
+    }
+catch (    BeanInstantiationException ex) {
+      if (ex.getCause() instanceof NoClassDefFoundError) {
+        ncdfe=(NoClassDefFoundError)ex.getCause();
+      }
+    }
+    if (ncdfe != null) {
       if (logger.isInfoEnabled()) {
-        logger.info(String.format("Could not instantiate TestExecutionListener [%s]. " + "Specify custom listener classes or make the default listener classes " + "(and their dependencies) available.",listenerClass.getName()));
+        logger.info(String.format("Could not instantiate TestExecutionListener [%s]. " + "Specify custom listener classes or make the default listener classes " + "(and their dependencies) available. Offending class: [%s]",listenerClass.getName(),ncdfe.getMessage()));
       }
     }
   }
