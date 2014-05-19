@@ -1,13 +1,11 @@
 {
   Assert.notNull(controllerType,"'controllerType' must not be null");
   RequestMapping annot=AnnotationUtils.findAnnotation(controllerType,RequestMapping.class);
-  if ((annot == null) || ObjectUtils.isEmpty(annot.value()) || StringUtils.isEmpty(annot.value()[0])) {
+  if (annot == null || ObjectUtils.isEmpty(annot.value()) || StringUtils.isEmpty(annot.value()[0])) {
     return "/";
   }
-  if (annot.value().length > 1) {
-    if (logger.isWarnEnabled()) {
-      logger.warn("Multiple paths on controller " + controllerType.getName() + ", using first one");
-    }
+  if (annot.value().length > 1 && logger.isWarnEnabled()) {
+    logger.warn("Multiple paths on controller " + controllerType.getName() + ", using first one");
   }
   return annot.value()[0];
 }

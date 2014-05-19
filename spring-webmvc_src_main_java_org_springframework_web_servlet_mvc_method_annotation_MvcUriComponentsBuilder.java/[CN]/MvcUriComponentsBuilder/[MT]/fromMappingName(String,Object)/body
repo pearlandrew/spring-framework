@@ -1,7 +1,11 @@
 {
   RequestMappingInfoHandlerMapping hm=getRequestMappingInfoHandlerMapping();
   List<HandlerMethod> handlerMethods=hm.getHandlerMethodsForMappingName(name);
-  Assert.state(handlerMethods != null,"Mapping name not found: " + name);
-  Assert.state(handlerMethods.size() == 1,"No unique match for mapping name " + name + ": "+ handlerMethods);
+  if (handlerMethods == null) {
+    throw new IllegalArgumentException("Mapping name not found: " + name);
+  }
+  if (handlerMethods.size() != 1) {
+    throw new IllegalArgumentException("No unique match for mapping name " + name + ": "+ handlerMethods);
+  }
   return fromMethod(handlerMethods.get(0).getMethod(),argumentValues);
 }
