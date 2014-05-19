@@ -5,7 +5,7 @@
   AnnotationDescriptor<TestExecutionListeners> descriptor=MetaAnnotationUtils.findAnnotationDescriptor(clazz,annotationType);
   if (descriptor == null) {
     if (logger.isDebugEnabled()) {
-      logger.debug("@TestExecutionListeners is not present for class [" + clazz + "]: using defaults.");
+      logger.debug("@TestExecutionListeners is not present for class [" + clazz.getName() + "]: using defaults.");
     }
     classesList.addAll(getDefaultTestExecutionListenerClasses());
   }
@@ -14,12 +14,12 @@
       Class<?> declaringClass=descriptor.getDeclaringClass();
       AnnotationAttributes annAttrs=descriptor.getAnnotationAttributes();
       if (logger.isTraceEnabled()) {
-        logger.trace(String.format("Retrieved @TestExecutionListeners attributes [%s] for declaring class [%s].",annAttrs,declaringClass));
+        logger.trace(String.format("Retrieved @TestExecutionListeners attributes [%s] for declaring class [%s].",annAttrs,declaringClass.getName()));
       }
       Class<? extends TestExecutionListener>[] valueListenerClasses=(Class<? extends TestExecutionListener>[])annAttrs.getClassArray("value");
       Class<? extends TestExecutionListener>[] listenerClasses=(Class<? extends TestExecutionListener>[])annAttrs.getClassArray("listeners");
       if (!ObjectUtils.isEmpty(valueListenerClasses) && !ObjectUtils.isEmpty(listenerClasses)) {
-        throw new IllegalStateException(String.format("Class [%s] has been configured with @TestExecutionListeners' 'value' [%s]" + " and 'listeners' [%s] attributes. Use one or the other, but not both.",declaringClass,ObjectUtils.nullSafeToString(valueListenerClasses),ObjectUtils.nullSafeToString(listenerClasses)));
+        throw new IllegalStateException(String.format("Class [%s] configured with @TestExecutionListeners' " + "'value' [%s] and 'listeners' [%s] attributes. Use one or the other, but not both.",declaringClass.getName(),ObjectUtils.nullSafeToString(valueListenerClasses),ObjectUtils.nullSafeToString(listenerClasses)));
       }
  else       if (!ObjectUtils.isEmpty(valueListenerClasses)) {
         listenerClasses=valueListenerClasses;
@@ -46,7 +46,7 @@ catch (    BeanInstantiationException ex) {
     }
     if (ncdfe != null) {
       if (logger.isInfoEnabled()) {
-        logger.info(String.format("Could not instantiate TestExecutionListener [%s]. " + "Specify custom listener classes or make the default listener classes " + "(and their dependencies) available. Offending class: [%s]",listenerClass.getName(),ncdfe.getMessage()));
+        logger.info(String.format("Could not instantiate TestExecutionListener [%s]. " + "Specify custom listener classes or make the default listener classes " + "(and their required dependencies) available. Offending class: [%s]",listenerClass.getName(),ncdfe.getMessage()));
       }
     }
   }
