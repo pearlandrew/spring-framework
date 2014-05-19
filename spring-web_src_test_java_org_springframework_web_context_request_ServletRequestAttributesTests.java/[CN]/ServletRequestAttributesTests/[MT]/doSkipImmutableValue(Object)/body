@@ -2,11 +2,10 @@
   HttpServletRequest request=mock(HttpServletRequest.class);
   HttpSession session=mock(HttpSession.class);
   when(request.getSession(anyBoolean())).thenReturn(session);
-  when(session.getAttribute(KEY)).thenReturn(VALUE);
+  when(session.getAttribute(KEY)).thenReturn(immutableValue);
   ServletRequestAttributes attrs=new ServletRequestAttributes(request);
-  assertSame(VALUE,attrs.getAttribute(KEY,RequestAttributes.SCOPE_SESSION));
+  attrs.getAttribute(KEY,RequestAttributes.SCOPE_SESSION);
   attrs.requestCompleted();
   verify(session,times(2)).getAttribute(KEY);
-  verify(session).setAttribute(KEY,VALUE);
   verifyNoMoreInteractions(session);
 }
