@@ -1,8 +1,11 @@
 {
   try {
     XMLReader reader=XMLReaderFactory.createXMLReader();
-    reader.setFeature("http://xml.org/sax/features/external-general-entities",this.processExternalEntities);
+    reader.setFeature("http://xml.org/sax/features/external-general-entities",isProcessExternalEntities());
     byte[] bytes=StreamUtils.copyToByteArray(body);
+    if (!isProcessExternalEntities()) {
+      reader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
+    }
     return new SAXSource(reader,new InputSource(new ByteArrayInputStream(bytes)));
   }
  catch (  SAXException ex) {

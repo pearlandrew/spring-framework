@@ -1,7 +1,10 @@
 {
   try {
     XMLInputFactory inputFactory=XMLInputFactory.newFactory();
-    inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES,this.processExternalEntities);
+    inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES,isProcessExternalEntities());
+    if (!isProcessExternalEntities()) {
+      inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
+    }
     XMLStreamReader streamReader=inputFactory.createXMLStreamReader(body);
     return new StAXSource(streamReader);
   }
