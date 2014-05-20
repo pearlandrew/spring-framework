@@ -1,11 +1,8 @@
 {
-  if (!MappingJackson2HttpMessageConverter.class.equals(converterType)) {
-    return body;
-  }
   JsonView annotation=returnType.getMethodAnnotation(JsonView.class);
   if (annotation == null) {
-    return body;
+    return;
   }
   Assert.isTrue(annotation.value().length != 0,"Expected at least one serialization view class in JsonView annotation on " + returnType);
-  return (T)new MappingJacksonValue(body,annotation.value()[0]);
+  bodyContainer.setSerializationView(annotation.value()[0]);
 }
