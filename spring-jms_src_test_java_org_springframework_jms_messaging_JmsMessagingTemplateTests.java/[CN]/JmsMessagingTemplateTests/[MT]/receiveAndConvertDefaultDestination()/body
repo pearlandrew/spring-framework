@@ -1,0 +1,11 @@
+{
+  Destination destination=new Destination(){
+  }
+;
+  messagingTemplate.setDefaultDestination(destination);
+  javax.jms.Message jmsMessage=createJmsTextMessage("my Payload");
+  given(jmsTemplate.receive(destination)).willReturn(jmsMessage);
+  String payload=messagingTemplate.receiveAndConvert(String.class);
+  assertEquals("my Payload",payload);
+  verify(jmsTemplate).receive(destination);
+}

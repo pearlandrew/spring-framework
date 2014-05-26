@@ -1,0 +1,8 @@
+{
+  javax.jms.Message jmsMessage=createJmsTextMessage("123");
+  given(jmsTemplate.receive("myQueue")).willReturn(jmsMessage);
+  messagingTemplate.setMessageConverter(new GenericMessageConverter(new DefaultConversionService()));
+  Integer payload=messagingTemplate.receiveAndConvert("myQueue",Integer.class);
+  assertEquals(Integer.valueOf(123),payload);
+  verify(jmsTemplate).receive("myQueue");
+}
