@@ -1,12 +1,15 @@
 {
   OutputStream stream=(this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream());
+  Class<?> serializationView=(Class<?>)model.get(JsonView.class.getName());
+  String jsonpParameterValue=getJsonpParameterValue(request);
   Object value=filterModel(model);
-  if (model.containsKey(JsonView.class.getName())) {
-    writeContent(stream,value,this.jsonPrefix,model);
+  if (serializationView != null || jsonpParameterValue != null) {
+    MappingJacksonValue container=new MappingJacksonValue(value);
+    container.setSerializationView(serializationView);
+    container.setJsonpFunction(jsonpParameterValue);
+    value=container;
   }
- else {
-    writeContent(stream,value,this.jsonPrefix);
-  }
+  writeContent(stream,value,this.jsonPrefix);
   if (this.updateContentLength) {
     writeToResponse(response,(ByteArrayOutputStream)stream);
   }
