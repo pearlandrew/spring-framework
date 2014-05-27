@@ -1,0 +1,23 @@
+{
+  Assert.notNull(testContext,"TestContext must not be null");
+  BeanFactory bf=testContext.getApplicationContext().getAutowireCapableBeanFactory();
+  try {
+    if (StringUtils.hasText(name)) {
+      return bf.getBean(name,DataSource.class);
+    }
+    if (bf instanceof ListableBeanFactory) {
+      ListableBeanFactory lbf=(ListableBeanFactory)bf;
+      Map<String,DataSource> dataSources=BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf,DataSource.class);
+      if (dataSources.size() == 1) {
+        return dataSources.values().iterator().next();
+      }
+    }
+    return bf.getBean(DEFAULT_DATA_SOURCE_NAME,DataSource.class);
+  }
+ catch (  BeansException ex) {
+    if (logger.isWarnEnabled()) {
+      logger.warn("Caught exception while retrieving DataSource for test context " + testContext,ex);
+    }
+    throw ex;
+  }
+}

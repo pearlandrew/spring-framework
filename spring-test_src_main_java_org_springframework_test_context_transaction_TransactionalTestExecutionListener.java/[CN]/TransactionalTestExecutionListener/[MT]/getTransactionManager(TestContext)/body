@@ -1,30 +1,4 @@
 {
-  BeanFactory bf=testContext.getApplicationContext().getAutowireCapableBeanFactory();
   String tmName=retrieveConfigurationAttributes(testContext).getTransactionManagerName();
-  try {
-    if (StringUtils.hasText(tmName) && !DEFAULT_TRANSACTION_MANAGER_NAME.equals(tmName)) {
-      return bf.getBean(tmName,PlatformTransactionManager.class);
-    }
-    if (bf instanceof ListableBeanFactory) {
-      ListableBeanFactory lbf=(ListableBeanFactory)bf;
-      Map<String,PlatformTransactionManager> txMgrs=BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf,PlatformTransactionManager.class);
-      if (txMgrs.size() == 1) {
-        return txMgrs.values().iterator().next();
-      }
-      Map<String,TransactionManagementConfigurer> configurers=BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf,TransactionManagementConfigurer.class);
-      if (configurers.size() > 1) {
-        throw new IllegalStateException("Only one TransactionManagementConfigurer may exist in the ApplicationContext");
-      }
-      if (configurers.size() == 1) {
-        return configurers.values().iterator().next().annotationDrivenTransactionManager();
-      }
-    }
-    return bf.getBean(DEFAULT_TRANSACTION_MANAGER_NAME,PlatformTransactionManager.class);
-  }
- catch (  BeansException ex) {
-    if (logger.isWarnEnabled()) {
-      logger.warn("Caught exception while retrieving transaction manager for test context " + testContext,ex);
-    }
-    throw ex;
-  }
+  return TestContextTransactionUtils.retrieveTransactionManager(testContext,tmName);
 }

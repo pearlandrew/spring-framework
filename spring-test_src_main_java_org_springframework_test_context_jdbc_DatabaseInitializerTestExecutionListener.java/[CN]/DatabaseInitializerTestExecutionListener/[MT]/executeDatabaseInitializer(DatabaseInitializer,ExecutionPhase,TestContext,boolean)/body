@@ -1,0 +1,32 @@
+{
+  if (logger.isDebugEnabled()) {
+    logger.debug(String.format("Processing %s for execution phase [%s] and test context %s.",databaseInitializer,executionPhase,testContext));
+  }
+  if (executionPhase != databaseInitializer.executionPhase()) {
+    return;
+  }
+  final ResourceDatabasePopulator populator=new ResourceDatabasePopulator();
+  populator.setSqlScriptEncoding(databaseInitializer.encoding());
+  populator.setSeparator(databaseInitializer.separator());
+  populator.setCommentPrefix(databaseInitializer.commentPrefix());
+  populator.setBlockCommentStartDelimiter(databaseInitializer.blockCommentStartDelimiter());
+  populator.setBlockCommentEndDelimiter(databaseInitializer.blockCommentEndDelimiter());
+  populator.setContinueOnError(databaseInitializer.continueOnError());
+  populator.setIgnoreFailedDrops(databaseInitializer.ignoreFailedDrops());
+  String[] scripts=getScripts(databaseInitializer,testContext,classLevel);
+  scripts=TestContextResourceUtils.convertToClasspathResourcePaths(testContext.getTestClass(),scripts);
+  populator.setScripts(TestContextResourceUtils.convertToResources(testContext.getApplicationContext(),scripts));
+  if (logger.isDebugEnabled()) {
+    logger.debug("Executing SQL scripts: " + ObjectUtils.nullSafeToString(scripts));
+  }
+  final DataSource dataSource=TestContextTransactionUtils.retrieveDataSource(testContext,databaseInitializer.dataSource());
+  final PlatformTransactionManager transactionManager=TestContextTransactionUtils.retrieveTransactionManager(testContext,databaseInitializer.transactionManager());
+  int propagation=databaseInitializer.requireNewTransaction() ? TransactionDefinition.PROPAGATION_REQUIRES_NEW : TransactionDefinition.PROPAGATION_REQUIRED;
+  TransactionAttribute transactionAttribute=TestContextTransactionUtils.createDelegatingTransactionAttribute(testContext,new DefaultTransactionAttribute(propagation));
+  new TransactionTemplate(transactionManager,transactionAttribute).execute(new TransactionCallbackWithoutResult(){
+    @Override public void doInTransactionWithoutResult(    TransactionStatus status){
+      populator.execute(dataSource);
+    }
+  }
+);
+}
