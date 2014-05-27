@@ -2,25 +2,25 @@
   if (this.gsonBuilder == null) {
     this.gsonBuilder=new GsonBuilder();
   }
-  if (this.prettyPrint != null && this.prettyPrint) {
-    this.gsonBuilder=this.gsonBuilder.setPrettyPrinting();
+  if (this.serializeNulls) {
+    this.gsonBuilder.serializeNulls();
   }
-  if (this.serializeNulls != null && this.serializeNulls) {
-    this.gsonBuilder=this.gsonBuilder.serializeNulls();
+  if (this.prettyPrinting) {
+    this.gsonBuilder.setPrettyPrinting();
   }
-  if (this.disableHtmlEscaping != null && this.disableHtmlEscaping) {
-    this.gsonBuilder=this.gsonBuilder.disableHtmlEscaping();
+  if (this.disableHtmlEscaping) {
+    this.gsonBuilder.disableHtmlEscaping();
   }
-  if (this.dateFormat != null) {
-    this.gsonBuilder.setDateFormat(this.dateFormat.toPattern());
+  if (this.dateFormatPattern != null) {
+    this.gsonBuilder.setDateFormat(this.dateFormatPattern);
   }
-  if (base64Present) {
-    if (this.base64EncodeByteArrays != null && this.base64EncodeByteArrays) {
+  if (this.base64EncodeByteArrays) {
+    if (commonsCodecPresent) {
       this.gsonBuilder.registerTypeHierarchyAdapter(byte[].class,new GsonBase64ByteArrayJsonTypeAdapter());
     }
-  }
- else   if (logger.isDebugEnabled()) {
-    logger.debug("org.apache.commons.codec.binary.Base64 is not " + "available on the class path. Gson Base64 encoding is disabled.");
+ else {
+      throw new IllegalStateException("Apache Commons Codec is not available on the classpath - cannot enable Gson Base64 encoding");
+    }
   }
   this.gson=this.gsonBuilder.create();
 }
