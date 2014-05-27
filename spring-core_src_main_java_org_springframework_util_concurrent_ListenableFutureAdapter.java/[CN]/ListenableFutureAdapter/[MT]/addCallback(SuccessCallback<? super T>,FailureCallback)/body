@@ -1,0 +1,21 @@
+{
+  ListenableFuture<S> listenableAdaptee=(ListenableFuture<S>)getAdaptee();
+  listenableAdaptee.addCallback(new ListenableFutureCallback<S>(){
+    @Override public void onSuccess(    S result){
+      try {
+        successCallback.onSuccess(adaptInternal(result));
+      }
+ catch (      ExecutionException ex) {
+        Throwable cause=ex.getCause();
+        onFailure(cause != null ? cause : ex);
+      }
+catch (      Throwable t) {
+        onFailure(t);
+      }
+    }
+    @Override public void onFailure(    Throwable t){
+      failureCallback.onFailure(t);
+    }
+  }
+);
+}

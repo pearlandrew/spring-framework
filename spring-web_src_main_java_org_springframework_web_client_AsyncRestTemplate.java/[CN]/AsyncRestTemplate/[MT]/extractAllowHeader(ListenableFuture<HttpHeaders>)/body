@@ -1,12 +1,15 @@
 {
   return new ListenableFuture<Set<HttpMethod>>(){
     @Override public void addCallback(    final ListenableFutureCallback<? super Set<HttpMethod>> callback){
+      addCallback(callback,callback);
+    }
+    @Override public void addCallback(    final SuccessCallback<? super Set<HttpMethod>> successCallback,    final FailureCallback failureCallback){
       headersFuture.addCallback(new ListenableFutureCallback<HttpHeaders>(){
         @Override public void onSuccess(        HttpHeaders result){
-          callback.onSuccess(result.getAllow());
+          successCallback.onSuccess(result.getAllow());
         }
         @Override public void onFailure(        Throwable t){
-          callback.onFailure(t);
+          failureCallback.onFailure(t);
         }
       }
 );
