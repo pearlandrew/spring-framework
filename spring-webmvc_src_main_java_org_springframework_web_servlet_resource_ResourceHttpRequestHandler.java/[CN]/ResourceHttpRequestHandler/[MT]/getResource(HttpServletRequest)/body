@@ -9,5 +9,12 @@
     }
     return null;
   }
-  return createResourceResolverChain().resolveResource(request,path,getLocations());
+  ResourceResolverChain resolveChain=new DefaultResourceResolverChain(getResourceResolvers());
+  Resource resource=resolveChain.resolveResource(request,path,getLocations());
+  if (resource == null || getResourceTransformers().isEmpty()) {
+    return resource;
+  }
+  ResourceTransformerChain transformChain=new DefaultResourceTransformerChain(resolveChain,getResourceTransformers());
+  resource=transformChain.transform(request,resource);
+  return resource;
 }
