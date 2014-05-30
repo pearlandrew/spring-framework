@@ -2,6 +2,8 @@
   RequestMappingHandlerMapping rmHandlerMapping=webConfig.requestMappingHandlerMapping();
   rmHandlerMapping.setApplicationContext(webAppContext);
   rmHandlerMapping.afterPropertiesSet();
+  assertEquals(TestPathHelper.class,rmHandlerMapping.getUrlPathHelper().getClass());
+  assertEquals(TestPathMatcher.class,rmHandlerMapping.getPathMatcher().getClass());
   HandlerExecutionChain chain=rmHandlerMapping.getHandler(new MockHttpServletRequest("GET","/"));
   assertNotNull(chain.getInterceptors());
   assertEquals(3,chain.getInterceptors().length);
@@ -12,12 +14,16 @@
   handlerMapping.setApplicationContext(webAppContext);
   assertNotNull(handlerMapping);
   assertEquals(1,handlerMapping.getOrder());
+  assertEquals(TestPathHelper.class,handlerMapping.getUrlPathHelper().getClass());
+  assertEquals(TestPathMatcher.class,handlerMapping.getPathMatcher().getClass());
   HandlerExecutionChain handler=handlerMapping.getHandler(new MockHttpServletRequest("GET","/path"));
   assertNotNull(handler.getHandler());
   handlerMapping=(AbstractHandlerMapping)webConfig.resourceHandlerMapping();
   handlerMapping.setApplicationContext(webAppContext);
   assertNotNull(handlerMapping);
   assertEquals(Integer.MAX_VALUE - 1,handlerMapping.getOrder());
+  assertEquals(TestPathHelper.class,handlerMapping.getUrlPathHelper().getClass());
+  assertEquals(TestPathMatcher.class,handlerMapping.getPathMatcher().getClass());
   handler=handlerMapping.getHandler(new MockHttpServletRequest("GET","/resources/foo.gif"));
   assertNotNull(handler.getHandler());
   handlerMapping=(AbstractHandlerMapping)webConfig.defaultServletHandlerMapping();

@@ -1,8 +1,11 @@
 {
   if (!parserContext.getRegistry().containsBeanDefinition(HANDLER_MAPPING_BEAN_NAME)) {
+    RuntimeBeanReference pathMatcherRef=MvcNamespaceUtils.registerPathMatcher(null,parserContext,source);
+    RuntimeBeanReference pathHelperRef=MvcNamespaceUtils.registerUrlPathHelper(null,parserContext,source);
     RootBeanDefinition handlerMappingDef=new RootBeanDefinition(SimpleUrlHandlerMapping.class);
     handlerMappingDef.setSource(source);
     handlerMappingDef.getPropertyValues().add("order","1");
+    handlerMappingDef.getPropertyValues().add("pathMatcher",pathMatcherRef).add("urlPathHelper",pathHelperRef);
     handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
     parserContext.getRegistry().registerBeanDefinition(HANDLER_MAPPING_BEAN_NAME,handlerMappingDef);
     parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef,HANDLER_MAPPING_BEAN_NAME));

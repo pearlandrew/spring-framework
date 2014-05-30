@@ -1,6 +1,7 @@
 {
   Element pathMatchingElement=DomUtils.getChildElementByTagName(element,"path-matching");
   if (pathMatchingElement != null) {
+    Object source=parserContext.extractSource(element);
     if (pathMatchingElement.hasAttribute("suffix-pattern")) {
       Boolean useSuffixPatternMatch=Boolean.valueOf(pathMatchingElement.getAttribute("suffix-pattern"));
       handlerMappingDef.getPropertyValues().add("useSuffixPatternMatch",useSuffixPatternMatch);
@@ -13,13 +14,17 @@
       Boolean useRegisteredSuffixPatternMatch=Boolean.valueOf(pathMatchingElement.getAttribute("registered-suffixes-only"));
       handlerMappingDef.getPropertyValues().add("useRegisteredSuffixPatternMatch",useRegisteredSuffixPatternMatch);
     }
+    RuntimeBeanReference pathHelperRef=null;
     if (pathMatchingElement.hasAttribute("path-helper")) {
-      RuntimeBeanReference pathHelperRef=new RuntimeBeanReference(pathMatchingElement.getAttribute("path-helper"));
-      handlerMappingDef.getPropertyValues().add("urlPathHelper",pathHelperRef);
+      pathHelperRef=new RuntimeBeanReference(pathMatchingElement.getAttribute("path-helper"));
     }
+    pathHelperRef=MvcNamespaceUtils.registerUrlPathHelper(pathHelperRef,parserContext,source);
+    handlerMappingDef.getPropertyValues().add("urlPathHelper",pathHelperRef);
+    RuntimeBeanReference pathMatcherRef=null;
     if (pathMatchingElement.hasAttribute("path-matcher")) {
-      RuntimeBeanReference pathMatcherRef=new RuntimeBeanReference(pathMatchingElement.getAttribute("path-matcher"));
-      handlerMappingDef.getPropertyValues().add("pathMatcher",pathMatcherRef);
+      pathMatcherRef=new RuntimeBeanReference(pathMatchingElement.getAttribute("path-matcher"));
     }
+    pathMatcherRef=MvcNamespaceUtils.registerPathMatcher(pathMatcherRef,parserContext,source);
+    handlerMappingDef.getPropertyValues().add("pathMatcher",pathMatcherRef);
   }
 }
