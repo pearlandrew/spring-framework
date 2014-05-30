@@ -3,7 +3,11 @@
   this.template.setDefaultDestination("home");
   this.template.setReceiveMessage(expected);
   this.template.setMessageConverter(new GenericMessageConverter(new DefaultConversionService()));
-  thrown.expect(MessageConversionException.class);
-  thrown.expectMessage("payload");
-  this.template.receiveAndConvert(Writer.class);
+  try {
+    this.template.receiveAndConvert(Writer.class);
+  }
+ catch (  MessageConversionException e) {
+    assertTrue("Invalid exception message '" + e.getMessage() + "'",e.getMessage().contains("payload"));
+    assertSame(expected,e.getFailedMessage());
+  }
 }
