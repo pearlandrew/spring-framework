@@ -11,8 +11,15 @@
         }
         interceptor=adviceBean.resolveBean();
       }
-      Assert.state(interceptor instanceof ResponseBodyInterceptor);
-      body=((ResponseBodyInterceptor)interceptor).beforeBodyWrite(body,contentType,converterType,returnType,request,response);
+      if (interceptor instanceof ResponseBodyInterceptor) {
+        ResponseBodyInterceptor<T> typedInterceptor=(ResponseBodyInterceptor<T>)interceptor;
+        if (typedInterceptor.supports(returnType,selectedConverterType)) {
+          body=typedInterceptor.beforeBodyWrite(body,returnType,selectedContentType,selectedConverterType,request,response);
+        }
+      }
+ else {
+        throw new IllegalStateException("Expected a ResponseBodyInterceptor: " + interceptor);
+      }
     }
     if (logger.isDebugEnabled()) {
       logger.debug("After interceptor chain body=" + body);
