@@ -7,7 +7,7 @@
   }
   List<ControllerAdviceBean> beans=ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
   Collections.sort(beans,new OrderComparator());
-  List<Object> interceptorBeans=new ArrayList<Object>();
+  List<Object> responseBodyAdviceBeans=new ArrayList<Object>();
   for (  ControllerAdviceBean bean : beans) {
     Set<Method> attrMethods=HandlerMethodSelector.selectMethods(bean.getBeanType(),MODEL_ATTRIBUTE_METHODS);
     if (!attrMethods.isEmpty()) {
@@ -19,12 +19,12 @@
       this.initBinderAdviceCache.put(bean,binderMethods);
       logger.info("Detected @InitBinder methods in " + bean);
     }
-    if (ResponseBodyInterceptor.class.isAssignableFrom(bean.getBeanType())) {
-      interceptorBeans.add(bean);
-      logger.info("Detected ResponseBodyInterceptor implementation in " + bean);
+    if (ResponseBodyAdvice.class.isAssignableFrom(bean.getBeanType())) {
+      responseBodyAdviceBeans.add(bean);
+      logger.info("Detected ResponseBodyAdvice bean in " + bean);
     }
   }
-  if (!interceptorBeans.isEmpty()) {
-    this.responseBodyInterceptors.addAll(0,interceptorBeans);
+  if (!responseBodyAdviceBeans.isEmpty()) {
+    this.responseBodyAdvice.addAll(0,responseBodyAdviceBeans);
   }
 }

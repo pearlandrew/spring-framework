@@ -5,17 +5,17 @@
   if (logger.isDebugEnabled()) {
     logger.debug("Looking for exception mappings: " + getApplicationContext());
   }
-  List<ControllerAdviceBean> beans=ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
-  Collections.sort(beans,new OrderComparator());
-  for (  ControllerAdviceBean bean : beans) {
-    ExceptionHandlerMethodResolver resolver=new ExceptionHandlerMethodResolver(bean.getBeanType());
+  List<ControllerAdviceBean> adviceBeans=ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
+  Collections.sort(adviceBeans,new OrderComparator());
+  for (  ControllerAdviceBean adviceBean : adviceBeans) {
+    ExceptionHandlerMethodResolver resolver=new ExceptionHandlerMethodResolver(adviceBean.getBeanType());
     if (resolver.hasExceptionMappings()) {
-      this.exceptionHandlerAdviceCache.put(bean,resolver);
-      logger.info("Detected @ExceptionHandler methods in " + bean);
+      this.exceptionHandlerAdviceCache.put(adviceBean,resolver);
+      logger.info("Detected @ExceptionHandler methods in " + adviceBean);
     }
-    if (ResponseBodyInterceptor.class.isAssignableFrom(bean.getBeanType())) {
-      this.responseBodyInterceptors.add(bean);
-      logger.info("Detected ResponseBodyInterceptor implementation in " + bean);
+    if (ResponseBodyAdvice.class.isAssignableFrom(adviceBean.getBeanType())) {
+      this.responseBodyAdvice.add(adviceBean);
+      logger.info("Detected ResponseBodyAdvice implementation in " + adviceBean);
     }
   }
 }

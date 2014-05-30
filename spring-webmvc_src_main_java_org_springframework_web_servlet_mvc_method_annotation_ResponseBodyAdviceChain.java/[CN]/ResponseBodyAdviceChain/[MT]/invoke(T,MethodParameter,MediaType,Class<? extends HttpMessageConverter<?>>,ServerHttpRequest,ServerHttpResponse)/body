@@ -1,0 +1,29 @@
+{
+  if (this.advice != null) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Invoking ResponseBodyAdvice chain for body=" + body);
+    }
+    for (    Object advice : this.advice) {
+      if (advice instanceof ControllerAdviceBean) {
+        ControllerAdviceBean adviceBean=(ControllerAdviceBean)advice;
+        if (!adviceBean.isApplicableToBeanType(returnType.getContainingClass())) {
+          continue;
+        }
+        advice=adviceBean.resolveBean();
+      }
+      if (advice instanceof ResponseBodyAdvice) {
+        ResponseBodyAdvice<T> typedAdvice=(ResponseBodyAdvice<T>)advice;
+        if (typedAdvice.supports(returnType,selectedConverterType)) {
+          body=typedAdvice.beforeBodyWrite(body,returnType,selectedContentType,selectedConverterType,request,response);
+        }
+      }
+ else {
+        throw new IllegalStateException("Expected ResponseBodyAdvice: " + advice);
+      }
+    }
+    if (logger.isDebugEnabled()) {
+      logger.debug("After ResponseBodyAdvice chain body=" + body);
+    }
+  }
+  return body;
+}
