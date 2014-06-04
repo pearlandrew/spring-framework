@@ -1,0 +1,24 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  DefaultDependencyComparator comparator=mock(DefaultDependencyComparator.class);
+  bf.setDependencyComparator(comparator);
+  AutowiredAnnotationBeanPostProcessor bpp=new AutowiredAnnotationBeanPostProcessor();
+  bpp.setBeanFactory(bf);
+  bf.addBeanPostProcessor(bpp);
+  bf.registerBeanDefinition("annotatedBean",new RootBeanDefinition(OptionalResourceInjectionBean.class));
+  TestBean tb=new TestBean();
+  bf.registerSingleton("testBean",tb);
+  IndexedTestBean itb=new IndexedTestBean();
+  bf.registerSingleton("indexedTestBean",itb);
+  final OrderedNestedTestBean ntb1=new OrderedNestedTestBean();
+  ntb1.setOrder(2);
+  bf.registerSingleton("nestedTestBean1",ntb1);
+  final OrderedNestedTestBean ntb2=new OrderedNestedTestBean();
+  ntb2.setOrder(1);
+  bf.registerSingleton("nestedTestBean2",ntb2);
+  OptionalResourceInjectionBean bean=(OptionalResourceInjectionBean)bf.getBean("annotatedBean");
+  verify(comparator,never()).compare(any(),any());
+  verify(comparator,never()).sortList(any(),any());
+  verify(comparator,times(2)).sortArray(any(),any());
+  bf.destroySingletons();
+}

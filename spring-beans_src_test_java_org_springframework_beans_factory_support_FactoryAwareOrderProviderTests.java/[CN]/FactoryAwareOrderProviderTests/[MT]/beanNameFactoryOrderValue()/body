@@ -1,0 +1,13 @@
+{
+  HashMap<Object,String> beans=new HashMap<>();
+  beans.put(25,"myBean");
+  Method m=ReflectionUtils.findMethod(getClass(),name.getMethodName());
+  RootBeanDefinition rbd=mock(RootBeanDefinition.class);
+  given(rbd.getResolvedFactoryMethod()).willReturn(m);
+  given(beanFactory.containsBeanDefinition("myBean")).willReturn(true);
+  given(beanFactory.getMergedBeanDefinition("myBean")).willReturn(rbd);
+  FactoryAwareOrderProvider orderProvider=createOrderProvider(beans);
+  assertEquals(Integer.valueOf(500),orderProvider.getOrder(25));
+  verify(beanFactory).containsBeanDefinition("myBean");
+  verify(beanFactory).getMergedBeanDefinition("myBean");
+}
