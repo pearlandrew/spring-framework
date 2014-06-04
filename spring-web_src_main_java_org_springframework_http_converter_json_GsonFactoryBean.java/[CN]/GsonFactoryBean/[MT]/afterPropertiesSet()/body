@@ -1,26 +1,16 @@
 {
-  if (this.gsonBuilder == null) {
-    this.gsonBuilder=new GsonBuilder();
-  }
+  GsonBuilder builder=(this.base64EncodeByteArrays ? GsonBuilderUtils.gsonBuilderWithBase64EncodedByteArrays() : new GsonBuilder());
   if (this.serializeNulls) {
-    this.gsonBuilder.serializeNulls();
+    builder.serializeNulls();
   }
   if (this.prettyPrinting) {
-    this.gsonBuilder.setPrettyPrinting();
+    builder.setPrettyPrinting();
   }
   if (this.disableHtmlEscaping) {
-    this.gsonBuilder.disableHtmlEscaping();
+    builder.disableHtmlEscaping();
   }
   if (this.dateFormatPattern != null) {
-    this.gsonBuilder.setDateFormat(this.dateFormatPattern);
+    builder.setDateFormat(this.dateFormatPattern);
   }
-  if (this.base64EncodeByteArrays) {
-    if (commonsCodecPresent) {
-      this.gsonBuilder.registerTypeHierarchyAdapter(byte[].class,new GsonBase64ByteArrayJsonTypeAdapter());
-    }
- else {
-      throw new IllegalStateException("Apache Commons Codec is not available on the classpath - cannot enable Gson Base64 encoding");
-    }
-  }
-  this.gson=this.gsonBuilder.create();
+  this.gson=builder.create();
 }
