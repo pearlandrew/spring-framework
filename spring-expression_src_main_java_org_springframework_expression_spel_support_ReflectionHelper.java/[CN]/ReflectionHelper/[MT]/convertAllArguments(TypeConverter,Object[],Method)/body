@@ -1,8 +1,10 @@
 {
   Integer varargsPosition=null;
+  boolean conversionOccurred=false;
   if (method.isVarArgs()) {
     Class<?>[] paramTypes=method.getParameterTypes();
     varargsPosition=paramTypes.length - 1;
+    conversionOccurred=true;
   }
   for (int argPos=0; argPos < arguments.length; argPos++) {
     TypeDescriptor targetType;
@@ -20,6 +22,7 @@
           throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR,argument.getClass().getName(),targetType);
         }
         arguments[argPos]=converter.convertValue(argument,TypeDescriptor.forObject(argument),targetType);
+        conversionOccurred|=(argument != arguments[argPos]);
       }
     }
  catch (    EvaluationException ex) {
@@ -31,4 +34,5 @@
       }
     }
   }
+  return conversionOccurred;
 }

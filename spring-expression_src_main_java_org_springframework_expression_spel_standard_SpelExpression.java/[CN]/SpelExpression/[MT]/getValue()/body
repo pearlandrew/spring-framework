@@ -1,4 +1,21 @@
 {
+  Object result=null;
+  if (compiledAst != null) {
+    try {
+      return this.compiledAst.getValue(null,null);
+    }
+ catch (    Throwable t) {
+      if (this.configuration.getCompilerMode() == SpelCompilerMode.mixed) {
+        interpretedCount=0;
+        compiledAst=null;
+      }
+ else {
+        throw new SpelEvaluationException(t,SpelMessage.EXCEPTION_RUNNING_COMPILED_EXPRESSION);
+      }
+    }
+  }
   ExpressionState expressionState=new ExpressionState(getEvaluationContext(),this.configuration);
-  return this.ast.getValue(expressionState);
+  result=this.ast.getValue(expressionState);
+  checkCompile(expressionState);
+  return result;
 }

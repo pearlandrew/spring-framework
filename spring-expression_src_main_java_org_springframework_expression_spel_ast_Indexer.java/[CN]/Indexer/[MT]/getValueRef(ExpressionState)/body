@@ -24,6 +24,7 @@
     if (targetObjectTypeDescriptor.getMapKeyTypeDescriptor() != null) {
       key=state.convertValue(key,targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
     }
+    this.indexedType=IndexedType.map;
     return new MapIndexingValueRef(state.getTypeConverter(),(Map<?,?>)targetObject,key,targetObjectTypeDescriptor);
   }
   if (targetObject == null) {
@@ -32,16 +33,22 @@
   if (targetObject.getClass().isArray() || targetObject instanceof Collection || targetObject instanceof String) {
     int idx=(Integer)state.convertValue(index,TypeDescriptor.valueOf(Integer.class));
     if (targetObject.getClass().isArray()) {
+      this.indexedType=IndexedType.array;
       return new ArrayIndexingValueRef(state.getTypeConverter(),targetObject,idx,targetObjectTypeDescriptor);
     }
  else     if (targetObject instanceof Collection) {
+      if (targetObject instanceof List) {
+        this.indexedType=IndexedType.list;
+      }
       return new CollectionIndexingValueRef((Collection<?>)targetObject,idx,targetObjectTypeDescriptor,state.getTypeConverter(),state.getConfiguration().isAutoGrowCollections(),state.getConfiguration().getMaximumAutoGrowSize());
     }
  else     if (targetObject instanceof String) {
+      this.indexedType=IndexedType.string;
       return new StringIndexingLValue((String)targetObject,idx,targetObjectTypeDescriptor);
     }
   }
   if (indexValue.getTypeDescriptor().getType() == String.class) {
+    this.indexedType=IndexedType.object;
     return new PropertyIndexingValueRef(targetObject,(String)indexValue.getValue(),state.getEvaluationContext(),targetObjectTypeDescriptor);
   }
   throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,targetObjectTypeDescriptor.toString());

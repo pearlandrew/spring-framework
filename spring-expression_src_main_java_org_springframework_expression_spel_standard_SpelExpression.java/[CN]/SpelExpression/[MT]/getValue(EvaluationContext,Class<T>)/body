@@ -1,4 +1,26 @@
 {
-  TypedValue typedResultValue=this.ast.getTypedValue(new ExpressionState(context,this.configuration));
+  if (compiledAst != null) {
+    try {
+      Object result=this.compiledAst.getValue(null,context);
+      if (expectedResultType != null) {
+        return (T)result;
+      }
+ else {
+        return ExpressionUtils.convertTypedValue(context,new TypedValue(result),expectedResultType);
+      }
+    }
+ catch (    Throwable t) {
+      if (this.configuration.getCompilerMode() == SpelCompilerMode.mixed) {
+        interpretedCount=0;
+        compiledAst=null;
+      }
+ else {
+        throw new SpelEvaluationException(t,SpelMessage.EXCEPTION_RUNNING_COMPILED_EXPRESSION);
+      }
+    }
+  }
+  ExpressionState expressionState=new ExpressionState(context,this.configuration);
+  TypedValue typedResultValue=this.ast.getTypedValue(expressionState);
+  checkCompile(expressionState);
   return ExpressionUtils.convertTypedValue(context,typedResultValue,expectedResultType);
 }

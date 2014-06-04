@@ -1,0 +1,19 @@
+{
+  ReflectiveConstructorExecutor executor=((ReflectiveConstructorExecutor)this.cachedExecutor);
+  Constructor<?> constructor=executor.getConstructor();
+  String classSlashedDescriptor=constructor.getDeclaringClass().getName().replace('.','/');
+  String[] paramDescriptors=CodeFlow.toParamDescriptors(constructor);
+  mv.visitTypeInsn(NEW,classSlashedDescriptor);
+  mv.visitInsn(DUP);
+  for (int c=1; c < children.length; c++) {
+    SpelNodeImpl child=children[c];
+    codeflow.enterCompilationScope();
+    child.generateCode(mv,codeflow);
+    if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && (paramDescriptors[c - 1].charAt(0) == 'L')) {
+      CodeFlow.insertBoxIfNecessary(mv,codeflow.lastDescriptor().charAt(0));
+    }
+    codeflow.exitCompilationScope();
+  }
+  mv.visitMethodInsn(INVOKESPECIAL,classSlashedDescriptor,"<init>",CodeFlow.createSignatureDescriptor(constructor),false);
+  codeflow.pushDescriptor(exitTypeDescriptor);
+}

@@ -5,11 +5,16 @@
     Object operandOne=leftOp.getValueInternal(state).getValue();
     if (operandOne instanceof Number) {
       if (operandOne instanceof Double || operandOne instanceof Long || operandOne instanceof BigDecimal) {
+        if (operandOne instanceof Double || operandOne instanceof Long) {
+          this.exitTypeDescriptor=(operandOne instanceof Double) ? "D" : "J";
+        }
         return new TypedValue(operandOne);
       }
       if (operandOne instanceof Float) {
+        this.exitTypeDescriptor="F";
         return new TypedValue(((Number)operandOne).floatValue());
       }
+      this.exitTypeDescriptor="I";
       return new TypedValue(((Number)operandOne).intValue());
     }
     return state.operate(Operation.ADD,operandOne,null);
@@ -27,14 +32,24 @@
       return new TypedValue(leftBigDecimal.add(rightBigDecimal));
     }
     if (leftNumber instanceof Double || rightNumber instanceof Double) {
+      if (leftNumber instanceof Double && rightNumber instanceof Double) {
+        this.exitTypeDescriptor="D";
+      }
       return new TypedValue(leftNumber.doubleValue() + rightNumber.doubleValue());
     }
     if (leftNumber instanceof Float || rightNumber instanceof Float) {
+      if (leftNumber instanceof Float && rightNumber instanceof Float) {
+        this.exitTypeDescriptor="F";
+      }
       return new TypedValue(leftNumber.floatValue() + rightNumber.floatValue());
     }
     if (leftNumber instanceof Long || rightNumber instanceof Long) {
+      if (leftNumber instanceof Long && rightNumber instanceof Long) {
+        this.exitTypeDescriptor="J";
+      }
       return new TypedValue(leftNumber.longValue() + rightNumber.longValue());
     }
+    this.exitTypeDescriptor="I";
     return new TypedValue(leftNumber.intValue() + rightNumber.intValue());
   }
   if (leftOperand instanceof String && rightOperand instanceof String) {

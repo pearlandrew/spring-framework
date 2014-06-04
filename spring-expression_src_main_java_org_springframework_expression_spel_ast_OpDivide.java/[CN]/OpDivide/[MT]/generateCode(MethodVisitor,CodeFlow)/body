@@ -1,0 +1,31 @@
+{
+  getLeftOperand().generateCode(mv,codeflow);
+  String leftdesc=getLeftOperand().getExitDescriptor();
+  if (!CodeFlow.isPrimitive(leftdesc)) {
+    CodeFlow.insertUnboxInsns(mv,this.exitTypeDescriptor.charAt(0),false);
+  }
+  if (this.children.length > 1) {
+    getRightOperand().generateCode(mv,codeflow);
+    String rightdesc=getRightOperand().getExitDescriptor();
+    if (!CodeFlow.isPrimitive(rightdesc)) {
+      CodeFlow.insertUnboxInsns(mv,this.exitTypeDescriptor.charAt(0),false);
+    }
+switch (this.exitTypeDescriptor.charAt(0)) {
+case 'I':
+      mv.visitInsn(IDIV);
+    break;
+case 'J':
+  mv.visitInsn(LDIV);
+break;
+case 'F':
+mv.visitInsn(FDIV);
+break;
+case 'D':
+mv.visitInsn(DDIV);
+break;
+default :
+throw new IllegalStateException("Unrecognized exit descriptor: '" + this.exitTypeDescriptor + "'");
+}
+}
+codeflow.pushDescriptor(this.exitTypeDescriptor);
+}

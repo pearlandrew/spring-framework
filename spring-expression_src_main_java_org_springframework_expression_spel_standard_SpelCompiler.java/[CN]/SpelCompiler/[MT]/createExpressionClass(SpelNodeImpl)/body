@@ -1,0 +1,27 @@
+{
+  String clazzName="spel/Ex" + getNextSuffix();
+  ClassWriter cw=new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+  cw.visit(V1_5,ACC_PUBLIC,clazzName,null,"org/springframework/expression/spel/CompiledExpression",null);
+  MethodVisitor mv=cw.visitMethod(ACC_PUBLIC,"<init>","()V",null,null);
+  mv.visitCode();
+  mv.visitVarInsn(ALOAD,0);
+  mv.visitMethodInsn(INVOKESPECIAL,"org/springframework/expression/spel/CompiledExpression","<init>","()V",false);
+  mv.visitInsn(RETURN);
+  mv.visitMaxs(1,1);
+  mv.visitEnd();
+  mv=cw.visitMethod(ACC_PUBLIC,"getValue","(Ljava/lang/Object;Lorg/springframework/expression/EvaluationContext;)Ljava/lang/Object;",null,new String[]{"org/springframework/expression/EvaluationException"});
+  mv.visitCode();
+  CodeFlow codeflow=new CodeFlow();
+  expressionToCompile.generateCode(mv,codeflow);
+  CodeFlow.insertBoxIfNecessary(mv,codeflow.lastDescriptor());
+  if (codeflow.lastDescriptor() == "V") {
+    mv.visitInsn(ACONST_NULL);
+  }
+  mv.visitInsn(ARETURN);
+  mv.visitMaxs(0,0);
+  mv.visitEnd();
+  cw.visitEnd();
+  byte[] data=cw.toByteArray();
+  Class<? extends CompiledExpression> clazz=(Class<? extends CompiledExpression>)ccl.defineClass(clazzName.replaceAll("/","."),data);
+  return clazz;
+}
