@@ -1,9 +1,10 @@
 {
-  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
-  new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectLazyMBeans.xml",getClass()));
+  GenericApplicationContext ctx=new GenericApplicationContext();
+  new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(new ClassPathResource("autodetectLazyMBeans.xml",getClass()));
+  ctx.refresh();
   try {
-    bf.getBean("exporter");
-    MBeanServer server=(MBeanServer)bf.getBean("server");
+    ctx.getBean("exporter");
+    MBeanServer server=(MBeanServer)ctx.getBean("server");
     ObjectName oname=ObjectNameManager.getInstance("spring:mbean=true");
     assertNotNull(server.getObjectInstance(oname));
     String name=(String)server.getAttribute(oname,"Name");
@@ -14,6 +15,6 @@
     assertEquals("Invalid name returned","Juergen Hoeller",name);
   }
   finally {
-    bf.destroySingletons();
+    ctx.destroy();
   }
 }
