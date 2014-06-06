@@ -1,35 +1,32 @@
 {
   final HttpServletRequest servletRequest=webRequest.getNativeRequest(HttpServletRequest.class);
   HttpInputMessage inputMessage=new ServletServerHttpRequest(servletRequest);
-  RequestBody annot=methodParam.getParameterAnnotation(RequestBody.class);
-  if (!annot.required()) {
-    InputStream inputStream=inputMessage.getBody();
-    if (inputStream == null) {
-      return null;
+  InputStream inputStream=inputMessage.getBody();
+  if (inputStream == null) {
+    return handleEmptyBody(methodParam);
+  }
+ else   if (inputStream.markSupported()) {
+    inputStream.mark(1);
+    if (inputStream.read() == -1) {
+      return handleEmptyBody(methodParam);
     }
- else     if (inputStream.markSupported()) {
-      inputStream.mark(1);
-      if (inputStream.read() == -1) {
-        return null;
-      }
-      inputStream.reset();
+    inputStream.reset();
+  }
+ else {
+    final PushbackInputStream pushbackInputStream=new PushbackInputStream(inputStream);
+    int b=pushbackInputStream.read();
+    if (b == -1) {
+      return handleEmptyBody(methodParam);
     }
  else {
-      final PushbackInputStream pushbackInputStream=new PushbackInputStream(inputStream);
-      int b=pushbackInputStream.read();
-      if (b == -1) {
-        return null;
+      pushbackInputStream.unread(b);
+    }
+    inputMessage=new ServletServerHttpRequest(servletRequest){
+      @Override public InputStream getBody() throws IOException {
+        return pushbackInputStream;
       }
- else {
-        pushbackInputStream.unread(b);
-      }
-      inputMessage=new ServletServerHttpRequest(servletRequest){
-        @Override public InputStream getBody() throws IOException {
-          return pushbackInputStream;
-        }
-      }
+    }
 ;
-    }
   }
   return super.readWithMessageConverters(inputMessage,methodParam,paramType);
 }
