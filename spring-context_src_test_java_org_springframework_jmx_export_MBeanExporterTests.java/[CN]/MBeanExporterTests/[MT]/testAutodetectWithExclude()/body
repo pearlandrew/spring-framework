@@ -1,20 +1,14 @@
 {
-  GenericApplicationContext ctx=new GenericApplicationContext();
-  new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(new ClassPathResource("autodetectMBeans.xml",getClass()));
-  ctx.refresh();
+  ConfigurableApplicationContext ctx=load("autodetectMBeans.xml");
   try {
     ctx.getBean("exporter");
-    MBeanServer server=(MBeanServer)ctx.getBean("server");
+    MBeanServer server=ctx.getBean("server",MBeanServer.class);
     ObjectInstance instance=server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=true"));
     assertNotNull(instance);
-    try {
-      server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=false"));
-      fail("MBean with name spring:mbean=false should have been excluded");
-    }
- catch (    InstanceNotFoundException expected) {
-    }
+    thrown.expect(InstanceNotFoundException.class);
+    server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=false"));
   }
   finally {
-    ctx.destroy();
+    ctx.close();
   }
 }

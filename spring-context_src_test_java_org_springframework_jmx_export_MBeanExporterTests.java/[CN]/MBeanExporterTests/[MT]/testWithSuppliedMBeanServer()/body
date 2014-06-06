@@ -2,7 +2,11 @@
   MBeanExporter exporter=new MBeanExporter();
   exporter.setBeans(getBeanMap());
   exporter.setServer(server);
-  exporter.afterPropertiesSet();
-  exporter.start();
-  assertIsRegistered("The bean was not registered with the MBeanServer",ObjectNameManager.getInstance(OBJECT_NAME));
+  try {
+    start(exporter);
+    assertIsRegistered("The bean was not registered with the MBeanServer",ObjectNameManager.getInstance(OBJECT_NAME));
+  }
+  finally {
+    exporter.stop();
+  }
 }
