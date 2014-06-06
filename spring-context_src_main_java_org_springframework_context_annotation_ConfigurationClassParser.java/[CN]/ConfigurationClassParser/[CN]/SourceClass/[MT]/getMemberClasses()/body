@@ -1,23 +1,31 @@
 {
-  List<SourceClass> members=new ArrayList<SourceClass>();
-  if (this.source instanceof Class<?>) {
-    Class<?> sourceClass=(Class<?>)this.source;
-    for (    Class<?> declaredClass : sourceClass.getDeclaredClasses()) {
-      try {
-        members.add(asSourceClass(declaredClass));
+  Object sourceToProcess=this.source;
+  if (sourceToProcess instanceof Class<?>) {
+    Class<?> sourceClass=(Class<?>)sourceToProcess;
+    try {
+      Class<?>[] declaredClasses=sourceClass.getDeclaredClasses();
+      List<SourceClass> members=new ArrayList<SourceClass>(declaredClasses.length);
+      for (      Class<?> declaredClass : declaredClasses) {
+        try {
+          members.add(asSourceClass(declaredClass));
+        }
+ catch (        ClassNotFoundException ex) {
+        }
       }
- catch (      ClassNotFoundException ex) {
-      }
+      return members;
+    }
+ catch (    NoClassDefFoundError err) {
+      sourceToProcess=metadataReaderFactory.getMetadataReader(sourceClass.getName());
     }
   }
- else {
-    MetadataReader sourceReader=(MetadataReader)source;
-    for (    String memberClassName : sourceReader.getClassMetadata().getMemberClassNames()) {
-      try {
-        members.add(asSourceClass(memberClassName));
-      }
- catch (      ClassNotFoundException ex) {
-      }
+  MetadataReader sourceReader=(MetadataReader)sourceToProcess;
+  String[] memberClassNames=sourceReader.getClassMetadata().getMemberClassNames();
+  List<SourceClass> members=new ArrayList<SourceClass>(memberClassNames.length);
+  for (  String memberClassName : memberClassNames) {
+    try {
+      members.add(asSourceClass(memberClassName));
+    }
+ catch (    ClassNotFoundException ex) {
     }
   }
   return members;
