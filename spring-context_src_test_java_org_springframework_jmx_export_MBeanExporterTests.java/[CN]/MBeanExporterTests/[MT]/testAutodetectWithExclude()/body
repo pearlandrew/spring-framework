@@ -1,19 +1,14 @@
 {
-  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
-  new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectMBeans.xml",getClass()));
+  ConfigurableApplicationContext ctx=load("autodetectMBeans.xml");
   try {
-    bf.getBean("exporter");
-    MBeanServer server=(MBeanServer)bf.getBean("server");
+    ctx.getBean("exporter");
+    MBeanServer server=ctx.getBean("server",MBeanServer.class);
     ObjectInstance instance=server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=true"));
     assertNotNull(instance);
-    try {
-      server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=false"));
-      fail("MBean with name spring:mbean=false should have been excluded");
-    }
- catch (    InstanceNotFoundException expected) {
-    }
+    thrown.expect(InstanceNotFoundException.class);
+    server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=false"));
   }
   finally {
-    bf.destroySingletons();
+    ctx.close();
   }
 }
