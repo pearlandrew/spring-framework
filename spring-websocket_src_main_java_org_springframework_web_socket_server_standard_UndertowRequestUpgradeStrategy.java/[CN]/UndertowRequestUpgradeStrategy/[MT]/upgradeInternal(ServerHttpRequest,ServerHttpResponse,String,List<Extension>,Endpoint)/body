@@ -5,12 +5,11 @@
   exchange.putAttachment(HandshakeUtil.PATH_PARAMS,Collections.<String,String>emptyMap());
   ServerWebSocketContainer wsContainer=(ServerWebSocketContainer)getContainer(servletRequest);
   final EndpointSessionHandler endpointSessionHandler=new EndpointSessionHandler(wsContainer);
-  final Handshake handshake=getHandshakeToUse(exchange);
   final ConfiguredServerEndpoint configuredServerEndpoint=createConfiguredServerEndpoint(selectedProtocol,selectedExtensions,endpoint,servletRequest);
+  final Handshake handshake=getHandshakeToUse(exchange,configuredServerEndpoint);
   exchange.upgradeChannel(new HttpUpgradeListener(){
     @Override public void handleUpgrade(    StreamConnection connection,    HttpServerExchange serverExchange){
       WebSocketChannel channel=handshake.createChannel(exchange,connection,exchange.getBufferPool());
-      HandshakeUtil.setConfig(channel,configuredServerEndpoint);
       endpointSessionHandler.onConnect(exchange,channel);
     }
   }
