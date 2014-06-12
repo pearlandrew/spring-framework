@@ -1,10 +1,10 @@
 {
   String scheme=request.getScheme();
-  int port=request.getServerPort();
   String host=request.getServerName();
-  String header=request.getHeader("X-Forwarded-Host");
-  if (StringUtils.hasText(header)) {
-    String[] hosts=StringUtils.commaDelimitedListToStringArray(header);
+  int port=request.getServerPort();
+  String hostHeader=request.getHeader("X-Forwarded-Host");
+  if (StringUtils.hasText(hostHeader)) {
+    String[] hosts=StringUtils.commaDelimitedListToStringArray(hostHeader);
     String hostToUse=hosts[0];
     if (hostToUse.contains(":")) {
       String[] hostAndPort=StringUtils.split(hostToUse,":");
@@ -14,6 +14,10 @@
  else {
       host=hostToUse;
     }
+  }
+  String portHeader=request.getHeader("X-Forwarded-Port");
+  if (StringUtils.hasText(portHeader)) {
+    port=Integer.parseInt(portHeader);
   }
   ServletUriComponentsBuilder builder=new ServletUriComponentsBuilder();
   builder.scheme(scheme);
