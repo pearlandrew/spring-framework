@@ -1,0 +1,39 @@
+{
+  source=parserContext.extractSource(element);
+  CompositeComponentDefinition compDefinition=new CompositeComponentDefinition(element.getTagName(),source);
+  parserContext.pushContainingComponent(compDefinition);
+  List<Element> viewResolverElements=DomUtils.getChildElementsByTagName(element,new String[]{"jsp","tiles","bean-name","freemarker","velocity","bean","ref"});
+  ManagedList<Object> viewResolvers=new ManagedList<Object>();
+  viewResolvers.setSource(parserContext.extractSource(element));
+  int order=0;
+  for (  Element viewResolverElement : viewResolverElements) {
+    if ("jsp".equals(viewResolverElement.getLocalName())) {
+      viewResolvers.add(registerInternalResourceViewResolverBean(viewResolverElement,parserContext,order));
+    }
+    if ("bean-name".equals(viewResolverElement.getLocalName())) {
+      viewResolvers.add(registerBeanNameViewResolverBean(viewResolverElement,parserContext,order));
+    }
+    if ("tiles".equals(viewResolverElement.getLocalName())) {
+      viewResolvers.add(registerTilesViewResolverBean(viewResolverElement,parserContext,order));
+      registerTilesConfigurerBean(viewResolverElement,parserContext);
+    }
+    if ("freemarker".equals(viewResolverElement.getLocalName())) {
+      viewResolvers.add(registerFreemarkerViewResolverBean(viewResolverElement,parserContext,order));
+      registerFreemarkerConfigurerBean(viewResolverElement,parserContext);
+    }
+    if ("velocity".equals(viewResolverElement.getLocalName())) {
+      viewResolvers.add(registerVelocityViewResolverBean(viewResolverElement,parserContext,order));
+      registerVelocityConfigurerBean(viewResolverElement,parserContext);
+    }
+    if ("bean".equals(viewResolverElement.getLocalName()) || "ref".equals(viewResolverElement.getLocalName())) {
+      viewResolvers.add(parserContext.getDelegate().parsePropertySubElement(viewResolverElement,null));
+    }
+    order++;
+  }
+  viewResolverElements=DomUtils.getChildElementsByTagName(element,new String[]{"content-negotiating"});
+  if (!viewResolverElements.isEmpty()) {
+    registerContentNegotiatingViewResolverBean(viewResolverElements.get(0),parserContext,viewResolvers);
+  }
+  parserContext.popAndRegisterContainingComponent();
+  return null;
+}

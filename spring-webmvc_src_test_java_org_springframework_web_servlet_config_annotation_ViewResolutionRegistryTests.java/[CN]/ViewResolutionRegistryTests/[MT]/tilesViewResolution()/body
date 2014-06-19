@@ -1,0 +1,15 @@
+{
+  registry.tiles().checkRefresh(true).definition("def1").definition("def2");
+  assertNotNull(registry.getViewResolvers());
+  assertEquals(1,registry.getViewResolvers().size());
+  assertEquals(TilesViewResolver.class,registry.getViewResolvers().get(0).getClass());
+  assertNotNull(registry.getTilesConfigurer());
+  TilesConfigurer configurer=registry.getTilesConfigurer();
+  DirectFieldAccessor configurerDirectFieldAccessor=new DirectFieldAccessor(configurer);
+  assertTrue((boolean)configurerDirectFieldAccessor.getPropertyValue("checkRefresh"));
+  assertNotNull(configurerDirectFieldAccessor.getPropertyValue("definitions"));
+  String[] definitions=(String[])configurerDirectFieldAccessor.getPropertyValue("definitions");
+  assertEquals(2,definitions.length);
+  assertEquals("def1",definitions[0]);
+  assertEquals("def2",definitions[1]);
+}

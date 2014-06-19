@@ -1,0 +1,26 @@
+{
+  Map<String,Object> propertyMap=new HashMap<String,Object>();
+  ManagedList<Object> defaultViewBeanDefinitions=new ManagedList<Object>();
+  List<Element> defaultViewElements=DomUtils.getChildElementsByTagName(viewResolverElement,new String[]{"default-views"});
+  if (!defaultViewElements.isEmpty()) {
+    for (    Element beanElem : DomUtils.getChildElementsByTagName(defaultViewElements.get(0),"bean","ref")) {
+      defaultViewBeanDefinitions.add(parserContext.getDelegate().parsePropertySubElement(beanElem,null));
+    }
+  }
+  if (viewResolverElement.hasAttribute("use-not-acceptable")) {
+    propertyMap.put("useNotAcceptableStatusCode",viewResolverElement.getAttribute("use-not-acceptable"));
+  }
+  if (viewResolverElement.hasAttribute("manager")) {
+    propertyMap.put("contentNegotiationManager",new RuntimeBeanReference(viewResolverElement.getAttribute("manager")));
+  }
+ else {
+    propertyMap.put("contentNegotiationManager",new RuntimeBeanReference("mvcContentNegotiationManager"));
+  }
+  if (viewResolvers != null && !viewResolvers.isEmpty()) {
+    propertyMap.put("viewResolvers",viewResolvers);
+  }
+  if (defaultViewBeanDefinitions != null && !defaultViewBeanDefinitions.isEmpty()) {
+    propertyMap.put("defaultViews",defaultViewBeanDefinitions);
+  }
+  return registerBean(propertyMap,ContentNegotiatingViewResolver.class,parserContext);
+}

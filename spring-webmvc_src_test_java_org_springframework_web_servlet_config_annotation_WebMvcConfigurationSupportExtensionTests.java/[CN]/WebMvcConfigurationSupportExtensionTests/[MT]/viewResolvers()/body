@@ -1,0 +1,21 @@
+{
+  ViewResolverComposite viewResolver=webConfig.viewResolverComposite();
+  assertEquals(Ordered.LOWEST_PRECEDENCE,viewResolver.getOrder());
+  List<ViewResolver> viewResolvers=viewResolver.getViewResolvers();
+  DirectFieldAccessor viewResolverFieldAccessor=new DirectFieldAccessor(viewResolvers.get(0));
+  assertEquals(1,viewResolvers.size());
+  assertEquals(ContentNegotiatingViewResolver.class,viewResolvers.get(0).getClass());
+  assertFalse((Boolean)viewResolverFieldAccessor.getPropertyValue("useNotAcceptableStatusCode"));
+  List<View> defaultViews=(List<View>)viewResolverFieldAccessor.getPropertyValue("defaultViews");
+  assertNotNull(defaultViews);
+  assertEquals(1,defaultViews.size());
+  assertEquals(MappingJackson2JsonView.class,defaultViews.get(0).getClass());
+  assertNotNull(viewResolverFieldAccessor.getPropertyValue("contentNegotiationManager"));
+  viewResolvers=(List<ViewResolver>)viewResolverFieldAccessor.getPropertyValue("viewResolvers");
+  assertNotNull(viewResolvers);
+  assertEquals(1,viewResolvers.size());
+  assertEquals(InternalResourceViewResolver.class,viewResolvers.get(0).getClass());
+  viewResolverFieldAccessor=new DirectFieldAccessor(viewResolvers.get(0));
+  assertEquals("/",viewResolverFieldAccessor.getPropertyValue("prefix"));
+  assertEquals(".jsp",viewResolverFieldAccessor.getPropertyValue("suffix"));
+}
