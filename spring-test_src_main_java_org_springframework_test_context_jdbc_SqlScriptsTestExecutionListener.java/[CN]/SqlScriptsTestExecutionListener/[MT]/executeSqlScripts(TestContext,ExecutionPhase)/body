@@ -1,0 +1,13 @@
+{
+  boolean classLevel=false;
+  Set<Sql> sqlAnnotations=AnnotationUtils.getRepeatableAnnotation(testContext.getTestMethod(),SqlGroup.class,Sql.class);
+  if (sqlAnnotations.isEmpty()) {
+    sqlAnnotations=AnnotationUtils.getRepeatableAnnotation(testContext.getTestClass(),SqlGroup.class,Sql.class);
+    if (!sqlAnnotations.isEmpty()) {
+      classLevel=true;
+    }
+  }
+  for (  Sql sql : sqlAnnotations) {
+    executeSqlScripts(sql,executionPhase,testContext,classLevel);
+  }
+}
