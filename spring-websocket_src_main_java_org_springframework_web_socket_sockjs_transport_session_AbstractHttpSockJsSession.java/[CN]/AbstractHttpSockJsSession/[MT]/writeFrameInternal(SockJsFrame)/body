@@ -2,8 +2,14 @@
   if (isActive()) {
     String formattedFrame=this.frameFormat.format(frame);
     if (logger.isTraceEnabled()) {
-      logger.trace("Writing " + formattedFrame);
+      logger.trace("Writing to HTTP response: " + formattedFrame);
     }
-    getResponse().getBody().write(formattedFrame.getBytes(SockJsFrame.CHARSET));
+    this.response.getBody().write(formattedFrame.getBytes(SockJsFrame.CHARSET));
+    if (isStreaming()) {
+      this.response.flush();
+    }
+ else {
+      resetRequest();
+    }
   }
 }

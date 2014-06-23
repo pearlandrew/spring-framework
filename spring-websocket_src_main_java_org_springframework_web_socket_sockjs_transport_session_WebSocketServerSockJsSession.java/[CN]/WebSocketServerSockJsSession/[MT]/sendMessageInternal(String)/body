@@ -1,7 +1,13 @@
 {
+  if (!this.openFrameSent) {
+synchronized (this.initSessionLock) {
+      if (!this.openFrameSent) {
+        this.initSessionCache.add(message);
+        return;
+      }
+    }
+  }
   cancelHeartbeat();
-  SockJsMessageCodec messageCodec=getSockJsServiceConfig().getMessageCodec();
-  SockJsFrame frame=SockJsFrame.messageFrame(messageCodec,message);
-  writeFrame(frame);
+  writeFrame(SockJsFrame.messageFrame(getMessageCodec(),message));
   scheduleHeartbeat();
 }

@@ -1,12 +1,10 @@
 {
-  try {
-    this.asyncRequestControl.start(-1);
-    this.requestInitialized=true;
+  this.asyncRequestControl.start(-1);
+  if (this.messageCache.size() > 0) {
+    flushCache();
+  }
+ else {
     scheduleHeartbeat();
-    tryFlushCache();
   }
- catch (  Throwable ex) {
-    tryCloseWithSockJsTransportError(ex,CloseStatus.SERVER_ERROR);
-    throw new SockJsTransportFailureException("Failed to flush messages",getId(),ex);
-  }
+  this.requestInitialized=true;
 }

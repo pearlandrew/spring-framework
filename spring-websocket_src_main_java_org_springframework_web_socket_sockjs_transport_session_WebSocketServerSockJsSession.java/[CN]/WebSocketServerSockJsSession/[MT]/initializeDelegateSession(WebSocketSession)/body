@@ -1,12 +1,17 @@
 {
-  this.webSocketSession=session;
-  try {
-    TextMessage message=new TextMessage(SockJsFrame.openFrame().getContent());
-    this.webSocketSession.sendMessage(message);
-    scheduleHeartbeat();
-    delegateConnectionEstablished();
-  }
- catch (  Exception ex) {
-    tryCloseWithSockJsTransportError(ex,CloseStatus.SERVER_ERROR);
+synchronized (this.initSessionLock) {
+    this.webSocketSession=session;
+    try {
+      delegateConnectionEstablished();
+      this.webSocketSession.sendMessage(new TextMessage(SockJsFrame.openFrame().getContent()));
+      while (!this.initSessionCache.isEmpty()) {
+        writeFrame(SockJsFrame.messageFrame(getMessageCodec(),this.initSessionCache.poll()));
+      }
+      scheduleHeartbeat();
+      this.openFrameSent=true;
+    }
+ catch (    Exception ex) {
+      tryCloseWithSockJsTransportError(ex,CloseStatus.SERVER_ERROR);
+    }
   }
 }
