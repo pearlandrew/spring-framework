@@ -1,0 +1,13 @@
+{
+  String versionFile="bar-version.css";
+  String version="version";
+  String file="bar.css";
+  when(this.chain.resolveResource(null,versionFile,this.locations)).thenReturn(null);
+  when(this.chain.resolveResource(null,file,this.locations)).thenReturn(null);
+  when(this.versionStrategy.extractVersionFromPath(versionFile)).thenReturn(version);
+  when(this.versionStrategy.deleteVersionFromPath(versionFile,version)).thenReturn(file);
+  this.versionResourceResolver.setVersionStrategyMap(Collections.singletonMap("/**",this.versionStrategy));
+  Resource actual=this.versionResourceResolver.resolveResourceInternal(null,versionFile,this.locations,this.chain);
+  assertNull(actual);
+  verify(this.versionStrategy,times(1)).deleteVersionFromPath(versionFile,version);
+}
