@@ -1,0 +1,12 @@
+{
+  Assert.state(State.OPEN.equals(this.state),this + " is not open, current state=" + this.state);
+  Assert.isInstanceOf(TextMessage.class,message,this + " supports text messages only.");
+  String payload=((TextMessage)message).getPayload();
+  payload=getMessageCodec().encode(new String[]{payload});
+  payload=payload.substring(1);
+  message=new TextMessage(payload);
+  if (logger.isTraceEnabled()) {
+    logger.trace("Sending message " + message + " in "+ this);
+  }
+  sendInternal((TextMessage)message);
+}

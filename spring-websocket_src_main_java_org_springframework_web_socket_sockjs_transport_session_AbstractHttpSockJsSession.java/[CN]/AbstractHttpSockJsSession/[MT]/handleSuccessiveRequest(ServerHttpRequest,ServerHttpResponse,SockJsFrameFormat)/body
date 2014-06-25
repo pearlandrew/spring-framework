@@ -1,11 +1,18 @@
 {
-  initRequest(request,response,frameFormat);
-  try {
-    writePrelude(request,response);
+synchronized (this.responseLock) {
+    try {
+      if (isClosed()) {
+        response.getBody().write(SockJsFrame.closeFrameGoAway().getContentBytes());
+      }
+      this.response=response;
+      this.frameFormat=frameFormat;
+      this.asyncRequestControl=request.getAsyncRequestControl(response);
+      writePrelude(request,response);
+      startAsyncRequest();
+    }
+ catch (    Throwable ex) {
+      tryCloseWithSockJsTransportError(ex,CloseStatus.SERVER_ERROR);
+      throw new SockJsTransportFailureException("Failed to handle SockJS receive request",getId(),ex);
+    }
   }
- catch (  Throwable ex) {
-    tryCloseWithSockJsTransportError(ex,CloseStatus.SERVER_ERROR);
-    throw new SockJsTransportFailureException("Failed to send \"open\" frame",getId(),ex);
-  }
-  startAsyncRequest();
 }

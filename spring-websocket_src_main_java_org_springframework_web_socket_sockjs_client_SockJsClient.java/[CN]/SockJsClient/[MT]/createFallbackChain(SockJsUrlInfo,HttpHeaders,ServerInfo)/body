@@ -1,0 +1,20 @@
+{
+  List<DefaultTransportRequest> requests=new ArrayList<DefaultTransportRequest>(this.transports.size());
+  for (  Transport transport : this.transports) {
+    if (transport instanceof XhrTransport) {
+      XhrTransport xhrTransport=(XhrTransport)transport;
+      if (!xhrTransport.isXhrStreamingDisabled()) {
+        addRequest(requests,urlInfo,headers,serverInfo,transport,TransportType.XHR_STREAMING);
+      }
+      addRequest(requests,urlInfo,headers,serverInfo,transport,TransportType.XHR);
+    }
+ else     if (serverInfo.isWebSocketEnabled()) {
+      addRequest(requests,urlInfo,headers,serverInfo,transport,TransportType.WEBSOCKET);
+    }
+  }
+  Assert.notEmpty(requests,"0 transports for request to " + urlInfo + " . Configured transports: "+ this.transports+ ". SockJS server webSocketEnabled="+ serverInfo.isWebSocketEnabled());
+  for (int i=0; i < requests.size() - 1; i++) {
+    requests.get(i).setFallbackRequest(requests.get(i + 1));
+  }
+  return requests.get(0);
+}

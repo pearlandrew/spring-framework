@@ -1,18 +1,20 @@
 {
-  this.requestInitialized=false;
-  updateLastActiveTime();
-  if (isActive()) {
+synchronized (this.responseLock) {
     ServerHttpAsyncRequestControl control=this.asyncRequestControl;
-    if (control.isStarted()) {
-      try {
-        logger.debug("Completing asynchronous request");
-        control.complete();
-      }
- catch (      Throwable ex) {
-        logger.error("Failed to complete request: " + ex.getMessage());
+    this.asyncRequestControl=null;
+    this.requestInitialized=false;
+    this.response=null;
+    updateLastActiveTime();
+    if (control != null && !control.isCompleted()) {
+      if (control.isStarted()) {
+        try {
+          logger.debug("Completing asynchronous request");
+          control.complete();
+        }
+ catch (        Throwable ex) {
+          logger.error("Failed to complete request: " + ex.getMessage());
+        }
       }
     }
   }
-  this.response=null;
-  this.asyncRequestControl=null;
 }

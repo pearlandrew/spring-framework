@@ -1,0 +1,15 @@
+{
+  SettableListenableFuture<WebSocketSession> connectFuture=new SettableListenableFuture<WebSocketSession>();
+  try {
+    SockJsUrlInfo sockJsUrlInfo=new SockJsUrlInfo(url);
+    ServerInfo serverInfo=getServerInfo(sockJsUrlInfo);
+    createFallbackChain(sockJsUrlInfo,handshakeHeaders,serverInfo).connect(handler,connectFuture);
+  }
+ catch (  Throwable exception) {
+    if (logger.isErrorEnabled()) {
+      logger.error("Initial SockJS \"Info\" request to server failed, url=" + url,exception);
+    }
+    connectFuture.setException(exception);
+  }
+  return connectFuture;
+}

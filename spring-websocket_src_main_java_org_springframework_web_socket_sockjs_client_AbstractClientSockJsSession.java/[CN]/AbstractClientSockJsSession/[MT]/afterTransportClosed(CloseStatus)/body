@@ -1,0 +1,17 @@
+{
+  this.closeStatus=(this.closeStatus != null ? this.closeStatus : closeStatus);
+  Assert.state(this.closeStatus != null,"CloseStatus not available");
+  if (logger.isInfoEnabled()) {
+    logger.info("Transport closed with " + this.closeStatus + " in "+ this);
+  }
+  this.state=State.CLOSED;
+  try {
+    this.webSocketHandler.afterConnectionClosed(this,this.closeStatus);
+  }
+ catch (  Exception ex) {
+    if (logger.isErrorEnabled()) {
+      Class<?> type=this.webSocketHandler.getClass();
+      logger.error(type + ".afterConnectionClosed threw an exception",ex);
+    }
+  }
+}

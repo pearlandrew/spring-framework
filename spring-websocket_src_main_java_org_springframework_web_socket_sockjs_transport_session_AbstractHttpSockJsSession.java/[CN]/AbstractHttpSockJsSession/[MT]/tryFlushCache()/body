@@ -1,18 +1,25 @@
 {
-  if (this.messageCache.isEmpty()) {
-    logger.trace("Nothing to flush");
-    return;
-  }
-  if (logger.isTraceEnabled()) {
-    logger.trace(this.messageCache.size() + " message(s) to flush");
-  }
-  if (isActive() && this.requestInitialized) {
-    logger.trace("Flushing messages");
-    flushCache();
-  }
- else {
+synchronized (this.responseLock) {
+    if (this.messageCache.isEmpty()) {
+      logger.trace("Nothing to flush in session=" + this.getId());
+      return false;
+    }
     if (logger.isTraceEnabled()) {
-      logger.trace("Not ready to flush");
+      logger.trace(this.messageCache.size() + " message(s) to flush in session " + this.getId());
+    }
+    if (isActive() && this.requestInitialized) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Session is active, ready to flush.");
+      }
+      cancelHeartbeat();
+      flushCache();
+      return true;
+    }
+ else {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Session is not active, not ready to flush.");
+      }
+      return false;
     }
   }
 }

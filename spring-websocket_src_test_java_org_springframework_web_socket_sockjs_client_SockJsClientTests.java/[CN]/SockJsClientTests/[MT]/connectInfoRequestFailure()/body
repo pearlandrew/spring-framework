@@ -1,0 +1,8 @@
+{
+  HttpServerErrorException exception=new HttpServerErrorException(HttpStatus.SERVICE_UNAVAILABLE);
+  when(this.infoReceiver.executeInfoRequest(any())).thenThrow(exception);
+  this.sockJsClient.doHandshake(handler,URL).addCallback(this.connectCallback);
+  verify(this.connectCallback).onFailure(exception);
+  assertFalse(this.webSocketTransport.invoked());
+  assertFalse(this.xhrTransport.invoked());
+}

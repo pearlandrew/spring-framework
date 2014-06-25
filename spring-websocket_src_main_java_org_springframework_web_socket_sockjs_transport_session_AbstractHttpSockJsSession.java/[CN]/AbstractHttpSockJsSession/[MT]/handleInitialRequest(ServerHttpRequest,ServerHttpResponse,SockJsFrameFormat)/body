@@ -1,23 +1,22 @@
 {
-  initRequest(request,response,frameFormat);
   this.uri=request.getURI();
   this.handshakeHeaders=request.getHeaders();
   this.principal=request.getPrincipal();
   this.localAddress=request.getLocalAddress();
   this.remoteAddress=request.getRemoteAddress();
+  this.response=response;
+  this.frameFormat=frameFormat;
+  this.asyncRequestControl=request.getAsyncRequestControl(response);
   try {
+    delegateConnectionEstablished();
     writePrelude(request,response);
     writeFrame(SockJsFrame.openFrame());
+    if (isStreaming() && !isClosed()) {
+      startAsyncRequest();
+    }
   }
  catch (  Throwable ex) {
     tryCloseWithSockJsTransportError(ex,CloseStatus.SERVER_ERROR);
-    throw new SockJsTransportFailureException("Failed to send \"open\" frame",getId(),ex);
-  }
-  try {
-    this.requestInitialized=true;
-    delegateConnectionEstablished();
-  }
- catch (  Throwable ex) {
-    throw new SockJsException("Unhandled exception from WebSocketHandler",getId(),ex);
+    throw new SockJsTransportFailureException("Failed to open session",getId(),ex);
   }
 }
