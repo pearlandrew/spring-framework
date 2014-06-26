@@ -1,0 +1,21 @@
+{
+  TestWebSocketSession session1=new TestWebSocketSession("id1");
+  TestWebSocketSession session2=new TestWebSocketSession("id2");
+  session1.setAcceptedProtocol("v12.stomp");
+  session2.setAcceptedProtocol("v12.stomp");
+  this.webSocketHandler.setProtocolHandlers(Arrays.asList(this.stompHandler));
+  this.webSocketHandler.afterConnectionEstablished(session1);
+  this.webSocketHandler.afterConnectionEstablished(session2);
+  session1.setOpen(true);
+  session2.setOpen(true);
+  long sixtyOneSecondsAgo=System.currentTimeMillis() - 61 * 1000;
+  new DirectFieldAccessor(this.webSocketHandler).setPropertyValue("lastSessionCheckTime",sixtyOneSecondsAgo);
+  Map<String,?> sessions=(Map<String,?>)new DirectFieldAccessor(this.webSocketHandler).getPropertyValue("sessions");
+  new DirectFieldAccessor(sessions.get("id1")).setPropertyValue("createTime",sixtyOneSecondsAgo);
+  new DirectFieldAccessor(sessions.get("id2")).setPropertyValue("createTime",sixtyOneSecondsAgo);
+  this.webSocketHandler.handleMessage(session1,new TextMessage("foo"));
+  assertTrue(session1.isOpen());
+  assertFalse(session2.isOpen());
+  assertNull(session1.getCloseStatus());
+  assertEquals(CloseStatus.PROTOCOL_ERROR,session2.getCloseStatus());
+}

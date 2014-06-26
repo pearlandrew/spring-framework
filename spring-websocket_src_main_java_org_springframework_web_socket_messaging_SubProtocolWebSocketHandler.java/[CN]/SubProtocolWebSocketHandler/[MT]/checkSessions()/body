@@ -1,0 +1,32 @@
+{
+  long currentTime=System.currentTimeMillis();
+  if (!isRunning() && currentTime - this.lastSessionCheckTime < TIME_TO_FIRST_MESSAGE) {
+    return;
+  }
+  try {
+    if (this.sessionCheckLock.tryLock()) {
+      for (      WebSocketSessionHolder holder : this.sessions.values()) {
+        if (holder.hasHandledMessages()) {
+          continue;
+        }
+        long timeSinceCreated=currentTime - holder.getCreateTime();
+        if (holder.hasHandledMessages() || timeSinceCreated < TIME_TO_FIRST_MESSAGE) {
+          continue;
+        }
+        WebSocketSession session=holder.getSession();
+        if (logger.isErrorEnabled()) {
+          logger.error("No messages received after " + timeSinceCreated + " ms. Closing "+ holder);
+        }
+        try {
+          session.close(CloseStatus.PROTOCOL_ERROR);
+        }
+ catch (        Throwable t) {
+          logger.error("Failed to close " + session,t);
+        }
+      }
+    }
+  }
+  finally {
+    this.sessionCheckLock.unlock();
+  }
+}

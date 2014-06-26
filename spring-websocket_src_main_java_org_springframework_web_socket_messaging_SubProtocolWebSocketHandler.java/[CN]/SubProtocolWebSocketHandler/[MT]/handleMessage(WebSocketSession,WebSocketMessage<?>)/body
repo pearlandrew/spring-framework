@@ -1,3 +1,12 @@
 {
-  findProtocolHandler(session).handleMessageFromClient(session,message,this.clientInboundChannel);
+  SubProtocolHandler protocolHandler=findProtocolHandler(session);
+  protocolHandler.handleMessageFromClient(session,message,this.clientInboundChannel);
+  WebSocketSessionHolder holder=this.sessions.get(session.getId());
+  if (holder != null) {
+    holder.setHasHandledMessages();
+  }
+ else {
+    throw new IllegalStateException("Session not found: " + session);
+  }
+  checkSessions();
 }

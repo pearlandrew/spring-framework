@@ -4,25 +4,26 @@
     logger.error("sessionId not found in message " + message);
     return;
   }
-  WebSocketSession session=this.sessions.get(sessionId);
-  if (session == null) {
+  WebSocketSessionHolder holder=this.sessions.get(sessionId);
+  if (holder == null) {
     logger.error("Session not found for session with id '" + sessionId + "', ignoring message "+ message);
     return;
   }
+  WebSocketSession session=holder.getSession();
   try {
     findProtocolHandler(session).handleMessageToClient(session,message);
   }
  catch (  SessionLimitExceededException ex) {
     try {
-      logger.error("Terminating session id '" + sessionId + "'",ex);
+      logger.error("Terminating '" + session + "'",ex);
       clearSession(session,ex.getStatus());
       session.close(ex.getStatus());
     }
  catch (    Exception secondException) {
-      logger.error("Exception terminating session id '" + sessionId + "'",secondException);
+      logger.error("Exception terminating '" + sessionId + "'",secondException);
     }
   }
 catch (  Exception e) {
-    logger.error("Failed to send message to client " + message,e);
+    logger.error("Failed to send message to client " + message + " in "+ session,e);
   }
 }
