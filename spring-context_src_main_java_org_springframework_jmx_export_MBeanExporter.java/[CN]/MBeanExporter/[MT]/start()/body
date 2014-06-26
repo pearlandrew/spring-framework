@@ -1,15 +1,13 @@
 {
-  logger.info("Registering beans for JMX exposure");
 synchronized (this.lifecycleMonitor) {
     try {
       registerBeans();
       registerNotificationListeners();
     }
  catch (    RuntimeException ex) {
-      unregisterNotificationListeners();
-      unregisterBeans();
+      doStop();
       throw ex;
     }
+    this.running=true;
   }
-  running=true;
 }
