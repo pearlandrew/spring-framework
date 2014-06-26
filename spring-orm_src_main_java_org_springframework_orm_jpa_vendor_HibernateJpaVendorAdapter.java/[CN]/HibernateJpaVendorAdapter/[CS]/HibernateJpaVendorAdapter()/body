@@ -1,21 +1,24 @@
 {
-  PersistenceProvider providerToUse;
+  ClassLoader cl=HibernateJpaVendorAdapter.class.getClassLoader();
   Class<? extends EntityManagerFactory> emfIfcToUse;
   Class<? extends EntityManager> emIfcToUse;
+  Class<?> providerClass;
+  PersistenceProvider providerToUse;
   try {
-    ClassLoader cl=HibernateJpaVendorAdapter.class.getClassLoader();
-    Class<?> hibernatePersistenceProviderClass=cl.loadClass("org.hibernate.jpa.HibernatePersistenceProvider");
-    providerToUse=(PersistenceProvider)hibernatePersistenceProviderClass.newInstance();
-    emfIfcToUse=(Class<? extends EntityManagerFactory>)cl.loadClass("org.hibernate.jpa.HibernateEntityManagerFactory");
-    emIfcToUse=(Class<? extends EntityManager>)cl.loadClass("org.hibernate.jpa.HibernateEntityManager");
+    try {
+      emfIfcToUse=(Class<? extends EntityManagerFactory>)cl.loadClass("org.hibernate.jpa.HibernateEntityManagerFactory");
+      emIfcToUse=(Class<? extends EntityManager>)cl.loadClass("org.hibernate.jpa.HibernateEntityManager");
+      providerClass=cl.loadClass("org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider");
+    }
+ catch (    ClassNotFoundException ex) {
+      emfIfcToUse=(Class<? extends EntityManagerFactory>)cl.loadClass("org.hibernate.ejb.HibernateEntityManagerFactory");
+      emIfcToUse=(Class<? extends EntityManager>)cl.loadClass("org.hibernate.ejb.HibernateEntityManager");
+      providerClass=cl.loadClass("org.springframework.orm.jpa.vendor.SpringHibernateEjbPersistenceProvider");
+    }
+    providerToUse=(PersistenceProvider)providerClass.newInstance();
   }
- catch (  ClassNotFoundException ex) {
-    providerToUse=new HibernatePersistence();
-    emfIfcToUse=HibernateEntityManagerFactory.class;
-    emIfcToUse=HibernateEntityManager.class;
-  }
-catch (  Exception ex) {
-    throw new IllegalStateException("Found HibernatePersistenceProvider but could not instantiate it",ex);
+ catch (  Exception ex) {
+    throw new IllegalStateException("Failed to determine Hibernate PersistenceProvider",ex);
   }
   this.persistenceProvider=providerToUse;
   this.entityManagerFactoryInterface=emfIfcToUse;

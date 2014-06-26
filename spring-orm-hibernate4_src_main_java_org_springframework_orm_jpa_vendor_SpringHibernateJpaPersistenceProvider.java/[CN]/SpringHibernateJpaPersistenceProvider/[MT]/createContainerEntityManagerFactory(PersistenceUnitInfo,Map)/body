@@ -1,0 +1,14 @@
+{
+  return new EntityManagerFactoryBuilderImpl(new PersistenceUnitInfoDescriptor(info),properties){
+    @Override public Configuration buildHibernateConfiguration(    ServiceRegistry serviceRegistry){
+      Configuration configuration=super.buildHibernateConfiguration(serviceRegistry);
+      if (info instanceof SmartPersistenceUnitInfo) {
+        for (        String managedPackage : ((SmartPersistenceUnitInfo)info).getManagedPackages()) {
+          configuration.addPackage(managedPackage);
+        }
+      }
+      return configuration;
+    }
+  }
+.build();
+}
