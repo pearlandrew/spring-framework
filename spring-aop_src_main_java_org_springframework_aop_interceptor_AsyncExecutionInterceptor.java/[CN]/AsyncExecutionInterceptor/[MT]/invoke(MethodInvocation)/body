@@ -6,7 +6,7 @@
   if (executor == null) {
     throw new IllegalStateException("No executor specified and no default executor set on AsyncExecutionInterceptor either");
   }
-  Future<?> result=executor.submit(new Callable<Object>(){
+  Callable<Object> task=new Callable<Object>(){
     @Override public Object call() throws Exception {
       try {
         Object result=invocation.proceed();
@@ -20,11 +20,16 @@
       return null;
     }
   }
-);
-  if (Future.class.isAssignableFrom(invocation.getMethod().getReturnType())) {
-    return result;
+;
+  Class<?> returnType=invocation.getMethod().getReturnType();
+  if (ListenableFuture.class.isAssignableFrom(returnType)) {
+    return ((AsyncListenableTaskExecutor)executor).submitListenable(task);
+  }
+ else   if (Future.class.isAssignableFrom(returnType)) {
+    return executor.submit(task);
   }
  else {
+    executor.submit(task);
     return null;
   }
 }
