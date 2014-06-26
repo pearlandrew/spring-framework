@@ -1,9 +1,13 @@
 {
   HttpHeaders requestHeaders=request.getHeaders();
   HttpHeaders responseHeaders=response.getHeaders();
-  if (!CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"))) {
-    logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
-    return;
+  try {
+    if (!CollectionUtils.isEmpty(responseHeaders.get("Access-Control-Allow-Origin"))) {
+      logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
+      return;
+    }
+  }
+ catch (  NullPointerException npe) {
   }
   String origin=requestHeaders.getFirst("origin");
   origin=((origin == null) || origin.equals("null")) ? "*" : origin;
