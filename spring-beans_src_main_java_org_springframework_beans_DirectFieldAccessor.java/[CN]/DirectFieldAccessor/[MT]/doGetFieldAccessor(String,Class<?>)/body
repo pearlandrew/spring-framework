@@ -1,0 +1,20 @@
+{
+  StringTokenizer st=new StringTokenizer(propertyPath,".");
+  FieldAccessor accessor=null;
+  Class<?> parentType=targetClass;
+  while (st.hasMoreTokens()) {
+    String localProperty=st.nextToken();
+    Field field=ReflectionUtils.findField(parentType,localProperty);
+    if (field == null) {
+      return null;
+    }
+    if (accessor == null) {
+      accessor=root(propertyPath,localProperty,field);
+    }
+ else {
+      accessor=accessor.child(localProperty,field);
+    }
+    parentType=field.getType();
+  }
+  return accessor;
+}

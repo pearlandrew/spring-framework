@@ -1,32 +1,29 @@
 {
-  Field field=this.fieldMap.get(propertyName);
-  if (field == null) {
-    throw new NotWritablePropertyException(this.target.getClass(),propertyName,"Field '" + propertyName + "' does not exist");
+  FieldAccessor fieldAccessor=getFieldAccessor(propertyName);
+  if (fieldAccessor == null) {
+    throw new NotWritablePropertyException(getRootClass(),propertyName,"Field '" + propertyName + "' does not exist");
   }
+  Field field=fieldAccessor.getField();
   Object oldValue=null;
   try {
-    ReflectionUtils.makeAccessible(field);
-    oldValue=field.get(this.target);
+    oldValue=fieldAccessor.getValue();
     Object convertedValue=this.typeConverterDelegate.convertIfNecessary(field.getName(),oldValue,newValue,field.getType(),new TypeDescriptor(field));
-    field.set(this.target,convertedValue);
+    fieldAccessor.setValue(convertedValue);
   }
  catch (  ConverterNotFoundException ex) {
-    PropertyChangeEvent pce=new PropertyChangeEvent(this.target,propertyName,oldValue,newValue);
+    PropertyChangeEvent pce=new PropertyChangeEvent(getRootInstance(),propertyName,oldValue,newValue);
     throw new ConversionNotSupportedException(pce,field.getType(),ex);
   }
 catch (  ConversionException ex) {
-    PropertyChangeEvent pce=new PropertyChangeEvent(this.target,propertyName,oldValue,newValue);
+    PropertyChangeEvent pce=new PropertyChangeEvent(getRootInstance(),propertyName,oldValue,newValue);
     throw new TypeMismatchException(pce,field.getType(),ex);
   }
 catch (  IllegalStateException ex) {
-    PropertyChangeEvent pce=new PropertyChangeEvent(this.target,propertyName,oldValue,newValue);
+    PropertyChangeEvent pce=new PropertyChangeEvent(getRootInstance(),propertyName,oldValue,newValue);
     throw new ConversionNotSupportedException(pce,field.getType(),ex);
   }
 catch (  IllegalArgumentException ex) {
-    PropertyChangeEvent pce=new PropertyChangeEvent(this.target,propertyName,oldValue,newValue);
+    PropertyChangeEvent pce=new PropertyChangeEvent(getRootInstance(),propertyName,oldValue,newValue);
     throw new TypeMismatchException(pce,field.getType(),ex);
-  }
-catch (  IllegalAccessException ex) {
-    throw new InvalidPropertyException(this.target.getClass(),propertyName,"Field is not accessible",ex);
   }
 }
