@@ -1,14 +1,15 @@
 {
   List<Object> interceptorList=new ArrayList<Object>(config.getAdvisors().length);
-  boolean hasIntroductions=hasMatchingIntroductions(config,targetClass);
+  Class<?> actualClass=(targetClass != null ? targetClass : method.getDeclaringClass());
+  boolean hasIntroductions=hasMatchingIntroductions(config,actualClass);
   AdvisorAdapterRegistry registry=GlobalAdvisorAdapterRegistry.getInstance();
   for (  Advisor advisor : config.getAdvisors()) {
     if (advisor instanceof PointcutAdvisor) {
       PointcutAdvisor pointcutAdvisor=(PointcutAdvisor)advisor;
-      if (config.isPreFiltered() || pointcutAdvisor.getPointcut().getClassFilter().matches(targetClass)) {
+      if (config.isPreFiltered() || pointcutAdvisor.getPointcut().getClassFilter().matches(actualClass)) {
         MethodInterceptor[] interceptors=registry.getInterceptors(advisor);
         MethodMatcher mm=pointcutAdvisor.getPointcut().getMethodMatcher();
-        if (MethodMatchers.matches(mm,method,targetClass,hasIntroductions)) {
+        if (MethodMatchers.matches(mm,method,actualClass,hasIntroductions)) {
           if (mm.isRuntime()) {
             for (            MethodInterceptor interceptor : interceptors) {
               interceptorList.add(new InterceptorAndDynamicMethodMatcher(interceptor,mm));
@@ -22,7 +23,7 @@
     }
  else     if (advisor instanceof IntroductionAdvisor) {
       IntroductionAdvisor ia=(IntroductionAdvisor)advisor;
-      if (config.isPreFiltered() || ia.getClassFilter().matches(targetClass)) {
+      if (config.isPreFiltered() || ia.getClassFilter().matches(actualClass)) {
         Interceptor[] interceptors=registry.getInterceptors(advisor);
         interceptorList.addAll(Arrays.asList(interceptors));
       }
