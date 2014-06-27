@@ -1,23 +1,30 @@
 {
-  A annotation=getAnnotation(method,annotationType);
-  Class<?> clazz=method.getDeclaringClass();
-  if (annotation == null) {
-    annotation=searchOnInterfaces(method,annotationType,clazz.getInterfaces());
+  AnnotationCacheKey cacheKey=new AnnotationCacheKey(method,annotationType);
+  A result=(A)findAnnotationCache.get(cacheKey);
+  if (result == null) {
+    result=getAnnotation(method,annotationType);
+    Class<?> clazz=method.getDeclaringClass();
+    if (result == null) {
+      result=searchOnInterfaces(method,annotationType,clazz.getInterfaces());
+    }
+    while (result == null) {
+      clazz=clazz.getSuperclass();
+      if (clazz == null || clazz.equals(Object.class)) {
+        break;
+      }
+      try {
+        Method equivalentMethod=clazz.getDeclaredMethod(method.getName(),method.getParameterTypes());
+        result=getAnnotation(equivalentMethod,annotationType);
+      }
+ catch (      NoSuchMethodException ex) {
+      }
+      if (result == null) {
+        result=searchOnInterfaces(method,annotationType,clazz.getInterfaces());
+      }
+    }
+    if (result != null) {
+      findAnnotationCache.put(cacheKey,result);
+    }
   }
-  while (annotation == null) {
-    clazz=clazz.getSuperclass();
-    if (clazz == null || clazz.equals(Object.class)) {
-      break;
-    }
-    try {
-      Method equivalentMethod=clazz.getDeclaredMethod(method.getName(),method.getParameterTypes());
-      annotation=getAnnotation(equivalentMethod,annotationType);
-    }
- catch (    NoSuchMethodException ex) {
-    }
-    if (annotation == null) {
-      annotation=searchOnInterfaces(method,annotationType,clazz.getInterfaces());
-    }
-  }
-  return annotation;
+  return result;
 }

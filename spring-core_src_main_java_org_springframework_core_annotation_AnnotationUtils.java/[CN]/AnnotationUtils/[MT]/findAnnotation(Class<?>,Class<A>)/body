@@ -1,3 +1,11 @@
 {
-  return findAnnotation(clazz,annotationType,new HashSet<Annotation>());
+  AnnotationCacheKey cacheKey=new AnnotationCacheKey(clazz,annotationType);
+  A result=(A)findAnnotationCache.get(cacheKey);
+  if (result == null) {
+    result=findAnnotation(clazz,annotationType,new HashSet<Annotation>());
+    if (result != null) {
+      findAnnotationCache.put(cacheKey,result);
+    }
+  }
+  return result;
 }
