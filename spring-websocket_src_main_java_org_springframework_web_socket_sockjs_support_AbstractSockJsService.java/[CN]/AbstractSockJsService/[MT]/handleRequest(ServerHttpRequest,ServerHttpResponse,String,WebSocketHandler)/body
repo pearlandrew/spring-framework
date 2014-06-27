@@ -1,20 +1,20 @@
 {
   if (sockJsPath == null) {
-    if (logger.isWarnEnabled()) {
-      logger.warn("No SockJS path provided, URI=\"" + request.getURI());
+    if (logger.isErrorEnabled()) {
+      logger.error("Expected SockJS path. Failing request: " + request.getURI());
     }
     response.setStatusCode(HttpStatus.NOT_FOUND);
     return;
   }
-  if (logger.isDebugEnabled()) {
-    logger.debug(request.getMethod() + " with SockJS path [" + sockJsPath+ "]");
+  if (logger.isTraceEnabled()) {
+    logger.trace(request.getMethod() + " with SockJS path [" + sockJsPath+ "]");
   }
   try {
     request.getHeaders();
   }
  catch (  InvalidMediaTypeException ex) {
-    if (logger.isWarnEnabled()) {
-      logger.warn("Invalid media type ignored: " + ex.getMediaType());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Invalid media type ignored: " + ex.getMediaType());
     }
   }
   try {
@@ -36,8 +36,8 @@
  else {
       String[] pathSegments=StringUtils.tokenizeToStringArray(sockJsPath.substring(1),"/");
       if (pathSegments.length != 3) {
-        if (logger.isWarnEnabled()) {
-          logger.warn("Expected \"/{server}/{session}/{transport}\" but got \"" + sockJsPath + "\"");
+        if (logger.isErrorEnabled()) {
+          logger.error("Expected \"/{server}/{session}/{transport}\" but got \"" + sockJsPath + "\"");
         }
         response.setStatusCode(HttpStatus.NOT_FOUND);
         return;

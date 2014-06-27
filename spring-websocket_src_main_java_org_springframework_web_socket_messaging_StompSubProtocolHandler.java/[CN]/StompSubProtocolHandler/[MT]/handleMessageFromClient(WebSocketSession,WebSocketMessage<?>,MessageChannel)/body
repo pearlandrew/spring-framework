@@ -10,12 +10,16 @@
     }
     messages=decoder.decode(byteBuffer);
     if (messages.isEmpty()) {
-      logger.debug("Incomplete STOMP frame content received," + "buffered=" + decoder.getBufferSize() + ", buffer size limit="+ decoder.getBufferSizeLimit());
+      if (logger.isTraceEnabled()) {
+        logger.trace("Incomplete STOMP frame content received, bufferSize=" + decoder.getBufferSize() + ", bufferSizeLimit="+ decoder.getBufferSizeLimit()+ ".");
+      }
       return;
     }
   }
  catch (  Throwable ex) {
-    logger.error("Failed to parse WebSocket message to STOMP." + "Sending STOMP ERROR to client, sessionId=" + session.getId(),ex);
+    if (logger.isErrorEnabled()) {
+      logger.error("Failed to parse " + webSocketMessage + " in session "+ session.getId()+ ". Sending STOMP ERROR to client.",ex);
+    }
     sendErrorMessage(session,ex);
     return;
   }
@@ -23,12 +27,7 @@
     try {
       StompHeaderAccessor headerAccessor=MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
       if (logger.isTraceEnabled()) {
-        if (headerAccessor.isHeartbeat()) {
-          logger.trace("Received heartbeat from client session=" + session.getId());
-        }
- else {
-          logger.trace("Received message from client session=" + session.getId());
-        }
+        logger.trace(headerAccessor.isHeartbeat() ? "Received heartbeat from broker in session " + session.getId() + "." : "Received message from broker in session " + session.getId() + ": "+ message+ ".");
       }
       headerAccessor.setSessionId(session.getId());
       headerAccessor.setSessionAttributes(session.getAttributes());
@@ -46,7 +45,7 @@
       }
     }
  catch (    Throwable ex) {
-      logger.error("Parsed STOMP message but could not send it to to message channel. " + "Sending STOMP ERROR to client, sessionId=" + session.getId(),ex);
+      logger.error("Failed to send STOMP message from client to application MessageChannel" + " in session " + session.getId() + ". Sending STOMP ERROR to client.",ex);
       sendErrorMessage(session,ex);
     }
   }

@@ -1,8 +1,8 @@
 {
   this.decoders.remove(session.getId());
   Principal principal=session.getPrincipal();
-  if ((this.userSessionRegistry != null) && (principal != null)) {
-    String userName=resolveNameForUserSessionRegistry(principal);
+  if (principal != null && this.userSessionRegistry != null) {
+    String userName=getSessionRegistryUserName(principal);
     this.userSessionRegistry.unregisterSessionId(userName,session.getId());
   }
   if (this.eventPublisher != null) {
@@ -11,9 +11,6 @@
   Message<?> message=createDisconnectMessage(session);
   SimpAttributes simpAttributes=SimpAttributes.fromMessage(message);
   try {
-    if (logger.isDebugEnabled()) {
-      logger.debug("WebSocket session ended, sending DISCONNECT message to broker");
-    }
     SimpAttributesContextHolder.setAttributes(simpAttributes);
     outputChannel.send(message);
   }

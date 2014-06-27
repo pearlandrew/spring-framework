@@ -1,38 +1,15 @@
 {
   if (!(message.getPayload() instanceof byte[])) {
-    logger.error("Ignoring message, expected byte[] content: " + message);
+    logger.error("Expected byte[] payload. Ignoring " + message + ".");
     return;
   }
-  MessageHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(message,MessageHeaderAccessor.class);
-  if (accessor == null) {
-    logger.error("No header accessor: " + message);
-    return;
-  }
-  StompHeaderAccessor stompAccessor;
-  if (accessor instanceof StompHeaderAccessor) {
-    stompAccessor=(StompHeaderAccessor)accessor;
-  }
- else   if (accessor instanceof SimpMessageHeaderAccessor) {
-    stompAccessor=StompHeaderAccessor.wrap(message);
-    if (SimpMessageType.CONNECT_ACK.equals(stompAccessor.getMessageType())) {
-      StompHeaderAccessor connectedHeaders=StompHeaderAccessor.create(StompCommand.CONNECTED);
-      connectedHeaders.setVersion(getVersion(stompAccessor));
-      connectedHeaders.setHeartbeat(0,0);
-      stompAccessor=connectedHeaders;
-    }
- else     if (stompAccessor.getCommand() == null || StompCommand.SEND.equals(stompAccessor.getCommand())) {
-      stompAccessor.updateStompCommandAsServerMessage();
-    }
-  }
- else {
-    logger.error("Unexpected header accessor type: " + accessor);
-    return;
-  }
+  StompHeaderAccessor stompAccessor=getStompHeaderAccessor(message);
   StompCommand command=stompAccessor.getCommand();
   if (StompCommand.MESSAGE.equals(command)) {
     if (stompAccessor.getSubscriptionId() == null) {
-      logger.error("Ignoring message, no subscriptionId header: " + message);
-      return;
+      if (logger.isWarnEnabled()) {
+        logger.warn("No STOMP \"subscription\" header in " + message);
+      }
     }
     String origDestination=stompAccessor.getFirstNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
     if (origDestination != null) {
@@ -49,14 +26,13 @@
   }
   try {
     byte[] bytes=this.stompEncoder.encode(stompAccessor.getMessageHeaders(),(byte[])message.getPayload());
-    TextMessage textMessage=new TextMessage(bytes);
-    session.sendMessage(textMessage);
+    session.sendMessage(new TextMessage(bytes));
   }
  catch (  SessionLimitExceededException ex) {
     throw ex;
   }
 catch (  Throwable ex) {
-    logger.error("Failed to send WebSocket message to client, sessionId=" + session.getId(),ex);
+    logger.error("Failed to send WebSocket message to client in session " + session.getId() + ".",ex);
     command=StompCommand.ERROR;
   }
  finally {

@@ -1,0 +1,23 @@
+{
+  MessageHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(message,MessageHeaderAccessor.class);
+  if (accessor == null) {
+    throw new IllegalStateException("No header accessor in " + message + ".");
+  }
+  StompHeaderAccessor stompAccessor;
+  if (accessor instanceof StompHeaderAccessor) {
+    stompAccessor=(StompHeaderAccessor)accessor;
+  }
+ else   if (accessor instanceof SimpMessageHeaderAccessor) {
+    stompAccessor=StompHeaderAccessor.wrap(message);
+    if (SimpMessageType.CONNECT_ACK.equals(stompAccessor.getMessageType())) {
+      stompAccessor=convertConnectAcktoStompConnected(stompAccessor);
+    }
+ else     if (stompAccessor.getCommand() == null || StompCommand.SEND.equals(stompAccessor.getCommand())) {
+      stompAccessor.updateStompCommandAsServerMessage();
+    }
+  }
+ else {
+    throw new IllegalStateException("Unexpected header accessor type: " + accessor.getClass() + " in "+ message+ ".");
+  }
+  return stompAccessor;
+}

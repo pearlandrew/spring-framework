@@ -1,12 +1,12 @@
 {
   String sessionId=resolveSessionId(message);
   if (sessionId == null) {
-    logger.error("sessionId not found in message " + message);
+    logger.error("Couldn't find sessionId in " + message);
     return;
   }
   WebSocketSessionHolder holder=this.sessions.get(sessionId);
   if (holder == null) {
-    logger.error("Session not found for session with id '" + sessionId + "', ignoring message "+ message);
+    logger.error("No session for " + message);
     return;
   }
   WebSocketSession session=holder.getSession();
@@ -20,10 +20,10 @@
       session.close(ex.getStatus());
     }
  catch (    Exception secondException) {
-      logger.error("Exception terminating '" + sessionId + "'",secondException);
+      logger.error("Failure while closing session " + sessionId + ".",secondException);
     }
   }
 catch (  Exception e) {
-    logger.error("Failed to send message to client " + message + " in "+ session,e);
+    logger.error("Failed to send message to client in " + session + ": "+ message,e);
   }
 }

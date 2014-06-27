@@ -5,23 +5,17 @@
   String sessionId=SimpMessageHeaderAccessor.getSessionId(headers);
   if (!checkDestinationPrefix(destination)) {
     if (logger.isTraceEnabled()) {
-      logger.trace("Ignoring message to destination=" + destination);
+      logger.trace("No match on destination in " + message);
     }
     return;
   }
   if (SimpMessageType.MESSAGE.equals(messageType)) {
     sendMessageToSubscribers(destination,message);
   }
- else   if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
-    this.subscriptionRegistry.registerSubscription(message);
-  }
- else   if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
-    this.subscriptionRegistry.unregisterSubscription(message);
-  }
- else   if (SimpMessageType.DISCONNECT.equals(messageType)) {
-    this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
-  }
  else   if (SimpMessageType.CONNECT.equals(messageType)) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Handling CONNECT: " + message);
+    }
     SimpMessageHeaderAccessor accessor=SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
     initHeaders(accessor);
     accessor.setSessionId(sessionId);
@@ -29,9 +23,27 @@
     Message<byte[]> connectAck=MessageBuilder.createMessage(EMPTY_PAYLOAD,accessor.getMessageHeaders());
     this.clientOutboundChannel.send(connectAck);
   }
+ else   if (SimpMessageType.DISCONNECT.equals(messageType)) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Handling DISCONNECT: " + message);
+    }
+    this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
+  }
+ else   if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Handling SUBSCRIBE: " + message);
+    }
+    this.subscriptionRegistry.registerSubscription(message);
+  }
+ else   if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Handling UNSUBSCRIBE: " + message);
+    }
+    this.subscriptionRegistry.unregisterSubscription(message);
+  }
  else {
     if (logger.isTraceEnabled()) {
-      logger.trace("Message type not supported. Ignoring: " + message);
+      logger.trace("Unsupported message type in " + message);
     }
   }
 }

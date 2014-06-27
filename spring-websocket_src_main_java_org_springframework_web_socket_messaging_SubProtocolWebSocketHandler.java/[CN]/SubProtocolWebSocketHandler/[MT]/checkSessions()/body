@@ -3,8 +3,8 @@
   if (!isRunning() && currentTime - this.lastSessionCheckTime < TIME_TO_FIRST_MESSAGE) {
     return;
   }
-  try {
-    if (this.sessionCheckLock.tryLock()) {
+  if (this.sessionCheckLock.tryLock()) {
+    try {
       for (      WebSocketSessionHolder holder : this.sessions.values()) {
         if (holder.hasHandledMessages()) {
           continue;
@@ -15,18 +15,18 @@
         }
         WebSocketSession session=holder.getSession();
         if (logger.isErrorEnabled()) {
-          logger.error("No messages received after " + timeSinceCreated + " ms. Closing "+ holder);
+          logger.error("No messages received after " + timeSinceCreated + " ms. Closing "+ holder+ ".");
         }
         try {
           session.close(CloseStatus.PROTOCOL_ERROR);
         }
  catch (        Throwable t) {
-          logger.error("Failed to close " + session,t);
+          logger.error("Failure while closing " + session,t);
         }
       }
     }
-  }
   finally {
-    this.sessionCheckLock.unlock();
+      this.sessionCheckLock.unlock();
+    }
   }
 }

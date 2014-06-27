@@ -1,17 +1,17 @@
 {
   StompHeaderAccessor headerAccessor=MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
   headerAccessor.setSessionId(this.sessionId);
-  if (headerAccessor.isHeartbeat()) {
-    logger.trace("Received broker heartbeat");
+  if (StompCommand.CONNECTED.equals(headerAccessor.getCommand())) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Received STOMP CONNECTED: " + headerAccessor);
+    }
+    afterStompConnected(headerAccessor);
   }
- else   if (logger.isDebugEnabled()) {
-    logger.debug("Received message from broker in session '" + this.sessionId + "'");
-  }
- else   if (logger.isErrorEnabled() && StompCommand.ERROR == headerAccessor.getCommand()) {
+ else   if (StompCommand.ERROR.equals(headerAccessor.getCommand()) && logger.isErrorEnabled()) {
     logger.error("Received STOMP ERROR: " + message);
   }
-  if (StompCommand.CONNECTED == headerAccessor.getCommand()) {
-    afterStompConnected(headerAccessor);
+ else   if (logger.isTraceEnabled()) {
+    logger.trace(headerAccessor.isHeartbeat() ? "Received heartbeat in session " + this.sessionId : "Received " + headerAccessor);
   }
   headerAccessor.setImmutable();
   sendMessageToClient(message);

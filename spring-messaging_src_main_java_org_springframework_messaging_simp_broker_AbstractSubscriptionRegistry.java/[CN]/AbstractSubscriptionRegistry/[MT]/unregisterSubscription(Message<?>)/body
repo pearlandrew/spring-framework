@@ -1,22 +1,16 @@
 {
   MessageHeaders headers=message.getHeaders();
-  SimpMessageType type=SimpMessageHeaderAccessor.getMessageType(headers);
-  if (!SimpMessageType.UNSUBSCRIBE.equals(type)) {
-    logger.error("Expected UNSUBSCRIBE message: " + message);
-    return;
-  }
+  SimpMessageType messageType=SimpMessageHeaderAccessor.getMessageType(headers);
+  Assert.isTrue(SimpMessageType.UNSUBSCRIBE.equals(messageType),"Expected UNSUBSCRIBE: " + message);
   String sessionId=SimpMessageHeaderAccessor.getSessionId(headers);
   if (sessionId == null) {
-    logger.error("Ignoring subscription. No sessionId in message: " + message);
+    logger.error("No sessionId in " + message);
     return;
   }
   String subscriptionId=SimpMessageHeaderAccessor.getSubscriptionId(headers);
   if (subscriptionId == null) {
-    logger.error("Ignoring subscription. No subscriptionId in message: " + message);
+    logger.error("No subscriptionId " + message);
     return;
-  }
-  if (logger.isDebugEnabled()) {
-    logger.debug("Unubscribe request: " + message);
   }
   removeSubscriptionInternal(sessionId,subscriptionId,message);
 }

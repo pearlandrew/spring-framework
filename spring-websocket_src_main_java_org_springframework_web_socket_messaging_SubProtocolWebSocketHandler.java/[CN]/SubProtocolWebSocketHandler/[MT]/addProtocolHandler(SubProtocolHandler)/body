@@ -1,13 +1,14 @@
 {
   List<String> protocols=handler.getSupportedProtocols();
   if (CollectionUtils.isEmpty(protocols)) {
-    logger.warn("No sub-protocols, ignoring handler " + handler);
+    logger.error("No sub-protocols for " + handler + ".");
     return;
   }
   for (  String protocol : protocols) {
-    SubProtocolHandler replaced=this.protocolHandlers.put(protocol,handler);
+    SubProtocolHandler replaced=this.protocolHandlerLookup.put(protocol,handler);
     if ((replaced != null) && (replaced != handler)) {
-      throw new IllegalStateException("Failed to map handler " + handler + " to protocol '"+ protocol+ "', it is already mapped to handler "+ replaced);
+      throw new IllegalStateException("Can't map " + handler + " to protocol '"+ protocol+ "'. Already mapped to "+ replaced+ ".");
     }
   }
+  this.protocolHandlers.add(handler);
 }

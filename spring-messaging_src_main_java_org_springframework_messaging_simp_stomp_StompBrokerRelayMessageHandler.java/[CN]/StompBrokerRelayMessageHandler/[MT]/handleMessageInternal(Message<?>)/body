@@ -2,14 +2,14 @@
   String sessionId=SimpMessageHeaderAccessor.getSessionId(message.getHeaders());
   if (!isBrokerAvailable()) {
     if (sessionId == null || SystemStompConnectionHandler.SESSION_ID.equals(sessionId)) {
-      throw new MessageDeliveryException("Message broker is not active.");
+      throw new MessageDeliveryException("Message broker not active. Consider subscribing to " + "receive BrokerAvailabilityEvent's from an ApplicationListener Spring bean.");
     }
     SimpMessageType messageType=SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
     if (messageType.equals(SimpMessageType.CONNECT) && logger.isErrorEnabled()) {
-      logger.error("Message broker is not active. Ignoring: " + message);
+      logger.error("Broker not active. Ignoring " + message);
     }
  else     if (logger.isDebugEnabled()) {
-      logger.debug("Message broker is not active. Ignoring: " + message);
+      logger.debug("Broker not active. Ignoring " + message);
     }
     return;
   }
@@ -17,8 +17,7 @@
   StompCommand command;
   MessageHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(message,MessageHeaderAccessor.class);
   if (accessor == null) {
-    logger.error("No header accessor, please use SimpMessagingTemplate. Ignoring: " + message);
-    return;
+    throw new IllegalStateException("No header accessor (not using the SimpMessagingTemplate?): " + message);
   }
  else   if (accessor instanceof StompHeaderAccessor) {
     stompAccessor=(StompHeaderAccessor)accessor;
@@ -32,12 +31,11 @@
     }
   }
  else {
-    logger.error("Unexpected header accessor type: " + accessor + ". Ignoring: "+ message);
-    return;
+    throw new IllegalStateException("Unexpected header accessor type " + accessor.getClass() + " in "+ message);
   }
   if (sessionId == null) {
     if (!SimpMessageType.MESSAGE.equals(stompAccessor.getMessageType())) {
-      logger.error("Only STOMP SEND frames supported on \"system\" connection. Ignoring: " + message);
+      logger.error("Only STOMP SEND supported from within the server side. Ignoring " + message);
       return;
     }
     sessionId=SystemStompConnectionHandler.SESSION_ID;
@@ -46,16 +44,13 @@
   String destination=stompAccessor.getDestination();
   if ((command != null) && command.requiresDestination() && !checkDestinationPrefix(destination)) {
     if (logger.isTraceEnabled()) {
-      logger.trace("Ignoring message to destination=" + destination);
+      logger.trace("No match on destination. Ignoring " + message);
     }
     return;
   }
-  if (logger.isTraceEnabled()) {
-    logger.trace("Processing message=" + message);
-  }
   if (StompCommand.CONNECT.equals(command)) {
     if (logger.isDebugEnabled()) {
-      logger.debug("Processing CONNECT (total connected=" + this.connectionHandlers.size() + ")");
+      logger.debug("STOMP CONNECT in session " + sessionId + " ("+ getConnectionCount()+ " connections).");
     }
     stompAccessor=(stompAccessor.isMutable() ? stompAccessor : StompHeaderAccessor.wrap(message));
     stompAccessor.setLogin(this.clientLogin);
@@ -70,8 +65,8 @@
  else   if (StompCommand.DISCONNECT.equals(command)) {
     StompConnectionHandler handler=this.connectionHandlers.get(sessionId);
     if (handler == null) {
-      if (logger.isTraceEnabled()) {
-        logger.trace("Connection already removed for sessionId '" + sessionId + "'");
+      if (logger.isDebugEnabled()) {
+        logger.debug("Ignoring DISCONNECT in session " + sessionId + ". Connection already cleaned up.");
       }
       return;
     }
@@ -80,8 +75,8 @@
  else {
     StompConnectionHandler handler=this.connectionHandlers.get(sessionId);
     if (handler == null) {
-      if (logger.isWarnEnabled()) {
-        logger.warn("Connection for sessionId '" + sessionId + "' not found. Ignoring message");
+      if (logger.isDebugEnabled()) {
+        logger.debug("No TCP connection for session " + sessionId + " in "+ message);
       }
       return;
     }

@@ -1,10 +1,15 @@
 {
-  ScheduledFuture<?> task=this.heartbeatTask;
-  this.heartbeatTask=null;
-  if ((task != null) && !task.isDone()) {
-    if (logger.isTraceEnabled()) {
-      logger.trace("Cancelling heartbeat");
+  try {
+    ScheduledFuture<?> task=this.heartbeatTask;
+    this.heartbeatTask=null;
+    if ((task != null) && !task.isDone()) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Cancelling heartbeat in session " + getId());
+      }
+      task.cancel(false);
     }
-    task.cancel(false);
+  }
+ catch (  Throwable ex) {
+    logger.error("Failure while cancelling heartbeat in session " + getId(),ex);
   }
 }

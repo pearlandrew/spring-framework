@@ -8,12 +8,12 @@
   String subscribeDestination;
   String user;
   Set<String> sessionIds;
+  if (destination == null || !checkDestination(destination,this.destinationPrefix)) {
+    return null;
+  }
   if (SimpMessageType.SUBSCRIBE.equals(messageType) || SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
-    if (!checkDestination(destination,this.destinationPrefix)) {
-      return null;
-    }
     if (sessionId == null) {
-      logger.error("Ignoring message, no session id available");
+      logger.error("No session id. Ignoring " + message);
       return null;
     }
     destinationWithoutPrefix=destination.substring(this.destinationPrefix.length() - 1);
@@ -22,9 +22,6 @@
     sessionIds=Collections.singleton(sessionId);
   }
  else   if (SimpMessageType.MESSAGE.equals(messageType)) {
-    if (!checkDestination(destination,this.destinationPrefix)) {
-      return null;
-    }
     int startIndex=this.destinationPrefix.length();
     int endIndex=destination.indexOf('/',startIndex);
     Assert.isTrue(endIndex > 0,"Expected destination pattern \"/user/{userId}/**\"");
@@ -36,9 +33,6 @@
     sessionIds=(sessionId != null ? Collections.singleton(sessionId) : this.userSessionRegistry.getSessionIds(user));
   }
  else {
-    if (logger.isTraceEnabled()) {
-      logger.trace("Ignoring " + messageType + " message");
-    }
     return null;
   }
   return new DestinationInfo(destinationWithoutPrefix,subscribeDestination,user,sessionIds);

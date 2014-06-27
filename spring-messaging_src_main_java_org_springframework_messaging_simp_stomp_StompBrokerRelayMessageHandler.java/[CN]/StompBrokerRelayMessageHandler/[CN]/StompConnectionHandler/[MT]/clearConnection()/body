@@ -1,14 +1,17 @@
 {
+  if (logger.isDebugEnabled()) {
+    logger.debug("Cleaning up connection state for session " + sessionId + " ("+ (getConnectionCount() - 1)+ " remaining connections).");
+  }
   if (this.isRemoteClientSession) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Removing session '" + sessionId + "' (total remaining="+ (StompBrokerRelayMessageHandler.this.connectionHandlers.size() - 1)+ ")");
-    }
     StompBrokerRelayMessageHandler.this.connectionHandlers.remove(this.sessionId);
   }
   this.isStompConnected=false;
   TcpConnection<byte[]> conn=this.tcpConnection;
   this.tcpConnection=null;
   if (conn != null) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Closing TCP connection in session " + this.sessionId);
+    }
     conn.close();
   }
 }

@@ -1,0 +1,24 @@
+{
+  String name=StompHeaderAccessor.CONNECT_MESSAGE_HEADER;
+  Message<?> message=(Message<?>)connectAckHeaders.getHeader(name);
+  Assert.notNull(message,"Original STOMP CONNECT not found in " + connectAckHeaders);
+  StompHeaderAccessor connectHeaders=MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
+  String version;
+  Set<String> acceptVersions=connectHeaders.getAcceptVersion();
+  if (acceptVersions.contains("1.2")) {
+    version="1.2";
+  }
+ else   if (acceptVersions.contains("1.1")) {
+    version="1.1";
+  }
+ else   if (acceptVersions.isEmpty()) {
+    version=null;
+  }
+ else {
+    throw new IllegalArgumentException("Unsupported STOMP version '" + acceptVersions + "'");
+  }
+  StompHeaderAccessor connectedHeaders=StompHeaderAccessor.create(StompCommand.CONNECTED);
+  connectedHeaders.setVersion(version);
+  connectedHeaders.setHeartbeat(0,0);
+  return connectedHeaders;
+}

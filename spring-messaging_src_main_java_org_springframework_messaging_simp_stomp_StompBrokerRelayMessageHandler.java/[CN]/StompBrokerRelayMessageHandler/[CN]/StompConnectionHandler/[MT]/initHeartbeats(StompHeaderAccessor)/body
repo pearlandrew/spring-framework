@@ -14,7 +14,8 @@
         if (conn != null) {
           conn.send(HEARTBEAT_MESSAGE).addCallback(new ListenableFutureCallback<Void>(){
             public void onFailure(            Throwable t){
-              handleTcpConnectionFailure("Failed to send heartbeat",t);
+              String error="failed to forward heartbeat in \"system\" session.";
+              handleTcpConnectionFailure(error,t);
             }
             public void onSuccess(            Void result){
             }
@@ -29,7 +30,7 @@
     final long interval=Math.max(clientReceiveInterval,serverSendInterval) * HEARTBEAT_MULTIPLIER;
     this.tcpConnection.onReadInactivity(new Runnable(){
       @Override public void run(){
-        handleTcpConnectionFailure("No hearbeat from broker for more than " + interval + "ms, closing connection",null);
+        handleTcpConnectionFailure("no messages received for more than " + interval + " ms.",null);
       }
     }
 ,interval);

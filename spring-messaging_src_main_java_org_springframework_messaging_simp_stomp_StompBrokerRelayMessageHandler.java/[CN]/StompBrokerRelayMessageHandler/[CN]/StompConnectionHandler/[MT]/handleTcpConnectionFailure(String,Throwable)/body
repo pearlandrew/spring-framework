@@ -1,9 +1,9 @@
 {
   if (logger.isErrorEnabled()) {
-    logger.error(errorMessage + ", sessionId '" + this.sessionId+ "'",ex);
+    logger.error("TCP connection failure in session " + this.sessionId + ": "+ error,ex);
   }
   try {
-    sendStompErrorToClient(errorMessage);
+    sendStompErrorFrameToClient(error);
   }
   finally {
     try {
@@ -11,7 +11,7 @@
     }
  catch (    Throwable t) {
       if (logger.isErrorEnabled()) {
-        logger.error("Failed to close connection: " + t.getMessage());
+        logger.error("Failure while cleaning up state for TCP connection" + " in session " + this.sessionId,t);
       }
     }
   }

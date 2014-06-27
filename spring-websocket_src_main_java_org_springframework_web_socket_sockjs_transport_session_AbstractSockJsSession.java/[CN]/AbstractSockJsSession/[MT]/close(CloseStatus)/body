@@ -1,7 +1,7 @@
 {
   if (isOpen()) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Closing " + this + ", "+ status);
+    if (logger.isInfoEnabled()) {
+      logger.info("Closing SockJS session " + getId() + " with "+ status);
     }
     try {
       if (isActive() && !CloseStatus.SESSION_NOT_RELIABLE.equals(status)) {
@@ -9,7 +9,7 @@
           writeFrameInternal(SockJsFrame.closeFrame(status.getCode(),status.getReason()));
         }
  catch (        Throwable ex) {
-          logger.warn("Failed to send SockJS close frame: " + ex.getMessage());
+          logger.debug("Failure while send SockJS close frame",ex);
         }
       }
       updateLastActiveTime();
@@ -22,7 +22,7 @@
         this.handler.afterConnectionClosed(this,status);
       }
  catch (      Throwable ex) {
-        logger.error("Unhandled error for " + this,ex);
+        logger.error("Error from WebSocketHandler.afterConnectionClosed in " + this,ex);
       }
     }
   }

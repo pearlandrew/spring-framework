@@ -4,25 +4,22 @@
     protocol=session.getAcceptedProtocol();
   }
  catch (  Exception ex) {
-    logger.warn("Ignoring protocol in WebSocket session after failure to obtain it: " + ex.toString());
+    logger.error("Failed to obtain session.getAcceptedProtocol(). Will use the " + "default protocol handler (if configured).",ex);
   }
   SubProtocolHandler handler;
   if (!StringUtils.isEmpty(protocol)) {
-    handler=this.protocolHandlers.get(protocol);
-    Assert.state(handler != null,"No handler for sub-protocol '" + protocol + "', handlers="+ this.protocolHandlers);
+    handler=this.protocolHandlerLookup.get(protocol);
+    Assert.state(handler != null,"No handler for '" + protocol + "' among "+ this.protocolHandlerLookup);
   }
  else {
     if (this.defaultProtocolHandler != null) {
       handler=this.defaultProtocolHandler;
     }
+ else     if (this.protocolHandlers.size() == 1) {
+      handler=this.protocolHandlers.get(0);
+    }
  else {
-      Set<SubProtocolHandler> handlers=new HashSet<SubProtocolHandler>(this.protocolHandlers.values());
-      if (handlers.size() == 1) {
-        handler=handlers.iterator().next();
-      }
- else {
-        throw new IllegalStateException("No sub-protocol was requested and a default sub-protocol handler was not configured");
-      }
+      throw new IllegalStateException("Multiple protocol handlers configured and " + "no protocol was negotiated. Consider configuring a default SubProtocolHandler.");
     }
   }
   return handler;

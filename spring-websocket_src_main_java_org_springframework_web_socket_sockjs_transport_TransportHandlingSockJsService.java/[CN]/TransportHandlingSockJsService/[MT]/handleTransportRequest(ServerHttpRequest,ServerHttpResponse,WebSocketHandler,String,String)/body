@@ -1,15 +1,15 @@
 {
   TransportType transportType=TransportType.fromValue(transport);
   if (transportType == null) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Unknown transport type: " + transportType);
+    if (logger.isErrorEnabled()) {
+      logger.error("Unknown transport type: " + transportType);
     }
     response.setStatusCode(HttpStatus.NOT_FOUND);
     return;
   }
   TransportHandler transportHandler=this.handlers.get(transportType);
   if (transportHandler == null) {
-    logger.debug("Transport handler not found");
+    logger.error("Transport handler not found");
     response.setStatusCode(HttpStatus.NOT_FOUND);
     return;
   }
@@ -43,7 +43,9 @@
       }
  else {
         response.setStatusCode(HttpStatus.NOT_FOUND);
-        logger.warn("Session not found, sessionId=" + sessionId);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Session not found, sessionId=" + sessionId);
+        }
         return;
       }
     }
