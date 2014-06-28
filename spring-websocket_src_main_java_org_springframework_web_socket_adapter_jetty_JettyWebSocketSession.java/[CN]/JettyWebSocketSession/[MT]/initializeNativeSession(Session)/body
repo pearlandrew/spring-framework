@@ -1,7 +1,17 @@
 {
   super.initializeNativeSession(session);
+  this.id=ObjectUtils.getIdentityHexString(getNativeSession());
+  this.uri=session.getUpgradeRequest().getRequestURI();
+  this.headers=new HttpHeaders();
+  this.headers.putAll(getNativeSession().getUpgradeRequest().getHeaders());
+  this.headers=HttpHeaders.readOnlyHttpHeaders(headers);
+  this.acceptedProtocol=session.getUpgradeResponse().getAcceptedSubProtocol();
+  List<ExtensionConfig> source=getNativeSession().getUpgradeResponse().getExtensions();
+  this.extensions=new ArrayList<WebSocketExtension>(source.size());
+  for (  ExtensionConfig e : source) {
+    this.extensions.add(new WebSocketExtension(e.getName(),e.getParameters()));
+  }
   if (this.user == null) {
     this.user=session.getUpgradeRequest().getUserPrincipal();
   }
-  this.acceptedProtocol=session.getUpgradeResponse().getAcceptedSubProtocol();
 }
