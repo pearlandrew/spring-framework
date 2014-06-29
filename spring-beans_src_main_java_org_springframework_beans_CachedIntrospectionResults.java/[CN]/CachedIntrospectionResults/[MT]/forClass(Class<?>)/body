@@ -1,32 +1,21 @@
 {
-  CachedIntrospectionResults results;
-  Object value;
-synchronized (classCache) {
-    value=classCache.get(beanClass);
+  CachedIntrospectionResults results=strongClassCache.get(beanClass);
+  if (results != null) {
+    return results;
   }
-  if (value instanceof Reference) {
-    Reference<CachedIntrospectionResults> ref=(Reference<CachedIntrospectionResults>)value;
-    results=ref.get();
+  results=softClassCache.get(beanClass);
+  if (results != null) {
+    return results;
+  }
+  results=new CachedIntrospectionResults(beanClass);
+  if (ClassUtils.isCacheSafe(beanClass,CachedIntrospectionResults.class.getClassLoader()) || isClassLoaderAccepted(beanClass.getClassLoader())) {
+    strongClassCache.put(beanClass,results);
   }
  else {
-    results=(CachedIntrospectionResults)value;
-  }
-  if (results == null) {
-    if (ClassUtils.isCacheSafe(beanClass,CachedIntrospectionResults.class.getClassLoader()) || isClassLoaderAccepted(beanClass.getClassLoader())) {
-      results=new CachedIntrospectionResults(beanClass);
-synchronized (classCache) {
-        classCache.put(beanClass,results);
-      }
+    if (logger.isDebugEnabled()) {
+      logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
     }
- else {
-      if (logger.isDebugEnabled()) {
-        logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
-      }
-      results=new CachedIntrospectionResults(beanClass);
-synchronized (classCache) {
-        classCache.put(beanClass,new WeakReference<CachedIntrospectionResults>(results));
-      }
-    }
+    softClassCache.put(beanClass,results);
   }
   return results;
 }

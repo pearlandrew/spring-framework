@@ -12,15 +12,25 @@
   }
   this.readMethod=readMethodToUse;
   this.writeMethod=writeMethodToUse;
-  if (this.writeMethod != null && this.readMethod == null) {
-    Set<Method> ambiguousCandidates=new HashSet<Method>();
-    for (    Method method : beanClass.getMethods()) {
-      if (method.getName().equals(writeMethodToUse.getName()) && !method.equals(writeMethodToUse) && !method.isBridge()) {
-        ambiguousCandidates.add(method);
+  if (this.writeMethod != null) {
+    if (this.readMethod == null) {
+      Set<Method> ambiguousCandidates=new HashSet<Method>();
+      for (      Method method : beanClass.getMethods()) {
+        if (method.getName().equals(writeMethodToUse.getName()) && !method.equals(writeMethodToUse) && !method.isBridge()) {
+          ambiguousCandidates.add(method);
+        }
+      }
+      if (!ambiguousCandidates.isEmpty()) {
+        this.ambiguousWriteMethods=ambiguousCandidates;
       }
     }
-    if (!ambiguousCandidates.isEmpty()) {
-      this.ambiguousWriteMethods=ambiguousCandidates;
-    }
+    this.writeMethodParameter=new MethodParameter(this.writeMethod,0);
+    GenericTypeResolver.resolveParameterType(this.writeMethodParameter,this.beanClass);
+  }
+  if (this.readMethod != null) {
+    this.propertyType=GenericTypeResolver.resolveReturnType(this.readMethod,this.beanClass);
+  }
+ else   if (this.writeMethodParameter != null) {
+    this.propertyType=this.writeMethodParameter.getParameterType();
   }
 }
