@@ -1,6 +1,6 @@
 {
   long currentTime=System.currentTimeMillis();
-  if (!isRunning() && currentTime - this.lastSessionCheckTime < TIME_TO_FIRST_MESSAGE) {
+  if (!isRunning() || (currentTime - this.lastSessionCheckTime < TIME_TO_FIRST_MESSAGE)) {
     return;
   }
   if (this.sessionCheckLock.tryLock()) {
@@ -10,7 +10,7 @@
           continue;
         }
         long timeSinceCreated=currentTime - holder.getCreateTime();
-        if (holder.hasHandledMessages() || timeSinceCreated < TIME_TO_FIRST_MESSAGE) {
+        if (timeSinceCreated < TIME_TO_FIRST_MESSAGE) {
           continue;
         }
         WebSocketSession session=holder.getSession();
