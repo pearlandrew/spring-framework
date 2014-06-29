@@ -1,10 +1,5 @@
 {
-  boolean actuallyClose;
-synchronized (this.activeMonitor) {
-    actuallyClose=this.active && !this.closed;
-    this.closed=true;
-  }
-  if (actuallyClose) {
+  if (this.active.get() && this.closed.compareAndSet(false,true)) {
     if (logger.isInfoEnabled()) {
       logger.info("Closing " + this);
     }
@@ -24,8 +19,6 @@ synchronized (this.activeMonitor) {
     destroyBeans();
     closeBeanFactory();
     onClose();
-synchronized (this.activeMonitor) {
-      this.active=false;
-    }
+    this.active.set(false);
   }
 }
