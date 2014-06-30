@@ -3,21 +3,29 @@
   for (  Map.Entry<String,Class<? extends BeanDefinitionReader>> entry : importedResources.entrySet()) {
     String resource=entry.getKey();
     Class<? extends BeanDefinitionReader> readerClass=entry.getValue();
-    if (!readerInstanceCache.containsKey(readerClass)) {
+    if (readerClass.equals(BeanDefinitionReader.class)) {
+      if (StringUtils.endsWithIgnoreCase(resource,".groovy")) {
+        readerClass=GroovyBeanDefinitionReader.class;
+      }
+ else {
+        readerClass=XmlBeanDefinitionReader.class;
+      }
+    }
+    BeanDefinitionReader reader=readerInstanceCache.get(readerClass);
+    if (reader == null) {
       try {
-        BeanDefinitionReader readerInstance=readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
-        if (readerInstance instanceof AbstractBeanDefinitionReader) {
-          AbstractBeanDefinitionReader abdr=((AbstractBeanDefinitionReader)readerInstance);
+        reader=readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
+        if (reader instanceof AbstractBeanDefinitionReader) {
+          AbstractBeanDefinitionReader abdr=((AbstractBeanDefinitionReader)reader);
           abdr.setResourceLoader(this.resourceLoader);
           abdr.setEnvironment(this.environment);
         }
-        readerInstanceCache.put(readerClass,readerInstance);
+        readerInstanceCache.put(readerClass,reader);
       }
  catch (      Exception ex) {
         throw new IllegalStateException("Could not instantiate BeanDefinitionReader class [" + readerClass.getName() + "]");
       }
     }
-    BeanDefinitionReader reader=readerInstanceCache.get(readerClass);
     reader.loadBeanDefinitions(resource);
   }
 }
