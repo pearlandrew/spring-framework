@@ -1,0 +1,16 @@
+{
+  loadBeanDefinitions("mvc-config-resources-resolvers-transformers.xml",10);
+  SimpleUrlHandlerMapping mapping=appContext.getBean(SimpleUrlHandlerMapping.class);
+  assertNotNull(mapping);
+  assertNotNull(mapping.getUrlMap().get("/resources/**"));
+  ResourceHttpRequestHandler handler=appContext.getBean((String)mapping.getUrlMap().get("/resources/**"),ResourceHttpRequestHandler.class);
+  assertNotNull(handler);
+  List<ResourceResolver> resolvers=handler.getResourceResolvers();
+  assertThat(resolvers,Matchers.hasSize(2));
+  assertThat(resolvers.get(0),Matchers.instanceOf(PathResourceResolver.class));
+  assertThat(resolvers.get(1),Matchers.instanceOf(GzipResourceResolver.class));
+  List<ResourceTransformer> transformers=handler.getResourceTransformers();
+  assertThat(transformers,Matchers.hasSize(2));
+  assertThat(transformers.get(0),Matchers.instanceOf(CachingResourceTransformer.class));
+  assertThat(transformers.get(1),Matchers.instanceOf(CssLinkResourceTransformer.class));
+}
