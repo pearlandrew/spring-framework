@@ -1,0 +1,12 @@
+{
+  @SuppressWarnings("unchecked") DestinationResolver<String> destinationResolver=(DestinationResolver<String>)mock(DestinationResolver.class);
+  CachingDestinationResolverProxy<String> cachingDestinationResolver=new CachingDestinationResolverProxy<String>(destinationResolver);
+  when(destinationResolver.resolveDestination("abcd")).thenReturn("dcba");
+  when(destinationResolver.resolveDestination("1234")).thenReturn("4321");
+  assertEquals("dcba",cachingDestinationResolver.resolveDestination("abcd"));
+  assertEquals("4321",cachingDestinationResolver.resolveDestination("1234"));
+  assertEquals("4321",cachingDestinationResolver.resolveDestination("1234"));
+  assertEquals("dcba",cachingDestinationResolver.resolveDestination("abcd"));
+  verify(destinationResolver,times(1)).resolveDestination("abcd");
+  verify(destinationResolver,times(1)).resolveDestination("1234");
+}
