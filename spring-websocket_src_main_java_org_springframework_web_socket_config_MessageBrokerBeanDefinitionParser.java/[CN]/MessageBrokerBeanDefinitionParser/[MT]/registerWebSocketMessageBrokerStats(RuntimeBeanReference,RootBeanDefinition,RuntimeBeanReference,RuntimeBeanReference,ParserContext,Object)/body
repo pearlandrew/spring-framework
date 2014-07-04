@@ -1,0 +1,23 @@
+{
+  RootBeanDefinition statsDef=new RootBeanDefinition(WebSocketMessageBrokerStats.class);
+  statsDef.getPropertyValues().add("subProtocolWebSocketHandler",subProtocolHandlerDef);
+  if (StompBrokerRelayMessageHandler.class.equals(brokerDef.getBeanClass())) {
+    statsDef.getPropertyValues().add("stompBrokerRelay",brokerDef);
+  }
+  String beanName=clientInChannel.getBeanName() + "Executor";
+  if (parserCxt.getRegistry().containsBeanDefinition(beanName)) {
+    BeanDefinition beanDef=parserCxt.getRegistry().getBeanDefinition(beanName);
+    statsDef.getPropertyValues().add("inboundChannelExecutor",beanDef);
+  }
+  beanName=clientOutChannel.getBeanName() + "Executor";
+  if (parserCxt.getRegistry().containsBeanDefinition(beanName)) {
+    BeanDefinition beanDef=parserCxt.getRegistry().getBeanDefinition(beanName);
+    statsDef.getPropertyValues().add("outboundChannelExecutor",beanDef);
+  }
+  beanName=SOCKJS_SCHEDULER_BEAN_NAME;
+  if (parserCxt.getRegistry().containsBeanDefinition(beanName)) {
+    BeanDefinition beanDef=parserCxt.getRegistry().getBeanDefinition(beanName);
+    statsDef.getPropertyValues().add("sockJsTaskScheduler",beanDef);
+  }
+  registerBeanDefByName("webSocketMessageBrokerStats",statsDef,parserCxt,source);
+}

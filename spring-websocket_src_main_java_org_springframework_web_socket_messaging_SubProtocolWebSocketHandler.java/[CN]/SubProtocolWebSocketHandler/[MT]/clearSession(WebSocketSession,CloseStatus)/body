@@ -2,6 +2,8 @@
   if (logger.isDebugEnabled()) {
     logger.debug("Clearing session " + session.getId() + " ("+ this.sessions.size()+ " remain)");
   }
-  this.sessions.remove(session.getId());
+  if (this.sessions.remove(session.getId()) != null) {
+    this.stats.decrementSessionCount(session);
+  }
   findProtocolHandler(session).afterSessionEnded(session,closeStatus,this.clientInboundChannel);
 }
