@@ -4,12 +4,23 @@
   }
   String qualifier=txAttr.getQualifier();
   if (StringUtils.hasLength(qualifier)) {
-    return BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory,PlatformTransactionManager.class,qualifier);
+    PlatformTransactionManager txManager=this.transactionManagerCache.get(qualifier);
+    if (txManager == null) {
+      txManager=BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory,PlatformTransactionManager.class,qualifier);
+      this.transactionManagerCache.putIfAbsent(qualifier,txManager);
+    }
+    return txManager;
   }
  else   if (this.transactionManagerBeanName != null) {
-    return this.beanFactory.getBean(this.transactionManagerBeanName,PlatformTransactionManager.class);
+    PlatformTransactionManager txManager=this.transactionManagerCache.get(this.transactionManagerBeanName);
+    if (txManager == null) {
+      txManager=this.beanFactory.getBean(this.transactionManagerBeanName,PlatformTransactionManager.class);
+      this.transactionManagerCache.putIfAbsent(this.transactionManagerBeanName,txManager);
+    }
+    return txManager;
   }
  else {
-    return this.beanFactory.getBean(PlatformTransactionManager.class);
+    this.transactionManager=this.beanFactory.getBean(PlatformTransactionManager.class);
+    return this.transactionManager;
   }
 }
