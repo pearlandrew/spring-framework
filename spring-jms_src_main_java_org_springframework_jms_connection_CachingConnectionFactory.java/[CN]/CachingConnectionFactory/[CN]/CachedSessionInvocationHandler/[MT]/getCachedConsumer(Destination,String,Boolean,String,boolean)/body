@@ -9,8 +9,9 @@
  else {
     if (dest instanceof Topic) {
       if (noLocal == null) {
+        Method method=(durable ? createSharedDurableConsumerMethod : createSharedConsumerMethod);
         try {
-          consumer=(MessageConsumer)createSharedDurableConsumerMethod.invoke(this.target,dest,subscription,selector);
+          consumer=(MessageConsumer)method.invoke(this.target,dest,subscription,selector);
         }
  catch (        InvocationTargetException ex) {
           if (ex.getTargetException() instanceof JMSException) {
@@ -23,7 +24,7 @@ catch (        IllegalAccessException ex) {
         }
       }
  else {
-        consumer=(subscription != null ? this.target.createDurableSubscriber((Topic)dest,subscription,selector,noLocal) : this.target.createConsumer(dest,selector,noLocal));
+        consumer=(durable ? this.target.createDurableSubscriber((Topic)dest,subscription,selector,noLocal) : this.target.createConsumer(dest,selector,noLocal));
       }
     }
  else {

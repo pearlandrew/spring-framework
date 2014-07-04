@@ -36,19 +36,25 @@ synchronized (this.sessionList) {
       if ((methodName.equals("createConsumer") || methodName.equals("createReceiver") || methodName.equals("createSubscriber"))) {
         Destination dest=(Destination)args[0];
         if (dest != null && !(dest instanceof TemporaryQueue || dest instanceof TemporaryTopic)) {
-          return getCachedConsumer(dest,(args.length > 1 ? (String)args[1] : null),(args.length > 2 && (Boolean)args[2]),null);
+          return getCachedConsumer(dest,(args.length > 1 ? (String)args[1] : null),(args.length > 2 && (Boolean)args[2]),null,false);
         }
       }
  else       if (methodName.equals("createDurableConsumer") || methodName.equals("createDurableSubscriber")) {
         Destination dest=(Destination)args[0];
         if (dest != null) {
-          return getCachedConsumer(dest,(args.length > 2 ? (String)args[2] : null),(args.length > 3 && (Boolean)args[3]),(String)args[1]);
+          return getCachedConsumer(dest,(args.length > 2 ? (String)args[2] : null),(args.length > 3 && (Boolean)args[3]),(String)args[1],true);
+        }
+      }
+ else       if (methodName.equals("createSharedConsumer")) {
+        Destination dest=(Destination)args[0];
+        if (dest != null) {
+          return getCachedConsumer(dest,(args.length > 2 ? (String)args[2] : null),null,(String)args[1],false);
         }
       }
  else       if (methodName.equals("createSharedDurableConsumer")) {
         Destination dest=(Destination)args[0];
         if (dest != null) {
-          return getCachedConsumer(dest,(args.length > 2 ? (String)args[2] : null),null,(String)args[1]);
+          return getCachedConsumer(dest,(args.length > 2 ? (String)args[2] : null),null,(String)args[1],true);
         }
       }
     }
