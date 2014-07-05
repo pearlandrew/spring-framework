@@ -1,0 +1,14 @@
+{
+  Collection<CacheOperationContext> cachePutContexts=contexts.get(CachePutOperation.class);
+  Collection<CacheOperationContext> excluded=new ArrayList<CacheOperationContext>();
+  for (  CacheOperationContext context : cachePutContexts) {
+    try {
+      if (!context.isConditionPassing(ExpressionEvaluator.RESULT_UNAVAILABLE)) {
+        excluded.add(context);
+      }
+    }
+ catch (    VariableNotAvailableException e) {
+    }
+  }
+  return cachePutContexts.size() != excluded.size();
+}

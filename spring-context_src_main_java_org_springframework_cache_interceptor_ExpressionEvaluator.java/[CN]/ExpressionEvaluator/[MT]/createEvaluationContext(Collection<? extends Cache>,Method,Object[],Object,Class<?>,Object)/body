@@ -1,8 +1,11 @@
 {
   CacheExpressionRootObject rootObject=new CacheExpressionRootObject(caches,method,args,target,targetClass);
-  LazyParamAwareEvaluationContext evaluationContext=new LazyParamAwareEvaluationContext(rootObject,this.paramNameDiscoverer,method,args,targetClass,this.targetMethodCache);
-  if (result != NO_RESULT) {
-    evaluationContext.setVariable("result",result);
+  CacheEvaluationContext evaluationContext=new CacheEvaluationContext(rootObject,this.paramNameDiscoverer,method,args,targetClass,this.targetMethodCache);
+  if (result == RESULT_UNAVAILABLE) {
+    evaluationContext.addUnavailableVariable(RESULT_VARIABLE);
+  }
+ else   if (result != NO_RESULT) {
+    evaluationContext.setVariable(RESULT_VARIABLE,result);
   }
   return evaluationContext;
 }
