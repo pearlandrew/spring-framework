@@ -2,7 +2,10 @@
   Element resolversElement=DomUtils.getChildElementByTagName(element,"argument-resolvers");
   if (resolversElement != null) {
     ManagedList<BeanDefinitionHolder> argumentResolvers=extractBeanSubElements(resolversElement,parserContext);
-    return wrapWebArgumentResolverBeanDefs(argumentResolvers,parserContext);
+    ManagedList<BeanMetadataElement> customAndReferencedResolvers=new ManagedList<BeanMetadataElement>();
+    customAndReferencedResolvers.addAll(wrapWebArgumentResolverBeanDefs(argumentResolvers,parserContext));
+    customAndReferencedResolvers.addAll(extractBeanRefSubElements(resolversElement,parserContext));
+    return customAndReferencedResolvers;
   }
   return null;
 }
