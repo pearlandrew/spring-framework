@@ -3,14 +3,15 @@
   try {
     messages=readMessages(request);
   }
- catch (  JsonMappingException ex) {
-    logger.error("Failed to read message",ex);
-    handleReadError(response,"Payload expected.",sockJsSession.getId());
-    return;
-  }
-catch (  IOException ex) {
-    logger.error("Failed to read message",ex);
-    handleReadError(response,"Broken JSON encoding.",sockJsSession.getId());
+ catch (  IOException ex) {
+    if (ex.getClass().getName().contains("Mapping")) {
+      logger.error("Failed to read message",ex);
+      handleReadError(response,"Payload expected.",sockJsSession.getId());
+    }
+ else {
+      logger.error("Failed to read message",ex);
+      handleReadError(response,"Broken JSON encoding.",sockJsSession.getId());
+    }
     return;
   }
 catch (  Throwable ex) {
