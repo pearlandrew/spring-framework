@@ -1,0 +1,14 @@
+{
+  return new ResultMatcher(){
+    @Override @SuppressWarnings("unchecked") public void match(    MvcResult mvcResult) throws Exception {
+      ModelAndView mav=getModelAndView(mvcResult);
+      BindingResult result=getBindingResult(mav,name);
+      assertTrue("No errors for attribute: [" + name + "]",result.hasErrors());
+      boolean hasFieldErrors=result.hasFieldErrors(fieldName);
+      assertTrue("No errors for field: [" + fieldName + "] of attribute ["+ name+ "]",hasFieldErrors);
+      String code=result.getFieldError(fieldName).getCode();
+      assertThat("Field name '" + fieldName + "' of attribute '"+ name+ "'",code,matcher);
+    }
+  }
+;
+}
