@@ -1,14 +1,16 @@
 {
-  String profileSpec=root.getAttribute(PROFILE_ATTRIBUTE);
-  if (StringUtils.hasText(profileSpec)) {
-    Assert.state(this.environment != null,"Environment must be set for evaluating profiles");
-    String[] specifiedProfiles=StringUtils.tokenizeToStringArray(profileSpec,BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
-    if (!this.environment.acceptsProfiles(specifiedProfiles)) {
-      return;
-    }
-  }
   BeanDefinitionParserDelegate parent=this.delegate;
   this.delegate=createDelegate(this.readerContext,root,parent);
+  if (this.delegate.isDefaultNamespace(root)) {
+    String profileSpec=root.getAttribute(PROFILE_ATTRIBUTE);
+    if (StringUtils.hasText(profileSpec)) {
+      Assert.state(this.environment != null,"Environment must be set for evaluating profiles");
+      String[] specifiedProfiles=StringUtils.tokenizeToStringArray(profileSpec,BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
+      if (!this.environment.acceptsProfiles(specifiedProfiles)) {
+        return;
+      }
+    }
+  }
   preProcessXml(root);
   parseBeanDefinitions(root,this.delegate);
   postProcessXml(root);
