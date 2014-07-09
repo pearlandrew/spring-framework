@@ -1,12 +1,15 @@
 {
   Object payload=message.getPayload();
-  if (conversionService.canConvert(payload.getClass(),targetClass)) {
+  if (targetClass == null) {
+    return payload;
+  }
+  if (payload != null && this.conversionService.canConvert(payload.getClass(),targetClass)) {
     try {
-      return conversionService.convert(payload,targetClass);
+      return this.conversionService.convert(payload,targetClass);
     }
- catch (    ConversionException e) {
-      throw new MessageConversionException(message,"Failed to convert message payload '" + payload + "' to '"+ targetClass.getName()+ "'",e);
+ catch (    ConversionException ex) {
+      throw new MessageConversionException(message,"Failed to convert message payload '" + payload + "' to '"+ targetClass.getName()+ "'",ex);
     }
   }
-  return null;
+  return (ClassUtils.isAssignableValue(targetClass,payload) ? payload : null);
 }
