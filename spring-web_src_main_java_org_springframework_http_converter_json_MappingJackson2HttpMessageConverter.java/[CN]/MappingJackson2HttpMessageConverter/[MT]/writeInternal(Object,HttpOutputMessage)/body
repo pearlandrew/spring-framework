@@ -1,12 +1,9 @@
 {
   JsonEncoding encoding=getJsonEncoding(outputMessage.getHeaders().getContentType());
-  @SuppressWarnings("deprecation") JsonGenerator jsonGenerator=this.objectMapper.getJsonFactory().createJsonGenerator(outputMessage.getBody(),encoding);
-  if (this.objectMapper.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
-    jsonGenerator.useDefaultPrettyPrinter();
-  }
+  JsonGenerator generator=this.objectMapper.getFactory().createGenerator(outputMessage.getBody(),encoding);
   try {
     if (this.jsonPrefix != null) {
-      jsonGenerator.writeRaw(this.jsonPrefix);
+      generator.writeRaw(this.jsonPrefix);
     }
     Class<?> serializationView=null;
     String jsonpFunction=null;
@@ -17,17 +14,17 @@
       jsonpFunction=container.getJsonpFunction();
     }
     if (jsonpFunction != null) {
-      jsonGenerator.writeRaw(jsonpFunction + "(");
+      generator.writeRaw(jsonpFunction + "(");
     }
     if (serializationView != null) {
-      this.objectMapper.writerWithView(serializationView).writeValue(jsonGenerator,object);
+      this.objectMapper.writerWithView(serializationView).writeValue(generator,object);
     }
  else {
-      this.objectMapper.writeValue(jsonGenerator,object);
+      this.objectMapper.writeValue(generator,object);
     }
     if (jsonpFunction != null) {
-      jsonGenerator.writeRaw(");");
-      jsonGenerator.flush();
+      generator.writeRaw(");");
+      generator.flush();
     }
   }
  catch (  JsonProcessingException ex) {
