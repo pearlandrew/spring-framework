@@ -1,18 +1,27 @@
 {
   Assert.notNull(message,"Message must not be null");
-  message=this.interceptorChain.preSend(message,this);
-  if (message == null) {
-    return false;
-  }
+  ChannelInterceptorChain chain=new ChannelInterceptorChain();
+  boolean sent=false;
   try {
-    boolean sent=sendInternal(message,timeout);
-    this.interceptorChain.postSend(message,this,sent);
+    message=chain.applyPreSend(message,this);
+    if (message == null) {
+      return false;
+    }
+    sent=sendInternal(message,timeout);
+    chain.applyPostSend(message,this,sent);
+    chain.triggerAfterSendCompletion(message,this,sent,null);
     return sent;
   }
- catch (  Exception e) {
-    if (e instanceof MessagingException) {
-      throw (MessagingException)e;
+ catch (  Exception ex) {
+    chain.triggerAfterSendCompletion(message,this,sent,ex);
+    if (ex instanceof MessagingException) {
+      throw (MessagingException)ex;
     }
-    throw new MessageDeliveryException(message,"Failed to send message to " + this,e);
+    throw new MessageDeliveryException(message,"Failed to send message to " + this,ex);
+  }
+catch (  Error ex) {
+    MessageDeliveryException ex2=new MessageDeliveryException(message,"Failed to send message to " + this,ex);
+    chain.triggerAfterSendCompletion(message,this,sent,ex2);
+    throw ex2;
   }
 }
