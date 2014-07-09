@@ -10,13 +10,17 @@
   if (logger.isInfoEnabled()) {
     logger.info("Connecting \"system\" session to " + this.relayHost + ":"+ this.relayPort);
   }
-  StompHeaderAccessor headers=StompHeaderAccessor.create(StompCommand.CONNECT);
-  headers.setAcceptVersion("1.1,1.2");
-  headers.setLogin(this.systemLogin);
-  headers.setPasscode(this.systemPasscode);
-  headers.setHeartbeat(this.systemHeartbeatSendInterval,this.systemHeartbeatReceiveInterval);
-  headers.setHost(getVirtualHost());
-  SystemStompConnectionHandler handler=new SystemStompConnectionHandler(headers);
+  StompHeaderAccessor accessor=StompHeaderAccessor.create(StompCommand.CONNECT);
+  accessor.setAcceptVersion("1.1,1.2");
+  accessor.setLogin(this.systemLogin);
+  accessor.setPasscode(this.systemPasscode);
+  accessor.setHeartbeat(this.systemHeartbeatSendInterval,this.systemHeartbeatReceiveInterval);
+  accessor.setHost(getVirtualHost());
+  accessor.setSessionId(SYSTEM_SESSION_ID);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Forwarding " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
+  }
+  SystemStompConnectionHandler handler=new SystemStompConnectionHandler(accessor);
   this.connectionHandlers.put(handler.getSessionId(),handler);
   this.stats.incrementConnectCount();
   this.tcpClient.connect(handler,new FixedIntervalReconnectStrategy(5000));

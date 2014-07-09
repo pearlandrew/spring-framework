@@ -1,15 +1,13 @@
 {
   TransportType transportType=TransportType.fromValue(transport);
   if (transportType == null) {
-    if (logger.isErrorEnabled()) {
-      logger.error("Unknown transport type: " + transportType);
-    }
+    logger.error("Unknown transport type for " + request.getURI());
     response.setStatusCode(HttpStatus.NOT_FOUND);
     return;
   }
   TransportHandler transportHandler=this.handlers.get(transportType);
   if (transportHandler == null) {
-    logger.error("Transport handler not found");
+    logger.error("No TransportHandler for " + request.getURI());
     response.setStatusCode(HttpStatus.NOT_FOUND);
     return;
   }
@@ -44,7 +42,7 @@
  else {
         response.setStatusCode(HttpStatus.NOT_FOUND);
         if (logger.isDebugEnabled()) {
-          logger.debug("Session not found, sessionId=" + sessionId);
+          logger.debug("Session not found, sessionId=" + sessionId + ". The session may have been closed "+ "(e.g. missed heart-beat) while a message was coming in.");
         }
         return;
       }

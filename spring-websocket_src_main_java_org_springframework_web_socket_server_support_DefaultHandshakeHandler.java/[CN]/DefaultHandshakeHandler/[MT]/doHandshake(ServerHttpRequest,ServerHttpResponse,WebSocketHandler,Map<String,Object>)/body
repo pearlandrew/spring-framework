@@ -1,13 +1,15 @@
 {
   WebSocketHttpHeaders headers=new WebSocketHttpHeaders(request.getHeaders());
-  if (logger.isDebugEnabled()) {
-    logger.debug("Initiating handshake for " + request.getURI() + ", headers="+ headers);
+  if (logger.isTraceEnabled()) {
+    logger.trace("Processing request " + request.getURI() + " with headers="+ headers);
   }
   try {
     if (!HttpMethod.GET.equals(request.getMethod())) {
       response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
       response.getHeaders().setAllow(Collections.singleton(HttpMethod.GET));
-      logger.debug("Only HTTP GET is allowed, current method is " + request.getMethod());
+      if (logger.isErrorEnabled()) {
+        logger.error("Handshake failed due to unexpected HTTP method: " + request.getMethod());
+      }
       return false;
     }
     if (!"WebSocket".equalsIgnoreCase(headers.getUpgrade())) {
@@ -28,7 +30,9 @@
     }
     String wsKey=headers.getSecWebSocketKey();
     if (wsKey == null) {
-      logger.debug("Missing \"Sec-WebSocket-Key\" header");
+      if (logger.isErrorEnabled()) {
+        logger.error("Missing \"Sec-WebSocket-Key\" header");
+      }
       response.setStatusCode(HttpStatus.BAD_REQUEST);
       return false;
     }
@@ -37,15 +41,12 @@
     throw new HandshakeFailureException("Response update failed during upgrade to WebSocket, uri=" + request.getURI(),ex);
   }
   String subProtocol=selectProtocol(headers.getSecWebSocketProtocol(),wsHandler);
-  if (logger.isDebugEnabled()) {
-    logger.debug("Selected sub-protocol: '" + subProtocol + "'");
-  }
   List<WebSocketExtension> requested=headers.getSecWebSocketExtensions();
   List<WebSocketExtension> supported=this.requestUpgradeStrategy.getSupportedExtensions(request);
   List<WebSocketExtension> extensions=filterRequestedExtensions(request,requested,supported);
   Principal user=determineUser(request,wsHandler,attributes);
-  if (logger.isDebugEnabled()) {
-    logger.debug("Upgrading request, sub-protocol=" + subProtocol + ", extensions="+ extensions);
+  if (logger.isTraceEnabled()) {
+    logger.trace("Upgrading to WebSocket");
   }
   this.requestUpgradeStrategy.upgrade(request,response,subProtocol,extensions,user,wsHandler,attributes);
   return true;

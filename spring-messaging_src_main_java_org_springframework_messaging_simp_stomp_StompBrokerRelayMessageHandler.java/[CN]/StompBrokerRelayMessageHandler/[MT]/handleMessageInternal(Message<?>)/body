@@ -1,7 +1,7 @@
 {
   String sessionId=SimpMessageHeaderAccessor.getSessionId(message.getHeaders());
   if (!isBrokerAvailable()) {
-    if (sessionId == null || SystemStompConnectionHandler.SESSION_ID.equals(sessionId)) {
+    if (sessionId == null || SYSTEM_SESSION_ID.equals(sessionId)) {
       throw new MessageDeliveryException("Message broker not active. Consider subscribing to " + "receive BrokerAvailabilityEvent's from an ApplicationListener Spring bean.");
     }
     SimpMessageType messageType=SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
@@ -38,7 +38,7 @@
       logger.error("Only STOMP SEND supported from within the server side. Ignoring " + message);
       return;
     }
-    sessionId=SystemStompConnectionHandler.SESSION_ID;
+    sessionId=SYSTEM_SESSION_ID;
     stompAccessor.setSessionId(sessionId);
   }
   String destination=stompAccessor.getDestination();
@@ -47,7 +47,7 @@
   }
   if (StompCommand.CONNECT.equals(command)) {
     if (logger.isDebugEnabled()) {
-      logger.debug("STOMP CONNECT in session " + sessionId + " ("+ getConnectionCount()+ " connections).");
+      logger.debug(stompAccessor.getShortLogMessage(EMPTY_PAYLOAD));
     }
     stompAccessor=(stompAccessor.isMutable() ? stompAccessor : StompHeaderAccessor.wrap(message));
     stompAccessor.setLogin(this.clientLogin);

@@ -11,7 +11,7 @@
     messages=decoder.decode(byteBuffer);
     if (messages.isEmpty()) {
       if (logger.isTraceEnabled()) {
-        logger.trace("Incomplete STOMP frame content received, bufferSize=" + decoder.getBufferSize() + ", bufferSizeLimit="+ decoder.getBufferSizeLimit()+ ".");
+        logger.trace("Incomplete STOMP frame content received in session " + session + ", bufferSize="+ decoder.getBufferSize()+ ", bufferSizeLimit="+ decoder.getBufferSizeLimit()+ ".");
       }
       return;
     }
@@ -27,7 +27,7 @@
     try {
       StompHeaderAccessor headerAccessor=MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
       if (logger.isTraceEnabled()) {
-        logger.trace(headerAccessor.isHeartbeat() ? "Received heartbeat from broker in session " + session.getId() + "." : "Received message from broker in session " + session.getId() + ": "+ message+ ".");
+        logger.trace("From client: " + headerAccessor.getShortLogMessage(message.getPayload()));
       }
       headerAccessor.setSessionId(session.getId());
       headerAccessor.setSessionAttributes(session.getAttributes());

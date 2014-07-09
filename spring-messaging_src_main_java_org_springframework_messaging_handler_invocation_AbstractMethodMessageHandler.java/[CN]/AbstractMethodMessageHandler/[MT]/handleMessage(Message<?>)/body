@@ -7,13 +7,13 @@
   if (lookupDestination == null) {
     return;
   }
-  if (logger.isDebugEnabled()) {
-    logger.debug("Handling message to " + destination);
-  }
   MessageHeaderAccessor headerAccessor=MessageHeaderAccessor.getMutableAccessor(message);
   headerAccessor.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,lookupDestination);
   headerAccessor.setLeaveMutable(true);
   message=MessageBuilder.createMessage(message.getPayload(),headerAccessor.getMessageHeaders());
+  if (logger.isDebugEnabled()) {
+    logger.debug("Searching methods to handle " + headerAccessor.getShortLogMessage(message.getPayload()));
+  }
   handleMessageInternal(message,lookupDestination);
   headerAccessor.setImmutable();
 }

@@ -6,35 +6,42 @@
   if (!checkDestinationPrefix(destination)) {
     return;
   }
+  SimpMessageHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(message,SimpMessageHeaderAccessor.class);
+  if (accessor == null) {
+    throw new IllegalStateException("No header accessor (not using the SimpMessagingTemplate?): " + message);
+  }
   if (SimpMessageType.MESSAGE.equals(messageType)) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Processing " + accessor.getShortLogMessage(message.getPayload()));
+    }
     sendMessageToSubscribers(destination,message);
   }
  else   if (SimpMessageType.CONNECT.equals(messageType)) {
-    if (logger.isInfoEnabled()) {
-      logger.info("Handling CONNECT: " + message);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
     }
-    SimpMessageHeaderAccessor accessor=SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
-    initHeaders(accessor);
-    accessor.setSessionId(sessionId);
-    accessor.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER,message);
-    Message<byte[]> connectAck=MessageBuilder.createMessage(EMPTY_PAYLOAD,accessor.getMessageHeaders());
-    this.clientOutboundChannel.send(connectAck);
+    SimpMessageHeaderAccessor connectAck=SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
+    initHeaders(connectAck);
+    connectAck.setSessionId(sessionId);
+    connectAck.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER,message);
+    Message<byte[]> messageOut=MessageBuilder.createMessage(EMPTY_PAYLOAD,connectAck.getMessageHeaders());
+    this.clientOutboundChannel.send(messageOut);
   }
  else   if (SimpMessageType.DISCONNECT.equals(messageType)) {
-    if (logger.isInfoEnabled()) {
-      logger.info("Handling DISCONNECT: " + message);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
     }
     this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
   }
  else   if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
     if (logger.isDebugEnabled()) {
-      logger.debug("Handling SUBSCRIBE: " + message);
+      logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
     }
     this.subscriptionRegistry.registerSubscription(message);
   }
  else   if (SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
     if (logger.isDebugEnabled()) {
-      logger.debug("Handling UNSUBSCRIBE: " + message);
+      logger.debug("Processing " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
     }
     this.subscriptionRegistry.unregisterSubscription(message);
   }

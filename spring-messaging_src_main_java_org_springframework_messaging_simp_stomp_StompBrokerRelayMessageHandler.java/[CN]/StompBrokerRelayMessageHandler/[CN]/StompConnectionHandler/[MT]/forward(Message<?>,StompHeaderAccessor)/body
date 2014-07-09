@@ -3,30 +3,21 @@
   if (!this.isStompConnected) {
     if (this.isRemoteClientSession) {
       if (logger.isDebugEnabled()) {
-        logger.debug("TCP connection closed already, ignoring " + message);
+        logger.debug("TCP connection closed already, ignoring " + accessor.getShortLogMessage((byte[])message.getPayload()));
       }
       return EMPTY_TASK;
     }
  else {
-      throw new IllegalStateException("Cannot forward messages " + (conn != null ? "before STOMP CONNECTED. " : "while inactive. ") + "Consider subscribing to receive BrokerAvailabilityEvent's from "+ "an ApplicationListener Spring bean. Dropped "+ message);
+      throw new IllegalStateException("Cannot forward messages " + (conn != null ? "before STOMP CONNECTED. " : "while inactive. ") + "Consider subscribing to receive BrokerAvailabilityEvent's from "+ "an ApplicationListener Spring bean. Dropped "+ accessor.getShortLogMessage((byte[])message.getPayload()));
     }
   }
   final Message<?> messageToSend=(accessor.isMutable() && accessor.isModified()) ? MessageBuilder.createMessage(message.getPayload(),accessor.getMessageHeaders()) : message;
   StompCommand command=accessor.getCommand();
-  if (accessor.isHeartbeat()) {
-    logger.trace("Forwarding heartbeat in session " + this.sessionId);
-  }
- else   if (StompCommand.SUBSCRIBE.equals(command) && logger.isDebugEnabled()) {
-    logger.debug("Forwarding SUBSCRIBE: " + messageToSend);
-  }
- else   if (StompCommand.UNSUBSCRIBE.equals(command) && logger.isDebugEnabled()) {
-    logger.debug("Forwarding UNSUBSCRIBE: " + messageToSend);
-  }
- else   if (StompCommand.DISCONNECT.equals(command) && logger.isInfoEnabled()) {
-    logger.info("Forwarding DISCONNECT: " + messageToSend);
+  if (logger.isDebugEnabled() && StompCommand.SEND.equals(command) || StompCommand.SUBSCRIBE.equals(command) || StompCommand.UNSUBSCRIBE.equals(command) || StompCommand.DISCONNECT.equals(command)) {
+    logger.debug("Forwarding " + accessor.getShortLogMessage((byte[])message.getPayload()));
   }
  else   if (logger.isTraceEnabled()) {
-    logger.trace("Forwarding " + command + ": "+ messageToSend);
+    logger.trace("Forwarding " + accessor.getDetailedLogMessage((byte[])message.getPayload()));
   }
   ListenableFuture<Void> future=conn.send((Message<byte[]>)messageToSend);
   future.addCallback(new ListenableFutureCallback<Void>(){
@@ -37,10 +28,10 @@
     }
     @Override public void onFailure(    Throwable t){
       if (tcpConnection != null) {
-        handleTcpConnectionFailure("failed to forward " + messageToSend,t);
+        handleTcpConnectionFailure("failed to forward " + accessor.getShortLogMessage((byte[])message.getPayload()),t);
       }
  else       if (logger.isErrorEnabled()) {
-        logger.error("Failed to forward " + messageToSend);
+        logger.error("Failed to forward " + accessor.getShortLogMessage((byte[])message.getPayload()));
       }
     }
   }

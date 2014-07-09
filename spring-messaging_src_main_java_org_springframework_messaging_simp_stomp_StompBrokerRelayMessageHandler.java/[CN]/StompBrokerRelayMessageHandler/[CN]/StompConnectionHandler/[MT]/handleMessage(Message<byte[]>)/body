@@ -1,18 +1,19 @@
 {
-  StompHeaderAccessor headerAccessor=MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
-  headerAccessor.setSessionId(this.sessionId);
-  if (StompCommand.CONNECTED.equals(headerAccessor.getCommand())) {
-    if (logger.isInfoEnabled()) {
-      logger.info("Received STOMP CONNECTED: " + headerAccessor);
+  StompHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
+  accessor.setSessionId(this.sessionId);
+  StompCommand command=accessor.getCommand();
+  if (StompCommand.CONNECTED.equals(command)) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Received " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
     }
-    afterStompConnected(headerAccessor);
+    afterStompConnected(accessor);
   }
- else   if (StompCommand.ERROR.equals(headerAccessor.getCommand()) && logger.isErrorEnabled()) {
-    logger.error("Received STOMP ERROR: " + message);
+ else   if (logger.isErrorEnabled() && StompCommand.ERROR.equals(command)) {
+    logger.error("Received " + accessor.getShortLogMessage(message.getPayload()));
   }
  else   if (logger.isTraceEnabled()) {
-    logger.trace(headerAccessor.isHeartbeat() ? "Received heartbeat in session " + this.sessionId : "Received " + headerAccessor);
+    logger.trace("Received " + accessor.getDetailedLogMessage(message.getPayload()));
   }
-  headerAccessor.setImmutable();
+  accessor.setImmutable();
   sendMessageToClient(message);
 }
