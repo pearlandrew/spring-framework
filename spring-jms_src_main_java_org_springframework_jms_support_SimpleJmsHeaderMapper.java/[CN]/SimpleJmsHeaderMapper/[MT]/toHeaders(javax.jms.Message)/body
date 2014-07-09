@@ -1,0 +1,103 @@
+{
+  Map<String,Object> headers=new HashMap<String,Object>();
+  try {
+    try {
+      String correlationId=jmsMessage.getJMSCorrelationID();
+      if (correlationId != null) {
+        headers.put(JmsHeaders.CORRELATION_ID,correlationId);
+      }
+    }
+ catch (    Exception ex) {
+      logger.info("failed to read JMSCorrelationID property, skipping",ex);
+    }
+    try {
+      Destination destination=jmsMessage.getJMSDestination();
+      if (destination != null) {
+        headers.put(JmsHeaders.DESTINATION,destination);
+      }
+    }
+ catch (    Exception ex) {
+      logger.info("failed to read JMSDestination property, skipping",ex);
+    }
+    try {
+      int deliveryMode=jmsMessage.getJMSDeliveryMode();
+      headers.put(JmsHeaders.DELIVERY_MODE,deliveryMode);
+    }
+ catch (    Exception ex) {
+      logger.info("failed to read JMSDeliveryMode property, skipping",ex);
+    }
+    try {
+      long expiration=jmsMessage.getJMSExpiration();
+      headers.put(JmsHeaders.EXPIRATION,expiration);
+    }
+ catch (    Exception ex) {
+      logger.info("failed to read JMSExpiration property, skipping",ex);
+    }
+    try {
+      String messageId=jmsMessage.getJMSMessageID();
+      if (messageId != null) {
+        headers.put(JmsHeaders.MESSAGE_ID,messageId);
+      }
+    }
+ catch (    Exception ex) {
+      logger.info("failed to read JMSMessageID property, skipping",ex);
+    }
+    try {
+      headers.put(JmsHeaders.PRIORITY,jmsMessage.getJMSPriority());
+    }
+ catch (    Exception ex) {
+      logger.info("failed to read JMSPriority property, skipping",ex);
+    }
+    try {
+      Destination replyTo=jmsMessage.getJMSReplyTo();
+      if (replyTo != null) {
+        headers.put(JmsHeaders.REPLY_TO,replyTo);
+      }
+    }
+ catch (    Exception ex) {
+      logger.info("failed to read JMSReplyTo property, skipping",ex);
+    }
+    try {
+      headers.put(JmsHeaders.REDELIVERED,jmsMessage.getJMSRedelivered());
+    }
+ catch (    Exception ex) {
+      logger.info("failed to read JMSRedelivered property, skipping",ex);
+    }
+    try {
+      String type=jmsMessage.getJMSType();
+      if (type != null) {
+        headers.put(JmsHeaders.TYPE,type);
+      }
+    }
+ catch (    Exception ex) {
+      logger.info("failed to read JMSType property, skipping",ex);
+    }
+    try {
+      headers.put(JmsHeaders.TIMESTAMP,jmsMessage.getJMSTimestamp());
+    }
+ catch (    Exception ex) {
+      logger.info("failed to read JMSTimestamp property, skipping",ex);
+    }
+    Enumeration<?> jmsPropertyNames=jmsMessage.getPropertyNames();
+    if (jmsPropertyNames != null) {
+      while (jmsPropertyNames.hasMoreElements()) {
+        String propertyName=jmsPropertyNames.nextElement().toString();
+        try {
+          String headerName=this.toHeaderName(propertyName);
+          headers.put(headerName,jmsMessage.getObjectProperty(propertyName));
+        }
+ catch (        Exception ex) {
+          if (logger.isWarnEnabled()) {
+            logger.warn("Error occurred while mapping JMS property '" + propertyName + "' to Message header",ex);
+          }
+        }
+      }
+    }
+  }
+ catch (  JMSException ex) {
+    if (logger.isWarnEnabled()) {
+      logger.warn("Error occurred while mapping from JMS properties to MessageHeaders",ex);
+    }
+  }
+  return new MessageHeaders(headers);
+}
