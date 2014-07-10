@@ -2,8 +2,8 @@
   this.errorFilter.responseStatusMap.put("/websocket",200);
   this.errorFilter.responseStatusMap.put("/xhr_streaming",500);
   TestClientHandler handler=new TestClientHandler();
-  Transport[] transports={getWebSocketTransport(),getXhrTransport()};
-  WebSocketSession session=createSockJsClient(transports).doHandshake(handler,this.baseUrl + "/echo").get();
+  initSockJsClient(createWebSocketTransport(),createXhrTransport());
+  WebSocketSession session=this.sockJsClient.doHandshake(handler,this.baseUrl + "/echo").get();
   assertEquals("Fallback didn't occur",XhrClientSockJsSession.class,session.getClass());
   TextMessage message=new TextMessage("message1");
   session.sendMessage(message);
