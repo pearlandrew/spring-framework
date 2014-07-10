@@ -1,3 +1,20 @@
 {
-  return this.resourceResolvers;
+  List<ResourceResolver> resolvers=new ArrayList<ResourceResolver>();
+  boolean hasCachingResolver=false;
+  if (!this.customResolvers.isEmpty()) {
+    if (ClassUtils.isAssignable(CachingResourceResolver.class,this.customResolvers.get(0).getClass())) {
+      hasCachingResolver=true;
+    }
+  }
+  if (!hasCachingResolver && !this.isDevMode) {
+    resolvers.add(new CachingResourceResolver(getDefaultResourceCache()));
+  }
+  resolvers.addAll(this.customResolvers);
+  if (!this.versionStrategies.isEmpty()) {
+    VersionResourceResolver versionResolver=new VersionResourceResolver();
+    versionResolver.setStrategyMap(this.versionStrategies);
+    resolvers.add(versionResolver);
+  }
+  resolvers.add(new PathResourceResolver());
+  return resolvers;
 }
