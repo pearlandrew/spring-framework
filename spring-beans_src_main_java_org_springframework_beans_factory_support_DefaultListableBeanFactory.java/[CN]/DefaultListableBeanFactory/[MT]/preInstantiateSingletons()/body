@@ -32,4 +32,22 @@ synchronized (this.beanDefinitionMap) {
       }
     }
   }
+  for (  String beanName : beanNames) {
+    Object singletonInstance=getSingleton(beanName);
+    if (singletonInstance instanceof SmartInitializingSingleton) {
+      final SmartInitializingSingleton smartSingleton=(SmartInitializingSingleton)singletonInstance;
+      if (System.getSecurityManager() != null) {
+        AccessController.doPrivileged(new PrivilegedAction<Object>(){
+          @Override public Object run(){
+            smartSingleton.afterSingletonsInstantiated();
+            return null;
+          }
+        }
+,getAccessControlContext());
+      }
+ else {
+        smartSingleton.afterSingletonsInstantiated();
+      }
+    }
+  }
 }
