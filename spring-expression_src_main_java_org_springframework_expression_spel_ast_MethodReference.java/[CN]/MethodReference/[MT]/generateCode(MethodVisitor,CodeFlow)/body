@@ -1,0 +1,31 @@
+{
+  ReflectiveMethodExecutor executor=(ReflectiveMethodExecutor)this.cachedExecutor.get();
+  Method method=executor.getMethod();
+  boolean isStaticMethod=Modifier.isStatic(method.getModifiers());
+  String descriptor=codeflow.lastDescriptor();
+  if (descriptor == null && !isStaticMethod) {
+    codeflow.loadTarget(mv);
+  }
+  boolean itf=method.getDeclaringClass().isInterface();
+  String methodDeclaringClassSlashedDescriptor=method.getDeclaringClass().getName().replace('.','/');
+  if (!isStaticMethod) {
+    if (descriptor == null || !descriptor.equals(method.getDeclaringClass())) {
+      mv.visitTypeInsn(CHECKCAST,method.getDeclaringClass().getName().replace('.','/'));
+    }
+  }
+  String[] paramDescriptors=CodeFlow.toParamDescriptors(method);
+  for (int c=0; c < children.length; c++) {
+    SpelNodeImpl child=children[c];
+    codeflow.enterCompilationScope();
+    child.generateCode(mv,codeflow);
+    if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && (paramDescriptors[c].charAt(0) == 'L')) {
+      CodeFlow.insertBoxIfNecessary(mv,codeflow.lastDescriptor().charAt(0));
+    }
+ else     if (!codeflow.lastDescriptor().equals(paramDescriptors[c])) {
+      CodeFlow.insertCheckCast(mv,paramDescriptors[c]);
+    }
+    codeflow.exitCompilationScope();
+  }
+  mv.visitMethodInsn(isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL,methodDeclaringClassSlashedDescriptor,method.getName(),CodeFlow.createSignatureDescriptor(method),itf);
+  codeflow.pushDescriptor(exitTypeDescriptor);
+}

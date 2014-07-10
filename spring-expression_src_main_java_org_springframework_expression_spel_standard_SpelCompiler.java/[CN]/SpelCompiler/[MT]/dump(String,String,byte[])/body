@@ -1,0 +1,25 @@
+{
+  name=name.replace('.','/');
+  String dir="";
+  if (name.indexOf('/') != -1) {
+    dir=name.substring(0,name.lastIndexOf('/'));
+  }
+  String dumplocation=null;
+  try {
+    File tempfile=null;
+    tempfile=File.createTempFile("tmp",null);
+    tempfile.delete();
+    File f=new File(tempfile,dir);
+    f.mkdirs();
+    dumplocation=tempfile + File.separator + name+ ".class";
+    System.out.println("Expression '" + expressionText + "' compiled code dumped to "+ dumplocation);
+    f=new File(dumplocation);
+    FileOutputStream fos=new FileOutputStream(f);
+    fos.write(bytecode);
+    fos.flush();
+    fos.close();
+  }
+ catch (  IOException ioe) {
+    throw new IllegalStateException("Unexpected problem dumping class " + name + " into "+ dumplocation,ioe);
+  }
+}

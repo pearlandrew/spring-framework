@@ -1,0 +1,19 @@
+{
+  boolean isStatic=Modifier.isStatic(member.getModifiers());
+  String descriptor=codeflow.lastDescriptor();
+  String memberDeclaringClassSlashedDescriptor=member.getDeclaringClass().getName().replace('.','/');
+  if (!isStatic) {
+    if (descriptor == null) {
+      codeflow.loadTarget(mv);
+    }
+    if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
+      mv.visitTypeInsn(CHECKCAST,memberDeclaringClassSlashedDescriptor);
+    }
+  }
+  if (member instanceof Field) {
+    mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD,memberDeclaringClassSlashedDescriptor,member.getName(),CodeFlow.toJVMDescriptor(((Field)member).getType()));
+  }
+ else {
+    mv.visitMethodInsn(isStatic ? INVOKESTATIC : INVOKEVIRTUAL,memberDeclaringClassSlashedDescriptor,member.getName(),CodeFlow.createSignatureDescriptor((Method)member),false);
+  }
+}

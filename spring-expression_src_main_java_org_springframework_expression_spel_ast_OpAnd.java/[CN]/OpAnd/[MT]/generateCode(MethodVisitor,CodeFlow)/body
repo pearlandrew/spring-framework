@@ -1,0 +1,18 @@
+{
+  Label elseTarget=new Label();
+  Label endOfIf=new Label();
+  codeflow.enterCompilationScope();
+  getLeftOperand().generateCode(mv,codeflow);
+  codeflow.unboxBooleanIfNecessary(mv);
+  codeflow.exitCompilationScope();
+  mv.visitJumpInsn(IFNE,elseTarget);
+  mv.visitLdcInsn(0);
+  mv.visitJumpInsn(GOTO,endOfIf);
+  mv.visitLabel(elseTarget);
+  codeflow.enterCompilationScope();
+  getRightOperand().generateCode(mv,codeflow);
+  codeflow.unboxBooleanIfNecessary(mv);
+  codeflow.exitCompilationScope();
+  mv.visitLabel(endOfIf);
+  codeflow.pushDescriptor(this.exitTypeDescriptor);
+}

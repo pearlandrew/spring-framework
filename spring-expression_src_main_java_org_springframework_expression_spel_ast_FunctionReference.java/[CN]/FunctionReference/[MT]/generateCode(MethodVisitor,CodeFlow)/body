@@ -1,0 +1,18 @@
+{
+  String methodDeclaringClassSlashedDescriptor=method.getDeclaringClass().getName().replace('.','/');
+  String[] paramDescriptors=CodeFlow.toParamDescriptors(method);
+  for (int c=0; c < children.length; c++) {
+    SpelNodeImpl child=children[c];
+    codeflow.enterCompilationScope();
+    child.generateCode(mv,codeflow);
+    if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && (paramDescriptors[c].charAt(0) == 'L')) {
+      CodeFlow.insertBoxIfNecessary(mv,codeflow.lastDescriptor().charAt(0));
+    }
+ else     if (!codeflow.lastDescriptor().equals(paramDescriptors[c])) {
+      CodeFlow.insertCheckCast(mv,paramDescriptors[c]);
+    }
+    codeflow.exitCompilationScope();
+  }
+  mv.visitMethodInsn(INVOKESTATIC,methodDeclaringClassSlashedDescriptor,method.getName(),CodeFlow.createSignatureDescriptor(method),false);
+  codeflow.pushDescriptor(exitTypeDescriptor);
+}

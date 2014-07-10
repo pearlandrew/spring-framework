@@ -14,7 +14,18 @@
           Indexer.this.cachedReadAccessor=accessor;
           Indexer.this.cachedReadName=this.name;
           Indexer.this.cachedReadTargetType=targetObjectRuntimeClass;
-          return accessor.read(this.evaluationContext,this.targetObject,this.name);
+          if (accessor instanceof ReflectivePropertyAccessor.OptimalPropertyAccessor) {
+            ReflectivePropertyAccessor.OptimalPropertyAccessor optimalAccessor=(ReflectivePropertyAccessor.OptimalPropertyAccessor)accessor;
+            Member member=optimalAccessor.member;
+            if (member instanceof Field) {
+              Indexer.this.exitTypeDescriptor=CodeFlow.toDescriptor(((Field)member).getType());
+            }
+ else {
+              Indexer.this.exitTypeDescriptor=CodeFlow.toDescriptor(((Method)member).getReturnType());
+            }
+          }
+          TypedValue value=accessor.read(this.evaluationContext,this.targetObject,this.name);
+          return value;
         }
       }
     }

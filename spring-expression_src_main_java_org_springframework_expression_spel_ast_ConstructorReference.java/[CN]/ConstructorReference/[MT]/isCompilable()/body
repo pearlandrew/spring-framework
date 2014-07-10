@@ -1,0 +1,21 @@
+{
+  if (!(this.cachedExecutor instanceof ReflectiveConstructorExecutor) || this.exitTypeDescriptor == null) {
+    return false;
+  }
+  if (getChildCount() > 1) {
+    for (int c=1, max=getChildCount(); c < max; c++) {
+      if (!children[c].isCompilable()) {
+        return false;
+      }
+    }
+  }
+  ReflectiveConstructorExecutor executor=(ReflectiveConstructorExecutor)this.cachedExecutor;
+  Constructor<?> constructor=executor.getConstructor();
+  if (!Modifier.isPublic(constructor.getModifiers()) || !Modifier.isPublic(constructor.getDeclaringClass().getModifiers())) {
+    return false;
+  }
+  if (constructor.isVarArgs()) {
+    return false;
+  }
+  return true;
+}

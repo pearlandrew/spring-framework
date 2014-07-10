@@ -1,0 +1,22 @@
+{
+  if (this.cachedExecutor == null || !(this.cachedExecutor.get() instanceof ReflectiveMethodExecutor)) {
+    return false;
+  }
+  for (  SpelNodeImpl child : children) {
+    if (!child.isCompilable()) {
+      return false;
+    }
+  }
+  ReflectiveMethodExecutor executor=(ReflectiveMethodExecutor)this.cachedExecutor.get();
+  Method method=executor.getMethod();
+  if (!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+    return false;
+  }
+  if (method.isVarArgs()) {
+    return false;
+  }
+  if (executor.didArgumentConversionOccur()) {
+    return false;
+  }
+  return true;
+}
