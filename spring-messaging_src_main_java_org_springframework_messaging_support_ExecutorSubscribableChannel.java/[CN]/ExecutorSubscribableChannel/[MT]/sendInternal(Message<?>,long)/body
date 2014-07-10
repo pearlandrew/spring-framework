@@ -1,15 +1,12 @@
 {
-  for (  final MessageHandler handler : getSubscribers()) {
+  for (  MessageHandler subscriber : getSubscribers()) {
+    ExecutorChannelInterceptorChain chain=new ExecutorChannelInterceptorChain();
+    SendTask sendTask=new SendTask(message,this,subscriber,chain);
     if (this.executor == null) {
-      handler.handleMessage(message);
+      sendTask.run();
     }
  else {
-      this.executor.execute(new Runnable(){
-        @Override public void run(){
-          handler.handleMessage(message);
-        }
-      }
-);
+      this.executor.execute(sendTask);
     }
   }
   return true;

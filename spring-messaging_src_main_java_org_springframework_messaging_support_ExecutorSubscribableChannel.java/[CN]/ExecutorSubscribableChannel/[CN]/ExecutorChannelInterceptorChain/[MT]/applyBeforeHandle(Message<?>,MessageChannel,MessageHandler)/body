@@ -1,0 +1,15 @@
+{
+  for (  ExecutorChannelInterceptor interceptor : executorInterceptors) {
+    message=interceptor.beforeHandle(message,channel,handler);
+    if (message == null) {
+      String name=interceptor.getClass().getSimpleName();
+      if (logger.isDebugEnabled()) {
+        logger.debug(name + " returned null from beforeHandle, i.e. precluding the send.");
+      }
+      triggerAfterMessageHandled(message,channel,handler,null);
+      return null;
+    }
+    this.interceptorIndex++;
+  }
+  return message;
+}
