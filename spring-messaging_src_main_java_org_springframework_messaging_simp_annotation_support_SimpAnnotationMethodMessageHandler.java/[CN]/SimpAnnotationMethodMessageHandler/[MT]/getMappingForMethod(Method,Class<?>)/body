@@ -2,17 +2,17 @@
   MessageMapping typeAnnotation=AnnotationUtils.findAnnotation(handlerType,MessageMapping.class);
   MessageMapping messageAnnot=AnnotationUtils.findAnnotation(method,MessageMapping.class);
   if (messageAnnot != null) {
-    SimpMessageMappingInfo result=createMessageMappingCondition(messageAnnot);
+    SimpMessageMappingInfo result=createMessageMappingCondition(messageAnnot,typeAnnotation == null);
     if (typeAnnotation != null) {
-      result=createMessageMappingCondition(typeAnnotation).combine(result);
+      result=createMessageMappingCondition(typeAnnotation,false).combine(result);
     }
     return result;
   }
   SubscribeMapping subsribeAnnotation=AnnotationUtils.findAnnotation(method,SubscribeMapping.class);
   if (subsribeAnnotation != null) {
-    SimpMessageMappingInfo result=createSubscribeCondition(subsribeAnnotation);
+    SimpMessageMappingInfo result=createSubscribeCondition(subsribeAnnotation,typeAnnotation == null);
     if (typeAnnotation != null) {
-      result=createMessageMappingCondition(typeAnnotation).combine(result);
+      result=createMessageMappingCondition(typeAnnotation,false).combine(result);
     }
     return result;
   }

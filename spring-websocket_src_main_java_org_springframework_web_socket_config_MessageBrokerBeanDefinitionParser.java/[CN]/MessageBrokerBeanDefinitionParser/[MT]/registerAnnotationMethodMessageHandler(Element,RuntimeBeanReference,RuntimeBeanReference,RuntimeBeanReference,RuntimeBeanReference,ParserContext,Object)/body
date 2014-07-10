@@ -8,5 +8,9 @@
   mpvs.add("destinationPrefixes",Arrays.asList(StringUtils.tokenizeToStringArray(appDestPrefix,",")));
   mpvs.add("messageConverter",brokerMessageConverterRef);
   RootBeanDefinition annotationMethodMessageHandlerDef=new RootBeanDefinition(SimpAnnotationMethodMessageHandler.class,cavs,mpvs);
+  String defaultSeparator=messageBrokerElement.getAttribute("default-separator");
+  if (!defaultSeparator.isEmpty()) {
+    annotationMethodMessageHandlerDef.getPropertyValues().add("pathMatcher",new AntPathMatcher(defaultSeparator));
+  }
   registerBeanDef(annotationMethodMessageHandlerDef,parserCxt,source);
 }
