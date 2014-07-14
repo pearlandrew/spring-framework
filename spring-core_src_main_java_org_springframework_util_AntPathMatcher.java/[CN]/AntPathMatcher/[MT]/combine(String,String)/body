@@ -12,15 +12,15 @@
   if (!pattern1.equals(pattern2) && !pattern1ContainsUriVar && match(pattern1,pattern2)) {
     return pattern2;
   }
-  if (pattern1.endsWith(this.pathSeparator + "*")) {
-    return separatorConcat(pattern1.substring(0,pattern1.length() - 2),pattern2);
+  if (pattern1.endsWith(this.pathSeparatorPatternCache.getEndsOnWildCard())) {
+    return concat(pattern1.substring(0,pattern1.length() - 2),pattern2);
   }
-  if (pattern1.endsWith(this.pathSeparator + "**")) {
-    return separatorConcat(pattern1,pattern2);
+  if (pattern1.endsWith(this.pathSeparatorPatternCache.getEndsOnDoubleWildCard())) {
+    return concat(pattern1,pattern2);
   }
   int starDotPos1=pattern1.indexOf("*.");
   if (pattern1ContainsUriVar || starDotPos1 == -1 || this.pathSeparator.equals(".")) {
-    return separatorConcat(pattern1,pattern2);
+    return concat(pattern1,pattern2);
   }
   String extension1=pattern1.substring(starDotPos1 + 1);
   int dotPos2=pattern2.indexOf('.');

@@ -7,10 +7,9 @@
   MutablePropertyValues mpvs=new MutablePropertyValues();
   mpvs.add("destinationPrefixes",Arrays.asList(StringUtils.tokenizeToStringArray(appDestPrefix,",")));
   mpvs.add("messageConverter",brokerMessageConverterRef);
-  RootBeanDefinition annotationMethodMessageHandlerDef=new RootBeanDefinition(SimpAnnotationMethodMessageHandler.class,cavs,mpvs);
-  String defaultSeparator=messageBrokerElement.getAttribute("default-separator");
-  if (!defaultSeparator.isEmpty()) {
-    annotationMethodMessageHandlerDef.getPropertyValues().add("pathMatcher",new AntPathMatcher(defaultSeparator));
+  RootBeanDefinition beanDef=new RootBeanDefinition(SimpAnnotationMethodMessageHandler.class,cavs,mpvs);
+  if (messageBrokerElement.hasAttribute("path-matcher")) {
+    beanDef.getPropertyValues().add("pathMatcher",new RuntimeBeanReference(messageBrokerElement.getAttribute("path-matcher")));
   }
-  registerBeanDef(annotationMethodMessageHandlerDef,parserCxt,source);
+  registerBeanDef(beanDef,parserCxt,source);
 }

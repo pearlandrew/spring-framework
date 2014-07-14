@@ -1,10 +1,11 @@
 {
-  String defaultSeparator=this.getBrokerRegistry().getDefaultSeparator();
-  SimpAnnotationMethodMessageHandler handler=new SimpAnnotationMethodMessageHandler(clientInboundChannel(),clientOutboundChannel(),brokerMessagingTemplate(),defaultSeparator);
+  SimpAnnotationMethodMessageHandler handler=new SimpAnnotationMethodMessageHandler(clientInboundChannel(),clientOutboundChannel(),brokerMessagingTemplate());
   handler.setDestinationPrefixes(getBrokerRegistry().getApplicationDestinationPrefixes());
   handler.setMessageConverter(brokerMessageConverter());
   handler.setValidator(simpValidator());
-  AntPathMatcher pathMatcher=new AntPathMatcher(defaultSeparator);
-  handler.setPathMatcher(pathMatcher);
+  PathMatcher pathMatcher=this.getBrokerRegistry().getPathMatcher();
+  if (pathMatcher != null) {
+    handler.setPathMatcher(pathMatcher);
+  }
   return handler;
 }
