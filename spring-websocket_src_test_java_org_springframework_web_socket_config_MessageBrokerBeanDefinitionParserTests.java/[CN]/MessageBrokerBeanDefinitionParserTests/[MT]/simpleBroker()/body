@@ -1,7 +1,6 @@
 {
   loadBeanDefinitions("websocket-config-broker-simple.xml");
   HandlerMapping hm=this.appContext.getBean(HandlerMapping.class);
-  assertNotNull(hm);
   assertThat(hm,Matchers.instanceOf(SimpleUrlHandlerMapping.class));
   SimpleUrlHandlerMapping suhm=(SimpleUrlHandlerMapping)hm;
   assertThat(suhm.getUrlMap().keySet(),Matchers.hasSize(4));
@@ -10,7 +9,7 @@
   assertNotNull(httpRequestHandler);
   assertThat(httpRequestHandler,Matchers.instanceOf(WebSocketHttpRequestHandler.class));
   WebSocketHttpRequestHandler wsHttpRequestHandler=(WebSocketHttpRequestHandler)httpRequestHandler;
-  HandshakeHandler handshakeHandler=(HandshakeHandler)new DirectFieldAccessor(wsHttpRequestHandler).getPropertyValue("handshakeHandler");
+  HandshakeHandler handshakeHandler=wsHttpRequestHandler.getHandshakeHandler();
   assertNotNull(handshakeHandler);
   assertTrue(handshakeHandler instanceof TestHandshakeHandler);
   WebSocketHandler wsHandler=unwrapWebSocketHandler(wsHttpRequestHandler.getWebSocketHandler());

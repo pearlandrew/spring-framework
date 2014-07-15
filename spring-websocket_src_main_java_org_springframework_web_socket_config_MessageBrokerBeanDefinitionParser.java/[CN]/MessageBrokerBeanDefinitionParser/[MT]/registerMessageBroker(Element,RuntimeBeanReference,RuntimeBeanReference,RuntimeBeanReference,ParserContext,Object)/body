@@ -2,64 +2,56 @@
   Element simpleBrokerElem=DomUtils.getChildElementByTagName(messageBrokerElement,"simple-broker");
   Element brokerRelayElem=DomUtils.getChildElementByTagName(messageBrokerElement,"stomp-broker-relay");
   ConstructorArgumentValues cavs=new ConstructorArgumentValues();
-  cavs.addIndexedArgumentValue(0,clientInChannelDef);
-  cavs.addIndexedArgumentValue(1,clientOutChannelDef);
-  cavs.addIndexedArgumentValue(2,brokerChannelDef);
+  cavs.addIndexedArgumentValue(0,inChannel);
+  cavs.addIndexedArgumentValue(1,outChannel);
+  cavs.addIndexedArgumentValue(2,brokerChannel);
   RootBeanDefinition brokerDef;
   if (simpleBrokerElem != null) {
     String prefix=simpleBrokerElem.getAttribute("prefix");
     cavs.addIndexedArgumentValue(3,Arrays.asList(StringUtils.tokenizeToStringArray(prefix,",")));
     brokerDef=new RootBeanDefinition(SimpleBrokerMessageHandler.class,cavs,null);
     if (messageBrokerElement.hasAttribute("path-matcher")) {
-      brokerDef.getPropertyValues().add("pathMatcher",new RuntimeBeanReference(messageBrokerElement.getAttribute("path-matcher")));
+      String pathMatcherRef=messageBrokerElement.getAttribute("path-matcher");
+      brokerDef.getPropertyValues().add("pathMatcher",new RuntimeBeanReference(pathMatcherRef));
     }
   }
  else   if (brokerRelayElem != null) {
     String prefix=brokerRelayElem.getAttribute("prefix");
     cavs.addIndexedArgumentValue(3,Arrays.asList(StringUtils.tokenizeToStringArray(prefix,",")));
-    MutablePropertyValues mpvs=new MutablePropertyValues();
-    String relayHost=brokerRelayElem.getAttribute("relay-host");
-    if (!relayHost.isEmpty()) {
-      mpvs.add("relayHost",relayHost);
+    MutablePropertyValues values=new MutablePropertyValues();
+    if (brokerRelayElem.hasAttribute("relay-host")) {
+      values.add("relayHost",brokerRelayElem.getAttribute("relay-host"));
     }
-    String relayPort=brokerRelayElem.getAttribute("relay-port");
-    if (!relayPort.isEmpty()) {
-      mpvs.add("relayPort",Integer.valueOf(relayPort));
+    if (brokerRelayElem.hasAttribute("relay-port")) {
+      values.add("relayPort",brokerRelayElem.getAttribute("relay-port"));
     }
-    String attrValue=brokerRelayElem.getAttribute("client-login");
-    if (!attrValue.isEmpty()) {
-      mpvs.add("clientLogin",attrValue);
+    if (brokerRelayElem.hasAttribute("client-login")) {
+      values.add("clientLogin",brokerRelayElem.getAttribute("client-login"));
     }
-    attrValue=brokerRelayElem.getAttribute("client-passcode");
-    if (!attrValue.isEmpty()) {
-      mpvs.add("clientPasscode",attrValue);
+    if (brokerRelayElem.hasAttribute("client-passcode")) {
+      values.add("clientPasscode",brokerRelayElem.getAttribute("client-passcode"));
     }
-    attrValue=brokerRelayElem.getAttribute("system-login");
-    if (!attrValue.isEmpty()) {
-      mpvs.add("systemLogin",attrValue);
+    if (brokerRelayElem.hasAttribute("system-login")) {
+      values.add("systemLogin",brokerRelayElem.getAttribute("system-login"));
     }
-    attrValue=brokerRelayElem.getAttribute("system-passcode");
-    if (!attrValue.isEmpty()) {
-      mpvs.add("systemPasscode",attrValue);
+    if (brokerRelayElem.hasAttribute("system-passcode")) {
+      values.add("systemPasscode",brokerRelayElem.getAttribute("system-passcode"));
     }
-    attrValue=brokerRelayElem.getAttribute("heartbeat-send-interval");
-    if (!attrValue.isEmpty()) {
-      mpvs.add("systemHeartbeatSendInterval",Long.parseLong(attrValue));
+    if (brokerRelayElem.hasAttribute("heartbeat-send-interval")) {
+      values.add("systemHeartbeatSendInterval",brokerRelayElem.getAttribute("heartbeat-send-interval"));
     }
-    attrValue=brokerRelayElem.getAttribute("heartbeat-receive-interval");
-    if (!attrValue.isEmpty()) {
-      mpvs.add("systemHeartbeatReceiveInterval",Long.parseLong(attrValue));
+    if (brokerRelayElem.hasAttribute("heartbeat-receive-interval")) {
+      values.add("systemHeartbeatReceiveInterval",brokerRelayElem.getAttribute("heartbeat-receive-interval"));
     }
-    attrValue=brokerRelayElem.getAttribute("virtual-host");
-    if (!attrValue.isEmpty()) {
-      mpvs.add("virtualHost",attrValue);
+    if (brokerRelayElem.hasAttribute("virtual-host")) {
+      values.add("virtualHost",brokerRelayElem.getAttribute("virtual-host"));
     }
     Class<?> handlerType=StompBrokerRelayMessageHandler.class;
-    brokerDef=new RootBeanDefinition(handlerType,cavs,mpvs);
+    brokerDef=new RootBeanDefinition(handlerType,cavs,values);
   }
  else {
     throw new IllegalStateException("Neither <simple-broker> nor <stomp-broker-relay> elements found.");
   }
-  registerBeanDef(brokerDef,parserCxt,source);
+  registerBeanDef(brokerDef,context,source);
   return brokerDef;
 }

@@ -1,0 +1,20 @@
+{
+  RootBeanDefinition beanDef;
+  RuntimeBeanReference sockJsService=WebSocketNamespaceUtils.registerSockJsService(element,SOCKJS_SCHEDULER_BEAN_NAME,context,source);
+  if (sockJsService != null) {
+    ConstructorArgumentValues cavs=new ConstructorArgumentValues();
+    cavs.addIndexedArgumentValue(0,sockJsService);
+    cavs.addIndexedArgumentValue(1,subProtoHandler);
+    beanDef=new RootBeanDefinition(SockJsHttpRequestHandler.class,cavs,null);
+  }
+ else {
+    RuntimeBeanReference handshakeHandler=WebSocketNamespaceUtils.registerHandshakeHandler(element,context,source);
+    ConstructorArgumentValues cavs=new ConstructorArgumentValues();
+    cavs.addIndexedArgumentValue(0,subProtoHandler);
+    if (handshakeHandler != null) {
+      cavs.addIndexedArgumentValue(1,handshakeHandler);
+    }
+    beanDef=new RootBeanDefinition(WebSocketHttpRequestHandler.class,cavs,null);
+  }
+  return new RuntimeBeanReference(registerBeanDef(beanDef,context,source));
+}

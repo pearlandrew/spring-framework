@@ -1,7 +1,7 @@
 {
-  Object source=parserCxt.extractSource(element);
+  Object source=context.extractSource(element);
   CompositeComponentDefinition compDefinition=new CompositeComponentDefinition(element.getTagName(),source);
-  parserCxt.pushContainingComponent(compDefinition);
+  context.pushContainingComponent(compDefinition);
   String orderAttribute=element.getAttribute("order");
   int order=orderAttribute.isEmpty() ? DEFAULT_MAPPING_ORDER : Integer.valueOf(orderAttribute);
   ManagedMap<String,Object> urlMap=new ManagedMap<String,Object>();
@@ -9,45 +9,42 @@
   RootBeanDefinition handlerMappingDef=new RootBeanDefinition(SimpleUrlHandlerMapping.class);
   handlerMappingDef.getPropertyValues().add("order",order);
   handlerMappingDef.getPropertyValues().add("urlMap",urlMap);
-  String beanName="clientInboundChannel";
+  registerBeanDef(handlerMappingDef,context,source);
   Element channelElem=DomUtils.getChildElementByTagName(element,"client-inbound-channel");
-  RuntimeBeanReference clientInChannel=getMessageChannel(beanName,channelElem,parserCxt,source);
-  beanName="clientOutboundChannel";
+  RuntimeBeanReference inChannel=getMessageChannel("clientInboundChannel",channelElem,context,source);
   channelElem=DomUtils.getChildElementByTagName(element,"client-outbound-channel");
-  RuntimeBeanReference clientOutChannel=getMessageChannel(beanName,channelElem,parserCxt,source);
-  RootBeanDefinition beanDef=new RootBeanDefinition(DefaultUserSessionRegistry.class);
-  beanName=registerBeanDef(beanDef,parserCxt,source);
-  RuntimeBeanReference userSessionRegistry=new RuntimeBeanReference(beanName);
-  RuntimeBeanReference subProtocolHandlerDef=registerSubProtocolWebSocketHandler(element,clientInChannel,clientOutChannel,userSessionRegistry,parserCxt,source);
-  for (  Element stompEndpointElem : DomUtils.getChildElementsByTagName(element,"stomp-endpoint")) {
-    RuntimeBeanReference httpRequestHandler=registerHttpRequestHandler(stompEndpointElem,subProtocolHandlerDef,parserCxt,source);
-    String pathAttribute=stompEndpointElem.getAttribute("path");
+  RuntimeBeanReference outChannel=getMessageChannel("clientOutboundChannel",channelElem,context,source);
+  RootBeanDefinition registryBeanDef=new RootBeanDefinition(DefaultUserSessionRegistry.class);
+  String registryBeanName=registerBeanDef(registryBeanDef,context,source);
+  RuntimeBeanReference sessionRegistry=new RuntimeBeanReference(registryBeanName);
+  RuntimeBeanReference subProtoHandler=registerSubProtoHandler(element,inChannel,outChannel,sessionRegistry,context,source);
+  for (  Element endpointElem : DomUtils.getChildElementsByTagName(element,"stomp-endpoint")) {
+    RuntimeBeanReference requestHandler=registerRequestHandler(endpointElem,subProtoHandler,context,source);
+    String pathAttribute=endpointElem.getAttribute("path");
     Assert.state(StringUtils.hasText(pathAttribute),"Invalid <stomp-endpoint> (no path mapping)");
     List<String> paths=Arrays.asList(StringUtils.tokenizeToStringArray(pathAttribute,","));
     for (    String path : paths) {
       path=path.trim();
       Assert.state(StringUtils.hasText(path),"Invalid <stomp-endpoint> path attribute: " + pathAttribute);
-      if (DomUtils.getChildElementByTagName(stompEndpointElem,"sockjs") != null) {
+      if (DomUtils.getChildElementByTagName(endpointElem,"sockjs") != null) {
         path=path.endsWith("/") ? path + "**" : path + "/**";
       }
-      urlMap.put(path,httpRequestHandler);
+      urlMap.put(path,requestHandler);
     }
   }
-  registerBeanDef(handlerMappingDef,parserCxt,source);
-  beanName="brokerChannel";
   channelElem=DomUtils.getChildElementByTagName(element,"broker-channel");
-  RuntimeBeanReference brokerChannel=getMessageChannel(beanName,channelElem,parserCxt,source);
-  RootBeanDefinition brokerDef=registerMessageBroker(element,clientInChannel,clientOutChannel,brokerChannel,parserCxt,source);
-  RuntimeBeanReference messageConverter=registerBrokerMessageConverter(element,parserCxt,source);
-  RuntimeBeanReference messagingTemplate=registerBrokerMessagingTemplate(element,brokerChannel,messageConverter,parserCxt,source);
-  registerAnnotationMethodMessageHandler(element,clientInChannel,clientOutChannel,messageConverter,messagingTemplate,parserCxt,source);
-  RuntimeBeanReference userDestinationResolver=registerUserDestinationResolver(element,userSessionRegistry,parserCxt,source);
-  registerUserDestinationMessageHandler(clientInChannel,clientOutChannel,brokerChannel,userDestinationResolver,parserCxt,source);
+  RuntimeBeanReference brokerChannel=getMessageChannel("brokerChannel",channelElem,context,source);
+  RootBeanDefinition broker=registerMessageBroker(element,inChannel,outChannel,brokerChannel,context,source);
+  RuntimeBeanReference converter=registerMessageConverter(element,context,source);
+  RuntimeBeanReference template=registerMessagingTemplate(element,brokerChannel,converter,context,source);
+  registerAnnotationMethodMessageHandler(element,inChannel,outChannel,converter,template,context,source);
+  RuntimeBeanReference resolver=registerUserDestinationResolver(element,sessionRegistry,context,source);
+  registerUserDestinationMessageHandler(inChannel,brokerChannel,resolver,context,source);
   Map<String,Object> scopeMap=Collections.<String,Object>singletonMap("websocket",new SimpSessionScope());
-  RootBeanDefinition scopeConfigurerDef=new RootBeanDefinition(CustomScopeConfigurer.class);
-  scopeConfigurerDef.getPropertyValues().add("scopes",scopeMap);
-  registerBeanDefByName("webSocketScopeConfigurer",scopeConfigurerDef,parserCxt,source);
-  registerWebSocketMessageBrokerStats(subProtocolHandlerDef,brokerDef,clientInChannel,clientOutChannel,parserCxt,source);
-  parserCxt.popAndRegisterContainingComponent();
+  RootBeanDefinition scopeConfigurer=new RootBeanDefinition(CustomScopeConfigurer.class);
+  scopeConfigurer.getPropertyValues().add("scopes",scopeMap);
+  registerBeanDefByName("webSocketScopeConfigurer",scopeConfigurer,context,source);
+  registerWebSocketMessageBrokerStats(subProtoHandler,broker,inChannel,outChannel,context,source);
+  context.popAndRegisterContainingComponent();
   return null;
 }
