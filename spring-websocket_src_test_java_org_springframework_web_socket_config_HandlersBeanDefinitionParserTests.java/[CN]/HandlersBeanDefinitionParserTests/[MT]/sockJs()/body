@@ -15,5 +15,10 @@
   assertThat(sockJsService,instanceOf(DefaultSockJsService.class));
   DefaultSockJsService defaultSockJsService=(DefaultSockJsService)sockJsService;
   assertThat(defaultSockJsService.getTaskScheduler(),instanceOf(ThreadPoolTaskScheduler.class));
-  assertThat(defaultSockJsService.getTransportHandlers().values(),containsInAnyOrder(instanceOf(XhrPollingTransportHandler.class),instanceOf(XhrReceivingTransportHandler.class),instanceOf(JsonpPollingTransportHandler.class),instanceOf(JsonpReceivingTransportHandler.class),instanceOf(XhrStreamingTransportHandler.class),instanceOf(EventSourceTransportHandler.class),instanceOf(HtmlFileTransportHandler.class),instanceOf(WebSocketTransportHandler.class)));
+  Map<TransportType,TransportHandler> transportHandlers=defaultSockJsService.getTransportHandlers();
+  assertThat(transportHandlers.values(),containsInAnyOrder(instanceOf(XhrPollingTransportHandler.class),instanceOf(XhrReceivingTransportHandler.class),instanceOf(JsonpPollingTransportHandler.class),instanceOf(JsonpReceivingTransportHandler.class),instanceOf(XhrStreamingTransportHandler.class),instanceOf(EventSourceTransportHandler.class),instanceOf(HtmlFileTransportHandler.class),instanceOf(WebSocketTransportHandler.class)));
+  WebSocketTransportHandler handler=(WebSocketTransportHandler)transportHandlers.get(TransportType.WEBSOCKET);
+  assertEquals(TestHandshakeHandler.class,handler.getHandshakeHandler().getClass());
+  List<HandshakeInterceptor> interceptors=defaultSockJsService.getHandshakeInterceptors();
+  assertThat(interceptors,contains(instanceOf(FooTestInterceptor.class),instanceOf(BarTestInterceptor.class)));
 }

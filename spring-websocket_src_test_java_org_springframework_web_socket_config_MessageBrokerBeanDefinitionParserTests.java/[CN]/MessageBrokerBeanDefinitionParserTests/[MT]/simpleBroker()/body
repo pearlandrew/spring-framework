@@ -12,6 +12,8 @@
   HandshakeHandler handshakeHandler=wsHttpRequestHandler.getHandshakeHandler();
   assertNotNull(handshakeHandler);
   assertTrue(handshakeHandler instanceof TestHandshakeHandler);
+  List<HandshakeInterceptor> interceptors=wsHttpRequestHandler.getHandshakeInterceptors();
+  assertThat(interceptors,contains(instanceOf(FooTestInterceptor.class),instanceOf(BarTestInterceptor.class)));
   WebSocketHandler wsHandler=unwrapWebSocketHandler(wsHttpRequestHandler.getWebSocketHandler());
   assertNotNull(wsHandler);
   assertThat(wsHandler,Matchers.instanceOf(SubProtocolWebSocketHandler.class));
@@ -39,6 +41,8 @@
   ThreadPoolTaskScheduler scheduler=(ThreadPoolTaskScheduler)defaultSockJsService.getTaskScheduler();
   assertEquals(Runtime.getRuntime().availableProcessors(),scheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
   assertTrue(scheduler.getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy());
+  interceptors=defaultSockJsService.getHandshakeInterceptors();
+  assertThat(interceptors,contains(instanceOf(FooTestInterceptor.class),instanceOf(BarTestInterceptor.class)));
   UserSessionRegistry userSessionRegistry=this.appContext.getBean(UserSessionRegistry.class);
   assertNotNull(userSessionRegistry);
   UserDestinationResolver userDestResolver=this.appContext.getBean(UserDestinationResolver.class);
