@@ -1,7 +1,9 @@
 {
   WebMvcStompWebSocketEndpointRegistration registration=new WebMvcStompWebSocketEndpointRegistration(new String[]{"/foo"},this.handler,this.scheduler);
   DefaultHandshakeHandler handshakeHandler=new DefaultHandshakeHandler();
+  HttpSessionHandshakeInterceptor interceptor=new HttpSessionHandshakeInterceptor();
   registration.setHandshakeHandler(handshakeHandler);
+  registration.addInterceptors(interceptor);
   registration.withSockJS();
   MultiValueMap<HttpRequestHandler,String> mappings=registration.getMappings();
   assertEquals(1,mappings.size());
@@ -14,4 +16,5 @@
   Map<TransportType,TransportHandler> handlers=sockJsService.getTransportHandlers();
   WebSocketTransportHandler transportHandler=(WebSocketTransportHandler)handlers.get(TransportType.WEBSOCKET);
   assertSame(handshakeHandler,transportHandler.getHandshakeHandler());
+  assertEquals(Arrays.asList(interceptor),sockJsService.getHandshakeInterceptors());
 }

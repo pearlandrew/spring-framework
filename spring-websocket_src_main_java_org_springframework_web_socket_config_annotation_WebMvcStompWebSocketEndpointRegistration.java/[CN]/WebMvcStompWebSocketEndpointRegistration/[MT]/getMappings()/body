@@ -10,7 +10,16 @@
   }
  else {
     for (    String path : this.paths) {
-      WebSocketHttpRequestHandler handler=(this.handshakeHandler != null) ? new WebSocketHttpRequestHandler(this.webSocketHandler,this.handshakeHandler) : new WebSocketHttpRequestHandler(this.webSocketHandler);
+      WebSocketHttpRequestHandler handler;
+      if (this.handshakeHandler != null) {
+        handler=new WebSocketHttpRequestHandler(this.webSocketHandler,this.handshakeHandler);
+      }
+ else {
+        handler=new WebSocketHttpRequestHandler(this.webSocketHandler);
+      }
+      if (this.interceptors != null) {
+        handler.setHandshakeInterceptors(Arrays.asList(this.interceptors));
+      }
       mappings.add(handler,path);
     }
   }
