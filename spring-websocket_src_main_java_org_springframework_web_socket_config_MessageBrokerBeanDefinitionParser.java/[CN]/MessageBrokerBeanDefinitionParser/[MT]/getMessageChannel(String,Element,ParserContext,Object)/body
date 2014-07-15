@@ -1,46 +1,42 @@
 {
-  RootBeanDefinition executorDef=null;
-  if (channelElement == null) {
-    executorDef=getDefaultExecutorBeanDefinition(channelName);
+  RootBeanDefinition executor=null;
+  if (element == null) {
+    executor=getDefaultExecutorBeanDefinition(name);
   }
  else {
-    Element executor=DomUtils.getChildElementByTagName(channelElement,"executor");
-    if (executor == null) {
-      executorDef=getDefaultExecutorBeanDefinition(channelName);
+    Element executorElem=DomUtils.getChildElementByTagName(element,"executor");
+    if (executorElem == null) {
+      executor=getDefaultExecutorBeanDefinition(name);
     }
  else {
-      executorDef=new RootBeanDefinition(ThreadPoolTaskExecutor.class);
-      String attrValue=executor.getAttribute("core-pool-size");
-      if (!StringUtils.isEmpty(attrValue)) {
-        executorDef.getPropertyValues().add("corePoolSize",attrValue);
+      executor=new RootBeanDefinition(ThreadPoolTaskExecutor.class);
+      if (executorElem.hasAttribute("core-pool-size")) {
+        executor.getPropertyValues().add("corePoolSize",executorElem.getAttribute("core-pool-size"));
       }
-      attrValue=executor.getAttribute("max-pool-size");
-      if (!StringUtils.isEmpty(attrValue)) {
-        executorDef.getPropertyValues().add("maxPoolSize",attrValue);
+      if (executorElem.hasAttribute("max-pool-size")) {
+        executor.getPropertyValues().add("maxPoolSize",executorElem.getAttribute("max-pool-size"));
       }
-      attrValue=executor.getAttribute("keep-alive-seconds");
-      if (!StringUtils.isEmpty(attrValue)) {
-        executorDef.getPropertyValues().add("keepAliveSeconds",attrValue);
+      if (executorElem.hasAttribute("keep-alive-seconds")) {
+        executor.getPropertyValues().add("keepAliveSeconds",executorElem.getAttribute("keep-alive-seconds"));
       }
-      attrValue=executor.getAttribute("queue-capacity");
-      if (!StringUtils.isEmpty(attrValue)) {
-        executorDef.getPropertyValues().add("queueCapacity",attrValue);
+      if (executorElem.hasAttribute("queue-capacity")) {
+        executor.getPropertyValues().add("queueCapacity",executorElem.getAttribute("queue-capacity"));
       }
     }
   }
   ConstructorArgumentValues argValues=new ConstructorArgumentValues();
-  if (executorDef != null) {
-    executorDef.getPropertyValues().add("threadNamePrefix",channelName + "-");
-    String executorName=channelName + "Executor";
-    registerBeanDefByName(executorName,executorDef,parserCxt,source);
+  if (executor != null) {
+    executor.getPropertyValues().add("threadNamePrefix",name + "-");
+    String executorName=name + "Executor";
+    registerBeanDefByName(executorName,executor,context,source);
     argValues.addIndexedArgumentValue(0,new RuntimeBeanReference(executorName));
   }
   RootBeanDefinition channelDef=new RootBeanDefinition(ExecutorSubscribableChannel.class,argValues,null);
-  if (channelElement != null) {
-    Element interceptorsElement=DomUtils.getChildElementByTagName(channelElement,"interceptors");
-    ManagedList<?> interceptorList=WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement,parserCxt);
-    channelDef.getPropertyValues().add("interceptors",interceptorList);
+  if (element != null) {
+    Element interceptorsElement=DomUtils.getChildElementByTagName(element,"interceptors");
+    ManagedList<?> interceptors=WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement,context);
+    channelDef.getPropertyValues().add("interceptors",interceptors);
   }
-  registerBeanDefByName(channelName,channelDef,parserCxt,source);
-  return new RuntimeBeanReference(channelName);
+  registerBeanDefByName(name,channelDef,context,source);
+  return new RuntimeBeanReference(name);
 }

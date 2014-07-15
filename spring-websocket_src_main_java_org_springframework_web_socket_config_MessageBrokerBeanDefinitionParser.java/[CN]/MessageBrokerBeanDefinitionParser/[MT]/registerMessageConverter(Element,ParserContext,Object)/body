@@ -1,0 +1,27 @@
+{
+  Element convertersElement=DomUtils.getChildElementByTagName(element,"message-converters");
+  ManagedList<? super Object> converters=new ManagedList<Object>();
+  if (convertersElement != null) {
+    converters.setSource(source);
+    for (    Element beanElement : DomUtils.getChildElementsByTagName(convertersElement,"bean","ref")) {
+      Object object=context.getDelegate().parsePropertySubElement(beanElement,null);
+      converters.add(object);
+    }
+  }
+  if (convertersElement == null || Boolean.valueOf(convertersElement.getAttribute("register-defaults"))) {
+    converters.setSource(source);
+    converters.add(new RootBeanDefinition(StringMessageConverter.class));
+    converters.add(new RootBeanDefinition(ByteArrayMessageConverter.class));
+    if (jackson2Present) {
+      RootBeanDefinition jacksonConverterDef=new RootBeanDefinition(MappingJackson2MessageConverter.class);
+      RootBeanDefinition resolverDef=new RootBeanDefinition(DefaultContentTypeResolver.class);
+      resolverDef.getPropertyValues().add("defaultMimeType",MimeTypeUtils.APPLICATION_JSON);
+      jacksonConverterDef.getPropertyValues().add("contentTypeResolver",resolverDef);
+      converters.add(jacksonConverterDef);
+    }
+  }
+  ConstructorArgumentValues cavs=new ConstructorArgumentValues();
+  cavs.addIndexedArgumentValue(0,converters);
+  RootBeanDefinition messageConverterDef=new RootBeanDefinition(CompositeMessageConverter.class,cavs,null);
+  return new RuntimeBeanReference(registerBeanDef(messageConverterDef,context,source));
+}

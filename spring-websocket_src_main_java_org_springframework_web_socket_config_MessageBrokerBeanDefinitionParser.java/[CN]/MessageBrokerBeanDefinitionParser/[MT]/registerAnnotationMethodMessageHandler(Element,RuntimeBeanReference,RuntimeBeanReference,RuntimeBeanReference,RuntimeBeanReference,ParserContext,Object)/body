@@ -1,15 +1,16 @@
 {
-  String appDestPrefix=messageBrokerElement.getAttribute("application-destination-prefix");
   ConstructorArgumentValues cavs=new ConstructorArgumentValues();
-  cavs.addIndexedArgumentValue(0,clientInChannelDef);
-  cavs.addIndexedArgumentValue(1,clientOutChannelDef);
-  cavs.addIndexedArgumentValue(2,brokerMessagingTemplateRef);
-  MutablePropertyValues mpvs=new MutablePropertyValues();
-  mpvs.add("destinationPrefixes",Arrays.asList(StringUtils.tokenizeToStringArray(appDestPrefix,",")));
-  mpvs.add("messageConverter",brokerMessageConverterRef);
-  RootBeanDefinition beanDef=new RootBeanDefinition(SimpAnnotationMethodMessageHandler.class,cavs,mpvs);
+  cavs.addIndexedArgumentValue(0,inChannel);
+  cavs.addIndexedArgumentValue(1,outChannel);
+  cavs.addIndexedArgumentValue(2,messagingTemplate);
+  MutablePropertyValues values=new MutablePropertyValues();
+  String prefixAttribute=messageBrokerElement.getAttribute("application-destination-prefix");
+  values.add("destinationPrefixes",Arrays.asList(StringUtils.tokenizeToStringArray(prefixAttribute,",")));
+  values.add("messageConverter",converter);
+  RootBeanDefinition beanDef=new RootBeanDefinition(SimpAnnotationMethodMessageHandler.class,cavs,values);
   if (messageBrokerElement.hasAttribute("path-matcher")) {
-    beanDef.getPropertyValues().add("pathMatcher",new RuntimeBeanReference(messageBrokerElement.getAttribute("path-matcher")));
+    String pathMatcherRef=messageBrokerElement.getAttribute("path-matcher");
+    beanDef.getPropertyValues().add("pathMatcher",new RuntimeBeanReference(pathMatcherRef));
   }
-  registerBeanDef(beanDef,parserCxt,source);
+  registerBeanDef(beanDef,context,source);
 }

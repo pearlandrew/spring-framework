@@ -1,23 +1,20 @@
 {
-  RootBeanDefinition statsDef=new RootBeanDefinition(WebSocketMessageBrokerStats.class);
-  statsDef.getPropertyValues().add("subProtocolWebSocketHandler",subProtocolHandlerDef);
-  if (StompBrokerRelayMessageHandler.class.equals(brokerDef.getBeanClass())) {
-    statsDef.getPropertyValues().add("stompBrokerRelay",brokerDef);
+  RootBeanDefinition beanDef=new RootBeanDefinition(WebSocketMessageBrokerStats.class);
+  beanDef.getPropertyValues().add("subProtocolWebSocketHandler",subProtoHandler);
+  if (StompBrokerRelayMessageHandler.class.equals(broker.getBeanClass())) {
+    beanDef.getPropertyValues().add("stompBrokerRelay",broker);
   }
-  String beanName=clientInChannel.getBeanName() + "Executor";
-  if (parserCxt.getRegistry().containsBeanDefinition(beanName)) {
-    BeanDefinition beanDef=parserCxt.getRegistry().getBeanDefinition(beanName);
-    statsDef.getPropertyValues().add("inboundChannelExecutor",beanDef);
+  String name=inChannel.getBeanName() + "Executor";
+  if (context.getRegistry().containsBeanDefinition(name)) {
+    beanDef.getPropertyValues().add("inboundChannelExecutor",context.getRegistry().getBeanDefinition(name));
   }
-  beanName=clientOutChannel.getBeanName() + "Executor";
-  if (parserCxt.getRegistry().containsBeanDefinition(beanName)) {
-    BeanDefinition beanDef=parserCxt.getRegistry().getBeanDefinition(beanName);
-    statsDef.getPropertyValues().add("outboundChannelExecutor",beanDef);
+  name=outChannel.getBeanName() + "Executor";
+  if (context.getRegistry().containsBeanDefinition(name)) {
+    beanDef.getPropertyValues().add("outboundChannelExecutor",context.getRegistry().getBeanDefinition(name));
   }
-  beanName=SOCKJS_SCHEDULER_BEAN_NAME;
-  if (parserCxt.getRegistry().containsBeanDefinition(beanName)) {
-    BeanDefinition beanDef=parserCxt.getRegistry().getBeanDefinition(beanName);
-    statsDef.getPropertyValues().add("sockJsTaskScheduler",beanDef);
+  name=SOCKJS_SCHEDULER_BEAN_NAME;
+  if (context.getRegistry().containsBeanDefinition(name)) {
+    beanDef.getPropertyValues().add("sockJsTaskScheduler",context.getRegistry().getBeanDefinition(name));
   }
-  registerBeanDefByName("webSocketMessageBrokerStats",statsDef,parserCxt,source);
+  registerBeanDefByName("webSocketMessageBrokerStats",beanDef,context,source);
 }

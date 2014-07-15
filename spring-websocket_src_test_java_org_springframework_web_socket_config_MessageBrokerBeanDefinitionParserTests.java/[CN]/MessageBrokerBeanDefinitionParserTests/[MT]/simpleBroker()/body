@@ -1,7 +1,6 @@
 {
   loadBeanDefinitions("websocket-config-broker-simple.xml");
   HandlerMapping hm=this.appContext.getBean(HandlerMapping.class);
-  assertNotNull(hm);
   assertThat(hm,Matchers.instanceOf(SimpleUrlHandlerMapping.class));
   SimpleUrlHandlerMapping suhm=(SimpleUrlHandlerMapping)hm;
   assertThat(suhm.getUrlMap().keySet(),Matchers.hasSize(4));
@@ -10,9 +9,11 @@
   assertNotNull(httpRequestHandler);
   assertThat(httpRequestHandler,Matchers.instanceOf(WebSocketHttpRequestHandler.class));
   WebSocketHttpRequestHandler wsHttpRequestHandler=(WebSocketHttpRequestHandler)httpRequestHandler;
-  HandshakeHandler handshakeHandler=(HandshakeHandler)new DirectFieldAccessor(wsHttpRequestHandler).getPropertyValue("handshakeHandler");
+  HandshakeHandler handshakeHandler=wsHttpRequestHandler.getHandshakeHandler();
   assertNotNull(handshakeHandler);
   assertTrue(handshakeHandler instanceof TestHandshakeHandler);
+  List<HandshakeInterceptor> interceptors=wsHttpRequestHandler.getHandshakeInterceptors();
+  assertThat(interceptors,contains(instanceOf(FooTestInterceptor.class),instanceOf(BarTestInterceptor.class)));
   WebSocketHandler wsHandler=unwrapWebSocketHandler(wsHttpRequestHandler.getWebSocketHandler());
   assertNotNull(wsHandler);
   assertThat(wsHandler,Matchers.instanceOf(SubProtocolWebSocketHandler.class));
@@ -40,6 +41,8 @@
   ThreadPoolTaskScheduler scheduler=(ThreadPoolTaskScheduler)defaultSockJsService.getTaskScheduler();
   assertEquals(Runtime.getRuntime().availableProcessors(),scheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
   assertTrue(scheduler.getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy());
+  interceptors=defaultSockJsService.getHandshakeInterceptors();
+  assertThat(interceptors,contains(instanceOf(FooTestInterceptor.class),instanceOf(BarTestInterceptor.class)));
   UserSessionRegistry userSessionRegistry=this.appContext.getBean(UserSessionRegistry.class);
   assertNotNull(userSessionRegistry);
   UserDestinationResolver userDestResolver=this.appContext.getBean(UserDestinationResolver.class);

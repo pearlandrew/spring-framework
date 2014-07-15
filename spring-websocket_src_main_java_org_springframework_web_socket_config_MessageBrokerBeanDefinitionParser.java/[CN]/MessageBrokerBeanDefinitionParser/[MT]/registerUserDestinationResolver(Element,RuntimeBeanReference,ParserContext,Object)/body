@@ -1,11 +1,9 @@
 {
   ConstructorArgumentValues cavs=new ConstructorArgumentValues();
   cavs.addIndexedArgumentValue(0,userSessionRegistry);
-  RootBeanDefinition userDestinationResolverDef=new RootBeanDefinition(DefaultUserDestinationResolver.class,cavs,null);
-  String prefix=messageBrokerElement.getAttribute("user-destination-prefix");
-  if (!prefix.isEmpty()) {
-    userDestinationResolverDef.getPropertyValues().add("userDestinationPrefix",prefix);
+  RootBeanDefinition beanDef=new RootBeanDefinition(DefaultUserDestinationResolver.class,cavs,null);
+  if (brokerElem.hasAttribute("user-destination-prefix")) {
+    beanDef.getPropertyValues().add("userDestinationPrefix",brokerElem.getAttribute("user-destination-prefix"));
   }
-  String userDestinationResolverName=registerBeanDef(userDestinationResolverDef,parserCxt,source);
-  return new RuntimeBeanReference(userDestinationResolverName);
+  return new RuntimeBeanReference(registerBeanDef(beanDef,context,source));
 }

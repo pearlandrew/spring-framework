@@ -1,0 +1,23 @@
+{
+  RootBeanDefinition stompHandlerDef=new RootBeanDefinition(StompSubProtocolHandler.class);
+  stompHandlerDef.getPropertyValues().add("userSessionRegistry",registry);
+  registerBeanDef(stompHandlerDef,context,source);
+  ConstructorArgumentValues cavs=new ConstructorArgumentValues();
+  cavs.addIndexedArgumentValue(0,inChannel);
+  cavs.addIndexedArgumentValue(1,outChannel);
+  RootBeanDefinition beanDef=new RootBeanDefinition(SubProtocolWebSocketHandler.class,cavs,null);
+  beanDef.getPropertyValues().addPropertyValue("protocolHandlers",stompHandlerDef);
+  Element transportElem=DomUtils.getChildElementByTagName(element,"transport");
+  if (transportElem != null) {
+    if (transportElem.hasAttribute("message-size")) {
+      stompHandlerDef.getPropertyValues().add("messageSizeLimit",transportElem.getAttribute("message-size"));
+    }
+    if (transportElem.hasAttribute("send-timeout")) {
+      beanDef.getPropertyValues().add("sendTimeLimit",transportElem.getAttribute("send-timeout"));
+    }
+    if (transportElem.hasAttribute("send-buffer-size")) {
+      beanDef.getPropertyValues().add("sendBufferSizeLimit",transportElem.getAttribute("send-buffer-size"));
+    }
+  }
+  return new RuntimeBeanReference(registerBeanDef(beanDef,context,source));
+}
