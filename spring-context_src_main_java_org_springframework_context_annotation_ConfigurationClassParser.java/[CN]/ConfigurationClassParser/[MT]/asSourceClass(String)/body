@@ -1,6 +1,11 @@
 {
   if (className.startsWith("java")) {
-    return new SourceClass(this.resourceLoader.getClassLoader().loadClass(className));
+    try {
+      return new SourceClass(this.resourceLoader.getClassLoader().loadClass(className));
+    }
+ catch (    ClassNotFoundException ex) {
+      throw new NestedIOException("Failed to load class [" + className + "]",ex);
+    }
   }
   return new SourceClass(this.metadataReaderFactory.getMetadataReader(className));
 }

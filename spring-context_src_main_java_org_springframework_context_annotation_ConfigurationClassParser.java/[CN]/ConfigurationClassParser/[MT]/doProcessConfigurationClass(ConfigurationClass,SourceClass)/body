@@ -14,7 +14,7 @@
       }
     }
   }
-  processImports(configClass,sourceClass,getImports(sourceClass),true);
+  processImports(configClass,sourceClass,getImports(sourceClass),true,false);
   if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
     AnnotationAttributes importResource=AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(),ImportResource.class);
     String[] resources=importResource.getStringArray("value");
@@ -32,12 +32,7 @@
     String superclass=sourceClass.getMetadata().getSuperClassName();
     if (!superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
       this.knownSuperclasses.put(superclass,configClass);
-      try {
-        return sourceClass.getSuperClass();
-      }
- catch (      ClassNotFoundException ex) {
-        throw new IllegalStateException(ex);
-      }
+      return sourceClass.getSuperClass();
     }
   }
   return null;
