@@ -9,8 +9,9 @@
       throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(),beanName,"Validation of bean definition failed",ex);
     }
   }
+  BeanDefinition oldBeanDefinition;
 synchronized (this.beanDefinitionMap) {
-    BeanDefinition oldBeanDefinition=this.beanDefinitionMap.get(beanName);
+    oldBeanDefinition=this.beanDefinitionMap.get(beanName);
     if (oldBeanDefinition != null) {
       if (!this.allowBeanDefinitionOverriding) {
         throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(),beanName,"Cannot register bean definition [" + beanDefinition + "] for bean '"+ beanName+ "': There is already ["+ oldBeanDefinition+ "] bound.");
@@ -32,5 +33,7 @@ synchronized (this.beanDefinitionMap) {
     }
     this.beanDefinitionMap.put(beanName,beanDefinition);
   }
-  resetBeanDefinition(beanName);
+  if (oldBeanDefinition != null || containsSingleton(beanName)) {
+    resetBeanDefinition(beanName);
+  }
 }
