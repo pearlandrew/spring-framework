@@ -1,21 +1,21 @@
 {
-  if (compiledAst != null) {
+  if (this.compiledAst != null) {
     try {
       Object result=this.compiledAst.getValue(rootObject,context);
       if (expectedResultType != null) {
-        return (T)result;
-      }
- else {
         return ExpressionUtils.convertTypedValue(context,new TypedValue(result),expectedResultType);
       }
+ else {
+        return (T)result;
+      }
     }
- catch (    Throwable t) {
-      if (this.configuration.getCompilerMode() == SpelCompilerMode.mixed) {
-        interpretedCount=0;
-        compiledAst=null;
+ catch (    Throwable ex) {
+      if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
+        this.interpretedCount=0;
+        this.compiledAst=null;
       }
  else {
-        throw new SpelEvaluationException(t,SpelMessage.EXCEPTION_RUNNING_COMPILED_EXPRESSION);
+        throw new SpelEvaluationException(ex,SpelMessage.EXCEPTION_RUNNING_COMPILED_EXPRESSION);
       }
     }
   }

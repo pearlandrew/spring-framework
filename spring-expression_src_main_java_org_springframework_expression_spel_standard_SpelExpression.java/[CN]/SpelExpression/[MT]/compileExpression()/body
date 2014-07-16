@@ -1,15 +1,16 @@
 {
-  if (failedAttempts > 100) {
+  if (this.failedAttempts > FAILED_ATTEMPTS_THRESHOLD) {
     return false;
   }
   if (this.compiledAst == null) {
-synchronized (expression) {
+synchronized (this.expression) {
       if (this.compiledAst != null) {
         return true;
       }
-      this.compiledAst=SpelCompiler.getCompiler().compile(this.ast);
+      SpelCompiler compiler=SpelCompiler.getCompiler(this.configuration.getCompilerClassLoader());
+      this.compiledAst=compiler.compile(this.ast);
       if (this.compiledAst == null) {
-        failedAttempts++;
+        this.failedAttempts++;
       }
     }
   }
