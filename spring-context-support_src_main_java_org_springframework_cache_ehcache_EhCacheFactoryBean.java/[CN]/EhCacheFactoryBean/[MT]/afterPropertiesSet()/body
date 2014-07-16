@@ -34,13 +34,11 @@ synchronized (this.cacheManager) {
     if (!cacheExists) {
       this.cacheManager.addCache(rawCache);
     }
-    if (setStatisticsAvailable) {
-      if (this.statisticsEnabled) {
-        rawCache.setStatisticsEnabled(true);
-      }
-      if (this.sampledStatisticsEnabled) {
-        rawCache.setSampledStatisticsEnabled(true);
-      }
+    if (this.statisticsEnabled && setStatisticsEnabledMethod != null) {
+      ReflectionUtils.invokeMethod(setStatisticsEnabledMethod,rawCache,true);
+    }
+    if (this.sampledStatisticsEnabled && setSampledStatisticsEnabledMethod != null) {
+      ReflectionUtils.invokeMethod(setSampledStatisticsEnabledMethod,rawCache,true);
     }
     if (this.disabled) {
       rawCache.setDisabled(true);
