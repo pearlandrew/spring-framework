@@ -1,8 +1,8 @@
 {
-  loadBeanDefinitions("mvc-config-view-resolution.xml",5);
+  loadBeanDefinitions("mvc-config-view-resolution.xml",6);
   ViewResolverComposite compositeResolver=this.appContext.getBean(ViewResolverComposite.class);
   assertNotNull(compositeResolver);
-  assertEquals(7,compositeResolver.getViewResolvers().size());
+  assertEquals(8,compositeResolver.getViewResolvers().size());
   assertEquals(0,compositeResolver.getOrder());
   List<ViewResolver> resolvers=compositeResolver.getViewResolvers();
   assertEquals(BeanNameViewResolver.class,resolvers.get(0).getClass());
@@ -24,8 +24,14 @@
   assertEquals("",accessor.getPropertyValue("prefix"));
   assertEquals(".vm",accessor.getPropertyValue("suffix"));
   assertEquals(0,accessor.getPropertyValue("cacheLimit"));
-  assertEquals(InternalResourceViewResolver.class,resolvers.get(5).getClass());
+  resolver=resolvers.get(5);
+  GroovyMarkupViewResolver groovyMarkupViewResolver=(GroovyMarkupViewResolver)resolver;
+  accessor=new DirectFieldAccessor(resolver);
+  assertEquals("",accessor.getPropertyValue("prefix"));
+  assertEquals(".tpl",accessor.getPropertyValue("suffix"));
+  assertEquals(1024,accessor.getPropertyValue("cacheLimit"));
   assertEquals(InternalResourceViewResolver.class,resolvers.get(6).getClass());
+  assertEquals(InternalResourceViewResolver.class,resolvers.get(7).getClass());
   TilesConfigurer tilesConfigurer=appContext.getBean(TilesConfigurer.class);
   assertNotNull(tilesConfigurer);
   String[] definitions={"/org/springframework/web/servlet/resource/tiles/tiles1.xml","/org/springframework/web/servlet/resource/tiles/tiles2.xml"};
@@ -39,5 +45,9 @@
   VelocityConfigurer velocityConfigurer=appContext.getBean(VelocityConfigurer.class);
   assertNotNull(velocityConfigurer);
   accessor=new DirectFieldAccessor(velocityConfigurer);
+  assertEquals("/test",accessor.getPropertyValue("resourceLoaderPath"));
+  GroovyMarkupConfigurer groovyMarkupConfigurer=appContext.getBean(GroovyMarkupConfigurer.class);
+  assertNotNull(groovyMarkupConfigurer);
+  accessor=new DirectFieldAccessor(groovyMarkupConfigurer);
   assertEquals("/test",accessor.getPropertyValue("resourceLoaderPath"));
 }

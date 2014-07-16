@@ -6,7 +6,7 @@
   compositeResolverBeanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
   ManagedList<Object> resolvers=new ManagedList<Object>(4);
   resolvers.setSource(context.extractSource(element));
-  String[] names=new String[]{"jsp","tiles","bean-name","freemarker","velocity","bean","ref"};
+  String[] names=new String[]{"jsp","tiles","bean-name","freemarker","velocity","groovy-markup","bean","ref"};
   for (  Element resolverElement : DomUtils.getChildElementsByTagName(element,names)) {
     String name=resolverElement.getLocalName();
     if ("bean".equals(name) || "ref".equals(name)) {
@@ -36,6 +36,11 @@
     }
  else     if ("bean-name".equals(name)) {
       resolverBeanDef=new RootBeanDefinition(BeanNameViewResolver.class);
+    }
+ else     if ("groovy-markup".equals(name)) {
+      resolverBeanDef=new RootBeanDefinition(GroovyMarkupViewResolver.class);
+      resolverBeanDef.getPropertyValues().add("suffix",".tpl");
+      addUrlBasedViewResolverProperties(resolverElement,resolverBeanDef);
     }
  else {
       throw new IllegalStateException("Unexpected element name: " + name);
