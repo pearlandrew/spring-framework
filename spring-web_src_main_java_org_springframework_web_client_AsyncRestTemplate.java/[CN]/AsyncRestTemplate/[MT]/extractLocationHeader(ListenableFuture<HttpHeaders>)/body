@@ -1,12 +1,15 @@
 {
   return new ListenableFuture<URI>(){
     @Override public void addCallback(    final ListenableFutureCallback<? super URI> callback){
+      addCallback(callback,callback);
+    }
+    @Override public void addCallback(    final SuccessCallback<? super URI> successCallback,    final FailureCallback failureCallback){
       headersFuture.addCallback(new ListenableFutureCallback<HttpHeaders>(){
         @Override public void onSuccess(        HttpHeaders result){
-          callback.onSuccess(result.getLocation());
+          successCallback.onSuccess(result.getLocation());
         }
         @Override public void onFailure(        Throwable t){
-          callback.onFailure(t);
+          failureCallback.onFailure(t);
         }
       }
 );
