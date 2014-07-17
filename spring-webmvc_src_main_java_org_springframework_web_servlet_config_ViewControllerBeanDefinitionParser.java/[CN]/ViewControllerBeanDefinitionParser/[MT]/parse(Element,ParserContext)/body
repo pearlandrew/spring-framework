@@ -1,20 +1,20 @@
 {
   Object source=parserContext.extractSource(element);
-  BeanDefinition handlerMappingDef=registerHandlerMapping(parserContext,source);
+  BeanDefinition handlerMapping=registerHandlerMapping(parserContext,source);
   MvcNamespaceUtils.registerDefaultComponents(parserContext,source);
-  RootBeanDefinition viewControllerDef=new RootBeanDefinition(ParameterizableViewController.class);
-  viewControllerDef.setSource(source);
+  RootBeanDefinition controller=new RootBeanDefinition(ParameterizableViewController.class);
+  controller.setSource(source);
   if (element.hasAttribute("view-name")) {
-    viewControllerDef.getPropertyValues().add("viewName",element.getAttribute("view-name"));
+    controller.getPropertyValues().add("viewName",element.getAttribute("view-name"));
   }
   Map<String,BeanDefinition> urlMap;
-  if (handlerMappingDef.getPropertyValues().contains("urlMap")) {
-    urlMap=(Map<String,BeanDefinition>)handlerMappingDef.getPropertyValues().getPropertyValue("urlMap").getValue();
+  if (handlerMapping.getPropertyValues().contains("urlMap")) {
+    urlMap=(Map<String,BeanDefinition>)handlerMapping.getPropertyValues().getPropertyValue("urlMap").getValue();
   }
  else {
     urlMap=new ManagedMap<String,BeanDefinition>();
-    handlerMappingDef.getPropertyValues().add("urlMap",urlMap);
+    handlerMapping.getPropertyValues().add("urlMap",urlMap);
   }
-  urlMap.put(element.getAttribute("path"),viewControllerDef);
+  urlMap.put(element.getAttribute("path"),controller);
   return null;
 }
