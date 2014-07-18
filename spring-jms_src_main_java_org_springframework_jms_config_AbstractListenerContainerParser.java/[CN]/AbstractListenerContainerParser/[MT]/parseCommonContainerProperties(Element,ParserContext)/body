@@ -1,9 +1,19 @@
 {
-  MutablePropertyValues propertyValues=new MutablePropertyValues();
-  String destinationType=ele.getAttribute(DESTINATION_TYPE_ATTRIBUTE);
+  MutablePropertyValues properties=new MutablePropertyValues();
+  String destinationType=containerEle.getAttribute(DESTINATION_TYPE_ATTRIBUTE);
   boolean pubSubDomain=false;
   boolean subscriptionDurable=false;
-  if (DESTINATION_TYPE_DURABLE_TOPIC.equals(destinationType)) {
+  boolean subscriptionShared=false;
+  if (DESTINATION_TYPE_SHARED_DURABLE_TOPIC.equals(destinationType)) {
+    pubSubDomain=true;
+    subscriptionDurable=true;
+    subscriptionShared=true;
+  }
+ else   if (DESTINATION_TYPE_SHARED_TOPIC.equals(destinationType)) {
+    pubSubDomain=true;
+    subscriptionShared=true;
+  }
+ else   if (DESTINATION_TYPE_DURABLE_TOPIC.equals(destinationType)) {
     pubSubDomain=true;
     subscriptionDurable=true;
   }
@@ -13,16 +23,26 @@
  else   if ("".equals(destinationType) || DESTINATION_TYPE_QUEUE.equals(destinationType)) {
   }
  else {
-    parserContext.getReaderContext().error("Invalid listener container 'destination-type': " + "only \"queue\", \"topic\" and \"durableTopic\" supported.",ele);
+    parserContext.getReaderContext().error("Invalid listener container 'destination-type': only " + "\"queue\", \"topic\", \"durableTopic\", \"sharedTopic\", \"sharedDurableTopic\" supported.",containerEle);
   }
-  propertyValues.add("pubSubDomain",pubSubDomain);
-  propertyValues.add("subscriptionDurable",subscriptionDurable);
-  if (ele.hasAttribute(CLIENT_ID_ATTRIBUTE)) {
-    String clientId=ele.getAttribute(CLIENT_ID_ATTRIBUTE);
+  properties.add("pubSubDomain",pubSubDomain);
+  properties.add("subscriptionDurable",subscriptionDurable);
+  properties.add("subscriptionShared",subscriptionShared);
+  if (containerEle.hasAttribute(CLIENT_ID_ATTRIBUTE)) {
+    String clientId=containerEle.getAttribute(CLIENT_ID_ATTRIBUTE);
     if (!StringUtils.hasText(clientId)) {
-      parserContext.getReaderContext().error("Listener 'client-id' attribute contains empty value.",ele);
+      parserContext.getReaderContext().error("Listener 'client-id' attribute contains empty value.",containerEle);
     }
-    propertyValues.add("clientId",clientId);
+    properties.add("clientId",clientId);
   }
-  return propertyValues;
+  if (containerEle.hasAttribute(MESSAGE_CONVERTER_ATTRIBUTE)) {
+    String messageConverter=containerEle.getAttribute(MESSAGE_CONVERTER_ATTRIBUTE);
+    if (!StringUtils.hasText(messageConverter)) {
+      parserContext.getReaderContext().error("listener container 'message-converter' attribute contains empty value.",containerEle);
+    }
+ else {
+      properties.add("messageConverter",new RuntimeBeanReference(messageConverter));
+    }
+  }
+  return properties;
 }

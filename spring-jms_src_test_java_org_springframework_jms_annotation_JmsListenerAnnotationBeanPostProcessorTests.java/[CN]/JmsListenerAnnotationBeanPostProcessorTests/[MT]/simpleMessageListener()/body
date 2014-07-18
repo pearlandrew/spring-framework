@@ -1,17 +1,18 @@
 {
-  final ConfigurableApplicationContext context=new AnnotationConfigApplicationContext(Config.class,SimpleMessageListenerTestBean.class);
+  ConfigurableApplicationContext context=new AnnotationConfigApplicationContext(Config.class,SimpleMessageListenerTestBean.class);
   JmsListenerContainerTestFactory factory=context.getBean(JmsListenerContainerTestFactory.class);
-  assertEquals("one container should have been registered",1,factory.getContainers().size());
-  MessageListenerTestContainer container=factory.getContainers().get(0);
+  assertEquals("One container should have been registered",1,factory.getListenerContainers().size());
+  MessageListenerTestContainer container=factory.getListenerContainers().get(0);
   JmsListenerEndpoint endpoint=container.getEndpoint();
   assertEquals("Wrong endpoint type",MethodJmsListenerEndpoint.class,endpoint.getClass());
   MethodJmsListenerEndpoint methodEndpoint=(MethodJmsListenerEndpoint)endpoint;
   assertNotNull(methodEndpoint.getBean());
   assertNotNull(methodEndpoint.getMethod());
-  assertTrue("Should have been started " + container,container.isStarted());
   SimpleMessageListenerContainer listenerContainer=new SimpleMessageListenerContainer();
-  methodEndpoint.setupMessageContainer(listenerContainer);
+  methodEndpoint.setupListenerContainer(listenerContainer);
   assertNotNull(listenerContainer.getMessageListener());
+  context.start();
+  assertTrue("Should have been started " + container,container.isStarted());
   context.close();
   assertTrue("Should have been stopped " + container,container.isStopped());
 }

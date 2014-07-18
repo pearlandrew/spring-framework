@@ -13,7 +13,7 @@ catch (    NoSuchMethodException ex) {
   MethodJmsListenerEndpoint endpoint=new MethodJmsListenerEndpoint();
   endpoint.setBean(bean);
   endpoint.setMethod(method);
-  endpoint.setJmsHandlerMethodFactory(jmsHandlerMethodFactory);
+  endpoint.setJmsHandlerMethodFactory(this.jmsHandlerMethodFactory);
   endpoint.setId(getEndpointId(jmsListener));
   endpoint.setDestination(jmsListener.destination());
   if (StringUtils.hasText(jmsListener.selector())) {
@@ -29,10 +29,10 @@ catch (    NoSuchMethodException ex) {
   String containerFactoryBeanName=jmsListener.containerFactory();
   if (StringUtils.hasText(containerFactoryBeanName)) {
     try {
-      factory=applicationContext.getBean(containerFactoryBeanName,JmsListenerContainerFactory.class);
+      factory=this.applicationContext.getBean(containerFactoryBeanName,JmsListenerContainerFactory.class);
     }
- catch (    NoSuchBeanDefinitionException e) {
-      throw new BeanInitializationException("Could not register jms listener endpoint on [" + method + "], no "+ JmsListenerContainerFactory.class.getSimpleName()+ " with id '"+ containerFactoryBeanName+ "' was found in the application context",e);
+ catch (    NoSuchBeanDefinitionException ex) {
+      throw new BeanInitializationException("Could not register jms listener endpoint on [" + method + "], no "+ JmsListenerContainerFactory.class.getSimpleName()+ " with id '"+ containerFactoryBeanName+ "' was found in the application context",ex);
     }
   }
   registrar.registerEndpoint(endpoint,factory);

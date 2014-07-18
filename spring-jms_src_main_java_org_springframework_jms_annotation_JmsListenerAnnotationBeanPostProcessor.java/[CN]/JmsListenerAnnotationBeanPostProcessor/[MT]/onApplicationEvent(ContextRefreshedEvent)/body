@@ -6,24 +6,24 @@
   for (  JmsListenerConfigurer configurer : instances.values()) {
     configurer.configureJmsListeners(registrar);
   }
-  registrar.setApplicationContext(this.applicationContext);
-  if (registrar.getEndpointRegistry() == null) {
-    if (endpointRegistry == null) {
-      endpointRegistry=applicationContext.getBean(AnnotationConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME,JmsListenerEndpointRegistry.class);
+  this.registrar.setApplicationContext(this.applicationContext);
+  if (this.registrar.getEndpointRegistry() == null) {
+    if (this.endpointRegistry == null) {
+      this.endpointRegistry=this.applicationContext.getBean(AnnotationConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME,JmsListenerEndpointRegistry.class);
     }
-    registrar.setEndpointRegistry(endpointRegistry);
+    this.registrar.setEndpointRegistry(this.endpointRegistry);
   }
   if (this.containerFactoryBeanName != null) {
-    registrar.setContainerFactoryBeanName(this.containerFactoryBeanName);
+    this.registrar.setContainerFactoryBeanName(this.containerFactoryBeanName);
   }
   JmsHandlerMethodFactory handlerMethodFactory=registrar.getJmsHandlerMethodFactory();
   if (handlerMethodFactory != null) {
     this.jmsHandlerMethodFactory.setJmsHandlerMethodFactory(handlerMethodFactory);
   }
   try {
-    registrar.afterPropertiesSet();
+    this.registrar.afterPropertiesSet();
   }
- catch (  Exception e) {
-    throw new BeanInitializationException(e.getMessage(),e);
+ catch (  Exception ex) {
+    throw new BeanInitializationException("Failed to initialize JmsListenerEndpointRegistrar",ex);
   }
 }
