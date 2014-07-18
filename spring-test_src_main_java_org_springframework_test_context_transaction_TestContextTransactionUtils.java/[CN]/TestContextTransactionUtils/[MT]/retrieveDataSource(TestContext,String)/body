@@ -5,6 +5,12 @@
     if (StringUtils.hasText(name)) {
       return bf.getBean(name,DataSource.class);
     }
+  }
+ catch (  BeansException ex) {
+    logger.error(String.format("Failed to retrieve DataSource named '%s' for test context %s",name,testContext),ex);
+    throw ex;
+  }
+  try {
     if (bf instanceof ListableBeanFactory) {
       ListableBeanFactory lbf=(ListableBeanFactory)bf;
       Map<String,DataSource> dataSources=BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf,DataSource.class);
@@ -15,9 +21,9 @@
     return bf.getBean(DEFAULT_DATA_SOURCE_NAME,DataSource.class);
   }
  catch (  BeansException ex) {
-    if (logger.isWarnEnabled()) {
-      logger.warn("Caught exception while retrieving DataSource for test context " + testContext,ex);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Caught exception while retrieving DataSource for test context " + testContext,ex);
     }
-    throw ex;
+    return null;
   }
 }

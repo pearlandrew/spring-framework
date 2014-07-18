@@ -5,6 +5,12 @@
     if (StringUtils.hasText(name)) {
       return bf.getBean(name,PlatformTransactionManager.class);
     }
+  }
+ catch (  BeansException ex) {
+    logger.error(String.format("Failed to retrieve transaction manager named '%s' for test context %s",name,testContext),ex);
+    throw ex;
+  }
+  try {
     if (bf instanceof ListableBeanFactory) {
       ListableBeanFactory lbf=(ListableBeanFactory)bf;
       Map<String,PlatformTransactionManager> txMgrs=BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf,PlatformTransactionManager.class);
@@ -22,9 +28,9 @@
     return bf.getBean(DEFAULT_TRANSACTION_MANAGER_NAME,PlatformTransactionManager.class);
   }
  catch (  BeansException ex) {
-    if (logger.isWarnEnabled()) {
-      logger.warn("Caught exception while retrieving transaction manager for test context " + testContext,ex);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Caught exception while retrieving transaction manager for test context " + testContext,ex);
     }
-    throw ex;
+    return null;
   }
 }
