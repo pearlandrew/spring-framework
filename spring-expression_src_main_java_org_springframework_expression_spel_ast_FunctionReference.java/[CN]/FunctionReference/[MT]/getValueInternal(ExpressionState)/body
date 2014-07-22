@@ -1,16 +1,16 @@
 {
-  TypedValue o=state.lookupVariable(this.name);
-  if (o == null) {
+  TypedValue value=state.lookupVariable(this.name);
+  if (value == null) {
     throw new SpelEvaluationException(getStartPosition(),SpelMessage.FUNCTION_NOT_DEFINED,this.name);
   }
-  if (!(o.getValue() instanceof Method)) {
-    throw new SpelEvaluationException(SpelMessage.FUNCTION_REFERENCE_CANNOT_BE_INVOKED,this.name,o.getClass());
+  if (!(value.getValue() instanceof Method)) {
+    throw new SpelEvaluationException(SpelMessage.FUNCTION_REFERENCE_CANNOT_BE_INVOKED,this.name,value.getClass());
   }
   try {
-    return executeFunctionJLRMethod(state,(Method)o.getValue());
+    return executeFunctionJLRMethod(state,(Method)value.getValue());
   }
- catch (  SpelEvaluationException se) {
-    se.setPosition(getStartPosition());
-    throw se;
+ catch (  SpelEvaluationException ex) {
+    ex.setPosition(getStartPosition());
+    throw ex;
   }
 }

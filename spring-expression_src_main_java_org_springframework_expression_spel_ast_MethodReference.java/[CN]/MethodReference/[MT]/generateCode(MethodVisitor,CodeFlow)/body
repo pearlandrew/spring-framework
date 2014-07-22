@@ -9,13 +9,13 @@
   boolean itf=method.getDeclaringClass().isInterface();
   String methodDeclaringClassSlashedDescriptor=method.getDeclaringClass().getName().replace('.','/');
   if (!isStaticMethod) {
-    if (descriptor == null || !descriptor.equals(method.getDeclaringClass())) {
-      mv.visitTypeInsn(CHECKCAST,method.getDeclaringClass().getName().replace('.','/'));
+    if (descriptor == null || !descriptor.equals(methodDeclaringClassSlashedDescriptor)) {
+      mv.visitTypeInsn(CHECKCAST,methodDeclaringClassSlashedDescriptor);
     }
   }
   String[] paramDescriptors=CodeFlow.toParamDescriptors(method);
-  for (int c=0; c < children.length; c++) {
-    SpelNodeImpl child=children[c];
+  for (int c=0; c < this.children.length; c++) {
+    SpelNodeImpl child=this.children[c];
     codeflow.enterCompilationScope();
     child.generateCode(mv,codeflow);
     if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && (paramDescriptors[c].charAt(0) == 'L')) {
@@ -27,5 +27,5 @@
     codeflow.exitCompilationScope();
   }
   mv.visitMethodInsn(isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL,methodDeclaringClassSlashedDescriptor,method.getName(),CodeFlow.createSignatureDescriptor(method),itf);
-  codeflow.pushDescriptor(exitTypeDescriptor);
+  codeflow.pushDescriptor(this.exitTypeDescriptor);
 }

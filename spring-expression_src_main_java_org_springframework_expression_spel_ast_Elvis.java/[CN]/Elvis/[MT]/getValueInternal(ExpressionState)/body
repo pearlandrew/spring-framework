@@ -1,20 +1,11 @@
 {
   TypedValue value=this.children[0].getValueInternal(state);
-  if ((value.getValue() != null) && !((value.getValue() instanceof String) && ((String)value.getValue()).length() == 0)) {
+  if (!StringUtils.isEmpty(value.getValue())) {
     return value;
   }
  else {
     TypedValue result=this.children[1].getValueInternal(state);
-    if (exitTypeDescriptor == null) {
-      String testDescriptor=this.children[0].exitTypeDescriptor;
-      String ifNullDescriptor=this.children[1].exitTypeDescriptor;
-      if (testDescriptor.equals(ifNullDescriptor)) {
-        this.exitTypeDescriptor=testDescriptor;
-      }
- else {
-        this.exitTypeDescriptor="Ljava/lang/Object";
-      }
-    }
+    computeExitTypeDescriptor();
     return result;
   }
 }
