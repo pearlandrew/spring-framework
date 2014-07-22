@@ -1,20 +1,21 @@
 {
   MediaType contentType=inputMessage.getHeaders().getContentType();
-  contentType=contentType != null ? contentType : PROTOBUF;
-  InputStreamReader reader=new InputStreamReader(inputMessage.getBody(),getCharset(inputMessage.getHeaders()));
+  contentType=(contentType != null ? contentType : PROTOBUF);
+  Charset charset=getCharset(inputMessage.getHeaders());
+  InputStreamReader reader=new InputStreamReader(inputMessage.getBody(),charset);
   try {
-    Message.Builder builder=createMessageBuilder(clazz);
+    Message.Builder builder=getMessageBuilder(clazz);
     if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
-      JsonFormat.merge(reader,extensionRegistry,builder);
+      JsonFormat.merge(reader,this.extensionRegistry,builder);
     }
  else     if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
-      TextFormat.merge(reader,extensionRegistry,builder);
+      TextFormat.merge(reader,this.extensionRegistry,builder);
     }
  else     if (MediaType.APPLICATION_XML.isCompatibleWith(contentType)) {
-      XmlFormat.merge(reader,extensionRegistry,builder);
+      XmlFormat.merge(reader,this.extensionRegistry,builder);
     }
  else {
-      builder.mergeFrom(inputMessage.getBody(),extensionRegistry);
+      builder.mergeFrom(inputMessage.getBody(),this.extensionRegistry);
     }
     return builder.build();
   }
