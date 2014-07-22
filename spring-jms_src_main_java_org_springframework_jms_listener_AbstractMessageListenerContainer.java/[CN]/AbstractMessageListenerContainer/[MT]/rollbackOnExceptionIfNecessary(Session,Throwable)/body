@@ -1,10 +1,15 @@
 {
   try {
-    if (session.getTransacted() && isSessionLocallyTransacted(session)) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("Initiating transaction rollback on application exception",ex);
+    if (session.getTransacted()) {
+      if (isSessionLocallyTransacted(session)) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Initiating transaction rollback on application exception",ex);
+        }
+        JmsUtils.rollbackIfNecessary(session);
       }
-      JmsUtils.rollbackIfNecessary(session);
+    }
+ else {
+      session.recover();
     }
   }
  catch (  IllegalStateException ex2) {
