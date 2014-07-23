@@ -1,6 +1,6 @@
 {
   CacheRemoveAllOperation operation=context.getOperation();
-  final boolean earlyRemove=operation.isEarlyRemove();
+  boolean earlyRemove=operation.isEarlyRemove();
   if (earlyRemove) {
     removeAll(context);
   }
@@ -11,11 +11,11 @@
     }
     return result;
   }
- catch (  CacheOperationInvoker.ThrowableWrapper t) {
-    Throwable ex=t.getOriginal();
-    if (!earlyRemove && operation.getExceptionTypeFilter().match(ex.getClass())) {
+ catch (  CacheOperationInvoker.ThrowableWrapper ex) {
+    Throwable original=ex.getOriginal();
+    if (!earlyRemove && operation.getExceptionTypeFilter().match(original.getClass())) {
       removeAll(context);
     }
-    throw t;
+    throw ex;
   }
 }

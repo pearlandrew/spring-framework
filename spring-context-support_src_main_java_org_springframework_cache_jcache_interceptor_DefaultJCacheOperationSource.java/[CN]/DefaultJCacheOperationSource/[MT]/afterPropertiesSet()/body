@@ -1,13 +1,11 @@
 {
-  Assert.state((cacheResolver != null && exceptionCacheResolver != null) || cacheManager != null,"'cacheManager' is required if cache resolvers are not set.");
+  Assert.state((this.cacheResolver != null && this.exceptionCacheResolver != null) || this.cacheManager != null,"'cacheManager' is required if cache resolvers are not set.");
   Assert.state(this.applicationContext != null,"The application context was not injected as it should.");
-  if (keyGenerator == null) {
-    keyGenerator=new KeyGeneratorAdapter(this,new SimpleCacheKeyGenerator());
+  this.adaptedKeyGenerator=new KeyGeneratorAdapter(this,this.keyGenerator);
+  if (this.cacheResolver == null) {
+    this.cacheResolver=new SimpleCacheResolver(this.cacheManager);
   }
-  if (cacheResolver == null) {
-    cacheResolver=new SimpleCacheResolver(cacheManager);
-  }
-  if (exceptionCacheResolver == null) {
-    exceptionCacheResolver=new SimpleExceptionCacheResolver(cacheManager);
+  if (this.exceptionCacheResolver == null) {
+    this.exceptionCacheResolver=new SimpleExceptionCacheResolver(this.cacheManager);
   }
 }

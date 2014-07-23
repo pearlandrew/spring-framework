@@ -1,8 +1,13 @@
 {
-  JCacheOperation<?> operation=cacheOperationSource.getCacheOperation(method,target.getClass());
-  if (!(BaseKeyCacheOperation.class.isInstance(operation))) {
+  JCacheOperation<?> operation=this.cacheOperationSource.getCacheOperation(method,target.getClass());
+  if (!(AbstractJCacheKeyOperation.class.isInstance(operation))) {
     throw new IllegalStateException("Invalid operation, should be a key-based operation " + operation);
   }
   CacheKeyInvocationContext<?> invocationContext=createCacheKeyInvocationContext(target,operation,params);
-  return this.target.generateCacheKey(invocationContext);
+  if (this.cacheKeyGenerator != null) {
+    return this.cacheKeyGenerator.generateCacheKey(invocationContext);
+  }
+ else {
+    return doGenerate(this.keyGenerator,invocationContext);
+  }
 }
