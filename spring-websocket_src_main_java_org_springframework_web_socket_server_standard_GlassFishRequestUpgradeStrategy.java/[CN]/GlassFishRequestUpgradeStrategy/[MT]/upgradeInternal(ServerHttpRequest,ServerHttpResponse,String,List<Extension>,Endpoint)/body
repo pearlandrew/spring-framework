@@ -1,21 +1,43 @@
 {
   HttpServletRequest servletRequest=getHttpServletRequest(request);
   HttpServletResponse servletResponse=getHttpServletResponse(response);
-  WebSocketApplication webSocketApplication=createTyrusEndpoint(endpoint,selectedProtocol,selectedExtensions);
-  WebSocketEngine webSocketEngine=WebSocketEngine.getEngine();
+  TyrusServerContainer serverContainer=(TyrusServerContainer)getContainer(servletRequest);
+  TyrusWebSocketEngine engine=(TyrusWebSocketEngine)serverContainer.getWebSocketEngine();
+  TyrusEndpointWrapper tyrusEndpoint=null;
   try {
-    webSocketEngine.register(webSocketApplication);
-  }
- catch (  DeploymentException ex) {
-    throw new HandshakeFailureException("Failed to configure endpoint in GlassFish",ex);
-  }
-  try {
-    performUpgrade(servletRequest,servletResponse,request.getHeaders(),webSocketApplication);
-  }
- catch (  IOException ex) {
-    throw new HandshakeFailureException("Response update failed during upgrade to WebSocket, uri=" + request.getURI(),ex);
-  }
+    tyrusEndpoint=createTyrusEndpoint(endpoint,subProtocol,extensions,serverContainer);
+    endpointRegistrationMethod.invoke(engine,tyrusEndpoint);
+    String endpointPath=tyrusEndpoint.getEndpointPath();
+    HttpHeaders headers=request.getHeaders();
+    RequestContext requestContext=createRequestContext(servletRequest,endpointPath,headers);
+    TyrusUpgradeResponse upgradeResponse=new TyrusUpgradeResponse();
+    UpgradeInfo upgradeInfo=engine.upgrade(requestContext,upgradeResponse);
+switch (upgradeInfo.getStatus()) {
+case SUCCESS:
+      TyrusHttpUpgradeHandler handler=servletRequest.upgrade(TyrusHttpUpgradeHandler.class);
+    Writer servletWriter=createTyrusServletWriter(handler);
+  handler.preInit(upgradeInfo,servletWriter,servletRequest.getUserPrincipal() != null);
+servletResponse.setStatus(upgradeResponse.getStatus());
+for (Map.Entry<String,List<String>> entry : upgradeResponse.getHeaders().entrySet()) {
+servletResponse.addHeader(entry.getKey(),Utils.getHeaderFromList(entry.getValue()));
+}
+servletResponse.flushBuffer();
+if (logger.isTraceEnabled()) {
+logger.trace("Successful upgrade uri=" + servletRequest.getRequestURI() + ", response headers="+ upgradeResponse.getHeaders());
+}
+break;
+case HANDSHAKE_FAILED:
+throw new HandshakeFailureException("Unexpected handshake failure: " + request.getURI());
+case NOT_APPLICABLE:
+throw new HandshakeFailureException("Unexpected handshake mapping failure: " + request.getURI());
+}
+}
+ catch (Exception ex) {
+throw new HandshakeFailureException("Error during handshake: " + request.getURI(),ex);
+}
  finally {
-    webSocketEngine.unregister(webSocketApplication);
-  }
+if (tyrusEndpoint != null) {
+engine.unregister(tyrusEndpoint);
+}
+}
 }
