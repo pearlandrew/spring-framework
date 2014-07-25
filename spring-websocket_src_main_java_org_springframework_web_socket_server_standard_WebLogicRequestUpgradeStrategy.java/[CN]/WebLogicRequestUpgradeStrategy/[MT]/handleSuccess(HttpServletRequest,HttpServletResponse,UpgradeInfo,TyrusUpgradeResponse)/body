@@ -1,0 +1,20 @@
+{
+  response.setStatus(upgradeResponse.getStatus());
+  for (  Map.Entry<String,List<String>> entry : upgradeResponse.getHeaders().entrySet()) {
+    response.addHeader(entry.getKey(),Utils.getHeaderFromList(entry.getValue()));
+  }
+  AsyncContext asyncContext=request.startAsync();
+  asyncContext.setTimeout(-1L);
+  Object nativeRequest=getNativeRequest(request);
+  BeanWrapper beanWrapper=new BeanWrapperImpl(nativeRequest);
+  Object httpSocket=beanWrapper.getPropertyValue("connection.connectionHandler.rawConnection");
+  Object webSocket=webSocketHelper.newInstance(httpSocket);
+  webSocketHelper.upgrade(webSocket,httpSocket,request.getServletContext());
+  response.flushBuffer();
+  boolean isProtected=request.getUserPrincipal() != null;
+  Writer servletWriter=servletWriterHelper.newInstance(response,webSocket,isProtected);
+  Connection connection=upgradeInfo.createConnection(servletWriter,noOpCloseListener);
+  new BeanWrapperImpl(webSocket).setPropertyValue("connection",connection);
+  new BeanWrapperImpl(servletWriter).setPropertyValue("connection",connection);
+  webSocketHelper.registerForReadEvent(webSocket);
+}
