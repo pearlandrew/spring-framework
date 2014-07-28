@@ -1,0 +1,8 @@
+{
+  messagingTemplate.setDefaultDestinationName("myQueue");
+  javax.jms.Message replyJmsMessage=createJmsTextMessage("My reply");
+  given(jmsTemplate.sendAndReceive(eq("myQueue"),anyObject())).willReturn(replyJmsMessage);
+  String reply=messagingTemplate.convertSendAndReceive("my Payload",String.class);
+  verify(jmsTemplate,times(1)).sendAndReceive(eq("myQueue"),anyObject());
+  assertEquals("My reply",reply);
+}

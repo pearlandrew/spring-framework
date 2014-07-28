@@ -1,0 +1,8 @@
+{
+  Message<String> request=createTextMessage();
+  javax.jms.Message replyJmsMessage=createJmsTextMessage();
+  given(jmsTemplate.sendAndReceive(eq("myQueue"),anyObject())).willReturn(replyJmsMessage);
+  Message<?> actual=messagingTemplate.sendAndReceive("myQueue",request);
+  verify(jmsTemplate,times(1)).sendAndReceive(eq("myQueue"),anyObject());
+  assertTextMessage(actual);
+}

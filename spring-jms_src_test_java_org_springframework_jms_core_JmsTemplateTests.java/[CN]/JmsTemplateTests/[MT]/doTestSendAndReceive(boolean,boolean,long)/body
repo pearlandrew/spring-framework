@@ -1,0 +1,51 @@
+{
+  JmsTemplate template=createTemplate();
+  template.setConnectionFactory(connectionFactory);
+  String destinationName="testDestination";
+  if (useDefaultDestination) {
+    if (explicitDestination) {
+      template.setDefaultDestination(queue);
+    }
+ else {
+      template.setDefaultDestinationName(destinationName);
+    }
+  }
+  template.setReceiveTimeout(timeout);
+  Session localSession=getLocalSession();
+  TemporaryQueue replyDestination=mock(TemporaryQueue.class);
+  MessageProducer messageProducer=mock(MessageProducer.class);
+  given(localSession.createProducer(queue)).willReturn(messageProducer);
+  given(localSession.createTemporaryQueue()).willReturn(replyDestination);
+  MessageConsumer messageConsumer=mock(MessageConsumer.class);
+  given(localSession.createConsumer(replyDestination)).willReturn(messageConsumer);
+  TextMessage request=mock(TextMessage.class);
+  MessageCreator messageCreator=mock(MessageCreator.class);
+  given(messageCreator.createMessage(localSession)).willReturn(request);
+  TextMessage reply=mock(TextMessage.class);
+  if (timeout == JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT) {
+    given(messageConsumer.receiveNoWait()).willReturn(reply);
+  }
+ else   if (timeout == JmsTemplate.RECEIVE_TIMEOUT_INDEFINITE_WAIT) {
+    given(messageConsumer.receive()).willReturn(reply);
+  }
+ else {
+    given(messageConsumer.receive(timeout)).willReturn(reply);
+  }
+  Message message=null;
+  if (useDefaultDestination) {
+    message=template.sendAndReceive(messageCreator);
+  }
+ else   if (explicitDestination) {
+    message=template.sendAndReceive(queue,messageCreator);
+  }
+ else {
+    message=template.sendAndReceive(destinationName,messageCreator);
+  }
+  verify(request).setJMSReplyTo(replyDestination);
+  assertSame("Reply message not received",reply,message);
+  verify(connection).start();
+  verify(connection).close();
+  verify(localSession).close();
+  verify(messageConsumer).close();
+  verify(messageProducer).close();
+}
