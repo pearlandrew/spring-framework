@@ -1,11 +1,19 @@
 {
   String baseUrl=chain.resolveUrlPath(resourceUrlPath,locations);
   if (StringUtils.hasText(baseUrl)) {
-    VersionStrategy versionStrategy=findStrategy(resourceUrlPath);
+    VersionStrategy versionStrategy=getStrategyForPath(resourceUrlPath);
     if (versionStrategy == null) {
       return null;
     }
-    return versionStrategy.addVersionToUrl(baseUrl,locations,chain);
+    if (logger.isTraceEnabled()) {
+      logger.trace("Getting the original resource to determine version");
+    }
+    Resource resource=chain.resolveResource(null,baseUrl,locations);
+    String version=versionStrategy.getResourceVersion(resource);
+    if (logger.isTraceEnabled()) {
+      logger.trace("Version=" + version);
+    }
+    return versionStrategy.addVersion(baseUrl,version);
   }
   return baseUrl;
 }

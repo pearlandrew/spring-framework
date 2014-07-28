@@ -3,18 +3,18 @@
   if (resolved != null) {
     return resolved;
   }
-  VersionStrategy versionStrategy=findStrategy(requestPath);
+  VersionStrategy versionStrategy=getStrategyForPath(requestPath);
   if (versionStrategy == null) {
     return null;
   }
-  String candidateVersion=versionStrategy.extractVersionFromPath(requestPath);
+  String candidateVersion=versionStrategy.extractVersion(requestPath);
   if (StringUtils.isEmpty(candidateVersion)) {
     if (logger.isTraceEnabled()) {
       logger.trace("No version found in path=\"" + requestPath + "\"");
     }
     return null;
   }
-  String simplePath=versionStrategy.deleteVersionFromPath(requestPath,candidateVersion);
+  String simplePath=versionStrategy.removeVersion(requestPath,candidateVersion);
   if (logger.isTraceEnabled()) {
     logger.trace("Extracted version from path, re-resolving without version, path=\"" + simplePath + "\"");
   }
@@ -22,7 +22,8 @@
   if (baseResource == null) {
     return null;
   }
-  if (versionStrategy.resourceVersionMatches(baseResource,candidateVersion)) {
+  String actualVersion=versionStrategy.getResourceVersion(baseResource);
+  if (candidateVersion.equals(actualVersion)) {
     if (logger.isTraceEnabled()) {
       logger.trace("resource matches extracted version");
     }
