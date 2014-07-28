@@ -1,15 +1,15 @@
 {
-  if (!parserContext.getRegistry().containsBeanDefinition(JCACHE_ADVISOR_BEAN_NAME)) {
+  if (!parserContext.getRegistry().containsBeanDefinition(CacheManagementConfigUtils.JCACHE_ADVISOR_BEAN_NAME)) {
     Object eleSource=parserContext.extractSource(element);
     BeanDefinition sourceDef=createJCacheOperationSourceBeanDefinition(element,eleSource);
     String sourceName=parserContext.getReaderContext().registerWithGeneratedName(sourceDef);
-    RootBeanDefinition interceptorDef=new RootBeanDefinition(JCACHE_INTERCEPTOR_CLASS);
+    RootBeanDefinition interceptorDef=new RootBeanDefinition("org.springframework.cache.jcache.interceptor.JCacheInterceptor");
     interceptorDef.setSource(eleSource);
     interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
     interceptorDef.getPropertyValues().add("cacheOperationSource",new RuntimeBeanReference(sourceName));
     parseErrorHandler(element,interceptorDef);
     String interceptorName=parserContext.getReaderContext().registerWithGeneratedName(interceptorDef);
-    RootBeanDefinition advisorDef=new RootBeanDefinition(JCACHE_ADVISOR_FACTORY_CLASS);
+    RootBeanDefinition advisorDef=new RootBeanDefinition("org.springframework.cache.jcache.interceptor.BeanFactoryJCacheOperationSourceAdvisor");
     advisorDef.setSource(eleSource);
     advisorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
     advisorDef.getPropertyValues().add("cacheOperationSource",new RuntimeBeanReference(sourceName));
@@ -17,11 +17,11 @@
     if (element.hasAttribute("order")) {
       advisorDef.getPropertyValues().add("order",element.getAttribute("order"));
     }
-    parserContext.getRegistry().registerBeanDefinition(JCACHE_ADVISOR_BEAN_NAME,advisorDef);
+    parserContext.getRegistry().registerBeanDefinition(CacheManagementConfigUtils.JCACHE_ADVISOR_BEAN_NAME,advisorDef);
     CompositeComponentDefinition compositeDef=new CompositeComponentDefinition(element.getTagName(),eleSource);
     compositeDef.addNestedComponent(new BeanComponentDefinition(sourceDef,sourceName));
     compositeDef.addNestedComponent(new BeanComponentDefinition(interceptorDef,interceptorName));
-    compositeDef.addNestedComponent(new BeanComponentDefinition(advisorDef,JCACHE_ADVISOR_BEAN_NAME));
+    compositeDef.addNestedComponent(new BeanComponentDefinition(advisorDef,CacheManagementConfigUtils.JCACHE_ADVISOR_BEAN_NAME));
     parserContext.registerComponent(compositeDef);
   }
 }
