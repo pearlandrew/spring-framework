@@ -1,0 +1,24 @@
+{
+  this.registrar.setBeanFactory(this.beanFactory);
+  if (this.beanFactory instanceof ListableBeanFactory) {
+    Map<String,JmsListenerConfigurer> instances=((ListableBeanFactory)this.beanFactory).getBeansOfType(JmsListenerConfigurer.class);
+    for (    JmsListenerConfigurer configurer : instances.values()) {
+      configurer.configureJmsListeners(this.registrar);
+    }
+  }
+  if (this.registrar.getEndpointRegistry() == null) {
+    if (this.endpointRegistry == null) {
+      Assert.state(this.beanFactory != null,"BeanFactory must be set to find endpoint registry by bean name");
+      this.endpointRegistry=this.beanFactory.getBean(AnnotationConfigUtils.JMS_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME,JmsListenerEndpointRegistry.class);
+    }
+    this.registrar.setEndpointRegistry(this.endpointRegistry);
+  }
+  if (this.containerFactoryBeanName != null) {
+    this.registrar.setContainerFactoryBeanName(this.containerFactoryBeanName);
+  }
+  JmsHandlerMethodFactory handlerMethodFactory=this.registrar.getJmsHandlerMethodFactory();
+  if (handlerMethodFactory != null) {
+    this.jmsHandlerMethodFactory.setJmsHandlerMethodFactory(handlerMethodFactory);
+  }
+  this.registrar.afterPropertiesSet();
+}

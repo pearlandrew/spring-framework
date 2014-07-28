@@ -28,12 +28,13 @@ catch (    NoSuchMethodException ex) {
   JmsListenerContainerFactory<?> factory=null;
   String containerFactoryBeanName=jmsListener.containerFactory();
   if (StringUtils.hasText(containerFactoryBeanName)) {
+    Assert.state(this.beanFactory != null,"BeanFactory must be set to obtain container factory by bean name");
     try {
-      factory=this.applicationContext.getBean(containerFactoryBeanName,JmsListenerContainerFactory.class);
+      factory=this.beanFactory.getBean(containerFactoryBeanName,JmsListenerContainerFactory.class);
     }
  catch (    NoSuchBeanDefinitionException ex) {
       throw new BeanInitializationException("Could not register jms listener endpoint on [" + method + "], no "+ JmsListenerContainerFactory.class.getSimpleName()+ " with id '"+ containerFactoryBeanName+ "' was found in the application context",ex);
     }
   }
-  registrar.registerEndpoint(endpoint,factory);
+  this.registrar.registerEndpoint(endpoint,factory);
 }

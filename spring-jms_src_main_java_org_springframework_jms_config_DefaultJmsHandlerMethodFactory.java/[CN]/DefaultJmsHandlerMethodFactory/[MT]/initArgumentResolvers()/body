@@ -1,10 +1,12 @@
 {
-  ConfigurableBeanFactory beanFactory=(ClassUtils.isAssignableValue(ConfigurableApplicationContext.class,applicationContext)) ? ((ConfigurableApplicationContext)applicationContext).getBeanFactory() : null;
   List<HandlerMethodArgumentResolver> resolvers=new ArrayList<HandlerMethodArgumentResolver>();
-  resolvers.add(new HeaderMethodArgumentResolver(getConversionService(),beanFactory));
+  ConfigurableBeanFactory cbf=(this.beanFactory instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory)this.beanFactory : null);
+  resolvers.add(new HeaderMethodArgumentResolver(this.conversionService,cbf));
   resolvers.add(new HeadersMethodArgumentResolver());
   resolvers.add(new MessageMethodArgumentResolver());
-  resolvers.addAll(getCustomArgumentResolvers());
-  resolvers.add(new PayloadArgumentResolver(getMessageConverter(),getValidator()));
+  if (this.customArgumentResolvers != null) {
+    resolvers.addAll(this.customArgumentResolvers);
+  }
+  resolvers.add(new PayloadArgumentResolver(this.messageConverter,this.validator));
   return resolvers;
 }

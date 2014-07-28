@@ -1,18 +1,18 @@
 {
-  if (event.getApplicationContext() != this.applicationContext) {
-    return;
-  }
   if (this.scheduler != null) {
     this.registrar.setScheduler(this.scheduler);
   }
-  Map<String,SchedulingConfigurer> configurers=this.applicationContext.getBeansOfType(SchedulingConfigurer.class);
-  for (  SchedulingConfigurer configurer : configurers.values()) {
-    configurer.configureTasks(this.registrar);
+  if (this.beanFactory != null) {
+    Map<String,SchedulingConfigurer> configurers=this.beanFactory.getBeansOfType(SchedulingConfigurer.class);
+    for (    SchedulingConfigurer configurer : configurers.values()) {
+      configurer.configureTasks(this.registrar);
+    }
   }
   if (this.registrar.hasTasks() && this.registrar.getScheduler() == null) {
+    Assert.state(this.beanFactory != null,"BeanFactory must be set to find scheduler by type");
     Map<String,? super Object> schedulers=new HashMap<String,Object>();
-    schedulers.putAll(this.applicationContext.getBeansOfType(TaskScheduler.class));
-    schedulers.putAll(this.applicationContext.getBeansOfType(ScheduledExecutorService.class));
+    schedulers.putAll(this.beanFactory.getBeansOfType(TaskScheduler.class));
+    schedulers.putAll(this.beanFactory.getBeansOfType(ScheduledExecutorService.class));
     if (schedulers.size() == 0) {
     }
  else     if (schedulers.size() == 1) {
