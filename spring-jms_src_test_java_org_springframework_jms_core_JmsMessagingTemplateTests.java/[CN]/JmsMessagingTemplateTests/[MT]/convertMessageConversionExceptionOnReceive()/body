@@ -1,0 +1,9 @@
+{
+  javax.jms.Message message=createJmsTextMessage();
+  MessageConverter messageConverter=mock(MessageConverter.class);
+  doThrow(org.springframework.jms.support.converter.MessageConversionException.class).when(messageConverter).fromMessage(message);
+  messagingTemplate.setJmsMessageConverter(messageConverter);
+  given(jmsTemplate.receive("myQueue")).willReturn(message);
+  thrown.expect(org.springframework.messaging.converter.MessageConversionException.class);
+  messagingTemplate.receive("myQueue");
+}
