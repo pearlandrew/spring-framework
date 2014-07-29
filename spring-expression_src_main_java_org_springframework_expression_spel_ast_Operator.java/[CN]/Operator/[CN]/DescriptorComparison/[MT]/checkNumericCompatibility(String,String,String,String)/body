@@ -1,0 +1,25 @@
+{
+  String ld=leftDeclaredDescriptor;
+  String rd=rightDeclaredDescriptor;
+  boolean leftNumeric=CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(ld);
+  boolean rightNumeric=CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(rd);
+  if (!leftNumeric && !ld.equals(leftActualDescriptor)) {
+    ld=leftActualDescriptor;
+    leftNumeric=CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(ld);
+  }
+  if (!rightNumeric && !rd.equals(rightActualDescriptor)) {
+    rd=rightActualDescriptor;
+    rightNumeric=CodeFlow.isPrimitiveOrUnboxableSupportedNumberOrBoolean(rd);
+  }
+  if (leftNumeric && rightNumeric) {
+    if (CodeFlow.areBoxingCompatible(ld,rd)) {
+      return new DescriptorComparison(true,true,CodeFlow.toPrimitiveTargetDesc(ld));
+    }
+ else {
+      return DescriptorComparison.INCOMPATIBLE_NUMBERS;
+    }
+  }
+ else {
+    return DescriptorComparison.NOT_NUMBERS;
+  }
+}
