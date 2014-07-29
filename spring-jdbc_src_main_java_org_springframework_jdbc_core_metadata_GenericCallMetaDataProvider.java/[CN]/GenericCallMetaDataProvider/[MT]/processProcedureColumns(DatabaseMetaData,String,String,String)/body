@@ -28,12 +28,12 @@
       int columnType=procs.getInt("COLUMN_TYPE");
       if (columnName == null && (columnType == DatabaseMetaData.procedureColumnIn || columnType == DatabaseMetaData.procedureColumnInOut || columnType == DatabaseMetaData.procedureColumnOut)) {
         if (logger.isDebugEnabled()) {
-          logger.debug("Skipping metadata for: " + columnName + " "+ columnType+ " "+ procs.getInt("DATA_TYPE")+ " "+ procs.getString("TYPE_NAME")+ " "+ procs.getBoolean("NULLABLE")+ " (probably a member of a collection)");
+          logger.debug("Skipping metadata for: " + columnType + " "+ procs.getInt("DATA_TYPE")+ " "+ procs.getString("TYPE_NAME")+ " "+ procs.getBoolean("NULLABLE")+ " (probably a member of a collection)");
         }
       }
  else {
         CallParameterMetaData meta=new CallParameterMetaData(columnName,columnType,procs.getInt("DATA_TYPE"),procs.getString("TYPE_NAME"),procs.getBoolean("NULLABLE"));
-        callParameterMetaData.add(meta);
+        this.callParameterMetaData.add(meta);
         if (logger.isDebugEnabled()) {
           logger.debug("Retrieved metadata: " + meta.getParameterName() + " "+ meta.getParameterType()+ " "+ meta.getSqlType()+ " "+ meta.getTypeName()+ " "+ meta.isNullable());
         }
@@ -41,7 +41,9 @@
     }
   }
  catch (  SQLException ex) {
-    logger.warn("Error while retrieving metadata for procedure columns: " + ex);
+    if (logger.isWarnEnabled()) {
+      logger.warn("Error while retrieving metadata for procedure columns: " + ex);
+    }
   }
  finally {
     try {
@@ -50,7 +52,9 @@
       }
     }
  catch (    SQLException ex) {
-      logger.warn("Problem closing ResultSet for procedure column metadata: " + ex);
+      if (logger.isWarnEnabled()) {
+        logger.warn("Problem closing ResultSet for procedure column metadata: " + ex);
+      }
     }
   }
 }
