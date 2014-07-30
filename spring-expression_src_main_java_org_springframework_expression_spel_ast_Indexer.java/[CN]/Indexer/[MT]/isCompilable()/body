@@ -2,8 +2,16 @@
   if (this.indexedType == IndexedType.array) {
     return exitTypeDescriptor != null;
   }
- else   if (this.indexedType == IndexedType.list || this.indexedType == IndexedType.map) {
-    return true;
+ else   if (this.indexedType == IndexedType.list) {
+    return this.children[0].isCompilable();
+  }
+ else   if (this.indexedType == IndexedType.map) {
+    if (this.children[0] instanceof PropertyOrFieldReference) {
+      return true;
+    }
+ else {
+      return this.children[0].isCompilable();
+    }
   }
  else   if (this.indexedType == IndexedType.object) {
     if (this.cachedReadAccessor != null && (this.cachedReadAccessor instanceof ReflectivePropertyAccessor.OptimalPropertyAccessor) && (getChild(0) instanceof StringLiteral)) {
