@@ -1,0 +1,23 @@
+{
+  if (this.constant != null) {
+    return this.constant;
+  }
+ else {
+    Map<Object,Object> returnValue=new LinkedHashMap<Object,Object>();
+    int childcount=getChildCount();
+    for (int c=0; c < childcount; c++) {
+      SpelNode keyChild=getChild(c++);
+      Object key=null;
+      if (keyChild instanceof PropertyOrFieldReference) {
+        PropertyOrFieldReference reference=(PropertyOrFieldReference)keyChild;
+        key=reference.getName();
+      }
+ else {
+        key=keyChild.getValue(expressionState);
+      }
+      Object value=getChild(c).getValue(expressionState);
+      returnValue.put(key,value);
+    }
+    return new TypedValue(returnValue);
+  }
+}

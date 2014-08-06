@@ -1,0 +1,51 @@
+{
+  Token t=peekToken();
+  if (!peekToken(TokenKind.LCURLY,true)) {
+    return false;
+  }
+  SpelNodeImpl expr=null;
+  Token closingCurly=peekToken();
+  if (peekToken(TokenKind.RCURLY,true)) {
+    expr=new InlineList(toPos(t.startpos,closingCurly.endpos));
+  }
+ else   if (peekToken(TokenKind.COLON,true)) {
+    closingCurly=eatToken(TokenKind.RCURLY);
+    expr=new InlineMap(toPos(t.startpos,closingCurly.endpos));
+  }
+ else {
+    SpelNodeImpl firstExpression=eatExpression();
+    if (peekToken(TokenKind.RCURLY)) {
+      List<SpelNodeImpl> listElements=new ArrayList<SpelNodeImpl>();
+      listElements.add(firstExpression);
+      closingCurly=eatToken(TokenKind.RCURLY);
+      expr=new InlineList(toPos(t.startpos,closingCurly.endpos),listElements.toArray(new SpelNodeImpl[listElements.size()]));
+    }
+ else     if (peekToken(TokenKind.COMMA,true)) {
+      List<SpelNodeImpl> listElements=new ArrayList<SpelNodeImpl>();
+      listElements.add(firstExpression);
+      do {
+        listElements.add(eatExpression());
+      }
+ while (peekToken(TokenKind.COMMA,true));
+      closingCurly=eatToken(TokenKind.RCURLY);
+      expr=new InlineList(toPos(t.startpos,closingCurly.endpos),listElements.toArray(new SpelNodeImpl[listElements.size()]));
+    }
+ else     if (peekToken(TokenKind.COLON,true)) {
+      List<SpelNodeImpl> mapElements=new ArrayList<SpelNodeImpl>();
+      mapElements.add(firstExpression);
+      mapElements.add(eatExpression());
+      while (peekToken(TokenKind.COMMA,true)) {
+        mapElements.add(eatExpression());
+        eatToken(TokenKind.COLON);
+        mapElements.add(eatExpression());
+      }
+      closingCurly=eatToken(TokenKind.RCURLY);
+      expr=new InlineMap(toPos(t.startpos,closingCurly.endpos),mapElements.toArray(new SpelNodeImpl[mapElements.size()]));
+    }
+ else {
+      raiseInternalException(t.startpos,SpelMessage.OOD);
+    }
+  }
+  this.constructedNodes.push(expr);
+  return true;
+}
