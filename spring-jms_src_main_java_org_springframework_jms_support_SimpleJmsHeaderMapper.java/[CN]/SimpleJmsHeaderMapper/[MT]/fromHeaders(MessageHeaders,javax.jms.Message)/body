@@ -12,19 +12,19 @@
         logger.info("failed to set JMSCorrelationID, skipping",e);
       }
     }
-    Object jmsReplyTo=headers.get(JmsHeaders.REPLY_TO);
-    if (jmsReplyTo instanceof Destination) {
+    Destination jmsReplyTo=getHeaderIfAvailable(headers,JmsHeaders.REPLY_TO,Destination.class);
+    if (jmsReplyTo != null) {
       try {
-        jmsMessage.setJMSReplyTo((Destination)jmsReplyTo);
+        jmsMessage.setJMSReplyTo(jmsReplyTo);
       }
  catch (      Exception e) {
         logger.info("failed to set JMSReplyTo, skipping",e);
       }
     }
-    Object jmsType=headers.get(JmsHeaders.TYPE);
-    if (jmsType instanceof String) {
+    String jmsType=getHeaderIfAvailable(headers,JmsHeaders.TYPE,String.class);
+    if (jmsType != null) {
       try {
-        jmsMessage.setJMSType((String)jmsType);
+        jmsMessage.setJMSType(jmsType);
       }
  catch (      Exception e) {
         logger.info("failed to set JMSType, skipping",e);
