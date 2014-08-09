@@ -1,23 +1,22 @@
 {
-  HttpServletRequest requestToExpose=getRequestToExpose(request);
-  exposeModelAsRequestAttributes(model,requestToExpose);
-  exposeHelpers(requestToExpose);
-  String dispatcherPath=prepareForRendering(requestToExpose,response);
-  RequestDispatcher rd=getRequestDispatcher(requestToExpose,dispatcherPath);
+  exposeModelAsRequestAttributes(model,request);
+  exposeHelpers(request);
+  String dispatcherPath=prepareForRendering(request,response);
+  RequestDispatcher rd=getRequestDispatcher(request,dispatcherPath);
   if (rd == null) {
     throw new ServletException("Could not get RequestDispatcher for [" + getUrl() + "]: Check that the corresponding file exists within your web application archive!");
   }
-  if (useInclude(requestToExpose,response)) {
+  if (useInclude(request,response)) {
     response.setContentType(getContentType());
     if (logger.isDebugEnabled()) {
       logger.debug("Including resource [" + getUrl() + "] in InternalResourceView '"+ getBeanName()+ "'");
     }
-    rd.include(requestToExpose,response);
+    rd.include(request,response);
   }
  else {
     if (logger.isDebugEnabled()) {
       logger.debug("Forwarding to resource [" + getUrl() + "] in InternalResourceView '"+ getBeanName()+ "'");
     }
-    rd.forward(requestToExpose,response);
+    rd.forward(request,response);
   }
 }
