@@ -1,11 +1,11 @@
 {
   ScheduledFuture<?> task=mock(ScheduledFuture.class);
-  doReturn(task).when(this.taskScheduler).schedule(any(Runnable.class),any(Date.class));
+  willReturn(task).given(this.taskScheduler).schedule(any(Runnable.class),any(Date.class));
   this.session.setActive(true);
   this.session.scheduleHeartbeat();
   verify(this.taskScheduler).schedule(any(Runnable.class),any(Date.class));
   verifyNoMoreInteractions(this.taskScheduler);
-  doReturn(false).when(task).isDone();
+  given(task.isDone()).willReturn(false);
   this.session.cancelHeartbeat();
   verify(task).isDone();
   verify(task).cancel(false);
