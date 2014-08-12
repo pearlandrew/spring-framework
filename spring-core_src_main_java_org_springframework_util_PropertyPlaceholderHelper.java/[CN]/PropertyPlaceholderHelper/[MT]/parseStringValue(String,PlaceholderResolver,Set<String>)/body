@@ -1,10 +1,10 @@
 {
-  StringBuilder buf=new StringBuilder(strVal);
+  StringBuilder result=new StringBuilder(strVal);
   int startIndex=strVal.indexOf(this.placeholderPrefix);
   while (startIndex != -1) {
-    int endIndex=findPlaceholderEndIndex(buf,startIndex);
+    int endIndex=findPlaceholderEndIndex(result,startIndex);
     if (endIndex != -1) {
-      String placeholder=buf.substring(startIndex + this.placeholderPrefix.length(),endIndex);
+      String placeholder=result.substring(startIndex + this.placeholderPrefix.length(),endIndex);
       String originalPlaceholder=placeholder;
       if (!visitedPlaceholders.add(originalPlaceholder)) {
         throw new IllegalArgumentException("Circular placeholder reference '" + originalPlaceholder + "' in property definitions");
@@ -24,14 +24,14 @@
       }
       if (propVal != null) {
         propVal=parseStringValue(propVal,placeholderResolver,visitedPlaceholders);
-        buf.replace(startIndex,endIndex + this.placeholderSuffix.length(),propVal);
+        result.replace(startIndex,endIndex + this.placeholderSuffix.length(),propVal);
         if (logger.isTraceEnabled()) {
           logger.trace("Resolved placeholder '" + placeholder + "'");
         }
-        startIndex=buf.indexOf(this.placeholderPrefix,startIndex + propVal.length());
+        startIndex=result.indexOf(this.placeholderPrefix,startIndex + propVal.length());
       }
  else       if (this.ignoreUnresolvablePlaceholders) {
-        startIndex=buf.indexOf(this.placeholderPrefix,endIndex + this.placeholderSuffix.length());
+        startIndex=result.indexOf(this.placeholderPrefix,endIndex + this.placeholderSuffix.length());
       }
  else {
         throw new IllegalArgumentException("Could not resolve placeholder '" + placeholder + "'"+ " in string value \""+ strVal+ "\"");
@@ -42,5 +42,5 @@
       startIndex=-1;
     }
   }
-  return buf.toString();
+  return result.toString();
 }
