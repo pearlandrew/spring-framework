@@ -1,0 +1,15 @@
+{
+  try {
+    ConfigurableEnvironment environment=context.getEnvironment();
+    String[] locations=mergedConfig.getPropertySourceLocations();
+    for (    String location : locations) {
+      String resolvedLocation=environment.resolveRequiredPlaceholders(location);
+      Resource resource=context.getResource(resolvedLocation);
+      ResourcePropertySource ps=new ResourcePropertySource(resource);
+      environment.getPropertySources().addFirst(ps);
+    }
+  }
+ catch (  IOException e) {
+    throw new IllegalStateException("Failed to add PropertySource to Environment",e);
+  }
+}
