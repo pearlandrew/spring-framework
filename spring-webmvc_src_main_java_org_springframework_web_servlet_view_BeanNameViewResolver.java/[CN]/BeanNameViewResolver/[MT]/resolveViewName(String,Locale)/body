@@ -1,6 +1,15 @@
 {
   ApplicationContext context=getApplicationContext();
   if (!context.containsBean(viewName)) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("No matching bean found for view name '" + viewName + "'");
+    }
+    return null;
+  }
+  if (!context.isTypeMatch(viewName,View.class)) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Found matching bean for view name '" + viewName + "' - to be ignored since it does not implement View");
+    }
     return null;
   }
   return context.getBean(viewName,View.class);
