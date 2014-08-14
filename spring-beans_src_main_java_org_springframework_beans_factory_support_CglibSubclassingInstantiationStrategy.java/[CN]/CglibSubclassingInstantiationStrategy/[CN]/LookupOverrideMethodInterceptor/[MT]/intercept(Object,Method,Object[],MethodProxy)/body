@@ -1,4 +1,10 @@
 {
   LookupOverride lo=(LookupOverride)getBeanDefinition().getMethodOverrides().getOverride(method);
-  return this.owner.getBean(lo.getBeanName());
+  Object[] argsToUse=(args.length > 0 ? args : null);
+  if (StringUtils.hasText(lo.getBeanName())) {
+    return this.owner.getBean(lo.getBeanName(),argsToUse);
+  }
+ else {
+    return this.owner.getBean(method.getReturnType(),argsToUse);
+  }
 }
