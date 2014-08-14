@@ -2,11 +2,13 @@
   Class<?> clazz=getBootstrapContext().getTestClass();
   Class<TestExecutionListeners> annotationType=TestExecutionListeners.class;
   List<Class<? extends TestExecutionListener>> classesList=new ArrayList<Class<? extends TestExecutionListener>>();
+  boolean usingDefaults=false;
   AnnotationDescriptor<TestExecutionListeners> descriptor=MetaAnnotationUtils.findAnnotationDescriptor(clazz,annotationType);
   if (descriptor == null) {
     if (logger.isDebugEnabled()) {
-      logger.debug("@TestExecutionListeners is not present for class [" + clazz.getName() + "]: using defaults.");
+      logger.debug(String.format("@TestExecutionListeners is not present for class [%s]: using defaults.",clazz.getName()));
     }
+    usingDefaults=true;
     classesList.addAll(getDefaultTestExecutionListenerClasses());
   }
  else {
@@ -30,25 +32,12 @@
       descriptor=(annAttrs.getBoolean("inheritListeners") ? MetaAnnotationUtils.findAnnotationDescriptor(descriptor.getRootDeclaringClass().getSuperclass(),annotationType) : null);
     }
   }
-  List<TestExecutionListener> listeners=new ArrayList<TestExecutionListener>(classesList.size());
-  for (  Class<? extends TestExecutionListener> listenerClass : classesList) {
-    NoClassDefFoundError ncdfe=null;
-    try {
-      listeners.add(BeanUtils.instantiateClass(listenerClass));
-    }
- catch (    NoClassDefFoundError err) {
-      ncdfe=err;
-    }
-catch (    BeanInstantiationException ex) {
-      if (ex.getCause() instanceof NoClassDefFoundError) {
-        ncdfe=(NoClassDefFoundError)ex.getCause();
-      }
-    }
-    if (ncdfe != null) {
-      if (logger.isInfoEnabled()) {
-        logger.info(String.format("Could not instantiate TestExecutionListener [%s]. " + "Specify custom listener classes or make the default listener classes " + "(and their required dependencies) available. Offending class: [%s]",listenerClass.getName(),ncdfe.getMessage()));
-      }
-    }
+  List<TestExecutionListener> listeners=instantiateListeners(classesList);
+  if (usingDefaults) {
+    AnnotationAwareOrderComparator.sort(listeners);
+  }
+  if (logger.isInfoEnabled()) {
+    logger.info(String.format("Using TestExecutionListeners: %s",listeners));
   }
   return listeners;
 }
