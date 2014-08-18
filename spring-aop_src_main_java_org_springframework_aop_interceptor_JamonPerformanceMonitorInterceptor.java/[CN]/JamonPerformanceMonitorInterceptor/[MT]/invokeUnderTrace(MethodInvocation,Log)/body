@@ -1,10 +1,15 @@
 {
   String name=createInvocationTraceName(invocation);
-  Monitor monitor=MonitorFactory.start(name);
+  MonKey key=new MonKeyImp(name,name,"ms.");
+  Monitor monitor=MonitorFactory.start(key);
   try {
     return invocation.proceed();
   }
-  finally {
+ catch (  Throwable ex) {
+    trackException(key,ex);
+    throw ex;
+  }
+ finally {
     monitor.stop();
     if (!this.trackAllInvocations || isLogEnabled(logger)) {
       logger.trace("JAMon performance statistics for method [" + name + "]:\n"+ monitor);
