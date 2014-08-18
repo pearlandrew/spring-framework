@@ -1,32 +1,24 @@
 {
   logger.info("Initializing EhCache CacheManager");
-  InputStream is=(this.configLocation != null ? this.configLocation.getInputStream() : null);
-  try {
-    Configuration configuration=(is != null ? ConfigurationFactory.parseConfiguration(is) : ConfigurationFactory.parseConfiguration());
-    if (this.cacheManagerName != null) {
-      configuration.setName(this.cacheManagerName);
-    }
-    if (this.shared) {
-      this.cacheManager=CacheManager.create(configuration);
-    }
- else     if (this.acceptExisting) {
+  Configuration configuration=(this.configLocation != null ? EhCacheManagerUtils.parseConfiguration(this.configLocation) : ConfigurationFactory.parseConfiguration());
+  if (this.cacheManagerName != null) {
+    configuration.setName(this.cacheManagerName);
+  }
+  if (this.shared) {
+    this.cacheManager=CacheManager.create(configuration);
+  }
+ else   if (this.acceptExisting) {
 synchronized (CacheManager.class) {
-        this.cacheManager=CacheManager.getCacheManager(this.cacheManagerName);
-        if (this.cacheManager == null) {
-          this.cacheManager=new CacheManager(configuration);
-        }
+      this.cacheManager=CacheManager.getCacheManager(this.cacheManagerName);
+      if (this.cacheManager == null) {
+        this.cacheManager=new CacheManager(configuration);
+      }
  else {
-          this.locallyManaged=false;
-        }
+        this.locallyManaged=false;
       }
     }
- else {
-      this.cacheManager=new CacheManager(configuration);
-    }
   }
-  finally {
-    if (is != null) {
-      is.close();
-    }
+ else {
+    this.cacheManager=new CacheManager(configuration);
   }
 }
