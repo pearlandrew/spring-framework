@@ -9,13 +9,11 @@
     }
   }
   AnnotationAttributes componentScan=AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(),ComponentScan.class);
-  if (componentScan != null) {
-    if (!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(),ConfigurationPhase.REGISTER_BEAN)) {
-      Set<BeanDefinitionHolder> scannedBeanDefinitions=this.componentScanParser.parse(componentScan,sourceClass.getMetadata().getClassName());
-      for (      BeanDefinitionHolder holder : scannedBeanDefinitions) {
-        if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(),this.metadataReaderFactory)) {
-          parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
-        }
+  if (componentScan != null && !this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(),ConfigurationPhase.REGISTER_BEAN)) {
+    Set<BeanDefinitionHolder> scannedBeanDefinitions=this.componentScanParser.parse(componentScan,sourceClass.getMetadata().getClassName());
+    for (    BeanDefinitionHolder holder : scannedBeanDefinitions) {
+      if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(),this.metadataReaderFactory)) {
+        parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
       }
     }
   }
