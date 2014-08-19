@@ -8,14 +8,16 @@
     return results;
   }
   results=new CachedIntrospectionResults(beanClass);
+  ConcurrentMap<Class<?>,CachedIntrospectionResults> classCacheToUse;
   if (ClassUtils.isCacheSafe(beanClass,CachedIntrospectionResults.class.getClassLoader()) || isClassLoaderAccepted(beanClass.getClassLoader())) {
-    strongClassCache.putIfAbsent(beanClass,results);
+    classCacheToUse=strongClassCache;
   }
  else {
     if (logger.isDebugEnabled()) {
       logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
     }
-    softClassCache.putIfAbsent(beanClass,results);
+    classCacheToUse=softClassCache;
   }
-  return results;
+  CachedIntrospectionResults existing=classCacheToUse.putIfAbsent(beanClass,results);
+  return (existing != null ? existing : results);
 }
