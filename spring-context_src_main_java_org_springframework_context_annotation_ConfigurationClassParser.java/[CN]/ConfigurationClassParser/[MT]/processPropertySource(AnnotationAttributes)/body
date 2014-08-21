@@ -6,21 +6,6 @@
     throw new IllegalArgumentException("At least one @PropertySource(value) location is required");
   }
   for (  String location : locations) {
-    try {
-      String resolvedLocation=this.environment.resolveRequiredPlaceholders(location);
-      Resource resource=this.resourceLoader.getResource(resolvedLocation);
-      ResourcePropertySource ps=new ResourcePropertySource(resource);
-      this.propertySources.add((StringUtils.hasText(name) ? name : ps.getName()),ps);
-    }
- catch (    IllegalArgumentException ex) {
-      if (!ignoreResourceNotFound) {
-        throw ex;
-      }
-    }
-catch (    FileNotFoundException ex) {
-      if (!ignoreResourceNotFound) {
-        throw ex;
-      }
-    }
+    this.propertySources.add((StringUtils.hasText(name) ? name : this.propertySources.size()),new PropertySourceDescriptor(location,ignoreResourceNotFound));
   }
 }
