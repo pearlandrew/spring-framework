@@ -1,10 +1,10 @@
 {
-  String s=codeflow.lastDescriptor();
-  if (s == null) {
+  String descriptor=codeflow.lastDescriptor();
+  if (descriptor == null) {
     codeflow.loadTarget(mv);
   }
   if (this.indexedType == IndexedType.array) {
-    if ("I".equals(exitTypeDescriptor)) {
+    if ("I".equals(this.exitTypeDescriptor)) {
       mv.visitTypeInsn(CHECKCAST,"[I");
       SpelNodeImpl index=this.children[0];
       codeflow.enterCompilationScope();
@@ -12,14 +12,14 @@
       codeflow.exitCompilationScope();
       mv.visitInsn(IALOAD);
     }
- else     if ("D".equals(exitTypeDescriptor)) {
+ else     if ("D".equals(this.exitTypeDescriptor)) {
       mv.visitTypeInsn(CHECKCAST,"[D");
       SpelNodeImpl index=this.children[0];
       codeflow.enterCompilationScope();
       index.generateCode(mv,codeflow);
       mv.visitInsn(DALOAD);
     }
- else     if ("J".equals(exitTypeDescriptor)) {
+ else     if ("J".equals(this.exitTypeDescriptor)) {
       mv.visitTypeInsn(CHECKCAST,"[J");
       SpelNodeImpl index=this.children[0];
       codeflow.enterCompilationScope();
@@ -27,7 +27,7 @@
       codeflow.exitCompilationScope();
       mv.visitInsn(LALOAD);
     }
- else     if ("F".equals(exitTypeDescriptor)) {
+ else     if ("F".equals(this.exitTypeDescriptor)) {
       mv.visitTypeInsn(CHECKCAST,"[F");
       SpelNodeImpl index=this.children[0];
       codeflow.enterCompilationScope();
@@ -35,7 +35,7 @@
       codeflow.exitCompilationScope();
       mv.visitInsn(FALOAD);
     }
- else     if ("S".equals(exitTypeDescriptor)) {
+ else     if ("S".equals(this.exitTypeDescriptor)) {
       mv.visitTypeInsn(CHECKCAST,"[S");
       SpelNodeImpl index=this.children[0];
       codeflow.enterCompilationScope();
@@ -43,7 +43,7 @@
       codeflow.exitCompilationScope();
       mv.visitInsn(SALOAD);
     }
- else     if ("B".equals(exitTypeDescriptor)) {
+ else     if ("B".equals(this.exitTypeDescriptor)) {
       mv.visitTypeInsn(CHECKCAST,"[B");
       SpelNodeImpl index=this.children[0];
       codeflow.enterCompilationScope();
@@ -51,7 +51,7 @@
       codeflow.exitCompilationScope();
       mv.visitInsn(BALOAD);
     }
- else     if ("C".equals(exitTypeDescriptor)) {
+ else     if ("C".equals(this.exitTypeDescriptor)) {
       mv.visitTypeInsn(CHECKCAST,"[C");
       SpelNodeImpl index=this.children[0];
       codeflow.enterCompilationScope();
@@ -60,7 +60,7 @@
       mv.visitInsn(CALOAD);
     }
  else {
-      mv.visitTypeInsn(CHECKCAST,"[" + exitTypeDescriptor + (CodeFlow.isPrimitiveArray(exitTypeDescriptor) ? "" : ";"));
+      mv.visitTypeInsn(CHECKCAST,"[" + this.exitTypeDescriptor + (CodeFlow.isPrimitiveArray(this.exitTypeDescriptor) ? "" : ";"));
       SpelNodeImpl index=this.children[0];
       codeflow.enterCompilationScope();
       index.generateCode(mv,codeflow);
@@ -74,7 +74,7 @@
     this.children[0].generateCode(mv,codeflow);
     codeflow.exitCompilationScope();
     mv.visitMethodInsn(INVOKEINTERFACE,"java/util/List","get","(I)Ljava/lang/Object;",true);
-    CodeFlow.insertCheckCast(mv,exitTypeDescriptor);
+    CodeFlow.insertCheckCast(mv,this.exitTypeDescriptor);
   }
  else   if (this.indexedType == IndexedType.map) {
     mv.visitTypeInsn(CHECKCAST,"java/util/Map");
@@ -89,13 +89,12 @@
       codeflow.exitCompilationScope();
     }
     mv.visitMethodInsn(INVOKEINTERFACE,"java/util/Map","get","(Ljava/lang/Object;)Ljava/lang/Object;",true);
-    CodeFlow.insertCheckCast(mv,exitTypeDescriptor);
+    CodeFlow.insertCheckCast(mv,this.exitTypeDescriptor);
   }
  else   if (this.indexedType == IndexedType.object) {
     ReflectivePropertyAccessor.OptimalPropertyAccessor accessor=(ReflectivePropertyAccessor.OptimalPropertyAccessor)this.cachedReadAccessor;
     Member member=accessor.member;
     boolean isStatic=Modifier.isStatic(member.getModifiers());
-    String descriptor=codeflow.lastDescriptor();
     String memberDeclaringClassSlashedDescriptor=member.getDeclaringClass().getName().replace('.','/');
     if (!isStatic) {
       if (descriptor == null) {
@@ -112,5 +111,5 @@
       mv.visitMethodInsn(isStatic ? INVOKESTATIC : INVOKEVIRTUAL,memberDeclaringClassSlashedDescriptor,member.getName(),CodeFlow.createSignatureDescriptor((Method)member),false);
     }
   }
-  codeflow.pushDescriptor(exitTypeDescriptor);
+  codeflow.pushDescriptor(this.exitTypeDescriptor);
 }
