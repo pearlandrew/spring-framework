@@ -1,17 +1,12 @@
 {
   PropertyDescriptor[] filtered=this.filteredPropertyDescriptorsCache.get(bw.getWrappedClass());
   if (filtered == null) {
+    filtered=filterPropertyDescriptorsForDependencyCheck(bw);
     if (cache) {
-synchronized (this.filteredPropertyDescriptorsCache) {
-        filtered=this.filteredPropertyDescriptorsCache.get(bw.getWrappedClass());
-        if (filtered == null) {
-          filtered=filterPropertyDescriptorsForDependencyCheck(bw);
-          this.filteredPropertyDescriptorsCache.put(bw.getWrappedClass(),filtered);
-        }
+      PropertyDescriptor[] existing=this.filteredPropertyDescriptorsCache.putIfAbsent(bw.getWrappedClass(),filtered);
+      if (existing != null) {
+        filtered=existing;
       }
-    }
- else {
-      filtered=filterPropertyDescriptorsForDependencyCheck(bw);
     }
   }
   return filtered;
