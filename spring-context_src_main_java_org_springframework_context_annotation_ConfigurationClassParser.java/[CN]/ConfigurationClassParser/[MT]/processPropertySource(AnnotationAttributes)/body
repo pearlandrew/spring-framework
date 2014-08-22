@@ -5,7 +5,10 @@
   Assert.isTrue(locations.length > 0,"At least one @PropertySource(value) location is required");
   for (  String location : locations) {
     try {
-      processPropertySourceLocation(name,location);
+      String resolvedLocation=this.environment.resolveRequiredPlaceholders(location);
+      Resource resource=this.resourceLoader.getResource(resolvedLocation);
+      ResourcePropertySource rps=(StringUtils.hasText(name) ? new ResourcePropertySource(name,resource) : new ResourcePropertySource(resource));
+      addPropertySource(rps);
     }
  catch (    IllegalArgumentException ex) {
       if (!ignoreResourceNotFound) {
