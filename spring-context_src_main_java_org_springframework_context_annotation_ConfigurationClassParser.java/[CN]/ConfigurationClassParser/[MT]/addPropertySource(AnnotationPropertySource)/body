@@ -1,0 +1,29 @@
+{
+  String name=propertySource.getName();
+  MutablePropertySources propertySources=((ConfigurableEnvironment)this.environment).getPropertySources();
+  if (propertySources.contains(name) && this.propertySourceNames.contains(name)) {
+    PropertySource<?> existing=propertySources.get(name);
+    if (existing instanceof CompositePropertySource) {
+      ((CompositePropertySource)existing).addFirstPropertySource(propertySource.resourceNamedPropertySource());
+    }
+ else {
+      if (existing instanceof AnnotationPropertySource) {
+        existing=((AnnotationPropertySource)existing).resourceNamedPropertySource();
+      }
+      CompositePropertySource composite=new CompositePropertySource(name);
+      composite.addPropertySource(propertySource.resourceNamedPropertySource());
+      composite.addPropertySource(existing);
+      propertySources.replace(name,composite);
+    }
+  }
+ else {
+    if (this.propertySourceNames.isEmpty()) {
+      propertySources.addLast(propertySource);
+    }
+ else {
+      String firstProcessed=this.propertySourceNames.iterator().next();
+      propertySources.addBefore(firstProcessed,propertySource);
+    }
+  }
+  this.propertySourceNames.add(name);
+}

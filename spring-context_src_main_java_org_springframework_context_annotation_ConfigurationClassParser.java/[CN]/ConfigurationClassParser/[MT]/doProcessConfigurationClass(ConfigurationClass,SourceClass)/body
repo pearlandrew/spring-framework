@@ -1,9 +1,13 @@
 {
   processMemberClasses(configClass,sourceClass);
   for (  AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(sourceClass.getMetadata(),PropertySources.class,org.springframework.context.annotation.PropertySource.class)) {
-    processPropertySource(propertySource);
+    if (!(this.environment instanceof ConfigurableEnvironment)) {
+      logger.warn("Ignoring @PropertySource annotation on " + sourceClass.getMetadata().getClassName() + "Reason: Environment must implement ConfigurableEnvironment");
+    }
+ else {
+      processPropertySource(propertySource);
+    }
   }
-  registerPropertySources();
   AnnotationAttributes componentScan=AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(),ComponentScan.class);
   if (componentScan != null) {
     if (!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(),ConfigurationPhase.REGISTER_BEAN)) {

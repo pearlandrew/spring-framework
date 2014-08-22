@@ -2,10 +2,20 @@
   String name=propertySource.getString("name");
   String[] locations=propertySource.getStringArray("value");
   boolean ignoreResourceNotFound=propertySource.getBoolean("ignoreResourceNotFound");
-  if (locations.length == 0) {
-    throw new IllegalArgumentException("At least one @PropertySource(value) location is required");
-  }
+  Assert.isTrue(locations.length > 0,"At least one @PropertySource(value) location is required");
   for (  String location : locations) {
-    this.propertySources.add((StringUtils.hasText(name) ? name : this.propertySources.size()),new PropertySourceDescriptor(location,ignoreResourceNotFound));
+    try {
+      processPropertySourceLocation(name,location);
+    }
+ catch (    IllegalArgumentException ex) {
+      if (!ignoreResourceNotFound) {
+        throw ex;
+      }
+    }
+catch (    FileNotFoundException ex) {
+      if (!ignoreResourceNotFound) {
+        throw ex;
+      }
+    }
   }
 }
