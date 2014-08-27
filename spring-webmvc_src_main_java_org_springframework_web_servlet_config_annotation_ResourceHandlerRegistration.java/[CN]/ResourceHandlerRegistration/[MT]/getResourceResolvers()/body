@@ -1,20 +1,16 @@
 {
-  List<ResourceResolver> resolvers=new ArrayList<ResourceResolver>();
-  boolean hasCachingResolver=false;
-  if (!this.customResolvers.isEmpty()) {
-    if (ClassUtils.isAssignable(CachingResourceResolver.class,this.customResolvers.get(0).getClass())) {
-      hasCachingResolver=true;
-    }
+  if (this.customResolvers.isEmpty()) {
+    return null;
   }
-  if (!hasCachingResolver && !this.isDevMode) {
+  List<ResourceResolver> resolvers=new ArrayList<ResourceResolver>();
+  ResourceResolver first=this.customResolvers.get(0);
+  if (!ClassUtils.isAssignable(CachingResourceResolver.class,first.getClass()) && !this.isDevMode) {
     resolvers.add(new CachingResourceResolver(getDefaultResourceCache()));
   }
   resolvers.addAll(this.customResolvers);
-  if (!this.versionStrategies.isEmpty()) {
-    VersionResourceResolver versionResolver=new VersionResourceResolver();
-    versionResolver.setStrategyMap(this.versionStrategies);
-    resolvers.add(versionResolver);
+  ResourceResolver last=this.customResolvers.get(this.customResolvers.size() - 1);
+  if (!ClassUtils.isAssignable(PathResourceResolver.class,last.getClass())) {
+    resolvers.add(new PathResourceResolver());
   }
-  resolvers.add(new PathResourceResolver());
   return resolvers;
 }

@@ -1,20 +1,12 @@
 {
-  List<ResourceTransformer> transformers=new ArrayList<ResourceTransformer>();
-  boolean hasCachingTransformer=false;
-  if (!this.customTransformers.isEmpty() || !this.versionStrategies.isEmpty()) {
-    if (!this.customTransformers.isEmpty()) {
-      if (ClassUtils.isAssignable(CachingResourceTransformer.class,this.customTransformers.get(0).getClass())) {
-        hasCachingTransformer=true;
-      }
-    }
-    if (!hasCachingTransformer && !this.isDevMode) {
-      transformers.add(new CachingResourceTransformer(getDefaultResourceCache()));
-    }
-    transformers.addAll(this.customTransformers);
-    if (!this.versionStrategies.isEmpty()) {
-      int cssLinkTransformerPosition=(hasCachingTransformer || !this.isDevMode) ? 1 : 0;
-      transformers.add(cssLinkTransformerPosition,new CssLinkResourceTransformer());
-    }
+  if (this.customTransformers.isEmpty()) {
+    return null;
   }
+  List<ResourceTransformer> transformers=new ArrayList<ResourceTransformer>();
+  ResourceTransformer first=this.customTransformers.get(0);
+  if (!ClassUtils.isAssignable(CachingResourceTransformer.class,first.getClass()) && !this.isDevMode) {
+    transformers.add(new CachingResourceTransformer(getDefaultResourceCache()));
+  }
+  transformers.addAll(this.customTransformers);
   return transformers;
 }
