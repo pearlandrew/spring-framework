@@ -1,5 +1,6 @@
 {
-  this.registration.addTransformer(new AppCacheManifestTransfomer()).addFixedVersionStrategy("fixed","/**/*.js").addContentVersionStrategy("/**");
+  VersionResourceResolver versionResolver=new VersionResourceResolver().addFixedVersionStrategy("fixed","/**/*.js").addContentVersionStrategy("/**");
+  this.registration.addResolver(versionResolver).addTransformer(new AppCacheManifestTransfomer());
   ResourceHttpRequestHandler handler=getHandler("/resources/**");
   List<ResourceResolver> resolvers=handler.getResourceResolvers();
   assertThat(resolvers.toString(),resolvers,Matchers.hasSize(3));
@@ -13,6 +14,6 @@
   List<ResourceTransformer> transformers=handler.getResourceTransformers();
   assertThat(transformers,Matchers.hasSize(3));
   assertThat(transformers.get(0),Matchers.instanceOf(CachingResourceTransformer.class));
-  assertThat(transformers.get(1),Matchers.instanceOf(AppCacheManifestTransfomer.class));
-  assertThat(transformers.get(2),Matchers.instanceOf(CssLinkResourceTransformer.class));
+  assertThat(transformers.get(1),Matchers.instanceOf(CssLinkResourceTransformer.class));
+  assertThat(transformers.get(2),Matchers.instanceOf(AppCacheManifestTransfomer.class));
 }
