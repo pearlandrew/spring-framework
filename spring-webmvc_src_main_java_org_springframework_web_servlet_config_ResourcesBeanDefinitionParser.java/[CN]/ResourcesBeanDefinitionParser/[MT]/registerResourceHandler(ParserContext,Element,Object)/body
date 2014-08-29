@@ -14,13 +14,9 @@
   if (StringUtils.hasText(cacheSeconds)) {
     resourceHandlerDef.getPropertyValues().add("cacheSeconds",cacheSeconds);
   }
-  ManagedList<? super Object> resourceResolvers=parseResourceResolvers(parserContext,element,source);
-  if (!resourceResolvers.isEmpty()) {
-    resourceHandlerDef.getPropertyValues().add("resourceResolvers",resourceResolvers);
-  }
-  ManagedList<? super Object> resourceTransformers=parseResourceTransformers(parserContext,element,source);
-  if (!resourceTransformers.isEmpty()) {
-    resourceHandlerDef.getPropertyValues().add("resourceTransformers",resourceTransformers);
+  Element resourceChainElement=DomUtils.getChildElementByTagName(element,"resource-chain");
+  if (resourceChainElement != null) {
+    parseResourceChain(resourceHandlerDef,parserContext,resourceChainElement,source);
   }
   String beanName=parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
   parserContext.getRegistry().registerBeanDefinition(beanName,resourceHandlerDef);

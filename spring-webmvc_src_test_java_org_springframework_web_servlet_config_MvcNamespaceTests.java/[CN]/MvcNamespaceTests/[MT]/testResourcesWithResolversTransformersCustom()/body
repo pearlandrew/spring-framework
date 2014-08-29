@@ -1,5 +1,5 @@
 {
-  loadBeanDefinitions("mvc-config-resources-chain.xml",8);
+  loadBeanDefinitions("mvc-config-resources-chain-no-auto.xml",9);
   SimpleUrlHandlerMapping mapping=appContext.getBean(SimpleUrlHandlerMapping.class);
   assertNotNull(mapping);
   assertNotNull(mapping.getUrlMap().get("/resources/**"));
@@ -7,17 +7,14 @@
   assertNotNull(handler);
   List<ResourceResolver> resolvers=handler.getResourceResolvers();
   assertThat(resolvers,Matchers.hasSize(3));
-  assertThat(resolvers.get(0),Matchers.instanceOf(CachingResourceResolver.class));
-  assertThat(resolvers.get(1),Matchers.instanceOf(VersionResourceResolver.class));
+  assertThat(resolvers.get(0),Matchers.instanceOf(VersionResourceResolver.class));
+  assertThat(resolvers.get(1),Matchers.instanceOf(GzipResourceResolver.class));
   assertThat(resolvers.get(2),Matchers.instanceOf(PathResourceResolver.class));
-  CachingResourceResolver cachingResolver=(CachingResourceResolver)resolvers.get(0);
-  assertThat(cachingResolver.getCache(),Matchers.instanceOf(TestResourceCache.class));
-  VersionResourceResolver versionResolver=(VersionResourceResolver)resolvers.get(1);
+  VersionResourceResolver versionResolver=(VersionResourceResolver)resolvers.get(0);
   assertThat(versionResolver.getStrategyMap().get("/**/*.js"),Matchers.instanceOf(FixedVersionStrategy.class));
   assertThat(versionResolver.getStrategyMap().get("/**"),Matchers.instanceOf(ContentVersionStrategy.class));
   List<ResourceTransformer> transformers=handler.getResourceTransformers();
-  assertThat(transformers,Matchers.hasSize(3));
+  assertThat(transformers,Matchers.hasSize(2));
   assertThat(transformers.get(0),Matchers.instanceOf(CachingResourceTransformer.class));
-  assertThat(transformers.get(1),Matchers.instanceOf(CssLinkResourceTransformer.class));
-  assertThat(transformers.get(2),Matchers.instanceOf(AppCacheManifestTransformer.class));
+  assertThat(transformers.get(1),Matchers.instanceOf(AppCacheManifestTransformer.class));
 }

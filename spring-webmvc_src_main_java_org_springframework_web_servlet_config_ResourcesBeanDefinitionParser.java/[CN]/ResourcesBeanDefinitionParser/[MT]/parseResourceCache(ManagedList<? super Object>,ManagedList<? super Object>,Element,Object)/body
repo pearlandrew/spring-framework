@@ -1,0 +1,30 @@
+{
+  Element resourceCacheElement=DomUtils.getChildElementByTagName(element,"resource-cache");
+  if (resourceCacheElement != null) {
+    ConstructorArgumentValues cavs=new ConstructorArgumentValues();
+    RootBeanDefinition cachingResolverDef=new RootBeanDefinition(CachingResourceResolver.class);
+    cachingResolverDef.setSource(source);
+    cachingResolverDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    cachingResolverDef.setConstructorArgumentValues(cavs);
+    RootBeanDefinition cachingTransformerDef=new RootBeanDefinition(CachingResourceTransformer.class);
+    cachingTransformerDef.setSource(source);
+    cachingTransformerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+    cachingTransformerDef.setConstructorArgumentValues(cavs);
+    String cacheBeanName=resourceCacheElement.getAttribute("cache");
+    if (StringUtils.hasText(cacheBeanName)) {
+      RuntimeBeanReference cacheRef=new RuntimeBeanReference(cacheBeanName);
+      cavs.addIndexedArgumentValue(0,cacheRef);
+    }
+ else {
+      ConstructorArgumentValues cacheCavs=new ConstructorArgumentValues();
+      cacheCavs.addIndexedArgumentValue(0,RESOURCE_CHAIN_CACHE);
+      RootBeanDefinition cacheDef=new RootBeanDefinition(ConcurrentMapCache.class);
+      cacheDef.setSource(source);
+      cacheDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+      cacheDef.setConstructorArgumentValues(cacheCavs);
+      cavs.addIndexedArgumentValue(0,cacheDef);
+    }
+    resourceResolvers.add(cachingResolverDef);
+    resourceTransformers.add(cachingTransformerDef);
+  }
+}
