@@ -1,17 +1,13 @@
 {
   Assert.isTrue(!CollectionUtils.isEmpty(locations),"At least one location is required for resource handling.");
-  ResourceHttpRequestHandler requestHandler=new ResourceHttpRequestHandler();
-  List<ResourceResolver> resourceResolvers=getResourceResolvers();
-  if (!CollectionUtils.isEmpty(resourceResolvers)) {
-    requestHandler.setResourceResolvers(resourceResolvers);
+  ResourceHttpRequestHandler handler=new ResourceHttpRequestHandler();
+  if (this.resourceChainRegistration != null) {
+    handler.setResourceResolvers(this.resourceChainRegistration.getResourceResolvers());
+    handler.setResourceTransformers(this.resourceChainRegistration.getResourceTransformers());
   }
-  List<ResourceTransformer> resourceTransformers=getResourceTransformers();
-  if (!CollectionUtils.isEmpty(resourceTransformers)) {
-    requestHandler.setResourceTransformers(resourceTransformers);
-  }
-  requestHandler.setLocations(this.locations);
+  handler.setLocations(this.locations);
   if (this.cachePeriod != null) {
-    requestHandler.setCacheSeconds(this.cachePeriod);
+    handler.setCacheSeconds(this.cachePeriod);
   }
-  return requestHandler;
+  return handler;
 }
