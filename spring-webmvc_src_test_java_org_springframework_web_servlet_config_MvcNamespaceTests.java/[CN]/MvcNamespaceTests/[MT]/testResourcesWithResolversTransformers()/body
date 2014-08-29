@@ -11,7 +11,8 @@
   assertThat(resolvers.get(1),Matchers.instanceOf(VersionResourceResolver.class));
   assertThat(resolvers.get(2),Matchers.instanceOf(PathResourceResolver.class));
   CachingResourceResolver cachingResolver=(CachingResourceResolver)resolvers.get(0);
-  assertThat(cachingResolver.getCache(),Matchers.instanceOf(TestResourceCache.class));
+  assertThat(cachingResolver.getCache(),Matchers.instanceOf(ConcurrentMapCache.class));
+  assertEquals("test-resource-cache",cachingResolver.getCache().getName());
   VersionResourceResolver versionResolver=(VersionResourceResolver)resolvers.get(1);
   assertThat(versionResolver.getStrategyMap().get("/**/*.js"),Matchers.instanceOf(FixedVersionStrategy.class));
   assertThat(versionResolver.getStrategyMap().get("/**"),Matchers.instanceOf(ContentVersionStrategy.class));
@@ -20,4 +21,7 @@
   assertThat(transformers.get(0),Matchers.instanceOf(CachingResourceTransformer.class));
   assertThat(transformers.get(1),Matchers.instanceOf(CssLinkResourceTransformer.class));
   assertThat(transformers.get(2),Matchers.instanceOf(AppCacheManifestTransformer.class));
+  CachingResourceTransformer cachingTransformer=(CachingResourceTransformer)transformers.get(0);
+  assertThat(cachingTransformer.getCache(),Matchers.instanceOf(ConcurrentMapCache.class));
+  assertEquals("test-resource-cache",cachingTransformer.getCache().getName());
 }
