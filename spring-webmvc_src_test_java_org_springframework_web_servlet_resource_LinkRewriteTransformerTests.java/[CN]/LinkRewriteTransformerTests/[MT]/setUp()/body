@@ -1,0 +1,18 @@
+{
+  VersionResourceResolver versionResolver=new VersionResourceResolver();
+  versionResolver.setStrategyMap(Collections.singletonMap("/**",new ContentVersionStrategy()));
+  List<ResourceResolver> resolvers=new ArrayList<>();
+  resolvers.add(versionResolver);
+  resolvers.add(new PathResourceResolver());
+  this.transformerChain=new DefaultResourceTransformerChain(new DefaultResourceResolverChain(resolvers),null);
+  List<Resource> locations=new ArrayList<>();
+  locations.add(new ClassPathResource("test/",getClass()));
+  ResourceHttpRequestHandler handler=new ResourceHttpRequestHandler();
+  handler.setLocations(locations);
+  handler.setResourceResolvers(resolvers);
+  ResourceUrlProvider urlProvider=new ResourceUrlProvider();
+  urlProvider.setHandlerMap(Collections.singletonMap("/resources/**",handler));
+  this.transformer=new TestTransformer();
+  this.transformer.setResourceUrlProvider(urlProvider);
+  this.request=new MockHttpServletRequest();
+}
