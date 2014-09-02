@@ -29,8 +29,10 @@
           configClass.addImportBeanDefinitionRegistrar(registrar,currentSourceClass.getMetadata());
         }
  else {
-          this.importStack.registerImport(currentSourceClass.getMetadata(),candidate.getMetadata().getClassName());
-          processConfigurationClass(candidate.asConfigClass(configClass));
+          if (!this.conditionEvaluator.shouldSkip(configClass.getMetadata(),ConfigurationPhase.REGISTER_BEAN)) {
+            this.importStack.registerImport(currentSourceClass.getMetadata(),candidate.getMetadata().getClassName());
+            processConfigurationClass(candidate.asConfigClass(configClass));
+          }
         }
       }
     }
