@@ -1,10 +1,13 @@
 {
   Object bean=null;
   if (!Boolean.FALSE.equals(mbd.beforeInstantiationResolved)) {
-    if (mbd.hasBeanClass() && !mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
-      bean=applyBeanPostProcessorsBeforeInstantiation(mbd.getBeanClass(),beanName);
-      if (bean != null) {
-        bean=applyBeanPostProcessorsAfterInitialization(bean,beanName);
+    if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+      Class<?> targetType=determineTargetType(beanName,mbd);
+      if (targetType != null) {
+        bean=applyBeanPostProcessorsBeforeInstantiation(targetType,beanName);
+        if (bean != null) {
+          bean=applyBeanPostProcessorsAfterInitialization(bean,beanName);
+        }
       }
     }
     mbd.beforeInstantiationResolved=(bean != null);
