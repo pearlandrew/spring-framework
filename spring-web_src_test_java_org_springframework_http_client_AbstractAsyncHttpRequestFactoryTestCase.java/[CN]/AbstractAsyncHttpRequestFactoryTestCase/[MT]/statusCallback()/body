@@ -3,28 +3,25 @@
   AsyncClientHttpRequest request=factory.createAsyncRequest(uri,HttpMethod.GET);
   assertEquals("Invalid HTTP method",HttpMethod.GET,request.getMethod());
   assertEquals("Invalid HTTP URI",uri,request.getURI());
-  Future<ClientHttpResponse> futureResponse=request.executeAsync();
-  if (futureResponse instanceof ListenableFuture) {
-    ListenableFuture<ClientHttpResponse> listenableFuture=(ListenableFuture<ClientHttpResponse>)futureResponse;
-    listenableFuture.addCallback(new ListenableFutureCallback<ClientHttpResponse>(){
-      @Override public void onSuccess(      ClientHttpResponse result){
-        try {
-          System.out.println("SUCCESS! " + result.getStatusCode());
-          System.out.println("Callback: " + System.currentTimeMillis());
-          System.out.println(Thread.currentThread().getId());
-          assertEquals("Invalid status code",HttpStatus.NOT_FOUND,result.getStatusCode());
-        }
- catch (        IOException e) {
-          e.printStackTrace();
-        }
+  ListenableFuture<ClientHttpResponse> listenableFuture=request.executeAsync();
+  listenableFuture.addCallback(new ListenableFutureCallback<ClientHttpResponse>(){
+    @Override public void onSuccess(    ClientHttpResponse result){
+      try {
+        System.out.println("SUCCESS! " + result.getStatusCode());
+        System.out.println("Callback: " + System.currentTimeMillis());
+        System.out.println(Thread.currentThread().getId());
+        assertEquals("Invalid status code",HttpStatus.NOT_FOUND,result.getStatusCode());
       }
-      @Override public void onFailure(      Throwable t){
-        System.out.println("FAILURE: " + t);
+ catch (      IOException ex) {
+        ex.printStackTrace();
       }
     }
-);
+    @Override public void onFailure(    Throwable ex){
+      System.out.println("FAILURE: " + ex);
+    }
   }
-  ClientHttpResponse response=futureResponse.get();
+);
+  ClientHttpResponse response=listenableFuture.get();
   System.out.println("Main thread: " + System.currentTimeMillis());
   assertEquals("Invalid status code",HttpStatus.NOT_FOUND,response.getStatusCode());
   System.out.println(Thread.currentThread().getId());

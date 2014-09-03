@@ -5,7 +5,7 @@
       throw new MessageDeliveryException("Message broker not active. Consider subscribing to " + "receive BrokerAvailabilityEvent's from an ApplicationListener Spring bean.");
     }
     SimpMessageType messageType=SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
-    if (messageType.equals(SimpMessageType.CONNECT) && logger.isErrorEnabled()) {
+    if (logger.isErrorEnabled() && messageType.equals(SimpMessageType.CONNECT)) {
       logger.error("Broker not active. Ignoring " + message);
     }
  else     if (logger.isDebugEnabled()) {
@@ -35,7 +35,9 @@
   }
   if (sessionId == null) {
     if (!SimpMessageType.MESSAGE.equals(stompAccessor.getMessageType())) {
-      logger.error("Only STOMP SEND supported from within the server side. Ignoring " + message);
+      if (logger.isErrorEnabled()) {
+        logger.error("Only STOMP SEND supported from within the server side. Ignoring " + message);
+      }
       return;
     }
     sessionId=SYSTEM_SESSION_ID;

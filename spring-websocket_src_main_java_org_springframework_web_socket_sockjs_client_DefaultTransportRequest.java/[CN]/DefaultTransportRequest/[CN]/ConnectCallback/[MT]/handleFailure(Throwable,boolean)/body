@@ -3,15 +3,15 @@
     if (isTimeoutFailure) {
       String message="Connect timed out for " + DefaultTransportRequest.this;
       logger.error(message);
-      failure=new SockJsTransportFailureException(message,getSockJsUrlInfo().getSessionId(),null);
+      ex=new SockJsTransportFailureException(message,getSockJsUrlInfo().getSessionId(),null);
     }
     if (fallbackRequest != null) {
-      logger.error(DefaultTransportRequest.this + " failed. Falling back on next transport.",failure);
+      logger.error(DefaultTransportRequest.this + " failed. Falling back on next transport.",ex);
       fallbackRequest.connect(this.handler,this.future);
     }
  else {
-      logger.error("No more fallback transports after " + DefaultTransportRequest.this,failure);
-      this.future.setException(failure);
+      logger.error("No more fallback transports after " + DefaultTransportRequest.this,ex);
+      this.future.setException(ex);
     }
     if (isTimeoutFailure) {
       try {
@@ -19,12 +19,12 @@
           runnable.run();
         }
       }
- catch (      Throwable ex) {
-        logger.error("Transport failed to run timeout tasks for " + DefaultTransportRequest.this,ex);
+ catch (      Throwable ex2) {
+        logger.error("Transport failed to run timeout tasks for " + DefaultTransportRequest.this,ex2);
       }
     }
   }
  else {
-    logger.error("Connect success/failure events already took place for " + DefaultTransportRequest.this + ". Ignoring this additional failure event.",failure);
+    logger.error("Connect success/failure events already took place for " + DefaultTransportRequest.this + ". Ignoring this additional failure event.",ex);
   }
 }

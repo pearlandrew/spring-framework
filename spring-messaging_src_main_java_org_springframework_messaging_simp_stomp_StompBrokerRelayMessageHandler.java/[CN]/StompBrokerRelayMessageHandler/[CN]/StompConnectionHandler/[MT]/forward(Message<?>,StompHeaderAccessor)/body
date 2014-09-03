@@ -13,11 +13,11 @@
   }
   final Message<?> messageToSend=(accessor.isMutable() && accessor.isModified()) ? MessageBuilder.createMessage(message.getPayload(),accessor.getMessageHeaders()) : message;
   StompCommand command=accessor.getCommand();
-  if (logger.isDebugEnabled() && StompCommand.SEND.equals(command) || StompCommand.SUBSCRIBE.equals(command) || StompCommand.UNSUBSCRIBE.equals(command) || StompCommand.DISCONNECT.equals(command)) {
-    logger.debug("Forwarding " + accessor.getShortLogMessage((byte[])message.getPayload()));
+  if (logger.isDebugEnabled() && (StompCommand.SEND.equals(command) || StompCommand.SUBSCRIBE.equals(command) || StompCommand.UNSUBSCRIBE.equals(command)|| StompCommand.DISCONNECT.equals(command))) {
+    logger.debug("Forwarding " + accessor.getShortLogMessage(message.getPayload()));
   }
  else   if (logger.isTraceEnabled()) {
-    logger.trace("Forwarding " + accessor.getDetailedLogMessage((byte[])message.getPayload()));
+    logger.trace("Forwarding " + accessor.getDetailedLogMessage(message.getPayload()));
   }
   ListenableFuture<Void> future=conn.send((Message<byte[]>)messageToSend);
   future.addCallback(new ListenableFutureCallback<Void>(){
@@ -26,12 +26,12 @@
         afterDisconnectSent(accessor);
       }
     }
-    @Override public void onFailure(    Throwable t){
+    @Override public void onFailure(    Throwable ex){
       if (tcpConnection != null) {
-        handleTcpConnectionFailure("failed to forward " + accessor.getShortLogMessage((byte[])message.getPayload()),t);
+        handleTcpConnectionFailure("failed to forward " + accessor.getShortLogMessage(message.getPayload()),ex);
       }
  else       if (logger.isErrorEnabled()) {
-        logger.error("Failed to forward " + accessor.getShortLogMessage((byte[])message.getPayload()));
+        logger.error("Failed to forward " + accessor.getShortLogMessage(message.getPayload()));
       }
     }
   }
