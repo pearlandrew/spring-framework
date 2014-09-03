@@ -13,8 +13,13 @@
     if (active) {
 synchronized (this.sessionList) {
         if (this.sessionList.size() < getSessionCacheSize()) {
-          logicalClose((Session)proxy);
-          return null;
+          try {
+            logicalClose((Session)proxy);
+            return null;
+          }
+ catch (          JMSException ex) {
+            logger.trace("Logical close of cached JMS Session failed - discarding it",ex);
+          }
         }
       }
     }
