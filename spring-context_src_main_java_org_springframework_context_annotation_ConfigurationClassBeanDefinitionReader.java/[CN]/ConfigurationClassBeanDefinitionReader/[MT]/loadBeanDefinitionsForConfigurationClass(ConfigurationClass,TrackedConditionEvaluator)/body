@@ -1,7 +1,10 @@
 {
   if (trackedConditionEvaluator.shouldSkip(configClass)) {
-    removeBeanDefinition(configClass);
-    importRegistry.removeImportingClassFor(configClass.getMetadata().getClassName());
+    String beanName=configClass.getBeanName();
+    if (StringUtils.hasLength(beanName) && this.registry.containsBeanDefinition(beanName)) {
+      this.registry.removeBeanDefinition(beanName);
+    }
+    this.importRegistry.removeImportingClassFor(configClass.getMetadata().getClassName());
     return;
   }
   if (configClass.isImported()) {
