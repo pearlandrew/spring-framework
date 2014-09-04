@@ -1,5 +1,5 @@
 {
-  loadBeanDefinitions("mvc-config-resources.xml",7);
+  loadBeanDefinitions("mvc-config-resources.xml",9);
   HttpRequestHandlerAdapter adapter=appContext.getBean(HttpRequestHandlerAdapter.class);
   assertNotNull(adapter);
   ResourceHttpRequestHandler handler=appContext.getBean(ResourceHttpRequestHandler.class);
@@ -10,6 +10,11 @@
   BeanNameUrlHandlerMapping beanNameMapping=appContext.getBean(BeanNameUrlHandlerMapping.class);
   assertNotNull(beanNameMapping);
   assertEquals(2,beanNameMapping.getOrder());
+  ResourceUrlProvider urlProvider=appContext.getBean(ResourceUrlProvider.class);
+  assertNotNull(urlProvider);
+  MappedInterceptor mappedInterceptor=appContext.getBean(MappedInterceptor.class);
+  assertNotNull(urlProvider);
+  assertEquals(ResourceUrlProviderExposingInterceptor.class,mappedInterceptor.getInterceptor().getClass());
   MockHttpServletRequest request=new MockHttpServletRequest();
   request.setRequestURI("/resources/foo.css");
   request.setMethod("GET");
