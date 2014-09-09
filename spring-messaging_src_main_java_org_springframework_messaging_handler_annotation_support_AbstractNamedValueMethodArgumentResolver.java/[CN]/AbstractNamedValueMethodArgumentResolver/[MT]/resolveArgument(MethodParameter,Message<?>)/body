@@ -1,22 +1,22 @@
 {
   Class<?> paramType=parameter.getParameterType();
   NamedValueInfo namedValueInfo=getNamedValueInfo(parameter);
-  Object value=resolveArgumentInternal(parameter,message,namedValueInfo.name);
-  if (value == null) {
+  Object arg=resolveArgumentInternal(parameter,message,namedValueInfo.name);
+  if (arg == null) {
     if (namedValueInfo.defaultValue != null) {
-      value=resolveDefaultValue(namedValueInfo.defaultValue);
+      arg=resolveDefaultValue(namedValueInfo.defaultValue);
     }
- else     if (namedValueInfo.required) {
+ else     if (namedValueInfo.required && !parameter.getParameterType().getName().equals("java.util.Optional")) {
       handleMissingValue(namedValueInfo.name,parameter,message);
     }
-    value=handleNullValue(namedValueInfo.name,value,paramType);
+    arg=handleNullValue(namedValueInfo.name,arg,paramType);
   }
- else   if ("".equals(value) && namedValueInfo.defaultValue != null) {
-    value=resolveDefaultValue(namedValueInfo.defaultValue);
+ else   if ("".equals(arg) && namedValueInfo.defaultValue != null) {
+    arg=resolveDefaultValue(namedValueInfo.defaultValue);
   }
-  if (!ClassUtils.isAssignableValue(paramType,value)) {
-    value=this.conversionService.convert(value,TypeDescriptor.valueOf(value.getClass()),new TypeDescriptor(parameter));
+  if (!ClassUtils.isAssignableValue(paramType,arg)) {
+    arg=this.conversionService.convert(arg,TypeDescriptor.valueOf(arg.getClass()),new TypeDescriptor(parameter));
   }
-  handleResolvedValue(value,namedValueInfo.name,parameter,message);
-  return value;
+  handleResolvedValue(arg,namedValueInfo.name,parameter,message);
+  return arg;
 }

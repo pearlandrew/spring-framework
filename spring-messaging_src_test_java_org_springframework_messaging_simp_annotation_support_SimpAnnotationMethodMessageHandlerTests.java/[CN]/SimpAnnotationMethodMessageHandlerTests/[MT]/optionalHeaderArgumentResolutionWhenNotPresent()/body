@@ -1,0 +1,11 @@
+{
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.create();
+  headers.setSessionId("session1");
+  headers.setSessionAttributes(new ConcurrentHashMap<>());
+  headers.setDestination("/pre/optionalHeaders");
+  Message<?> message=MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+  this.messageHandler.handleMessage(message);
+  assertEquals("optionalHeaders",this.testController.method);
+  assertNull(this.testController.arguments.get("foo1"));
+  assertNull(this.testController.arguments.get("foo2"));
+}
