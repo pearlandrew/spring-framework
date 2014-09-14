@@ -12,8 +12,19 @@
   RequestMappingHandlerAdapter adapter=appContext.getBean(RequestMappingHandlerAdapter.class);
   assertNotNull(adapter);
   assertEquals(false,new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
-  List<HttpMessageConverter<?>> messageConverters=adapter.getMessageConverters();
-  assertTrue(messageConverters.size() > 0);
+  List<HttpMessageConverter<?>> converters=adapter.getMessageConverters();
+  assertTrue(converters.size() > 0);
+  for (  HttpMessageConverter<?> converter : converters) {
+    if (converter instanceof AbstractJackson2HttpMessageConverter) {
+      ObjectMapper objectMapper=((AbstractJackson2HttpMessageConverter)converter).getObjectMapper();
+      assertTrue(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+      assertTrue(objectMapper.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
+      assertTrue(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+      if (converter instanceof MappingJackson2XmlHttpMessageConverter) {
+        assertEquals(XmlMapper.class,objectMapper.getClass());
+      }
+    }
+  }
   assertNotNull(appContext.getBean(FormattingConversionServiceFactoryBean.class));
   assertNotNull(appContext.getBean(ConversionService.class));
   assertNotNull(appContext.getBean(LocalValidatorFactoryBean.class));

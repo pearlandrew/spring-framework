@@ -1,6 +1,21 @@
 {
   if (this.objectMapper == null) {
-    this.objectMapper=new ObjectMapper();
+    if (this.createXmlMapper) {
+      ClassLoader cl=this.beanClassLoader;
+      if (cl == null) {
+        cl=getClass().getClassLoader();
+      }
+      try {
+        Class<? extends ObjectMapper> xmlMapper=(Class<? extends ObjectMapper>)cl.loadClass("com.fasterxml.jackson.dataformat.xml.XmlMapper");
+        this.objectMapper=BeanUtils.instantiate(xmlMapper);
+      }
+ catch (      ClassNotFoundException ex) {
+        throw new IllegalStateException("Could not instantiate XmlMapper",ex);
+      }
+    }
+ else {
+      this.objectMapper=new ObjectMapper();
+    }
   }
   if (this.dateFormat != null) {
     this.objectMapper.setDateFormat(this.dateFormat);
