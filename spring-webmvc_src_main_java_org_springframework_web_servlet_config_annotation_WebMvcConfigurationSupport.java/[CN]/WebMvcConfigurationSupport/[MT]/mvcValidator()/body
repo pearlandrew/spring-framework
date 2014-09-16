@@ -7,23 +7,16 @@
         String className="org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
         clazz=ClassUtils.forName(className,WebMvcConfigurationSupport.class.getClassLoader());
       }
- catch (      ClassNotFoundException e) {
-        throw new BeanInitializationException("Could not find default validator",e);
+ catch (      ClassNotFoundException ex) {
+        throw new BeanInitializationException("Could not find default validator class",ex);
       }
-catch (      LinkageError e) {
-        throw new BeanInitializationException("Could not find default validator",e);
+catch (      LinkageError ex) {
+        throw new BeanInitializationException("Could not load default validator class",ex);
       }
       validator=(Validator)BeanUtils.instantiate(clazz);
     }
  else {
-      validator=new Validator(){
-        @Override public boolean supports(        Class<?> clazz){
-          return false;
-        }
-        @Override public void validate(        Object target,        Errors errors){
-        }
-      }
-;
+      validator=new NoOpValidator();
     }
   }
   return validator;
