@@ -1,20 +1,20 @@
 {
-  Class<?> paramType=param.getParameterType();
+  Class<?> paramType=parameter.getParameterType();
   if (Map.class.isAssignableFrom(paramType) || MultipartFile.class.equals(paramType) || "javax.servlet.http.Part".equals(paramType.getName())) {
     return;
   }
-  RequestParam annot=param.getParameterAnnotation(RequestParam.class);
-  String name=(annot == null || StringUtils.isEmpty(annot.value()) ? param.getParameterName() : annot.value());
+  RequestParam ann=parameter.getParameterAnnotation(RequestParam.class);
+  String name=(ann == null || StringUtils.isEmpty(ann.value()) ? parameter.getParameterName() : ann.value());
   if (value == null) {
     builder.queryParam(name);
   }
  else   if (value instanceof Collection) {
     for (    Object element : (Collection<?>)value) {
-      element=formatUriValue(conversionService,TypeDescriptor.nested(param,1),element);
+      element=formatUriValue(conversionService,TypeDescriptor.nested(parameter,1),element);
       builder.queryParam(name,element);
     }
   }
  else {
-    builder.queryParam(name,formatUriValue(conversionService,new TypeDescriptor(param),value));
+    builder.queryParam(name,formatUriValue(conversionService,new TypeDescriptor(parameter),value));
   }
 }
