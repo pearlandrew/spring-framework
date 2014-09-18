@@ -32,9 +32,7 @@ synchronized (this.injectionMetadataCache) {
             }
           }
           for (          Method method : targetClass.getDeclaredMethods()) {
-            method=BridgeMethodResolver.findBridgedMethod(method);
-            Method mostSpecificMethod=BridgeMethodResolver.findBridgedMethod(ClassUtils.getMostSpecificMethod(method,clazz));
-            if (method.equals(mostSpecificMethod)) {
+            if (!method.isBridge() && method.equals(ClassUtils.getMostSpecificMethod(method,clazz))) {
               if (webServiceRefClass != null && method.isAnnotationPresent(webServiceRefClass)) {
                 if (Modifier.isStatic(method.getModifiers())) {
                   throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");
