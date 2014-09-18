@@ -5,10 +5,10 @@
     String userName=getSessionRegistryUserName(principal);
     this.userSessionRegistry.unregisterSessionId(userName,session.getId());
   }
+  Message<byte[]> message=createDisconnectMessage(session);
   if (this.eventPublisher != null) {
-    publishEvent(new SessionDisconnectEvent(this,session.getId(),closeStatus));
+    publishEvent(new SessionDisconnectEvent(this,message,session.getId(),closeStatus));
   }
-  Message<?> message=createDisconnectMessage(session);
   SimpAttributes simpAttributes=SimpAttributes.fromMessage(message);
   try {
     SimpAttributesContextHolder.setAttributes(simpAttributes);
