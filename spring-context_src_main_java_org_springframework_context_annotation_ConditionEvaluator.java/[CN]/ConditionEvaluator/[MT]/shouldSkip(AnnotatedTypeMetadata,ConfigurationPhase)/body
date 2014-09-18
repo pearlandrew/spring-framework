@@ -8,17 +8,22 @@
     }
     return shouldSkip(metadata,ConfigurationPhase.REGISTER_BEAN);
   }
+  List<Condition> conditions=new ArrayList<Condition>();
   for (  String[] conditionClasses : getConditionClasses(metadata)) {
     for (    String conditionClass : conditionClasses) {
       Condition condition=getCondition(conditionClass,this.context.getClassLoader());
-      ConfigurationPhase requiredPhase=null;
-      if (condition instanceof ConfigurationCondition) {
-        requiredPhase=((ConfigurationCondition)condition).getConfigurationPhase();
-      }
-      if (requiredPhase == null || requiredPhase == phase) {
-        if (!condition.matches(this.context,metadata)) {
-          return true;
-        }
+      conditions.add(condition);
+    }
+  }
+  Collections.sort(conditions,AnnotationAwareOrderComparator.INSTANCE);
+  for (  Condition condition : conditions) {
+    ConfigurationPhase requiredPhase=null;
+    if (condition instanceof ConfigurationCondition) {
+      requiredPhase=((ConfigurationCondition)condition).getConfigurationPhase();
+    }
+    if (requiredPhase == null || requiredPhase == phase) {
+      if (!condition.matches(this.context,metadata)) {
+        return true;
       }
     }
   }
