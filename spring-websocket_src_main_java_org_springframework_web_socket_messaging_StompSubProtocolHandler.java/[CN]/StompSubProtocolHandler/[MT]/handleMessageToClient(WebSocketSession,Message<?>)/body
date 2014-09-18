@@ -20,7 +20,14 @@
     this.stats.incrementConnectedCount();
     stompAccessor=afterStompSessionConnected(message,stompAccessor,session);
     if (this.eventPublisher != null && StompCommand.CONNECTED.equals(command)) {
-      publishEvent(new SessionConnectedEvent(this,(Message<byte[]>)message));
+      try {
+        SimpAttributes simpAttributes=new SimpAttributes(session.getId(),session.getAttributes());
+        SimpAttributesContextHolder.setAttributes(simpAttributes);
+        publishEvent(new SessionConnectedEvent(this,(Message<byte[]>)message));
+      }
+  finally {
+        SimpAttributesContextHolder.resetAttributes();
+      }
     }
   }
   try {

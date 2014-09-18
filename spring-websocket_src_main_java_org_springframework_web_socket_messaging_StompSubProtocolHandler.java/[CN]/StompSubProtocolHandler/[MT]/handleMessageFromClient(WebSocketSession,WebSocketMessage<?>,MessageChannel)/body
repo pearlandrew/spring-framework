@@ -33,23 +33,25 @@
       headerAccessor.setSessionAttributes(session.getAttributes());
       headerAccessor.setUser(session.getPrincipal());
       headerAccessor.setImmutable();
-      if (this.eventPublisher != null) {
-        if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
-          this.stats.incrementConnectCount();
-          publishEvent(new SessionConnectEvent(this,message));
-        }
- else         if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
-          this.stats.incrementDisconnectCount();
-        }
- else         if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
-          publishEvent(new SessionSubscribeEvent(this,message));
-        }
- else         if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
-          publishEvent(new SessionUnsubscribeEvent(this,message));
-        }
+      if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
+        this.stats.incrementConnectCount();
+      }
+ else       if (StompCommand.DISCONNECT.equals(headerAccessor.getCommand())) {
+        this.stats.incrementDisconnectCount();
       }
       try {
         SimpAttributesContextHolder.setAttributesFromMessage(message);
+        if (this.eventPublisher != null) {
+          if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
+            publishEvent(new SessionConnectEvent(this,message));
+          }
+ else           if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
+            publishEvent(new SessionSubscribeEvent(this,message));
+          }
+ else           if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
+            publishEvent(new SessionUnsubscribeEvent(this,message));
+          }
+        }
         outputChannel.send(message);
       }
   finally {
