@@ -1,0 +1,14 @@
+{
+  ResponseEntity<String> returnValue=new ResponseEntity<>(HttpStatus.OK);
+  servletRequest.addHeader("Accept","text/*");
+  servletRequest.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE,Collections.singleton(MediaType.TEXT_HTML));
+  ResponseBodyAdvice<String> advice=mock(ResponseBodyAdvice.class);
+  given(advice.supports(any(),any())).willReturn(true);
+  given(advice.beforeBodyWrite(any(),any(),any(),any(),any(),any())).willReturn("Foo");
+  HttpEntityMethodProcessor processor=new HttpEntityMethodProcessor(Collections.singletonList(messageConverter),null,Collections.singletonList(advice));
+  reset(messageConverter);
+  given(messageConverter.canWrite(String.class,MediaType.TEXT_HTML)).willReturn(true);
+  processor.handleReturnValue(returnValue,returnTypeResponseEntity,mavContainer,webRequest);
+  assertTrue(mavContainer.isRequestHandled());
+  verify(messageConverter).write(eq("Foo"),eq(MediaType.TEXT_HTML),isA(HttpOutputMessage.class));
+}

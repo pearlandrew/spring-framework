@@ -1,5 +1,5 @@
 {
-  Class<?> returnValueClass=returnValue.getClass();
+  Class<?> returnValueClass=getReturnValueType(returnValue,returnType);
   HttpServletRequest servletRequest=inputMessage.getServletRequest();
   List<MediaType> requestedMediaTypes=getAcceptableMediaTypes(servletRequest);
   List<MediaType> producibleMediaTypes=getProducibleMediaTypes(servletRequest,returnValueClass);
@@ -32,9 +32,11 @@
     for (    HttpMessageConverter<?> messageConverter : this.messageConverters) {
       if (messageConverter.canWrite(returnValueClass,selectedMediaType)) {
         returnValue=this.adviceChain.invoke(returnValue,returnType,selectedMediaType,(Class<HttpMessageConverter<?>>)messageConverter.getClass(),inputMessage,outputMessage);
-        ((HttpMessageConverter<T>)messageConverter).write(returnValue,selectedMediaType,outputMessage);
-        if (logger.isDebugEnabled()) {
-          logger.debug("Written [" + returnValue + "] as \""+ selectedMediaType+ "\" using ["+ messageConverter+ "]");
+        if (returnValue != null) {
+          ((HttpMessageConverter<T>)messageConverter).write(returnValue,selectedMediaType,outputMessage);
+          if (logger.isDebugEnabled()) {
+            logger.debug("Written [" + returnValue + "] as \""+ selectedMediaType+ "\" using ["+ messageConverter+ "]");
+          }
         }
         return;
       }
