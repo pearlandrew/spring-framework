@@ -1,35 +1,23 @@
 {
   Assert.notNull(name,"Property name must not be null");
-  try {
-    String[] propertyNames=(this.usePropertyNames ? getPropertyNames() : null);
-    if (containsProperty(propertyNames,name)) {
-      return name;
-    }
-    String usName=name.replace('.','_');
-    if (!name.equals(usName) && containsProperty(propertyNames,usName)) {
-      return usName;
-    }
-    String ucName=name.toUpperCase();
-    if (!name.equals(ucName)) {
-      if (containsProperty(propertyNames,ucName)) {
-        return ucName;
-      }
- else {
-        String usUcName=ucName.replace('.','_');
-        if (!ucName.equals(usUcName) && containsProperty(propertyNames,usUcName)) {
-          return usUcName;
-        }
-      }
-    }
+  if (containsKey(name)) {
     return name;
   }
- catch (  RuntimeException ex) {
-    if (this.usePropertyNames) {
-      throw ex;
+  String usName=name.replace('.','_');
+  if (!name.equals(usName) && containsKey(usName)) {
+    return usName;
+  }
+  String ucName=name.toUpperCase();
+  if (!name.equals(ucName)) {
+    if (containsKey(ucName)) {
+      return ucName;
     }
  else {
-      this.usePropertyNames=true;
-      return resolvePropertyName(name);
+      String usUcName=ucName.replace('.','_');
+      if (!ucName.equals(usUcName) && containsKey(usUcName)) {
+        return usUcName;
+      }
     }
   }
+  return name;
 }
