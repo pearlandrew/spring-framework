@@ -1,9 +1,14 @@
 {
   Assert.notNull(object,"Bean object must not be null");
-  this.object=object;
+  if (object.getClass().equals(javaUtilOptionalClass)) {
+    this.object=OptionalUnwrapper.unwrap(object);
+  }
+ else {
+    this.object=object;
+  }
   this.nestedPath=(nestedPath != null ? nestedPath : "");
-  this.rootObject=(!"".equals(this.nestedPath) ? rootObject : object);
+  this.rootObject=(!"".equals(this.nestedPath) ? rootObject : this.object);
   this.nestedBeanWrappers=null;
-  this.typeConverterDelegate=new TypeConverterDelegate(this,object);
-  setIntrospectionClass(object.getClass());
+  this.typeConverterDelegate=new TypeConverterDelegate(this,this.object);
+  setIntrospectionClass(this.object.getClass());
 }
