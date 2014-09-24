@@ -1,7 +1,12 @@
 {
   this.scheduledExecutor=createExecutor(this.poolSize,threadFactory,rejectedExecutionHandler);
-  if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor && this.removeOnCancelPolicy != null) {
-    ((ScheduledThreadPoolExecutor)this.scheduledExecutor).setRemoveOnCancelPolicy(this.removeOnCancelPolicy);
+  if (this.removeOnCancelPolicy) {
+    if (setRemoveOnCancelPolicyAvailable && this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
+      ((ScheduledThreadPoolExecutor)this.scheduledExecutor).setRemoveOnCancelPolicy(true);
+    }
+ else {
+      logger.info("Could not apply remove-on-cancel policy - not a Java 7+ ScheduledThreadPoolExecutor");
+    }
   }
   return this.scheduledExecutor;
 }
