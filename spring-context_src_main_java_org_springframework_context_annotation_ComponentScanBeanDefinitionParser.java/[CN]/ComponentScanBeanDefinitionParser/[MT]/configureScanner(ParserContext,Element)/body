@@ -1,12 +1,11 @@
 {
-  XmlReaderContext readerContext=parserContext.getReaderContext();
   boolean useDefaultFilters=true;
   if (element.hasAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE)) {
     useDefaultFilters=Boolean.valueOf(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));
   }
-  ClassPathBeanDefinitionScanner scanner=createScanner(readerContext,useDefaultFilters);
-  scanner.setResourceLoader(readerContext.getResourceLoader());
-  scanner.setEnvironment(parserContext.getDelegate().getEnvironment());
+  ClassPathBeanDefinitionScanner scanner=createScanner(parserContext.getReaderContext(),useDefaultFilters);
+  scanner.setResourceLoader(parserContext.getReaderContext().getResourceLoader());
+  scanner.setEnvironment(parserContext.getReaderContext().getEnvironment());
   scanner.setBeanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults());
   scanner.setAutowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());
   if (element.hasAttribute(RESOURCE_PATTERN_ATTRIBUTE)) {
@@ -16,14 +15,14 @@
     parseBeanNameGenerator(element,scanner);
   }
  catch (  Exception ex) {
-    readerContext.error(ex.getMessage(),readerContext.extractSource(element),ex.getCause());
+    parserContext.getReaderContext().error(ex.getMessage(),parserContext.extractSource(element),ex.getCause());
   }
   try {
     parseScope(element,scanner);
   }
  catch (  Exception ex) {
-    readerContext.error(ex.getMessage(),readerContext.extractSource(element),ex.getCause());
+    parserContext.getReaderContext().error(ex.getMessage(),parserContext.extractSource(element),ex.getCause());
   }
-  parseTypeFilters(element,scanner,readerContext,parserContext);
+  parseTypeFilters(element,scanner,parserContext);
   return scanner;
 }
