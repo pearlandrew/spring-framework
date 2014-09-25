@@ -1,9 +1,9 @@
 {
   String name=ModelFactory.getNameForParameter(parameter);
-  Object attribute=(mavContainer.containsAttribute(name)) ? mavContainer.getModel().get(name) : createAttribute(name,parameter,binderFactory,request);
-  WebDataBinder binder=binderFactory.createBinder(request,attribute,name);
+  Object attribute=(mavContainer.containsAttribute(name) ? mavContainer.getModel().get(name) : createAttribute(name,parameter,binderFactory,webRequest));
+  WebDataBinder binder=binderFactory.createBinder(webRequest,attribute,name);
   if (binder.getTarget() != null) {
-    bindRequestParameters(binder,request);
+    bindRequestParameters(binder,webRequest);
     validateIfApplicable(binder,parameter);
     if (binder.getBindingResult().hasErrors()) {
       if (isBindExceptionRequired(binder,parameter)) {
@@ -14,5 +14,5 @@
   Map<String,Object> bindingResultModel=binder.getBindingResult().getModel();
   mavContainer.removeAttributes(bindingResultModel);
   mavContainer.addAllAttributes(bindingResultModel);
-  return binder.getTarget();
+  return binder.convertIfNecessary(binder.getTarget(),parameter.getParameterType(),parameter);
 }
