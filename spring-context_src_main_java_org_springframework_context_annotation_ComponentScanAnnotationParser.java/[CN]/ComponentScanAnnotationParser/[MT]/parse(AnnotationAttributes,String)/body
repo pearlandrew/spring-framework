@@ -30,16 +30,13 @@
   if (lazyInit) {
     scanner.getBeanDefinitionDefaults().setLazyInit(true);
   }
-  List<String> basePackages=new ArrayList<String>();
-  for (  String pkg : componentScan.getStringArray("value")) {
-    if (StringUtils.hasText(pkg)) {
-      basePackages.add(pkg);
-    }
-  }
-  for (  String pkg : componentScan.getStringArray("basePackages")) {
-    if (StringUtils.hasText(pkg)) {
-      basePackages.add(pkg);
-    }
+  Set<String> basePackages=new LinkedHashSet<String>();
+  Set<String> specifiedPackages=new LinkedHashSet<String>();
+  specifiedPackages.addAll(Arrays.asList(componentScan.getStringArray("value")));
+  specifiedPackages.addAll(Arrays.asList(componentScan.getStringArray("basePackages")));
+  for (  String pkg : specifiedPackages) {
+    String[] tokenized=StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
+    basePackages.addAll(Arrays.asList(tokenized));
   }
   for (  Class<?> clazz : componentScan.getClassArray("basePackageClasses")) {
     basePackages.add(ClassUtils.getPackageName(clazz));
