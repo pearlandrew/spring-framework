@@ -1,7 +1,16 @@
 {
   if (part instanceof Resource) {
     Resource resource=(Resource)part;
-    return resource.getFilename();
+    String filename=resource.getFilename();
+    if (multipartCharset != null) {
+      try {
+        filename=MimeUtility.encodeText(filename,multipartCharset.name(),null);
+      }
+ catch (      UnsupportedEncodingException e) {
+        throw new IllegalStateException(e);
+      }
+    }
+    return filename;
   }
  else {
     return null;
