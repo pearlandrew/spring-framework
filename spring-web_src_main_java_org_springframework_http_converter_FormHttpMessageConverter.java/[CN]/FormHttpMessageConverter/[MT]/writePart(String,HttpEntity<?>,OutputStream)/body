@@ -5,12 +5,12 @@
   MediaType partContentType=partHeaders.getContentType();
   for (  HttpMessageConverter<?> messageConverter : partConverters) {
     if (messageConverter.canWrite(partType,partContentType)) {
-      HttpOutputMessage multipartOutputMessage=new MultipartHttpOutputMessage(os);
-      multipartOutputMessage.getHeaders().setContentDispositionFormData(name,getFilename(partBody));
+      HttpOutputMessage multipartMessage=new MultipartHttpOutputMessage(os);
+      multipartMessage.getHeaders().setContentDispositionFormData(name,getFilename(partBody));
       if (!partHeaders.isEmpty()) {
-        multipartOutputMessage.getHeaders().putAll(partHeaders);
+        multipartMessage.getHeaders().putAll(partHeaders);
       }
-      ((HttpMessageConverter<Object>)messageConverter).write(partBody,partContentType,multipartOutputMessage);
+      ((HttpMessageConverter<Object>)messageConverter).write(partBody,partContentType,multipartMessage);
       return;
     }
   }
