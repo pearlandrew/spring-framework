@@ -2,7 +2,13 @@
   if (streamAsLob) {
     if (asciiStream != null) {
       try {
-        ps.setClob(paramIndex,new InputStreamReader(asciiStream,"US-ASCII"),contentLength);
+        Reader reader=new InputStreamReader(asciiStream,"US-ASCII");
+        if (contentLength >= 0) {
+          ps.setClob(paramIndex,reader,contentLength);
+        }
+ else {
+          ps.setClob(paramIndex,reader);
+        }
       }
  catch (      UnsupportedEncodingException ex) {
         throw new SQLException("US-ASCII encoding not supported: " + ex);
