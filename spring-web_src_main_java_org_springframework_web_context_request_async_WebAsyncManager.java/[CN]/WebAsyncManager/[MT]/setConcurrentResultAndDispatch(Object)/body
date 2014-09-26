@@ -3,13 +3,14 @@ synchronized (WebAsyncManager.this) {
     if (hasConcurrentResult()) {
       return;
     }
-    concurrentResult=result;
+    this.concurrentResult=result;
   }
-  if (asyncWebRequest.isAsyncComplete()) {
+  if (this.asyncWebRequest.isAsyncComplete()) {
     logger.error("Could not complete async processing due to timeout or network error");
     return;
   }
-  logger.debug("Concurrent result value [" + concurrentResult + "]");
-  logger.debug("Dispatching request to resume processing");
-  asyncWebRequest.dispatch();
+  if (logger.isDebugEnabled()) {
+    logger.debug("Concurrent result value [" + this.concurrentResult + "] - dispatching request to resume processing");
+  }
+  this.asyncWebRequest.dispatch();
 }
