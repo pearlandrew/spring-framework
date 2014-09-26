@@ -5,6 +5,9 @@ synchronized (this.lifecycleMonitor) {
     }
     this.clientInboundChannel.subscribe(this);
     this.brokerChannel.subscribe(this);
+    if (this.clientInboundChannel instanceof AbstractMessageChannel) {
+      ((AbstractMessageChannel)this.clientInboundChannel).addInterceptor(0,this.unsentDisconnectInterceptor);
+    }
     startInternal();
     this.running=true;
     if (logger.isInfoEnabled()) {
