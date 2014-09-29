@@ -12,7 +12,15 @@
   mv=cw.visitMethod(ACC_PUBLIC,"getValue","(Ljava/lang/Object;Lorg/springframework/expression/EvaluationContext;)Ljava/lang/Object;",null,new String[]{"org/springframework/expression/EvaluationException"});
   mv.visitCode();
   CodeFlow codeflow=new CodeFlow();
-  expressionToCompile.generateCode(mv,codeflow);
+  try {
+    expressionToCompile.generateCode(mv,codeflow);
+  }
+ catch (  IllegalStateException ex) {
+    if (logger.isDebugEnabled()) {
+      logger.debug(expressionToCompile.getClass().getSimpleName() + ".generateCode opted out of compilation: " + ex.getMessage());
+    }
+    return null;
+  }
   CodeFlow.insertBoxIfNecessary(mv,codeflow.lastDescriptor());
   if ("V".equals(codeflow.lastDescriptor())) {
     mv.visitInsn(ACONST_NULL);

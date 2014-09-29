@@ -4,17 +4,17 @@
       logger.debug("SpEL: compiling " + expression.toStringAST());
     }
     Class<? extends CompiledExpression> clazz=createExpressionClass(expression);
-    try {
-      return clazz.newInstance();
-    }
- catch (    Exception ex) {
-      throw new IllegalStateException("Failed to instantiate CompiledExpression",ex);
+    if (clazz != null) {
+      try {
+        return clazz.newInstance();
+      }
+ catch (      Throwable ex) {
+        throw new IllegalStateException("Failed to instantiate CompiledExpression",ex);
+      }
     }
   }
- else {
-    if (logger.isDebugEnabled()) {
-      logger.debug("SpEL: unable to compile " + expression.toStringAST());
-    }
+  if (logger.isDebugEnabled()) {
+    logger.debug("SpEL: unable to compile " + expression.toStringAST());
   }
   return null;
 }

@@ -1,13 +1,14 @@
 {
-  if (this.cachedExecutor == null || !(this.cachedExecutor.get() instanceof ReflectiveMethodExecutor)) {
+  CachedMethodExecutor executorToCheck=this.cachedExecutor;
+  if (executorToCheck == null || !(executorToCheck.get() instanceof ReflectiveMethodExecutor)) {
     return false;
   }
-  for (  SpelNodeImpl child : children) {
+  for (  SpelNodeImpl child : this.children) {
     if (!child.isCompilable()) {
       return false;
     }
   }
-  ReflectiveMethodExecutor executor=(ReflectiveMethodExecutor)this.cachedExecutor.get();
+  ReflectiveMethodExecutor executor=(ReflectiveMethodExecutor)executorToCheck.get();
   Method method=executor.getMethod();
   if (!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
     return false;

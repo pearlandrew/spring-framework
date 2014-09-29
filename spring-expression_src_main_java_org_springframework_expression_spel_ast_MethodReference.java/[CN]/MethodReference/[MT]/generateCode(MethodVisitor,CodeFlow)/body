@@ -1,6 +1,9 @@
 {
-  ReflectiveMethodExecutor executor=(ReflectiveMethodExecutor)this.cachedExecutor.get();
-  Method method=executor.getMethod();
+  CachedMethodExecutor executorToCheck=this.cachedExecutor;
+  if (executorToCheck == null || !(executorToCheck.get() instanceof ReflectiveMethodExecutor)) {
+    throw new IllegalStateException("No applicable cached executor found: " + executorToCheck);
+  }
+  Method method=((ReflectiveMethodExecutor)executorToCheck.get()).getMethod();
   boolean isStaticMethod=Modifier.isStatic(method.getModifiers());
   String descriptor=codeflow.lastDescriptor();
   if (descriptor == null && !isStaticMethod) {
@@ -14,15 +17,15 @@
     }
   }
   String[] paramDescriptors=CodeFlow.toParamDescriptors(method);
-  for (int c=0; c < this.children.length; c++) {
-    SpelNodeImpl child=this.children[c];
+  for (int i=0; i < this.children.length; i++) {
+    SpelNodeImpl child=this.children[i];
     codeflow.enterCompilationScope();
     child.generateCode(mv,codeflow);
-    if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && (paramDescriptors[c].charAt(0) == 'L')) {
+    if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && paramDescriptors[i].charAt(0) == 'L') {
       CodeFlow.insertBoxIfNecessary(mv,codeflow.lastDescriptor().charAt(0));
     }
- else     if (!codeflow.lastDescriptor().equals(paramDescriptors[c])) {
-      CodeFlow.insertCheckCast(mv,paramDescriptors[c]);
+ else     if (!codeflow.lastDescriptor().equals(paramDescriptors[i])) {
+      CodeFlow.insertCheckCast(mv,paramDescriptors[i]);
     }
     codeflow.exitCompilationScope();
   }
