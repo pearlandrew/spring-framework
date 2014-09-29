@@ -1,5 +1,8 @@
 {
   JsonView annotation=returnType.getMethodAnnotation(JsonView.class);
-  Assert.isTrue(annotation.value().length != 0,"No view class in JsonView annotation on " + returnType);
-  bodyContainer.setSerializationView(annotation.value()[0]);
+  Class<?>[] classes=annotation.value();
+  if (classes.length != 1) {
+    throw new IllegalArgumentException("@JsonView only supported for response body advice with exactly 1 class argument: " + returnType);
+  }
+  bodyContainer.setSerializationView(classes[0]);
 }
