@@ -3,7 +3,7 @@
   Class<?> partType=partBody.getClass();
   HttpHeaders partHeaders=partEntity.getHeaders();
   MediaType partContentType=partHeaders.getContentType();
-  for (  HttpMessageConverter<?> messageConverter : partConverters) {
+  for (  HttpMessageConverter<?> messageConverter : this.partConverters) {
     if (messageConverter.canWrite(partType,partContentType)) {
       HttpOutputMessage multipartMessage=new MultipartHttpOutputMessage(os);
       multipartMessage.getHeaders().setContentDispositionFormData(name,getFilename(partBody));
@@ -14,5 +14,5 @@
       return;
     }
   }
-  throw new HttpMessageNotWritableException("Could not write request: no suitable HttpMessageConverter found for request type [" + partType.getName() + "]");
+  throw new HttpMessageNotWritableException("Could not write request: no suitable HttpMessageConverter " + "found for request type [" + partType.getName() + "]");
 }
