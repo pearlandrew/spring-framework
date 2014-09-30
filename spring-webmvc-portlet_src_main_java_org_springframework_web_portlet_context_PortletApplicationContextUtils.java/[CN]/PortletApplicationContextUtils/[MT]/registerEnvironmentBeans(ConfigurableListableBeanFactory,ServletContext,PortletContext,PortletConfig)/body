@@ -1,38 +1,38 @@
 {
-  if (sc != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
-    bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME,sc);
+  if (servletContext != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
+    bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME,servletContext);
   }
-  if (pc != null && !bf.containsBean(ConfigurablePortletApplicationContext.PORTLET_CONTEXT_BEAN_NAME)) {
-    bf.registerSingleton(ConfigurablePortletApplicationContext.PORTLET_CONTEXT_BEAN_NAME,pc);
+  if (portletContext != null && !bf.containsBean(ConfigurablePortletApplicationContext.PORTLET_CONTEXT_BEAN_NAME)) {
+    bf.registerSingleton(ConfigurablePortletApplicationContext.PORTLET_CONTEXT_BEAN_NAME,portletContext);
   }
-  if (config != null && !bf.containsBean(ConfigurablePortletApplicationContext.PORTLET_CONFIG_BEAN_NAME)) {
-    bf.registerSingleton(ConfigurablePortletApplicationContext.PORTLET_CONFIG_BEAN_NAME,config);
+  if (portletConfig != null && !bf.containsBean(ConfigurablePortletApplicationContext.PORTLET_CONFIG_BEAN_NAME)) {
+    bf.registerSingleton(ConfigurablePortletApplicationContext.PORTLET_CONFIG_BEAN_NAME,portletConfig);
   }
   if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {
     Map<String,String> parameterMap=new HashMap<String,String>();
-    if (pc != null) {
-      Enumeration<String> paramNameEnum=pc.getInitParameterNames();
+    if (portletContext != null) {
+      Enumeration<String> paramNameEnum=portletContext.getInitParameterNames();
       while (paramNameEnum.hasMoreElements()) {
         String paramName=paramNameEnum.nextElement();
-        parameterMap.put(paramName,pc.getInitParameter(paramName));
+        parameterMap.put(paramName,portletContext.getInitParameter(paramName));
       }
     }
-    if (config != null) {
-      Enumeration<String> paramNameEnum=config.getInitParameterNames();
+    if (portletConfig != null) {
+      Enumeration<String> paramNameEnum=portletConfig.getInitParameterNames();
       while (paramNameEnum.hasMoreElements()) {
         String paramName=paramNameEnum.nextElement();
-        parameterMap.put(paramName,config.getInitParameter(paramName));
+        parameterMap.put(paramName,portletConfig.getInitParameter(paramName));
       }
     }
     bf.registerSingleton(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME,Collections.unmodifiableMap(parameterMap));
   }
   if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {
     Map<String,Object> attributeMap=new HashMap<String,Object>();
-    if (pc != null) {
-      Enumeration<String> attrNameEnum=pc.getAttributeNames();
+    if (portletContext != null) {
+      Enumeration<String> attrNameEnum=portletContext.getAttributeNames();
       while (attrNameEnum.hasMoreElements()) {
         String attrName=attrNameEnum.nextElement();
-        attributeMap.put(attrName,pc.getAttribute(attrName));
+        attributeMap.put(attrName,portletContext.getAttribute(attrName));
       }
     }
     bf.registerSingleton(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME,Collections.unmodifiableMap(attributeMap));
