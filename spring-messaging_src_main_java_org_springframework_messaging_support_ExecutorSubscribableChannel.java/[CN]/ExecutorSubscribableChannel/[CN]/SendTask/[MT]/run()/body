@@ -1,22 +1,24 @@
 {
   Message<?> message=this.inputMessage;
   try {
-    message=chain.applyBeforeHandle(message,this.channel,this.handler);
+    message=applyBeforeHandle(message);
     if (message == null) {
       return;
     }
     this.handler.handleMessage(message);
-    this.chain.triggerAfterMessageHandled(message,this.channel,this.handler,null);
+    triggerAfterMessageHandled(message,null);
   }
  catch (  Exception ex) {
-    this.chain.triggerAfterMessageHandled(message,this.channel,this.handler,ex);
+    triggerAfterMessageHandled(message,ex);
     if (ex instanceof MessagingException) {
       throw (MessagingException)ex;
     }
-    throw new MessageDeliveryException(message,"Failed to handle message to " + this.channel + " in "+ this.handler,ex);
+    String description="Failed to handle " + message + " to "+ this+ " in "+ this.handler;
+    throw new MessageDeliveryException(message,description,ex);
   }
 catch (  Error ex) {
-    this.chain.triggerAfterMessageHandled(message,this.channel,this.handler,new MessageDeliveryException(message,"Failed to handle message to " + this.channel + " in "+ this.handler,ex));
+    String description="Failed to handle " + message + " to "+ this+ " in "+ this.handler;
+    triggerAfterMessageHandled(message,new MessageDeliveryException(message,description,ex));
     throw ex;
   }
 }
