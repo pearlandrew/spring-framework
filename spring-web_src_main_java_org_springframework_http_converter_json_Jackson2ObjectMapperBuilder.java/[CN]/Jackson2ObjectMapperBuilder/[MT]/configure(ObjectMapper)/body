@@ -1,0 +1,48 @@
+{
+  Assert.notNull(objectMapper,"ObjectMapper must not be null");
+  if (this.dateFormat != null) {
+    objectMapper.setDateFormat(this.dateFormat);
+  }
+  if (this.annotationIntrospector != null) {
+    objectMapper.setAnnotationIntrospector(this.annotationIntrospector);
+  }
+  if (this.serializationInclusion != null) {
+    objectMapper.setSerializationInclusion(this.serializationInclusion);
+  }
+  if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
+    SimpleModule module=new SimpleModule();
+    addSerializers(module);
+    addDeserializers(module);
+    objectMapper.registerModule(module);
+  }
+  if (!this.features.containsKey(MapperFeature.DEFAULT_VIEW_INCLUSION)) {
+    configureFeature(objectMapper,MapperFeature.DEFAULT_VIEW_INCLUSION,false);
+  }
+  if (!this.features.containsKey(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) {
+    configureFeature(objectMapper,DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
+  }
+  for (  Object feature : this.features.keySet()) {
+    configureFeature(objectMapper,feature,this.features.get(feature));
+  }
+  if (this.modules != null) {
+    for (    Module module : this.modules) {
+      objectMapper.registerModule(module);
+    }
+  }
+ else {
+    if (this.modulesToInstall != null) {
+      for (      Class<? extends Module> module : this.modulesToInstall) {
+        objectMapper.registerModule(BeanUtils.instantiate(module));
+      }
+    }
+    if (this.findModulesViaServiceLoader) {
+      objectMapper.registerModules(ObjectMapper.findModules(this.moduleClassLoader));
+    }
+ else {
+      registerWellKnownModulesIfAvailable(objectMapper);
+    }
+  }
+  if (this.propertyNamingStrategy != null) {
+    objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
+  }
+}

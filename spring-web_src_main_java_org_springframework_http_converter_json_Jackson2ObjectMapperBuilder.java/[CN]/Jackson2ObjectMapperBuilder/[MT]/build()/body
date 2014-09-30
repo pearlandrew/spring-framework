@@ -1,63 +1,17 @@
 {
-  if (this.objectMapper == null) {
-    if (this.createXmlMapper) {
-      ClassLoader cl=getClassLoader();
-      try {
-        Class<? extends ObjectMapper> xmlMapper=(Class<? extends ObjectMapper>)cl.loadClass("com.fasterxml.jackson.dataformat.xml.XmlMapper");
-        this.objectMapper=BeanUtils.instantiate(xmlMapper);
-      }
- catch (      ClassNotFoundException ex) {
-        throw new IllegalStateException("Could not instantiate XmlMapper, it has not been found on the classpath");
-      }
+  ObjectMapper objectMapper;
+  if (this.createXmlMapper) {
+    try {
+      Class<? extends ObjectMapper> xmlMapper=(Class<? extends ObjectMapper>)ClassUtils.forName("com.fasterxml.jackson.dataformat.xml.XmlMapper",this.moduleClassLoader);
+      objectMapper=BeanUtils.instantiate(xmlMapper);
     }
- else {
-      this.objectMapper=new ObjectMapper();
-    }
-  }
-  if (this.dateFormat != null) {
-    this.objectMapper.setDateFormat(this.dateFormat);
-  }
-  if (this.annotationIntrospector != null) {
-    this.objectMapper.setAnnotationIntrospector(this.annotationIntrospector);
-  }
-  if (this.serializationInclusion != null) {
-    this.objectMapper.setSerializationInclusion(this.serializationInclusion);
-  }
-  if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
-    SimpleModule module=new SimpleModule();
-    addSerializers(module);
-    addDeserializers(module);
-    this.objectMapper.registerModule(module);
-  }
-  if (!features.containsKey(MapperFeature.DEFAULT_VIEW_INCLUSION)) {
-    configureFeature(MapperFeature.DEFAULT_VIEW_INCLUSION,false);
-  }
-  if (!features.containsKey(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) {
-    configureFeature(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
-  }
-  for (  Object feature : this.features.keySet()) {
-    configureFeature(feature,this.features.get(feature));
-  }
-  if (this.modules != null) {
-    for (    Module module : this.modules) {
-      this.objectMapper.registerModule(module);
+ catch (    ClassNotFoundException ex) {
+      throw new IllegalStateException("Could not instantiate XmlMapper - not found on classpath");
     }
   }
  else {
-    if (this.modulesToInstall != null) {
-      for (      Class<? extends Module> module : this.modulesToInstall) {
-        this.objectMapper.registerModule(BeanUtils.instantiate(module));
-      }
-    }
-    if (this.findModulesViaServiceLoader) {
-      this.objectMapper.registerModules(ObjectMapper.findModules(getClassLoader()));
-    }
- else {
-      registerWellKnownModulesIfAvailable();
-    }
+    objectMapper=new ObjectMapper();
   }
-  if (this.propertyNamingStrategy != null) {
-    this.objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
-  }
-  return (T)this.objectMapper;
+  configure(objectMapper);
+  return (T)objectMapper;
 }
