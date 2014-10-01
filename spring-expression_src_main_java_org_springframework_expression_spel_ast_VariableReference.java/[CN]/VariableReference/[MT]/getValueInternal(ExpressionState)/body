@@ -8,6 +8,12 @@
     return result;
   }
   TypedValue result=state.lookupVariable(this.name);
-  this.exitTypeDescriptor=CodeFlow.toDescriptorFromObject(result.getValue());
+  Object value=result.getValue();
+  if (value == null || !Modifier.isPublic(value.getClass().getModifiers())) {
+    this.exitTypeDescriptor="Ljava/lang/Object";
+  }
+ else {
+    this.exitTypeDescriptor=CodeFlow.toDescriptorFromObject(value);
+  }
   return result;
 }
