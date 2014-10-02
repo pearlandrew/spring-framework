@@ -30,7 +30,10 @@
     }
   }
  catch (  Throwable ex) {
-    DataSourceUtils.releaseConnection(con,this.dataSource);
+    if (txObject.isNewConnectionHolder()) {
+      DataSourceUtils.releaseConnection(con,this.dataSource);
+      txObject.setConnectionHolder(null,false);
+    }
     throw new CannotCreateTransactionException("Could not open JDBC Connection for transaction",ex);
   }
 }
