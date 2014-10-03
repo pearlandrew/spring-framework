@@ -1,15 +1,17 @@
 {
+  Message<?> messageToUse=message;
   for (  ChannelInterceptor interceptor : interceptors) {
-    message=interceptor.preSend(message,channel);
-    if (message == null) {
+    Message<?> resolvedMessage=interceptor.preSend(messageToUse,channel);
+    if (resolvedMessage == null) {
       String name=interceptor.getClass().getSimpleName();
       if (logger.isDebugEnabled()) {
         logger.debug(name + " returned null from preSend, i.e. precluding the send.");
       }
-      triggerAfterSendCompletion(message,channel,false,null);
+      triggerAfterSendCompletion(messageToUse,channel,false,null);
       return null;
     }
+    messageToUse=resolvedMessage;
     this.sendInterceptorIndex++;
   }
-  return message;
+  return messageToUse;
 }
