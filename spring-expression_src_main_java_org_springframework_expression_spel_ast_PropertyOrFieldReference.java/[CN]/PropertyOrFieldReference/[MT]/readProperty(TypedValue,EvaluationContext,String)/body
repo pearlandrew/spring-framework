@@ -6,27 +6,27 @@
   PropertyAccessor accessorToUse=this.cachedReadAccessor;
   if (accessorToUse != null) {
     try {
-      return accessorToUse.read(eContext,contextObject.getValue(),name);
+      return accessorToUse.read(evalContext,contextObject.getValue(),name);
     }
- catch (    AccessException ae) {
+ catch (    AccessException ex) {
       this.cachedReadAccessor=null;
     }
   }
-  List<PropertyAccessor> accessorsToTry=getPropertyAccessorsToTry(contextObject.getValue(),eContext.getPropertyAccessors());
+  List<PropertyAccessor> accessorsToTry=getPropertyAccessorsToTry(contextObject.getValue(),evalContext.getPropertyAccessors());
   if (accessorsToTry != null) {
     try {
       for (      PropertyAccessor accessor : accessorsToTry) {
-        if (accessor.canRead(eContext,contextObject.getValue(),name)) {
+        if (accessor.canRead(evalContext,contextObject.getValue(),name)) {
           if (accessor instanceof ReflectivePropertyAccessor) {
-            accessor=((ReflectivePropertyAccessor)accessor).createOptimalAccessor(eContext,contextObject.getValue(),name);
+            accessor=((ReflectivePropertyAccessor)accessor).createOptimalAccessor(evalContext,contextObject.getValue(),name);
           }
           this.cachedReadAccessor=accessor;
-          return accessor.read(eContext,contextObject.getValue(),name);
+          return accessor.read(evalContext,contextObject.getValue(),name);
         }
       }
     }
- catch (    AccessException ae) {
-      throw new SpelEvaluationException(ae,SpelMessage.EXCEPTION_DURING_PROPERTY_READ,name,ae.getMessage());
+ catch (    AccessException ex) {
+      throw new SpelEvaluationException(ex,SpelMessage.EXCEPTION_DURING_PROPERTY_READ,name,ex.getMessage());
     }
   }
   if (contextObject.getValue() == null) {

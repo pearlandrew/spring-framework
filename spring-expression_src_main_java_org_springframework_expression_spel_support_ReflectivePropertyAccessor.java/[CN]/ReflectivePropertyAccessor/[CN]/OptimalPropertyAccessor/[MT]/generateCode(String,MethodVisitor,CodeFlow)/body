@@ -1,17 +1,17 @@
 {
   boolean isStatic=Modifier.isStatic(this.member.getModifiers());
-  String descriptor=codeflow.lastDescriptor();
+  String descriptor=cf.lastDescriptor();
   String memberDeclaringClassSlashedDescriptor=this.member.getDeclaringClass().getName().replace('.','/');
   if (!isStatic) {
     if (descriptor == null) {
-      codeflow.loadTarget(mv);
+      cf.loadTarget(mv);
     }
     if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
       mv.visitTypeInsn(CHECKCAST,memberDeclaringClassSlashedDescriptor);
     }
   }
   if (this.member instanceof Field) {
-    mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD,memberDeclaringClassSlashedDescriptor,this.member.getName(),CodeFlow.toJVMDescriptor(((Field)this.member).getType()));
+    mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD,memberDeclaringClassSlashedDescriptor,this.member.getName(),CodeFlow.toJvmDescriptor(((Field)this.member).getType()));
   }
  else {
     mv.visitMethodInsn(isStatic ? INVOKESTATIC : INVOKEVIRTUAL,memberDeclaringClassSlashedDescriptor,this.member.getName(),CodeFlow.createSignatureDescriptor((Method)this.member),false);

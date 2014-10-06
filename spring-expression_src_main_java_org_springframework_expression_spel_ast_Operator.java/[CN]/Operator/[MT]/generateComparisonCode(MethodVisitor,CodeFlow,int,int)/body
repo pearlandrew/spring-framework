@@ -1,17 +1,17 @@
 {
-  String leftDesc=getLeftOperand().getExitDescriptor();
-  String rightDesc=getRightOperand().getExitDescriptor();
+  String leftDesc=getLeftOperand().exitTypeDescriptor;
+  String rightDesc=getRightOperand().exitTypeDescriptor;
   boolean unboxLeft=!CodeFlow.isPrimitive(leftDesc);
   boolean unboxRight=!CodeFlow.isPrimitive(rightDesc);
-  DescriptorComparison dc=DescriptorComparison.checkNumericCompatibility(leftDesc,rightDesc,leftActualDescriptor,rightActualDescriptor);
+  DescriptorComparison dc=DescriptorComparison.checkNumericCompatibility(leftDesc,rightDesc,this.leftActualDescriptor,this.rightActualDescriptor);
   char targetType=dc.compatibleType;
-  getLeftOperand().generateCode(mv,codeflow);
+  getLeftOperand().generateCode(mv,cf);
   if (unboxLeft) {
     CodeFlow.insertUnboxInsns(mv,targetType,leftDesc);
   }
-  codeflow.enterCompilationScope();
-  getRightOperand().generateCode(mv,codeflow);
-  codeflow.exitCompilationScope();
+  cf.enterCompilationScope();
+  getRightOperand().generateCode(mv,cf);
+  cf.exitCompilationScope();
   if (unboxRight) {
     CodeFlow.insertUnboxInsns(mv,targetType,rightDesc);
   }
@@ -19,18 +19,18 @@
   Label endOfIf=new Label();
   if (targetType == 'D') {
     mv.visitInsn(DCMPG);
-    mv.visitJumpInsn(compareInstruction1,elseTarget);
+    mv.visitJumpInsn(compInstruction1,elseTarget);
   }
  else   if (targetType == 'F') {
     mv.visitInsn(FCMPG);
-    mv.visitJumpInsn(compareInstruction1,elseTarget);
+    mv.visitJumpInsn(compInstruction1,elseTarget);
   }
  else   if (targetType == 'J') {
     mv.visitInsn(LCMP);
-    mv.visitJumpInsn(compareInstruction1,elseTarget);
+    mv.visitJumpInsn(compInstruction1,elseTarget);
   }
  else   if (targetType == 'I') {
-    mv.visitJumpInsn(compareInstruction2,elseTarget);
+    mv.visitJumpInsn(compInstruction2,elseTarget);
   }
  else {
     throw new IllegalStateException("Unexpected descriptor " + leftDesc);
@@ -40,5 +40,5 @@
   mv.visitLabel(elseTarget);
   mv.visitInsn(ICONST_0);
   mv.visitLabel(endOfIf);
-  codeflow.pushDescriptor("Z");
+  cf.pushDescriptor("Z");
 }

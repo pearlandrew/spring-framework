@@ -12,22 +12,22 @@
     try {
       return executorToUse.execute(state.getEvaluationContext(),arguments);
     }
- catch (    AccessException ae) {
-      if (ae.getCause() instanceof InvocationTargetException) {
-        Throwable rootCause=ae.getCause().getCause();
+ catch (    AccessException ex) {
+      if (ex.getCause() instanceof InvocationTargetException) {
+        Throwable rootCause=ex.getCause().getCause();
         if (rootCause instanceof RuntimeException) {
           throw (RuntimeException)rootCause;
         }
  else {
-          String typename=(String)this.children[0].getValueInternal(state).getValue();
-          throw new SpelEvaluationException(getStartPosition(),rootCause,SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM,typename,FormatHelper.formatMethodForMessage("",argumentTypes));
+          String typeName=(String)this.children[0].getValueInternal(state).getValue();
+          throw new SpelEvaluationException(getStartPosition(),rootCause,SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM,typeName,FormatHelper.formatMethodForMessage("",argumentTypes));
         }
       }
       this.cachedExecutor=null;
     }
   }
-  String typename=(String)this.children[0].getValueInternal(state).getValue();
-  executorToUse=findExecutorForConstructor(typename,argumentTypes,state);
+  String typeName=(String)this.children[0].getValueInternal(state).getValue();
+  executorToUse=findExecutorForConstructor(typeName,argumentTypes,state);
   try {
     this.cachedExecutor=executorToUse;
     if (this.cachedExecutor instanceof ReflectiveConstructorExecutor) {
@@ -35,7 +35,7 @@
     }
     return executorToUse.execute(state.getEvaluationContext(),arguments);
   }
- catch (  AccessException ae) {
-    throw new SpelEvaluationException(getStartPosition(),ae,SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM,typename,FormatHelper.formatMethodForMessage("",argumentTypes));
+ catch (  AccessException ex) {
+    throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM,typeName,FormatHelper.formatMethodForMessage("",argumentTypes));
   }
 }

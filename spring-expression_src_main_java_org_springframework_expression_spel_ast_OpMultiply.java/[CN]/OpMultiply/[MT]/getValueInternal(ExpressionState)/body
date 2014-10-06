@@ -9,30 +9,40 @@
       BigDecimal rightBigDecimal=NumberUtils.convertNumberToTargetClass(rightNumber,BigDecimal.class);
       return new TypedValue(leftBigDecimal.multiply(rightBigDecimal));
     }
-    if (leftNumber instanceof Double || rightNumber instanceof Double) {
-      if (leftNumber instanceof Double && rightNumber instanceof Double) {
+ else     if (leftNumber instanceof Double || rightNumber instanceof Double) {
+      if (leftNumber.getClass() == rightNumber.getClass()) {
         this.exitTypeDescriptor="D";
       }
       return new TypedValue(leftNumber.doubleValue() * rightNumber.doubleValue());
     }
-    if (leftNumber instanceof Float || rightNumber instanceof Float) {
-      if (leftNumber instanceof Float && rightNumber instanceof Float) {
+ else     if (leftNumber instanceof Float || rightNumber instanceof Float) {
+      if (leftNumber.getClass() == rightNumber.getClass()) {
         this.exitTypeDescriptor="F";
       }
       return new TypedValue(leftNumber.floatValue() * rightNumber.floatValue());
     }
-    if (leftNumber instanceof Long || rightNumber instanceof Long) {
-      if (leftNumber instanceof Long && rightNumber instanceof Long) {
+ else     if (leftNumber instanceof BigInteger || rightNumber instanceof BigInteger) {
+      BigInteger leftBigInteger=NumberUtils.convertNumberToTargetClass(leftNumber,BigInteger.class);
+      BigInteger rightBigInteger=NumberUtils.convertNumberToTargetClass(rightNumber,BigInteger.class);
+      return new TypedValue(leftBigInteger.multiply(rightBigInteger));
+    }
+ else     if (leftNumber instanceof Long || rightNumber instanceof Long) {
+      if (leftNumber.getClass() == rightNumber.getClass()) {
         this.exitTypeDescriptor="J";
       }
       return new TypedValue(leftNumber.longValue() * rightNumber.longValue());
     }
-    if (leftNumber instanceof Integer && rightNumber instanceof Integer) {
-      this.exitTypeDescriptor="I";
+ else     if (CodeFlow.isIntegerForNumericOp(leftNumber) || CodeFlow.isIntegerForNumericOp(rightNumber)) {
+      if (leftNumber instanceof Integer && rightNumber instanceof Integer) {
+        this.exitTypeDescriptor="I";
+      }
+      return new TypedValue(leftNumber.intValue() * rightNumber.intValue());
     }
-    return new TypedValue(leftNumber.intValue() * rightNumber.intValue());
+ else {
+      return new TypedValue(leftNumber.doubleValue() * rightNumber.doubleValue());
+    }
   }
- else   if (leftOperand instanceof String && rightOperand instanceof Integer) {
+  if (leftOperand instanceof String && rightOperand instanceof Integer) {
     int repeats=(Integer)rightOperand;
     StringBuilder result=new StringBuilder();
     for (int i=0; i < repeats; i++) {

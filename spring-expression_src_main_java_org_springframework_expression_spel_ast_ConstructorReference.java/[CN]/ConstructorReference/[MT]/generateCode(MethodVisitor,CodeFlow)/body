@@ -5,15 +5,15 @@
   String[] paramDescriptors=CodeFlow.toParamDescriptors(constructor);
   mv.visitTypeInsn(NEW,classSlashedDescriptor);
   mv.visitInsn(DUP);
-  for (int c=1; c < children.length; c++) {
-    SpelNodeImpl child=children[c];
-    codeflow.enterCompilationScope();
-    child.generateCode(mv,codeflow);
-    if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && (paramDescriptors[c - 1].charAt(0) == 'L')) {
-      CodeFlow.insertBoxIfNecessary(mv,codeflow.lastDescriptor().charAt(0));
+  for (int c=1; c < this.children.length; c++) {
+    SpelNodeImpl child=this.children[c];
+    cf.enterCompilationScope();
+    child.generateCode(mv,cf);
+    if (CodeFlow.isPrimitive(cf.lastDescriptor()) && paramDescriptors[c - 1].charAt(0) == 'L') {
+      CodeFlow.insertBoxIfNecessary(mv,cf.lastDescriptor().charAt(0));
     }
-    codeflow.exitCompilationScope();
+    cf.exitCompilationScope();
   }
   mv.visitMethodInsn(INVOKESPECIAL,classSlashedDescriptor,"<init>",CodeFlow.createSignatureDescriptor(constructor),false);
-  codeflow.pushDescriptor(exitTypeDescriptor);
+  cf.pushDescriptor(this.exitTypeDescriptor);
 }

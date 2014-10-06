@@ -3,16 +3,16 @@
   String[] paramDescriptors=CodeFlow.toParamDescriptors(this.method);
   for (int c=0; c < this.children.length; c++) {
     SpelNodeImpl child=this.children[c];
-    codeflow.enterCompilationScope();
-    child.generateCode(mv,codeflow);
-    if (CodeFlow.isPrimitive(codeflow.lastDescriptor()) && paramDescriptors[c].charAt(0) == 'L') {
-      CodeFlow.insertBoxIfNecessary(mv,codeflow.lastDescriptor().charAt(0));
+    cf.enterCompilationScope();
+    child.generateCode(mv,cf);
+    if (CodeFlow.isPrimitive(cf.lastDescriptor()) && paramDescriptors[c].charAt(0) == 'L') {
+      CodeFlow.insertBoxIfNecessary(mv,cf.lastDescriptor().charAt(0));
     }
- else     if (!codeflow.lastDescriptor().equals(paramDescriptors[c])) {
+ else     if (!cf.lastDescriptor().equals(paramDescriptors[c])) {
       CodeFlow.insertCheckCast(mv,paramDescriptors[c]);
     }
-    codeflow.exitCompilationScope();
+    cf.exitCompilationScope();
   }
   mv.visitMethodInsn(INVOKESTATIC,methodDeclaringClassSlashedDescriptor,this.method.getName(),CodeFlow.createSignatureDescriptor(this.method),false);
-  codeflow.pushDescriptor(this.exitTypeDescriptor);
+  cf.pushDescriptor(this.exitTypeDescriptor);
 }

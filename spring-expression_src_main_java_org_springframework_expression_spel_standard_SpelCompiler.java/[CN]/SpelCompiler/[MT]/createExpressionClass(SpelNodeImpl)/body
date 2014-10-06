@@ -11,9 +11,9 @@
   mv.visitEnd();
   mv=cw.visitMethod(ACC_PUBLIC,"getValue","(Ljava/lang/Object;Lorg/springframework/expression/EvaluationContext;)Ljava/lang/Object;",null,new String[]{"org/springframework/expression/EvaluationException"});
   mv.visitCode();
-  CodeFlow codeflow=new CodeFlow();
+  CodeFlow cf=new CodeFlow();
   try {
-    expressionToCompile.generateCode(mv,codeflow);
+    expressionToCompile.generateCode(mv,cf);
   }
  catch (  IllegalStateException ex) {
     if (logger.isDebugEnabled()) {
@@ -21,8 +21,8 @@
     }
     return null;
   }
-  CodeFlow.insertBoxIfNecessary(mv,codeflow.lastDescriptor());
-  if ("V".equals(codeflow.lastDescriptor())) {
+  CodeFlow.insertBoxIfNecessary(mv,cf.lastDescriptor());
+  if ("V".equals(cf.lastDescriptor())) {
     mv.visitInsn(ACONST_NULL);
   }
   mv.visitInsn(ARETURN);
@@ -30,5 +30,5 @@
   mv.visitEnd();
   cw.visitEnd();
   byte[] data=cw.toByteArray();
-  return (Class<? extends CompiledExpression>)ccl.defineClass(clazzName.replaceAll("/","."),data);
+  return (Class<? extends CompiledExpression>)this.ccl.defineClass(clazzName.replaceAll("/","."),data);
 }

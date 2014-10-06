@@ -1,6 +1,6 @@
 {
-  String leftDesc=getLeftOperand().getExitDescriptor();
-  String rightDesc=getRightOperand().getExitDescriptor();
+  String leftDesc=getLeftOperand().exitTypeDescriptor;
+  String rightDesc=getRightOperand().exitTypeDescriptor;
   Label elseTarget=new Label();
   Label endOfIf=new Label();
   boolean leftPrim=CodeFlow.isPrimitive(leftDesc);
@@ -8,13 +8,13 @@
   DescriptorComparison dc=DescriptorComparison.checkNumericCompatibility(leftDesc,rightDesc,leftActualDescriptor,rightActualDescriptor);
   if (dc.areNumbers && dc.areCompatible) {
     char targetType=dc.compatibleType;
-    getLeftOperand().generateCode(mv,codeflow);
+    getLeftOperand().generateCode(mv,cf);
     if (!leftPrim) {
       CodeFlow.insertUnboxInsns(mv,targetType,leftDesc);
     }
-    codeflow.enterCompilationScope();
-    getRightOperand().generateCode(mv,codeflow);
-    codeflow.exitCompilationScope();
+    cf.enterCompilationScope();
+    getRightOperand().generateCode(mv,cf);
+    cf.exitCompilationScope();
     if (!rightPrim) {
       CodeFlow.insertUnboxInsns(mv,targetType,rightDesc);
     }
@@ -38,8 +38,8 @@
     }
   }
  else {
-    getLeftOperand().generateCode(mv,codeflow);
-    getRightOperand().generateCode(mv,codeflow);
+    getLeftOperand().generateCode(mv,cf);
+    getRightOperand().generateCode(mv,cf);
     mv.visitJumpInsn(IF_ACMPEQ,elseTarget);
   }
   mv.visitInsn(ICONST_1);
@@ -47,5 +47,5 @@
   mv.visitLabel(elseTarget);
   mv.visitInsn(ICONST_0);
   mv.visitLabel(endOfIf);
-  codeflow.pushDescriptor("Z");
+  cf.pushDescriptor("Z");
 }

@@ -4,25 +4,26 @@
   if (rightOp == null) {
     Object operandOne=leftOp.getValueInternal(state).getValue();
     if (operandOne instanceof Number) {
-      if (operandOne instanceof Double || operandOne instanceof Long || operandOne instanceof BigDecimal) {
-        if (operandOne instanceof Double || operandOne instanceof Long) {
-          this.exitTypeDescriptor=(operandOne instanceof Double) ? "D" : "J";
-        }
-        return new TypedValue(operandOne);
+      if (operandOne instanceof Double) {
+        this.exitTypeDescriptor="D";
       }
-      if (operandOne instanceof Float) {
+ else       if (operandOne instanceof Float) {
         this.exitTypeDescriptor="F";
-        return new TypedValue(((Number)operandOne).floatValue());
       }
-      this.exitTypeDescriptor="I";
-      return new TypedValue(((Number)operandOne).intValue());
+ else       if (operandOne instanceof Long) {
+        this.exitTypeDescriptor="J";
+      }
+ else       if (operandOne instanceof Integer) {
+        this.exitTypeDescriptor="I";
+      }
+      return new TypedValue(operandOne);
     }
     return state.operate(Operation.ADD,operandOne,null);
   }
-  final TypedValue operandOneValue=leftOp.getValueInternal(state);
-  final Object leftOperand=operandOneValue.getValue();
-  final TypedValue operandTwoValue=rightOp.getValueInternal(state);
-  final Object rightOperand=operandTwoValue.getValue();
+  TypedValue operandOneValue=leftOp.getValueInternal(state);
+  Object leftOperand=operandOneValue.getValue();
+  TypedValue operandTwoValue=rightOp.getValueInternal(state);
+  Object rightOperand=operandTwoValue.getValue();
   if (leftOperand instanceof Number && rightOperand instanceof Number) {
     Number leftNumber=(Number)leftOperand;
     Number rightNumber=(Number)rightOperand;
@@ -31,39 +32,47 @@
       BigDecimal rightBigDecimal=NumberUtils.convertNumberToTargetClass(rightNumber,BigDecimal.class);
       return new TypedValue(leftBigDecimal.add(rightBigDecimal));
     }
-    if (leftNumber instanceof Double || rightNumber instanceof Double) {
-      if (leftNumber instanceof Double && rightNumber instanceof Double) {
+ else     if (leftNumber instanceof Double || rightNumber instanceof Double) {
+      if (leftNumber.getClass() == rightNumber.getClass()) {
         this.exitTypeDescriptor="D";
       }
       return new TypedValue(leftNumber.doubleValue() + rightNumber.doubleValue());
     }
-    if (leftNumber instanceof Float || rightNumber instanceof Float) {
-      if (leftNumber instanceof Float && rightNumber instanceof Float) {
+ else     if (leftNumber instanceof Float || rightNumber instanceof Float) {
+      if (leftNumber.getClass() == rightNumber.getClass()) {
         this.exitTypeDescriptor="F";
       }
       return new TypedValue(leftNumber.floatValue() + rightNumber.floatValue());
     }
-    if (leftNumber instanceof Long || rightNumber instanceof Long) {
-      if (leftNumber instanceof Long && rightNumber instanceof Long) {
+ else     if (leftNumber instanceof BigInteger || rightNumber instanceof BigInteger) {
+      BigInteger leftBigInteger=NumberUtils.convertNumberToTargetClass(leftNumber,BigInteger.class);
+      BigInteger rightBigInteger=NumberUtils.convertNumberToTargetClass(rightNumber,BigInteger.class);
+      return new TypedValue(leftBigInteger.add(rightBigInteger));
+    }
+ else     if (leftNumber instanceof Long || rightNumber instanceof Long) {
+      if (leftNumber.getClass() == rightNumber.getClass()) {
         this.exitTypeDescriptor="J";
       }
       return new TypedValue(leftNumber.longValue() + rightNumber.longValue());
     }
-    this.exitTypeDescriptor="I";
-    return new TypedValue(leftNumber.intValue() + rightNumber.intValue());
+ else     if (CodeFlow.isIntegerForNumericOp(leftNumber) || CodeFlow.isIntegerForNumericOp(rightNumber)) {
+      if (leftNumber instanceof Integer && rightNumber instanceof Integer) {
+        this.exitTypeDescriptor="I";
+      }
+      return new TypedValue(leftNumber.intValue() + rightNumber.intValue());
+    }
+ else {
+      return new TypedValue(leftNumber.doubleValue() + rightNumber.doubleValue());
+    }
   }
   if (leftOperand instanceof String && rightOperand instanceof String) {
-    return new TypedValue(new StringBuilder((String)leftOperand).append((String)rightOperand).toString());
+    return new TypedValue((String)leftOperand + rightOperand);
   }
   if (leftOperand instanceof String) {
-    StringBuilder result=new StringBuilder((String)leftOperand);
-    result.append((rightOperand == null ? "null" : convertTypedValueToString(operandTwoValue,state)));
-    return new TypedValue(result.toString());
+    return new TypedValue(leftOperand + (rightOperand == null ? "null" : convertTypedValueToString(operandTwoValue,state)));
   }
   if (rightOperand instanceof String) {
-    StringBuilder result=new StringBuilder((leftOperand == null ? "null" : convertTypedValueToString(operandOneValue,state)));
-    result.append((String)rightOperand);
-    return new TypedValue(result.toString());
+    return new TypedValue((leftOperand == null ? "null" : convertTypedValueToString(operandOneValue,state)) + rightOperand);
   }
   return state.operate(Operation.ADD,leftOperand,rightOperand);
 }

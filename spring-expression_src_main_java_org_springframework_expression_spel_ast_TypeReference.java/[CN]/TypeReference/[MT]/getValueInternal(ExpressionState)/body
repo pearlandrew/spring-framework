@@ -1,16 +1,15 @@
 {
-  String typename=(String)this.children[0].getValueInternal(state).getValue();
-  if (typename.indexOf('.') == -1 && Character.isLowerCase(typename.charAt(0))) {
-    TypeCode tc=TypeCode.valueOf(typename.toUpperCase());
+  String typeName=(String)this.children[0].getValueInternal(state).getValue();
+  if (!typeName.contains(".") && Character.isLowerCase(typeName.charAt(0))) {
+    TypeCode tc=TypeCode.valueOf(typeName.toUpperCase());
     if (tc != TypeCode.OBJECT) {
-      Class<?> clazz=tc.getType();
-      clazz=makeArrayIfNecessary(clazz);
+      Class<?> clazz=makeArrayIfNecessary(tc.getType());
       this.exitTypeDescriptor="Ljava/lang/Class";
       this.type=clazz;
       return new TypedValue(clazz);
     }
   }
-  Class<?> clazz=state.findType(typename);
+  Class<?> clazz=state.findType(typeName);
   clazz=makeArrayIfNecessary(clazz);
   this.exitTypeDescriptor="Ljava/lang/Class";
   this.type=clazz;

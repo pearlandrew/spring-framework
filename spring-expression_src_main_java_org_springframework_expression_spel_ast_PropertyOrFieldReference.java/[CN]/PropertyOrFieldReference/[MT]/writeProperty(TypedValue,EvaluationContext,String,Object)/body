@@ -5,26 +5,26 @@
   PropertyAccessor accessorToUse=this.cachedWriteAccessor;
   if (accessorToUse != null) {
     try {
-      accessorToUse.write(eContext,contextObject.getValue(),name,newValue);
+      accessorToUse.write(evalContext,contextObject.getValue(),name,newValue);
       return;
     }
- catch (    AccessException ae) {
+ catch (    AccessException ex) {
       this.cachedWriteAccessor=null;
     }
   }
-  List<PropertyAccessor> accessorsToTry=getPropertyAccessorsToTry(contextObject.getValue(),eContext.getPropertyAccessors());
+  List<PropertyAccessor> accessorsToTry=getPropertyAccessorsToTry(contextObject.getValue(),evalContext.getPropertyAccessors());
   if (accessorsToTry != null) {
     try {
       for (      PropertyAccessor accessor : accessorsToTry) {
-        if (accessor.canWrite(eContext,contextObject.getValue(),name)) {
+        if (accessor.canWrite(evalContext,contextObject.getValue(),name)) {
           this.cachedWriteAccessor=accessor;
-          accessor.write(eContext,contextObject.getValue(),name,newValue);
+          accessor.write(evalContext,contextObject.getValue(),name,newValue);
           return;
         }
       }
     }
- catch (    AccessException ae) {
-      throw new SpelEvaluationException(getStartPosition(),ae,SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE,name,ae.getMessage());
+ catch (    AccessException ex) {
+      throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE,name,ex.getMessage());
     }
   }
   if (contextObject.getValue() == null) {
