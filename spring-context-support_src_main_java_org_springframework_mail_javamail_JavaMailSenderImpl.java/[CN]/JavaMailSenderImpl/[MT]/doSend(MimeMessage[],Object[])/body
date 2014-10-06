@@ -1,30 +1,31 @@
 {
-  String username=getUsername();
-  String password=getPassword();
-  if ("".equals(username)) {
-    username=null;
-    if ("".equals(password)) {
-      password=null;
-    }
-  }
   Map<Object,Exception> failedMessages=new LinkedHashMap<Object,Exception>();
-  Transport transport;
-  try {
-    transport=getTransport(getSession());
-    transport.connect(getHost(),getPort(),username,password);
-  }
- catch (  AuthenticationFailedException ex) {
-    throw new MailAuthenticationException(ex);
-  }
-catch (  MessagingException ex) {
-    for (int i=0; i < mimeMessages.length; i++) {
-      Object original=(originalMessages != null ? originalMessages[i] : mimeMessages[i]);
-      failedMessages.put(original,ex);
-    }
-    throw new MailSendException("Mail server connection failed",ex,failedMessages);
-  }
+  Transport transport=null;
   try {
     for (int i=0; i < mimeMessages.length; i++) {
+      if (transport == null || !transport.isConnected()) {
+        if (transport != null) {
+          try {
+            transport.close();
+          }
+ catch (          Exception ex) {
+          }
+          transport=null;
+        }
+        try {
+          transport=connectTransport();
+        }
+ catch (        AuthenticationFailedException ex) {
+          throw new MailAuthenticationException(ex);
+        }
+catch (        Exception ex) {
+          for (int j=i; j < mimeMessages.length; j++) {
+            Object original=(originalMessages != null ? originalMessages[j] : mimeMessages[j]);
+            failedMessages.put(original,ex);
+          }
+          throw new MailSendException("Mail server connection failed",ex,failedMessages);
+        }
+      }
       MimeMessage mimeMessage=mimeMessages[i];
       try {
         if (mimeMessage.getSentDate() == null) {
@@ -37,7 +38,7 @@ catch (  MessagingException ex) {
         }
         transport.sendMessage(mimeMessage,mimeMessage.getAllRecipients());
       }
- catch (      MessagingException ex) {
+ catch (      Exception ex) {
         Object original=(originalMessages != null ? originalMessages[i] : mimeMessage);
         failedMessages.put(original,ex);
       }
@@ -45,9 +46,11 @@ catch (  MessagingException ex) {
   }
   finally {
     try {
-      transport.close();
+      if (transport != null) {
+        transport.close();
+      }
     }
- catch (    MessagingException ex) {
+ catch (    Exception ex) {
       if (!failedMessages.isEmpty()) {
         throw new MailSendException("Failed to close server connection after message failures",ex,failedMessages);
       }
