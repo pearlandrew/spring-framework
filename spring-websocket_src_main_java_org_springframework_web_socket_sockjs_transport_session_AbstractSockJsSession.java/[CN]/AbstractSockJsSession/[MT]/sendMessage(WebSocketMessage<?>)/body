@@ -1,5 +1,7 @@
 {
-  Assert.isTrue(!isClosed(),"Cannot send a message when session is closed");
-  Assert.isInstanceOf(TextMessage.class,message,"Expected text message: " + message);
+  Assert.state(!isClosed(),"Cannot send a message when session is closed");
+  if (!(message instanceof TextMessage)) {
+    throw new IllegalArgumentException("Expected text message: " + message);
+  }
   sendMessageInternal(((TextMessage)message).getPayload());
 }
