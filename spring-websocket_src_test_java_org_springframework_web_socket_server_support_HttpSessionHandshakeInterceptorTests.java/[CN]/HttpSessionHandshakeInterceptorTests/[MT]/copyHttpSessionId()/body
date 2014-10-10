@@ -1,11 +1,10 @@
 {
   Map<String,Object> attributes=new HashMap<String,Object>();
   WebSocketHandler wsHandler=Mockito.mock(WebSocketHandler.class);
-  this.servletRequest.getSession().setAttribute("foo","bar");
-  this.servletRequest.getSession().setAttribute("bar","baz");
+  this.servletRequest.setSession(new MockHttpSession(null,"foo"));
   HttpSessionHandshakeInterceptor interceptor=new HttpSessionHandshakeInterceptor();
+  interceptor.setCopyHttpSessionId(true);
   interceptor.beforeHandshake(this.request,this.response,wsHandler,attributes);
-  assertEquals(2,attributes.size());
-  assertEquals("bar",attributes.get("foo"));
-  assertEquals("baz",attributes.get("bar"));
+  assertEquals(1,attributes.size());
+  assertEquals("foo",attributes.get(HttpSessionHandshakeInterceptor.HTTP_SESSION_ID_ATTR_NAME));
 }
