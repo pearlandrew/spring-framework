@@ -1,9 +1,16 @@
 {
   List<Message<byte[]>> messages;
   try {
-    Assert.isInstanceOf(TextMessage.class,webSocketMessage);
-    TextMessage textMessage=(TextMessage)webSocketMessage;
-    ByteBuffer byteBuffer=ByteBuffer.wrap(textMessage.asBytes());
+    ByteBuffer byteBuffer;
+    if (webSocketMessage instanceof TextMessage) {
+      byteBuffer=ByteBuffer.wrap(((TextMessage)webSocketMessage).asBytes());
+    }
+ else     if (webSocketMessage instanceof BinaryMessage) {
+      byteBuffer=((BinaryMessage)webSocketMessage).getPayload();
+    }
+ else {
+      throw new IllegalArgumentException("Unexpected WebSocket message type: " + webSocketMessage);
+    }
     BufferingStompDecoder decoder=this.decoders.get(session.getId());
     if (decoder == null) {
       throw new IllegalStateException("No decoder for session id '" + session.getId() + "'");
