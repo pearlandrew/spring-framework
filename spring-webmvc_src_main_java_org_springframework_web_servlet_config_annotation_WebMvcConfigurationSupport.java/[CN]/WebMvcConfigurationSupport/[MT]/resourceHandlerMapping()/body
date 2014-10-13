@@ -2,8 +2,13 @@
   ResourceHandlerRegistry registry=new ResourceHandlerRegistry(this.applicationContext,this.servletContext);
   addResourceHandlers(registry);
   AbstractHandlerMapping handlerMapping=registry.getHandlerMapping();
-  handlerMapping=(handlerMapping != null ? handlerMapping : new EmptyHandlerMapping());
-  handlerMapping.setPathMatcher(mvcPathMatcher());
-  handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
+  if (handlerMapping != null) {
+    handlerMapping.setPathMatcher(mvcPathMatcher());
+    handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
+    handlerMapping.setInterceptors(new HandlerInterceptor[]{new ResourceUrlProviderExposingInterceptor(mvcResourceUrlProvider())});
+  }
+ else {
+    handlerMapping=new EmptyHandlerMapping();
+  }
   return handlerMapping;
 }
