@@ -14,6 +14,9 @@
   assertTrue(handshakeHandler instanceof TestHandshakeHandler);
   List<HandshakeInterceptor> interceptors=wsHttpRequestHandler.getHandshakeInterceptors();
   assertThat(interceptors,contains(instanceOf(FooTestInterceptor.class),instanceOf(BarTestInterceptor.class)));
+  WebSocketSession session=new TestWebSocketSession("id");
+  wsHttpRequestHandler.getWebSocketHandler().afterConnectionEstablished(session);
+  assertEquals(true,session.getAttributes().get("decorated"));
   WebSocketHandler wsHandler=unwrapWebSocketHandler(wsHttpRequestHandler.getWebSocketHandler());
   assertNotNull(wsHandler);
   assertThat(wsHandler,Matchers.instanceOf(SubProtocolWebSocketHandler.class));
