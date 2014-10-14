@@ -1,14 +1,9 @@
 {
-  Map<String,VersionStrategy> versionStrategyMap=new HashMap<>();
-  versionStrategyMap.put("/**",new ContentVersionStrategy());
-  VersionResourceResolver versionResolver=new VersionResourceResolver();
-  versionResolver.setStrategyMap(versionStrategyMap);
-  List<ResourceResolver> resolvers=new ArrayList<ResourceResolver>();
-  resolvers.add(versionResolver);
-  resolvers.add(new PathResourceResolver());
+  VersionResourceResolver resolver=new VersionResourceResolver();
+  resolver.setStrategyMap(Collections.singletonMap("/**",new ContentVersionStrategy()));
+  List<ResourceResolver> resolvers=Arrays.asList(resolver,new PathResourceResolver());
+  List<ResourceTransformer> transformers=Arrays.asList(new CssLinkResourceTransformer());
   ResourceResolverChain resolverChain=new DefaultResourceResolverChain(resolvers);
-  List<ResourceTransformer> transformers=new ArrayList<>();
-  transformers.add(new CssLinkResourceTransformer());
   this.transformerChain=new DefaultResourceTransformerChain(resolverChain,transformers);
   this.request=new MockHttpServletRequest();
 }

@@ -1,14 +1,11 @@
 {
-  MockHttpServletRequest request=new MockHttpServletRequest();
-  request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,"/foo.css");
-  request.setMethod("GET");
-  MockHttpServletResponse response=new MockHttpServletResponse();
-  handler.handleRequest(request,response);
-  assertEquals("text/css",response.getContentType());
-  assertEquals(17,response.getContentLength());
-  assertTrue(Long.valueOf(response.getHeader("Expires")) >= System.currentTimeMillis() - 1000 + (3600 * 1000));
-  assertEquals("max-age=3600, must-revalidate",response.getHeader("Cache-Control"));
-  assertTrue(response.containsHeader("Last-Modified"));
-  assertEquals(Long.valueOf(response.getHeader("Last-Modified")).longValue(),new ClassPathResource("test/foo.css",getClass()).getFile().lastModified());
-  assertEquals("h1 { color:red; }",response.getContentAsString());
+  this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,"/foo.css");
+  this.handler.handleRequest(this.request,this.response);
+  assertEquals("text/css",this.response.getContentType());
+  assertEquals(17,this.response.getContentLength());
+  assertTrue(headerAsLong("Expires") >= System.currentTimeMillis() - 1000 + (3600 * 1000));
+  assertEquals("max-age=3600, must-revalidate",this.response.getHeader("Cache-Control"));
+  assertTrue(this.response.containsHeader("Last-Modified"));
+  assertEquals(headerAsLong("Last-Modified"),resourceLastModified("test/foo.css"));
+  assertEquals("h1 { color:red; }",this.response.getContentAsString());
 }

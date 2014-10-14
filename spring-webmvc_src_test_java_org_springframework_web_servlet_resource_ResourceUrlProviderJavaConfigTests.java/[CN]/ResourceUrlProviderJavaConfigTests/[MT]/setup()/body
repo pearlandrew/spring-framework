@@ -1,10 +1,12 @@
 {
   this.filterChain=new MockFilterChain(this.servlet,new ResourceUrlEncodingFilter());
-  AnnotationConfigWebApplicationContext ctx=new AnnotationConfigWebApplicationContext();
-  ctx.setServletContext(new MockServletContext());
-  ctx.register(WebConfig.class);
-  ctx.refresh();
-  ResourceUrlProvider urlProvider=ctx.getBean(ResourceUrlProvider.class);
+  AnnotationConfigWebApplicationContext context=new AnnotationConfigWebApplicationContext();
+  context.setServletContext(new MockServletContext());
+  context.register(WebConfig.class);
+  context.refresh();
   this.request=new MockHttpServletRequest("GET","/");
-  request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR,urlProvider);
+  this.request.setContextPath("/myapp");
+  this.response=new MockHttpServletResponse();
+  Object urlProvider=context.getBean(ResourceUrlProvider.class);
+  this.request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR,urlProvider);
 }
