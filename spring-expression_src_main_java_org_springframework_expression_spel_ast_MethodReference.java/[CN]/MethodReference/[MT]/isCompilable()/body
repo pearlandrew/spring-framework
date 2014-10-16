@@ -9,14 +9,12 @@
     }
   }
   ReflectiveMethodExecutor executor=(ReflectiveMethodExecutor)executorToCheck.get();
-  Method method=executor.getMethod();
-  if (!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
-    return false;
-  }
-  if (method.isVarArgs()) {
-    return false;
-  }
   if (executor.didArgumentConversionOccur()) {
+    return false;
+  }
+  Method method=executor.getMethod();
+  Class<?> clazz=method.getDeclaringClass();
+  if (!Modifier.isPublic(clazz.getModifiers()) && executor.getPublicDeclaringClass() == null) {
     return false;
   }
   return true;

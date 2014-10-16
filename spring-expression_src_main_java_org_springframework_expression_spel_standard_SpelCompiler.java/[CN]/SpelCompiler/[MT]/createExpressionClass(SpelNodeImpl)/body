@@ -11,7 +11,7 @@
   mv.visitEnd();
   mv=cw.visitMethod(ACC_PUBLIC,"getValue","(Ljava/lang/Object;Lorg/springframework/expression/EvaluationContext;)Ljava/lang/Object;",null,new String[]{"org/springframework/expression/EvaluationException"});
   mv.visitCode();
-  CodeFlow cf=new CodeFlow();
+  CodeFlow cf=new CodeFlow(clazzName,cw);
   try {
     expressionToCompile.generateCode(mv,cf);
   }
@@ -29,6 +29,7 @@
   mv.visitMaxs(0,0);
   mv.visitEnd();
   cw.visitEnd();
+  cf.finish();
   byte[] data=cw.toByteArray();
   return (Class<? extends CompiledExpression>)this.ccl.defineClass(clazzName.replaceAll("/","."),data);
 }

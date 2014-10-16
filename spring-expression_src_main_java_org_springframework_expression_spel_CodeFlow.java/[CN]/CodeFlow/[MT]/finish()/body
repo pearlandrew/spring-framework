@@ -1,0 +1,18 @@
+{
+  if (fieldAdders != null) {
+    for (    FieldAdder fieldAdder : fieldAdders) {
+      fieldAdder.generateField(cw,this);
+    }
+  }
+  if (clinitAdders != null) {
+    MethodVisitor mv=cw.visitMethod(ACC_PUBLIC | ACC_STATIC,"<clinit>","()V",null,null);
+    mv.visitCode();
+    nextFreeVariableId=0;
+    for (    ClinitAdder clinitAdder : clinitAdders) {
+      clinitAdder.generateCode(mv,this);
+    }
+    mv.visitInsn(RETURN);
+    mv.visitMaxs(0,0);
+    mv.visitEnd();
+  }
+}

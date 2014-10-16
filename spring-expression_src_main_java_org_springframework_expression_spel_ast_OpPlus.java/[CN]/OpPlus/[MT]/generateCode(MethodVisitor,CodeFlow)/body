@@ -1,24 +1,33 @@
 {
-  getLeftOperand().generateCode(mv,cf);
-  String leftDesc=getLeftOperand().exitTypeDescriptor;
-  if (!CodeFlow.isPrimitive(leftDesc)) {
-    CodeFlow.insertUnboxInsns(mv,this.exitTypeDescriptor.charAt(0),leftDesc);
+  if (this.exitTypeDescriptor == "Ljava/lang/String") {
+    mv.visitTypeInsn(NEW,"java/lang/StringBuilder");
+    mv.visitInsn(DUP);
+    mv.visitMethodInsn(INVOKESPECIAL,"java/lang/StringBuilder","<init>","()V",false);
+    walk(mv,cf,getLeftOperand());
+    walk(mv,cf,getRightOperand());
+    mv.visitMethodInsn(INVOKEVIRTUAL,"java/lang/StringBuilder","toString","()Ljava/lang/String;",false);
   }
-  if (this.children.length > 1) {
-    cf.enterCompilationScope();
-    getRightOperand().generateCode(mv,cf);
-    String rightDesc=getRightOperand().exitTypeDescriptor;
-    cf.exitCompilationScope();
-    if (!CodeFlow.isPrimitive(rightDesc)) {
-      CodeFlow.insertUnboxInsns(mv,this.exitTypeDescriptor.charAt(0),rightDesc);
+ else {
+    getLeftOperand().generateCode(mv,cf);
+    String leftDesc=getLeftOperand().exitTypeDescriptor;
+    if (!CodeFlow.isPrimitive(leftDesc)) {
+      CodeFlow.insertUnboxInsns(mv,this.exitTypeDescriptor.charAt(0),leftDesc);
     }
+    if (this.children.length > 1) {
+      cf.enterCompilationScope();
+      getRightOperand().generateCode(mv,cf);
+      String rightDesc=getRightOperand().exitTypeDescriptor;
+      cf.exitCompilationScope();
+      if (!CodeFlow.isPrimitive(rightDesc)) {
+        CodeFlow.insertUnboxInsns(mv,this.exitTypeDescriptor.charAt(0),rightDesc);
+      }
 switch (this.exitTypeDescriptor.charAt(0)) {
 case 'I':
-      mv.visitInsn(IADD);
-    break;
+        mv.visitInsn(IADD);
+      break;
 case 'J':
-  mv.visitInsn(LADD);
-break;
+    mv.visitInsn(LADD);
+  break;
 case 'F':
 mv.visitInsn(FADD);
 break;
@@ -27,6 +36,7 @@ mv.visitInsn(DADD);
 break;
 default :
 throw new IllegalStateException("Unrecognized exit type descriptor: '" + this.exitTypeDescriptor + "'");
+}
 }
 }
 cf.pushDescriptor(this.exitTypeDescriptor);

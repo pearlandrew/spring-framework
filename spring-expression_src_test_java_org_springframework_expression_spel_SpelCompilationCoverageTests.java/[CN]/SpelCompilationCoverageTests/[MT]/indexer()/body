@@ -61,7 +61,7 @@
   assertEquals("bbb",expression.getValue(strings));
   assertCanCompile(expression);
   assertEquals("bbb",expression.getValue(strings));
-  assertEquals("Ljava/lang/String",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
   List<Integer> ints=new ArrayList<Integer>();
   ints.add(123);
   ints.add(456);
@@ -70,7 +70,7 @@
   assertEquals(789,expression.getValue(ints));
   assertCanCompile(expression);
   assertEquals(789,expression.getValue(ints));
-  assertEquals("Ljava/lang/Integer",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
   Map<String,Integer> map1=new HashMap<String,Integer>();
   map1.put("aaa",111);
   map1.put("bbb",222);
@@ -79,7 +79,7 @@
   assertEquals(111,expression.getValue(map1));
   assertCanCompile(expression);
   assertEquals(111,expression.getValue(map1));
-  assertEquals("Ljava/lang/Integer",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
   TestClass6 tc=new TestClass6();
   expression=parser.parseExpression("['orange']");
   assertEquals("value1",expression.getValue(tc));
@@ -103,7 +103,12 @@
   assertEquals("d e f",stringify(expression.getValue(listOfStringArrays)));
   assertCanCompile(expression);
   assertEquals("d e f",stringify(expression.getValue(listOfStringArrays)));
-  assertEquals("[Ljava/lang/String",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
+  expression=parser.parseExpression("[1][0]");
+  assertEquals("d",stringify(expression.getValue(listOfStringArrays)));
+  assertCanCompile(expression);
+  assertEquals("d",stringify(expression.getValue(listOfStringArrays)));
+  assertEquals("Ljava/lang/String",getAst().getExitDescriptor());
   List<Integer[]> listOfIntegerArrays=new ArrayList<Integer[]>();
   listOfIntegerArrays.add(new Integer[]{1,2,3});
   listOfIntegerArrays.add(new Integer[]{4,5,6});
@@ -111,7 +116,7 @@
   assertEquals("1 2 3",stringify(expression.getValue(listOfIntegerArrays)));
   assertCanCompile(expression);
   assertEquals("1 2 3",stringify(expression.getValue(listOfIntegerArrays)));
-  assertEquals("[Ljava/lang/Integer",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
   expression=parser.parseExpression("[0][1]");
   assertEquals(2,expression.getValue(listOfIntegerArrays));
   assertCanCompile(expression);
@@ -135,7 +140,7 @@
   assertEquals("f",stringify(expression.getValue(stringArrayOfLists)));
   assertCanCompile(expression);
   assertEquals("f",stringify(expression.getValue(stringArrayOfLists)));
-  assertEquals("Ljava/lang/String",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
   String[][] referenceTypeArrayOfArrays=new String[][]{new String[]{"a","b","c"},new String[]{"d","e","f"}};
   expression=parser.parseExpression("[1]");
   assertEquals("d e f",stringify(expression.getValue(referenceTypeArrayOfArrays)));
@@ -173,14 +178,14 @@
   expression=parser.parseExpression("[1]");
   assertEquals("d e f",stringify(expression.getValue(listOfListOfStrings)));
   assertCanCompile(expression);
-  assertEquals("Ljava/util/ArrayList",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
   assertEquals("d e f",stringify(expression.getValue(listOfListOfStrings)));
-  assertEquals("Ljava/util/ArrayList",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
   expression=parser.parseExpression("[1][2]");
   assertEquals("f",stringify(expression.getValue(listOfListOfStrings)));
   assertCanCompile(expression);
   assertEquals("f",stringify(expression.getValue(listOfListOfStrings)));
-  assertEquals("Ljava/lang/String",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
   Map<String,List<String>> mapToLists=new HashMap<String,List<String>>();
   list=new ArrayList<String>();
   list.add("a");
@@ -190,14 +195,14 @@
   expression=parser.parseExpression("['foo']");
   assertEquals("a b c",stringify(expression.getValue(mapToLists)));
   assertCanCompile(expression);
-  assertEquals("Ljava/util/ArrayList",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
   assertEquals("a b c",stringify(expression.getValue(mapToLists)));
-  assertEquals("Ljava/util/ArrayList",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
   expression=parser.parseExpression("['foo'][2]");
   assertEquals("c",stringify(expression.getValue(mapToLists)));
   assertCanCompile(expression);
   assertEquals("c",stringify(expression.getValue(mapToLists)));
-  assertEquals("Ljava/lang/String",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
   Map<String,int[]> mapToIntArray=new HashMap<String,int[]>();
   StandardEvaluationContext ctx=new StandardEvaluationContext();
   ctx.addPropertyAccessor(new CompilableMapAccessor());
@@ -205,9 +210,9 @@
   expression=parser.parseExpression("['foo']");
   assertEquals("1 2 3",stringify(expression.getValue(mapToIntArray)));
   assertCanCompile(expression);
-  assertEquals("[I",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
   assertEquals("1 2 3",stringify(expression.getValue(mapToIntArray)));
-  assertEquals("[I",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
   expression=parser.parseExpression("['foo'][1]");
   assertEquals(2,expression.getValue(mapToIntArray));
   assertCanCompile(expression);
@@ -239,5 +244,5 @@
   assertEquals("value1",stringify(expression.getValue(mapArray)));
   assertCanCompile(expression);
   assertEquals("value1",stringify(expression.getValue(mapArray)));
-  assertEquals("Ljava/lang/String",getAst().getExitDescriptor());
+  assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
 }
