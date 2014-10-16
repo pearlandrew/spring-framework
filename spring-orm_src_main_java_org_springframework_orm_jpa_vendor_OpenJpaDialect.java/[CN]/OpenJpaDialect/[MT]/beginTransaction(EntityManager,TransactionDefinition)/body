@@ -1,8 +1,15 @@
 {
-  super.beginTransaction(entityManager,definition);
-  OpenJPAEntityManager em=getOpenJPAEntityManager(entityManager);
-  if (!definition.isReadOnly()) {
-    em.beginStore();
+  OpenJPAEntityManager openJpaEntityManager=getOpenJPAEntityManager(entityManager);
+  if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+    FetchPlan fetchPlan=openJpaEntityManager.getFetchPlan();
+    if (fetchPlan instanceof JDBCFetchPlan) {
+      IsolationLevel isolation=IsolationLevel.fromConnectionConstant(definition.getIsolationLevel());
+      ((JDBCFetchPlan)fetchPlan).setIsolation(isolation);
+    }
   }
-  return new OpenJpaTransactionData(em);
+  entityManager.getTransaction().begin();
+  if (!definition.isReadOnly()) {
+    openJpaEntityManager.beginStore();
+  }
+  return new OpenJpaTransactionData(openJpaEntityManager);
 }
