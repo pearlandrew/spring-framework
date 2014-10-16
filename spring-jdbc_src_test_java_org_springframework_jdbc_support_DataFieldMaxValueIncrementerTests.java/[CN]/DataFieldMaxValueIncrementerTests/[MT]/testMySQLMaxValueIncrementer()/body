@@ -1,7 +1,6 @@
 {
   given(dataSource.getConnection()).willReturn(connection);
   given(connection.createStatement()).willReturn(statement);
-  given(statement.executeUpdate("update myseq set seq = last_insert_id(seq + 2)")).willReturn(1);
   given(statement.executeQuery("select last_insert_id()")).willReturn(resultSet);
   given(resultSet.next()).willReturn(true);
   given(resultSet.getLong(1)).willReturn(2L,4L);
@@ -16,6 +15,7 @@
   assertEquals(2,incrementer.nextLongValue());
   assertEquals("3",incrementer.nextStringValue());
   assertEquals(4,incrementer.nextLongValue());
+  verify(statement,times(2)).executeUpdate("update myseq set seq = last_insert_id(seq + 2)");
   verify(resultSet,times(2)).close();
   verify(statement,times(2)).close();
   verify(connection,times(2)).close();

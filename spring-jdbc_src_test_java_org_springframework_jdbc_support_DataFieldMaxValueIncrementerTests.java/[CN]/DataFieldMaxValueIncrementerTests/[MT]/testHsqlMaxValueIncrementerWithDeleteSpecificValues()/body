@@ -10,6 +10,7 @@
   incrementer.setColumnName("seq");
   incrementer.setCacheSize(3);
   incrementer.setPaddingLength(3);
+  incrementer.setDeleteSpecificValues(true);
   incrementer.afterPropertiesSet();
   assertEquals(0,incrementer.nextIntValue());
   assertEquals(1,incrementer.nextLongValue());
@@ -17,8 +18,8 @@
   assertEquals(3,incrementer.nextIntValue());
   assertEquals(4,incrementer.nextLongValue());
   verify(statement,times(6)).executeUpdate("insert into myseq values(null)");
-  verify(statement).executeUpdate("delete from myseq where seq < 2");
-  verify(statement).executeUpdate("delete from myseq where seq < 5");
+  verify(statement).executeUpdate("delete from myseq where seq in (-1, 0, 1)");
+  verify(statement).executeUpdate("delete from myseq where seq in (2, 3, 4)");
   verify(resultSet,times(6)).close();
   verify(statement,times(2)).close();
   verify(connection,times(2)).close();
