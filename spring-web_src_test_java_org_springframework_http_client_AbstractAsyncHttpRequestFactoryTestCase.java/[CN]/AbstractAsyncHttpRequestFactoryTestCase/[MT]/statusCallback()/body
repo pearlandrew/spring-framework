@@ -7,22 +7,22 @@
   listenableFuture.addCallback(new ListenableFutureCallback<ClientHttpResponse>(){
     @Override public void onSuccess(    ClientHttpResponse result){
       try {
-        System.out.println("SUCCESS! " + result.getStatusCode());
-        System.out.println("Callback: " + System.currentTimeMillis());
-        System.out.println(Thread.currentThread().getId());
         assertEquals("Invalid status code",HttpStatus.NOT_FOUND,result.getStatusCode());
       }
  catch (      IOException ex) {
-        ex.printStackTrace();
+        fail(ex.getMessage());
       }
     }
     @Override public void onFailure(    Throwable ex){
-      System.out.println("FAILURE: " + ex);
+      fail(ex.getMessage());
     }
   }
 );
   ClientHttpResponse response=listenableFuture.get();
-  System.out.println("Main thread: " + System.currentTimeMillis());
-  assertEquals("Invalid status code",HttpStatus.NOT_FOUND,response.getStatusCode());
-  System.out.println(Thread.currentThread().getId());
+  try {
+    assertEquals("Invalid status code",HttpStatus.NOT_FOUND,response.getStatusCode());
+  }
+  finally {
+    response.close();
+  }
 }

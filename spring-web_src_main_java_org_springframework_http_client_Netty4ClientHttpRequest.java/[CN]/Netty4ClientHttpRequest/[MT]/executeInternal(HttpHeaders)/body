@@ -1,0 +1,27 @@
+{
+  final SettableListenableFuture<ClientHttpResponse> responseFuture=new SettableListenableFuture<ClientHttpResponse>();
+  ChannelFutureListener connectionListener=new ChannelFutureListener(){
+    @Override public void operationComplete(    ChannelFuture future) throws Exception {
+      if (future.isSuccess()) {
+        Channel channel=future.channel();
+        channel.pipeline().addLast(new SimpleChannelInboundHandler<FullHttpResponse>(){
+          @Override protected void channelRead0(          ChannelHandlerContext ctx,          FullHttpResponse msg) throws Exception {
+            responseFuture.set(new Netty4ClientHttpResponse(ctx,msg));
+          }
+          @Override public void exceptionCaught(          ChannelHandlerContext ctx,          Throwable cause) throws Exception {
+            responseFuture.setException(cause);
+          }
+        }
+);
+        FullHttpRequest nettyRequest=createFullHttpRequest(headers);
+        channel.writeAndFlush(nettyRequest);
+      }
+ else {
+        responseFuture.setException(future.cause());
+      }
+    }
+  }
+;
+  bootstrap.connect(uri.getHost(),getPort(uri)).addListener(connectionListener);
+  return responseFuture;
+}
