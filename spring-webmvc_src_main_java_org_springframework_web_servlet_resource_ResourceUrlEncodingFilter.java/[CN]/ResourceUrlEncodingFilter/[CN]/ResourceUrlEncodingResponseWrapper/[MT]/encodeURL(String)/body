@@ -4,6 +4,9 @@
     logger.debug("Request attribute exposing ResourceUrlProvider not found.");
     return super.encodeURL(url);
   }
-  String resolvedUrl=resourceUrlProvider.getForRequestUrl(this.request,url);
-  return (resolvedUrl != null ? super.encodeURL(resolvedUrl) : super.encodeURL(url));
+  initIndexLookupPath(resourceUrlProvider);
+  String prefix=url.substring(0,this.indexLookupPath);
+  String lookupPath=url.substring(this.indexLookupPath);
+  lookupPath=resourceUrlProvider.getForLookupPath(lookupPath);
+  return (lookupPath != null ? super.encodeURL(prefix + lookupPath) : super.encodeURL(url));
 }
