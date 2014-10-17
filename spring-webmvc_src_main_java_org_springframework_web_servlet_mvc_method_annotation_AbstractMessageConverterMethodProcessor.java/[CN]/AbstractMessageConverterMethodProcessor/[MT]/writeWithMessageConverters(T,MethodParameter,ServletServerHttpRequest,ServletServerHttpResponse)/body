@@ -1,8 +1,5 @@
 {
   Class<?> returnValueClass=getReturnValueType(returnValue,returnType);
-  if (returnValue == null && Void.class.equals(returnValueClass)) {
-    return;
-  }
   HttpServletRequest servletRequest=inputMessage.getServletRequest();
   List<MediaType> requestedMediaTypes=getAcceptableMediaTypes(servletRequest);
   List<MediaType> producibleMediaTypes=getProducibleMediaTypes(servletRequest,returnValueClass);
@@ -15,7 +12,10 @@
     }
   }
   if (compatibleMediaTypes.isEmpty()) {
-    throw new HttpMediaTypeNotAcceptableException(producibleMediaTypes);
+    if (returnValue != null) {
+      throw new HttpMediaTypeNotAcceptableException(producibleMediaTypes);
+    }
+    return;
   }
   List<MediaType> mediaTypes=new ArrayList<MediaType>(compatibleMediaTypes);
   MediaType.sortBySpecificityAndQuality(mediaTypes);
@@ -45,5 +45,7 @@
       }
     }
   }
-  throw new HttpMediaTypeNotAcceptableException(this.allSupportedMediaTypes);
+  if (returnValue != null) {
+    throw new HttpMediaTypeNotAcceptableException(this.allSupportedMediaTypes);
+  }
 }
