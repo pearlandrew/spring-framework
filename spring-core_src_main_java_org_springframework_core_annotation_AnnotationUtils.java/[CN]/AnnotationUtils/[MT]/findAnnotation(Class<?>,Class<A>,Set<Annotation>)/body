@@ -1,28 +1,28 @@
 {
   Assert.notNull(clazz,"Class must not be null");
-  if (isAnnotationDeclaredLocally(annotationType,clazz)) {
-    try {
-      return clazz.getAnnotation(annotationType);
-    }
- catch (    Exception ex) {
-      if (logger.isInfoEnabled()) {
-        logger.info("Failed to introspect annotations on [" + clazz + "]: "+ ex);
+  try {
+    Annotation[] anns=clazz.getDeclaredAnnotations();
+    for (    Annotation ann : anns) {
+      if (ann.annotationType().equals(annotationType)) {
+        return (A)ann;
       }
-      return null;
     }
+    for (    Annotation ann : anns) {
+      if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
+        A annotation=findAnnotation(ann.annotationType(),annotationType,visited);
+        if (annotation != null) {
+          return annotation;
+        }
+      }
+    }
+  }
+ catch (  Exception ex) {
+    return null;
   }
   for (  Class<?> ifc : clazz.getInterfaces()) {
     A annotation=findAnnotation(ifc,annotationType,visited);
     if (annotation != null) {
       return annotation;
-    }
-  }
-  for (  Annotation ann : clazz.getDeclaredAnnotations()) {
-    if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
-      A annotation=findAnnotation(ann.annotationType(),annotationType,visited);
-      if (annotation != null) {
-        return annotation;
-      }
     }
   }
   Class<?> superclass=clazz.getSuperclass();
