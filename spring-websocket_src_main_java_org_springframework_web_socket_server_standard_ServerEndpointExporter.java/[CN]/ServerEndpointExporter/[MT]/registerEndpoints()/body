@@ -3,10 +3,23 @@
   if (this.annotatedEndpointClasses != null) {
     endpointClasses.addAll(this.annotatedEndpointClasses);
   }
-  if (this.annotatedEndpointBeanTypes != null) {
-    endpointClasses.addAll(this.annotatedEndpointBeanTypes);
+  ApplicationContext context=getApplicationContext();
+  if (context != null) {
+    String[] endpointNames=context.getBeanNamesForAnnotation(ServerEndpoint.class);
+    for (    String beanName : endpointNames) {
+      Class<?> beanType=context.getType(beanName);
+      endpointClasses.add(beanType);
+    }
   }
   for (  Class<?> endpointClass : endpointClasses) {
     registerEndpoint(endpointClass);
+  }
+  if (context != null) {
+    Map<String,ServerEndpointConfig> endpointConfigMap=context.getBeansOfType(ServerEndpointConfig.class);
+    for (    Map.Entry<String,ServerEndpointConfig> configEntry : endpointConfigMap.entrySet()) {
+      String beanName=configEntry.getKey();
+      ServerEndpointConfig endpointConfig=configEntry.getValue();
+      registerEndpoint(endpointConfig);
+    }
   }
 }
