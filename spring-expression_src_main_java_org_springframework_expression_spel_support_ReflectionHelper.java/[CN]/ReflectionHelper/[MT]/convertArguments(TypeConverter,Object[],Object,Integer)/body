@@ -19,8 +19,11 @@
     if (varargsPosition == arguments.length - 1) {
       TypeDescriptor targetType=new TypeDescriptor(methodParam);
       Object argument=arguments[varargsPosition];
-      arguments[varargsPosition]=converter.convertValue(argument,TypeDescriptor.forObject(argument),targetType);
-      conversionOccurred|=(argument != arguments[varargsPosition]);
+      TypeDescriptor sourceType=TypeDescriptor.forObject(argument);
+      arguments[varargsPosition]=converter.convertValue(argument,sourceType,targetType);
+      if (!looksLikeSimpleArrayPackaging(sourceType,targetType)) {
+        conversionOccurred|=(argument != arguments[varargsPosition]);
+      }
     }
  else {
       TypeDescriptor targetType=new TypeDescriptor(methodParam).getElementTypeDescriptor();
