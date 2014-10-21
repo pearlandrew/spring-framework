@@ -1,10 +1,10 @@
 {
-  if (beanDefinition.getMethodOverrides().isEmpty()) {
+  if (bd.getMethodOverrides().isEmpty()) {
     Constructor<?> constructorToUse;
-synchronized (beanDefinition.constructorArgumentLock) {
-      constructorToUse=(Constructor<?>)beanDefinition.resolvedConstructorOrFactoryMethod;
+synchronized (bd.constructorArgumentLock) {
+      constructorToUse=(Constructor<?>)bd.resolvedConstructorOrFactoryMethod;
       if (constructorToUse == null) {
-        final Class<?> clazz=beanDefinition.getBeanClass();
+        final Class<?> clazz=bd.getBeanClass();
         if (clazz.isInterface()) {
           throw new BeanInstantiationException(clazz,"Specified class is an interface");
         }
@@ -20,7 +20,7 @@ synchronized (beanDefinition.constructorArgumentLock) {
  else {
             constructorToUse=clazz.getDeclaredConstructor((Class[])null);
           }
-          beanDefinition.resolvedConstructorOrFactoryMethod=constructorToUse;
+          bd.resolvedConstructorOrFactoryMethod=constructorToUse;
         }
  catch (        Exception ex) {
           throw new BeanInstantiationException(clazz,"No default constructor found",ex);
@@ -30,6 +30,6 @@ synchronized (beanDefinition.constructorArgumentLock) {
     return BeanUtils.instantiateClass(constructorToUse);
   }
  else {
-    return instantiateWithMethodInjection(beanDefinition,beanName,owner);
+    return instantiateWithMethodInjection(bd,beanName,owner);
   }
 }
