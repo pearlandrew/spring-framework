@@ -10,10 +10,17 @@
   if (this.prepareConnection && session.isConnected() && isSameConnectionForEntireSession(session)) {
     try {
       Connection con=((SessionImplementor)session).connection();
+      Integer previousHoldability=txObject.getPreviousHoldability();
+      if (previousHoldability != null) {
+        con.setHoldability(previousHoldability);
+      }
       DataSourceUtils.resetConnectionAfterTransaction(con,txObject.getPreviousIsolationLevel());
     }
  catch (    HibernateException ex) {
       logger.debug("Could not access JDBC Connection of Hibernate Session",ex);
+    }
+catch (    Throwable ex) {
+      logger.debug("Could not reset JDBC Connection after transaction",ex);
     }
   }
   if (txObject.isNewSession()) {
@@ -29,8 +36,8 @@
     if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
       session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
     }
-    if (!this.hibernateManagedSession) {
-      session.disconnect();
+    if (!this.allowResultAccessAfterCompletion && !this.hibernateManagedSession) {
+      disconnectOnCompletion(session);
     }
   }
   txObject.getSessionHolder().clear();

@@ -21,6 +21,13 @@
       Connection con=((SessionImplementor)session).connection();
       Integer previousIsolationLevel=DataSourceUtils.prepareConnectionForTransaction(con,definition);
       txObject.setPreviousIsolationLevel(previousIsolationLevel);
+      if (this.allowResultAccessAfterCompletion && !txObject.isNewSession()) {
+        int currentHoldability=con.getHoldability();
+        if (currentHoldability != ResultSet.HOLD_CURSORS_OVER_COMMIT) {
+          txObject.setPreviousHoldability(currentHoldability);
+          con.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+        }
+      }
     }
  else {
       if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
