@@ -2,12 +2,16 @@
   ApplicationContext config=createConfig(TestChannelConfig.class,TestConfigurer.class);
   TestChannel channel=config.getBean("clientInboundChannel",TestChannel.class);
   SubProtocolWebSocketHandler webSocketHandler=config.getBean(SubProtocolWebSocketHandler.class);
+  List<ChannelInterceptor> interceptors=channel.getInterceptors();
+  assertEquals(ImmutableMessageChannelInterceptor.class,interceptors.get(interceptors.size() - 1).getClass());
   WebSocketSession session=new TestWebSocketSession("s1");
   webSocketHandler.afterConnectionEstablished(session);
   TextMessage textMessage=StompTextMessageBuilder.create(StompCommand.SEND).headers("destination:/foo").build();
   webSocketHandler.handleMessage(session,textMessage);
   Message<?> message=channel.messages.get(0);
-  StompHeaderAccessor headers=StompHeaderAccessor.wrap(message);
-  assertEquals(SimpMessageType.MESSAGE,headers.getMessageType());
-  assertEquals("/foo",headers.getDestination());
+  StompHeaderAccessor accessor=StompHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
+  assertNotNull(accessor);
+  assertFalse(accessor.isMutable());
+  assertEquals(SimpMessageType.MESSAGE,accessor.getMessageType());
+  assertEquals("/foo",accessor.getDestination());
 }

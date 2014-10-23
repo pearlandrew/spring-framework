@@ -39,7 +39,9 @@
       headerAccessor.setSessionId(session.getId());
       headerAccessor.setSessionAttributes(session.getAttributes());
       headerAccessor.setUser(session.getPrincipal());
-      headerAccessor.setImmutable();
+      if (!detectImmutableMessageInterceptor(outputChannel)) {
+        headerAccessor.setImmutable();
+      }
       if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
         this.stats.incrementConnectCount();
       }
