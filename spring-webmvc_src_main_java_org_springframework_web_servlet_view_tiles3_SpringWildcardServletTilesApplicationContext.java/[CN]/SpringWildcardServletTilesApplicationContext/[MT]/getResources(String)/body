@@ -4,19 +4,21 @@
     resources=this.resolver.getResources(path);
   }
  catch (  IOException ex) {
-    return Collections.<ApplicationResource>emptyList();
+    ((ServletContext)getContext()).log("Resource retrieval failed for path: " + path,ex);
+    return Collections.emptyList();
   }
-  Collection<ApplicationResource> resourceList=new ArrayList<ApplicationResource>();
-  if (!ObjectUtils.isEmpty(resources)) {
-    for (    Resource resource : resources) {
-      URL url;
-      try {
-        url=resource.getURL();
-        resourceList.add(new URLApplicationResource(url.toExternalForm(),url));
-      }
- catch (      IOException ex) {
-        throw new IllegalArgumentException("No URL for " + resource.toString(),ex);
-      }
+  if (ObjectUtils.isEmpty(resources)) {
+    ((ServletContext)getContext()).log("No resources found for path pattern: " + path);
+    return Collections.emptyList();
+  }
+  Collection<ApplicationResource> resourceList=new ArrayList<ApplicationResource>(resources.length);
+  for (  Resource resource : resources) {
+    try {
+      URL url=resource.getURL();
+      resourceList.add(new URLApplicationResource(url.toExternalForm(),url));
+    }
+ catch (    IOException ex) {
+      throw new IllegalArgumentException("No URL for " + resource,ex);
     }
   }
   return resourceList;
