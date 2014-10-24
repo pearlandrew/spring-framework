@@ -1,37 +1,4 @@
 {
-  Integer varargsPosition=null;
-  boolean conversionOccurred=false;
-  if (method.isVarArgs()) {
-    Class<?>[] paramTypes=method.getParameterTypes();
-    varargsPosition=paramTypes.length - 1;
-  }
-  for (int argPos=0; argPos < arguments.length; argPos++) {
-    TypeDescriptor targetType;
-    if (varargsPosition != null && argPos >= varargsPosition) {
-      MethodParameter methodParam=new MethodParameter(method,varargsPosition);
-      targetType=TypeDescriptor.nested(methodParam,1);
-    }
- else {
-      targetType=new TypeDescriptor(new MethodParameter(method,argPos));
-    }
-    try {
-      Object argument=arguments[argPos];
-      if (argument != null && !targetType.getObjectType().isInstance(argument)) {
-        if (converter == null) {
-          throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR,argument.getClass().getName(),targetType);
-        }
-        arguments[argPos]=converter.convertValue(argument,TypeDescriptor.forObject(argument),targetType);
-        conversionOccurred|=(argument != arguments[argPos]);
-      }
-    }
- catch (    EvaluationException ex) {
-      if (ex instanceof SpelEvaluationException) {
-        throw (SpelEvaluationException)ex;
-      }
- else {
-        throw new SpelEvaluationException(ex,SpelMessage.TYPE_CONVERSION_ERROR,arguments[argPos].getClass().getName(),targetType);
-      }
-    }
-  }
-  return conversionOccurred;
+  Integer varargsPosition=method.isVarArgs() ? method.getParameterTypes().length - 1 : null;
+  return convertArguments(converter,arguments,method,varargsPosition);
 }
