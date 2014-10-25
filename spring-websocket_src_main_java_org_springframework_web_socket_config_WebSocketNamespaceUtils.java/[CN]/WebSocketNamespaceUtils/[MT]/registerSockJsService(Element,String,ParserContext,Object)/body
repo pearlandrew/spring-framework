@@ -30,7 +30,15 @@
       sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(1,transportHandler);
     }
     Element interceptorsElement=DomUtils.getChildElementByTagName(element,"handshake-interceptors");
-    ManagedList<?> interceptors=WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement,context);
+    ManagedList<? super Object> interceptors=WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement,context);
+    String allowedOriginsAttribute=element.getAttribute("allowed-origins");
+    List<String> allowedOrigins=Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute,","));
+    if (!allowedOrigins.isEmpty()) {
+      sockJsServiceDef.getPropertyValues().add("allowedOrigins",allowedOrigins);
+      OriginHandshakeInterceptor interceptor=new OriginHandshakeInterceptor();
+      interceptor.setAllowedOrigins(allowedOrigins);
+      interceptors.add(interceptor);
+    }
     sockJsServiceDef.getPropertyValues().add("handshakeInterceptors",interceptors);
     String attrValue=sockJsElement.getAttribute("name");
     if (!attrValue.isEmpty()) {

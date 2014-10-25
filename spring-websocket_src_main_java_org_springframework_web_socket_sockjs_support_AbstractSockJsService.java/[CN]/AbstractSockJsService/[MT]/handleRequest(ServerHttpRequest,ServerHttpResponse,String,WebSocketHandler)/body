@@ -53,6 +53,11 @@
         response.setStatusCode(HttpStatus.NOT_FOUND);
         return;
       }
+ else       if (!this.allowedOrigins.contains("*") && !TransportType.fromValue(transport).supportsOrigin()) {
+        logger.debug("Origin check has been enabled, but this transport does not support it, ignoring " + requestInfo);
+        response.setStatusCode(HttpStatus.NOT_FOUND);
+        return;
+      }
       handleTransportRequest(request,response,wsHandler,sessionId,transport);
     }
     response.close();

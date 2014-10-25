@@ -1,0 +1,17 @@
+{
+  TransportHandlingSockJsService jsonpService=new TransportHandlingSockJsService(this.taskScheduler,this.jsonpHandler,this.jsonpSendHandler);
+  String sockJsPath=sessionUrlPrefix + "jsonp";
+  setRequest("GET",sockJsPrefix + sockJsPath);
+  jsonpService.handleRequest(this.request,this.response,sockJsPath,this.wsHandler);
+  assertNotEquals(404,this.servletResponse.getStatus());
+  resetRequestAndResponse();
+  jsonpService.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+  setRequest("GET",sockJsPrefix + sockJsPath);
+  jsonpService.handleRequest(this.request,this.response,sockJsPath,this.wsHandler);
+  assertEquals(404,this.servletResponse.getStatus());
+  resetRequestAndResponse();
+  jsonpService.setAllowedOrigins(null);
+  setRequest("GET",sockJsPrefix + sockJsPath);
+  jsonpService.handleRequest(this.request,this.response,sockJsPath,this.wsHandler);
+  assertEquals(404,this.servletResponse.getStatus());
+}

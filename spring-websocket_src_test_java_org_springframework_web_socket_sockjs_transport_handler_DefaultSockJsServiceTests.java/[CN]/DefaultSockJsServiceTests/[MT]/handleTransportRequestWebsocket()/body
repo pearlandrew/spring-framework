@@ -1,0 +1,20 @@
+{
+  TransportHandlingSockJsService wsService=new TransportHandlingSockJsService(this.taskScheduler,this.wsTransportHandler);
+  String sockJsPath="/websocket";
+  setRequest("GET",sockJsPrefix + sockJsPath);
+  wsService.handleRequest(this.request,this.response,sockJsPath,this.wsHandler);
+  assertNotEquals(403,this.servletResponse.getStatus());
+  resetRequestAndResponse();
+  OriginHandshakeInterceptor interceptor=new OriginHandshakeInterceptor();
+  interceptor.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+  wsService.setHandshakeInterceptors(Arrays.asList(interceptor));
+  setRequest("GET",sockJsPrefix + sockJsPath);
+  setOrigin("http://mydomain1.com");
+  wsService.handleRequest(this.request,this.response,sockJsPath,this.wsHandler);
+  assertNotEquals(403,this.servletResponse.getStatus());
+  resetRequestAndResponse();
+  setRequest("GET",sockJsPrefix + sockJsPath);
+  setOrigin("http://mydomain2.com");
+  wsService.handleRequest(this.request,this.response,sockJsPath,this.wsHandler);
+  assertEquals(403,this.servletResponse.getStatus());
+}

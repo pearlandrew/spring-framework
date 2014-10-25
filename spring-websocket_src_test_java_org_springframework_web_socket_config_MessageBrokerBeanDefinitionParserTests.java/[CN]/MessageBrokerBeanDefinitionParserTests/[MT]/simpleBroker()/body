@@ -13,7 +13,7 @@
   assertNotNull(handshakeHandler);
   assertTrue(handshakeHandler instanceof TestHandshakeHandler);
   List<HandshakeInterceptor> interceptors=wsHttpRequestHandler.getHandshakeInterceptors();
-  assertThat(interceptors,contains(instanceOf(FooTestInterceptor.class),instanceOf(BarTestInterceptor.class)));
+  assertThat(interceptors,contains(instanceOf(FooTestInterceptor.class),instanceOf(BarTestInterceptor.class),instanceOf(OriginHandshakeInterceptor.class)));
   WebSocketSession session=new TestWebSocketSession("id");
   wsHttpRequestHandler.getWebSocketHandler().afterConnectionEstablished(session);
   assertEquals(true,session.getAttributes().get("decorated"));
@@ -45,7 +45,8 @@
   assertEquals(Runtime.getRuntime().availableProcessors(),scheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
   assertTrue(scheduler.getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy());
   interceptors=defaultSockJsService.getHandshakeInterceptors();
-  assertThat(interceptors,contains(instanceOf(FooTestInterceptor.class),instanceOf(BarTestInterceptor.class)));
+  assertThat(interceptors,contains(instanceOf(FooTestInterceptor.class),instanceOf(BarTestInterceptor.class),instanceOf(OriginHandshakeInterceptor.class)));
+  assertEquals(Arrays.asList("http://mydomain3.com","http://mydomain4.com"),defaultSockJsService.getAllowedOrigins());
   UserSessionRegistry userSessionRegistry=this.appContext.getBean(UserSessionRegistry.class);
   assertNotNull(userSessionRegistry);
   UserDestinationResolver userDestResolver=this.appContext.getBean(UserDestinationResolver.class);

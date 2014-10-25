@@ -14,9 +14,10 @@
   HttpMethod supportedMethod=transportType.getHttpMethod();
   if (!supportedMethod.equals(request.getMethod())) {
     if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.supportsCors()) {
-      response.setStatusCode(HttpStatus.NO_CONTENT);
-      addCorsHeaders(request,response,HttpMethod.OPTIONS,supportedMethod);
-      addCacheHeaders(response);
+      if (checkAndAddCorsHeaders(request,response,HttpMethod.OPTIONS,supportedMethod)) {
+        response.setStatusCode(HttpStatus.NO_CONTENT);
+        addCacheHeaders(response);
+      }
     }
  else     if (transportType.supportsCors()) {
       sendMethodNotAllowed(response,supportedMethod,HttpMethod.OPTIONS);
@@ -51,7 +52,9 @@
       addNoCacheHeaders(response);
     }
     if (transportType.supportsCors()) {
-      addCorsHeaders(request,response);
+      if (!checkAndAddCorsHeaders(request,response)) {
+        return;
+      }
     }
     transportHandler.handleRequest(request,response,handler,session);
     chain.applyAfterHandshake(request,response,null);

@@ -2,10 +2,18 @@
   this.servletRequest.addHeader("Access-Control-Request-Headers","Last-Modified");
   resetResponseAndHandleRequest("OPTIONS","/echo/info",HttpStatus.NO_CONTENT);
   this.response.flush();
-  assertEquals("*",this.servletResponse.getHeader("Access-Control-Allow-Origin"));
-  assertEquals("true",this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
-  assertEquals("Last-Modified",this.servletResponse.getHeader("Access-Control-Allow-Headers"));
-  assertEquals("OPTIONS, GET",this.servletResponse.getHeader("Access-Control-Allow-Methods"));
-  assertEquals("31536000",this.servletResponse.getHeader("Access-Control-Max-Age"));
+  assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+  assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+  assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+  assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+  assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
   assertEquals("Origin",this.servletResponse.getHeader("Vary"));
+  this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+  resetResponseAndHandleRequest("OPTIONS","/echo/info",HttpStatus.FORBIDDEN);
+  assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+  assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+  assertNull(this.servletResponse.getHeader("Access-Control-Allow-Headers"));
+  assertNull(this.servletResponse.getHeader("Access-Control-Allow-Methods"));
+  assertNull(this.servletResponse.getHeader("Access-Control-Max-Age"));
+  assertNull(this.servletResponse.getHeader("Vary"));
 }
