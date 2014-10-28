@@ -12,4 +12,15 @@
   List<Object> interceptors=(List<Object>)fieldAccessor.getPropertyValue("responseBodyAdvice");
   assertEquals(1,interceptors.size());
   assertEquals(JsonViewResponseBodyAdvice.class,interceptors.get(0).getClass());
+  LocaleContextHolder.setLocale(Locale.ENGLISH);
+  try {
+    ResponseStatusExceptionResolver rser=(ResponseStatusExceptionResolver)expectedResolvers.get(1);
+    MockHttpServletRequest request=new MockHttpServletRequest("GET","/");
+    MockHttpServletResponse response=new MockHttpServletResponse();
+    rser.resolveException(request,response,context.getBean(TestController.class),new UserAlreadyExistsException());
+    assertEquals("User already exists!",response.getErrorMessage());
+  }
+  finally {
+    LocaleContextHolder.resetLocaleContext();
+  }
 }
