@@ -1,11 +1,11 @@
 {
-  UnitOfWork uow=entityManager.unwrap(UnitOfWork.class);
   if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+    UnitOfWork uow=entityManager.unwrap(UnitOfWork.class);
     uow.getLogin().setTransactionIsolation(definition.getIsolationLevel());
   }
   entityManager.getTransaction().begin();
   if (!definition.isReadOnly() && !this.lazyDatabaseTransaction) {
-    uow.beginEarlyTransaction();
+    entityManager.unwrap(UnitOfWork.class).beginEarlyTransaction();
   }
   return null;
 }
