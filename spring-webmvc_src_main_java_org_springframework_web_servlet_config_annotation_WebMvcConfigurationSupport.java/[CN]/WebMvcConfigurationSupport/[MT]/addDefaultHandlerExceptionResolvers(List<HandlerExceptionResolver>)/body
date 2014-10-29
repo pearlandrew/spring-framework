@@ -1,6 +1,5 @@
 {
   ExceptionHandlerExceptionResolver exceptionHandlerExceptionResolver=new ExceptionHandlerExceptionResolver();
-  exceptionHandlerExceptionResolver.setApplicationContext(this.applicationContext);
   exceptionHandlerExceptionResolver.setContentNegotiationManager(mvcContentNegotiationManager());
   exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
   if (jackson2Present) {
@@ -8,10 +7,11 @@
     interceptors.add(new JsonViewResponseBodyAdvice());
     exceptionHandlerExceptionResolver.setResponseBodyAdvice(interceptors);
   }
+  exceptionHandlerExceptionResolver.setApplicationContext(this.applicationContext);
+  exceptionHandlerExceptionResolver.afterPropertiesSet();
+  exceptionResolvers.add(exceptionHandlerExceptionResolver);
   ResponseStatusExceptionResolver responseStatusExceptionResolver=new ResponseStatusExceptionResolver();
   responseStatusExceptionResolver.setMessageSource(this.applicationContext);
-  exceptionResolvers.add(exceptionHandlerExceptionResolver);
   exceptionResolvers.add(responseStatusExceptionResolver);
   exceptionResolvers.add(new DefaultHandlerExceptionResolver());
-  exceptionHandlerExceptionResolver.afterPropertiesSet();
 }
