@@ -1,15 +1,23 @@
 {
   if (method.getName().equals("equals")) {
-    return (proxy == args[0]);
+    Object other=args[0];
+    if (proxy == other) {
+      return true;
+    }
+    if (other == null || !Proxy.isProxyClass(other.getClass())) {
+      return false;
+    }
+    InvocationHandler otherHandler=Proxy.getInvocationHandler(other);
+    return (otherHandler instanceof SharedConnectionInvocationHandler && factory() == ((SharedConnectionInvocationHandler)otherHandler).factory());
   }
  else   if (method.getName().equals("hashCode")) {
-    return System.identityHashCode(proxy);
+    return System.identityHashCode(factory());
   }
  else   if (method.getName().equals("toString")) {
-    return "Shared JMS Connection: " + this.target;
+    return "Shared JMS Connection: " + getConnection();
   }
  else   if (method.getName().equals("setClientID")) {
-    String currentClientId=this.target.getClientID();
+    String currentClientId=getConnection().getClientID();
     if (currentClientId != null && currentClientId.equals(args[0])) {
       return null;
     }
@@ -18,28 +26,53 @@
     }
   }
  else   if (method.getName().equals("setExceptionListener")) {
-    ExceptionListener currentExceptionListener=this.target.getExceptionListener();
-    if (currentExceptionListener instanceof InternalChainedExceptionListener && args[0] != null) {
-      ((InternalChainedExceptionListener)currentExceptionListener).addDelegate((ExceptionListener)args[0]);
-      return null;
-    }
+synchronized (connectionMonitor) {
+      if (aggregatedExceptionListener != null) {
+        ExceptionListener listener=(ExceptionListener)args[0];
+        if (listener != this.localExceptionListener) {
+          if (this.localExceptionListener != null) {
+            aggregatedExceptionListener.delegates.remove(this.localExceptionListener);
+          }
+          if (listener != null) {
+            aggregatedExceptionListener.delegates.add(listener);
+          }
+          this.localExceptionListener=listener;
+        }
+        return null;
+      }
  else {
-      throw new javax.jms.IllegalStateException("setExceptionListener call not supported on proxy for shared Connection. " + "Set the 'exceptionListener' property on the SingleConnectionFactory instead. " + "Alternatively, activate SingleConnectionFactory's 'reconnectOnException' feature, "+ "which will allow for registering further ExceptionListeners to the recovery chain.");
+        throw new javax.jms.IllegalStateException("setExceptionListener call not supported on proxy for shared Connection. " + "Set the 'exceptionListener' property on the SingleConnectionFactory instead. " + "Alternatively, activate SingleConnectionFactory's 'reconnectOnException' feature, "+ "which will allow for registering further ExceptionListeners to the recovery chain.");
+      }
+    }
+  }
+ else   if (method.getName().equals("getExceptionListener")) {
+synchronized (connectionMonitor) {
+      if (this.localExceptionListener != null) {
+        return this.localExceptionListener;
+      }
+ else {
+        return getExceptionListener();
+      }
     }
   }
  else   if (method.getName().equals("start")) {
-synchronized (connectionMonitor) {
-      if (!started) {
-        this.target.start();
-        started=true;
-      }
-    }
+    localStart();
     return null;
   }
  else   if (method.getName().equals("stop")) {
+    localStop();
     return null;
   }
  else   if (method.getName().equals("close")) {
+    localStop();
+synchronized (connectionMonitor) {
+      if (this.localExceptionListener != null) {
+        if (aggregatedExceptionListener != null) {
+          aggregatedExceptionListener.delegates.remove(this.localExceptionListener);
+        }
+        this.localExceptionListener=null;
+      }
+    }
     return null;
   }
  else   if (method.getName().equals("createSession") || method.getName().equals("createQueueSession") || method.getName().equals("createTopicSession")) {
@@ -54,7 +87,7 @@ synchronized (connectionMonitor) {
         mode=(transacted ? Session.SESSION_TRANSACTED : ackMode);
       }
     }
-    Session session=getSession(this.target,mode);
+    Session session=getSession(getConnection(),mode);
     if (session != null) {
       if (!method.getReturnType().isInstance(session)) {
         String msg="JMS Session does not implement specific domain: " + session;
@@ -70,14 +103,7 @@ synchronized (connectionMonitor) {
     }
   }
   try {
-    Object retVal=method.invoke(this.target,args);
-    if (method.getName().equals("getExceptionListener") && retVal instanceof InternalChainedExceptionListener) {
-      InternalChainedExceptionListener listener=(InternalChainedExceptionListener)retVal;
-      return listener.getUserListener();
-    }
- else {
-      return retVal;
-    }
+    return method.invoke(getConnection(),args);
   }
  catch (  InvocationTargetException ex) {
     throw ex.getTargetException();
