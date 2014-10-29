@@ -1,33 +1,37 @@
 {
-  AnnotationMetadata metadata=null;
-  if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition)beanDef).hasBeanClass()) {
+  String className=beanDef.getBeanClassName();
+  if (className == null) {
+    return false;
+  }
+  AnnotationMetadata metadata;
+  if (beanDef instanceof AnnotatedBeanDefinition && className.equals(((AnnotatedBeanDefinition)beanDef).getMetadata().getClassName())) {
+    metadata=((AnnotatedBeanDefinition)beanDef).getMetadata();
+  }
+ else   if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition)beanDef).hasBeanClass()) {
     Class<?> beanClass=((AbstractBeanDefinition)beanDef).getBeanClass();
     metadata=new StandardAnnotationMetadata(beanClass,true);
   }
  else {
-    String className=beanDef.getBeanClassName();
-    if (className != null) {
-      try {
-        MetadataReader metadataReader=metadataReaderFactory.getMetadataReader(className);
-        metadata=metadataReader.getAnnotationMetadata();
+    try {
+      MetadataReader metadataReader=metadataReaderFactory.getMetadataReader(className);
+      metadata=metadataReader.getAnnotationMetadata();
+    }
+ catch (    IOException ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Could not find class file for introspecting configuration annotations: " + className,ex);
       }
- catch (      IOException ex) {
-        if (logger.isDebugEnabled()) {
-          logger.debug("Could not find class file for introspecting factory methods: " + className,ex);
-        }
-        return false;
-      }
+      return false;
     }
   }
-  if (metadata != null) {
-    if (isFullConfigurationCandidate(metadata)) {
-      beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE,CONFIGURATION_CLASS_FULL);
-      return true;
-    }
- else     if (isLiteConfigurationCandidate(metadata)) {
-      beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE,CONFIGURATION_CLASS_LITE);
-      return true;
-    }
+  if (isFullConfigurationCandidate(metadata)) {
+    beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE,CONFIGURATION_CLASS_FULL);
+    return true;
   }
-  return false;
+ else   if (isLiteConfigurationCandidate(metadata)) {
+    beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE,CONFIGURATION_CLASS_LITE);
+    return true;
+  }
+ else {
+    return false;
+  }
 }
