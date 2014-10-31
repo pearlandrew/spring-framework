@@ -5,7 +5,7 @@
   }
  else   if (value instanceof RuntimeBeanNameReference) {
     String refName=((RuntimeBeanNameReference)value).getBeanName();
-    refName=String.valueOf(evaluate(refName));
+    refName=String.valueOf(doEvaluate(refName));
     if (!this.beanFactory.containsBean(refName)) {
       throw new BeanDefinitionStoreException("Invalid bean name '" + refName + "' in bean reference for "+ argName);
     }
@@ -80,14 +80,6 @@
  catch (    Throwable ex) {
       throw new BeanCreationException(this.beanDefinition.getResourceDescription(),this.beanName,"Error converting typed String value for " + argName,ex);
     }
-  }
- else   if (value instanceof String[]) {
-    String[] values=(String[])value;
-    Object[] resolvedValues=new Object[values.length];
-    for (int i=0; i < values.length; i++) {
-      resolvedValues[i]=evaluate(values[i]);
-    }
-    return resolvedValues;
   }
  else {
     return evaluate(value);
