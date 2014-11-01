@@ -1,9 +1,14 @@
 {
-  Map<String,T> map=BeanFactoryUtils.beansOfTypeIncludingAncestors(this.applicationContext,type);
-  if (map.size() == 1) {
-    return map.values().iterator().next();
+  try {
+    return this.applicationContext.getBean(type);
   }
- else {
+ catch (  NoUniqueBeanDefinitionException ex) {
+    throw new IllegalStateException("No unique [" + type.getName() + "] bean found in application context - "+ "mark one as primary, or declare a more specific implementation type for your cache",ex);
+  }
+catch (  NoSuchBeanDefinitionException ex) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("No bean of type [" + type.getName() + "] found in application context",ex);
+    }
     return BeanUtils.instantiateClass(type);
   }
 }
