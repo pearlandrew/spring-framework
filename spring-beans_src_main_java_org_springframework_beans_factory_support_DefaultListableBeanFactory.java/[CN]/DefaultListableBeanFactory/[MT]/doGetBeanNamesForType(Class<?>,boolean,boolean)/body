@@ -37,7 +37,7 @@ catch (      BeanDefinitionStoreException ex) {
     }
   }
   for (  String beanName : this.manualSingletonNames) {
-    if (!containsBeanDefinition(beanName)) {
+    try {
       if (isFactoryBean(beanName)) {
         if ((includeNonSingletons || isSingleton(beanName)) && isTypeMatch(beanName,type)) {
           result.add(beanName);
@@ -47,6 +47,11 @@ catch (      BeanDefinitionStoreException ex) {
       }
       if (isTypeMatch(beanName,type)) {
         result.add(beanName);
+      }
+    }
+ catch (    NoSuchBeanDefinitionException ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Failed to check manually registered singleton with name '" + beanName + "'",ex);
       }
     }
   }
