@@ -10,29 +10,28 @@
     }
   }
   BeanDefinition oldBeanDefinition;
-synchronized (this.beanDefinitionMap) {
-    oldBeanDefinition=this.beanDefinitionMap.get(beanName);
-    if (oldBeanDefinition != null) {
-      if (!this.allowBeanDefinitionOverriding) {
-        throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(),beanName,"Cannot register bean definition [" + beanDefinition + "] for bean '"+ beanName+ "': There is already ["+ oldBeanDefinition+ "] bound.");
-      }
- else       if (oldBeanDefinition.getRole() < beanDefinition.getRole()) {
-        if (this.logger.isWarnEnabled()) {
-          this.logger.warn("Overriding user-defined bean definition for bean '" + beanName + " with a framework-generated bean definition ': replacing ["+ oldBeanDefinition+ "] with ["+ beanDefinition+ "]");
-        }
-      }
- else {
-        if (this.logger.isInfoEnabled()) {
-          this.logger.info("Overriding bean definition for bean '" + beanName + "': replacing ["+ oldBeanDefinition+ "] with ["+ beanDefinition+ "]");
-        }
+  oldBeanDefinition=this.beanDefinitionMap.get(beanName);
+  if (oldBeanDefinition != null) {
+    if (!this.allowBeanDefinitionOverriding) {
+      throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(),beanName,"Cannot register bean definition [" + beanDefinition + "] for bean '"+ beanName+ "': There is already ["+ oldBeanDefinition+ "] bound.");
+    }
+ else     if (oldBeanDefinition.getRole() < beanDefinition.getRole()) {
+      if (this.logger.isWarnEnabled()) {
+        this.logger.warn("Overriding user-defined bean definition for bean '" + beanName + " with a framework-generated bean definition ': replacing ["+ oldBeanDefinition+ "] with ["+ beanDefinition+ "]");
       }
     }
  else {
-      this.beanDefinitionNames.add(beanName);
-      this.frozenBeanDefinitionNames=null;
+      if (this.logger.isInfoEnabled()) {
+        this.logger.info("Overriding bean definition for bean '" + beanName + "': replacing ["+ oldBeanDefinition+ "] with ["+ beanDefinition+ "]");
+      }
     }
-    this.beanDefinitionMap.put(beanName,beanDefinition);
   }
+ else {
+    this.beanDefinitionNames.add(beanName);
+    this.manualSingletonNames.remove(beanName);
+    this.frozenBeanDefinitionNames=null;
+  }
+  this.beanDefinitionMap.put(beanName,beanDefinition);
   if (oldBeanDefinition != null || containsSingleton(beanName)) {
     resetBeanDefinition(beanName);
   }
