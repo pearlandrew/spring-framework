@@ -1,17 +1,15 @@
 {
   Assert.notNull(key,"Key must not be null");
-synchronized (monitor) {
-    Set<MergedContextConfiguration> children=hierarchyMap.get(key);
-    if (children != null) {
-      for (      MergedContextConfiguration child : children) {
-        remove(removedContexts,child);
-      }
-      hierarchyMap.remove(key);
+  Set<MergedContextConfiguration> children=this.hierarchyMap.get(key);
+  if (children != null) {
+    for (    MergedContextConfiguration child : children) {
+      remove(removedContexts,child);
     }
-    ApplicationContext context=contextMap.remove(key);
-    if (context instanceof ConfigurableApplicationContext) {
-      ((ConfigurableApplicationContext)context).close();
-    }
-    removedContexts.add(key);
+    this.hierarchyMap.remove(key);
   }
+  ApplicationContext context=this.contextMap.remove(key);
+  if (context instanceof ConfigurableApplicationContext) {
+    ((ConfigurableApplicationContext)context).close();
+  }
+  removedContexts.add(key);
 }

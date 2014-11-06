@@ -1,13 +1,13 @@
 {
-synchronized (contextCache) {
-    ApplicationContext context=contextCache.get(mergedContextConfiguration);
+synchronized (this.contextCache) {
+    ApplicationContext context=this.contextCache.get(mergedContextConfiguration);
     if (context == null) {
       try {
         context=loadContextInternal(mergedContextConfiguration);
         if (logger.isDebugEnabled()) {
-          logger.debug(String.format("Storing ApplicationContext in cache under key [%s].",mergedContextConfiguration));
+          logger.debug(String.format("Storing ApplicationContext in cache under key [%s]",mergedContextConfiguration));
         }
-        contextCache.put(mergedContextConfiguration,context);
+        this.contextCache.put(mergedContextConfiguration,context);
       }
  catch (      Exception ex) {
         throw new IllegalStateException("Failed to load ApplicationContext",ex);
@@ -15,11 +15,11 @@ synchronized (contextCache) {
     }
  else {
       if (logger.isDebugEnabled()) {
-        logger.debug(String.format("Retrieved ApplicationContext from cache with key [%s].",mergedContextConfiguration));
+        logger.debug(String.format("Retrieved ApplicationContext from cache with key [%s]",mergedContextConfiguration));
       }
     }
     if (statsLogger.isDebugEnabled()) {
-      statsLogger.debug(String.format("Spring test ApplicationContext cache statistics: %s",contextCache));
+      statsLogger.debug("Spring test ApplicationContext cache statistics: " + this.contextCache);
     }
     return context;
   }
