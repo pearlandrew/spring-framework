@@ -1,8 +1,10 @@
 {
-  Assert.notNull(handler,"'webSocketHandler' is required");
-  Assert.notNull(url,"'url' is required");
+  Assert.notNull(handler,"WebSocketHandler is required");
+  Assert.notNull(url,"URL is required");
   String scheme=url.getScheme();
-  Assert.isTrue(scheme != null && ("ws".equals(scheme) || "wss".equals(scheme) || "http".equals(scheme)|| "https".equals(scheme)),"Invalid scheme: " + scheme);
+  if (!supportedProtocols.contains(scheme)) {
+    throw new IllegalArgumentException("Invalid scheme: '" + scheme + "'");
+  }
   SettableListenableFuture<WebSocketSession> connectFuture=new SettableListenableFuture<WebSocketSession>();
   try {
     SockJsUrlInfo sockJsUrlInfo=new SockJsUrlInfo(url);
