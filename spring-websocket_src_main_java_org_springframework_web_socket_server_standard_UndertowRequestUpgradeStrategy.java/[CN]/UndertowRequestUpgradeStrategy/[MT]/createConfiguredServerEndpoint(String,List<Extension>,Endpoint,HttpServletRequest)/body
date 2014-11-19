@@ -3,5 +3,11 @@
   ServerEndpointRegistration endpointRegistration=new ServerEndpointRegistration(path,endpoint);
   endpointRegistration.setSubprotocols(Arrays.asList(selectedProtocol));
   endpointRegistration.setExtensions(selectedExtensions);
-  return new ConfiguredServerEndpoint(endpointRegistration,new EndpointInstanceFactory(endpoint),null,new EncodingFactory(Collections.<Class<?>,List<InstanceFactory<? extends Encoder>>>emptyMap(),Collections.<Class<?>,List<InstanceFactory<? extends Decoder>>>emptyMap(),Collections.<Class<?>,List<InstanceFactory<? extends Encoder>>>emptyMap(),Collections.<Class<?>,List<InstanceFactory<? extends Decoder>>>emptyMap()));
+  EncodingFactory encodingFactory=new EncodingFactory(Collections.<Class<?>,List<InstanceFactory<? extends Encoder>>>emptyMap(),Collections.<Class<?>,List<InstanceFactory<? extends Decoder>>>emptyMap(),Collections.<Class<?>,List<InstanceFactory<? extends Encoder>>>emptyMap(),Collections.<Class<?>,List<InstanceFactory<? extends Decoder>>>emptyMap());
+  try {
+    return undertow11Present ? endpointConstructor.newInstance(endpointRegistration,new EndpointInstanceFactory(endpoint),null,encodingFactory,null) : endpointConstructor.newInstance(endpointRegistration,new EndpointInstanceFactory(endpoint),null,encodingFactory);
+  }
+ catch (  Exception ex) {
+    throw new HandshakeFailureException("Failed to instantiate ConfiguredServerEndpoint",ex);
+  }
 }
