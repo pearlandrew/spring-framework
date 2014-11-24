@@ -56,10 +56,13 @@
  else       if (Value.class.isInstance(paramAnn)) {
         defaultValue=((Value)paramAnn).value();
       }
- else       if (paramAnn.annotationType().getSimpleName().startsWith("Valid")) {
-        validate=true;
-        Object value=AnnotationUtils.getValue(paramAnn);
-        validationHints=(value instanceof Object[] ? (Object[])value : new Object[]{value});
+ else {
+        Validated validatedAnn=AnnotationUtils.getAnnotation(paramAnn,Validated.class);
+        if (validatedAnn != null || paramAnn.annotationType().getSimpleName().startsWith("Valid")) {
+          validate=true;
+          Object hints=(validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(paramAnn));
+          validationHints=(hints instanceof Object[] ? (Object[])hints : new Object[]{hints});
+        }
       }
     }
     if (annotationsFound > 1) {
