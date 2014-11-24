@@ -2,6 +2,8 @@
   this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,requestPath);
   this.response=new MockHttpServletResponse();
   this.handler.handleRequest(this.request,this.response);
-  assertTrue(location.createRelative(requestPath).exists());
+  if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
+    fail(requestPath + " doesn't actually exist as a relative path");
+  }
   assertEquals(404,this.response.getStatus());
 }
