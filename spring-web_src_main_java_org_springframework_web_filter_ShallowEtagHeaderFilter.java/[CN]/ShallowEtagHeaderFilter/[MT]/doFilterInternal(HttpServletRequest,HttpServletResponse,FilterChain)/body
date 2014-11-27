@@ -1,7 +1,7 @@
 {
   HttpServletResponse responseToUse=response;
-  if (!isAsyncDispatch(request)) {
-    responseToUse=new ShallowEtagResponseWrapper(response);
+  if (!isAsyncDispatch(request) && !(response instanceof ContentCachingResponseWrapper)) {
+    responseToUse=new ContentCachingResponseWrapper(response);
   }
   filterChain.doFilter(request,responseToUse);
   if (!isAsyncStarted(request)) {

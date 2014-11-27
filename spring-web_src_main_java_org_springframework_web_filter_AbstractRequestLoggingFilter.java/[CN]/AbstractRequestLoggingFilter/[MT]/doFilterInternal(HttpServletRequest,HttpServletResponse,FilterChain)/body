@@ -1,19 +1,18 @@
 {
   boolean isFirstRequest=!isAsyncDispatch(request);
-  if (isIncludePayload()) {
-    if (isFirstRequest) {
-      request=new RequestCachingRequestWrapper(request);
-    }
+  HttpServletRequest requestToUse=request;
+  if (isIncludePayload() && isFirstRequest && !(request instanceof ContentCachingRequestWrapper)) {
+    requestToUse=new ContentCachingRequestWrapper(request);
   }
   if (isFirstRequest) {
-    beforeRequest(request,getBeforeMessage(request));
+    beforeRequest(requestToUse,getBeforeMessage(requestToUse));
   }
   try {
-    filterChain.doFilter(request,response);
+    filterChain.doFilter(requestToUse,response);
   }
   finally {
-    if (!isAsyncStarted(request)) {
-      afterRequest(request,getAfterMessage(request));
+    if (!isAsyncStarted(requestToUse)) {
+      afterRequest(requestToUse,getAfterMessage(requestToUse));
     }
   }
 }
