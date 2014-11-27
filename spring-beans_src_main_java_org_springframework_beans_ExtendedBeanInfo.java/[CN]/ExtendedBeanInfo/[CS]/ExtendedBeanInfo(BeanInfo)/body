@@ -1,12 +1,26 @@
 {
   this.delegate=delegate;
   for (  PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
-    this.propertyDescriptors.add(pd instanceof IndexedPropertyDescriptor ? new SimpleIndexedPropertyDescriptor((IndexedPropertyDescriptor)pd) : new SimplePropertyDescriptor(pd));
+    try {
+      this.propertyDescriptors.add(pd instanceof IndexedPropertyDescriptor ? new SimpleIndexedPropertyDescriptor((IndexedPropertyDescriptor)pd) : new SimplePropertyDescriptor(pd));
+    }
+ catch (    IntrospectionException ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Ignoring invalid bean property '" + pd.getName() + "': "+ ex.getMessage());
+      }
+    }
   }
   MethodDescriptor[] methodDescriptors=delegate.getMethodDescriptors();
   if (methodDescriptors != null) {
     for (    Method method : findCandidateWriteMethods(methodDescriptors)) {
-      handleCandidateWriteMethod(method);
+      try {
+        handleCandidateWriteMethod(method);
+      }
+ catch (      IntrospectionException ex) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Ignoring candidate write method [" + method + "]: "+ ex.getMessage());
+        }
+      }
     }
   }
 }
