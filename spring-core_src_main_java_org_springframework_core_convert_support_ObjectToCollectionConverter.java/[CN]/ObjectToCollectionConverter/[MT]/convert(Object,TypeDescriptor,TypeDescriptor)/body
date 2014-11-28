@@ -2,12 +2,13 @@
   if (source == null) {
     return null;
   }
-  Collection<Object> target=CollectionFactory.createCollection(targetType.getType(),1);
-  if (targetType.getElementTypeDescriptor() == null || targetType.getElementTypeDescriptor().isCollection()) {
+  TypeDescriptor elementDesc=targetType.getElementTypeDescriptor();
+  Collection<Object> target=CollectionFactory.createCollection(targetType.getType(),(elementDesc != null ? elementDesc.getType() : null),1);
+  if (elementDesc == null || elementDesc.isCollection()) {
     target.add(source);
   }
  else {
-    Object singleElement=this.conversionService.convert(source,sourceType,targetType.getElementTypeDescriptor());
+    Object singleElement=this.conversionService.convert(source,sourceType,elementDesc);
     target.add(singleElement);
   }
   return target;

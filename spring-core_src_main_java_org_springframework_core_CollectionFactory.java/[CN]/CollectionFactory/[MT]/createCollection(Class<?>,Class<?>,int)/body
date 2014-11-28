@@ -1,0 +1,31 @@
+{
+  if (collectionClass.isInterface()) {
+    if (Set.class.equals(collectionClass) || Collection.class.equals(collectionClass)) {
+      return new LinkedHashSet<E>(capacity);
+    }
+ else     if (List.class.equals(collectionClass)) {
+      return new ArrayList<E>(capacity);
+    }
+ else     if (SortedSet.class.equals(collectionClass) || NavigableSet.class.equals(collectionClass)) {
+      return new TreeSet<E>();
+    }
+ else {
+      throw new IllegalArgumentException("Unsupported Collection interface: " + collectionClass.getName());
+    }
+  }
+ else   if (EnumSet.class.equals(collectionClass)) {
+    Assert.notNull(elementType,"Cannot create EnumSet for unknown element type");
+    return EnumSet.noneOf((Class)elementType);
+  }
+ else {
+    if (!Collection.class.isAssignableFrom(collectionClass)) {
+      throw new IllegalArgumentException("Unsupported Collection type: " + collectionClass.getName());
+    }
+    try {
+      return (Collection<E>)collectionClass.newInstance();
+    }
+ catch (    Exception ex) {
+      throw new IllegalArgumentException("Could not instantiate Collection type: " + collectionClass.getName(),ex);
+    }
+  }
+}

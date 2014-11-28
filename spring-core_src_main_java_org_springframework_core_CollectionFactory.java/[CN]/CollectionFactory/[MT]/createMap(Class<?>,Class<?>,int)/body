@@ -1,0 +1,31 @@
+{
+  if (mapClass.isInterface()) {
+    if (Map.class.equals(mapClass)) {
+      return new LinkedHashMap<K,V>(capacity);
+    }
+ else     if (SortedMap.class.equals(mapClass) || NavigableMap.class.equals(mapClass)) {
+      return new TreeMap<K,V>();
+    }
+ else     if (MultiValueMap.class.equals(mapClass)) {
+      return new LinkedMultiValueMap();
+    }
+ else {
+      throw new IllegalArgumentException("Unsupported Map interface: " + mapClass.getName());
+    }
+  }
+ else   if (EnumMap.class.equals(mapClass)) {
+    Assert.notNull(keyType,"Cannot create EnumMap for unknown key type");
+    return new EnumMap(keyType);
+  }
+ else {
+    if (!Map.class.isAssignableFrom(mapClass)) {
+      throw new IllegalArgumentException("Unsupported Map type: " + mapClass.getName());
+    }
+    try {
+      return (Map<K,V>)mapClass.newInstance();
+    }
+ catch (    Exception ex) {
+      throw new IllegalArgumentException("Could not instantiate Map type: " + mapClass.getName(),ex);
+    }
+  }
+}
