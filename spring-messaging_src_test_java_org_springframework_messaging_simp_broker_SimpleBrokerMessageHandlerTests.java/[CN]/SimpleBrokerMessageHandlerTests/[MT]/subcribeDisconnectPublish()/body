@@ -10,6 +10,7 @@
   this.messageHandler.handleMessage(createSubscriptionMessage(sess2,"sub3","/bar"));
   SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT);
   headers.setSessionId(sess1);
+  headers.setUser(new TestPrincipal("joe"));
   Message<byte[]> message=MessageBuilder.createMessage(new byte[0],headers.getMessageHeaders());
   this.messageHandler.handleMessage(message);
   this.messageHandler.handleMessage(createMessage("/foo","message1"));
@@ -18,6 +19,7 @@
   Message<?> captured=this.messageCaptor.getAllValues().get(0);
   assertEquals(SimpMessageType.DISCONNECT_ACK,SimpMessageHeaderAccessor.getMessageType(captured.getHeaders()));
   assertEquals(sess1,SimpMessageHeaderAccessor.getSessionId(captured.getHeaders()));
+  assertEquals("joe",SimpMessageHeaderAccessor.getUser(captured.getHeaders()).getName());
   assertCapturedMessage(sess2,"sub1","/foo");
   assertCapturedMessage(sess2,"sub2","/foo");
   assertCapturedMessage(sess2,"sub3","/bar");
