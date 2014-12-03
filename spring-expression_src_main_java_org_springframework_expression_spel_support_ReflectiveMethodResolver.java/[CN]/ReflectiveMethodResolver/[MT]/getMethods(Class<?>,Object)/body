@@ -1,9 +1,16 @@
 {
   if (targetObject instanceof Class) {
-    Set<Method> methods=new HashSet<Method>();
-    methods.addAll(Arrays.asList(getMethods(type)));
-    methods.addAll(Arrays.asList(getMethods(targetObject.getClass())));
-    return methods.toArray(new Method[methods.size()]);
+    Set<Method> result=new LinkedHashSet<Method>();
+    result.addAll(Arrays.asList(getMethods(targetObject.getClass())));
+    Method[] methods=getMethods(type);
+    for (    Method method : methods) {
+      if (Modifier.isStatic(method.getModifiers())) {
+        result.add(method);
+      }
+    }
+    return result;
   }
-  return getMethods(type);
+ else {
+    return Arrays.asList(getMethods(type));
+  }
 }
