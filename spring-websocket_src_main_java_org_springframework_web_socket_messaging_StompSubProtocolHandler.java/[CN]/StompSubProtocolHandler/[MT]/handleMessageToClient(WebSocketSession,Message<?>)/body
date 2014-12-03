@@ -32,7 +32,12 @@
   }
   try {
     byte[] bytes=this.stompEncoder.encode(stompAccessor.getMessageHeaders(),(byte[])message.getPayload());
-    session.sendMessage(new TextMessage(bytes));
+    if (MimeTypeUtils.APPLICATION_OCTET_STREAM.isCompatibleWith(stompAccessor.getContentType())) {
+      session.sendMessage(new BinaryMessage(bytes));
+    }
+ else {
+      session.sendMessage(new TextMessage(bytes));
+    }
   }
  catch (  SessionLimitExceededException ex) {
     throw ex;
