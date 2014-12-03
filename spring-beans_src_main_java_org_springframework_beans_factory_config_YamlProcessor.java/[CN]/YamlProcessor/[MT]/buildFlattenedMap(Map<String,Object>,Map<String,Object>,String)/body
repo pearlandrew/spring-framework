@@ -1,5 +1,5 @@
 {
-  for (  Entry<String,Object> entry : input.entrySet()) {
+  for (  Entry<String,Object> entry : source.entrySet()) {
     String key=entry.getKey();
     if (StringUtils.hasText(path)) {
       if (key.startsWith("[")) {
@@ -11,21 +11,21 @@
     }
     Object value=entry.getValue();
     if (value instanceof String) {
-      properties.put(key,value);
+      result.put(key,value);
     }
  else     if (value instanceof Map) {
       @SuppressWarnings("unchecked") Map<String,Object> map=(Map<String,Object>)value;
-      assignProperties(properties,map,key);
+      buildFlattenedMap(result,map,key);
     }
  else     if (value instanceof Collection) {
       @SuppressWarnings("unchecked") Collection<Object> collection=(Collection<Object>)value;
       int count=0;
       for (      Object object : collection) {
-        assignProperties(properties,Collections.singletonMap("[" + (count++) + "]",object),key);
+        buildFlattenedMap(result,Collections.singletonMap("[" + (count++) + "]",object),key);
       }
     }
  else {
-      properties.put(key,value == null ? "" : value);
+      result.put(key,value == null ? "" : value);
     }
   }
 }
