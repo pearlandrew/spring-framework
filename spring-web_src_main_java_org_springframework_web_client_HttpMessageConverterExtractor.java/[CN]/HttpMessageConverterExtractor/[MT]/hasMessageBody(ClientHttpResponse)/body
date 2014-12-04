@@ -3,6 +3,15 @@
   if (responseStatus == HttpStatus.NO_CONTENT || responseStatus == HttpStatus.NOT_MODIFIED) {
     return false;
   }
-  long contentLength=response.getHeaders().getContentLength();
-  return contentLength != 0;
+  HttpHeaders headers=response.getHeaders();
+  long contentLength=headers.getContentLength();
+  if (contentLength == 0) {
+    return false;
+  }
+  boolean chunked=headers.containsKey(HttpHeaders.TRANSFER_ENCODING) && headers.get(HttpHeaders.TRANSFER_ENCODING).contains("chunked");
+  boolean closed=headers.containsKey(HttpHeaders.CONNECTION) && headers.getConnection().contains("close");
+  if (!chunked && contentLength == -1 && closed) {
+    return false;
+  }
+  return true;
 }
