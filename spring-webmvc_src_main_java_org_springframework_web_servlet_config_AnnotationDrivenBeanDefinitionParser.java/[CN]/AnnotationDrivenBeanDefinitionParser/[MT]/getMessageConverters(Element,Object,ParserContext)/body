@@ -22,13 +22,20 @@
       messageConverters.add(createConverterDefinition(RssChannelHttpMessageConverter.class,source));
     }
     if (jackson2XmlPresent) {
-      messageConverters.add(createConverterDefinition(MappingJackson2XmlHttpMessageConverter.class,source));
+      RootBeanDefinition jacksonConverterDef=createConverterDefinition(MappingJackson2XmlHttpMessageConverter.class,source);
+      GenericBeanDefinition jacksonFactoryDef=createObjectMapperFactoryDefinition(source);
+      jacksonFactoryDef.getPropertyValues().add("createXmlMapper",true);
+      jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0,jacksonFactoryDef);
+      messageConverters.add(jacksonConverterDef);
     }
  else     if (jaxb2Present) {
       messageConverters.add(createConverterDefinition(Jaxb2RootElementHttpMessageConverter.class,source));
     }
     if (jackson2Present) {
-      messageConverters.add(createConverterDefinition(MappingJackson2HttpMessageConverter.class,source));
+      RootBeanDefinition jacksonConverterDef=createConverterDefinition(MappingJackson2HttpMessageConverter.class,source);
+      GenericBeanDefinition jacksonFactoryDef=createObjectMapperFactoryDefinition(source);
+      jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0,jacksonFactoryDef);
+      messageConverters.add(jacksonConverterDef);
     }
  else     if (gsonPresent) {
       messageConverters.add(createConverterDefinition(GsonHttpMessageConverter.class,source));

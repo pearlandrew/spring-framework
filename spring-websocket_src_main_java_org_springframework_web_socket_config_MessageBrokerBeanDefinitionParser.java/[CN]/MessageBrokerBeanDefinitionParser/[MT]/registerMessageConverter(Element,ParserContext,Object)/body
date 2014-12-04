@@ -17,7 +17,11 @@
       RootBeanDefinition resolverDef=new RootBeanDefinition(DefaultContentTypeResolver.class);
       resolverDef.getPropertyValues().add("defaultMimeType",MimeTypeUtils.APPLICATION_JSON);
       jacksonConverterDef.getPropertyValues().add("contentTypeResolver",resolverDef);
-      jacksonConverterDef.getPropertyValues().add("objectMapper",Jackson2ObjectMapperBuilder.json().build());
+      GenericBeanDefinition jacksonFactoryDef=new GenericBeanDefinition();
+      jacksonFactoryDef.setBeanClass(Jackson2ObjectMapperFactoryBean.class);
+      jacksonFactoryDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+      jacksonFactoryDef.setSource(source);
+      jacksonConverterDef.getPropertyValues().add("objectMapper",jacksonFactoryDef);
       converters.add(jacksonConverterDef);
     }
   }
