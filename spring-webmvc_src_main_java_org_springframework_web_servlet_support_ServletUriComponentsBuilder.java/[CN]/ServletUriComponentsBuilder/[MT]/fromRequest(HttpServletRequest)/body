@@ -1,38 +1,6 @@
 {
-  String scheme=request.getScheme();
-  String host=request.getServerName();
-  int port=request.getServerPort();
-  String hostHeader=request.getHeader("X-Forwarded-Host");
-  if (StringUtils.hasText(hostHeader)) {
-    String[] hosts=StringUtils.commaDelimitedListToStringArray(hostHeader);
-    String hostToUse=hosts[0];
-    if (hostToUse.contains(":")) {
-      String[] hostAndPort=StringUtils.split(hostToUse,":");
-      host=hostAndPort[0];
-      port=Integer.parseInt(hostAndPort[1]);
-    }
- else {
-      host=hostToUse;
-      port=-1;
-    }
-  }
-  String portHeader=request.getHeader("X-Forwarded-Port");
-  if (StringUtils.hasText(portHeader)) {
-    port=Integer.parseInt(portHeader);
-  }
-  String protocolHeader=request.getHeader("X-Forwarded-Proto");
-  if (StringUtils.hasText(protocolHeader)) {
-    scheme=protocolHeader;
-  }
-  String path=request.getRequestURI();
-  path=prependForwardedPrefix(request,path);
-  ServletUriComponentsBuilder builder=new ServletUriComponentsBuilder();
-  builder.scheme(scheme);
-  builder.host(host);
-  if (scheme.equals("http") && port != 80 || scheme.equals("https") && port != 443) {
-    builder.port(port);
-  }
-  builder.initPath(path);
+  ServletUriComponentsBuilder builder=initFromRequest(request);
+  builder.initPath(prependForwardedPrefix(request,request.getRequestURI()));
   builder.query(request.getQueryString());
   return builder;
 }
