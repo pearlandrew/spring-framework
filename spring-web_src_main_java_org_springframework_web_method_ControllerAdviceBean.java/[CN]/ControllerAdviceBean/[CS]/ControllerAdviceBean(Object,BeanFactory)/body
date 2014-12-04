@@ -1,0 +1,27 @@
+{
+  this.bean=bean;
+  this.beanFactory=beanFactory;
+  Class<?> beanType;
+  if (bean instanceof String) {
+    String beanName=(String)bean;
+    Assert.hasText(beanName,"Bean name must not be null");
+    Assert.notNull(beanFactory,"BeanFactory must not be null");
+    if (!beanFactory.containsBean(beanName)) {
+      throw new IllegalArgumentException("BeanFactory [" + beanFactory + "] does not contain specified controller advice bean '"+ beanName+ "'");
+    }
+    beanType=this.beanFactory.getType(beanName);
+    this.order=initOrderFromBeanType(beanType);
+  }
+ else {
+    Assert.notNull(bean,"Bean must not be null");
+    beanType=bean.getClass();
+    this.order=initOrderFromBean(bean);
+  }
+  ControllerAdvice annotation=AnnotationUtils.findAnnotation(beanType,ControllerAdvice.class);
+  if (annotation == null) {
+    throw new IllegalArgumentException("Bean type [" + beanType.getName() + "] is not annotated as @ControllerAdvice");
+  }
+  this.basePackages=initBasePackages(annotation);
+  this.assignableTypes=Arrays.asList(annotation.assignableTypes());
+  this.annotations=Arrays.asList(annotation.annotations());
+}

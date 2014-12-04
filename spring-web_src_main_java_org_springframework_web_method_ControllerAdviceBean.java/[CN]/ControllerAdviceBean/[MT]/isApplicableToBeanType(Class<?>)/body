@@ -3,6 +3,11 @@
     return true;
   }
  else   if (beanType != null) {
+    for (    String basePackage : this.basePackages) {
+      if (ClassUtils.getPackageName(beanType).startsWith(basePackage)) {
+        return true;
+      }
+    }
     for (    Class<?> clazz : this.assignableTypes) {
       if (ClassUtils.isAssignable(clazz,beanType)) {
         return true;
@@ -10,12 +15,6 @@
     }
     for (    Class<? extends Annotation> annotationClass : this.annotations) {
       if (AnnotationUtils.findAnnotation(beanType,annotationClass) != null) {
-        return true;
-      }
-    }
-    String packageName=beanType.getPackage().getName();
-    for (    Package basePackage : this.basePackages) {
-      if (packageName.startsWith(basePackage.getName())) {
         return true;
       }
     }
