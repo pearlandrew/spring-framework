@@ -1,0 +1,23 @@
+{
+  String canonicalName=canonicalName(beanName);
+  if (alreadySeen != null && alreadySeen.contains(beanName)) {
+    return false;
+  }
+  Set<String> dependentBeans=this.dependentBeanMap.get(canonicalName);
+  if (dependentBeans == null) {
+    return false;
+  }
+  if (dependentBeans.contains(dependentBeanName)) {
+    return true;
+  }
+  for (  String transitiveDependency : dependentBeans) {
+    if (alreadySeen == null) {
+      alreadySeen=new HashSet<String>();
+    }
+    alreadySeen.add(beanName);
+    if (isDependent(transitiveDependency,dependentBeanName,alreadySeen)) {
+      return true;
+    }
+  }
+  return false;
+}
