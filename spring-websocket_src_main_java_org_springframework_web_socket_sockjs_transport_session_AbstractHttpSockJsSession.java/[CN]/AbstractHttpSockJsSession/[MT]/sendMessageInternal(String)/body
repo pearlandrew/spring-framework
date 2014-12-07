@@ -1,4 +1,22 @@
 {
-  this.messageCache.add(message);
-  tryFlushCache();
+synchronized (this.responseLock) {
+    this.messageCache.add(message);
+    if (logger.isTraceEnabled()) {
+      logger.trace(this.messageCache.size() + " message(s) to flush in session " + this.getId());
+    }
+    if (isActive() && this.readyToSend) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Session is active, ready to flush.");
+      }
+      cancelHeartbeat();
+      flushCache();
+      return;
+    }
+ else {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Session is not active, not ready to flush.");
+      }
+      return;
+    }
+  }
 }

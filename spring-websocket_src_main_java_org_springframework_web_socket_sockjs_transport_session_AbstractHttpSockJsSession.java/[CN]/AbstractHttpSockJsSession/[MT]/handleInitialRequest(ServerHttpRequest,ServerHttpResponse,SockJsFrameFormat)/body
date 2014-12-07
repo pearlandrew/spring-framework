@@ -4,16 +4,21 @@
   this.principal=request.getPrincipal();
   this.localAddress=request.getLocalAddress();
   this.remoteAddress=request.getRemoteAddress();
-  this.response=response;
-  this.frameFormat=frameFormat;
-  this.asyncRequestControl=request.getAsyncRequestControl(response);
 synchronized (this.responseLock) {
     try {
+      this.response=response;
+      this.frameFormat=frameFormat;
+      this.asyncRequestControl=request.getAsyncRequestControl(response);
+      this.asyncRequestControl.start(-1);
       delegateConnectionEstablished();
-      writePrelude(request,response);
-      writeFrame(SockJsFrame.openFrame());
-      if (isStreaming() && !isClosed()) {
-        startAsyncRequest();
+      if (isStreaming()) {
+        writePrelude(request,response);
+        writeFrame(SockJsFrame.openFrame());
+        flushCache();
+        this.readyToSend=true;
+      }
+ else {
+        writeFrame(SockJsFrame.openFrame());
       }
     }
  catch (    Throwable ex) {
