@@ -1,7 +1,12 @@
 {
   ConfigurableApplicationContext context=new AnnotationConfigApplicationContext(Config.class,MetaAnnotationTestBean.class);
-  JmsListenerContainerTestFactory factory=context.getBean(JmsListenerContainerTestFactory.class);
-  assertEquals("one container should have been registered",1,factory.getListenerContainers().size());
-  JmsListenerEndpoint endpoint=factory.getListenerContainers().get(0).getEndpoint();
-  assertEquals("metaTestQueue",((AbstractJmsListenerEndpoint)endpoint).getDestination());
+  try {
+    JmsListenerContainerTestFactory factory=context.getBean(JmsListenerContainerTestFactory.class);
+    assertEquals("one container should have been registered",1,factory.getListenerContainers().size());
+    JmsListenerEndpoint endpoint=factory.getListenerContainers().get(0).getEndpoint();
+    assertEquals("metaTestQueue",((AbstractJmsListenerEndpoint)endpoint).getDestination());
+  }
+  finally {
+    context.close();
+  }
 }

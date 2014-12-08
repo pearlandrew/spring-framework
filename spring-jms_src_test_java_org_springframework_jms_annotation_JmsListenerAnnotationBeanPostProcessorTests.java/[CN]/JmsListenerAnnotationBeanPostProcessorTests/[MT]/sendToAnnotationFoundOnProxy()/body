@@ -1,0 +1,15 @@
+{
+  ConfigurableApplicationContext context=new AnnotationConfigApplicationContext(Config.class,ProxyConfig.class,ProxyTestBean.class);
+  try {
+    JmsListenerContainerTestFactory factory=context.getBean(JmsListenerContainerTestFactory.class);
+    assertEquals("one container should have been registered",1,factory.getListenerContainers().size());
+    JmsListenerEndpoint endpoint=factory.getListenerContainers().get(0).getEndpoint();
+    Method m=ReflectionUtils.findMethod(endpoint.getClass(),"getDefaultResponseDestination");
+    ReflectionUtils.makeAccessible(m);
+    Object destination=ReflectionUtils.invokeMethod(m,endpoint);
+    assertEquals("SendTo annotation not found on proxy","foobar",destination);
+  }
+  finally {
+    context.close();
+  }
+}
