@@ -11,15 +11,8 @@ synchronized (this.responseLock) {
       this.asyncRequestControl=request.getAsyncRequestControl(response);
       this.asyncRequestControl.start(-1);
       delegateConnectionEstablished();
-      if (isStreaming()) {
-        writePrelude(request,response);
-        writeFrame(SockJsFrame.openFrame());
-        flushCache();
-        this.readyToSend=true;
-      }
- else {
-        writeFrame(SockJsFrame.openFrame());
-      }
+      handleRequestInternal(request,response,true);
+      this.readyToSend=isActive();
     }
  catch (    Throwable ex) {
       tryCloseWithSockJsTransportError(ex,CloseStatus.SERVER_ERROR);

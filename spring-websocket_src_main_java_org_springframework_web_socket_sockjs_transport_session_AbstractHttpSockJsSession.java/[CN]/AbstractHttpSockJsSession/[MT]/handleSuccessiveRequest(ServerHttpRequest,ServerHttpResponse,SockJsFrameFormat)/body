@@ -9,20 +9,8 @@ synchronized (this.responseLock) {
       this.frameFormat=frameFormat;
       this.asyncRequestControl=request.getAsyncRequestControl(response);
       this.asyncRequestControl.start(-1);
-      if (isStreaming()) {
-        writePrelude(request,response);
-        flushCache();
-        this.readyToSend=true;
-      }
- else {
-        if (this.messageCache.isEmpty()) {
-          scheduleHeartbeat();
-          this.readyToSend=true;
-        }
- else {
-          flushCache();
-        }
-      }
+      handleRequestInternal(request,response,false);
+      this.readyToSend=isActive();
     }
  catch (    Throwable ex) {
       tryCloseWithSockJsTransportError(ex,CloseStatus.SERVER_ERROR);
