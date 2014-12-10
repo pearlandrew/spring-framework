@@ -1,31 +1,32 @@
 {
-  if (mapClass.isInterface()) {
-    if (Map.class.equals(mapClass)) {
+  Assert.notNull(mapType,"Map type must not be null");
+  if (mapType.isInterface()) {
+    if (Map.class.equals(mapType)) {
       return new LinkedHashMap<K,V>(capacity);
     }
- else     if (SortedMap.class.equals(mapClass) || NavigableMap.class.equals(mapClass)) {
+ else     if (SortedMap.class.equals(mapType) || NavigableMap.class.equals(mapType)) {
       return new TreeMap<K,V>();
     }
- else     if (MultiValueMap.class.equals(mapClass)) {
+ else     if (MultiValueMap.class.equals(mapType)) {
       return new LinkedMultiValueMap();
     }
  else {
-      throw new IllegalArgumentException("Unsupported Map interface: " + mapClass.getName());
+      throw new IllegalArgumentException("Unsupported Map interface: " + mapType.getName());
     }
   }
- else   if (EnumMap.class.equals(mapClass)) {
+ else   if (EnumMap.class.equals(mapType)) {
     Assert.notNull(keyType,"Cannot create EnumMap for unknown key type");
-    return new EnumMap(keyType);
+    return new EnumMap(asEnumType(keyType));
   }
  else {
-    if (!Map.class.isAssignableFrom(mapClass)) {
-      throw new IllegalArgumentException("Unsupported Map type: " + mapClass.getName());
+    if (!Map.class.isAssignableFrom(mapType)) {
+      throw new IllegalArgumentException("Unsupported Map type: " + mapType.getName());
     }
     try {
-      return (Map<K,V>)mapClass.newInstance();
+      return (Map<K,V>)mapType.newInstance();
     }
  catch (    Exception ex) {
-      throw new IllegalArgumentException("Could not instantiate Map type: " + mapClass.getName(),ex);
+      throw new IllegalArgumentException("Could not instantiate Map type: " + mapType.getName(),ex);
     }
   }
 }
