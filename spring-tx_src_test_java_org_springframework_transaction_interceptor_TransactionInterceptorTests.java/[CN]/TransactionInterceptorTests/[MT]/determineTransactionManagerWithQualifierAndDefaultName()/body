@@ -1,0 +1,10 @@
+{
+  BeanFactory beanFactory=mock(BeanFactory.class);
+  associateTransactionManager(beanFactory,"defaultTransactionManager");
+  TransactionInterceptor ti=createTestTransactionInterceptor(beanFactory);
+  ti.setTransactionManagerBeanName("defaultTransactionManager");
+  PlatformTransactionManager fooTransactionManager=associateTransactionManager(beanFactory,"fooTransactionManager");
+  DefaultTransactionAttribute attribute=new DefaultTransactionAttribute();
+  attribute.setQualifier("fooTransactionManager");
+  assertSame(fooTransactionManager,ti.determineTransactionManager(attribute));
+}

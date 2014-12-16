@@ -1,9 +1,7 @@
 {
   BeanFactory beanFactory=mock(BeanFactory.class);
   TransactionInterceptor ti=createTestTransactionInterceptor(beanFactory);
-  PlatformTransactionManager txManager=mock(PlatformTransactionManager.class);
-  given(beanFactory.containsBean("fooTransactionManager")).willReturn(true);
-  given(beanFactory.getBean("fooTransactionManager",PlatformTransactionManager.class)).willReturn(txManager);
+  PlatformTransactionManager txManager=associateTransactionManager(beanFactory,"fooTransactionManager");
   DefaultTransactionAttribute attribute=new DefaultTransactionAttribute();
   attribute.setQualifier("fooTransactionManager");
   PlatformTransactionManager actual=ti.determineTransactionManager(attribute);
