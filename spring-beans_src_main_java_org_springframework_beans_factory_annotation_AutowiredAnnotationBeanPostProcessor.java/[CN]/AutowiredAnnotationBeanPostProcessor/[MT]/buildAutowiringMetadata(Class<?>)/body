@@ -4,15 +4,15 @@
   do {
     LinkedList<InjectionMetadata.InjectedElement> currElements=new LinkedList<InjectionMetadata.InjectedElement>();
     for (    Field field : targetClass.getDeclaredFields()) {
-      AnnotationAttributes annotation=findAutowiredAnnotation(field);
-      if (annotation != null) {
+      AnnotationAttributes ann=findAutowiredAnnotation(field);
+      if (ann != null) {
         if (Modifier.isStatic(field.getModifiers())) {
           if (logger.isWarnEnabled()) {
             logger.warn("Autowired annotation is not supported on static fields: " + field);
           }
           continue;
         }
-        boolean required=determineRequiredStatus(annotation);
+        boolean required=determineRequiredStatus(ann);
         currElements.add(new AutowiredFieldElement(field,required));
       }
     }
