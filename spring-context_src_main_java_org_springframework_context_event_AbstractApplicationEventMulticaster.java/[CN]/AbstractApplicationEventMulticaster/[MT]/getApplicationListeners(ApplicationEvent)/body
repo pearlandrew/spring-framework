@@ -1,48 +1,24 @@
 {
-  Class<? extends ApplicationEvent> eventType=event.getClass();
   Object source=event.getSource();
   Class<?> sourceType=(source != null ? source.getClass() : null);
-  ListenerCacheKey cacheKey=new ListenerCacheKey(eventType,sourceType);
+  ListenerCacheKey cacheKey=new ListenerCacheKey(event.getClass(),sourceType);
   ListenerRetriever retriever=this.retrieverCache.get(cacheKey);
   if (retriever != null) {
     return retriever.getApplicationListeners();
   }
- else {
-    retriever=new ListenerRetriever(true);
-    LinkedList<ApplicationListener<?>> allListeners=new LinkedList<ApplicationListener<?>>();
-    Set<ApplicationListener<?>> listeners;
-    Set<String> listenerBeans;
+  if (this.beanClassLoader == null || (ClassUtils.isCacheSafe(event.getClass(),this.beanClassLoader) && (sourceType == null || ClassUtils.isCacheSafe(sourceType,this.beanClassLoader)))) {
 synchronized (this.defaultRetriever) {
-      listeners=new LinkedHashSet<ApplicationListener<?>>(this.defaultRetriever.applicationListeners);
-      listenerBeans=new LinkedHashSet<String>(this.defaultRetriever.applicationListenerBeans);
-    }
-    for (    ApplicationListener<?> listener : listeners) {
-      if (supportsEvent(listener,eventType,sourceType)) {
-        retriever.applicationListeners.add(listener);
-        allListeners.add(listener);
+      retriever=this.retrieverCache.get(cacheKey);
+      if (retriever != null) {
+        return retriever.getApplicationListeners();
       }
-    }
-    if (!listenerBeans.isEmpty()) {
-      BeanFactory beanFactory=getBeanFactory();
-      for (      String listenerBeanName : listenerBeans) {
-        try {
-          Class<?> listenerType=beanFactory.getType(listenerBeanName);
-          if (listenerType == null || supportsEvent(listenerType,event)) {
-            ApplicationListener<?> listener=beanFactory.getBean(listenerBeanName,ApplicationListener.class);
-            if (!allListeners.contains(listener) && supportsEvent(listener,eventType,sourceType)) {
-              retriever.applicationListenerBeans.add(listenerBeanName);
-              allListeners.add(listener);
-            }
-          }
-        }
- catch (        NoSuchBeanDefinitionException ex) {
-        }
-      }
-    }
-    OrderComparator.sort(allListeners);
-    if (this.beanClassLoader == null || (ClassUtils.isCacheSafe(eventType,this.beanClassLoader) && (sourceType == null || ClassUtils.isCacheSafe(sourceType,this.beanClassLoader)))) {
+      retriever=new ListenerRetriever(true);
+      Collection<ApplicationListener<?>> listeners=retrieveApplicationListeners(event,sourceType,retriever);
       this.retrieverCache.put(cacheKey,retriever);
+      return listeners;
     }
-    return allListeners;
+  }
+ else {
+    return retrieveApplicationListeners(event,sourceType,null);
   }
 }
