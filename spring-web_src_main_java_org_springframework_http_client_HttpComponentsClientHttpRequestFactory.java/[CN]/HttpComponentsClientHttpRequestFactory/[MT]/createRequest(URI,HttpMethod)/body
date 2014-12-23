@@ -13,14 +13,11 @@
       config=((Configurable)httpRequest).getConfig();
     }
     if (config == null) {
-      if (this.connectTimeout > 0 || this.connectionRequestTimeout > 0 || this.socketTimeout > 0) {
-        config=RequestConfig.custom().setConnectTimeout(this.connectTimeout).setConnectionRequestTimeout(this.connectionRequestTimeout).setSocketTimeout(this.socketTimeout).build();
-      }
- else {
-        config=RequestConfig.DEFAULT;
-      }
+      config=this.requestConfig;
     }
-    context.setAttribute(HttpClientContext.REQUEST_CONFIG,config);
+    if (config != null) {
+      context.setAttribute(HttpClientContext.REQUEST_CONFIG,config);
+    }
   }
   if (this.bufferRequestBody) {
     return new HttpComponentsClientHttpRequest(client,httpRequest,context);
