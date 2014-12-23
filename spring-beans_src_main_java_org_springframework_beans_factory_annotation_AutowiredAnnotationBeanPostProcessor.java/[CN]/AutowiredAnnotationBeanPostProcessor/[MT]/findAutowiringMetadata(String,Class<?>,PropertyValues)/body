@@ -5,12 +5,15 @@
 synchronized (this.injectionMetadataCache) {
       metadata=this.injectionMetadataCache.get(cacheKey);
       if (InjectionMetadata.needsRefresh(metadata,clazz)) {
+        if (metadata != null) {
+          metadata.clear(pvs);
+        }
         try {
-          metadata=buildPersistenceMetadata(clazz);
+          metadata=buildAutowiringMetadata(clazz);
           this.injectionMetadataCache.put(cacheKey,metadata);
         }
  catch (        NoClassDefFoundError err) {
-          throw new IllegalStateException("Failed to introspect bean class [" + clazz.getName() + "] for persistence metadata: could not find class that it depends on",err);
+          throw new IllegalStateException("Failed to introspect bean class [" + clazz.getName() + "] for autowiring metadata: could not find class that it depends on",err);
         }
       }
     }
