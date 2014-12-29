@@ -31,8 +31,10 @@
     }
   }
   try {
-    byte[] bytes=this.stompEncoder.encode(stompAccessor.getMessageHeaders(),(byte[])message.getPayload());
-    if (MimeTypeUtils.APPLICATION_OCTET_STREAM.isCompatibleWith(stompAccessor.getContentType())) {
+    byte[] payload=(byte[])message.getPayload();
+    byte[] bytes=this.stompEncoder.encode(stompAccessor.getMessageHeaders(),payload);
+    boolean useBinary=(payload.length > 0 && !(session instanceof SockJsSession) && MimeTypeUtils.APPLICATION_OCTET_STREAM.isCompatibleWith(stompAccessor.getContentType()));
+    if (useBinary) {
       session.sendMessage(new BinaryMessage(bytes));
     }
  else {
