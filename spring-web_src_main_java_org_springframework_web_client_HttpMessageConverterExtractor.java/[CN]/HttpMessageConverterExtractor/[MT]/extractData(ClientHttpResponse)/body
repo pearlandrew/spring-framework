@@ -1,8 +1,9 @@
 {
-  if (!hasMessageBody(response)) {
+  MessageBodyClientHttpResponseWrapper responseWrapper=new MessageBodyClientHttpResponseWrapper(response);
+  if (!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
     return null;
   }
-  MediaType contentType=getContentType(response);
+  MediaType contentType=getContentType(responseWrapper);
   for (  HttpMessageConverter<?> messageConverter : this.messageConverters) {
     if (messageConverter instanceof GenericHttpMessageConverter) {
       GenericHttpMessageConverter<?> genericMessageConverter=(GenericHttpMessageConverter<?>)messageConverter;
@@ -10,7 +11,7 @@
         if (logger.isDebugEnabled()) {
           logger.debug("Reading [" + this.responseType + "] as \""+ contentType+ "\" using ["+ messageConverter+ "]");
         }
-        return (T)genericMessageConverter.read(this.responseType,null,response);
+        return (T)genericMessageConverter.read(this.responseType,null,responseWrapper);
       }
     }
     if (this.responseClass != null) {
@@ -18,7 +19,7 @@
         if (logger.isDebugEnabled()) {
           logger.debug("Reading [" + this.responseClass.getName() + "] as \""+ contentType+ "\" using ["+ messageConverter+ "]");
         }
-        return (T)messageConverter.read((Class)this.responseClass,response);
+        return (T)messageConverter.read((Class)this.responseClass,responseWrapper);
       }
     }
   }

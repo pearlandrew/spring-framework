@@ -12,8 +12,9 @@
   extractor=new HttpMessageConverterExtractor<List<String>>(type,converters);
   given(response.getStatusCode()).willReturn(HttpStatus.OK);
   given(response.getHeaders()).willReturn(responseHeaders);
+  given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
   given(converter.canRead(type,null,contentType)).willReturn(true);
-  given(converter.read(type,null,response)).willReturn(expected);
+  given(converter.read(eq(type),eq(null),any(HttpInputMessage.class))).willReturn(expected);
   Object result=extractor.extractData(response);
   assertEquals(expected,result);
 }

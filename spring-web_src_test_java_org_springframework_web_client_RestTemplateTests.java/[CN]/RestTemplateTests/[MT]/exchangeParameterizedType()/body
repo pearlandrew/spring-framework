@@ -14,14 +14,15 @@
   converter.write(requestBody,null,this.request);
   given(this.request.execute()).willReturn(response);
   given(errorHandler.hasError(response)).willReturn(false);
+  List<Integer> expected=Collections.singletonList(42);
   HttpHeaders responseHeaders=new HttpHeaders();
   responseHeaders.setContentType(MediaType.TEXT_PLAIN);
   responseHeaders.setContentLength(10);
   given(response.getStatusCode()).willReturn(HttpStatus.OK);
   given(response.getHeaders()).willReturn(responseHeaders);
-  List<Integer> expected=Collections.singletonList(42);
+  given(response.getBody()).willReturn(new ByteArrayInputStream(new Integer(42).toString().getBytes()));
   given(converter.canRead(intList.getType(),null,MediaType.TEXT_PLAIN)).willReturn(true);
-  given(converter.read(intList.getType(),null,response)).willReturn(expected);
+  given(converter.read(eq(intList.getType()),eq(null),any(HttpInputMessage.class))).willReturn(expected);
   given(response.getStatusCode()).willReturn(HttpStatus.OK);
   HttpStatus status=HttpStatus.OK;
   given(response.getStatusCode()).willReturn(status);

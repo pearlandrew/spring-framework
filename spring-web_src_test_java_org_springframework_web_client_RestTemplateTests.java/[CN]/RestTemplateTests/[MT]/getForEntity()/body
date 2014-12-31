@@ -7,14 +7,15 @@
   given(request.getHeaders()).willReturn(requestHeaders);
   given(request.execute()).willReturn(response);
   given(errorHandler.hasError(response)).willReturn(false);
+  String expected="Hello World";
   HttpHeaders responseHeaders=new HttpHeaders();
   responseHeaders.setContentType(textPlain);
   responseHeaders.setContentLength(10);
   given(response.getStatusCode()).willReturn(HttpStatus.OK);
   given(response.getHeaders()).willReturn(responseHeaders);
+  given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
   given(converter.canRead(String.class,textPlain)).willReturn(true);
-  String expected="Hello World";
-  given(converter.read(String.class,response)).willReturn(expected);
+  given(converter.read(eq(String.class),any(HttpInputMessage.class))).willReturn(expected);
   given(response.getStatusCode()).willReturn(HttpStatus.OK);
   HttpStatus status=HttpStatus.OK;
   given(response.getStatusCode()).willReturn(status);
