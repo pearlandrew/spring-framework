@@ -1,12 +1,15 @@
 {
-  CloseableHttpClient client=HttpClientBuilder.create().setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(1234).build()).build();
+  RequestConfig defaultConfig=RequestConfig.custom().setConnectTimeout(1234).build();
+  CloseableHttpClient client=mock(CloseableHttpClient.class,withSettings().extraInterfaces(Configurable.class));
+  Configurable configurable=(Configurable)client;
+  when(configurable.getConfig()).thenReturn(defaultConfig);
   HttpComponentsHttpInvokerRequestExecutor executor=new HttpComponentsHttpInvokerRequestExecutor(client);
   HttpInvokerClientConfiguration config=mockHttpInvokerClientConfiguration("http://fake-service");
   HttpPost httpPost=executor.createHttpPost(config);
-  assertNull("No custom config should be set with a custom HttpClient",httpPost.getConfig());
+  assertSame("Default client configuration is expected",defaultConfig,httpPost.getConfig());
   executor.setConnectionRequestTimeout(4567);
   HttpPost httpPost2=executor.createHttpPost(config);
   assertNotNull(httpPost2.getConfig());
   assertEquals(4567,httpPost2.getConfig().getConnectionRequestTimeout());
-  assertEquals(-1,httpPost2.getConfig().getConnectTimeout());
+  assertEquals(1234,httpPost2.getConfig().getConnectTimeout());
 }
