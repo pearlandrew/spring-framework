@@ -3,14 +3,11 @@
   Assert.notNull(responseWrapper,"ShallowEtagResponseWrapper not found");
   HttpServletResponse rawResponse=(HttpServletResponse)responseWrapper.getResponse();
   int statusCode=responseWrapper.getStatusCode();
-  byte[] body=responseWrapper.getContentAsByteArray();
   if (rawResponse.isCommitted()) {
-    if (body.length > 0) {
-      StreamUtils.copy(body,rawResponse.getOutputStream());
-    }
+    responseWrapper.copyBodyToResponse();
   }
- else   if (isEligibleForEtag(request,responseWrapper,statusCode,body)) {
-    String responseETag=generateETagHeaderValue(body);
+ else   if (isEligibleForEtag(request,responseWrapper,statusCode,responseWrapper.getContentInputStream())) {
+    String responseETag=generateETagHeaderValue(responseWrapper.getContentInputStream());
     rawResponse.setHeader(HEADER_ETAG,responseETag);
     String requestETag=request.getHeader(HEADER_IF_NONE_MATCH);
     if (responseETag.equals(requestETag)) {
@@ -23,19 +20,13 @@
       if (logger.isTraceEnabled()) {
         logger.trace("ETag [" + responseETag + "] not equal to If-None-Match ["+ requestETag+ "], sending normal response");
       }
-      if (body.length > 0) {
-        rawResponse.setContentLength(body.length);
-        StreamUtils.copy(body,rawResponse.getOutputStream());
-      }
+      responseWrapper.copyBodyToResponse();
     }
   }
  else {
     if (logger.isTraceEnabled()) {
       logger.trace("Response with status code [" + statusCode + "] not eligible for ETag");
     }
-    if (body.length > 0) {
-      rawResponse.setContentLength(body.length);
-      StreamUtils.copy(body,rawResponse.getOutputStream());
-    }
+    responseWrapper.copyBodyToResponse();
   }
 }

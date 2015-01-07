@@ -1,0 +1,28 @@
+{
+  Assert.isTrue(targetCapacity >= size(),"New capacity must not be smaller than current size");
+  if (buffers.peekFirst() == null) {
+    nextBlockSize=targetCapacity - size();
+  }
+ else   if (size() == targetCapacity && buffers.getFirst().length == targetCapacity) {
+  }
+ else {
+    int totalSize=size();
+    byte[] data=new byte[targetCapacity];
+    int pos=0;
+    Iterator<byte[]> iter=buffers.iterator();
+    while (iter.hasNext()) {
+      byte[] bytes=iter.next();
+      if (iter.hasNext()) {
+        System.arraycopy(bytes,0,data,pos,bytes.length);
+        pos+=bytes.length;
+      }
+ else {
+        System.arraycopy(bytes,0,data,pos,index);
+      }
+    }
+    buffers.clear();
+    buffers.add(data);
+    index=totalSize;
+    alreadyBufferedSize=0;
+  }
+}

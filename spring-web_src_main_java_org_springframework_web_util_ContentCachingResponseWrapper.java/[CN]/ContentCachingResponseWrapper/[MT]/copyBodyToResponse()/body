@@ -1,7 +1,10 @@
 {
   if (this.content.size() > 0) {
-    getResponse().setContentLength(this.content.size());
-    StreamUtils.copy(this.content.toByteArray(),getResponse().getOutputStream());
+    HttpServletResponse rawResponse=(HttpServletResponse)getResponse();
+    if (!rawResponse.isCommitted()) {
+      rawResponse.setContentLength(this.content.size());
+    }
+    this.content.writeTo(rawResponse.getOutputStream());
     this.content.reset();
   }
 }
