@@ -1,0 +1,21 @@
+{
+synchronized (this) {
+    this.handler=handler;
+    for (    Map.Entry<Object,MediaType> entry : this.initHandlerCache.entrySet()) {
+      try {
+        sendInternal(entry.getKey(),entry.getValue());
+      }
+ catch (      Throwable ex) {
+        return;
+      }
+    }
+    if (this.complete) {
+      if (this.failure != null) {
+        this.handler.completeWithError(this.failure);
+      }
+ else {
+        this.handler.complete();
+      }
+    }
+  }
+}

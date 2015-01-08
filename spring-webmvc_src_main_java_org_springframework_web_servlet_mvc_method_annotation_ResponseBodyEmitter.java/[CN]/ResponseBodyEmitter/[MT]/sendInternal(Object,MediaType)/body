@@ -1,0 +1,24 @@
+{
+  if (object == null) {
+    return;
+  }
+  if (handler == null) {
+synchronized (this) {
+      if (handler == null) {
+        this.initHandlerCache.put(object,mediaType);
+        return;
+      }
+    }
+  }
+  try {
+    this.handler.send(object,mediaType);
+  }
+ catch (  IOException ex) {
+    this.handler.completeWithError(ex);
+    throw ex;
+  }
+catch (  Throwable ex) {
+    this.handler.completeWithError(ex);
+    throw new IllegalStateException("Failed to send " + object,ex);
+  }
+}

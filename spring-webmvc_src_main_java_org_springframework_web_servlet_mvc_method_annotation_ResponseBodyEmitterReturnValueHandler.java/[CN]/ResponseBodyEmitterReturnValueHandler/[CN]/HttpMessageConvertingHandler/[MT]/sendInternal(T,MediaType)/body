@@ -1,0 +1,13 @@
+{
+  for (  HttpMessageConverter<?> converter : ResponseBodyEmitterReturnValueHandler.this.messageConverters) {
+    if (converter.canWrite(data.getClass(),mediaType)) {
+      ((HttpMessageConverter<T>)converter).write(data,mediaType,this.outputMessage);
+      this.outputMessage.flush();
+      if (logger.isDebugEnabled()) {
+        logger.debug("Written [" + data + "] using ["+ converter+ "]");
+      }
+      return;
+    }
+  }
+  throw new IllegalArgumentException("No suitable converter for " + data);
+}

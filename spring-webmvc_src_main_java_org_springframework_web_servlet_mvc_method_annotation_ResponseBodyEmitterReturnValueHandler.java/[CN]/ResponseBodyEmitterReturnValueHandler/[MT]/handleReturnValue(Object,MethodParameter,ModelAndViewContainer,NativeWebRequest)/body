@@ -1,0 +1,27 @@
+{
+  if (returnValue == null) {
+    mavContainer.setRequestHandled(true);
+    return;
+  }
+  HttpServletResponse response=webRequest.getNativeResponse(HttpServletResponse.class);
+  ServerHttpResponse outputMessage=new ServletServerHttpResponse(response);
+  if (ResponseEntity.class.isAssignableFrom(returnValue.getClass())) {
+    ResponseEntity<?> responseEntity=(ResponseEntity<?>)returnValue;
+    outputMessage.setStatusCode(responseEntity.getStatusCode());
+    outputMessage.getHeaders().putAll(responseEntity.getHeaders());
+    returnValue=responseEntity.getBody();
+    if (returnValue == null) {
+      mavContainer.setRequestHandled(true);
+      return;
+    }
+  }
+  Assert.isInstanceOf(ResponseBodyEmitter.class,returnValue);
+  ResponseBodyEmitter emitter=(ResponseBodyEmitter)returnValue;
+  emitter.extendResponse(outputMessage);
+  outputMessage.getBody();
+  outputMessage=new StreamingServletServerHttpResponse(outputMessage);
+  DeferredResult<?> deferredResult=new DeferredResult<Object>();
+  WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(deferredResult,mavContainer);
+  HttpMessageConvertingHandler handler=new HttpMessageConvertingHandler(outputMessage,deferredResult);
+  emitter.initialize(handler);
+}
