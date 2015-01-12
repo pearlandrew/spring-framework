@@ -1,7 +1,8 @@
 {
-  if (!runTests)   return;
+  assumeTrue(runTests);
   Assume.group(TestGroup.JMXMP);
-  JMXServiceURL url=new JMXServiceURL("service:jmx:jmxmp://localhost:9876");
+  final int port=SocketUtils.findAvailableTcpPort();
+  JMXServiceURL url=new JMXServiceURL("service:jmx:jmxmp://localhost:" + port);
   JMXConnectorServer connector=JMXConnectorServerFactory.newJMXConnectorServer(url,null,getServer());
   MBeanProxyFactoryBean factory=new MBeanProxyFactoryBean();
   factory.setServiceUrl(url.toString());
@@ -15,7 +16,7 @@
     connector.start();
   }
  catch (  BindException ex) {
-    System.out.println("Skipping JMX LazyConnectionToRemote test because binding to local port 9876 failed: " + ex.getMessage());
+    System.out.println("Skipping remainder of JMX LazyConnectionToRemote test because binding to local port [" + port + "] failed: "+ ex.getMessage());
     return;
   }
   try {
