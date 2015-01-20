@@ -6,10 +6,12 @@
       if (!StringUtils.hasText(id)) {
         parserContext.getReaderContext().error("Id is required for element '" + parserContext.getDelegate().getLocalName(element) + "' when used as a top-level tag",element);
       }
-      String[] aliases=new String[0];
-      String name=element.getAttribute(NAME_ATTRIBUTE);
-      if (StringUtils.hasLength(name)) {
-        aliases=StringUtils.trimArrayElements(StringUtils.commaDelimitedListToStringArray(name));
+      String[] aliases=null;
+      if (shouldParseNameAsAliases()) {
+        String name=element.getAttribute(NAME_ATTRIBUTE);
+        if (StringUtils.hasLength(name)) {
+          aliases=StringUtils.trimArrayElements(StringUtils.commaDelimitedListToStringArray(name));
+        }
       }
       BeanDefinitionHolder holder=new BeanDefinitionHolder(definition,id,aliases);
       registerBeanDefinition(holder,parserContext.getRegistry());
