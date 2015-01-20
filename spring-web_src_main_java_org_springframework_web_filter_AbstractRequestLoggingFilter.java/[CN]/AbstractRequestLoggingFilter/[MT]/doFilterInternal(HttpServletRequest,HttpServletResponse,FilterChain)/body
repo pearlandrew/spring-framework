@@ -4,14 +4,15 @@
   if (isIncludePayload() && isFirstRequest && !(request instanceof ContentCachingRequestWrapper)) {
     requestToUse=new ContentCachingRequestWrapper(request);
   }
-  if (isFirstRequest) {
+  boolean shouldLog=shouldLog(requestToUse);
+  if (shouldLog && isFirstRequest) {
     beforeRequest(requestToUse,getBeforeMessage(requestToUse));
   }
   try {
     filterChain.doFilter(requestToUse,response);
   }
   finally {
-    if (!isAsyncStarted(requestToUse)) {
+    if (shouldLog && !isAsyncStarted(requestToUse)) {
       afterRequest(requestToUse,getAfterMessage(requestToUse));
     }
   }
