@@ -1,0 +1,33 @@
+{
+  if (this.scheduler != null) {
+    this.registrar.setScheduler(this.scheduler);
+  }
+  if (this.beanFactory instanceof ListableBeanFactory) {
+    Map<String,SchedulingConfigurer> configurers=((ListableBeanFactory)this.beanFactory).getBeansOfType(SchedulingConfigurer.class);
+    for (    SchedulingConfigurer configurer : configurers.values()) {
+      configurer.configureTasks(this.registrar);
+    }
+  }
+  if (this.registrar.hasTasks() && this.registrar.getScheduler() == null) {
+    Assert.state(this.beanFactory != null,"BeanFactory must be set to find scheduler by type");
+    try {
+      this.registrar.setScheduler(this.beanFactory.getBean(TaskScheduler.class));
+    }
+ catch (    NoUniqueBeanDefinitionException ex) {
+      throw new IllegalStateException("More than one TaskScheduler exists within the context. " + "Remove all but one of the beans; or implement the SchedulingConfigurer interface and call " + "ScheduledTaskRegistrar#setScheduler explicitly within the configureTasks() callback.",ex);
+    }
+catch (    NoSuchBeanDefinitionException ex) {
+      logger.debug("Could not find default TaskScheduler bean",ex);
+      try {
+        this.registrar.setScheduler(this.beanFactory.getBean(ScheduledExecutorService.class));
+      }
+ catch (      NoUniqueBeanDefinitionException ex2) {
+        throw new IllegalStateException("More than one ScheduledExecutorService exists within the context. " + "Remove all but one of the beans; or implement the SchedulingConfigurer interface and call " + "ScheduledTaskRegistrar#setScheduler explicitly within the configureTasks() callback.",ex);
+      }
+catch (      NoSuchBeanDefinitionException ex2) {
+        logger.debug("Could not find default ScheduledExecutorService bean",ex);
+      }
+    }
+  }
+  this.registrar.afterPropertiesSet();
+}
