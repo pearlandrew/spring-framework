@@ -1,0 +1,15 @@
+{
+  Assert.notNull(event,"Event must not be null");
+  if (logger.isTraceEnabled()) {
+    logger.trace("Publishing event in " + getDisplayName() + ": "+ event);
+  }
+  getApplicationEventMulticaster().multicastEvent(event,eventType);
+  if (this.parent != null) {
+    if (this.parent instanceof AbstractApplicationContext) {
+      ((AbstractApplicationContext)this.parent).publishEvent(event,eventType);
+    }
+ else {
+      this.parent.publishEvent(event);
+    }
+  }
+}

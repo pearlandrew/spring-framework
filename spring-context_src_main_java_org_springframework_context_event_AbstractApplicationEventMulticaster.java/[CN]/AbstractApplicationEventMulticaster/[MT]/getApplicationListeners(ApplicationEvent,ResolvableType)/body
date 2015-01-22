@@ -1,0 +1,24 @@
+{
+  Object source=event.getSource();
+  Class<?> sourceType=(source != null ? source.getClass() : null);
+  ListenerCacheKey cacheKey=new ListenerCacheKey(eventType,sourceType);
+  ListenerRetriever retriever=this.retrieverCache.get(cacheKey);
+  if (retriever != null) {
+    return retriever.getApplicationListeners();
+  }
+  if (this.beanClassLoader == null || (ClassUtils.isCacheSafe(event.getClass(),this.beanClassLoader) && (sourceType == null || ClassUtils.isCacheSafe(sourceType,this.beanClassLoader)))) {
+synchronized (this.defaultRetriever) {
+      retriever=this.retrieverCache.get(cacheKey);
+      if (retriever != null) {
+        return retriever.getApplicationListeners();
+      }
+      retriever=new ListenerRetriever(true);
+      Collection<ApplicationListener<?>> listeners=retrieveApplicationListeners(event,eventType,sourceType,retriever);
+      this.retrieverCache.put(cacheKey,retriever);
+      return listeners;
+    }
+  }
+ else {
+    return retrieveApplicationListeners(event,eventType,sourceType,null);
+  }
+}
