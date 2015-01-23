@@ -1,0 +1,29 @@
+{
+  try {
+    if (this.cachedContent.size() == 0) {
+      String requestEncoding=getCharacterEncoding();
+      Map<String,String[]> form=getParameterMap();
+      for (Iterator<String> nameIterator=form.keySet().iterator(); nameIterator.hasNext(); ) {
+        String name=nameIterator.next();
+        List<String> values=Arrays.asList(form.get(name));
+        for (Iterator<String> valueIterator=values.iterator(); valueIterator.hasNext(); ) {
+          String value=valueIterator.next();
+          cachedContent.write(URLEncoder.encode(name,requestEncoding).getBytes());
+          if (value != null) {
+            cachedContent.write('=');
+            cachedContent.write(URLEncoder.encode(value,requestEncoding).getBytes());
+            if (valueIterator.hasNext()) {
+              cachedContent.write('&');
+            }
+          }
+        }
+        if (nameIterator.hasNext()) {
+          cachedContent.write('&');
+        }
+      }
+    }
+  }
+ catch (  IOException e) {
+    throw new RuntimeException(e);
+  }
+}
