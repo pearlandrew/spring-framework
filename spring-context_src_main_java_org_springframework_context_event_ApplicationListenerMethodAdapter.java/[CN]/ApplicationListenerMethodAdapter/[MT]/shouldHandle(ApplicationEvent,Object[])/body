@@ -1,0 +1,13 @@
+{
+  if (args == null) {
+    return false;
+  }
+  EventListener eventListener=AnnotationUtils.findAnnotation(this.method,EventListener.class);
+  String condition=(eventListener != null ? eventListener.condition() : null);
+  if (StringUtils.hasText(condition)) {
+    Assert.notNull(this.evaluator,"Evaluator must no be null.");
+    EvaluationContext evaluationContext=this.evaluator.createEvaluationContext(event,this.targetClass,this.method,args);
+    return this.evaluator.condition(condition,this.methodKey,evaluationContext);
+  }
+  return true;
+}

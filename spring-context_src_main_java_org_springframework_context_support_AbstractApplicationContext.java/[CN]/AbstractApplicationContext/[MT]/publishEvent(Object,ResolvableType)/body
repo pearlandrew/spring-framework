@@ -1,0 +1,25 @@
+{
+  Assert.notNull(event,"Event must not be null");
+  if (logger.isTraceEnabled()) {
+    logger.trace("Publishing event in " + getDisplayName() + ": "+ event);
+  }
+  final ApplicationEvent applicationEvent;
+  if (event instanceof ApplicationEvent) {
+    applicationEvent=(ApplicationEvent)event;
+  }
+ else {
+    applicationEvent=new PayloadApplicationEvent<Object>(this,event);
+    if (eventType == null) {
+      eventType=ResolvableType.forClassWithGenerics(PayloadApplicationEvent.class,event.getClass());
+    }
+  }
+  getApplicationEventMulticaster().multicastEvent(applicationEvent,eventType);
+  if (this.parent != null) {
+    if (this.parent instanceof AbstractApplicationContext) {
+      ((AbstractApplicationContext)this.parent).publishEvent(event,eventType);
+    }
+ else {
+      this.parent.publishEvent(event);
+    }
+  }
+}

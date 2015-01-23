@@ -1,0 +1,16 @@
+{
+  long timestamp=System.currentTimeMillis();
+  load(ConditionalEventListener.class);
+  TestEvent event=new TestEvent(this,"OK");
+  TestEventListener listener=this.context.getBean(ConditionalEventListener.class);
+  this.eventCollector.assertNoEventReceived(listener);
+  this.context.publishEvent(event);
+  this.eventCollector.assertEvent(listener,event);
+  this.eventCollector.assertTotalEventsCount(1);
+  this.context.publishEvent("OK");
+  this.eventCollector.assertEvent(listener,event,"OK");
+  this.eventCollector.assertTotalEventsCount(2);
+  this.context.publishEvent(timestamp);
+  this.eventCollector.assertEvent(listener,event,"OK",timestamp);
+  this.eventCollector.assertTotalEventsCount(3);
+}
