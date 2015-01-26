@@ -1,5 +1,23 @@
 {
   Assert.notNull(objectMapper,"ObjectMapper must not be null");
+  if (this.modules != null) {
+    for (    Module module : this.modules) {
+      objectMapper.registerModule(module);
+    }
+  }
+ else {
+    if (this.findModulesViaServiceLoader) {
+      objectMapper.registerModules(ObjectMapper.findModules(this.moduleClassLoader));
+    }
+ else {
+      registerWellKnownModulesIfAvailable(objectMapper);
+    }
+    if (this.modulesToInstall != null) {
+      for (      Class<? extends Module> module : this.modulesToInstall) {
+        objectMapper.registerModule(BeanUtils.instantiate(module));
+      }
+    }
+  }
   if (this.dateFormat != null) {
     objectMapper.setDateFormat(this.dateFormat);
   }
@@ -24,24 +42,6 @@
   customizeDefaultFeatures(objectMapper);
   for (  Object feature : this.features.keySet()) {
     configureFeature(objectMapper,feature,this.features.get(feature));
-  }
-  if (this.modules != null) {
-    for (    Module module : this.modules) {
-      objectMapper.registerModule(module);
-    }
-  }
- else {
-    if (this.modulesToInstall != null) {
-      for (      Class<? extends Module> module : this.modulesToInstall) {
-        objectMapper.registerModule(BeanUtils.instantiate(module));
-      }
-    }
-    if (this.findModulesViaServiceLoader) {
-      objectMapper.registerModules(ObjectMapper.findModules(this.moduleClassLoader));
-    }
- else {
-      registerWellKnownModulesIfAvailable(objectMapper);
-    }
   }
   if (this.propertyNamingStrategy != null) {
     objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
