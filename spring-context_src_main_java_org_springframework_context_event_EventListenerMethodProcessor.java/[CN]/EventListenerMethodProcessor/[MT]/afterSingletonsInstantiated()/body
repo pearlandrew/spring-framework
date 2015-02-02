@@ -1,10 +1,11 @@
 {
+  List<EventListenerFactory> factories=getEventListenerFactories();
   String[] allBeanNames=this.applicationContext.getBeanNamesForType(Object.class);
   for (  String beanName : allBeanNames) {
     if (!ScopedProxyUtils.isScopedTarget(beanName)) {
       Class<?> type=this.applicationContext.getType(beanName);
       try {
-        processBean(beanName,type);
+        processBean(factories,beanName,type);
       }
  catch (      RuntimeException e) {
         throw new BeanInitializationException("Failed to process @EventListener " + "annotation on bean with name '" + beanName + "'",e);

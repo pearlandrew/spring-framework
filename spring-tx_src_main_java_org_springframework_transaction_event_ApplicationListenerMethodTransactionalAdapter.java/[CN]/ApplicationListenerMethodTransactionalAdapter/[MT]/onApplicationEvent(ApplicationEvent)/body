@@ -1,0 +1,17 @@
+{
+  if (TransactionSynchronizationManager.isSynchronizationActive()) {
+    TransactionSynchronization transactionSynchronization=createTransactionSynchronization(event);
+    TransactionSynchronizationManager.registerSynchronization(transactionSynchronization);
+  }
+ else   if (annotation.fallbackExecution()) {
+    if (annotation.phase() == TransactionPhase.AFTER_ROLLBACK) {
+      logger.warn("Processing '" + event + "' as a fallback execution on AFTER_ROLLBACK phase.");
+    }
+    processEvent(event);
+  }
+ else {
+    if (logger.isDebugEnabled()) {
+      logger.debug("No transaction is running, skipping '" + event + "' for '"+ this+ "'");
+    }
+  }
+}
