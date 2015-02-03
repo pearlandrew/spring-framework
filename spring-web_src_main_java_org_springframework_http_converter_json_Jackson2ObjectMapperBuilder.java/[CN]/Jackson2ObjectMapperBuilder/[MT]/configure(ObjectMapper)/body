@@ -1,21 +1,19 @@
 {
   Assert.notNull(objectMapper,"ObjectMapper must not be null");
+  if (this.findModulesViaServiceLoader) {
+    objectMapper.registerModules(ObjectMapper.findModules(this.moduleClassLoader));
+  }
+ else   if (this.findWellKnownModules) {
+    registerWellKnownModulesIfAvailable(objectMapper);
+  }
   if (this.modules != null) {
     for (    Module module : this.modules) {
       objectMapper.registerModule(module);
     }
   }
- else {
-    if (this.findModulesViaServiceLoader) {
-      objectMapper.registerModules(ObjectMapper.findModules(this.moduleClassLoader));
-    }
- else {
-      registerWellKnownModulesIfAvailable(objectMapper);
-    }
-    if (this.modulesToInstall != null) {
-      for (      Class<? extends Module> module : this.modulesToInstall) {
-        objectMapper.registerModule(BeanUtils.instantiate(module));
-      }
+  if (this.moduleClasses != null) {
+    for (    Class<? extends Module> module : this.moduleClasses) {
+      objectMapper.registerModule(BeanUtils.instantiate(module));
     }
   }
   if (this.dateFormat != null) {
