@@ -2,25 +2,32 @@
   if (logger.isTraceEnabled()) {
     logger.trace("Getting resource URL for lookupPath=" + lookupPath);
   }
+  List<String> matchingPatterns=new ArrayList<String>();
   for (  String pattern : this.handlerMap.keySet()) {
-    if (!getPathMatcher().match(pattern,lookupPath)) {
-      continue;
+    if (getPathMatcher().match(pattern,lookupPath)) {
+      matchingPatterns.add(pattern);
     }
-    String pathWithinMapping=getPathMatcher().extractPathWithinPattern(pattern,lookupPath);
-    String pathMapping=lookupPath.substring(0,lookupPath.indexOf(pathWithinMapping));
-    if (logger.isTraceEnabled()) {
-      logger.trace("Invoking ResourceResolverChain for URL pattern=\"" + pattern + "\"");
+  }
+  if (!matchingPatterns.isEmpty()) {
+    Comparator<String> patternComparator=getPathMatcher().getPatternComparator(lookupPath);
+    Collections.sort(matchingPatterns,patternComparator);
+    for (    String pattern : matchingPatterns) {
+      String pathWithinMapping=getPathMatcher().extractPathWithinPattern(pattern,lookupPath);
+      String pathMapping=lookupPath.substring(0,lookupPath.indexOf(pathWithinMapping));
+      if (logger.isTraceEnabled()) {
+        logger.trace("Invoking ResourceResolverChain for URL pattern=\"" + pattern + "\"");
+      }
+      ResourceHttpRequestHandler handler=this.handlerMap.get(pattern);
+      ResourceResolverChain chain=new DefaultResourceResolverChain(handler.getResourceResolvers());
+      String resolved=chain.resolveUrlPath(pathWithinMapping,handler.getLocations());
+      if (resolved == null) {
+        continue;
+      }
+      if (logger.isTraceEnabled()) {
+        logger.trace("Resolved public resource URL path=\"" + resolved + "\"");
+      }
+      return pathMapping + resolved;
     }
-    ResourceHttpRequestHandler handler=this.handlerMap.get(pattern);
-    ResourceResolverChain chain=new DefaultResourceResolverChain(handler.getResourceResolvers());
-    String resolved=chain.resolveUrlPath(pathWithinMapping,handler.getLocations());
-    if (resolved == null) {
-      continue;
-    }
-    if (logger.isTraceEnabled()) {
-      logger.trace("Resolved public resource URL path=\"" + resolved + "\"");
-    }
-    return pathMapping + resolved;
   }
   logger.debug("No matching resource mapping");
   return null;
