@@ -21,6 +21,11 @@
       this.infoHandler.handle(request,response);
     }
  else     if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
+      if (!this.allowedOrigins.isEmpty() && !this.allowedOrigins.contains("*")) {
+        logger.debug("Iframe support is disabled when an origin check is required, ignoring " + requestInfo);
+        response.setStatusCode(HttpStatus.NOT_FOUND);
+        return;
+      }
       logger.debug(requestInfo);
       this.iframeHandler.handle(request,response);
     }

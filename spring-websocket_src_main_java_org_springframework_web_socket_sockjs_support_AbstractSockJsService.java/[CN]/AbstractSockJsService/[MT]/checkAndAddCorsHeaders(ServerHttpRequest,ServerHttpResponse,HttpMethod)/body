@@ -2,7 +2,11 @@
   HttpHeaders requestHeaders=request.getHeaders();
   HttpHeaders responseHeaders=response.getHeaders();
   String origin=requestHeaders.getOrigin();
-  if (!this.allowedOrigins.contains("*") && (origin == null || !this.allowedOrigins.contains(origin))) {
+  String host=requestHeaders.getFirst(HttpHeaders.HOST);
+  if (origin == null) {
+    return true;
+  }
+  if (!this.allowedOrigins.contains("*") && !this.allowedOrigins.contains(origin)) {
     logger.debug("Request rejected, Origin header value " + origin + " not allowed");
     response.setStatusCode(HttpStatus.FORBIDDEN);
     return false;
@@ -13,7 +17,7 @@
   }
  catch (  NullPointerException npe) {
   }
-  if (!this.suppressCors && origin != null && !hasCorsResponseHeaders) {
+  if (!this.suppressCors && !hasCorsResponseHeaders) {
     addCorsHeaders(request,response,httpMethods);
   }
   return true;
