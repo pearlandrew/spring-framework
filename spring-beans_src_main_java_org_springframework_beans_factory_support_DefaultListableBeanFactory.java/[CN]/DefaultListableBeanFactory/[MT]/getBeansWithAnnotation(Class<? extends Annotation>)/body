@@ -1,15 +1,8 @@
 {
-  Map<String,Object> results=new LinkedHashMap<String,Object>();
-  for (  String beanName : this.beanDefinitionNames) {
-    BeanDefinition beanDefinition=getBeanDefinition(beanName);
-    if (!beanDefinition.isAbstract() && findAnnotationOnBean(beanName,annotationType) != null) {
-      results.put(beanName,getBean(beanName));
-    }
-  }
-  for (  String beanName : this.manualSingletonNames) {
-    if (!results.containsKey(beanName) && findAnnotationOnBean(beanName,annotationType) != null) {
-      results.put(beanName,getBean(beanName));
-    }
+  String[] beanNames=getBeanNamesForAnnotation(annotationType);
+  Map<String,Object> results=new LinkedHashMap<String,Object>(beanNames.length);
+  for (  String beanName : beanNames) {
+    results.put(beanName,getBean(beanName));
   }
   return results;
 }
