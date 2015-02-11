@@ -35,6 +35,14 @@
           oldValue=Array.get(propValue,arrayIndex);
         }
         Object convertedValue=convertIfNecessary(propertyName,oldValue,pv.getValue(),requiredType,TypeDescriptor.nested(property(pd),tokens.keys.length));
+        int length=Array.getLength(propValue);
+        if (arrayIndex >= length && arrayIndex < this.autoGrowCollectionLimit) {
+          Class<?> componentType=propValue.getClass().getComponentType();
+          Object newArray=Array.newInstance(componentType,arrayIndex + 1);
+          System.arraycopy(propValue,0,newArray,0,length);
+          setPropertyValue(actualName,newArray);
+          propValue=getPropertyValue(actualName);
+        }
         Array.set(propValue,arrayIndex,convertedValue);
       }
  catch (      IndexOutOfBoundsException ex) {
