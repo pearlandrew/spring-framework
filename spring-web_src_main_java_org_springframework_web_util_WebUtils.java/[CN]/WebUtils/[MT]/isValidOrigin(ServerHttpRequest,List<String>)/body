@@ -1,0 +1,18 @@
+{
+  Assert.notNull(request,"Request must not be null");
+  Assert.notNull(allowedOrigins,"Allowed origins must not be null");
+  String origin=request.getHeaders().getOrigin();
+  if (origin == null || allowedOrigins.contains("*")) {
+    return true;
+  }
+ else   if (allowedOrigins.isEmpty()) {
+    UriComponents originComponents=UriComponentsBuilder.fromHttpUrl(origin).build();
+    UriComponents requestComponents=UriComponentsBuilder.fromHttpRequest(request).build();
+    int originPort=getPort(originComponents);
+    int requestPort=getPort(requestComponents);
+    return originComponents.getHost().equals(requestComponents.getHost()) && (originPort == requestPort);
+  }
+ else {
+    return allowedOrigins.contains(origin);
+  }
+}

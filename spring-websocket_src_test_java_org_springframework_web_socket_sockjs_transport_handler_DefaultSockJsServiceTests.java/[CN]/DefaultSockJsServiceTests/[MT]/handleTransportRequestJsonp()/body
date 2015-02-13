@@ -3,10 +3,15 @@
   String sockJsPath=sessionUrlPrefix + "jsonp";
   setRequest("GET",sockJsPrefix + sockJsPath);
   jsonpService.handleRequest(this.request,this.response,sockJsPath,this.wsHandler);
-  assertNotEquals(404,this.servletResponse.getStatus());
+  assertEquals(404,this.servletResponse.getStatus());
   resetRequestAndResponse();
   jsonpService.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
   setRequest("GET",sockJsPrefix + sockJsPath);
   jsonpService.handleRequest(this.request,this.response,sockJsPath,this.wsHandler);
   assertEquals(404,this.servletResponse.getStatus());
+  resetRequestAndResponse();
+  jsonpService.setAllowedOrigins(Arrays.asList("*"));
+  setRequest("GET",sockJsPrefix + sockJsPath);
+  jsonpService.handleRequest(this.request,this.response,sockJsPath,this.wsHandler);
+  assertNotEquals(404,this.servletResponse.getStatus());
 }

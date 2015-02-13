@@ -1,4 +1,5 @@
 {
+  this.servletRequest.setServerName("mydomain2.com");
   setOrigin("http://mydomain2.com");
   resetResponseAndHandleRequest("GET","/echo/info",HttpStatus.OK);
   assertEquals("application/json;charset=UTF-8",this.servletResponse.getContentType());
@@ -15,6 +16,11 @@
   assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
   assertNull(this.servletResponse.getHeader("Vary"));
   this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com","http://mydomain2.com","http://mydomain3.com"));
+  resetResponseAndHandleRequest("GET","/echo/info",HttpStatus.OK);
+  assertEquals("http://mydomain2.com",this.servletResponse.getHeader("Access-Control-Allow-Origin"));
+  assertEquals("true",this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
+  assertEquals("Origin",this.servletResponse.getHeader("Vary"));
+  this.service.setAllowedOrigins(Arrays.asList("*"));
   resetResponseAndHandleRequest("GET","/echo/info",HttpStatus.OK);
   assertEquals("http://mydomain2.com",this.servletResponse.getHeader("Access-Control-Allow-Origin"));
   assertEquals("true",this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
