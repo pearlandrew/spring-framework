@@ -1,0 +1,21 @@
+{
+  Map<String,Object> map=new LinkedHashMap<String,Object>();
+  Properties props=new Properties();
+  for (  String pair : keyValuePairs) {
+    if (!StringUtils.hasText(pair)) {
+      continue;
+    }
+    try {
+      props.load(new StringReader(pair));
+    }
+ catch (    Exception e) {
+      throw new IllegalStateException("Failed to load test environment property from [" + pair + "].",e);
+    }
+    Assert.state(props.size() == 1,"Failed to load exactly one test environment property from [" + pair + "].");
+    for (    String name : props.stringPropertyNames()) {
+      map.put(name,props.getProperty(name));
+    }
+    props.clear();
+  }
+  return map;
+}
