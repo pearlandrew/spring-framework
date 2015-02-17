@@ -1,13 +1,16 @@
 {
-  RequestMapping annot=AnnotationUtils.findAnnotation(method,RequestMapping.class);
-  if (annot == null) {
+  String annotType=RequestMapping.class.getName();
+  AnnotationAttributes attrs=AnnotatedElementUtils.getAnnotationAttributes(method,annotType);
+  if (attrs == null) {
     throw new IllegalArgumentException("No @RequestMapping on: " + method.toGenericString());
   }
-  if (ObjectUtils.isEmpty(annot.value()) || StringUtils.isEmpty(annot.value()[0])) {
+  String[] paths=attrs.getStringArray("path");
+  paths=ObjectUtils.isEmpty(paths) ? attrs.getStringArray("value") : paths;
+  if (ObjectUtils.isEmpty(paths) || StringUtils.isEmpty(paths[0])) {
     return "/";
   }
-  if (annot.value().length > 1 && logger.isWarnEnabled()) {
+  if (paths.length > 1 && logger.isWarnEnabled()) {
     logger.warn("Multiple paths on method " + method.toGenericString() + ", using first one");
   }
-  return annot.value()[0];
+  return paths[0];
 }

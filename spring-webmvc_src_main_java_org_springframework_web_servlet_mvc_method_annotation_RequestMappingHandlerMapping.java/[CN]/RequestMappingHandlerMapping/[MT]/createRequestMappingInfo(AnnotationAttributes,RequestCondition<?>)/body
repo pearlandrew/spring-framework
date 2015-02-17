@@ -1,0 +1,17 @@
+{
+  String mappingName=attributes.getString("name");
+  String[] paths=attributes.getStringArray("path");
+  paths=ObjectUtils.isEmpty(paths) ? attributes.getStringArray("value") : paths;
+  PatternsRequestCondition patternsCondition=new PatternsRequestCondition(resolveEmbeddedValuesInPatterns(paths),getUrlPathHelper(),getPathMatcher(),this.useSuffixPatternMatch,this.useTrailingSlashMatch,this.fileExtensions);
+  RequestMethod[] methods=(RequestMethod[])attributes.get("method");
+  RequestMethodsRequestCondition methodsCondition=new RequestMethodsRequestCondition(methods);
+  String[] params=attributes.getStringArray("params");
+  ParamsRequestCondition paramsCondition=new ParamsRequestCondition(params);
+  String[] headers=attributes.getStringArray("headers");
+  String[] consumes=attributes.getStringArray("consumes");
+  String[] produces=attributes.getStringArray("produces");
+  HeadersRequestCondition headersCondition=new HeadersRequestCondition(headers);
+  ConsumesRequestCondition consumesCondition=new ConsumesRequestCondition(consumes,headers);
+  ProducesRequestCondition producesCondition=new ProducesRequestCondition(produces,headers,this.contentNegotiationManager);
+  return new RequestMappingInfo(mappingName,patternsCondition,methodsCondition,paramsCondition,headersCondition,consumesCondition,producesCondition,customCondition);
+}
