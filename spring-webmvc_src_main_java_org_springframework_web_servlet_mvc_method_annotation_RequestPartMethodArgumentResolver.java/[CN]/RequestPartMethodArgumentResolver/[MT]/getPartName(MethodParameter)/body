@@ -1,9 +1,11 @@
 {
-  RequestPart annot=parameter.getParameterAnnotation(RequestPart.class);
+  RequestPart annot=param.getParameterAnnotation(RequestPart.class);
   String partName=(annot != null ? annot.value() : "");
   if (partName.length() == 0) {
-    partName=parameter.getParameterName();
-    Assert.notNull(partName,"Request part name for argument type [" + parameter.getParameterType().getName() + "] not specified, and parameter name information not found in class file either.");
+    partName=param.getParameterName();
+    if (partName == null) {
+      throw new IllegalArgumentException("Request part name for argument type [" + param.getNestedParameterType().getName() + "] not specified, and parameter name information not found in class file either.");
+    }
   }
   return partName;
 }

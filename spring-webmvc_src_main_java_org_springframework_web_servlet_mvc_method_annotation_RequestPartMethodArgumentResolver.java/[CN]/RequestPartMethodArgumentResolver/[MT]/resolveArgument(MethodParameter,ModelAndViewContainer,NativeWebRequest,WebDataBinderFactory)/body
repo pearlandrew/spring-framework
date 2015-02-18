@@ -2,9 +2,15 @@
   HttpServletRequest servletRequest=request.getNativeRequest(HttpServletRequest.class);
   assertIsMultipartRequest(servletRequest);
   MultipartHttpServletRequest multipartRequest=WebUtils.getNativeRequest(servletRequest,MultipartHttpServletRequest.class);
+  Class<?> paramType=parameter.getParameterType();
+  boolean optional=paramType.getName().equals("java.util.Optional");
+  if (optional) {
+    parameter.increaseNestingLevel();
+    paramType=parameter.getNestedParameterType();
+  }
   String partName=getPartName(parameter);
   Object arg;
-  if (MultipartFile.class.equals(parameter.getParameterType())) {
+  if (MultipartFile.class.equals(paramType)) {
     Assert.notNull(multipartRequest,"Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
     arg=multipartRequest.getFile(partName);
   }
@@ -17,7 +23,7 @@
     List<MultipartFile> files=multipartRequest.getFiles(partName);
     arg=files.toArray(new MultipartFile[files.size()]);
   }
- else   if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
+ else   if ("javax.servlet.http.Part".equals(paramType.getName())) {
     assertIsMultipartRequest(servletRequest);
     arg=servletRequest.getPart(partName);
   }
@@ -32,7 +38,7 @@
  else {
     try {
       HttpInputMessage inputMessage=new RequestPartServletServerHttpRequest(servletRequest,partName);
-      arg=readWithMessageConverters(inputMessage,parameter,parameter.getParameterType());
+      arg=readWithMessageConverters(inputMessage,parameter,parameter.getNestedGenericParameterType());
       WebDataBinder binder=binderFactory.createBinder(request,arg,partName);
       if (arg != null) {
         validate(binder,parameter);
@@ -44,9 +50,12 @@
     }
   }
   RequestPart annot=parameter.getParameterAnnotation(RequestPart.class);
-  boolean isRequired=(annot == null || annot.required());
+  boolean isRequired=((annot == null || annot.required()) && !optional);
   if (arg == null && isRequired) {
     throw new MissingServletRequestPartException(partName);
+  }
+  if (optional) {
+    arg=Optional.ofNullable(arg);
   }
   return arg;
 }

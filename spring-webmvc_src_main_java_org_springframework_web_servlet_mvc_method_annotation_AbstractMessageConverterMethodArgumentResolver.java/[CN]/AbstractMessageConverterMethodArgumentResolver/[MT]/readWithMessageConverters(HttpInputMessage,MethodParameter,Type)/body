@@ -9,7 +9,12 @@
   if (contentType == null) {
     contentType=MediaType.APPLICATION_OCTET_STREAM;
   }
-  Class<?> contextClass=methodParam.getContainingClass();
+  Class<?> contextClass=(methodParam != null ? methodParam.getContainingClass() : null);
+  Class<T> targetClass=(targetType instanceof Class<?> ? (Class<T>)targetType : null);
+  if (targetClass == null) {
+    ResolvableType resolvableType=(methodParam != null ? ResolvableType.forMethodParameter(methodParam) : ResolvableType.forType(targetType));
+    targetClass=(Class<T>)resolvableType.resolve();
+  }
   for (  HttpMessageConverter<?> converter : this.messageConverters) {
     if (converter instanceof GenericHttpMessageConverter) {
       GenericHttpMessageConverter<?> genericConverter=(GenericHttpMessageConverter<?>)converter;
@@ -20,12 +25,13 @@
         return genericConverter.read(targetType,contextClass,inputMessage);
       }
     }
-    Class<T> targetClass=(Class<T>)ResolvableType.forMethodParameter(methodParam,targetType).resolve(Object.class);
-    if (converter.canRead(targetClass,contentType)) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("Reading [" + targetClass.getName() + "] as \""+ contentType+ "\" using ["+ converter+ "]");
+ else     if (targetClass != null) {
+      if (converter.canRead(targetClass,contentType)) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Reading [" + targetClass.getName() + "] as \""+ contentType+ "\" using ["+ converter+ "]");
+        }
+        return ((HttpMessageConverter<T>)converter).read(targetClass,inputMessage);
       }
-      return ((HttpMessageConverter<T>)converter).read(targetClass,inputMessage);
     }
   }
   throw new HttpMediaTypeNotSupportedException(contentType,this.allSupportedMediaTypes);
