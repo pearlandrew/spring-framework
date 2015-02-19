@@ -6,7 +6,14 @@
     return true;
   }
  else   if (allowedOrigins.isEmpty()) {
-    UriComponents originComponents=UriComponentsBuilder.fromHttpUrl(origin).build();
+    UriComponents originComponents;
+    try {
+      originComponents=UriComponentsBuilder.fromHttpUrl(origin).build();
+    }
+ catch (    IllegalArgumentException ex) {
+      logger.error("Failed to parse Origin header value [" + origin + "]");
+      return false;
+    }
     UriComponents requestComponents=UriComponentsBuilder.fromHttpRequest(request).build();
     int originPort=getPort(originComponents);
     int requestPort=getPort(requestComponents);
