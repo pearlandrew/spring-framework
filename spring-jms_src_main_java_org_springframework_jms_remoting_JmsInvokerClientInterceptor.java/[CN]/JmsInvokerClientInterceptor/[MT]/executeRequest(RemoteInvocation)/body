@@ -7,7 +7,12 @@
     Message requestMessage=createRequestMessage(session,invocation);
     con.start();
     Message responseMessage=doExecuteRequest(session,queueToUse,requestMessage);
-    return extractInvocationResult(responseMessage);
+    if (responseMessage != null) {
+      return extractInvocationResult(responseMessage);
+    }
+ else {
+      return onReceiveTimeout(invocation);
+    }
   }
   finally {
     JmsUtils.closeSession(session);
