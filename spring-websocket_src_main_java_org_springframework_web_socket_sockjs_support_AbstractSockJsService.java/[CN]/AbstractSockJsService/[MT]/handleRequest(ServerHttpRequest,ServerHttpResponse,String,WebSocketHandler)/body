@@ -1,6 +1,8 @@
 {
   if (sockJsPath == null) {
-    logger.error("Expected SockJS path. Failing request: " + request.getURI());
+    if (logger.isWarnEnabled()) {
+      logger.warn("Expected SockJS path. Failing request: " + request.getURI());
+    }
     response.setStatusCode(HttpStatus.NOT_FOUND);
     return;
   }
@@ -22,7 +24,9 @@
     }
  else     if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
       if (!this.allowedOrigins.isEmpty() && !this.allowedOrigins.contains("*")) {
-        logger.debug("Iframe support is disabled when an origin check is required, ignoring " + requestInfo);
+        if (logger.isDebugEnabled()) {
+          logger.debug("Iframe support is disabled when an origin check is required, ignoring " + requestInfo);
+        }
         response.setStatusCode(HttpStatus.NOT_FOUND);
         return;
       }
@@ -44,7 +48,9 @@
  else {
       String[] pathSegments=StringUtils.tokenizeToStringArray(sockJsPath.substring(1),"/");
       if (pathSegments.length != 3) {
-        logger.error("Ignoring invalid transport request " + requestInfo);
+        if (logger.isWarnEnabled()) {
+          logger.warn("Ignoring invalid transport request " + requestInfo);
+        }
         response.setStatusCode(HttpStatus.NOT_FOUND);
         return;
       }
@@ -52,12 +58,16 @@
       String sessionId=pathSegments[1];
       String transport=pathSegments[2];
       if (!isWebSocketEnabled() && transport.equals("websocket")) {
-        logger.debug("WebSocket transport is disabled, ignoring " + requestInfo);
+        if (logger.isDebugEnabled()) {
+          logger.debug("WebSocket transport is disabled, ignoring " + requestInfo);
+        }
         response.setStatusCode(HttpStatus.NOT_FOUND);
         return;
       }
  else       if (!validateRequest(serverId,sessionId,transport)) {
-        logger.error("Ignoring transport request " + requestInfo);
+        if (logger.isWarnEnabled()) {
+          logger.warn("Ignoring transport request " + requestInfo);
+        }
         response.setStatusCode(HttpStatus.NOT_FOUND);
         return;
       }
