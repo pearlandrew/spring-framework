@@ -1,7 +1,19 @@
 {
   Integer order=null;
   if (sourceProvider != null) {
-    order=findOrder(sourceProvider.getOrderSource(obj));
+    Object orderSource=sourceProvider.getOrderSource(obj);
+    if (orderSource != null && orderSource.getClass().isArray()) {
+      Object[] sources=ObjectUtils.toObjectArray(orderSource);
+      for (      Object source : sources) {
+        order=findOrder(source);
+        if (order != null) {
+          break;
+        }
+      }
+    }
+ else {
+      order=findOrder(orderSource);
+    }
   }
   return (order != null ? order : getOrder(obj));
 }
