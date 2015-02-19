@@ -1,10 +1,13 @@
 {
-  Object argument=readWithMessageConverters(webRequest,parameter,parameter.getGenericParameterType());
+  Object arg=readWithMessageConverters(webRequest,parameter,parameter.getGenericParameterType());
   String name=Conventions.getVariableNameForParameter(parameter);
-  WebDataBinder binder=binderFactory.createBinder(webRequest,argument,name);
-  if (argument != null) {
-    validate(binder,parameter);
+  WebDataBinder binder=binderFactory.createBinder(webRequest,arg,name);
+  if (arg != null) {
+    validateIfApplicable(binder,parameter);
+    if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder,parameter)) {
+      throw new MethodArgumentNotValidException(parameter,binder.getBindingResult());
+    }
   }
   mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + name,binder.getBindingResult());
-  return argument;
+  return arg;
 }

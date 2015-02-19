@@ -41,7 +41,10 @@
       arg=readWithMessageConverters(inputMessage,parameter,parameter.getNestedGenericParameterType());
       WebDataBinder binder=binderFactory.createBinder(request,arg,partName);
       if (arg != null) {
-        validate(binder,parameter);
+        validateIfApplicable(binder,parameter);
+        if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder,parameter)) {
+          throw new MethodArgumentNotValidException(parameter,binder.getBindingResult());
+        }
       }
       mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + partName,binder.getBindingResult());
     }
@@ -49,8 +52,8 @@
       arg=null;
     }
   }
-  RequestPart annot=parameter.getParameterAnnotation(RequestPart.class);
-  boolean isRequired=((annot == null || annot.required()) && !optional);
+  RequestPart ann=parameter.getParameterAnnotation(RequestPart.class);
+  boolean isRequired=((ann == null || ann.required()) && !optional);
   if (arg == null && isRequired) {
     throw new MissingServletRequestPartException(partName);
   }
