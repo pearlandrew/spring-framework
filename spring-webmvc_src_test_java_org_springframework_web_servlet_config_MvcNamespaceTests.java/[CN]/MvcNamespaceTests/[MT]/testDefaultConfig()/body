@@ -31,6 +31,7 @@
   assertNotNull(appContext.getBean(Validator.class));
   request=new MockHttpServletRequest("GET","/");
   request.addParameter("date","2009-10-31");
+  request.addParameter("percent","99.99%");
   MockHttpServletResponse response=new MockHttpServletResponse();
   HandlerExecutionChain chain=mapping.getHandler(request);
   assertEquals(1,chain.getInterceptors().length);
@@ -40,6 +41,8 @@
   assertSame(appContext.getBean(ConversionService.class),request.getAttribute(ConversionService.class.getName()));
   adapter.handle(request,response,handlerMethod);
   assertTrue(handler.recordedValidationError);
+  assertEquals(LocalDate.parse("2009-10-31").toDate(),handler.date);
+  assertEquals(Double.valueOf(0.9999),handler.percent);
   CompositeUriComponentsContributor uriComponentsContributor=this.appContext.getBean(MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME,CompositeUriComponentsContributor.class);
   assertNotNull(uriComponentsContributor);
 }
