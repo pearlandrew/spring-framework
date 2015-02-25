@@ -1,0 +1,17 @@
+{
+  String destination=stompHeaders.getDestination();
+  Assert.hasText(destination,"'destination' is required");
+  Assert.notNull(handler,"'handler' is required");
+  String subscriptionId=stompHeaders.getId();
+  if (!StringUtils.hasText(subscriptionId)) {
+    subscriptionId=String.valueOf(DefaultStompSession.this.subscriptionIndex.getAndIncrement());
+    stompHeaders.setId(subscriptionId);
+  }
+  String receiptId=checkOrAddReceipt(stompHeaders);
+  Subscription subscription=new DefaultSubscription(subscriptionId,destination,receiptId,handler);
+  StompHeaderAccessor accessor=createHeaderAccessor(StompCommand.SUBSCRIBE);
+  accessor.addNativeHeaders(stompHeaders);
+  Message<byte[]> message=createMessage(accessor,EMPTY_PAYLOAD);
+  execute(message);
+  return subscription;
+}

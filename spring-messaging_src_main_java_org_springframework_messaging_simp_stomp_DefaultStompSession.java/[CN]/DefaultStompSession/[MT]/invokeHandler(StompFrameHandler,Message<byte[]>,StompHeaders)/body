@@ -1,0 +1,13 @@
+{
+  if (message.getPayload().length == 0) {
+    handler.handleFrame(stompHeaders,null);
+    return;
+  }
+  Type type=handler.getPayloadType(stompHeaders);
+  Class<?> payloadType=ResolvableType.forType(type).getRawClass();
+  Object object=getMessageConverter().fromMessage(message,payloadType);
+  if (object == null) {
+    throw new MessageConversionException("No suitable converter, payloadType=" + payloadType);
+  }
+  handler.handleFrame(stompHeaders,object);
+}

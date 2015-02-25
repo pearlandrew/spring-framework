@@ -1,0 +1,19 @@
+{
+  Assert.notNull(getTaskScheduler(),"No scheduler configured.");
+  this.lastReadTime=System.currentTimeMillis();
+  this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(new Runnable(){
+    @Override public void run(){
+      if (System.currentTimeMillis() - lastReadTime > duration) {
+        try {
+          runnable.run();
+        }
+ catch (        Throwable ex) {
+          if (logger.isDebugEnabled()) {
+            logger.debug("ReadInactivityTask failure",ex);
+          }
+        }
+      }
+    }
+  }
+,duration / 2));
+}
