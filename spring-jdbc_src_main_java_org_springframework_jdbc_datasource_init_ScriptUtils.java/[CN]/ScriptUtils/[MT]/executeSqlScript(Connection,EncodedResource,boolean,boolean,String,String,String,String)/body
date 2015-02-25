@@ -4,7 +4,6 @@
       logger.info("Executing SQL script from " + resource);
     }
     long startTime=System.currentTimeMillis();
-    List<String> statements=new LinkedList<String>();
     String script;
     try {
       script=readScript(resource,commentPrefix,separator);
@@ -18,12 +17,13 @@
     if (!EOF_STATEMENT_SEPARATOR.equals(separator) && !containsSqlScriptDelimiters(script,separator)) {
       separator=FALLBACK_STATEMENT_SEPARATOR;
     }
+    List<String> statements=new LinkedList<String>();
     splitSqlScript(resource,script,separator,commentPrefix,blockCommentStartDelimiter,blockCommentEndDelimiter,statements);
-    int lineNumber=0;
+    int stmtNumber=0;
     Statement stmt=connection.createStatement();
     try {
       for (      String statement : statements) {
-        lineNumber++;
+        stmtNumber++;
         try {
           stmt.execute(statement);
           int rowsAffected=stmt.getUpdateCount();
@@ -35,11 +35,11 @@
           boolean dropStatement=StringUtils.startsWithIgnoreCase(statement.trim(),"drop");
           if (continueOnError || (dropStatement && ignoreFailedDrops)) {
             if (logger.isDebugEnabled()) {
-              logger.debug("Failed to execute SQL script statement at line " + lineNumber + " of resource "+ resource+ ": "+ statement,ex);
+              logger.debug("Failed to execute SQL script statement #" + stmtNumber + " of resource "+ resource+ ": "+ statement,ex);
             }
           }
  else {
-            throw new ScriptStatementFailedException(statement,lineNumber,resource,ex);
+            throw new ScriptStatementFailedException(statement,stmtNumber,resource,ex);
           }
         }
       }
