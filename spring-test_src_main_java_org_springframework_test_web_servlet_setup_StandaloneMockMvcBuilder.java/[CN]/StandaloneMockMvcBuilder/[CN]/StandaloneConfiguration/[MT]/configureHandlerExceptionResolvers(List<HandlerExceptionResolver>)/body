@@ -1,3 +1,19 @@
 {
-  exceptionResolvers.addAll(StandaloneMockMvcBuilder.this.handlerExceptionResolvers);
+  if (handlerExceptionResolvers == null) {
+    return;
+  }
+  for (  HandlerExceptionResolver resolver : handlerExceptionResolvers) {
+    if (resolver instanceof ApplicationContextAware) {
+      ((ApplicationContextAware)resolver).setApplicationContext(getApplicationContext());
+    }
+    if (resolver instanceof InitializingBean) {
+      try {
+        ((InitializingBean)resolver).afterPropertiesSet();
+      }
+ catch (      Exception ex) {
+        throw new IllegalStateException("Failure from afterPropertiesSet",ex);
+      }
+    }
+    exceptionResolvers.add(resolver);
+  }
 }
