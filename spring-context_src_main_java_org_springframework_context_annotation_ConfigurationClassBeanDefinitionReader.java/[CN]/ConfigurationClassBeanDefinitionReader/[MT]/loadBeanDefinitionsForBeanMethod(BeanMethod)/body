@@ -1,16 +1,17 @@
 {
   ConfigurationClass configClass=beanMethod.getConfigurationClass();
   MethodMetadata metadata=beanMethod.getMetadata();
+  String methodName=metadata.getMethodName();
+  if (this.conditionEvaluator.shouldSkip(metadata,ConfigurationPhase.REGISTER_BEAN)) {
+    configClass.skippedBeanMethods.add(methodName);
+    return;
+  }
+  if (configClass.skippedBeanMethods.contains(methodName)) {
+    return;
+  }
   AnnotationAttributes bean=AnnotationConfigUtils.attributesFor(metadata,Bean.class);
   List<String> names=new ArrayList<String>(Arrays.asList(bean.getStringArray("name")));
-  String beanName=(names.size() > 0 ? names.remove(0) : beanMethod.getMetadata().getMethodName());
-  if (this.conditionEvaluator.shouldSkip(metadata,ConfigurationPhase.REGISTER_BEAN)) {
-    configClass.skippedBeans.add(beanName);
-    return;
-  }
-  if (configClass.skippedBeans.contains(beanName)) {
-    return;
-  }
+  String beanName=(names.size() > 0 ? names.remove(0) : methodName);
   for (  String alias : names) {
     this.registry.registerAlias(beanName,alias);
   }
@@ -22,11 +23,11 @@
   beanDef.setSource(this.sourceExtractor.extractSource(metadata,configClass.getResource()));
   if (metadata.isStatic()) {
     beanDef.setBeanClassName(configClass.getMetadata().getClassName());
-    beanDef.setFactoryMethodName(metadata.getMethodName());
+    beanDef.setFactoryMethodName(methodName);
   }
  else {
     beanDef.setFactoryBeanName(configClass.getBeanName());
-    beanDef.setUniqueFactoryMethodName(metadata.getMethodName());
+    beanDef.setUniqueFactoryMethodName(methodName);
   }
   beanDef.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
   beanDef.setAttribute(RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE,Boolean.TRUE);
