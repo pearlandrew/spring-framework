@@ -1,13 +1,12 @@
 {
   try {
-    Factory factory=(Factory)this.objenesis.newInstance(enhancer.createClass());
+    Objenesis objenesis=(enhancer.getUseCache() ? cachedObjenesis : nonCachedObjenesis);
+    Factory factory=(Factory)objenesis.newInstance(enhancer.createClass());
     factory.setCallbacks(callbacks);
     return factory;
   }
  catch (  ObjenesisException ex) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Unable to instantiate proxy using Objenesis, falling back to regular proxy construction",ex);
-    }
+    logger.debug("Unable to instantiate proxy using Objenesis, falling back to regular proxy construction",ex);
     return super.createProxyClassAndInstance(enhancer,callbacks);
   }
 }
