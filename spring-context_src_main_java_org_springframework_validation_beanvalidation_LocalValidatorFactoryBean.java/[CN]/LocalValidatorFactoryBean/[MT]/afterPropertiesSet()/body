@@ -1,5 +1,13 @@
 {
   @SuppressWarnings({"rawtypes","unchecked"}) Configuration<?> configuration=(this.providerClass != null ? Validation.byProvider(this.providerClass).configure() : Validation.byDefaultProvider().configure());
+  if (this.applicationContext != null) {
+    try {
+      Method eclMethod=configuration.getClass().getMethod("externalClassLoader",ClassLoader.class);
+      ReflectionUtils.invokeMethod(eclMethod,configuration,this.applicationContext.getClassLoader());
+    }
+ catch (    NoSuchMethodException ex) {
+    }
+  }
   MessageInterpolator targetInterpolator=this.messageInterpolator;
   if (targetInterpolator == null) {
     targetInterpolator=configuration.getDefaultMessageInterpolator();
