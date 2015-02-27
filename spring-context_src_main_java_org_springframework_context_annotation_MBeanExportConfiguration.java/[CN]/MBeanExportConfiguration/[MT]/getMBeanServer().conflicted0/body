@@ -1,5 +1,8 @@
 {
-  WebSphereMBeanServerFactoryBean fb=new WebSphereMBeanServerFactoryBean();
-  fb.afterPropertiesSet();
-  return fb.getObject();
+  try {
+    return new JndiLocatorDelegate().lookup("java:comp/env/jmx/runtime",MBeanServer.class);
+  }
+ catch (  NamingException ex) {
+    throw new MBeanServerNotFoundException("Failed to retrieve WebLogic MBeanServer from JNDI",ex);
+  }
 }
