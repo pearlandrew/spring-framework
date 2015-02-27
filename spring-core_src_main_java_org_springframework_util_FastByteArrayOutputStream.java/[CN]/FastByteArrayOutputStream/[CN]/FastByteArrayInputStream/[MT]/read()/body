@@ -1,0 +1,27 @@
+{
+  if (this.currentBuffer == null) {
+    return -1;
+  }
+ else {
+    if (this.nextIndexInCurrentBuffer < this.currentBufferLength) {
+      this.totalBytesRead++;
+      return this.currentBuffer[this.nextIndexInCurrentBuffer++];
+    }
+ else {
+      if (this.buffersIterator.hasNext()) {
+        this.currentBuffer=this.buffersIterator.next();
+        if (this.currentBuffer == this.fastByteArrayOutputStream.buffers.getLast()) {
+          this.currentBufferLength=this.fastByteArrayOutputStream.index;
+        }
+ else {
+          this.currentBufferLength=this.currentBuffer.length;
+        }
+        this.nextIndexInCurrentBuffer=0;
+      }
+ else {
+        this.currentBuffer=null;
+      }
+      return read();
+    }
+  }
+}
