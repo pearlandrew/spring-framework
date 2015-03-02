@@ -1,8 +1,21 @@
 {
-  byte[] boundary=generateMultipartBoundary();
+  final byte[] boundary=generateMultipartBoundary();
   Map<String,String> parameters=Collections.singletonMap("boundary",new String(boundary,"US-ASCII"));
   MediaType contentType=new MediaType(MediaType.MULTIPART_FORM_DATA,parameters);
-  outputMessage.getHeaders().setContentType(contentType);
-  writeParts(outputMessage.getBody(),parts,boundary);
-  writeEnd(outputMessage.getBody(),boundary);
+  HttpHeaders headers=outputMessage.getHeaders();
+  headers.setContentType(contentType);
+  if (outputMessage instanceof StreamingHttpOutputMessage) {
+    StreamingHttpOutputMessage streamingOutputMessage=(StreamingHttpOutputMessage)outputMessage;
+    streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body(){
+      @Override public void writeTo(      OutputStream outputStream) throws IOException {
+        writeParts(outputStream,parts,boundary);
+        writeEnd(outputStream,boundary);
+      }
+    }
+);
+  }
+ else {
+    writeParts(outputMessage.getBody(),parts,boundary);
+    writeEnd(outputMessage.getBody(),boundary);
+  }
 }

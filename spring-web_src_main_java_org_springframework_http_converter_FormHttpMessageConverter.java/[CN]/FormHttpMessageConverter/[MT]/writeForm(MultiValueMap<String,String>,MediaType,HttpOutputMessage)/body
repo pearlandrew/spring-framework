@@ -26,7 +26,18 @@
       builder.append('&');
     }
   }
-  byte[] bytes=builder.toString().getBytes(charset.name());
+  final byte[] bytes=builder.toString().getBytes(charset.name());
   outputMessage.getHeaders().setContentLength(bytes.length);
-  StreamUtils.copy(bytes,outputMessage.getBody());
+  if (outputMessage instanceof StreamingHttpOutputMessage) {
+    StreamingHttpOutputMessage streamingOutputMessage=(StreamingHttpOutputMessage)outputMessage;
+    streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body(){
+      @Override public void writeTo(      OutputStream outputStream) throws IOException {
+        StreamUtils.copy(bytes,outputStream);
+      }
+    }
+);
+  }
+ else {
+    StreamUtils.copy(bytes,outputMessage.getBody());
+  }
 }
