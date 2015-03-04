@@ -1,0 +1,28 @@
+{
+  if (range == null) {
+    return null;
+  }
+  int dashIdx=range.indexOf('-');
+  if (dashIdx < 0) {
+    throw new IllegalArgumentException("Range '\"" + range + "\" does not"+ "contain \"-\"");
+  }
+ else   if (dashIdx > 0) {
+    long firstPos=Long.parseLong(range.substring(0,dashIdx));
+    ByteRange byteRange;
+    if (dashIdx < range.length() - 1) {
+      long lastPos=Long.parseLong(range.substring(dashIdx + 1,range.length()));
+      byteRange=new ByteRange(firstPos,lastPos);
+    }
+ else {
+      byteRange=new ByteRange(firstPos,null);
+    }
+    if (!byteRange.validate()) {
+      throw new IllegalArgumentException("Invalid Range \"" + range + "\"");
+    }
+    return byteRange;
+  }
+ else {
+    long suffixLength=Long.parseLong(range.substring(1));
+    return new SuffixByteRange(suffixLength);
+  }
+}

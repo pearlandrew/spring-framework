@@ -6,6 +6,10 @@
     response.sendError(HttpServletResponse.SC_NOT_FOUND);
     return;
   }
+  if (new ServletWebRequest(request,response).checkNotModified(resource.lastModified())) {
+    logger.trace("Resource not modified - returning 304");
+    return;
+  }
   MediaType mediaType=getMediaType(resource);
   if (mediaType != null) {
     if (logger.isTraceEnabled()) {
@@ -17,14 +21,16 @@
       logger.trace("No media type found for " + resource + " - not sending a content-type header");
     }
   }
-  if (new ServletWebRequest(request,response).checkNotModified(resource.lastModified())) {
-    logger.trace("Resource not modified - returning 304");
-    return;
-  }
-  setHeaders(response,resource,mediaType);
   if (METHOD_HEAD.equals(request.getMethod())) {
+    setHeaders(response,resource,mediaType);
     logger.trace("HEAD request - skipping content");
     return;
   }
-  writeContent(response,resource);
+  if (request.getHeader("Range") == null) {
+    setHeaders(response,resource,mediaType);
+    writeContent(response,resource);
+  }
+ else {
+    writePartialContent(request,response,resource,mediaType);
+  }
 }
