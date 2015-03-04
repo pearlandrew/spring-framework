@@ -1,5 +1,13 @@
 {
   Assert.notNull(endpoint,"Endpoint must be set");
   Assert.hasText(endpoint.getId(),"Endpoint id must be set");
-  this.endpointDescriptors.add(new JmsListenerEndpointDescriptor(endpoint,factory));
+  JmsListenerEndpointDescriptor descriptor=new JmsListenerEndpointDescriptor(endpoint,factory);
+synchronized (this.mutex) {
+    if (startImmediately) {
+      this.endpointRegistry.registerListenerContainer(descriptor.endpoint,resolveContainerFactory(descriptor),true);
+    }
+ else {
+      this.endpointDescriptors.add(descriptor);
+    }
+  }
 }
