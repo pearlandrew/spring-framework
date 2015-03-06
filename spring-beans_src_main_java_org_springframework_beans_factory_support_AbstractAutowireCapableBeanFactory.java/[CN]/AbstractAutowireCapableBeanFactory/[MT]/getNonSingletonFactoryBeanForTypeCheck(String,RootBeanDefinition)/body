@@ -11,7 +11,14 @@
       instance=bw.getWrappedInstance();
     }
   }
-  finally {
+ catch (  BeanCreationException ex) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Bean creation exception on non-singleton FactoryBean type check: " + ex);
+    }
+    onSuppressedException(ex);
+    return null;
+  }
+ finally {
     afterPrototypeCreation(beanName);
   }
   return getFactoryBean(beanName,instance);
