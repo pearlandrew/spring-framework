@@ -1,17 +1,13 @@
 {
   getLeftOperand().generateCode(mv,cf);
   String leftDesc=getLeftOperand().exitTypeDescriptor;
-  if (!CodeFlow.isPrimitive(leftDesc)) {
-    CodeFlow.insertUnboxInsns(mv,this.exitTypeDescriptor.charAt(0),leftDesc);
-  }
+  CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv,leftDesc,this.exitTypeDescriptor.charAt(0));
   if (this.children.length > 1) {
     cf.enterCompilationScope();
     getRightOperand().generateCode(mv,cf);
     String rightDesc=getRightOperand().exitTypeDescriptor;
     cf.exitCompilationScope();
-    if (!CodeFlow.isPrimitive(rightDesc)) {
-      CodeFlow.insertUnboxInsns(mv,this.exitTypeDescriptor.charAt(0),rightDesc);
-    }
+    CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv,rightDesc,this.exitTypeDescriptor.charAt(0));
 switch (this.exitTypeDescriptor.charAt(0)) {
 case 'I':
       mv.visitInsn(IDIV);
