@@ -56,15 +56,15 @@
             return new ReflectiveMethodExecutor(method);
           }
  else           if (matchInfo.isCloseMatch()) {
-            if (!this.useDistance) {
-              if (closeMatch == null) {
+            if (this.useDistance) {
+              int matchDistance=ReflectionHelper.getTypeDifferenceWeight(paramDescriptors,argumentTypes);
+              if (closeMatch == null || matchDistance < closeMatchDistance) {
                 closeMatch=method;
+                closeMatchDistance=matchDistance;
               }
             }
  else {
-              int matchDistance=ReflectionHelper.getTypeDifferenceWeight(paramDescriptors,argumentTypes);
-              if (matchDistance < closeMatchDistance) {
-                closeMatchDistance=matchDistance;
+              if (closeMatch == null) {
                 closeMatch=method;
               }
             }
