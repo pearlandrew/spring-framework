@@ -5,6 +5,7 @@
   assertNotNull(mapping.getUrlMap().get("/resources/**"));
   ResourceHttpRequestHandler handler=appContext.getBean((String)mapping.getUrlMap().get("/resources/**"),ResourceHttpRequestHandler.class);
   assertNotNull(handler);
+  assertThat(handler.getCacheControl().getHeaderValue(),Matchers.equalTo(CacheControl.maxAge(1,TimeUnit.HOURS).sMaxAge(30,TimeUnit.MINUTES).cachePublic().getHeaderValue()));
   List<ResourceResolver> resolvers=handler.getResourceResolvers();
   assertThat(resolvers,Matchers.hasSize(3));
   assertThat(resolvers.get(0),Matchers.instanceOf(VersionResourceResolver.class));

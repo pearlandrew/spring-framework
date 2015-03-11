@@ -3,6 +3,15 @@
   Enumeration<?> propNames=cacheMappings.propertyNames();
   while (propNames.hasMoreElements()) {
     String path=(String)propNames.nextElement();
-    this.cacheMappings.put(path,Integer.valueOf(cacheMappings.getProperty(path)));
+    int cacheSeconds=Integer.valueOf(cacheMappings.getProperty(path));
+    if (cacheSeconds > 0) {
+      this.cacheMappings.put(path,CacheControl.maxAge(cacheSeconds,TimeUnit.SECONDS));
+    }
+ else     if (cacheSeconds == 0) {
+      this.cacheMappings.put(path,CacheControl.noStore());
+    }
+ else {
+      this.cacheMappings.put(path,CacheControl.empty());
+    }
   }
 }
