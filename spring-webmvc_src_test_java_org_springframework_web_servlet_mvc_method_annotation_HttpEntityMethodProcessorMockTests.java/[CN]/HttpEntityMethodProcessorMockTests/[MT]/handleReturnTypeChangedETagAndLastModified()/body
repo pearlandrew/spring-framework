@@ -1,0 +1,21 @@
+{
+  long currentTime=new Date().getTime();
+  long oneMinuteAgo=currentTime - (1000 * 60);
+  String etagValue="\"deadb33f8badf00d\"";
+  String changedEtagValue="\"changed-etag-value\"";
+  servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE,currentTime);
+  servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH,etagValue);
+  HttpHeaders responseHeaders=new HttpHeaders();
+  responseHeaders.setDate(HttpHeaders.LAST_MODIFIED,oneMinuteAgo);
+  responseHeaders.set(HttpHeaders.ETAG,changedEtagValue);
+  ResponseEntity<String> returnValue=new ResponseEntity<String>("body",responseHeaders,HttpStatus.OK);
+  given(messageConverter.canWrite(String.class,null)).willReturn(true);
+  given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+  given(messageConverter.canWrite(String.class,MediaType.TEXT_PLAIN)).willReturn(true);
+  processor.handleReturnValue(returnValue,returnTypeResponseEntity,mavContainer,webRequest);
+  assertTrue(mavContainer.isRequestHandled());
+  assertEquals(HttpStatus.OK.value(),servletResponse.getStatus());
+  assertEquals(oneMinuteAgo / 1000 * 1000,Long.parseLong(servletResponse.getHeader(HttpHeaders.LAST_MODIFIED)));
+  assertEquals(changedEtagValue,servletResponse.getHeader(HttpHeaders.ETAG));
+  assertEquals(0,servletResponse.getContentAsByteArray().length);
+}

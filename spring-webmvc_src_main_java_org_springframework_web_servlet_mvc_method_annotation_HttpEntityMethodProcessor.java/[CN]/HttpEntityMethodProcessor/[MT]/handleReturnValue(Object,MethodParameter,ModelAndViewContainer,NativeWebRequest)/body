@@ -15,6 +15,12 @@
     outputMessage.getHeaders().putAll(entityHeaders);
   }
   Object body=responseEntity.getBody();
+  if (responseEntity instanceof ResponseEntity) {
+    if (isResourceNotModified(webRequest,(ResponseEntity<?>)responseEntity)) {
+      outputMessage.flush();
+      return;
+    }
+  }
   writeWithMessageConverters(body,returnType,inputMessage,outputMessage);
-  outputMessage.getBody();
+  outputMessage.flush();
 }
