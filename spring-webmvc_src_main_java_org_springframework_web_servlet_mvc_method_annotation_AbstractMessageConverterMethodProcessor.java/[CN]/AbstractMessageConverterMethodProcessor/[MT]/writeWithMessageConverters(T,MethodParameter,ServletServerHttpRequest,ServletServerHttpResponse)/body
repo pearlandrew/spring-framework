@@ -34,7 +34,7 @@
     selectedMediaType=selectedMediaType.removeQualityValue();
     for (    HttpMessageConverter<?> messageConverter : this.messageConverters) {
       if (messageConverter.canWrite(returnValueClass,selectedMediaType)) {
-        returnValue=this.adviceChain.invoke(returnValue,returnType,selectedMediaType,(Class<HttpMessageConverter<?>>)messageConverter.getClass(),inputMessage,outputMessage);
+        returnValue=(T)getAdvice().beforeBodyWrite(returnValue,returnType,selectedMediaType,(Class<? extends HttpMessageConverter<?>>)messageConverter.getClass(),inputMessage,outputMessage);
         if (returnValue != null) {
           ((HttpMessageConverter<T>)messageConverter).write(returnValue,selectedMediaType,outputMessage);
           if (logger.isDebugEnabled()) {

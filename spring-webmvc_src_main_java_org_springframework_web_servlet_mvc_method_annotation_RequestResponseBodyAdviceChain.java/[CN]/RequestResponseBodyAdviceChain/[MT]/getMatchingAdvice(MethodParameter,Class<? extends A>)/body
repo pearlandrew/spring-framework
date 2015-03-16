@@ -1,0 +1,20 @@
+{
+  List<Object> availableAdvice=getAdvice(adviceType);
+  if (CollectionUtils.isEmpty(availableAdvice)) {
+    return Collections.emptyList();
+  }
+  List<A> result=new ArrayList<A>(availableAdvice.size());
+  for (  Object advice : availableAdvice) {
+    if (advice instanceof ControllerAdviceBean) {
+      ControllerAdviceBean adviceBean=(ControllerAdviceBean)advice;
+      if (!adviceBean.isApplicableToBeanType(parameter.getContainingClass())) {
+        continue;
+      }
+      advice=adviceBean.resolveBean();
+    }
+    if (adviceType.isAssignableFrom(advice.getClass())) {
+      result.add((A)advice);
+    }
+  }
+  return result;
+}

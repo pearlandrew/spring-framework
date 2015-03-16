@@ -9,28 +9,33 @@
   if (contentType == null) {
     contentType=MediaType.APPLICATION_OCTET_STREAM;
   }
-  Class<?> contextClass=(methodParam != null ? methodParam.getContainingClass() : null);
+  Class<?> contextClass=(param != null ? param.getContainingClass() : null);
   Class<T> targetClass=(targetType instanceof Class<?> ? (Class<T>)targetType : null);
   if (targetClass == null) {
-    ResolvableType resolvableType=(methodParam != null ? ResolvableType.forMethodParameter(methodParam) : ResolvableType.forType(targetType));
+    ResolvableType resolvableType=(param != null ? ResolvableType.forMethodParameter(param) : ResolvableType.forType(targetType));
     targetClass=(Class<T>)resolvableType.resolve();
   }
   for (  HttpMessageConverter<?> converter : this.messageConverters) {
+    Class<HttpMessageConverter<?>> converterType=(Class<HttpMessageConverter<?>>)converter.getClass();
     if (converter instanceof GenericHttpMessageConverter) {
       GenericHttpMessageConverter<?> genericConverter=(GenericHttpMessageConverter<?>)converter;
       if (genericConverter.canRead(targetType,contextClass,contentType)) {
         if (logger.isDebugEnabled()) {
-          logger.debug("Reading [" + targetType + "] as \""+ contentType+ "\" using ["+ converter+ "]");
+          logger.debug("Read [" + targetType + "] as \""+ contentType+ "\" with ["+ converter+ "]");
         }
-        return genericConverter.read(targetType,contextClass,inputMessage);
+        inputMessage=getAdvice().beforeBodyRead(inputMessage,param,targetType,converterType);
+        T body=(T)genericConverter.read(targetType,contextClass,inputMessage);
+        return getAdvice().afterBodyRead(body,inputMessage,param,targetType,converterType);
       }
     }
  else     if (targetClass != null) {
       if (converter.canRead(targetClass,contentType)) {
         if (logger.isDebugEnabled()) {
-          logger.debug("Reading [" + targetClass.getName() + "] as \""+ contentType+ "\" using ["+ converter+ "]");
+          logger.debug("Read [" + targetType + "] as \""+ contentType+ "\" with ["+ converter+ "]");
         }
-        return ((HttpMessageConverter<T>)converter).read(targetClass,inputMessage);
+        inputMessage=getAdvice().beforeBodyRead(inputMessage,param,targetType,converterType);
+        T body=((HttpMessageConverter<T>)converter).read(targetClass,inputMessage);
+        return getAdvice().afterBodyRead(body,inputMessage,param,targetType,converterType);
       }
     }
   }

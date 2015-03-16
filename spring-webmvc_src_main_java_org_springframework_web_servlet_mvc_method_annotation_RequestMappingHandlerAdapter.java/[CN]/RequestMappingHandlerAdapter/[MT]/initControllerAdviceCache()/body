@@ -7,7 +7,7 @@
   }
   List<ControllerAdviceBean> beans=ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
   AnnotationAwareOrderComparator.sort(beans);
-  List<Object> responseBodyAdviceBeans=new ArrayList<Object>();
+  List<Object> requestResponseBodyAdviceBeans=new ArrayList<Object>();
   for (  ControllerAdviceBean bean : beans) {
     Set<Method> attrMethods=HandlerMethodSelector.selectMethods(bean.getBeanType(),MODEL_ATTRIBUTE_METHODS);
     if (!attrMethods.isEmpty()) {
@@ -19,12 +19,16 @@
       this.initBinderAdviceCache.put(bean,binderMethods);
       logger.info("Detected @InitBinder methods in " + bean);
     }
+    if (RequestBodyAdvice.class.isAssignableFrom(bean.getBeanType())) {
+      requestResponseBodyAdviceBeans.add(bean);
+      logger.info("Detected RequestBodyAdvice bean in " + bean);
+    }
     if (ResponseBodyAdvice.class.isAssignableFrom(bean.getBeanType())) {
-      responseBodyAdviceBeans.add(bean);
+      requestResponseBodyAdviceBeans.add(bean);
       logger.info("Detected ResponseBodyAdvice bean in " + bean);
     }
   }
-  if (!responseBodyAdviceBeans.isEmpty()) {
-    this.responseBodyAdvice.addAll(0,responseBodyAdviceBeans);
+  if (!requestResponseBodyAdviceBeans.isEmpty()) {
+    this.requestResponseBodyAdvice.addAll(0,requestResponseBodyAdviceBeans);
   }
 }
