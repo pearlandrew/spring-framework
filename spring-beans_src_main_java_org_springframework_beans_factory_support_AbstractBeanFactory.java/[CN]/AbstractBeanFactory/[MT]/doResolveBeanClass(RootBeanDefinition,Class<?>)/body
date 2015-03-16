@@ -1,16 +1,35 @@
 {
+  ClassLoader beanClassLoader=getBeanClassLoader();
+  ClassLoader classLoaderToUse=beanClassLoader;
   if (!ObjectUtils.isEmpty(typesToMatch)) {
     ClassLoader tempClassLoader=getTempClassLoader();
     if (tempClassLoader != null) {
+      classLoaderToUse=tempClassLoader;
       if (tempClassLoader instanceof DecoratingClassLoader) {
         DecoratingClassLoader dcl=(DecoratingClassLoader)tempClassLoader;
         for (        Class<?> typeToMatch : typesToMatch) {
           dcl.excludeClass(typeToMatch.getName());
         }
       }
-      String className=mbd.getBeanClassName();
-      return (className != null ? ClassUtils.forName(className,tempClassLoader) : null);
     }
   }
-  return mbd.resolveBeanClass(getBeanClassLoader());
+  String className=mbd.getBeanClassName();
+  if (className != null) {
+    Object evaluated=evaluateBeanDefinitionString(className,mbd);
+    if (!className.equals(evaluated)) {
+      if (evaluated instanceof Class) {
+        return (Class<?>)evaluated;
+      }
+ else       if (evaluated instanceof String) {
+        return ClassUtils.forName((String)evaluated,classLoaderToUse);
+      }
+ else {
+        throw new IllegalStateException("Invalid class name expression result: " + evaluated);
+      }
+    }
+    if (classLoaderToUse != beanClassLoader) {
+      return ClassUtils.forName(className,classLoaderToUse);
+    }
+  }
+  return mbd.resolveBeanClass(beanClassLoader);
 }

@@ -2,23 +2,28 @@
   if (logger.isDebugEnabled()) {
     logger.debug("Creating instance of bean '" + beanName + "'");
   }
-  resolveBeanClass(mbd,beanName);
+  RootBeanDefinition mbdToUse=mbd;
+  Class<?> resolvedClass=resolveBeanClass(mbd,beanName);
+  if (resolvedClass != null && !mbd.hasBeanClass() && mbd.getBeanClassName() != null) {
+    mbdToUse=new RootBeanDefinition(mbd);
+    mbdToUse.setBeanClass(resolvedClass);
+  }
   try {
-    mbd.prepareMethodOverrides();
+    mbdToUse.prepareMethodOverrides();
   }
  catch (  BeanDefinitionValidationException ex) {
-    throw new BeanDefinitionStoreException(mbd.getResourceDescription(),beanName,"Validation of method overrides failed",ex);
+    throw new BeanDefinitionStoreException(mbdToUse.getResourceDescription(),beanName,"Validation of method overrides failed",ex);
   }
   try {
-    Object bean=resolveBeforeInstantiation(beanName,mbd);
+    Object bean=resolveBeforeInstantiation(beanName,mbdToUse);
     if (bean != null) {
       return bean;
     }
   }
  catch (  Throwable ex) {
-    throw new BeanCreationException(mbd.getResourceDescription(),beanName,"BeanPostProcessor before instantiation of bean failed",ex);
+    throw new BeanCreationException(mbdToUse.getResourceDescription(),beanName,"BeanPostProcessor before instantiation of bean failed",ex);
   }
-  Object beanInstance=doCreateBean(beanName,mbd,args);
+  Object beanInstance=doCreateBean(beanName,mbdToUse,args);
   if (logger.isDebugEnabled()) {
     logger.debug("Finished creating instance of bean '" + beanName + "'");
   }
