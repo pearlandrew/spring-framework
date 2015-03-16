@@ -1,11 +1,11 @@
 {
   for (  ConstraintViolation<Object> violation : violations) {
-    String field=violation.getPropertyPath().toString();
+    String field=determineField(violation);
     FieldError fieldError=errors.getFieldError(field);
     if (fieldError == null || !fieldError.isBindingFailure()) {
       try {
         ConstraintDescriptor<?> cd=violation.getConstraintDescriptor();
-        String errorCode=cd.getAnnotation().annotationType().getSimpleName();
+        String errorCode=determineErrorCode(cd);
         Object[] errorArgs=getArgumentsForConstraint(errors.getObjectName(),field,cd);
         if (errors instanceof BindingResult) {
           BindingResult bindingResult=(BindingResult)errors;
@@ -15,12 +15,9 @@
             bindingResult.addError(new ObjectError(errors.getObjectName(),errorCodes,errorArgs,violation.getMessage()));
           }
  else {
-            Object invalidValue=violation.getInvalidValue();
-            if (!"".equals(field) && (invalidValue == violation.getLeafBean() || (field.contains(".") && !field.contains("[]")))) {
-              invalidValue=bindingResult.getRawFieldValue(field);
-            }
+            Object rejectedValue=getRejectedValue(field,violation,bindingResult);
             String[] errorCodes=bindingResult.resolveMessageCodes(errorCode,field);
-            bindingResult.addError(new FieldError(errors.getObjectName(),nestedField,invalidValue,false,errorCodes,errorArgs,violation.getMessage()));
+            bindingResult.addError(new FieldError(errors.getObjectName(),nestedField,rejectedValue,false,errorCodes,errorArgs,violation.getMessage()));
           }
         }
  else {
