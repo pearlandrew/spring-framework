@@ -3,7 +3,7 @@
   context.pushContainingComponent(new CompositeComponentDefinition(element.getTagName(),source));
   ManagedList<Object> resolvers=new ManagedList<Object>(4);
   resolvers.setSource(context.extractSource(element));
-  String[] names=new String[]{"jsp","tiles","bean-name","freemarker","velocity","groovy","bean","ref"};
+  String[] names=new String[]{"jsp","tiles","bean-name","freemarker","velocity","groovy","script-template","bean","ref"};
   for (  Element resolverElement : DomUtils.getChildElementsByTagName(element,names)) {
     String name=resolverElement.getLocalName();
     if ("bean".equals(name) || "ref".equals(name)) {
@@ -34,6 +34,10 @@
  else     if ("groovy".equals(name)) {
       resolverBeanDef=new RootBeanDefinition(GroovyMarkupViewResolver.class);
       resolverBeanDef.getPropertyValues().add("suffix",".tpl");
+      addUrlBasedViewResolverProperties(resolverElement,resolverBeanDef);
+    }
+ else     if ("script-template".equals(name)) {
+      resolverBeanDef=new RootBeanDefinition(ScriptTemplateViewResolver.class);
       addUrlBasedViewResolverProperties(resolverElement,resolverBeanDef);
     }
  else     if ("bean-name".equals(name)) {

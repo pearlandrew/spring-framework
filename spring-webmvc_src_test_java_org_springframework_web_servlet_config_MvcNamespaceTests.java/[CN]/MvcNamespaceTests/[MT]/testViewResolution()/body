@@ -1,8 +1,8 @@
 {
-  loadBeanDefinitions("mvc-config-view-resolution.xml",6);
+  loadBeanDefinitions("mvc-config-view-resolution.xml",7);
   ViewResolverComposite compositeResolver=this.appContext.getBean(ViewResolverComposite.class);
   assertNotNull(compositeResolver);
-  assertEquals("Actual: " + compositeResolver.getViewResolvers(),8,compositeResolver.getViewResolvers().size());
+  assertEquals("Actual: " + compositeResolver.getViewResolvers(),9,compositeResolver.getViewResolvers().size());
   assertEquals(Ordered.LOWEST_PRECEDENCE,compositeResolver.getOrder());
   List<ViewResolver> resolvers=compositeResolver.getViewResolvers();
   assertEquals(BeanNameViewResolver.class,resolvers.get(0).getClass());
@@ -30,8 +30,14 @@
   assertEquals("",accessor.getPropertyValue("prefix"));
   assertEquals(".tpl",accessor.getPropertyValue("suffix"));
   assertEquals(1024,accessor.getPropertyValue("cacheLimit"));
-  assertEquals(InternalResourceViewResolver.class,resolvers.get(6).getClass());
+  resolver=resolvers.get(6);
+  assertThat(resolver,instanceOf(ScriptTemplateViewResolver.class));
+  accessor=new DirectFieldAccessor(resolver);
+  assertEquals("",accessor.getPropertyValue("prefix"));
+  assertEquals("",accessor.getPropertyValue("suffix"));
+  assertEquals(1024,accessor.getPropertyValue("cacheLimit"));
   assertEquals(InternalResourceViewResolver.class,resolvers.get(7).getClass());
+  assertEquals(InternalResourceViewResolver.class,resolvers.get(8).getClass());
   TilesConfigurer tilesConfigurer=appContext.getBean(TilesConfigurer.class);
   assertNotNull(tilesConfigurer);
   String[] definitions={"/org/springframework/web/servlet/resource/tiles/tiles1.xml","/org/springframework/web/servlet/resource/tiles/tiles2.xml"};
@@ -51,4 +57,13 @@
   assertEquals("/test",groovyMarkupConfigurer.getResourceLoaderPath());
   assertTrue(groovyMarkupConfigurer.isAutoIndent());
   assertFalse(groovyMarkupConfigurer.isCacheTemplates());
+  ScriptTemplateConfigurer scriptTemplateConfigurer=appContext.getBean(ScriptTemplateConfigurer.class);
+  assertNotNull(scriptTemplateConfigurer);
+  assertEquals("Mustache",scriptTemplateConfigurer.getRenderObject());
+  assertEquals("render",scriptTemplateConfigurer.getRenderFunction());
+  assertEquals(StandardCharsets.ISO_8859_1,scriptTemplateConfigurer.getCharset());
+  assertEquals("classpath:",scriptTemplateConfigurer.getResourceLoaderPath());
+  String[] scripts={"/META-INF/resources/webjars/mustachejs/0.8.2/mustache.js"};
+  accessor=new DirectFieldAccessor(scriptTemplateConfigurer);
+  assertArrayEquals(scripts,(String[])accessor.getPropertyValue("scripts"));
 }
