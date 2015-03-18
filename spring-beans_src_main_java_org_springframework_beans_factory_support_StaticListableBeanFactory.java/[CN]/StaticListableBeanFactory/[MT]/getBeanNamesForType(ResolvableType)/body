@@ -1,0 +1,20 @@
+{
+  boolean isFactoryType=(type != null && FactoryBean.class.isAssignableFrom(type.getRawClass()));
+  List<String> matches=new ArrayList<String>();
+  for (  Map.Entry<String,Object> entry : this.beans.entrySet()) {
+    String name=entry.getKey();
+    Object beanInstance=entry.getValue();
+    if (beanInstance instanceof FactoryBean && !isFactoryType) {
+      Class<?> objectType=((FactoryBean<?>)beanInstance).getObjectType();
+      if (objectType != null && (type == null || type.isAssignableFrom(objectType))) {
+        matches.add(name);
+      }
+    }
+ else {
+      if (type == null || type.isInstance(beanInstance)) {
+        matches.add(name);
+      }
+    }
+  }
+  return StringUtils.toStringArray(matches);
+}

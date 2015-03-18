@@ -1,0 +1,57 @@
+{
+  String beanName=transformedBeanName(name);
+  Object beanInstance=getSingleton(beanName,false);
+  if (beanInstance != null) {
+    if (beanInstance instanceof FactoryBean) {
+      if (!BeanFactoryUtils.isFactoryDereference(name)) {
+        Class<?> type=getTypeForFactoryBean((FactoryBean<?>)beanInstance);
+        return (type != null && typeToMatch.isAssignableFrom(type));
+      }
+ else {
+        return typeToMatch.isInstance(beanInstance);
+      }
+    }
+ else {
+      return (!BeanFactoryUtils.isFactoryDereference(name) && typeToMatch.isInstance(beanInstance));
+    }
+  }
+ else   if (containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
+    return false;
+  }
+ else {
+    BeanFactory parentBeanFactory=getParentBeanFactory();
+    if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
+      return parentBeanFactory.isTypeMatch(originalBeanName(name),typeToMatch);
+    }
+    RootBeanDefinition mbd=getMergedLocalBeanDefinition(beanName);
+    Class<?> classToMatch=typeToMatch.getRawClass();
+    Class<?>[] typesToMatch=(FactoryBean.class.equals(classToMatch) ? new Class<?>[]{classToMatch} : new Class<?>[]{FactoryBean.class,classToMatch});
+    BeanDefinitionHolder dbd=mbd.getDecoratedDefinition();
+    if (dbd != null && !BeanFactoryUtils.isFactoryDereference(name)) {
+      RootBeanDefinition tbd=getMergedBeanDefinition(dbd.getBeanName(),dbd.getBeanDefinition(),mbd);
+      Class<?> targetClass=predictBeanType(dbd.getBeanName(),tbd,typesToMatch);
+      if (targetClass != null && !FactoryBean.class.isAssignableFrom(targetClass)) {
+        return typeToMatch.isAssignableFrom(targetClass);
+      }
+    }
+    Class<?> beanType=predictBeanType(beanName,mbd,typesToMatch);
+    if (beanType == null) {
+      return false;
+    }
+    if (FactoryBean.class.isAssignableFrom(beanType)) {
+      if (!BeanFactoryUtils.isFactoryDereference(name)) {
+        beanType=getTypeForFactoryBean(beanName,mbd);
+        if (beanType == null) {
+          return false;
+        }
+      }
+    }
+ else     if (BeanFactoryUtils.isFactoryDereference(name)) {
+      beanType=predictBeanType(beanName,mbd,FactoryBean.class);
+      if (beanType == null || !FactoryBean.class.isAssignableFrom(beanType)) {
+        return false;
+      }
+    }
+    return typeToMatch.isAssignableFrom(beanType);
+  }
+}
