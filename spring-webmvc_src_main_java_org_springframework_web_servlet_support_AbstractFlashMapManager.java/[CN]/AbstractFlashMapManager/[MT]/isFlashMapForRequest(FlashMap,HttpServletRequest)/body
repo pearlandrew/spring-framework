@@ -6,10 +6,16 @@
       return false;
     }
   }
-  MultiValueMap<String,String> targetParams=flashMap.getTargetRequestParams();
-  for (  String expectedName : targetParams.keySet()) {
-    for (    String expectedValue : targetParams.get(expectedName)) {
-      if (!ObjectUtils.containsElement(request.getParameterValues(expectedName),expectedValue)) {
+  UriComponents uriComponents=ServletUriComponentsBuilder.fromRequest(request).build();
+  MultiValueMap<String,String> actualParams=uriComponents.getQueryParams();
+  MultiValueMap<String,String> expectedParams=flashMap.getTargetRequestParams();
+  for (  String expectedName : expectedParams.keySet()) {
+    List<String> actualValues=actualParams.get(expectedName);
+    if (actualValues == null) {
+      return false;
+    }
+    for (    String expectedValue : expectedParams.get(expectedName)) {
+      if (!actualValues.contains(expectedValue)) {
         return false;
       }
     }
