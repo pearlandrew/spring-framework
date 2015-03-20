@@ -1,10 +1,19 @@
 {
   this.contentType=contentType;
   if (contentType != null) {
-    int charsetIndex=contentType.toLowerCase().indexOf(CHARSET_PREFIX);
-    if (charsetIndex != -1) {
-      this.characterEncoding=contentType.substring(charsetIndex + CHARSET_PREFIX.length());
-      this.charset=true;
+    try {
+      MediaType mediaType=MediaType.parseMediaType(contentType);
+      if (mediaType.getCharSet() != null) {
+        this.characterEncoding=mediaType.getCharSet().name();
+        this.charset=true;
+      }
+    }
+ catch (    Exception ex) {
+      int charsetIndex=contentType.toLowerCase().indexOf(CHARSET_PREFIX);
+      if (charsetIndex != -1) {
+        this.characterEncoding=contentType.substring(charsetIndex + CHARSET_PREFIX.length());
+        this.charset=true;
+      }
     }
     updateContentTypeHeader();
   }
