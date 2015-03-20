@@ -1,37 +1,5 @@
 {
   Assert.notNull(uriComponents,"'uriComponents' must not be null");
-  this.scheme=uriComponents.getScheme();
-  if (uriComponents instanceof OpaqueUriComponents) {
-    this.ssp=uriComponents.getSchemeSpecificPart();
-    resetHierarchicalComponents();
-  }
- else {
-    if (uriComponents.getUserInfo() != null) {
-      this.userInfo=uriComponents.getUserInfo();
-    }
-    if (uriComponents.getHost() != null) {
-      this.host=uriComponents.getHost();
-    }
-    if (uriComponents.getPort() != -1) {
-      this.port=String.valueOf(uriComponents.getPort());
-    }
-    if (StringUtils.hasLength(uriComponents.getPath())) {
-      List<String> segments=uriComponents.getPathSegments();
-      if (segments.isEmpty()) {
-        this.pathBuilder.addPath(uriComponents.getPath());
-      }
- else {
-        this.pathBuilder.addPathSegments(segments.toArray(new String[segments.size()]));
-      }
-    }
-    if (!uriComponents.getQueryParams().isEmpty()) {
-      this.queryParams.clear();
-      this.queryParams.putAll(uriComponents.getQueryParams());
-    }
-    resetSchemeSpecificPart();
-  }
-  if (uriComponents.getFragment() != null) {
-    this.fragment=uriComponents.getFragment();
-  }
+  uriComponents.copyToUriComponentsBuilder(this);
   return this;
 }
