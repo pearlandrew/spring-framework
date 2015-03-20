@@ -1,27 +1,27 @@
 {
-  long resourceLength=resource.contentLength();
+  long length=resource.contentLength();
   List<HttpRange> ranges;
   try {
-    HttpHeaders requestHeaders=new ServletServerHttpRequest(request).getHeaders();
-    ranges=requestHeaders.getRange();
+    HttpHeaders headers=new ServletServerHttpRequest(request).getHeaders();
+    ranges=headers.getRange();
   }
  catch (  IllegalArgumentException ex) {
-    response.addHeader("Content-Range","bytes */" + resourceLength);
+    response.addHeader("Content-Range","bytes */" + length);
     response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
     return;
   }
   response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
   if (ranges.size() == 1) {
     HttpRange range=ranges.get(0);
-    long rangeStart=range.getRangeStart(resourceLength);
-    long rangeEnd=range.getRangeEnd(resourceLength);
-    long rangeLength=rangeEnd - rangeStart + 1;
+    long start=range.getRangeStart(length);
+    long end=range.getRangeEnd(length);
+    long rangeLength=end - start + 1;
     setHeaders(response,resource,contentType);
-    response.addHeader("Content-Range","bytes " + rangeStart + "-"+ rangeEnd+ "/"+ resourceLength);
+    response.addHeader("Content-Range","bytes " + start + "-"+ end+ "/"+ length);
     response.setContentLength((int)rangeLength);
     InputStream in=resource.getInputStream();
     try {
-      copyRange(in,response.getOutputStream(),rangeStart,rangeEnd);
+      copyRange(in,response.getOutputStream(),start,end);
     }
   finally {
       try {
@@ -36,17 +36,17 @@
     response.setContentType("multipart/byteranges; boundary=" + boundaryString);
     ServletOutputStream out=response.getOutputStream();
     for (    HttpRange range : ranges) {
-      long rangeStart=range.getRangeStart(resourceLength);
-      long rangeEnd=range.getRangeEnd(resourceLength);
+      long start=range.getRangeStart(length);
+      long end=range.getRangeEnd(length);
       InputStream in=resource.getInputStream();
       out.println();
       out.println("--" + boundaryString);
       if (contentType != null) {
         out.println("Content-Type: " + contentType);
       }
-      out.println("Content-Range: bytes " + rangeStart + "-"+ rangeEnd+ "/"+ resourceLength);
+      out.println("Content-Range: bytes " + start + "-"+ end+ "/"+ length);
       out.println();
-      copyRange(in,out,rangeStart,rangeEnd);
+      copyRange(in,out,start,end);
     }
     out.println();
     out.print("--" + boundaryString + "--");

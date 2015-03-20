@@ -1,28 +1,21 @@
 {
-  if (range == null) {
-    return null;
-  }
+  Assert.notNull(range);
   int dashIdx=range.indexOf('-');
-  if (dashIdx < 0) {
-    throw new IllegalArgumentException("Range '\"" + range + "\" does not"+ "contain \"-\"");
-  }
- else   if (dashIdx > 0) {
+  if (dashIdx > 0) {
     long firstPos=Long.parseLong(range.substring(0,dashIdx));
-    ByteRange byteRange;
     if (dashIdx < range.length() - 1) {
-      long lastPos=Long.parseLong(range.substring(dashIdx + 1,range.length()));
-      byteRange=new ByteRange(firstPos,lastPos);
+      Long lastPos=Long.parseLong(range.substring(dashIdx + 1,range.length()));
+      return new ByteRange(firstPos,lastPos);
     }
  else {
-      byteRange=new ByteRange(firstPos,null);
+      return new ByteRange(firstPos,null);
     }
-    if (!byteRange.validate()) {
-      throw new IllegalArgumentException("Invalid Range \"" + range + "\"");
-    }
-    return byteRange;
   }
- else {
+ else   if (dashIdx == 0) {
     long suffixLength=Long.parseLong(range.substring(1));
     return new SuffixByteRange(suffixLength);
+  }
+ else {
+    throw new IllegalArgumentException("Range '" + range + "' does not contain \"-\"");
   }
 }
