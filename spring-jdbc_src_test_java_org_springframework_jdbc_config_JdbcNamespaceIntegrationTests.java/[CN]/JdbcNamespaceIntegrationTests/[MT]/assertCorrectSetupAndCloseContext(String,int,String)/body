@@ -3,8 +3,10 @@
   try {
     for (    String dataSourceName : dataSources) {
       DataSource dataSource=context.getBean(dataSourceName,DataSource.class);
-      JdbcTemplate template=new JdbcTemplate(dataSource);
-      assertNumRowsInTestTable(template,count);
+      assertNumRowsInTestTable(new JdbcTemplate(dataSource),count);
+      assertTrue(dataSource instanceof AbstractDriverBasedDataSource);
+      AbstractDriverBasedDataSource adbDataSource=(AbstractDriverBasedDataSource)dataSource;
+      assertThat(adbDataSource.getUrl(),containsString(dataSourceName));
     }
   }
   finally {
