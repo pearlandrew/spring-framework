@@ -1,0 +1,20 @@
+{
+  Class<?> testClass=testContext.getTestClass();
+  Assert.notNull(testClass,"The test class of the supplied TestContext must not be null");
+  Method testMethod=testContext.getTestMethod();
+  Assert.notNull(testMethod,"The test method of the supplied TestContext must not be null");
+  final String annotationType=DirtiesContext.class.getName();
+  AnnotationAttributes methodAnnAttrs=AnnotatedElementUtils.getAnnotationAttributes(testMethod,annotationType);
+  AnnotationAttributes classAnnAttrs=AnnotatedElementUtils.getAnnotationAttributes(testClass,annotationType);
+  boolean methodAnnotated=methodAnnAttrs != null;
+  boolean classAnnotated=classAnnAttrs != null;
+  MethodMode methodMode=methodAnnotated ? methodAnnAttrs.<MethodMode>getEnum("methodMode") : null;
+  ClassMode classMode=classAnnotated ? classAnnAttrs.<ClassMode>getEnum("classMode") : null;
+  if (logger.isDebugEnabled()) {
+    logger.debug(String.format("%s test method: context %s, class annotated with @DirtiesContext [%s] with mode [%s], method annotated with @DirtiesContext [%s] with mode [%s].",phase,testContext,classAnnotated,classMode,methodAnnotated,methodMode));
+  }
+  if ((methodMode == requiredMethodMode) || (classMode == requiredClassMode)) {
+    HierarchyMode hierarchyMode=methodAnnotated ? methodAnnAttrs.<HierarchyMode>getEnum("hierarchyMode") : classAnnAttrs.<HierarchyMode>getEnum("hierarchyMode");
+    dirtyContext(testContext,hierarchyMode);
+  }
+}

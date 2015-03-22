@@ -1,0 +1,9 @@
+{
+  Class<?> clazz=getClass();
+  BDDMockito.<Class<?>>given(testContext.getTestClass()).willReturn(clazz);
+  given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("dirtiesContextDeclaredLocallyWithAfterMethodMode"));
+  listener.beforeTestMethod(testContext);
+  verify(testContext,times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+  listener.afterTestMethod(testContext);
+  verify(testContext,times(1)).markApplicationContextDirty(EXHAUSTIVE);
+}
