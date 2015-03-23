@@ -1,10 +1,12 @@
 {
-  Collections.sort(this.deferredImportSelectors,DEFERRED_IMPORT_COMPARATOR);
-  for (  DeferredImportSelectorHolder deferredImport : this.deferredImportSelectors) {
+  List<DeferredImportSelectorHolder> deferredImports=this.deferredImportSelectors;
+  this.deferredImportSelectors=null;
+  Collections.sort(deferredImports,DEFERRED_IMPORT_COMPARATOR);
+  for (  DeferredImportSelectorHolder deferredImport : deferredImports) {
     ConfigurationClass configClass=deferredImport.getConfigurationClass();
     try {
       String[] imports=deferredImport.getImportSelector().selectImports(configClass.getMetadata());
-      processImports(configClass,asSourceClass(configClass),asSourceClasses(imports),false,true);
+      processImports(configClass,asSourceClass(configClass),asSourceClasses(imports),false);
     }
  catch (    BeanDefinitionStoreException ex) {
       throw ex;
@@ -13,5 +15,4 @@ catch (    Exception ex) {
       throw new BeanDefinitionStoreException("Failed to process import candidates for configuration class [" + configClass.getMetadata().getClassName() + "]",ex);
     }
   }
-  this.deferredImportSelectors.clear();
 }
