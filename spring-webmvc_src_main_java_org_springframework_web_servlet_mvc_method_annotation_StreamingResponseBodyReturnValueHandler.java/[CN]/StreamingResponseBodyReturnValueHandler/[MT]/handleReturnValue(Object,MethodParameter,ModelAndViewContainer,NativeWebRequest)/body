@@ -1,0 +1,22 @@
+{
+  if (returnValue == null) {
+    mavContainer.setRequestHandled(true);
+    return;
+  }
+  HttpServletResponse response=webRequest.getNativeResponse(HttpServletResponse.class);
+  ServerHttpResponse outputMessage=new ServletServerHttpResponse(response);
+  if (ResponseEntity.class.isAssignableFrom(returnValue.getClass())) {
+    ResponseEntity<?> responseEntity=(ResponseEntity<?>)returnValue;
+    outputMessage.setStatusCode(responseEntity.getStatusCode());
+    outputMessage.getHeaders().putAll(responseEntity.getHeaders());
+    returnValue=responseEntity.getBody();
+    if (returnValue == null) {
+      mavContainer.setRequestHandled(true);
+      return;
+    }
+  }
+  Assert.isInstanceOf(StreamingResponseBody.class,returnValue);
+  StreamingResponseBody streamingBody=(StreamingResponseBody)returnValue;
+  Callable<Void> callable=new StreamingResponseBodyTask(outputMessage.getBody(),streamingBody);
+  WebAsyncUtils.getAsyncManager(webRequest).startCallableProcessing(callable,mavContainer);
+}
