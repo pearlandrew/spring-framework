@@ -11,13 +11,13 @@
         ReflectionUtils.makeAccessible(method);
         return method.invoke(source);
       }
-      method=getOfMethod(targetClass,sourceClass);
-      if (method != null) {
-        ReflectionUtils.makeAccessible(method);
-        return method.invoke(null,source);
-      }
     }
-    Constructor<?> constructor=ClassUtils.getConstructorIfAvailable(targetClass,sourceClass);
+    Method method=getFactoryMethod(targetClass,sourceClass);
+    if (method != null) {
+      ReflectionUtils.makeAccessible(method);
+      return method.invoke(null,source);
+    }
+    Constructor<?> constructor=getFactoryConstructor(targetClass,sourceClass);
     if (constructor != null) {
       return constructor.newInstance(source);
     }
@@ -28,5 +28,6 @@
 catch (  Throwable ex) {
     throw new ConversionFailedException(sourceType,targetType,source,ex);
   }
-  throw new IllegalStateException("No static valueOf/of/from(" + sourceClass.getName() + ") method or Constructor("+ sourceClass.getName()+ ") exists on "+ targetClass.getName());
+  String message=String.format("No to%3$s() method exists on %1$s, and no static valueOf/of/from(%1$s) method or %3$s(%1$s) constructor exists on %2$s.",sourceClass.getName(),targetClass.getName(),targetClass.getSimpleName());
+  throw new IllegalStateException(message);
 }
