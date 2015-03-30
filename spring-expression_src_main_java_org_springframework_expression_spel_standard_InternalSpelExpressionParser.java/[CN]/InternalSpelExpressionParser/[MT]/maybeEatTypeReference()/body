@@ -4,7 +4,11 @@
     if (!typeName.stringValue().equals("T")) {
       return false;
     }
-    nextToken();
+    Token t=nextToken();
+    if (peekToken(TokenKind.RSQUARE)) {
+      push(new PropertyOrFieldReference(false,t.data,toPos(t)));
+      return true;
+    }
     eatToken(TokenKind.LPAREN);
     SpelNodeImpl node=eatPossiblyQualifiedId();
     int dims=0;

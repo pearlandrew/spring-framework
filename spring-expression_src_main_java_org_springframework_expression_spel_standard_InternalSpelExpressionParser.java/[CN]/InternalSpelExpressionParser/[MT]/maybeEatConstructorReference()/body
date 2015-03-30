@@ -1,6 +1,10 @@
 {
   if (peekIdentifierToken("new")) {
     Token newToken=nextToken();
+    if (peekToken(TokenKind.RSQUARE)) {
+      push(new PropertyOrFieldReference(false,newToken.data,toPos(newToken)));
+      return true;
+    }
     SpelNodeImpl possiblyQualifiedConstructorName=eatPossiblyQualifiedId();
     List<SpelNodeImpl> nodes=new ArrayList<SpelNodeImpl>();
     nodes.add(possiblyQualifiedConstructorName);
