@@ -1,32 +1,11 @@
 {
   HttpServletRequest servletRequest=webRequest.getNativeRequest(HttpServletRequest.class);
   HttpInputMessage inputMessage=new ServletServerHttpRequest(servletRequest);
-  InputStream inputStream=inputMessage.getBody();
-  if (inputStream == null) {
-    return handleEmptyBody(methodParam);
+  Object arg=readWithMessageConverters(inputMessage,methodParam,paramType);
+  if (arg == null) {
+    if (methodParam.getParameterAnnotation(RequestBody.class).required()) {
+      throw new HttpMessageNotReadableException("Required request body is missing: " + methodParam);
+    }
   }
- else   if (inputStream.markSupported()) {
-    inputStream.mark(1);
-    if (inputStream.read() == -1) {
-      return handleEmptyBody(methodParam);
-    }
-    inputStream.reset();
-  }
- else {
-    final PushbackInputStream pushbackInputStream=new PushbackInputStream(inputStream);
-    int b=pushbackInputStream.read();
-    if (b == -1) {
-      return handleEmptyBody(methodParam);
-    }
- else {
-      pushbackInputStream.unread(b);
-    }
-    inputMessage=new ServletServerHttpRequest(servletRequest){
-      @Override public InputStream getBody(){
-        return pushbackInputStream;
-      }
-    }
-;
-  }
-  return super.readWithMessageConverters(inputMessage,methodParam,paramType);
+  return arg;
 }

@@ -15,6 +15,8 @@
     ResolvableType resolvableType=(param != null ? ResolvableType.forMethodParameter(param) : ResolvableType.forType(targetType));
     targetClass=(Class<T>)resolvableType.resolve();
   }
+  inputMessage=new EmptyBodyCheckingHttpInputMessage(inputMessage);
+  Object body=NO_VALUE;
   for (  HttpMessageConverter<?> converter : this.messageConverters) {
     Class<HttpMessageConverter<?>> converterType=(Class<HttpMessageConverter<?>>)converter.getClass();
     if (converter instanceof GenericHttpMessageConverter) {
@@ -23,9 +25,16 @@
         if (logger.isDebugEnabled()) {
           logger.debug("Read [" + targetType + "] as \""+ contentType+ "\" with ["+ converter+ "]");
         }
-        inputMessage=getAdvice().beforeBodyRead(inputMessage,param,targetType,converterType);
-        T body=(T)genericConverter.read(targetType,contextClass,inputMessage);
-        return getAdvice().afterBodyRead(body,inputMessage,param,targetType,converterType);
+        if (inputMessage.getBody() != null) {
+          inputMessage=getAdvice().beforeBodyRead(inputMessage,param,targetType,converterType);
+          body=genericConverter.read(targetType,contextClass,inputMessage);
+          body=getAdvice().afterBodyRead(body,inputMessage,param,targetType,converterType);
+        }
+ else {
+          body=null;
+          body=getAdvice().handleEmptyBody(body,inputMessage,param,targetType,converterType);
+        }
+        break;
       }
     }
  else     if (targetClass != null) {
@@ -33,11 +42,21 @@
         if (logger.isDebugEnabled()) {
           logger.debug("Read [" + targetType + "] as \""+ contentType+ "\" with ["+ converter+ "]");
         }
-        inputMessage=getAdvice().beforeBodyRead(inputMessage,param,targetType,converterType);
-        T body=((HttpMessageConverter<T>)converter).read(targetClass,inputMessage);
-        return getAdvice().afterBodyRead(body,inputMessage,param,targetType,converterType);
+        if (inputMessage.getBody() != null) {
+          inputMessage=getAdvice().beforeBodyRead(inputMessage,param,targetType,converterType);
+          body=((HttpMessageConverter<T>)converter).read(targetClass,inputMessage);
+          body=getAdvice().afterBodyRead(body,inputMessage,param,targetType,converterType);
+        }
+ else {
+          body=null;
+          body=getAdvice().handleEmptyBody(body,inputMessage,param,targetType,converterType);
+        }
+        break;
       }
     }
   }
-  throw new HttpMediaTypeNotSupportedException(contentType,this.allSupportedMediaTypes);
+  if (body == NO_VALUE) {
+    throw new HttpMediaTypeNotSupportedException(contentType,this.allSupportedMediaTypes);
+  }
+  return body;
 }
