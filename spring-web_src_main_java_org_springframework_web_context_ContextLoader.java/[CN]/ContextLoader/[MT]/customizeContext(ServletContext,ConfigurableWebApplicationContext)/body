@@ -1,18 +1,14 @@
 {
   List<Class<ApplicationContextInitializer<ConfigurableApplicationContext>>> initializerClasses=determineContextInitializerClasses(sc);
-  if (initializerClasses.isEmpty()) {
-    return;
-  }
-  ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances=new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
   for (  Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass : initializerClasses) {
     Class<?> initializerContextClass=GenericTypeResolver.resolveTypeArgument(initializerClass,ApplicationContextInitializer.class);
     if (initializerContextClass != null) {
       Assert.isAssignable(initializerContextClass,wac.getClass(),String.format("Could not add context initializer [%s] since its generic parameter [%s] " + "is not assignable from the type of application context used by this " + "context loader [%s]: ",initializerClass.getName(),initializerContextClass.getName(),wac.getClass().getName()));
     }
-    initializerInstances.add(BeanUtils.instantiateClass(initializerClass));
+    this.contextInitializers.add(BeanUtils.instantiateClass(initializerClass));
   }
-  AnnotationAwareOrderComparator.sort(initializerInstances);
-  for (  ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {
+  AnnotationAwareOrderComparator.sort(this.contextInitializers);
+  for (  ApplicationContextInitializer<ConfigurableApplicationContext> initializer : this.contextInitializers) {
     initializer.initialize(wac);
   }
 }
