@@ -2,8 +2,13 @@
   Class<?>[] specifiedInterfaces=advised.getProxiedInterfaces();
   if (specifiedInterfaces.length == 0) {
     Class<?> targetClass=advised.getTargetClass();
-    if (targetClass != null && targetClass.isInterface()) {
-      specifiedInterfaces=new Class<?>[]{targetClass};
+    if (targetClass != null) {
+      if (targetClass.isInterface()) {
+        specifiedInterfaces=new Class<?>[]{targetClass};
+      }
+ else       if (Proxy.isProxyClass(targetClass)) {
+        specifiedInterfaces=targetClass.getInterfaces();
+      }
     }
   }
   boolean addSpringProxy=!advised.isInterfaceProxied(SpringProxy.class);
