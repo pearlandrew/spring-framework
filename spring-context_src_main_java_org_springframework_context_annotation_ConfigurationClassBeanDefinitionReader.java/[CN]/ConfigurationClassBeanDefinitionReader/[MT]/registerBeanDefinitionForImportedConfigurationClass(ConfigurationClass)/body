@@ -1,20 +1,15 @@
 {
   AnnotationMetadata metadata=configClass.getMetadata();
   AnnotatedGenericBeanDefinition configBeanDef=new AnnotatedGenericBeanDefinition(metadata);
-  if (ConfigurationClassUtils.checkConfigurationClassCandidate(configBeanDef,this.metadataReaderFactory)) {
-    ScopeMetadata scopeMetadata=scopeMetadataResolver.resolveScopeMetadata(configBeanDef);
-    configBeanDef.setScope(scopeMetadata.getScopeName());
-    String configBeanName=this.importBeanNameGenerator.generateBeanName(configBeanDef,this.registry);
-    AnnotationConfigUtils.processCommonDefinitionAnnotations(configBeanDef,metadata);
-    BeanDefinitionHolder definitionHolder=new BeanDefinitionHolder(configBeanDef,configBeanName);
-    definitionHolder=AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata,definitionHolder,this.registry);
-    this.registry.registerBeanDefinition(definitionHolder.getBeanName(),definitionHolder.getBeanDefinition());
-    configClass.setBeanName(configBeanName);
-    if (logger.isDebugEnabled()) {
-      logger.debug(String.format("Registered bean definition for imported @Configuration class %s",configBeanName));
-    }
-  }
- else {
-    this.problemReporter.error(new InvalidConfigurationImportProblem(metadata.getClassName(),configClass.getResource(),metadata));
+  ScopeMetadata scopeMetadata=scopeMetadataResolver.resolveScopeMetadata(configBeanDef);
+  configBeanDef.setScope(scopeMetadata.getScopeName());
+  String configBeanName=this.importBeanNameGenerator.generateBeanName(configBeanDef,this.registry);
+  AnnotationConfigUtils.processCommonDefinitionAnnotations(configBeanDef,metadata);
+  BeanDefinitionHolder definitionHolder=new BeanDefinitionHolder(configBeanDef,configBeanName);
+  definitionHolder=AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata,definitionHolder,this.registry);
+  this.registry.registerBeanDefinition(definitionHolder.getBeanName(),definitionHolder.getBeanDefinition());
+  configClass.setBeanName(configBeanName);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Registered bean definition for imported class '" + configBeanName + "'");
   }
 }
