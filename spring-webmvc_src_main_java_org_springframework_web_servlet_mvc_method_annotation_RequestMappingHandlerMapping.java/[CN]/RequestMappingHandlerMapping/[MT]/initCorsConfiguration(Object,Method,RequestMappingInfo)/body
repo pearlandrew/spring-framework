@@ -1,0 +1,21 @@
+{
+  HandlerMethod handlerMethod=createHandlerMethod(handler,method);
+  CorsConfiguration config=new CorsConfiguration();
+  CrossOrigin typeAnnotation=AnnotationUtils.findAnnotation(handlerMethod.getBeanType(),CrossOrigin.class);
+  applyAnnotation(config,typeAnnotation);
+  CrossOrigin methodAnnotation=AnnotationUtils.findAnnotation(method,CrossOrigin.class);
+  applyAnnotation(config,methodAnnotation);
+  if (CollectionUtils.isEmpty(config.getAllowedMethods())) {
+    for (    RequestMethod allowedMethod : mappingInfo.getMethodsCondition().getMethods()) {
+      config.addAllowedMethod(allowedMethod.name());
+    }
+  }
+  if (CollectionUtils.isEmpty(config.getAllowedHeaders())) {
+    for (    NameValueExpression<String> headerExpression : mappingInfo.getHeadersCondition().getExpressions()) {
+      if (!headerExpression.isNegated()) {
+        config.addAllowedHeader(headerExpression.getName());
+      }
+    }
+  }
+  return config;
+}

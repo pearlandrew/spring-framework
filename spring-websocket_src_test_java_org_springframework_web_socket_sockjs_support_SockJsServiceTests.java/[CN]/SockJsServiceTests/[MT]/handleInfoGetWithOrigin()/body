@@ -1,28 +1,16 @@
 {
   this.servletRequest.setServerName("mydomain2.com");
-  setOrigin("http://mydomain2.com");
+  this.servletRequest.addHeader(HttpHeaders.ORIGIN,"http://mydomain2.com");
   resetResponseAndHandleRequest("GET","/echo/info",HttpStatus.OK);
   assertEquals("application/json;charset=UTF-8",this.servletResponse.getContentType());
-  assertEquals("no-store, no-cache, must-revalidate, max-age=0",this.servletResponse.getHeader("Cache-Control"));
-  assertEquals("http://mydomain2.com",this.servletResponse.getHeader("Access-Control-Allow-Origin"));
-  assertEquals("true",this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
-  assertEquals("Origin",this.servletResponse.getHeader("Vary"));
+  assertEquals("no-store, no-cache, must-revalidate, max-age=0",this.servletResponse.getHeader(HttpHeaders.CACHE_CONTROL));
   String body=this.servletResponse.getContentAsString();
   assertEquals("{\"entropy\"",body.substring(0,body.indexOf(':')));
   assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":true,\"websocket\":true}",body.substring(body.indexOf(',')));
   this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
   resetResponseAndHandleRequest("GET","/echo/info",HttpStatus.FORBIDDEN);
-  assertNull(this.servletResponse.getHeader("Access-Control-Allow-Origin"));
-  assertNull(this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
-  assertNull(this.servletResponse.getHeader("Vary"));
   this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com","http://mydomain2.com","http://mydomain3.com"));
   resetResponseAndHandleRequest("GET","/echo/info",HttpStatus.OK);
-  assertEquals("http://mydomain2.com",this.servletResponse.getHeader("Access-Control-Allow-Origin"));
-  assertEquals("true",this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
-  assertEquals("Origin",this.servletResponse.getHeader("Vary"));
   this.service.setAllowedOrigins(Arrays.asList("*"));
   resetResponseAndHandleRequest("GET","/echo/info",HttpStatus.OK);
-  assertEquals("http://mydomain2.com",this.servletResponse.getHeader("Access-Control-Allow-Origin"));
-  assertEquals("true",this.servletResponse.getHeader("Access-Control-Allow-Credentials"));
-  assertEquals("Origin",this.servletResponse.getHeader("Vary"));
 }

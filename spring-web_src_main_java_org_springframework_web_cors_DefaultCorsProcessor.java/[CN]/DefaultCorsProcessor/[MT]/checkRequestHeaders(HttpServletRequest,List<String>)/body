@@ -1,0 +1,24 @@
+{
+  String[] requestHeaders=CorsUtils.isPreFlightRequest(request) ? StringUtils.commaDelimitedListToStringArray(request.getHeader(CorsUtils.ACCESS_CONTROL_REQUEST_HEADERS)) : Collections.list(request.getHeaderNames()).toArray(new String[0]);
+  if ((allowedHeaders != null) && allowedHeaders.contains("*")) {
+    return true;
+  }
+  for (  String requestHeader : requestHeaders) {
+    if (!HttpHeaders.ORIGIN.equals(requestHeader)) {
+      requestHeader=requestHeader.trim();
+      boolean found=false;
+      if (allowedHeaders != null) {
+        for (        String header : allowedHeaders) {
+          if (requestHeader.equalsIgnoreCase(header)) {
+            found=true;
+            break;
+          }
+        }
+      }
+      if (!found) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
