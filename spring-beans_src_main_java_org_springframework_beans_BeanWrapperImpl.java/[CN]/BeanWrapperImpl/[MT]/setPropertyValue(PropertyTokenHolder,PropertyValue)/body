@@ -208,7 +208,11 @@ catch (    InvocationTargetException ex) {
         throw new TypeMismatchException(propertyChangeEvent,pd.getPropertyType(),ex.getTargetException());
       }
  else {
-        throw new MethodInvocationException(propertyChangeEvent,ex.getTargetException());
+        Throwable cause=ex.getTargetException();
+        if (cause instanceof UndeclaredThrowableException) {
+          cause=cause.getCause();
+        }
+        throw new MethodInvocationException(propertyChangeEvent,cause);
       }
     }
 catch (    Exception ex) {
