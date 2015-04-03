@@ -1,0 +1,15 @@
+{
+  Assert.isTrue(targetObject != null || targetClass != null,"Either targetObject or targetClass for the field must be specified");
+  if (targetClass == null) {
+    targetClass=targetObject.getClass();
+  }
+  Field field=ReflectionUtils.findField(targetClass,name,type);
+  if (field == null) {
+    throw new IllegalArgumentException(String.format("Could not find field [%s] of type [%s] on target object [%s] or target class [%s]",name,type,targetObject,targetClass));
+  }
+  if (logger.isDebugEnabled()) {
+    logger.debug(String.format("Setting field [%s] of type [%s] on target object [%s] or target class [%s] to value [%s]",name,type,targetObject,targetClass,value));
+  }
+  ReflectionUtils.makeAccessible(field);
+  ReflectionUtils.setField(field,targetObject,value);
+}
