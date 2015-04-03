@@ -1,36 +1,41 @@
 {
   if (visited.add(element)) {
-    Annotation[] annotations=(traverseClassHierarchy ? element.getDeclaredAnnotations() : element.getAnnotations());
-    for (    Annotation annotation : annotations) {
-      if (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0) {
-        T result=processor.process(annotation,metaDepth);
-        if (result != null) {
-          return result;
+    try {
+      Annotation[] annotations=(traverseClassHierarchy ? element.getDeclaredAnnotations() : element.getAnnotations());
+      for (      Annotation annotation : annotations) {
+        if (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0) {
+          T result=processor.process(annotation,metaDepth);
+          if (result != null) {
+            return result;
+          }
+          result=doProcess(annotation.annotationType(),annotationType,traverseClassHierarchy,processor,visited,metaDepth + 1);
+          if (result != null) {
+            processor.postProcess(annotation,result);
+            return result;
+          }
         }
-        result=doProcess(annotation.annotationType(),annotationType,traverseClassHierarchy,processor,visited,metaDepth + 1);
-        if (result != null) {
-          processor.postProcess(annotation,result);
-          return result;
+      }
+      for (      Annotation annotation : annotations) {
+        if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
+          T result=doProcess(annotation.annotationType(),annotationType,traverseClassHierarchy,processor,visited,metaDepth);
+          if (result != null) {
+            processor.postProcess(annotation,result);
+            return result;
+          }
+        }
+      }
+      if (traverseClassHierarchy && element instanceof Class) {
+        Class<?> superclass=((Class<?>)element).getSuperclass();
+        if (superclass != null && !superclass.equals(Object.class)) {
+          T result=doProcess(superclass,annotationType,true,processor,visited,metaDepth);
+          if (result != null) {
+            return result;
+          }
         }
       }
     }
-    for (    Annotation annotation : annotations) {
-      if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-        T result=doProcess(annotation.annotationType(),annotationType,traverseClassHierarchy,processor,visited,metaDepth);
-        if (result != null) {
-          processor.postProcess(annotation,result);
-          return result;
-        }
-      }
-    }
-    if (traverseClassHierarchy && element instanceof Class) {
-      Class<?> superclass=((Class<?>)element).getSuperclass();
-      if (superclass != null && !superclass.equals(Object.class)) {
-        T result=doProcess(superclass,annotationType,true,processor,visited,metaDepth);
-        if (result != null) {
-          return result;
-        }
-      }
+ catch (    Exception ex) {
+      AnnotationUtils.logIntrospectionFailure(element,ex);
     }
   }
   return null;

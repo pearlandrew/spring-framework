@@ -1,15 +1,20 @@
 {
-  if (this.visited.add(annotatedElement)) {
-    for (    Annotation ann : annotatedElement.getAnnotations()) {
-      if (ObjectUtils.nullSafeEquals(this.annotationType,ann.annotationType())) {
-        this.result.add((A)ann);
+  if (this.visited.add(element)) {
+    try {
+      for (      Annotation ann : element.getAnnotations()) {
+        if (ObjectUtils.nullSafeEquals(this.annotationType,ann.annotationType())) {
+          this.result.add((A)ann);
+        }
+ else         if (ObjectUtils.nullSafeEquals(this.containerAnnotationType,ann.annotationType())) {
+          this.result.addAll(getValue(ann));
+        }
+ else         if (!isInJavaLangAnnotationPackage(ann)) {
+          process(ann.annotationType());
+        }
       }
- else       if (ObjectUtils.nullSafeEquals(this.containerAnnotationType,ann.annotationType())) {
-        this.result.addAll(getValue(ann));
-      }
- else       if (!isInJavaLangAnnotationPackage(ann)) {
-        process(ann.annotationType());
-      }
+    }
+ catch (    Exception ex) {
+      logIntrospectionFailure(element,ex);
     }
   }
 }
