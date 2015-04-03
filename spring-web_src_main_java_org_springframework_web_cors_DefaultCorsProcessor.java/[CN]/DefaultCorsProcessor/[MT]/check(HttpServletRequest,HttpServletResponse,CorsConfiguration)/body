@@ -1,10 +1,10 @@
 {
-  if (CorsUtils.isCorsResponse(response)) {
+  if (hasAllowOriginHeader(response)) {
     logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
     return false;
   }
-  if (!(checkOrigin(request,config.getAllowedOrigins()) && checkRequestMethod(request,config.getAllowedMethods()) && checkRequestHeaders(request,config.getAllowedHeaders()))) {
-    rejectCorsRequest(response);
+  if (!checkOrigin(request,config.getAllowedOrigins()) || !checkMethod(request,config.getAllowedMethods()) || !checkHeaders(request,config.getAllowedHeaders())) {
+    response.sendError(HttpServletResponse.SC_FORBIDDEN,"Invalid CORS request");
     return false;
   }
   return true;
