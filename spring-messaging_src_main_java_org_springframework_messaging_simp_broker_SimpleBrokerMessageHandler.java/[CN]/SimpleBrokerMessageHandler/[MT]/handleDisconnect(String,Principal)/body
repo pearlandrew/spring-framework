@@ -1,0 +1,10 @@
+{
+  this.sessions.remove(sessionId);
+  this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
+  SimpMessageHeaderAccessor accessor=SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT_ACK);
+  accessor.setSessionId(sessionId);
+  accessor.setUser(user);
+  initHeaders(accessor);
+  Message<byte[]> message=MessageBuilder.createMessage(EMPTY_PAYLOAD,accessor.getMessageHeaders());
+  getClientOutboundChannel().send(message);
+}

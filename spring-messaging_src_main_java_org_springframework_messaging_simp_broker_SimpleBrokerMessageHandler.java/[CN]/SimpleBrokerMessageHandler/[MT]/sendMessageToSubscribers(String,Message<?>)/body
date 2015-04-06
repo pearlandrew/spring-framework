@@ -3,6 +3,7 @@
   if (!subscriptions.isEmpty() && logger.isDebugEnabled()) {
     logger.debug("Broadcasting to " + subscriptions.size() + " sessions.");
   }
+  long now=System.currentTimeMillis();
   for (  String sessionId : subscriptions.keySet()) {
     for (    String subscriptionId : subscriptions.get(sessionId)) {
       SimpMessageHeaderAccessor headerAccessor=SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
@@ -17,6 +18,12 @@
       }
  catch (      Throwable ex) {
         logger.error("Failed to send " + message,ex);
+      }
+ finally {
+        SessionInfo info=this.sessions.get(sessionId);
+        if (info != null) {
+          info.setLastWriteTime(now);
+        }
       }
     }
   }

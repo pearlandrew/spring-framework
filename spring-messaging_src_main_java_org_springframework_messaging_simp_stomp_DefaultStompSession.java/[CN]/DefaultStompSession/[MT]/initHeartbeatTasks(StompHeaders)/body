@@ -1,0 +1,15 @@
+{
+  long[] connect=this.connectHeaders.getHeartbeat();
+  long[] connected=connectedHeaders.getHeartbeat();
+  if (connect == null || connected == null) {
+    return;
+  }
+  if (connect[0] > 0 && connected[1] > 0) {
+    long interval=Math.max(connect[0],connected[1]);
+    this.connection.onWriteInactivity(new WriteInactivityTask(),interval);
+  }
+  if (connect[1] > 0 && connected[0] > 0) {
+    final long interval=Math.max(connect[1],connected[0]) * HEARTBEAT_MULTIPLIER;
+    this.connection.onReadInactivity(new ReadInactivityTask(),interval);
+  }
+}

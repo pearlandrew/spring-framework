@@ -33,14 +33,15 @@
   for (  Message<byte[]> message : messages) {
     try {
       StompHeaderAccessor headerAccessor=MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
-      if (logger.isTraceEnabled()) {
-        logger.trace("From client: " + headerAccessor.getShortLogMessage(message.getPayload()));
-      }
       headerAccessor.setSessionId(session.getId());
       headerAccessor.setSessionAttributes(session.getAttributes());
       headerAccessor.setUser(session.getPrincipal());
+      headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER,headerAccessor.getHeartbeat());
       if (!detectImmutableMessageInterceptor(outputChannel)) {
         headerAccessor.setImmutable();
+      }
+      if (logger.isTraceEnabled()) {
+        logger.trace("From client: " + headerAccessor.getShortLogMessage(message.getPayload()));
       }
       if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
         this.stats.incrementConnectCount();

@@ -3,6 +3,8 @@
   SimpMessageType messageType=SimpMessageHeaderAccessor.getMessageType(headers);
   String destination=SimpMessageHeaderAccessor.getDestination(headers);
   String sessionId=SimpMessageHeaderAccessor.getSessionId(headers);
+  Principal user=SimpMessageHeaderAccessor.getUser(headers);
+  updateSessionReadTime(sessionId);
   if (!checkDestinationPrefix(destination)) {
     return;
   }
@@ -16,23 +18,21 @@
   }
  else   if (SimpMessageType.CONNECT.equals(messageType)) {
     logMessage(message);
+    long[] clientHeartbeat=SimpMessageHeaderAccessor.getHeartbeat(headers);
+    long[] serverHeartbeat=getHeartbeatValue();
+    this.sessions.put(sessionId,new SessionInfo(sessionId,user,clientHeartbeat,serverHeartbeat));
     SimpMessageHeaderAccessor connectAck=SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
     initHeaders(connectAck);
     connectAck.setSessionId(sessionId);
     connectAck.setUser(SimpMessageHeaderAccessor.getUser(headers));
     connectAck.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER,message);
+    connectAck.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER,serverHeartbeat);
     Message<byte[]> messageOut=MessageBuilder.createMessage(EMPTY_PAYLOAD,connectAck.getMessageHeaders());
     getClientOutboundChannel().send(messageOut);
   }
  else   if (SimpMessageType.DISCONNECT.equals(messageType)) {
     logMessage(message);
-    this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
-    SimpMessageHeaderAccessor disconnectAck=SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT_ACK);
-    initHeaders(disconnectAck);
-    disconnectAck.setSessionId(sessionId);
-    disconnectAck.setUser(SimpMessageHeaderAccessor.getUser(headers));
-    Message<byte[]> messageOut=MessageBuilder.createMessage(EMPTY_PAYLOAD,disconnectAck.getMessageHeaders());
-    getClientOutboundChannel().send(messageOut);
+    handleDisconnect(sessionId,user);
   }
  else   if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
     logMessage(message);

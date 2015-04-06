@@ -9,12 +9,16 @@
   }
  else   if (accessor instanceof SimpMessageHeaderAccessor) {
     stompAccessor=StompHeaderAccessor.wrap(message);
-    if (SimpMessageType.CONNECT_ACK.equals(stompAccessor.getMessageType())) {
+    SimpMessageType messageType=SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
+    if (SimpMessageType.CONNECT_ACK.equals(messageType)) {
       stompAccessor=convertConnectAcktoStompConnected(stompAccessor);
     }
- else     if (SimpMessageType.DISCONNECT_ACK.equals(stompAccessor.getMessageType())) {
+ else     if (SimpMessageType.DISCONNECT_ACK.equals(messageType)) {
       stompAccessor=StompHeaderAccessor.create(StompCommand.ERROR);
       stompAccessor.setMessage("Session closed.");
+    }
+ else     if (SimpMessageType.HEARTBEAT.equals(messageType)) {
+      stompAccessor=StompHeaderAccessor.createForHeartbeat();
     }
  else     if (stompAccessor.getCommand() == null || StompCommand.SEND.equals(stompAccessor.getCommand())) {
       stompAccessor.updateStompCommandAsServerMessage();

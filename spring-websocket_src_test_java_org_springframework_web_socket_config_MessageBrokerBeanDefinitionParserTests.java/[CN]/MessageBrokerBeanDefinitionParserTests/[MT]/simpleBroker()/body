@@ -60,7 +60,10 @@
   assertNotNull(userDestHandler);
   SimpleBrokerMessageHandler brokerMessageHandler=this.appContext.getBean(SimpleBrokerMessageHandler.class);
   assertNotNull(brokerMessageHandler);
-  assertEquals(Arrays.asList("/topic","/queue"),new ArrayList<String>(brokerMessageHandler.getDestinationPrefixes()));
+  Collection<String> prefixes=brokerMessageHandler.getDestinationPrefixes();
+  assertEquals(Arrays.asList("/topic","/queue"),new ArrayList<String>(prefixes));
+  assertNotNull(brokerMessageHandler.getTaskScheduler());
+  assertArrayEquals(new long[]{15000,15000},brokerMessageHandler.getHeartbeatValue());
   List<Class<? extends MessageHandler>> subscriberTypes=Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,UserDestinationMessageHandler.class,SimpleBrokerMessageHandler.class);
   testChannel("clientInboundChannel",subscriberTypes,2);
   testExecutor("clientInboundChannel",Runtime.getRuntime().availableProcessors() * 2,Integer.MAX_VALUE,60);
