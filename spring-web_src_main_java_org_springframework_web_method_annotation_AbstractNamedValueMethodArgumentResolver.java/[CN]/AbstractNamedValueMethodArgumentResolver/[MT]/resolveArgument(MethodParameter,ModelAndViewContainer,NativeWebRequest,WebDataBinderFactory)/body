@@ -16,7 +16,15 @@
   }
   if (binderFactory != null) {
     WebDataBinder binder=binderFactory.createBinder(webRequest,null,namedValueInfo.name);
-    arg=binder.convertIfNecessary(arg,paramType,parameter);
+    try {
+      arg=binder.convertIfNecessary(arg,paramType,parameter);
+    }
+ catch (    ConversionNotSupportedException ex) {
+      throw new MethodArgumentConversionNotSupportedException(arg,ex.getRequiredType(),ex.getCause(),namedValueInfo.name,parameter);
+    }
+catch (    TypeMismatchException ex) {
+      throw new MethodArgumentTypeMismatchException(arg,ex.getRequiredType(),ex.getCause(),namedValueInfo.name,parameter);
+    }
   }
   handleResolvedValue(arg,namedValueInfo.name,parameter,mavContainer,webRequest);
   return arg;
