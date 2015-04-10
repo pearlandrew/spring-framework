@@ -4,9 +4,11 @@
     future.get();
     fail("HttpServerErrorException expected");
   }
- catch (  HttpServerErrorException ex) {
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,ex.getStatusCode());
-    assertNotNull(ex.getStatusText());
-    assertNotNull(ex.getResponseBodyAsString());
+ catch (  ExecutionException ex) {
+    assertTrue(ex.getCause() instanceof HttpServerErrorException);
+    HttpServerErrorException cause=(HttpServerErrorException)ex.getCause();
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,cause.getStatusCode());
+    assertNotNull(cause.getStatusText());
+    assertNotNull(cause.getResponseBodyAsString());
   }
 }
