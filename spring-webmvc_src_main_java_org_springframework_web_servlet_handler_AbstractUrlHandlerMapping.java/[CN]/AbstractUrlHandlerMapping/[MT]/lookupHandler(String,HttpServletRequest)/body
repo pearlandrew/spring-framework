@@ -13,6 +13,11 @@
     if (getPathMatcher().match(registeredPattern,urlPath)) {
       matchingPatterns.add(registeredPattern);
     }
+ else     if (useTrailingSlashMatch()) {
+      if (!registeredPattern.endsWith("/") && getPathMatcher().match(registeredPattern + "/",urlPath)) {
+        matchingPatterns.add(registeredPattern + "/");
+      }
+    }
   }
   String bestPatternMatch=null;
   Comparator<String> patternComparator=getPathMatcher().getPatternComparator(urlPath);
@@ -25,6 +30,10 @@
   }
   if (bestPatternMatch != null) {
     handler=this.handlerMap.get(bestPatternMatch);
+    if (handler == null) {
+      Assert.isTrue(bestPatternMatch.endsWith("/"));
+      handler=this.handlerMap.get(bestPatternMatch.substring(0,bestPatternMatch.length() - 1));
+    }
     if (handler instanceof String) {
       String handlerName=(String)handler;
       handler=getApplicationContext().getBean(handlerName);
