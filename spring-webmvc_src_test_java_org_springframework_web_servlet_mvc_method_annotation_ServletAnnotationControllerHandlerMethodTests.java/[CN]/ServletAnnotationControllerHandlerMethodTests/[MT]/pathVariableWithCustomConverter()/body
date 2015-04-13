@@ -1,0 +1,18 @@
+{
+  initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>(){
+    @Override public void initialize(    GenericWebApplicationContext context){
+      RootBeanDefinition csDef=new RootBeanDefinition(FormattingConversionServiceFactoryBean.class);
+      csDef.getPropertyValues().add("converters",new AnnotatedExceptionRaisingConverter());
+      RootBeanDefinition wbiDef=new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
+      wbiDef.getPropertyValues().add("conversionService",csDef);
+      RootBeanDefinition adapterDef=new RootBeanDefinition(RequestMappingHandlerAdapter.class);
+      adapterDef.getPropertyValues().add("webBindingInitializer",wbiDef);
+      context.registerBeanDefinition("handlerAdapter",adapterDef);
+    }
+  }
+,PathVariableWithCustomConverterController.class);
+  MockHttpServletRequest request=new MockHttpServletRequest("GET","/myPath/1");
+  MockHttpServletResponse response=new MockHttpServletResponse();
+  getServlet().service(request,response);
+  assertEquals(404,response.getStatus());
+}
