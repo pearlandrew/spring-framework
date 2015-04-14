@@ -1,41 +1,4 @@
 {
-  if (logger.isInfoEnabled()) {
-    logger.info("Executing SQL script '" + sqlResourcePath + "'");
-  }
-  EncodedResource resource=new EncodedResource(getApplicationContext().getResource(sqlResourcePath),this.sqlScriptEncoding);
-  long startTime=System.currentTimeMillis();
-  List statements=new LinkedList();
-  try {
-    LineNumberReader lnr=new LineNumberReader(resource.getReader());
-    String script=JdbcTestUtils.readScript(lnr);
-    char delimiter=';';
-    if (!JdbcTestUtils.containsSqlScriptDelimiters(script,delimiter)) {
-      delimiter='\n';
-    }
-    JdbcTestUtils.splitSqlScript(script,delimiter,statements);
-    for (Iterator itr=statements.iterator(); itr.hasNext(); ) {
-      String statement=(String)itr.next();
-      try {
-        int rowsAffected=this.jdbcTemplate.update(statement);
-        if (logger.isDebugEnabled()) {
-          logger.debug(rowsAffected + " rows affected by SQL: " + statement);
-        }
-      }
- catch (      DataAccessException ex) {
-        if (continueOnError) {
-          if (logger.isWarnEnabled()) {
-            logger.warn("SQL: " + statement + " failed",ex);
-          }
-        }
- else {
-          throw ex;
-        }
-      }
-    }
-    long elapsedTime=System.currentTimeMillis() - startTime;
-    logger.info("Done executing SQL scriptBuilder '" + sqlResourcePath + "' in "+ elapsedTime+ " ms");
-  }
- catch (  IOException ex) {
-    throw new DataAccessResourceFailureException("Failed to open SQL script '" + sqlResourcePath + "'",ex);
-  }
+  Resource resource=this.applicationContext.getResource(sqlResourcePath);
+  new ResourceDatabasePopulator(continueOnError,false,this.sqlScriptEncoding,resource).execute(jdbcTemplate.getDataSource());
 }
