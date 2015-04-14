@@ -1,15 +1,18 @@
 {
-  String destination=SimpMessageHeaderAccessor.getDestination(message.getHeaders());
-  DestinationInfo info=parseUserDestination(message);
-  if (info == null) {
+  String sourceDestination=SimpMessageHeaderAccessor.getDestination(message.getHeaders());
+  ParseResult parseResult=parse(message);
+  if (parseResult == null) {
     return null;
   }
-  Set<String> resolved=new HashSet<String>();
-  for (  String sessionId : info.getSessionIds()) {
-    String targetDestination=getTargetDestination(destination,info.getDestinationWithoutPrefix(),sessionId,info.getUser());
+  String user=parseResult.getUser();
+  Set<String> targetSet=new HashSet<String>();
+  for (  String sessionId : parseResult.getSessionIds()) {
+    String actualDestination=parseResult.getActualDestination();
+    String targetDestination=getTargetDestination(sourceDestination,actualDestination,sessionId,user);
     if (targetDestination != null) {
-      resolved.add(targetDestination);
+      targetSet.add(targetDestination);
     }
   }
-  return new UserDestinationResult(destination,resolved,info.getSubscribeDestination(),info.getUser());
+  String subscribeDestination=parseResult.getSubscribeDestination();
+  return new UserDestinationResult(sourceDestination,targetSet,subscribeDestination,user);
 }

@@ -1,5 +1,5 @@
 {
-  UserDestinationResult result=this.userDestinationResolver.resolveDestination(message);
+  UserDestinationResult result=this.destinationResolver.resolveDestination(message);
   if (result == null) {
     return;
   }
@@ -11,16 +11,16 @@
     return;
   }
   if (SimpMessageType.MESSAGE.equals(SimpMessageHeaderAccessor.getMessageType(message.getHeaders()))) {
-    SimpMessageHeaderAccessor headerAccessor=SimpMessageHeaderAccessor.wrap(message);
-    initHeaders(headerAccessor);
+    SimpMessageHeaderAccessor accessor=SimpMessageHeaderAccessor.wrap(message);
+    initHeaders(accessor);
     String header=SimpMessageHeaderAccessor.ORIGINAL_DESTINATION;
-    headerAccessor.setNativeHeader(header,result.getSubscribeDestination());
-    message=MessageBuilder.createMessage(message.getPayload(),headerAccessor.getMessageHeaders());
+    accessor.setNativeHeader(header,result.getSubscribeDestination());
+    message=MessageBuilder.createMessage(message.getPayload(),accessor.getMessageHeaders());
   }
   if (logger.isDebugEnabled()) {
     logger.debug("Translated " + result.getSourceDestination() + " -> "+ destinations);
   }
   for (  String destination : destinations) {
-    this.brokerMessagingTemplate.send(destination,message);
+    this.messagingTemplate.send(destination,message);
   }
 }

@@ -1,0 +1,44 @@
+{
+  MessageHeaders headers=message.getHeaders();
+  String destination=SimpMessageHeaderAccessor.getDestination(headers);
+  if (destination == null || !checkDestination(destination,this.prefix)) {
+    return null;
+  }
+  SimpMessageType messageType=SimpMessageHeaderAccessor.getMessageType(headers);
+  Principal principal=SimpMessageHeaderAccessor.getUser(headers);
+  String sessionId=SimpMessageHeaderAccessor.getSessionId(headers);
+  if (SimpMessageType.SUBSCRIBE.equals(messageType) || SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
+    if (sessionId == null) {
+      logger.error("No session id. Ignoring " + message);
+      return null;
+    }
+    int prefixEnd=this.prefix.length() - 1;
+    String actualDestination=destination.substring(prefixEnd);
+    String user=(principal != null ? principal.getName() : null);
+    return new ParseResult(actualDestination,destination,Collections.singleton(sessionId),user);
+  }
+ else   if (SimpMessageType.MESSAGE.equals(messageType)) {
+    int prefixEnd=this.prefix.length();
+    int userEnd=destination.indexOf('/',prefixEnd);
+    Assert.isTrue(userEnd > 0,"Expected destination pattern \"/user/{userId}/**\"");
+    String actualDestination=destination.substring(userEnd);
+    String subscribeDestination=this.prefix.substring(0,prefixEnd - 1) + actualDestination;
+    String user=destination.substring(prefixEnd,userEnd);
+    user=StringUtils.replace(user,"%2F","/");
+    Set<String> sessionIds;
+    if (user.equals(sessionId)) {
+      user=null;
+      sessionIds=Collections.singleton(sessionId);
+    }
+ else     if (this.sessionRegistry.getSessionIds(user).contains(sessionId)) {
+      sessionIds=Collections.singleton(sessionId);
+    }
+ else {
+      sessionIds=this.sessionRegistry.getSessionIds(user);
+    }
+    return new ParseResult(actualDestination,subscribeDestination,sessionIds,user);
+  }
+ else {
+    return null;
+  }
+}
