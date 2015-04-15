@@ -18,7 +18,7 @@
   }
   if (isCurrentlyInvokedFactoryMethod(beanMethod)) {
     if (BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
-      logger.warn(String.format("@Bean method %s.%s is non-static and returns an object " + "assignable to Spring's BeanFactoryPostProcessor interface. This will " + "result in a failure to process annotations such as @Autowired, "+ "@Resource and @PostConstruct within the method's declaring "+ "@Configuration class. Add the 'static' modifier to this method to avoid "+ "these container lifecycle issues; see @Bean javadoc for complete details",beanMethod.getDeclaringClass().getSimpleName(),beanMethod.getName()));
+      logger.warn(String.format("@Bean method %s.%s is non-static and returns an object " + "assignable to Spring's BeanFactoryPostProcessor interface. This will " + "result in a failure to process annotations such as @Autowired, "+ "@Resource and @PostConstruct within the method's declaring "+ "@Configuration class. Add the 'static' modifier to this method to avoid "+ "these container lifecycle issues; see @Bean javadoc for complete details.",beanMethod.getDeclaringClass().getSimpleName(),beanMethod.getName()));
     }
     return cglibMethodProxy.invokeSuper(enhancedConfigInstance,beanMethodArgs);
   }
@@ -28,7 +28,18 @@
       if (alreadyInCreation) {
         beanFactory.setCurrentlyInCreation(beanName,false);
       }
-      return (!ObjectUtils.isEmpty(beanMethodArgs) ? beanFactory.getBean(beanName,beanMethodArgs) : beanFactory.getBean(beanName));
+      Object beanInstance=(!ObjectUtils.isEmpty(beanMethodArgs) ? beanFactory.getBean(beanName,beanMethodArgs) : beanFactory.getBean(beanName));
+      if (beanInstance != null && !beanMethod.getReturnType().isInstance(beanInstance)) {
+        String msg=String.format("@Bean method %s.%s called as a bean reference " + "for type [%s] but overridden by non-compatible bean instance of type [%s].",beanMethod.getDeclaringClass().getSimpleName(),beanMethod.getName(),beanMethod.getReturnType().getName(),beanInstance.getClass().getName());
+        try {
+          BeanDefinition beanDefinition=beanFactory.getMergedBeanDefinition(beanName);
+          msg+=" Overriding bean of same name declared in: " + beanDefinition.getResourceDescription();
+        }
+ catch (        NoSuchBeanDefinitionException ex) {
+        }
+        throw new IllegalStateException(msg);
+      }
+      return beanInstance;
     }
   finally {
       if (alreadyInCreation) {
