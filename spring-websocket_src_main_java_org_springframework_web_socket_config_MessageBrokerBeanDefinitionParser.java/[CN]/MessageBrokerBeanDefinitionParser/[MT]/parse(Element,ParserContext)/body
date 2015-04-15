@@ -38,12 +38,12 @@
   }
   channelElem=DomUtils.getChildElementByTagName(element,"broker-channel");
   RuntimeBeanReference brokerChannel=getMessageChannel("brokerChannel",channelElem,context,source);
-  RootBeanDefinition broker=registerMessageBroker(element,inChannel,outChannel,brokerChannel,context,source);
+  RuntimeBeanReference resolver=registerUserDestResolver(element,sessionRegistry,context,source);
+  RuntimeBeanReference userDestHandler=registerUserDestHandler(element,inChannel,brokerChannel,resolver,context,source);
+  RootBeanDefinition broker=registerMessageBroker(element,userDestHandler,inChannel,outChannel,brokerChannel,context,source);
   RuntimeBeanReference converter=registerMessageConverter(element,context,source);
   RuntimeBeanReference template=registerMessagingTemplate(element,brokerChannel,converter,context,source);
   registerAnnotationMethodMessageHandler(element,inChannel,outChannel,converter,template,context,source);
-  RuntimeBeanReference resolver=registerUserDestinationResolver(element,sessionRegistry,context,source);
-  registerUserDestinationMessageHandler(inChannel,brokerChannel,resolver,context,source);
   Map<String,Object> scopeMap=Collections.<String,Object>singletonMap("websocket",new SimpSessionScope());
   RootBeanDefinition scopeConfigurer=new RootBeanDefinition(CustomScopeConfigurer.class);
   scopeConfigurer.getPropertyValues().add("scopes",scopeMap);

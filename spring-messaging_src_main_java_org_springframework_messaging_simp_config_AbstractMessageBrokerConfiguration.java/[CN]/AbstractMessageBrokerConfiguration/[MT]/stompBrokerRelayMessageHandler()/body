@@ -1,4 +1,13 @@
 {
-  AbstractBrokerMessageHandler handler=getBrokerRegistry().getStompBrokerRelay(brokerChannel());
-  return (handler != null ? handler : new NoOpBrokerMessageHandler());
+  StompBrokerRelayMessageHandler handler=getBrokerRegistry().getStompBrokerRelay(brokerChannel());
+  if (handler == null) {
+    return new NoOpBrokerMessageHandler();
+  }
+  String destination=getBrokerRegistry().getUserDestinationBroadcast();
+  if (destination != null) {
+    Map<String,MessageHandler> map=new HashMap<String,MessageHandler>(1);
+    map.put(destination,userDestinationMessageHandler());
+    handler.setSystemSubscriptions(map);
+  }
+  return handler;
 }

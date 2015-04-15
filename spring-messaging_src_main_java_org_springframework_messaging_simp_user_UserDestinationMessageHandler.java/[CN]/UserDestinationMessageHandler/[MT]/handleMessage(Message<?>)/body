@@ -1,26 +1,32 @@
 {
+  if (this.broadcastHandler != null) {
+    message=this.broadcastHandler.preHandle(message);
+    if (message == null) {
+      return;
+    }
+  }
   UserDestinationResult result=this.destinationResolver.resolveDestination(message);
   if (result == null) {
     return;
   }
-  Set<String> destinations=result.getTargetDestinations();
-  if (destinations.isEmpty()) {
+  if (result.getTargetDestinations().isEmpty()) {
     if (logger.isTraceEnabled()) {
-      logger.trace("No user destinations found for " + result.getSourceDestination());
+      logger.trace("No active sessions for user destination: " + result.getSourceDestination());
+    }
+    if (this.broadcastHandler != null) {
+      this.broadcastHandler.handleUnresolved(message);
     }
     return;
   }
-  if (SimpMessageType.MESSAGE.equals(SimpMessageHeaderAccessor.getMessageType(message.getHeaders()))) {
-    SimpMessageHeaderAccessor accessor=SimpMessageHeaderAccessor.wrap(message);
-    initHeaders(accessor);
-    String header=SimpMessageHeaderAccessor.ORIGINAL_DESTINATION;
-    accessor.setNativeHeader(header,result.getSubscribeDestination());
-    message=MessageBuilder.createMessage(message.getPayload(),accessor.getMessageHeaders());
+  SimpMessageHeaderAccessor accessor=SimpMessageHeaderAccessor.wrap(message);
+  initHeaders(accessor);
+  accessor.setNativeHeader(ORIGINAL_DESTINATION,result.getSubscribeDestination());
+  accessor.setLeaveMutable(true);
+  message=MessageBuilder.createMessage(message.getPayload(),accessor.getMessageHeaders());
+  if (logger.isTraceEnabled()) {
+    logger.trace("Translated " + result.getSourceDestination() + " -> "+ result.getTargetDestinations());
   }
-  if (logger.isDebugEnabled()) {
-    logger.debug("Translated " + result.getSourceDestination() + " -> "+ destinations);
-  }
-  for (  String destination : destinations) {
-    this.messagingTemplate.send(destination,message);
+  for (  String target : result.getTargetDestinations()) {
+    this.messagingTemplate.send(target,message);
   }
 }
