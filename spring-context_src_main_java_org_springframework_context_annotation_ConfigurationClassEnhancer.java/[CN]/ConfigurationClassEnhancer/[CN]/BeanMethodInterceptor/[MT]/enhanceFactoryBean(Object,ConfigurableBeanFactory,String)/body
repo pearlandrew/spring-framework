@@ -1,6 +1,6 @@
 {
   Enhancer enhancer=new Enhancer();
-  enhancer.setSuperclass(fbClass);
+  enhancer.setSuperclass(factoryBean.getClass());
   enhancer.setUseFactory(false);
   enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
   enhancer.setCallback(new MethodInterceptor(){
@@ -8,7 +8,7 @@
       if (method.getName().equals("getObject") && args.length == 0) {
         return beanFactory.getBean(beanName);
       }
-      return proxy.invokeSuper(obj,args);
+      return proxy.invoke(factoryBean,args);
     }
   }
 );
