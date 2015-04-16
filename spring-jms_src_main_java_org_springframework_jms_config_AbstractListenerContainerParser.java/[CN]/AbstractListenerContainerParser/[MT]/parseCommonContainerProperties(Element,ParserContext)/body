@@ -28,6 +28,21 @@
   properties.add("pubSubDomain",pubSubDomain);
   properties.add("subscriptionDurable",subscriptionDurable);
   properties.add("subscriptionShared",subscriptionShared);
+  boolean replyPubSubDomain=false;
+  String replyDestinationType=containerEle.getAttribute(RESPONSE_DESTINATION_TYPE_ATTRIBUTE);
+  if (DESTINATION_TYPE_TOPIC.equals(replyDestinationType)) {
+    replyPubSubDomain=true;
+  }
+ else   if (DESTINATION_TYPE_QUEUE.equals(replyDestinationType)) {
+    replyPubSubDomain=false;
+  }
+ else   if (!StringUtils.hasText(replyDestinationType)) {
+    replyPubSubDomain=pubSubDomain;
+  }
+ else   if (StringUtils.hasText(replyDestinationType)) {
+    parserContext.getReaderContext().error("Invalid listener container 'response-destination-type': only " + "\"queue\", \"topic\" supported.",containerEle);
+  }
+  properties.add("replyPubSubDomain",replyPubSubDomain);
   if (containerEle.hasAttribute(CLIENT_ID_ATTRIBUTE)) {
     String clientId=containerEle.getAttribute(CLIENT_ID_ATTRIBUTE);
     if (!StringUtils.hasText(clientId)) {
