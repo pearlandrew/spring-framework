@@ -6,7 +6,13 @@ synchronized (this.lifecycleMonitor) {
         if (logger.isDebugEnabled()) {
           logger.debug("Still waiting for shutdown of " + this.activeInvokerCount + " message listener invokers");
         }
-        this.lifecycleMonitor.wait();
+        long timeout=getReceiveTimeout();
+        if (timeout > 0) {
+          this.lifecycleMonitor.wait(timeout);
+        }
+ else {
+          this.lifecycleMonitor.wait();
+        }
       }
       for (      AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
         scheduledInvoker.clearResources();
