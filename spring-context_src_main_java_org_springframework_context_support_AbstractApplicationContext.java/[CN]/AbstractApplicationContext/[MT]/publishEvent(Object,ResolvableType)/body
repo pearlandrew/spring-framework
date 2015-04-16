@@ -3,7 +3,7 @@
   if (logger.isTraceEnabled()) {
     logger.trace("Publishing event in " + getDisplayName() + ": "+ event);
   }
-  final ApplicationEvent applicationEvent;
+  ApplicationEvent applicationEvent;
   if (event instanceof ApplicationEvent) {
     applicationEvent=(ApplicationEvent)event;
   }
@@ -13,7 +13,12 @@
       eventType=ResolvableType.forClassWithGenerics(PayloadApplicationEvent.class,event.getClass());
     }
   }
-  getApplicationEventMulticaster().multicastEvent(applicationEvent,eventType);
+  if (this.earlyApplicationEvents != null) {
+    this.earlyApplicationEvents.add(applicationEvent);
+  }
+ else {
+    getApplicationEventMulticaster().multicastEvent(applicationEvent,eventType);
+  }
   if (this.parent != null) {
     if (this.parent instanceof AbstractApplicationContext) {
       ((AbstractApplicationContext)this.parent).publishEvent(event,eventType);

@@ -3,7 +3,14 @@
     getApplicationEventMulticaster().addApplicationListener(listener);
   }
   String[] listenerBeanNames=getBeanNamesForType(ApplicationListener.class,true,false);
-  for (  String lisName : listenerBeanNames) {
-    getApplicationEventMulticaster().addApplicationListenerBean(lisName);
+  for (  String listenerBeanName : listenerBeanNames) {
+    getApplicationEventMulticaster().addApplicationListenerBean(listenerBeanName);
+  }
+  Set<ApplicationEvent> earlyEventsToProcess=this.earlyApplicationEvents;
+  this.earlyApplicationEvents=null;
+  if (earlyEventsToProcess != null) {
+    for (    ApplicationEvent earlyEvent : earlyEventsToProcess) {
+      getApplicationEventMulticaster().multicastEvent(earlyEvent);
+    }
   }
 }
