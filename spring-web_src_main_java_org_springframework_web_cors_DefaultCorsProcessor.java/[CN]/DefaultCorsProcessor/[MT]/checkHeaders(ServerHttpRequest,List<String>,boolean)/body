@@ -1,0 +1,24 @@
+{
+  List<String> requestHeaders=isPreFlight ? request.getHeaders().getAccessControlRequestHeaders() : new ArrayList<String>(request.getHeaders().keySet());
+  if ((allowedHeaders != null) && allowedHeaders.contains("*")) {
+    return true;
+  }
+  for (  String requestHeader : requestHeaders) {
+    if (!HttpHeaders.ORIGIN.equals(requestHeader)) {
+      requestHeader=requestHeader.trim();
+      boolean found=false;
+      if (allowedHeaders != null) {
+        for (        String header : allowedHeaders) {
+          if (requestHeader.equalsIgnoreCase(header)) {
+            found=true;
+            break;
+          }
+        }
+      }
+      if (!found) {
+        return false;
+      }
+    }
+  }
+  return true;
+}

@@ -1,0 +1,19 @@
+{
+  if ((allowedHeaders != null) && !allowedHeaders.isEmpty()) {
+    List<String> requestHeaders=request.getHeaders().getAccessControlRequestHeaders();
+    boolean matchAll=allowedHeaders.contains("*");
+    List<String> matchingHeaders=new ArrayList<String>();
+    for (    String requestHeader : requestHeaders) {
+      for (      String header : allowedHeaders) {
+        requestHeader=requestHeader.trim();
+        if (matchAll || requestHeader.equalsIgnoreCase(header)) {
+          matchingHeaders.add(requestHeader);
+          break;
+        }
+      }
+    }
+    if (!matchingHeaders.isEmpty()) {
+      response.getHeaders().setAccessControlAllowHeaders(matchingHeaders);
+    }
+  }
+}

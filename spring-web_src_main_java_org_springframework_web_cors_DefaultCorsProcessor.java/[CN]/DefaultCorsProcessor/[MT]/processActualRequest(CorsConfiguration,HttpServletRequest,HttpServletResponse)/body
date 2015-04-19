@@ -1,9 +1,17 @@
 {
-  Assert.isTrue(CorsUtils.isCorsRequest(request) && !CorsUtils.isPreFlightRequest(request));
-  if (check(request,response,config)) {
-    setAllowOrigin(request,response,config.getAllowedOrigins(),config.isAllowCredentials());
-    setAllowCredentials(response,config.isAllowCredentials());
-    setExposeHeadersHeader(response,config.getExposedHeaders());
+  ServerHttpRequest serverRequest=new ServletServerHttpRequest(request);
+  ServerHttpResponse serverResponse=new ServletServerHttpResponse(response);
+  boolean isPreFlight=CorsUtils.isPreFlightRequest(request);
+  Assert.isTrue(CorsUtils.isCorsRequest(request) && !isPreFlight);
+  if (skip(serverResponse)) {
+    return true;
   }
-  return true;
+  if (check(serverRequest,serverResponse,config,isPreFlight)) {
+    setAllowOrigin(serverRequest,serverResponse,config.getAllowedOrigins(),config.isAllowCredentials());
+    setAllowCredentials(serverResponse,config.isAllowCredentials());
+    setExposeHeadersHeader(serverResponse,config.getExposedHeaders());
+    serverResponse.close();
+    return true;
+  }
+  return false;
 }
