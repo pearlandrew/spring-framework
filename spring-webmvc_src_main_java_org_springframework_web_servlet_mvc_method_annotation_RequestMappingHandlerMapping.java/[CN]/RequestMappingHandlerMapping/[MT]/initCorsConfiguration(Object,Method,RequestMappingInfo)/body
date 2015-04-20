@@ -1,9 +1,12 @@
 {
   HandlerMethod handlerMethod=createHandlerMethod(handler,method);
-  CorsConfiguration config=new CorsConfiguration();
   CrossOrigin typeAnnotation=AnnotationUtils.findAnnotation(handlerMethod.getBeanType(),CrossOrigin.class);
-  applyAnnotation(config,typeAnnotation);
   CrossOrigin methodAnnotation=AnnotationUtils.findAnnotation(method,CrossOrigin.class);
+  if (typeAnnotation == null && methodAnnotation == null) {
+    return null;
+  }
+  CorsConfiguration config=new CorsConfiguration();
+  applyAnnotation(config,typeAnnotation);
   applyAnnotation(config,methodAnnotation);
   if (CollectionUtils.isEmpty(config.getAllowedMethods())) {
     for (    RequestMethod allowedMethod : mappingInfo.getMethodsCondition().getMethods()) {
