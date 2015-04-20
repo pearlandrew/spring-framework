@@ -1,0 +1,35 @@
+{
+  final Method writeMethod=(this.pd instanceof GenericTypeAwarePropertyDescriptor ? ((GenericTypeAwarePropertyDescriptor)this.pd).getWriteMethodForActualAccess() : this.pd.getWriteMethod());
+  if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers()) && !writeMethod.isAccessible()) {
+    if (System.getSecurityManager() != null) {
+      AccessController.doPrivileged(new PrivilegedAction<Object>(){
+        @Override public Object run(){
+          writeMethod.setAccessible(true);
+          return null;
+        }
+      }
+);
+    }
+ else {
+      writeMethod.setAccessible(true);
+    }
+  }
+  final Object value=valueToApply;
+  if (System.getSecurityManager() != null) {
+    try {
+      AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
+        @Override public Object run() throws Exception {
+          writeMethod.invoke(object,value);
+          return null;
+        }
+      }
+,acc);
+    }
+ catch (    PrivilegedActionException ex) {
+      throw ex.getException();
+    }
+  }
+ else {
+    writeMethod.invoke(getWrappedInstance(),value);
+  }
+}

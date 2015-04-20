@@ -1,0 +1,33 @@
+{
+  final Method readMethod=this.pd.getReadMethod();
+  if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers()) && !readMethod.isAccessible()) {
+    if (System.getSecurityManager() != null) {
+      AccessController.doPrivileged(new PrivilegedAction<Object>(){
+        @Override public Object run(){
+          readMethod.setAccessible(true);
+          return null;
+        }
+      }
+);
+    }
+ else {
+      readMethod.setAccessible(true);
+    }
+  }
+  if (System.getSecurityManager() != null) {
+    try {
+      return AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
+        @Override public Object run() throws Exception {
+          return readMethod.invoke(getWrappedInstance(),(Object[])null);
+        }
+      }
+,acc);
+    }
+ catch (    PrivilegedActionException pae) {
+      throw pae.getException();
+    }
+  }
+ else {
+    return readMethod.invoke(getWrappedInstance(),(Object[])null);
+  }
+}

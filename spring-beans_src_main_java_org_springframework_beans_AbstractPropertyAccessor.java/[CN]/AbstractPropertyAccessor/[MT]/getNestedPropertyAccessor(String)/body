@@ -1,0 +1,32 @@
+{
+  if (this.nestedPropertyAccessors == null) {
+    this.nestedPropertyAccessors=new HashMap<String,AbstractPropertyAccessor>();
+  }
+  PropertyTokenHolder tokens=getPropertyNameTokens(nestedProperty);
+  String canonicalName=tokens.canonicalName;
+  Object value=getPropertyValue(tokens);
+  if (value == null || (value.getClass().equals(javaUtilOptionalClass) && OptionalUnwrapper.isEmpty(value))) {
+    if (isAutoGrowNestedPaths()) {
+      value=setDefaultValue(tokens);
+    }
+ else {
+      throw new NullValueInNestedPathException(getRootClass(),this.nestedPath + canonicalName);
+    }
+  }
+  AbstractPropertyAccessor nestedPa=this.nestedPropertyAccessors.get(canonicalName);
+  if (nestedPa == null || nestedPa.getWrappedInstance() != (value.getClass().equals(javaUtilOptionalClass) ? OptionalUnwrapper.unwrap(value) : value)) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Creating new nested " + getClass().getSimpleName() + " for property '"+ canonicalName+ "'");
+    }
+    nestedPa=newNestedPropertyAccessor(value,this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR);
+    copyDefaultEditorsTo(nestedPa);
+    copyCustomEditorsTo(nestedPa,canonicalName);
+    this.nestedPropertyAccessors.put(canonicalName,nestedPa);
+  }
+ else {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Using cached nested property accessor for property '" + canonicalName + "'");
+    }
+  }
+  return nestedPa;
+}
