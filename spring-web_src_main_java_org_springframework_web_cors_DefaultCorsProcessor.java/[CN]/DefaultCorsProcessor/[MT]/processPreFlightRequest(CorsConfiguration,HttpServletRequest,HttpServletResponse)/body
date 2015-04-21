@@ -1,18 +1,12 @@
 {
-  ServerHttpRequest serverRequest=new ServletServerHttpRequest(request);
+  Assert.isTrue(CorsUtils.isPreFlightRequest(request));
   ServerHttpResponse serverResponse=new ServletServerHttpResponse(response);
-  boolean isPreFlight=CorsUtils.isPreFlightRequest(request);
-  Assert.isTrue(isPreFlight);
-  if (skip(serverResponse)) {
+  if (responseHasCors(serverResponse)) {
     return true;
   }
-  if (check(serverRequest,serverResponse,config,isPreFlight)) {
-    setAllowOrigin(serverRequest,serverResponse,config.getAllowedOrigins(),config.isAllowCredentials());
-    setAllowCredentials(serverResponse,config.isAllowCredentials());
-    setAllowMethods(serverRequest,serverResponse,config.getAllowedMethods());
-    setAllowHeadersHeader(serverRequest,serverResponse,config.getAllowedHeaders());
-    setMaxAgeHeader(serverResponse,config.getMaxAge());
-    serverResponse.close();
+  ServerHttpRequest serverRequest=new ServletServerHttpRequest(request);
+  if (handleInternal(serverRequest,serverResponse,config,true)) {
+    serverResponse.flush();
     return true;
   }
   return false;
