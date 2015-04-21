@@ -2,14 +2,15 @@
   if (this.visited.add(element)) {
     try {
       for (      Annotation ann : element.getAnnotations()) {
-        if (ObjectUtils.nullSafeEquals(this.annotationType,ann.annotationType())) {
+        Class<? extends Annotation> currentAnnotationType=ann.annotationType();
+        if (ObjectUtils.nullSafeEquals(this.annotationType,currentAnnotationType)) {
           this.result.add((A)ann);
         }
- else         if (ObjectUtils.nullSafeEquals(this.containerAnnotationType,ann.annotationType())) {
+ else         if (ObjectUtils.nullSafeEquals(this.containerAnnotationType,currentAnnotationType)) {
           this.result.addAll(getValue(ann));
         }
  else         if (!isInJavaLangAnnotationPackage(ann)) {
-          process(ann.annotationType());
+          process(currentAnnotationType);
         }
       }
     }
