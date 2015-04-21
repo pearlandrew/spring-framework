@@ -1,13 +1,15 @@
 {
-  for (  String destination : this.subscriptions.keySet()) {
-    Set<String> subscriptionIds=this.subscriptions.get(destination);
-    if (subscriptionIds.remove(subscriptionId)) {
+  for (  String destination : this.destinationLookup.keySet()) {
+    Set<Subscription> subscriptions=this.destinationLookup.get(destination);
+    for (    Subscription sub : subscriptions) {
+      if (sub.getId().equals(subscriptionId) && subscriptions.remove(sub)) {
 synchronized (this.monitor) {
-        if (subscriptionIds.isEmpty()) {
-          this.subscriptions.remove(destination);
+          if (subscriptions.isEmpty()) {
+            this.destinationLookup.remove(destination);
+          }
         }
+        return destination;
       }
-      return destination;
     }
   }
   return null;
