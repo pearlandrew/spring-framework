@@ -2,11 +2,12 @@
   AnnotationCacheKey cacheKey=new AnnotationCacheKey(method,annotationType);
   A result=(A)findAnnotationCache.get(cacheKey);
   if (result == null) {
-    result=getAnnotation(method,annotationType);
-    Class<?> clazz=method.getDeclaringClass();
+    Method resolvedMethod=BridgeMethodResolver.findBridgedMethod(method);
+    result=findAnnotation((AnnotatedElement)resolvedMethod,annotationType);
     if (result == null) {
-      result=searchOnInterfaces(method,annotationType,clazz.getInterfaces());
+      result=searchOnInterfaces(method,annotationType,method.getDeclaringClass().getInterfaces());
     }
+    Class<?> clazz=method.getDeclaringClass();
     while (result == null) {
       clazz=clazz.getSuperclass();
       if (clazz == null || clazz.equals(Object.class)) {
@@ -14,7 +15,8 @@
       }
       try {
         Method equivalentMethod=clazz.getDeclaredMethod(method.getName(),method.getParameterTypes());
-        result=getAnnotation(equivalentMethod,annotationType);
+        Method resolvedEquivalentMethod=BridgeMethodResolver.findBridgedMethod(equivalentMethod);
+        result=findAnnotation((AnnotatedElement)resolvedEquivalentMethod,annotationType);
       }
  catch (      NoSuchMethodException ex) {
       }
@@ -22,9 +24,9 @@
         result=searchOnInterfaces(method,annotationType,clazz.getInterfaces());
       }
     }
-    if (result != null) {
-      findAnnotationCache.put(cacheKey,result);
-    }
+  }
+  if (result != null) {
+    findAnnotationCache.put(cacheKey,result);
   }
   return result;
 }
