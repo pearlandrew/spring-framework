@@ -4,6 +4,7 @@
   }
   MessageHeaders headers=message.getHeaders();
   String sessionId=SimpMessageHeaderAccessor.getSessionId(headers);
+  PlaceholderResolver varResolver=initVarResolver(headers);
   SendToUser sendToUser=returnType.getMethodAnnotation(SendToUser.class);
   if (sendToUser != null) {
     boolean broadcast=sendToUser.broadcast();
@@ -17,6 +18,7 @@
     }
     String[] destinations=getTargetDestinations(sendToUser,message,this.defaultUserDestinationPrefix);
     for (    String destination : destinations) {
+      destination=this.placeholderHelper.replacePlaceholders(destination,varResolver);
       if (broadcast) {
         this.messagingTemplate.convertAndSendToUser(user,destination,returnValue);
       }
@@ -29,6 +31,7 @@
     SendTo sendTo=returnType.getMethodAnnotation(SendTo.class);
     String[] destinations=getTargetDestinations(sendTo,message,this.defaultDestinationPrefix);
     for (    String destination : destinations) {
+      destination=this.placeholderHelper.replacePlaceholders(destination,varResolver);
       this.messagingTemplate.convertAndSend(destination,returnValue,createHeaders(sessionId));
     }
   }

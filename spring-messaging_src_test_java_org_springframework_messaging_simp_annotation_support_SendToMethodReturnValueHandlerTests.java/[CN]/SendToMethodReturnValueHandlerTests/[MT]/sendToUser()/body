@@ -5,14 +5,12 @@
   Message<?> inputMessage=createInputMessage(sessionId,"sub1",null,null,user);
   this.handler.handleReturnValue(PAYLOAD,this.sendToUserReturnType,inputMessage);
   verify(this.messageChannel,times(2)).send(this.messageCaptor.capture());
-  Message<?> message=this.messageCaptor.getAllValues().get(0);
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
-  assertNull(headers.getSessionId());
-  assertNull(headers.getSubscriptionId());
-  assertEquals("/user/" + user.getName() + "/dest1",headers.getDestination());
-  message=this.messageCaptor.getAllValues().get(1);
-  headers=SimpMessageHeaderAccessor.wrap(message);
-  assertNull(headers.getSessionId());
-  assertNull(headers.getSubscriptionId());
-  assertEquals("/user/" + user.getName() + "/dest2",headers.getDestination());
+  SimpMessageHeaderAccessor accessor=getCapturedAccessor(0);
+  assertNull(accessor.getSessionId());
+  assertNull(accessor.getSubscriptionId());
+  assertEquals("/user/" + user.getName() + "/dest1",accessor.getDestination());
+  accessor=getCapturedAccessor(1);
+  assertNull(accessor.getSessionId());
+  assertNull(accessor.getSubscriptionId());
+  assertEquals("/user/" + user.getName() + "/dest2",accessor.getDestination());
 }

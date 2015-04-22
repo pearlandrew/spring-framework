@@ -5,9 +5,10 @@
   handler.handleReturnValue(PAYLOAD,this.noAnnotationsReturnType,inputMessage);
   ArgumentCaptor<MessageHeaders> captor=ArgumentCaptor.forClass(MessageHeaders.class);
   verify(messagingTemplate).convertAndSend(eq("/topic/dest"),eq(PAYLOAD),captor.capture());
-  SimpMessageHeaderAccessor headerAccessor=MessageHeaderAccessor.getAccessor(captor.getValue(),SimpMessageHeaderAccessor.class);
-  assertNotNull(headerAccessor);
-  assertTrue(headerAccessor.isMutable());
-  assertEquals("sess1",headerAccessor.getSessionId());
-  assertNull("Subscription id should not be copied",headerAccessor.getSubscriptionId());
+  MessageHeaders messageHeaders=captor.getValue();
+  SimpMessageHeaderAccessor accessor=getAccessor(messageHeaders,SimpMessageHeaderAccessor.class);
+  assertNotNull(accessor);
+  assertTrue(accessor.isMutable());
+  assertEquals("sess1",accessor.getSessionId());
+  assertNull("Subscription id should not be copied",accessor.getSubscriptionId());
 }

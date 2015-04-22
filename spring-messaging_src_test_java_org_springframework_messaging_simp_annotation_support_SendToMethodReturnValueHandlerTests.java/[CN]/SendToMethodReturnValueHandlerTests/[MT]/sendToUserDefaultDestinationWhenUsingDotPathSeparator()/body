@@ -4,7 +4,6 @@
   Message<?> inputMessage=createInputMessage("sess1","sub1","/app/","dest.foo.bar",user);
   this.handler.handleReturnValue(PAYLOAD,this.sendToUserDefaultDestReturnType,inputMessage);
   verify(this.messageChannel,times(1)).send(this.messageCaptor.capture());
-  Message<?> message=this.messageCaptor.getAllValues().get(0);
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
-  assertEquals("/user/" + user.getName() + "/queue/dest.foo.bar",headers.getDestination());
+  SimpMessageHeaderAccessor accessor=getCapturedAccessor(0);
+  assertEquals("/user/" + user.getName() + "/queue/dest.foo.bar",accessor.getDestination());
 }

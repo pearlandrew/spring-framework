@@ -5,16 +5,14 @@
   Message<?> inputMessage=createInputMessage(sessionId,"sub1",null,null,user);
   this.handler.handleReturnValue(PAYLOAD,this.sendToUserSingleSessionReturnType,inputMessage);
   verify(this.messageChannel,times(2)).send(this.messageCaptor.capture());
-  Message<?> message=this.messageCaptor.getAllValues().get(0);
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
-  assertEquals(sessionId,headers.getSessionId());
-  assertEquals(MIME_TYPE,headers.getContentType());
-  assertEquals("/user/" + user.getName() + "/dest1",headers.getDestination());
-  assertNull("Subscription id should not be copied",headers.getSubscriptionId());
-  message=this.messageCaptor.getAllValues().get(1);
-  headers=SimpMessageHeaderAccessor.wrap(message);
-  assertEquals(sessionId,headers.getSessionId());
-  assertEquals("/user/" + user.getName() + "/dest2",headers.getDestination());
-  assertEquals(MIME_TYPE,headers.getContentType());
-  assertNull("Subscription id should not be copied",headers.getSubscriptionId());
+  SimpMessageHeaderAccessor accessor=getCapturedAccessor(0);
+  assertEquals(sessionId,accessor.getSessionId());
+  assertEquals(MIME_TYPE,accessor.getContentType());
+  assertEquals("/user/" + user.getName() + "/dest1",accessor.getDestination());
+  assertNull("Subscription id should not be copied",accessor.getSubscriptionId());
+  accessor=getCapturedAccessor(1);
+  assertEquals(sessionId,accessor.getSessionId());
+  assertEquals("/user/" + user.getName() + "/dest2",accessor.getDestination());
+  assertEquals(MIME_TYPE,accessor.getContentType());
+  assertNull("Subscription id should not be copied",accessor.getSubscriptionId());
 }

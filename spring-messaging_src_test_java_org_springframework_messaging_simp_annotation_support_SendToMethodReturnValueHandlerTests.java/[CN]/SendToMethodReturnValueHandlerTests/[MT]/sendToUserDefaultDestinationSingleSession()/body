@@ -5,10 +5,9 @@
   Message<?> inputMessage=createInputMessage(sessionId,"sub1","/app","/dest",user);
   this.handler.handleReturnValue(PAYLOAD,this.sendToUserSingleSessionDefaultDestReturnType,inputMessage);
   verify(this.messageChannel,times(1)).send(this.messageCaptor.capture());
-  Message<?> message=this.messageCaptor.getAllValues().get(0);
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.wrap(message);
-  assertEquals(sessionId,headers.getSessionId());
-  assertEquals("/user/" + user.getName() + "/queue/dest",headers.getDestination());
-  assertEquals(MIME_TYPE,headers.getContentType());
-  assertNull("Subscription id should not be copied",headers.getSubscriptionId());
+  SimpMessageHeaderAccessor accessor=getCapturedAccessor(0);
+  assertEquals(sessionId,accessor.getSessionId());
+  assertEquals("/user/" + user.getName() + "/queue/dest",accessor.getDestination());
+  assertEquals(MIME_TYPE,accessor.getContentType());
+  assertNull("Subscription id should not be copied",accessor.getSubscriptionId());
 }
