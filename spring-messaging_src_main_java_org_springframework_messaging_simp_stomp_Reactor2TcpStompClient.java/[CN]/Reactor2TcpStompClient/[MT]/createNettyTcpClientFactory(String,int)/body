@@ -1,0 +1,9 @@
+{
+  final Environment environment=new Environment(new StompClientDispatcherConfigReader()).assignErrorJournal();
+  return new Function<Spec.TcpClientSpec<Message<byte[]>,Message<byte[]>>,Spec.TcpClientSpec<Message<byte[]>,Message<byte[]>>>(){
+    @Override public Spec.TcpClientSpec<Message<byte[]>,Message<byte[]>> apply(    Spec.TcpClientSpec<Message<byte[]>,Message<byte[]>> spec){
+      return spec.codec(new Reactor2StompCodec(new StompEncoder(),new StompDecoder())).env(environment).dispatcher(environment.getCachedDispatchers("StompClient").get()).connect(host,port);
+    }
+  }
+;
+}

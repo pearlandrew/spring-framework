@@ -1,0 +1,37 @@
+{
+synchronized (activeClients) {
+    activeClients.add(tcpClient);
+  }
+  tcpClient.finallyDo(new Consumer<Signal<ChannelStream<Message<P>,Message<P>>>>(){
+    @Override public void accept(    Signal<ChannelStream<Message<P>,Message<P>>> signal){
+synchronized (activeClients) {
+        activeClients.remove(tcpClient);
+      }
+      if (signal.isOnError()) {
+        connectionHandler.afterConnectFailure(signal.getThrowable());
+      }
+    }
+  }
+).log("reactor.client").consume(new Consumer<ChannelStream<Message<P>,Message<P>>>(){
+    @Override public void accept(    ChannelStream<Message<P>,Message<P>> connection){
+      connection.log("reactor.connection").finallyDo(new Consumer<Signal<Message<P>>>(){
+        @Override public void accept(        Signal<Message<P>> signal){
+          if (signal.isOnError()) {
+            connectionHandler.handleFailure(signal.getThrowable());
+          }
+ else           if (signal.isOnComplete()) {
+            connectionHandler.afterConnectionClosed();
+          }
+        }
+      }
+).consume(new Consumer<Message<P>>(){
+        @Override public void accept(        Message<P> message){
+          connectionHandler.handleMessage(message);
+        }
+      }
+);
+      connectionHandler.afterConnected(new Reactor2TcpConnection<P>(connection));
+    }
+  }
+);
+}

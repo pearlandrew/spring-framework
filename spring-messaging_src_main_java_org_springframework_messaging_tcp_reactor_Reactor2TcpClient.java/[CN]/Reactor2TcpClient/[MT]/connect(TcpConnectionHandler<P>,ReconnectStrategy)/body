@@ -1,0 +1,19 @@
+{
+  Assert.notNull(reconnectStrategy,"ReconnectStrategy must not be null");
+  Reconnect reconnect=new Reconnect(){
+    @Override public Tuple2<InetSocketAddress,Long> reconnect(    InetSocketAddress address,    int attempt){
+      return Tuple.of(address,reconnectStrategy.getTimeToNextAttempt(attempt));
+    }
+  }
+;
+  TcpClient<Message<P>,Message<P>> tcpClient=NetStreams.tcpClient(REACTOR_TCP_CLIENT_TYPE,tcpClientSpec);
+  composeConnectionHandling(tcpClient,connectionHandler);
+  Stream<Boolean> stream=tcpClient.open(reconnect);
+  Promise<Void> promise=stream.next().map(new Function<Boolean,Void>(){
+    @Override public Void apply(    Boolean ch){
+      return null;
+    }
+  }
+);
+  return new PassThroughPromiseToListenableFutureAdapter<Void>(promise);
+}
