@@ -1,0 +1,23 @@
+{
+  Assert.notNull(annotatedElement,"AnnotatedElement must not be null");
+  try {
+    Annotation[] anns=annotatedElement.getDeclaredAnnotations();
+    for (    Annotation ann : anns) {
+      if (ann.annotationType().equals(annotationType)) {
+        return (A)ann;
+      }
+    }
+    for (    Annotation ann : anns) {
+      if (!isInJavaLangAnnotationPackage(ann) && visited.add(ann)) {
+        A annotation=findAnnotation((AnnotatedElement)ann.annotationType(),annotationType,visited);
+        if (annotation != null) {
+          return annotation;
+        }
+      }
+    }
+  }
+ catch (  Exception ex) {
+    logIntrospectionFailure(annotatedElement,ex);
+  }
+  return null;
+}

@@ -1,0 +1,33 @@
+{
+  if (visited.add(element)) {
+    try {
+      Annotation[] annotations=element.getAnnotations();
+      for (      Annotation annotation : annotations) {
+        if (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0) {
+          T result=processor.process(annotation,metaDepth);
+          if (result != null) {
+            return result;
+          }
+          result=processWithGetSemantics(annotation.annotationType(),annotationType,processor,visited,metaDepth + 1);
+          if (result != null) {
+            processor.postProcess(annotation,result);
+            return result;
+          }
+        }
+      }
+      for (      Annotation annotation : annotations) {
+        if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
+          T result=processWithGetSemantics(annotation.annotationType(),annotationType,processor,visited,metaDepth);
+          if (result != null) {
+            processor.postProcess(annotation,result);
+            return result;
+          }
+        }
+      }
+    }
+ catch (    Exception ex) {
+      AnnotationUtils.logIntrospectionFailure(element,ex);
+    }
+  }
+  return null;
+}
