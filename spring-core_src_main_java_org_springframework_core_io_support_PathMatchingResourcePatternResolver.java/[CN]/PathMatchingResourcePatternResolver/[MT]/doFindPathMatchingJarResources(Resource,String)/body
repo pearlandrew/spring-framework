@@ -14,18 +14,26 @@
   }
  else {
     String urlFile=rootDirResource.getURL().getFile();
-    int separatorIndex=urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
-    if (separatorIndex != -1) {
-      jarFileUrl=urlFile.substring(0,separatorIndex);
-      rootEntryPath=urlFile.substring(separatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
-      jarFile=getJarFile(jarFileUrl);
-    }
+    try {
+      int separatorIndex=urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
+      if (separatorIndex != -1) {
+        jarFileUrl=urlFile.substring(0,separatorIndex);
+        rootEntryPath=urlFile.substring(separatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
+        jarFile=getJarFile(jarFileUrl);
+      }
  else {
-      jarFile=new JarFile(urlFile);
-      jarFileUrl=urlFile;
-      rootEntryPath="";
+        jarFile=new JarFile(urlFile);
+        jarFileUrl=urlFile;
+        rootEntryPath="";
+      }
+      newJarFile=true;
     }
-    newJarFile=true;
+ catch (    ZipException ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Skipping invalid jar classpath entry [" + urlFile + "]");
+      }
+      return Collections.emptySet();
+    }
   }
   try {
     if (logger.isDebugEnabled()) {
