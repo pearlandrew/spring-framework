@@ -1,11 +1,7 @@
 {
-  TcpClient<Message<P>,Message<P>> tcpClient=NetStreams.tcpClient(REACTOR_TCP_CLIENT_TYPE,tcpClientSpec);
+  Class<NettyTcpClient> type=REACTOR_TCP_CLIENT_TYPE;
+  TcpClient<Message<P>,Message<P>> tcpClient=NetStreams.tcpClient(type,this.tcpClientSpecFactory);
   composeConnectionHandling(tcpClient,connectionHandler);
   Promise<Boolean> promise=tcpClient.open();
-  return new AbstractPromiseToListenableFutureAdapter<Boolean,Void>(promise){
-    @Override protected Void adapt(    Boolean result){
-      return null;
-    }
-  }
-;
+  return new BooleanToVoidAdapter(promise);
 }

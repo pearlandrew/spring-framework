@@ -1,18 +1,8 @@
 {
-  int ioThreadCount;
-  try {
-    ioThreadCount=Integer.parseInt(System.getProperty("reactor.tcp.ioThreadCount"));
-  }
- catch (  Exception i) {
-    ioThreadCount=-1;
-  }
-  if (ioThreadCount <= 0l) {
-    ioThreadCount=Runtime.getRuntime().availableProcessors();
-  }
-  final NioEventLoopGroup eventLoopGroup=new NioEventLoopGroup(ioThreadCount,new NamedDaemonThreadFactory("reactor-tcp-io"));
-  this.tcpClientSpec=new Function<Spec.TcpClientSpec<Message<P>,Message<P>>,Spec.TcpClientSpec<Message<P>,Message<P>>>(){
-    @Override public Spec.TcpClientSpec<Message<P>,Message<P>> apply(    Spec.TcpClientSpec<Message<P>,Message<P>> messageMessageTcpClientSpec){
-      return messageMessageTcpClientSpec.codec(codec).connect(host,port).options(new NettyClientSocketOptions().eventLoopGroup(eventLoopGroup));
+  final NioEventLoopGroup eventLoopGroup=initEventLoopGroup();
+  this.tcpClientSpecFactory=new TcpClientSpecFactory<Message<P>,Message<P>>(){
+    @Override public TcpClientSpec<Message<P>,Message<P>> apply(    TcpClientSpec<Message<P>,Message<P>> spec){
+      return spec.env(new Environment(new SynchronousDispatcherConfigReader())).codec(codec).connect(host,port).options(new NettyClientSocketOptions().eventLoopGroup(eventLoopGroup));
     }
   }
 ;

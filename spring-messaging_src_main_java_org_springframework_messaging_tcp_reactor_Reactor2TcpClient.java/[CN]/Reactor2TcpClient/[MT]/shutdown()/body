@@ -1,7 +1,7 @@
 {
   final List<TcpClient<Message<P>,Message<P>>> clients;
-synchronized (activeClients) {
-    clients=new ArrayList<TcpClient<Message<P>,Message<P>>>(activeClients);
+synchronized (this.tcpClients) {
+    clients=new ArrayList<TcpClient<Message<P>,Message<P>>>(this.tcpClients);
   }
   Promise<Boolean> promise=Streams.from(clients).flatMap(new Function<TcpClient<Message<P>,Message<P>>,Promise<Boolean>>(){
     @Override public Promise<Boolean> apply(    TcpClient<Message<P>,Message<P>> client){
@@ -14,10 +14,5 @@ synchronized (activeClients) {
     }
   }
 ).next();
-  return new AbstractPromiseToListenableFutureAdapter<Boolean,Boolean>(promise){
-    @Override protected Boolean adapt(    Boolean result){
-      return result;
-    }
-  }
-;
+  return new PassThroughPromiseToListenableFutureAdapter<Boolean>(promise);
 }
