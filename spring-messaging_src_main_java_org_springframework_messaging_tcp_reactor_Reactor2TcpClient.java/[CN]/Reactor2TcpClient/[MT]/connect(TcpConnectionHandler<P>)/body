@@ -1,7 +1,11 @@
 {
   Class<NettyTcpClient> type=REACTOR_TCP_CLIENT_TYPE;
   TcpClient<Message<P>,Message<P>> tcpClient=NetStreams.tcpClient(type,this.tcpClientSpecFactory);
-  composeConnectionHandling(tcpClient,connectionHandler);
-  Promise<Boolean> promise=tcpClient.open();
-  return new BooleanToVoidAdapter(promise);
+  Promise<Void> promise=tcpClient.start(composeConnectionHandling(tcpClient,connectionHandler));
+  return new PassThroughPromiseToListenableFutureAdapter<Void>(promise.onError(new Consumer<Throwable>(){
+    @Override public void accept(    Throwable throwable){
+      connectionHandler.afterConnectFailure(throwable);
+    }
+  }
+));
 }

@@ -1,4 +1,5 @@
 {
-  this.sink.onNext(message);
-  return new PassThroughPromiseToListenableFutureAdapter<Void>(Promises.<Void>success(null));
+  Promise<Void> afterWrite=Promises.prepare();
+  this.channelStream.writeWith(Streams.just(message)).subscribe(afterWrite);
+  return new PassThroughPromiseToListenableFutureAdapter<Void>(afterWrite);
 }

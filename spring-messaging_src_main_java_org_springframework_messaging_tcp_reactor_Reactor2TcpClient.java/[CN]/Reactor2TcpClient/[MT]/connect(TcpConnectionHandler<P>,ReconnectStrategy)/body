@@ -2,7 +2,6 @@
   Assert.notNull(strategy,"ReconnectStrategy must not be null");
   Class<NettyTcpClient> type=REACTOR_TCP_CLIENT_TYPE;
   TcpClient<Message<P>,Message<P>> tcpClient=NetStreams.tcpClient(type,this.tcpClientSpecFactory);
-  composeConnectionHandling(tcpClient,handler);
-  Stream<Boolean> stream=tcpClient.open(new ReactorRectonnectAdapter(strategy));
-  return new BooleanToVoidAdapter(stream.next());
+  Stream<Tuple2<InetSocketAddress,Integer>> stream=tcpClient.start(composeConnectionHandling(tcpClient,handler),new ReactorRectonnectAdapter(strategy));
+  return new PassThroughPromiseToListenableFutureAdapter<Void>(stream.next().after());
 }

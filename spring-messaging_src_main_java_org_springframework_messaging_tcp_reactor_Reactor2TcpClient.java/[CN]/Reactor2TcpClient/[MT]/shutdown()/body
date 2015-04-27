@@ -3,16 +3,18 @@
 synchronized (this.tcpClients) {
     clients=new ArrayList<TcpClient<Message<P>,Message<P>>>(this.tcpClients);
   }
-  Promise<Boolean> promise=Streams.from(clients).flatMap(new Function<TcpClient<Message<P>,Message<P>>,Promise<Boolean>>(){
-    @Override public Promise<Boolean> apply(    TcpClient<Message<P>,Message<P>> client){
-      return client.close();
-    }
-  }
-).reduce(new BiFunction<Boolean,Boolean,Boolean>(){
-    @Override public Boolean apply(    Boolean prev,    Boolean next){
-      return prev && next;
+  Promise<Void> promise=Streams.from(clients).flatMap(new Function<TcpClient<Message<P>,Message<P>>,Promise<Void>>(){
+    @Override public Promise<Void> apply(    final TcpClient<Message<P>,Message<P>> client){
+      return client.shutdown().onComplete(new Consumer<Promise<Void>>(){
+        @Override public void accept(        Promise<Void> voidPromise){
+synchronized (tcpClients) {
+            tcpClients.remove(client);
+          }
+        }
+      }
+);
     }
   }
 ).next();
-  return new PassThroughPromiseToListenableFutureAdapter<Boolean>(promise);
+  return new PassThroughPromiseToListenableFutureAdapter<Void>(promise);
 }
