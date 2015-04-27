@@ -1,9 +1,9 @@
 {
-  final List<TcpClient<Message<P>,Message<P>>> clients;
+  final List<TcpClient<Message<P>,Message<P>>> readOnlyClients;
 synchronized (this.tcpClients) {
-    clients=new ArrayList<TcpClient<Message<P>,Message<P>>>(this.tcpClients);
+    readOnlyClients=new ArrayList<TcpClient<Message<P>,Message<P>>>(this.tcpClients);
   }
-  Promise<Void> promise=Streams.from(clients).flatMap(new Function<TcpClient<Message<P>,Message<P>>,Promise<Void>>(){
+  Promise<Void> promise=Streams.from(readOnlyClients).flatMap(new Function<TcpClient<Message<P>,Message<P>>,Promise<Void>>(){
     @Override public Promise<Void> apply(    final TcpClient<Message<P>,Message<P>> client){
       return client.shutdown().onComplete(new Consumer<Promise<Void>>(){
         @Override public void accept(        Promise<Void> voidPromise){
