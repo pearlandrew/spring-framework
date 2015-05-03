@@ -5,21 +5,10 @@
   if (origin == null || allowedOrigins.contains("*")) {
     return true;
   }
- else   if (allowedOrigins.isEmpty()) {
-    UriComponents originComponents;
-    try {
-      originComponents=UriComponentsBuilder.fromHttpUrl(origin).build();
-    }
- catch (    IllegalArgumentException ex) {
-      if (logger.isWarnEnabled()) {
-        logger.warn("Failed to parse Origin header value [" + origin + "]");
-      }
-      return false;
-    }
-    UriComponents requestComponents=UriComponentsBuilder.fromHttpRequest(request).build();
-    int originPort=getPort(originComponents);
-    int requestPort=getPort(requestComponents);
-    return (originComponents.getHost().equals(requestComponents.getHost()) && originPort == requestPort);
+ else   if (CollectionUtils.isEmpty(allowedOrigins)) {
+    UriComponents actualUrl=UriComponentsBuilder.fromHttpRequest(request).build();
+    UriComponents originUrl=UriComponentsBuilder.fromOriginHeader(origin).build();
+    return (actualUrl.getHost().equals(originUrl.getHost()) && getPort(actualUrl) == getPort(originUrl));
   }
  else {
     return allowedOrigins.contains(origin);
