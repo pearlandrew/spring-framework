@@ -3,14 +3,12 @@
   InetSocketAddress localAddress=new InetSocketAddress(getLocalHost(),port);
   InetSocketAddress remoteAddress=new InetSocketAddress(uri.getHost(),port);
   final StandardWebSocketSession session=new StandardWebSocketSession(headers,attributes,localAddress,remoteAddress);
-  final ClientEndpointConfig.Builder configBuilder=ClientEndpointConfig.Builder.create();
-  configBuilder.configurator(new StandardWebSocketClientConfigurator(headers));
-  configBuilder.preferredSubprotocols(protocols);
-  configBuilder.extensions(adaptExtensions(extensions));
+  final ClientEndpointConfig endpointConfig=ClientEndpointConfig.Builder.create().configurator(new StandardWebSocketClientConfigurator(headers)).preferredSubprotocols(protocols).extensions(adaptExtensions(extensions)).build();
+  endpointConfig.getUserProperties().putAll(getUserProperties());
   final Endpoint endpoint=new StandardWebSocketHandlerAdapter(webSocketHandler,session);
   Callable<WebSocketSession> connectTask=new Callable<WebSocketSession>(){
     @Override public WebSocketSession call() throws Exception {
-      webSocketContainer.connectToServer(endpoint,configBuilder.build(),uri);
+      webSocketContainer.connectToServer(endpoint,endpointConfig,uri);
       return session;
     }
   }
