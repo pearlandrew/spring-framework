@@ -1,20 +1,37 @@
 {
-  final List<TcpClient<Message<P>,Message<P>>> readOnlyClients;
 synchronized (this.tcpClients) {
-    readOnlyClients=new ArrayList<TcpClient<Message<P>,Message<P>>>(this.tcpClients);
+    this.stopping=true;
   }
-  Promise<Void> promise=Streams.from(readOnlyClients).flatMap(new Function<TcpClient<Message<P>,Message<P>>,Promise<Void>>(){
+  Promise<Void> promise=Streams.from(this.tcpClients).flatMap(new Function<TcpClient<Message<P>,Message<P>>,Promise<Void>>(){
     @Override public Promise<Void> apply(    final TcpClient<Message<P>,Message<P>> client){
       return client.shutdown().onComplete(new Consumer<Promise<Void>>(){
         @Override public void accept(        Promise<Void> voidPromise){
-synchronized (tcpClients) {
-            tcpClients.remove(client);
-          }
+          tcpClients.remove(client);
         }
       }
 );
     }
   }
 ).next();
+  if (this.eventLoopGroup != null) {
+    final Promise<Void> eventLoopPromise=Promises.prepare();
+    promise.onComplete(new Consumer<Promise<Void>>(){
+      @Override public void accept(      Promise<Void> voidPromise){
+        eventLoopGroup.shutdownGracefully().addListener(new FutureListener<Object>(){
+          @Override public void operationComplete(          Future<Object> future) throws Exception {
+            if (future.isSuccess()) {
+              eventLoopPromise.onComplete();
+            }
+ else {
+              eventLoopPromise.onError(future.cause());
+            }
+          }
+        }
+);
+      }
+    }
+);
+    promise=eventLoopPromise;
+  }
   return new PassThroughPromiseToListenableFutureAdapter<Void>(promise);
 }
