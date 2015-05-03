@@ -1,0 +1,23 @@
+{
+  this.readWriteLock.writeLock().lock();
+  try {
+    MappingDefinition<T> definition=this.methodLookup.remove(handlerMethod.getMethod());
+    if (definition == null) {
+      return;
+    }
+    this.mappingLookup.remove(definition.getMapping());
+    for (    String url : definition.getDirectUrls()) {
+      List<T> list=this.urlLookup.get(url);
+      if (list != null) {
+        list.remove(definition.getMapping());
+        if (list.isEmpty()) {
+          this.urlLookup.remove(url);
+        }
+      }
+    }
+    removeMappingName(definition);
+  }
+  finally {
+    this.readWriteLock.writeLock().unlock();
+  }
+}

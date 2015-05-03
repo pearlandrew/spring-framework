@@ -1,3 +1,9 @@
 {
-  return this.mappingRegistry.getMappings();
+  this.mappingRegistry.acquireReadLock();
+  try {
+    return Collections.unmodifiableMap(this.mappingRegistry.getMappings());
+  }
+  finally {
+    this.mappingRegistry.releaseReadLock();
+  }
 }
