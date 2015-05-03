@@ -1,11 +1,11 @@
 {
   List<Match> matches=new ArrayList<Match>();
-  List<T> directPathMatches=this.urlMap.get(lookupPath);
+  List<T> directPathMatches=this.mappingRegistry.getMappingKeysByUrl(lookupPath);
   if (directPathMatches != null) {
     addMatchingMappings(directPathMatches,matches,request);
   }
   if (matches.isEmpty()) {
-    addMatchingMappings(this.handlerMethods.keySet(),matches,request);
+    addMatchingMappings(this.mappingRegistry.getMappingKeys(),matches,request);
   }
   if (!matches.isEmpty()) {
     Comparator<Match> comparator=new MatchComparator(getMappingComparator(request));
@@ -16,7 +16,7 @@
     Match bestMatch=matches.get(0);
     if (matches.size() > 1) {
       if (CorsUtils.isPreFlightRequest(request)) {
-        return PREFLIGHT_MULTI_MATCH_HANDLER_METHOD;
+        return PREFLIGHT_AMBIGUOUS_MATCH;
       }
       Match secondBestMatch=matches.get(1);
       if (comparator.compare(bestMatch,secondBestMatch) == 0) {
@@ -29,6 +29,6 @@
     return bestMatch.handlerMethod;
   }
  else {
-    return handleNoMatch(handlerMethods.keySet(),lookupPath,request);
+    return handleNoMatch(this.mappingRegistry.getMappingKeys(),lookupPath,request);
   }
 }

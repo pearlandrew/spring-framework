@@ -1,0 +1,21 @@
+{
+  List<HandlerMethod> oldHandlerMethods=this.nameLookup.containsKey(name) ? this.nameLookup.get(name) : Collections.<HandlerMethod>emptyList();
+  for (  HandlerMethod oldHandlerMethod : oldHandlerMethods) {
+    if (oldHandlerMethod.getMethod().equals(handlerMethod.getMethod())) {
+      return;
+    }
+  }
+  if (logger.isTraceEnabled()) {
+    logger.trace("Mapping name=" + name);
+  }
+  int size=oldHandlerMethods.size() + 1;
+  List<HandlerMethod> definitions=new ArrayList<HandlerMethod>(size);
+  definitions.addAll(oldHandlerMethods);
+  definitions.add(handlerMethod);
+  this.nameLookup.put(name,definitions);
+  if (definitions.size() > 1) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Mapping name clash for handlerMethods=" + definitions + ". Consider assigning explicit names.");
+    }
+  }
+}

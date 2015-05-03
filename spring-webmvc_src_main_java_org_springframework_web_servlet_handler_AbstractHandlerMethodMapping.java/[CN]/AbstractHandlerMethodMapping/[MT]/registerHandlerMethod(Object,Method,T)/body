@@ -1,25 +1,3 @@
 {
-  HandlerMethod newHandlerMethod=createHandlerMethod(handler,method);
-  HandlerMethod oldHandlerMethod=this.handlerMethods.get(mapping);
-  if (oldHandlerMethod != null && !oldHandlerMethod.equals(newHandlerMethod)) {
-    throw new IllegalStateException("Ambiguous mapping found. Cannot map '" + newHandlerMethod.getBean() + "' bean method \n"+ newHandlerMethod+ "\nto "+ mapping+ ": There is already '"+ oldHandlerMethod.getBean()+ "' bean method\n"+ oldHandlerMethod+ " mapped.");
-  }
-  this.handlerMethods.put(mapping,newHandlerMethod);
-  if (logger.isInfoEnabled()) {
-    logger.info("Mapped \"" + mapping + "\" onto "+ newHandlerMethod);
-  }
-  Set<String> patterns=getMappingPathPatterns(mapping);
-  for (  String pattern : patterns) {
-    if (!getPathMatcher().isPattern(pattern)) {
-      this.urlMap.add(pattern,mapping);
-    }
-  }
-  if (this.namingStrategy != null) {
-    String name=this.namingStrategy.getName(newHandlerMethod,mapping);
-    updateNameMap(name,newHandlerMethod);
-  }
-  CorsConfiguration config=initCorsConfiguration(handler,method,mapping);
-  if (config != null) {
-    this.corsMap.put(method,config);
-  }
+  this.mappingRegistry.register(handler,method,mapping);
 }

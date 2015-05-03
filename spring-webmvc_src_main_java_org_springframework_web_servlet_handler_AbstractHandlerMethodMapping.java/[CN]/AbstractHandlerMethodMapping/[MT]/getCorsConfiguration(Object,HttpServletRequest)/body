@@ -1,6 +1,13 @@
 {
   if (handler instanceof HandlerMethod) {
-    this.corsMap.get(((HandlerMethod)handler).getMethod());
+    HandlerMethod handlerMethod=(HandlerMethod)handler;
+    CorsConfiguration corsConfig=this.mappingRegistry.getCorsConfiguration(handlerMethod);
+    if (corsConfig != null) {
+      return corsConfig;
+    }
+ else     if (handlerMethod.equals(PREFLIGHT_AMBIGUOUS_MATCH)) {
+      return AbstractHandlerMethodMapping.ALLOW_CORS_CONFIG;
+    }
   }
   return null;
 }
