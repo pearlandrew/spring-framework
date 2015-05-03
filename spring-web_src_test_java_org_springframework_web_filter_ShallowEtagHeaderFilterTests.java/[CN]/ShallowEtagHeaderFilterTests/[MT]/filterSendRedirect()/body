@@ -1,19 +1,2 @@
 {
-  final MockHttpServletRequest request=new MockHttpServletRequest("GET","/hotels");
-  MockHttpServletResponse response=new MockHttpServletResponse();
-  final byte[] responseBody="Hello World".getBytes("UTF-8");
-  FilterChain filterChain=new FilterChain(){
-    @Override public void doFilter(    ServletRequest filterRequest,    ServletResponse filterResponse) throws IOException, ServletException {
-      assertEquals("Invalid request passed",request,filterRequest);
-      FileCopyUtils.copy(responseBody,filterResponse.getOutputStream());
-      ((HttpServletResponse)filterResponse).sendRedirect("http://www.google.com");
-    }
-  }
-;
-  filter.doFilter(request,response,filterChain);
-  assertEquals("Invalid status",302,response.getStatus());
-  assertNull("Invalid ETag header",response.getHeader("ETag"));
-  assertTrue("Invalid Content-Length header",response.getContentLength() > 0);
-  assertArrayEquals("Invalid content",responseBody,response.getContentAsByteArray());
-  assertEquals("Invalid redirect URL","http://www.google.com",response.getRedirectedUrl());
 }

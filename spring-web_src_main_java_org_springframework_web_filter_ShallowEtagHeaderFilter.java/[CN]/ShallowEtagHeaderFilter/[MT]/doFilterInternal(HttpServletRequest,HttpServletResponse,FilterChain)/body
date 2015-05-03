@@ -1,10 +1,10 @@
 {
   HttpServletResponse responseToUse=response;
   if (!isAsyncDispatch(request) && !(response instanceof ContentCachingResponseWrapper)) {
-    responseToUse=new ContentCachingResponseWrapper(response);
+    responseToUse=new HttpStreamingAwareContentCachingResponseWrapper(response,request);
   }
   filterChain.doFilter(request,responseToUse);
-  if (!isAsyncStarted(request)) {
+  if (!isAsyncStarted(request) && !isContentCachingDisabled(request)) {
     updateResponse(request,responseToUse);
   }
 }

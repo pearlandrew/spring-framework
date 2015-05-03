@@ -1,19 +1,2 @@
 {
-  final MockHttpServletRequest request=new MockHttpServletRequest("GET","/hotels");
-  MockHttpServletResponse response=new MockHttpServletResponse();
-  final byte[] responseBody="Hello World".getBytes("UTF-8");
-  FilterChain filterChain=new FilterChain(){
-    @Override public void doFilter(    ServletRequest filterRequest,    ServletResponse filterResponse) throws IOException, ServletException {
-      assertEquals("Invalid request passed",request,filterRequest);
-      FileCopyUtils.copy(responseBody,filterResponse.getOutputStream());
-      ((HttpServletResponse)filterResponse).sendError(HttpServletResponse.SC_FORBIDDEN,"ERROR");
-    }
-  }
-;
-  filter.doFilter(request,response,filterChain);
-  assertEquals("Invalid status",403,response.getStatus());
-  assertNull("Invalid ETag header",response.getHeader("ETag"));
-  assertTrue("Invalid Content-Length header",response.getContentLength() > 0);
-  assertArrayEquals("Invalid content",responseBody,response.getContentAsByteArray());
-  assertEquals("Invalid error message","ERROR",response.getErrorMessage());
 }
