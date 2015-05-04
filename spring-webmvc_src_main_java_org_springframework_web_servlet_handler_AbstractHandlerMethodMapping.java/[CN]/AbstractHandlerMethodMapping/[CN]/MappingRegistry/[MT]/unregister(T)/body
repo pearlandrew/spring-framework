@@ -1,7 +1,7 @@
 {
   this.readWriteLock.writeLock().lock();
   try {
-    MappingDefinition<T> definition=this.methodLookup.remove(handlerMethod.getMethod());
+    MappingDefinition<T> definition=this.definitionMap.remove(mapping);
     if (definition == null) {
       return;
     }
@@ -16,6 +16,7 @@
       }
     }
     removeMappingName(definition);
+    this.corsLookup.remove(definition.getHandlerMethod().getMethod());
   }
   finally {
     this.readWriteLock.writeLock().unlock();
