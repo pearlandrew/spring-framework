@@ -1,20 +1,11 @@
 {
   Assert.state(!this.encoded,"Cannot expand an already encoded UriComponents object");
-  String expandedScheme=expandUriComponent(getScheme(),uriVariables);
-  String expandedUserInfo=expandUriComponent(this.userInfo,uriVariables);
-  String expandedHost=expandUriComponent(this.host,uriVariables);
-  String expandedPort=expandUriComponent(this.port,uriVariables);
-  PathComponent expandedPath=this.path.expand(uriVariables);
-  MultiValueMap<String,String> expandedQueryParams=new LinkedMultiValueMap<String,String>(this.queryParams.size());
-  for (  Map.Entry<String,List<String>> entry : this.queryParams.entrySet()) {
-    String expandedName=expandUriComponent(entry.getKey(),uriVariables);
-    List<String> expandedValues=new ArrayList<String>(entry.getValue().size());
-    for (    String value : entry.getValue()) {
-      String expandedValue=expandUriComponent(value,uriVariables);
-      expandedValues.add(expandedValue);
-    }
-    expandedQueryParams.put(expandedName,expandedValues);
-  }
-  String expandedFragment=expandUriComponent(this.getFragment(),uriVariables);
-  return new HierarchicalUriComponents(expandedScheme,expandedUserInfo,expandedHost,expandedPort,expandedPath,expandedQueryParams,expandedFragment,false,false);
+  String schemeTo=expandUriComponent(getScheme(),uriVariables);
+  String userInfoTo=expandUriComponent(this.userInfo,uriVariables);
+  String hostTo=expandUriComponent(this.host,uriVariables);
+  String portTo=expandUriComponent(this.port,uriVariables);
+  PathComponent pathTo=this.path.expand(uriVariables);
+  MultiValueMap<String,String> paramsTo=expandQueryParams(uriVariables);
+  String fragmentTo=expandUriComponent(this.getFragment(),uriVariables);
+  return new HierarchicalUriComponents(schemeTo,userInfoTo,hostTo,portTo,pathTo,paramsTo,fragmentTo,false,false);
 }
