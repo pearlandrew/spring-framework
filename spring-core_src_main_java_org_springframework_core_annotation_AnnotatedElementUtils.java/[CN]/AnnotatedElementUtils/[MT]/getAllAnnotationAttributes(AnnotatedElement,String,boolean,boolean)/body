@@ -1,25 +1,17 @@
 {
-  final MultiValueMap<String,Object> attributes=new LinkedMultiValueMap<String,Object>();
-  processWithGetSemantics(element,annotationType,new Processor<Void>(){
+  final MultiValueMap<String,Object> attributesMap=new LinkedMultiValueMap<String,Object>();
+  processWithGetSemantics(element,annotationType,new SimpleAnnotationProcessor<Void>(){
     @Override public Void process(    Annotation annotation,    int metaDepth){
-      if (annotation.annotationType().getName().equals(annotationType)) {
-        for (        Map.Entry<String,Object> entry : AnnotationUtils.getAnnotationAttributes(annotation,classValuesAsString,nestedAnnotationsAsMap).entrySet()) {
-          attributes.add(entry.getKey(),entry.getValue());
+      boolean found=annotation.annotationType().getName().equals(annotationType);
+      if (found) {
+        AnnotationAttributes annotationAttributes=AnnotationUtils.getAnnotationAttributes(annotation,classValuesAsString,nestedAnnotationsAsMap);
+        for (        Map.Entry<String,Object> entry : annotationAttributes.entrySet()) {
+          attributesMap.add(entry.getKey(),entry.getValue());
         }
       }
       return null;
     }
-    @Override public void postProcess(    Annotation annotation,    Void result){
-      for (      String key : attributes.keySet()) {
-        if (!AnnotationUtils.VALUE.equals(key)) {
-          Object value=AnnotationUtils.getValue(annotation,key);
-          if (value != null) {
-            attributes.add(key,value);
-          }
-        }
-      }
-    }
   }
 );
-  return (attributes.isEmpty() ? null : attributes);
+  return (attributesMap.isEmpty() ? null : attributesMap);
 }
