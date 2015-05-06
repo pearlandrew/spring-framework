@@ -33,9 +33,10 @@
   for (  Message<byte[]> message : messages) {
     try {
       StompHeaderAccessor headerAccessor=MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
+      Principal user=session.getPrincipal();
       headerAccessor.setSessionId(session.getId());
       headerAccessor.setSessionAttributes(session.getAttributes());
-      headerAccessor.setUser(session.getPrincipal());
+      headerAccessor.setUser(user);
       headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER,headerAccessor.getHeartbeat());
       if (!detectImmutableMessageInterceptor(outputChannel)) {
         headerAccessor.setImmutable();
@@ -53,13 +54,13 @@
         SimpAttributesContextHolder.setAttributesFromMessage(message);
         if (this.eventPublisher != null) {
           if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
-            publishEvent(new SessionConnectEvent(this,message));
+            publishEvent(new SessionConnectEvent(this,message,user));
           }
  else           if (StompCommand.SUBSCRIBE.equals(headerAccessor.getCommand())) {
-            publishEvent(new SessionSubscribeEvent(this,message));
+            publishEvent(new SessionSubscribeEvent(this,message,user));
           }
  else           if (StompCommand.UNSUBSCRIBE.equals(headerAccessor.getCommand())) {
-            publishEvent(new SessionUnsubscribeEvent(this,message));
+            publishEvent(new SessionUnsubscribeEvent(this,message,user));
           }
         }
         outputChannel.send(message);

@@ -1,7 +1,8 @@
 {
-  WebSocketHandler handler=subProtocolWebSocketHandler();
-  handler=decorateWebSocketHandler(handler);
-  WebMvcStompEndpointRegistry registry=new WebMvcStompEndpointRegistry(handler,getTransportRegistration(),userSessionRegistry(),messageBrokerSockJsTaskScheduler());
+  WebSocketHandler handler=decorateWebSocketHandler(subProtocolWebSocketHandler());
+  WebSocketTransportRegistration transport=getTransportRegistration();
+  ThreadPoolTaskScheduler scheduler=messageBrokerTaskScheduler();
+  WebMvcStompEndpointRegistry registry=new WebMvcStompEndpointRegistry(handler,transport,scheduler);
   registry.setApplicationContext(getApplicationContext());
   registerStompEndpoints(registry);
   return registry.getHandlerMapping();

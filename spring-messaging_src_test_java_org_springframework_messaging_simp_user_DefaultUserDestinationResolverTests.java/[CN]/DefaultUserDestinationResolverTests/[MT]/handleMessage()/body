@@ -1,10 +1,11 @@
 {
+  TestPrincipal user=new TestPrincipal("joe");
   String sourceDestination="/user/joe/queue/foo";
-  Message<?> message=createWith(SimpMessageType.MESSAGE,this.user,SESSION_ID,sourceDestination);
+  Message<?> message=createMessage(SimpMessageType.MESSAGE,user,"123",sourceDestination);
   UserDestinationResult actual=this.resolver.resolveDestination(message);
   assertEquals(sourceDestination,actual.getSourceDestination());
   assertEquals(1,actual.getTargetDestinations().size());
   assertEquals("/queue/foo-user123",actual.getTargetDestinations().iterator().next());
   assertEquals("/user/queue/foo",actual.getSubscribeDestination());
-  assertEquals(this.user.getName(),actual.getUser());
+  assertEquals(user.getName(),actual.getUser());
 }

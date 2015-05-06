@@ -1,0 +1,24 @@
+{
+  TestSimpSession remoteSession=new TestSimpSession("remote-sess");
+  remoteSession.addSubscriptions(new TestSimpSubscription("remote-sub","/remote-dest"));
+  TestSimpUser remoteUser=new TestSimpUser("joe");
+  remoteUser.addSessions(remoteSession);
+  SimpUserRegistry remoteUserRegistry=mock(SimpUserRegistry.class);
+  when(remoteUserRegistry.getUsers()).thenReturn(Collections.singleton(remoteUser));
+  MultiServerUserRegistry remoteRegistry=new MultiServerUserRegistry(remoteUserRegistry);
+  Message<?> message=this.converter.toMessage(remoteRegistry.getLocalRegistryDto(),null);
+  this.multiServerRegistry.addRemoteRegistryDto(message,this.converter,20000);
+  assertEquals(1,this.multiServerRegistry.getUsers().size());
+  SimpUser user=this.multiServerRegistry.getUser("joe");
+  assertNotNull(user);
+  assertEquals(1,user.getSessions().size());
+  SimpSession session=user.getSession("remote-sess");
+  assertNotNull(session);
+  assertEquals("remote-sess",session.getId());
+  assertSame(user,session.getUser());
+  assertEquals(1,session.getSubscriptions().size());
+  SimpSubscription subscription=session.getSubscriptions().iterator().next();
+  assertEquals("remote-sub",subscription.getId());
+  assertSame(session,subscription.getSession());
+  assertEquals("/remote-dest",subscription.getDestination());
+}

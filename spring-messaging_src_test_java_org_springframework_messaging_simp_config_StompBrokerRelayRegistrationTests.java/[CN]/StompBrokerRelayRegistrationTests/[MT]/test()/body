@@ -1,9 +1,8 @@
 {
-  SubscribableChannel clientInboundChannel=new StubMessageChannel();
-  MessageChannel clientOutboundChannel=new StubMessageChannel();
-  SubscribableChannel brokerChannel=new StubMessageChannel();
-  String[] destinationPrefixes=new String[]{"/foo","/bar"};
-  StompBrokerRelayRegistration registration=new StompBrokerRelayRegistration(clientInboundChannel,clientOutboundChannel,destinationPrefixes);
+  SubscribableChannel inChannel=new StubMessageChannel();
+  MessageChannel outChannel=new StubMessageChannel();
+  String[] prefixes=new String[]{"/foo","/bar"};
+  StompBrokerRelayRegistration registration=new StompBrokerRelayRegistration(inChannel,outChannel,prefixes);
   registration.setClientLogin("clientlogin");
   registration.setClientPasscode("clientpasscode");
   registration.setSystemLogin("syslogin");
@@ -11,13 +10,13 @@
   registration.setSystemHeartbeatReceiveInterval(123);
   registration.setSystemHeartbeatSendInterval(456);
   registration.setVirtualHost("example.org");
-  StompBrokerRelayMessageHandler relayMessageHandler=registration.getMessageHandler(brokerChannel);
-  assertEquals(Arrays.asList(destinationPrefixes),new ArrayList<String>(relayMessageHandler.getDestinationPrefixes()));
-  assertEquals("clientlogin",relayMessageHandler.getClientLogin());
-  assertEquals("clientpasscode",relayMessageHandler.getClientPasscode());
-  assertEquals("syslogin",relayMessageHandler.getSystemLogin());
-  assertEquals("syspasscode",relayMessageHandler.getSystemPasscode());
-  assertEquals(123,relayMessageHandler.getSystemHeartbeatReceiveInterval());
-  assertEquals(456,relayMessageHandler.getSystemHeartbeatSendInterval());
-  assertEquals("example.org",relayMessageHandler.getVirtualHost());
+  StompBrokerRelayMessageHandler handler=registration.getMessageHandler(new StubMessageChannel());
+  assertArrayEquals(prefixes,handler.getDestinationPrefixes().toArray(new String[2]));
+  assertEquals("clientlogin",handler.getClientLogin());
+  assertEquals("clientpasscode",handler.getClientPasscode());
+  assertEquals("syslogin",handler.getSystemLogin());
+  assertEquals("syspasscode",handler.getSystemPasscode());
+  assertEquals(123,handler.getSystemHeartbeatReceiveInterval());
+  assertEquals(456,handler.getSystemHeartbeatSendInterval());
+  assertEquals("example.org",handler.getVirtualHost());
 }

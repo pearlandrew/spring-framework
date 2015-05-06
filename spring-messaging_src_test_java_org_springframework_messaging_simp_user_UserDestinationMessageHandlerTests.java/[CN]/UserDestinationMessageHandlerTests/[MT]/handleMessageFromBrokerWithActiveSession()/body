@@ -1,6 +1,8 @@
 {
-  this.registry.registerSessionId("joe","123");
-  this.handler.setUserDestinationBroadcast("/topic/unresolved");
+  TestSimpUser simpUser=new TestSimpUser("joe");
+  simpUser.addSessions(new TestSimpSession("123"));
+  when(this.registry.getUser("joe")).thenReturn(simpUser);
+  this.handler.setBroadcastDestination("/topic/unresolved");
   given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
   StompHeaderAccessor accessor=StompHeaderAccessor.create(StompCommand.MESSAGE);
   accessor.setSessionId("system123");

@@ -35,7 +35,7 @@
   List<Class<? extends MessageHandler>> subscriberTypes=Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,UserDestinationMessageHandler.class,StompBrokerRelayMessageHandler.class);
   testChannel("clientInboundChannel",subscriberTypes,2);
   testExecutor("clientInboundChannel",Runtime.getRuntime().availableProcessors() * 2,Integer.MAX_VALUE,60);
-  subscriberTypes=Arrays.<Class<? extends MessageHandler>>asList(SubProtocolWebSocketHandler.class);
+  subscriberTypes=Collections.singletonList(SubProtocolWebSocketHandler.class);
   testChannel("clientOutboundChannel",subscriberTypes,1);
   testExecutor("clientOutboundChannel",Runtime.getRuntime().availableProcessors() * 2,Integer.MAX_VALUE,60);
   subscriberTypes=Arrays.<Class<? extends MessageHandler>>asList(StompBrokerRelayMessageHandler.class,UserDestinationMessageHandler.class);
@@ -46,10 +46,18 @@
   }
  catch (  NoSuchBeanDefinitionException ex) {
   }
+  String destination="/topic/unresolved-user-destination";
   UserDestinationMessageHandler userDestHandler=this.appContext.getBean(UserDestinationMessageHandler.class);
-  assertEquals("/topic/unresolved",userDestHandler.getUserDestinationBroadcast());
+  assertEquals(destination,userDestHandler.getBroadcastDestination());
   assertNotNull(messageBroker.getSystemSubscriptions());
-  assertSame(userDestHandler,messageBroker.getSystemSubscriptions().get("/topic/unresolved"));
+  assertSame(userDestHandler,messageBroker.getSystemSubscriptions().get(destination));
+  destination="/topic/simp-user-registry";
+  UserRegistryMessageHandler userRegistryHandler=this.appContext.getBean(UserRegistryMessageHandler.class);
+  assertEquals(destination,userRegistryHandler.getBroadcastDestination());
+  assertNotNull(messageBroker.getSystemSubscriptions());
+  assertSame(userRegistryHandler,messageBroker.getSystemSubscriptions().get(destination));
+  SimpUserRegistry userRegistry=this.appContext.getBean(SimpUserRegistry.class);
+  assertEquals(MultiServerUserRegistry.class,userRegistry.getClass());
   String name="webSocketMessageBrokerStats";
   WebSocketMessageBrokerStats stats=this.appContext.getBean(name,WebSocketMessageBrokerStats.class);
   String actual=stats.toString();

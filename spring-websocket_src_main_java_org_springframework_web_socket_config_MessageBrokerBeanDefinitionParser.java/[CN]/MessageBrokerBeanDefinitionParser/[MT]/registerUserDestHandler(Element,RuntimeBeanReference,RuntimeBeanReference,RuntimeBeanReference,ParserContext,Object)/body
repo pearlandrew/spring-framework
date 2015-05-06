@@ -1,12 +1,14 @@
 {
-  ConstructorArgumentValues cavs=new ConstructorArgumentValues();
-  cavs.addIndexedArgumentValue(0,inChannel);
-  cavs.addIndexedArgumentValue(1,brokerChannel);
-  cavs.addIndexedArgumentValue(2,userDestinationResolver);
-  RootBeanDefinition beanDef=new RootBeanDefinition(UserDestinationMessageHandler.class,cavs,null);
-  if (brokerElem.hasAttribute("user-destination-broadcast")) {
-    String destination=brokerElem.getAttribute("user-destination-broadcast");
-    beanDef.getPropertyValues().add("userDestinationBroadcast",destination);
+  Object userDestResolver=registerUserDestResolver(brokerElem,userRegistry,context,source);
+  RootBeanDefinition beanDef=new RootBeanDefinition(UserDestinationMessageHandler.class);
+  beanDef.getConstructorArgumentValues().addIndexedArgumentValue(0,inChannel);
+  beanDef.getConstructorArgumentValues().addIndexedArgumentValue(1,brokerChannel);
+  beanDef.getConstructorArgumentValues().addIndexedArgumentValue(2,userDestResolver);
+  Element relayElement=DomUtils.getChildElementByTagName(brokerElem,"stomp-broker-relay");
+  if (relayElement != null && relayElement.hasAttribute("user-destination-broadcast")) {
+    String destination=relayElement.getAttribute("user-destination-broadcast");
+    beanDef.getPropertyValues().add("broadcastDestination",destination);
   }
-  return new RuntimeBeanReference(registerBeanDef(beanDef,context,source));
+  String beanName=registerBeanDef(beanDef,context,source);
+  return new RuntimeBeanReference(beanName);
 }

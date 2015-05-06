@@ -1,0 +1,13 @@
+{
+  TestSimpUser remoteUser=new TestSimpUser("joe");
+  remoteUser.addSessions(new TestSimpSession("remote-sub"));
+  SimpUserRegistry remoteUserRegistry=mock(SimpUserRegistry.class);
+  when(remoteUserRegistry.getUsers()).thenReturn(Collections.singleton(remoteUser));
+  MultiServerUserRegistry remoteRegistry=new MultiServerUserRegistry(remoteUserRegistry);
+  Message<?> message=this.converter.toMessage(remoteRegistry.getLocalRegistryDto(),null);
+  long expirationPeriod=-1;
+  this.multiServerRegistry.addRemoteRegistryDto(message,this.converter,expirationPeriod);
+  assertEquals(1,this.multiServerRegistry.getUsers().size());
+  this.multiServerRegistry.purgeExpiredRegistries();
+  assertEquals(0,this.multiServerRegistry.getUsers().size());
+}

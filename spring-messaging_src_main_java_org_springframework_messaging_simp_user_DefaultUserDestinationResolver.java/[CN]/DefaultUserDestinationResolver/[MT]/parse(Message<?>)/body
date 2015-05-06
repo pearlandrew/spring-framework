@@ -23,20 +23,32 @@
     Assert.isTrue(userEnd > 0,"Expected destination pattern \"/user/{userId}/**\"");
     String actualDestination=destination.substring(userEnd);
     String subscribeDestination=this.prefix.substring(0,prefixEnd - 1) + actualDestination;
-    String user=destination.substring(prefixEnd,userEnd);
-    user=StringUtils.replace(user,"%2F","/");
+    String userName=destination.substring(prefixEnd,userEnd);
+    userName=StringUtils.replace(userName,"%2F","/");
     Set<String> sessionIds;
-    if (user.equals(sessionId)) {
-      user=null;
-      sessionIds=Collections.singleton(sessionId);
-    }
- else     if (this.sessionRegistry.getSessionIds(user).contains(sessionId)) {
+    if (userName.equals(sessionId)) {
+      userName=null;
       sessionIds=Collections.singleton(sessionId);
     }
  else {
-      sessionIds=this.sessionRegistry.getSessionIds(user);
+      SimpUser user=this.userRegistry.getUser(userName);
+      if (user != null) {
+        if (user.getSession(sessionId) != null) {
+          sessionIds=Collections.singleton(sessionId);
+        }
+ else {
+          Set<SimpSession> sessions=user.getSessions();
+          sessionIds=new HashSet<String>(sessions.size());
+          for (          SimpSession session : sessions) {
+            sessionIds.add(session.getId());
+          }
+        }
+      }
+ else {
+        sessionIds=Collections.<String>emptySet();
+      }
     }
-    return new ParseResult(actualDestination,subscribeDestination,sessionIds,user);
+    return new ParseResult(actualDestination,subscribeDestination,sessionIds,userName);
   }
  else {
     return null;

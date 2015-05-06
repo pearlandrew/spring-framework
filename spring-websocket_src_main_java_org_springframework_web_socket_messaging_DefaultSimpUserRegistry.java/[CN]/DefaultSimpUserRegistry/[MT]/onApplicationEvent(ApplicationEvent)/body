@@ -1,0 +1,54 @@
+{
+  AbstractSubProtocolEvent subProtocolEvent=(AbstractSubProtocolEvent)event;
+  Message<?> message=subProtocolEvent.getMessage();
+  SimpMessageHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(message,SimpMessageHeaderAccessor.class);
+  String sessionId=accessor.getSessionId();
+  if (event instanceof SessionSubscribeEvent) {
+    DefaultSimpSession session=this.sessions.get(sessionId);
+    if (session != null) {
+      String id=accessor.getSubscriptionId();
+      String destination=accessor.getDestination();
+      session.addSubscription(id,destination);
+    }
+  }
+ else   if (event instanceof SessionConnectedEvent) {
+    Principal user=subProtocolEvent.getUser();
+    if (user == null) {
+      return;
+    }
+    String name=user.getName();
+    if (user instanceof DestinationUserNameProvider) {
+      name=((DestinationUserNameProvider)user).getDestinationUserName();
+    }
+synchronized (this) {
+      DefaultSimpUser simpUser=this.users.get(name);
+      if (simpUser == null) {
+        simpUser=new DefaultSimpUser(name,sessionId);
+        this.users.put(name,simpUser);
+      }
+ else {
+        simpUser.addSession(sessionId);
+      }
+      this.sessions.put(sessionId,(DefaultSimpSession)simpUser.getSession(sessionId));
+    }
+  }
+ else   if (event instanceof SessionDisconnectEvent) {
+synchronized (this) {
+      DefaultSimpSession session=this.sessions.remove(sessionId);
+      if (session != null) {
+        DefaultSimpUser user=session.getUser();
+        user.removeSession(sessionId);
+        if (!user.hasSessions()) {
+          this.users.remove(user.getName());
+        }
+      }
+    }
+  }
+ else   if (event instanceof SessionUnsubscribeEvent) {
+    DefaultSimpSession session=this.sessions.get(sessionId);
+    if (session != null) {
+      String subscriptionId=accessor.getSubscriptionId();
+      session.removeSubscription(subscriptionId);
+    }
+  }
+}

@@ -24,7 +24,8 @@
   assertEquals(Arrays.asList("v10.stomp","v11.stomp","v12.stomp"),subProtocolWsHandler.getSubProtocols());
   assertEquals(25 * 1000,subProtocolWsHandler.getSendTimeLimit());
   assertEquals(1024 * 1024,subProtocolWsHandler.getSendBufferSizeLimit());
-  StompSubProtocolHandler stompHandler=(StompSubProtocolHandler)subProtocolWsHandler.getProtocolHandlerMap().get("v12.stomp");
+  Map<String,SubProtocolHandler> handlerMap=subProtocolWsHandler.getProtocolHandlerMap();
+  StompSubProtocolHandler stompHandler=(StompSubProtocolHandler)handlerMap.get("v12.stomp");
   assertNotNull(stompHandler);
   assertEquals(128 * 1024,stompHandler.getMessageSizeLimit());
   assertNotNull(new DirectFieldAccessor(stompHandler).getPropertyValue("eventPublisher"));
@@ -48,14 +49,14 @@
   interceptors=defaultSockJsService.getHandshakeInterceptors();
   assertThat(interceptors,contains(instanceOf(FooTestInterceptor.class),instanceOf(BarTestInterceptor.class),instanceOf(OriginHandshakeInterceptor.class)));
   assertEquals(Arrays.asList("http://mydomain3.com","http://mydomain4.com"),defaultSockJsService.getAllowedOrigins());
-  UserSessionRegistry userSessionRegistry=this.appContext.getBean(UserSessionRegistry.class);
-  assertNotNull(userSessionRegistry);
+  SimpUserRegistry userRegistry=this.appContext.getBean(SimpUserRegistry.class);
+  assertNotNull(userRegistry);
+  assertEquals(DefaultSimpUserRegistry.class,userRegistry.getClass());
   UserDestinationResolver userDestResolver=this.appContext.getBean(UserDestinationResolver.class);
   assertNotNull(userDestResolver);
   assertThat(userDestResolver,Matchers.instanceOf(DefaultUserDestinationResolver.class));
   DefaultUserDestinationResolver defaultUserDestResolver=(DefaultUserDestinationResolver)userDestResolver;
   assertEquals("/personal/",defaultUserDestResolver.getDestinationPrefix());
-  assertSame(stompHandler.getUserSessionRegistry(),defaultUserDestResolver.getUserSessionRegistry());
   UserDestinationMessageHandler userDestHandler=this.appContext.getBean(UserDestinationMessageHandler.class);
   assertNotNull(userDestHandler);
   SimpleBrokerMessageHandler brokerMessageHandler=this.appContext.getBean(SimpleBrokerMessageHandler.class);
@@ -67,7 +68,7 @@
   List<Class<? extends MessageHandler>> subscriberTypes=Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,UserDestinationMessageHandler.class,SimpleBrokerMessageHandler.class);
   testChannel("clientInboundChannel",subscriberTypes,2);
   testExecutor("clientInboundChannel",Runtime.getRuntime().availableProcessors() * 2,Integer.MAX_VALUE,60);
-  subscriberTypes=Arrays.<Class<? extends MessageHandler>>asList(SubProtocolWebSocketHandler.class);
+  subscriberTypes=Collections.singletonList(SubProtocolWebSocketHandler.class);
   testChannel("clientOutboundChannel",subscriberTypes,1);
   testExecutor("clientOutboundChannel",Runtime.getRuntime().availableProcessors() * 2,Integer.MAX_VALUE,60);
   subscriberTypes=Arrays.<Class<? extends MessageHandler>>asList(SimpleBrokerMessageHandler.class,UserDestinationMessageHandler.class);

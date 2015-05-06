@@ -2,28 +2,22 @@
   Object source=context.extractSource(element);
   CompositeComponentDefinition compDefinition=new CompositeComponentDefinition(element.getTagName(),source);
   context.pushContainingComponent(compDefinition);
-  RootBeanDefinition handlerMappingDef=new RootBeanDefinition(SimpleUrlHandlerMapping.class);
-  String orderAttribute=element.getAttribute("order");
-  int order=orderAttribute.isEmpty() ? DEFAULT_MAPPING_ORDER : Integer.valueOf(orderAttribute);
-  handlerMappingDef.getPropertyValues().add("order",order);
-  String pathHelper=element.getAttribute("path-helper");
-  if (StringUtils.hasText(pathHelper)) {
-    handlerMappingDef.getPropertyValues().add("urlPathHelper",new RuntimeBeanReference(pathHelper));
-  }
-  ManagedMap<String,Object> urlMap=new ManagedMap<String,Object>();
-  urlMap.setSource(source);
-  handlerMappingDef.getPropertyValues().add("urlMap",urlMap);
-  registerBeanDef(handlerMappingDef,context,source);
   Element channelElem=DomUtils.getChildElementByTagName(element,"client-inbound-channel");
   RuntimeBeanReference inChannel=getMessageChannel("clientInboundChannel",channelElem,context,source);
   channelElem=DomUtils.getChildElementByTagName(element,"client-outbound-channel");
   RuntimeBeanReference outChannel=getMessageChannel("clientOutboundChannel",channelElem,context,source);
-  RootBeanDefinition registryBeanDef=new RootBeanDefinition(DefaultUserSessionRegistry.class);
-  String registryBeanName=registerBeanDef(registryBeanDef,context,source);
-  RuntimeBeanReference sessionRegistry=new RuntimeBeanReference(registryBeanName);
-  RuntimeBeanReference subProtoHandler=registerSubProtoHandler(element,inChannel,outChannel,sessionRegistry,context,source);
+  channelElem=DomUtils.getChildElementByTagName(element,"broker-channel");
+  RuntimeBeanReference brokerChannel=getMessageChannel("brokerChannel",channelElem,context,source);
+  RuntimeBeanReference userRegistry=registerUserRegistry(element,context,source);
+  Object userDestHandler=registerUserDestHandler(element,userRegistry,inChannel,brokerChannel,context,source);
+  RuntimeBeanReference converter=registerMessageConverter(element,context,source);
+  RuntimeBeanReference template=registerMessagingTemplate(element,brokerChannel,converter,context,source);
+  registerAnnotationMethodMessageHandler(element,inChannel,outChannel,converter,template,context,source);
+  RootBeanDefinition broker=registerMessageBroker(element,inChannel,outChannel,brokerChannel,userDestHandler,template,userRegistry,context,source);
+  ManagedMap<String,Object> urlMap=registerHandlerMapping(element,context,source);
+  RuntimeBeanReference stompHandler=registerStompHandler(element,inChannel,outChannel,context,source);
   for (  Element endpointElem : DomUtils.getChildElementsByTagName(element,"stomp-endpoint")) {
-    RuntimeBeanReference requestHandler=registerRequestHandler(endpointElem,subProtoHandler,context,source);
+    RuntimeBeanReference requestHandler=registerRequestHandler(endpointElem,stompHandler,context,source);
     String pathAttribute=endpointElem.getAttribute("path");
     Assert.state(StringUtils.hasText(pathAttribute),"Invalid <stomp-endpoint> (no path mapping)");
     List<String> paths=Arrays.asList(StringUtils.tokenizeToStringArray(pathAttribute,","));
@@ -36,14 +30,6 @@
       urlMap.put(path,requestHandler);
     }
   }
-  channelElem=DomUtils.getChildElementByTagName(element,"broker-channel");
-  RuntimeBeanReference brokerChannel=getMessageChannel("brokerChannel",channelElem,context,source);
-  RuntimeBeanReference resolver=registerUserDestResolver(element,sessionRegistry,context,source);
-  RuntimeBeanReference userDestHandler=registerUserDestHandler(element,inChannel,brokerChannel,resolver,context,source);
-  RootBeanDefinition broker=registerMessageBroker(element,userDestHandler,inChannel,outChannel,brokerChannel,context,source);
-  RuntimeBeanReference converter=registerMessageConverter(element,context,source);
-  RuntimeBeanReference template=registerMessagingTemplate(element,brokerChannel,converter,context,source);
-  registerAnnotationMethodMessageHandler(element,inChannel,outChannel,converter,template,context,source);
   Map<String,Object> scopeMap=Collections.<String,Object>singletonMap("websocket",new SimpSessionScope());
   RootBeanDefinition scopeConfigurer=new RootBeanDefinition(CustomScopeConfigurer.class);
   scopeConfigurer.getPropertyValues().add("scopes",scopeMap);

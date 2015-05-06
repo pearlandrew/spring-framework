@@ -3,11 +3,15 @@
   if (handler == null) {
     return new NoOpBrokerMessageHandler();
   }
+  Map<String,MessageHandler> subscriptions=new HashMap<String,MessageHandler>(1);
   String destination=getBrokerRegistry().getUserDestinationBroadcast();
   if (destination != null) {
-    Map<String,MessageHandler> map=new HashMap<String,MessageHandler>(1);
-    map.put(destination,userDestinationMessageHandler());
-    handler.setSystemSubscriptions(map);
+    subscriptions.put(destination,userDestinationMessageHandler());
   }
+  destination=getBrokerRegistry().getUserRegistryBroadcast();
+  if (destination != null) {
+    subscriptions.put(destination,userRegistryMessageHandler());
+  }
+  handler.setSystemSubscriptions(subscriptions);
   return handler;
 }
