@@ -1,0 +1,60 @@
+{
+  Object script;
+  try {
+    if (this.scriptEngine == null) {
+      this.scriptEngine=retrieveScriptEngine(scriptSource);
+      if (this.scriptEngine == null) {
+        throw new IllegalStateException("Could not determine script engine for " + scriptSource);
+      }
+    }
+    script=this.scriptEngine.eval(scriptSource.getScriptAsString());
+  }
+ catch (  Exception ex) {
+    throw new ScriptCompilationException(scriptSource,ex);
+  }
+  if (!ObjectUtils.isEmpty(actualInterfaces)) {
+    boolean adaptationRequired=false;
+    for (    Class<?> requestedIfc : actualInterfaces) {
+      if (!requestedIfc.isInstance(script)) {
+        adaptationRequired=true;
+      }
+    }
+    if (adaptationRequired) {
+      Class<?> adaptedIfc;
+      if (actualInterfaces.length == 1) {
+        adaptedIfc=actualInterfaces[0];
+      }
+ else {
+        adaptedIfc=ClassUtils.createCompositeInterface(actualInterfaces,this.beanClassLoader);
+      }
+      if (adaptedIfc != null) {
+        if (!(this.scriptEngine instanceof Invocable)) {
+          throw new ScriptCompilationException(scriptSource,"ScriptEngine must implement Invocable in order to adapt it to an interface: " + this.scriptEngine);
+        }
+        Invocable invocable=(Invocable)this.scriptEngine;
+        if (script != null) {
+          script=invocable.getInterface(script,adaptedIfc);
+        }
+        if (script == null) {
+          script=invocable.getInterface(adaptedIfc);
+          if (script == null) {
+            throw new ScriptCompilationException(scriptSource,"Could not adapt script to interface [" + adaptedIfc.getName() + "]");
+          }
+        }
+      }
+    }
+  }
+  if (script instanceof Class) {
+    Class<?> scriptClass=(Class<?>)script;
+    try {
+      return scriptClass.newInstance();
+    }
+ catch (    InstantiationException ex) {
+      throw new ScriptCompilationException(scriptSource,"Could not instantiate script class: " + scriptClass.getName(),ex);
+    }
+catch (    IllegalAccessException ex) {
+      throw new ScriptCompilationException(scriptSource,"Could not access script constructor: " + scriptClass.getName(),ex);
+    }
+  }
+  return script;
+}

@@ -1,4 +1,5 @@
 {
+  String engine=element.getAttribute(ENGINE_ATTRIBUTE);
   String value=resolveScriptSource(element,parserContext.getReaderContext());
   if (value == null) {
     return null;
@@ -53,9 +54,12 @@
   }
   ConstructorArgumentValues cav=bd.getConstructorArgumentValues();
   int constructorArgNum=0;
+  if (StringUtils.hasLength(engine)) {
+    cav.addIndexedArgumentValue(constructorArgNum++,engine);
+  }
   cav.addIndexedArgumentValue(constructorArgNum++,value);
   if (element.hasAttribute(SCRIPT_INTERFACES_ATTRIBUTE)) {
-    cav.addIndexedArgumentValue(constructorArgNum++,element.getAttribute(SCRIPT_INTERFACES_ATTRIBUTE));
+    cav.addIndexedArgumentValue(constructorArgNum++,element.getAttribute(SCRIPT_INTERFACES_ATTRIBUTE),"java.lang.Class[]");
   }
   if (element.hasAttribute(CUSTOMIZER_REF_ATTRIBUTE)) {
     String customizerBeanName=element.getAttribute(CUSTOMIZER_REF_ATTRIBUTE);
