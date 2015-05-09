@@ -8,7 +8,7 @@
   if (!StringUtils.hasText(pattern2)) {
     return pattern1;
   }
-  boolean pattern1ContainsUriVar=pattern1.indexOf('{') != -1;
+  boolean pattern1ContainsUriVar=(pattern1.indexOf('{') != -1);
   if (!pattern1.equals(pattern2) && !pattern1ContainsUriVar && match(pattern1,pattern2)) {
     return pattern2;
   }
@@ -22,10 +22,15 @@
   if (pattern1ContainsUriVar || starDotPos1 == -1 || this.pathSeparator.equals(".")) {
     return concat(pattern1,pattern2);
   }
-  String extension1=pattern1.substring(starDotPos1 + 1);
+  String ext1=pattern1.substring(starDotPos1 + 1);
   int dotPos2=pattern2.indexOf('.');
-  String fileName2=(dotPos2 == -1 ? pattern2 : pattern2.substring(0,dotPos2));
-  String extension2=(dotPos2 == -1 ? "" : pattern2.substring(dotPos2));
-  String extension=extension1.startsWith("*") ? extension2 : extension1;
-  return fileName2 + extension;
+  String file2=(dotPos2 == -1 ? pattern2 : pattern2.substring(0,dotPos2));
+  String ext2=(dotPos2 == -1 ? "" : pattern2.substring(dotPos2));
+  boolean ext1All=(ext1.equals(".*") || ext1.equals(""));
+  boolean ext2All=(ext2.equals(".*") || ext2.equals(""));
+  if (!ext1All && !ext2All) {
+    throw new IllegalArgumentException("Cannot combine patterns: " + pattern1 + " vs "+ pattern2);
+  }
+  String ext=(ext1All ? ext2 : ext1);
+  return file2 + ext;
 }
