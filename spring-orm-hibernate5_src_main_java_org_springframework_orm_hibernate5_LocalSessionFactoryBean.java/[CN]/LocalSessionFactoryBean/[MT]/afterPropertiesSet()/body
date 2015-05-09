@@ -1,0 +1,70 @@
+{
+  LocalSessionFactoryBuilder sfb=new LocalSessionFactoryBuilder(this.dataSource,this.resourcePatternResolver);
+  if (this.configLocations != null) {
+    for (    Resource resource : this.configLocations) {
+      sfb.configure(resource.getURL());
+    }
+  }
+  if (this.mappingResources != null) {
+    for (    String mapping : this.mappingResources) {
+      Resource mr=new ClassPathResource(mapping.trim(),this.resourcePatternResolver.getClassLoader());
+      sfb.addInputStream(mr.getInputStream());
+    }
+  }
+  if (this.mappingLocations != null) {
+    for (    Resource resource : this.mappingLocations) {
+      sfb.addInputStream(resource.getInputStream());
+    }
+  }
+  if (this.cacheableMappingLocations != null) {
+    for (    Resource resource : this.cacheableMappingLocations) {
+      sfb.addCacheableFile(resource.getFile());
+    }
+  }
+  if (this.mappingJarLocations != null) {
+    for (    Resource resource : this.mappingJarLocations) {
+      sfb.addJar(resource.getFile());
+    }
+  }
+  if (this.mappingDirectoryLocations != null) {
+    for (    Resource resource : this.mappingDirectoryLocations) {
+      File file=resource.getFile();
+      if (!file.isDirectory()) {
+        throw new IllegalArgumentException("Mapping directory location [" + resource + "] does not denote a directory");
+      }
+      sfb.addDirectory(file);
+    }
+  }
+  if (this.entityInterceptor != null) {
+    sfb.setInterceptor(this.entityInterceptor);
+  }
+  if (this.implicitNamingStrategy != null) {
+    sfb.setImplicitNamingStrategy(this.implicitNamingStrategy);
+  }
+  if (this.physicalNamingStrategy != null) {
+    sfb.setPhysicalNamingStrategy(this.physicalNamingStrategy);
+  }
+  if (this.jtaTransactionManager != null) {
+    sfb.setJtaTransactionManager(this.jtaTransactionManager);
+  }
+  if (this.currentTenantIdentifierResolver != null) {
+    sfb.setCurrentTenantIdentifierResolver(this.currentTenantIdentifierResolver);
+  }
+  if (this.entityTypeFilters != null) {
+    sfb.setEntityTypeFilters(this.entityTypeFilters);
+  }
+  if (this.hibernateProperties != null) {
+    sfb.addProperties(this.hibernateProperties);
+  }
+  if (this.annotatedClasses != null) {
+    sfb.addAnnotatedClasses(this.annotatedClasses);
+  }
+  if (this.annotatedPackages != null) {
+    sfb.addPackages(this.annotatedPackages);
+  }
+  if (this.packagesToScan != null) {
+    sfb.scanPackages(this.packagesToScan);
+  }
+  this.configuration=sfb;
+  this.sessionFactory=buildSessionFactory(sfb);
+}

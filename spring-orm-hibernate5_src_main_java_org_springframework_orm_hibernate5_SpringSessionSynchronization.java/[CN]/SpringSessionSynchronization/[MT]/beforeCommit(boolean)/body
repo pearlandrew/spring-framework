@@ -1,0 +1,14 @@
+{
+  if (!readOnly) {
+    Session session=getCurrentSession();
+    if (!session.getFlushMode().equals(FlushMode.MANUAL)) {
+      try {
+        SessionFactoryUtils.logger.debug("Flushing Hibernate Session on transaction synchronization");
+        session.flush();
+      }
+ catch (      HibernateException ex) {
+        throw SessionFactoryUtils.convertHibernateAccessException(ex);
+      }
+    }
+  }
+}

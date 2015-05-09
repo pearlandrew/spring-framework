@@ -1,0 +1,17 @@
+{
+  SessionFactory sf=getSessionFactory();
+  if (!TransactionSynchronizationManager.hasResource(sf)) {
+    Session session=openSession();
+    try {
+      TransactionSynchronizationManager.bindResource(sf,new SessionHolder(session));
+      return invocation.proceed();
+    }
+  finally {
+      SessionFactoryUtils.closeSession(session);
+      TransactionSynchronizationManager.unbindResource(sf);
+    }
+  }
+ else {
+    return invocation.proceed();
+  }
+}

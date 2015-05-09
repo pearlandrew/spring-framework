@@ -1,0 +1,23 @@
+{
+  Assert.notNull(jtaTransactionManager,"Transaction manager reference must not be null");
+  if (jtaTransactionManager instanceof JtaTransactionManager) {
+    boolean webspherePresent=ClassUtils.isPresent("com.ibm.wsspi.uow.UOWManager",getClass().getClassLoader());
+    if (webspherePresent) {
+      getProperties().put(AvailableSettings.JTA_PLATFORM,"org.hibernate.engine.transaction.jta.platform.internal.WebSphereExtendedJtaPlatform");
+    }
+ else {
+      JtaTransactionManager jtaTm=(JtaTransactionManager)jtaTransactionManager;
+      if (jtaTm.getTransactionManager() == null) {
+        throw new IllegalArgumentException("Can only apply JtaTransactionManager which has a TransactionManager reference set");
+      }
+      getProperties().put(AvailableSettings.JTA_PLATFORM,new ConfigurableJtaPlatform(jtaTm.getTransactionManager(),jtaTm.getUserTransaction(),jtaTm.getTransactionSynchronizationRegistry()));
+    }
+  }
+ else   if (jtaTransactionManager instanceof TransactionManager) {
+    getProperties().put(AvailableSettings.JTA_PLATFORM,new ConfigurableJtaPlatform((TransactionManager)jtaTransactionManager,null,null));
+  }
+ else {
+    throw new IllegalArgumentException("Unknown transaction manager type: " + jtaTransactionManager.getClass().getName());
+  }
+  return this;
+}
