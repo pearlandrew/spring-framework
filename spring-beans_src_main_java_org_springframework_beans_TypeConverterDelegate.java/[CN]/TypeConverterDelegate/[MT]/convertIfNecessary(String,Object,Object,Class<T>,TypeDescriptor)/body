@@ -33,7 +33,7 @@
       if (Object.class.equals(requiredType)) {
         return (T)convertedValue;
       }
-      if (requiredType.isArray()) {
+ else       if (requiredType.isArray()) {
         if (convertedValue instanceof String && Enum.class.isAssignableFrom(requiredType.getComponentType())) {
           convertedValue=StringUtils.commaDelimitedListToStringArray((String)convertedValue);
         }
@@ -76,6 +76,10 @@ catch (          Exception ex) {
           return null;
         }
         convertedValue=attemptToConvertStringToEnum(requiredType,trimmedValue,convertedValue);
+        standardConversion=true;
+      }
+ else       if (convertedValue instanceof Number && Number.class.isAssignableFrom(requiredType)) {
+        convertedValue=NumberUtils.convertNumberToTargetClass((Number)convertedValue,(Class<Number>)requiredType);
         standardConversion=true;
       }
     }

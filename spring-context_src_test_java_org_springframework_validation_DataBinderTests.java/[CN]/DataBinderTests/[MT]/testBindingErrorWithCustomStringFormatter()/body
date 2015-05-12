@@ -1,9 +1,7 @@
 {
   TestBean tb=new TestBean();
   DataBinder binder=new DataBinder(tb);
-  FormattingConversionService conversionService=new FormattingConversionService();
-  DefaultConversionService.addDefaultConverters(conversionService);
-  conversionService.addFormatter(new Formatter<String>(){
+  binder.addCustomFormatter(new Formatter<String>(){
     @Override public String parse(    String text,    Locale locale) throws ParseException {
       throw new ParseException(text,0);
     }
@@ -12,7 +10,6 @@
     }
   }
 );
-  binder.setConversionService(conversionService);
   MutablePropertyValues pvs=new MutablePropertyValues();
   pvs.add("name","test");
   binder.bind(pvs);
