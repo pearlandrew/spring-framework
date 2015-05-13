@@ -3,23 +3,20 @@
   Assert.hasText(annotationType,"annotationType must not be null or empty");
   if (visited.add(element)) {
     try {
-      Annotation[] annotations=element.getAnnotations();
-      for (      Annotation annotation : annotations) {
-        if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0)) {
-          T result=processor.process(annotation,metaDepth);
-          if (result != null) {
-            return result;
-          }
+      List<Annotation> declaredAnnotations=Arrays.asList(element.getDeclaredAnnotations());
+      T result=searchWithGetSemanticsInAnnotations(declaredAnnotations,annotationType,processor,visited,metaDepth);
+      if (result != null) {
+        return result;
+      }
+      List<Annotation> inheritedAnnotations=new ArrayList<Annotation>();
+      for (      Annotation annotation : element.getAnnotations()) {
+        if (!declaredAnnotations.contains(annotation)) {
+          inheritedAnnotations.add(annotation);
         }
       }
-      for (      Annotation annotation : annotations) {
-        if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-          T result=searchWithGetSemantics(annotation.annotationType(),annotationType,processor,visited,metaDepth + 1);
-          if (result != null) {
-            processor.postProcess(annotation,result);
-            return result;
-          }
-        }
+      result=searchWithGetSemanticsInAnnotations(inheritedAnnotations,annotationType,processor,visited,metaDepth);
+      if (result != null) {
+        return result;
       }
     }
  catch (    Exception ex) {
