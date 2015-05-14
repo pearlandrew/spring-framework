@@ -1,0 +1,20 @@
+{
+  for (  Annotation annotation : annotations) {
+    if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0)) {
+      T result=processor.process(annotatedElement,annotation,metaDepth);
+      if (result != null) {
+        return result;
+      }
+    }
+  }
+  for (  Annotation annotation : annotations) {
+    if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
+      T result=searchWithGetSemantics(annotation.annotationType(),annotationType,processor,visited,metaDepth + 1);
+      if (result != null) {
+        processor.postProcess(annotatedElement,annotation,result);
+        return result;
+      }
+    }
+  }
+  return null;
+}

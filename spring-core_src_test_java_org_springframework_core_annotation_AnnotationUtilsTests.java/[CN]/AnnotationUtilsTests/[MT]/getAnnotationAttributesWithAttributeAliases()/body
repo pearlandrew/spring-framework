@@ -1,0 +1,25 @@
+{
+  Method method=WebController.class.getMethod("handleMappedWithValueAttribute");
+  WebMapping webMapping=method.getAnnotation(WebMapping.class);
+  AnnotationAttributes attributes=(AnnotationAttributes)getAnnotationAttributes(webMapping);
+  assertNotNull(attributes);
+  assertEquals(WebMapping.class,attributes.annotationType());
+  assertEquals("name attribute: ","foo",attributes.getString("name"));
+  assertEquals("value attribute: ","/test",attributes.getString(VALUE));
+  assertEquals("path attribute: ","/test",attributes.getString("path"));
+  method=WebController.class.getMethod("handleMappedWithPathAttribute");
+  webMapping=method.getAnnotation(WebMapping.class);
+  attributes=(AnnotationAttributes)getAnnotationAttributes(webMapping);
+  assertNotNull(attributes);
+  assertEquals(WebMapping.class,attributes.annotationType());
+  assertEquals("name attribute: ","bar",attributes.getString("name"));
+  assertEquals("value attribute: ","/test",attributes.getString(VALUE));
+  assertEquals("path attribute: ","/test",attributes.getString("path"));
+  method=WebController.class.getMethod("handleMappedWithPathValueAndAttributes");
+  webMapping=method.getAnnotation(WebMapping.class);
+  exception.expect(AnnotationConfigurationException.class);
+  exception.expectMessage(containsString("attribute [value] and its alias [path]"));
+  exception.expectMessage(containsString("values of [/enigma] and [/test]"));
+  exception.expectMessage(containsString("but only one declaration is permitted"));
+  getAnnotationAttributes(webMapping);
+}

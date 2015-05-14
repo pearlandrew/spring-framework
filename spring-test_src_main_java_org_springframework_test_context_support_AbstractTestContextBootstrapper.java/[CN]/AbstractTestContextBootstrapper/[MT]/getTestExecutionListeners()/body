@@ -18,14 +18,7 @@
       if (logger.isTraceEnabled()) {
         logger.trace(String.format("Retrieved @TestExecutionListeners attributes [%s] for declaring class [%s].",annAttrs,declaringClass.getName()));
       }
-      Class<? extends TestExecutionListener>[] valueListenerClasses=(Class<? extends TestExecutionListener>[])annAttrs.getClassArray("value");
       Class<? extends TestExecutionListener>[] listenerClasses=(Class<? extends TestExecutionListener>[])annAttrs.getClassArray("listeners");
-      if (!ObjectUtils.isEmpty(valueListenerClasses) && !ObjectUtils.isEmpty(listenerClasses)) {
-        throw new IllegalStateException(String.format("Class [%s] configured with @TestExecutionListeners' " + "'value' [%s] and 'listeners' [%s] attributes. Use one or the other, but not both.",declaringClass.getName(),ObjectUtils.nullSafeToString(valueListenerClasses),ObjectUtils.nullSafeToString(listenerClasses)));
-      }
- else       if (!ObjectUtils.isEmpty(valueListenerClasses)) {
-        listenerClasses=valueListenerClasses;
-      }
       boolean inheritListeners=annAttrs.getBoolean("inheritListeners");
       AnnotationDescriptor<TestExecutionListeners> superDescriptor=MetaAnnotationUtils.findAnnotationDescriptor(descriptor.getRootDeclaringClass().getSuperclass(),annotationType);
       if ((!inheritListeners || superDescriptor == null) && (annAttrs.getEnum("mergeMode") == MergeMode.MERGE_WITH_DEFAULTS)) {

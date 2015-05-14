@@ -1,0 +1,34 @@
+{
+  if (attributes == null) {
+    return;
+  }
+  Class<? extends Annotation> annotationType=attributes.annotationType();
+  Map<String,String> aliasMap=getAliasMap(annotationType);
+  if (aliasMap != null) {
+    Set<String> validated=new HashSet<String>();
+    for (    String attributeName : aliasMap.keySet()) {
+      String aliasedAttributeName=aliasMap.get(attributeName);
+      if (validated.add(attributeName) && validated.add(aliasedAttributeName)) {
+        Object value=attributes.get(attributeName);
+        Object aliasedValue=attributes.get(aliasedAttributeName);
+        if (!ObjectUtils.nullSafeEquals(value,aliasedValue) && !DEFAULT_VALUE_PLACEHOLDER.equals(value) && !DEFAULT_VALUE_PLACEHOLDER.equals(aliasedValue)) {
+          String elementAsString=(element == null ? "unknown element" : element.toString());
+          String msg=String.format("In AnnotationAttributes for annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are " + "declared with values of [%s] and [%s], but only one declaration is permitted.",annotationType.getName(),elementAsString,attributeName,aliasedAttributeName,ObjectUtils.nullSafeToString(value),ObjectUtils.nullSafeToString(aliasedValue));
+          throw new AnnotationConfigurationException(msg);
+        }
+        if (DEFAULT_VALUE_PLACEHOLDER.equals(value)) {
+          attributes.put(attributeName,adaptValue(element,aliasedValue,classValuesAsString,nestedAnnotationsAsMap));
+        }
+        if (DEFAULT_VALUE_PLACEHOLDER.equals(aliasedValue)) {
+          attributes.put(aliasedAttributeName,adaptValue(element,value,classValuesAsString,nestedAnnotationsAsMap));
+        }
+      }
+    }
+  }
+  for (  String attributeName : attributes.keySet()) {
+    Object value=attributes.get(attributeName);
+    if (DEFAULT_VALUE_PLACEHOLDER.equals(value)) {
+      attributes.put(attributeName,adaptValue(element,getDefaultValue(annotationType,attributeName),classValuesAsString,nestedAnnotationsAsMap));
+    }
+  }
+}

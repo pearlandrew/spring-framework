@@ -1,0 +1,42 @@
+{
+  if (classValuesAsString) {
+    if (value instanceof Class) {
+      return ((Class<?>)value).getName();
+    }
+ else     if (value instanceof Class[]) {
+      Class<?>[] clazzArray=(Class<?>[])value;
+      String[] classNames=new String[clazzArray.length];
+      for (int i=0; i < clazzArray.length; i++) {
+        classNames[i]=clazzArray[i].getName();
+      }
+      return classNames;
+    }
+  }
+  if (value instanceof Annotation) {
+    Annotation annotation=(Annotation)value;
+    if (nestedAnnotationsAsMap) {
+      return getAnnotationAttributes(annotatedElement,annotation,classValuesAsString,nestedAnnotationsAsMap);
+    }
+ else {
+      return synthesizeAnnotation(annotatedElement,annotation);
+    }
+  }
+  if (value instanceof Annotation[]) {
+    Annotation[] annotations=(Annotation[])value;
+    if (nestedAnnotationsAsMap) {
+      AnnotationAttributes[] mappedAnnotations=new AnnotationAttributes[annotations.length];
+      for (int i=0; i < annotations.length; i++) {
+        mappedAnnotations[i]=getAnnotationAttributes(annotatedElement,annotations[i],classValuesAsString,nestedAnnotationsAsMap);
+      }
+      return mappedAnnotations;
+    }
+ else {
+      Annotation[] synthesizedAnnotations=new Annotation[annotations.length];
+      for (int i=0; i < annotations.length; i++) {
+        synthesizedAnnotations[i]=synthesizeAnnotation(annotatedElement,annotations[i]);
+      }
+      return synthesizedAnnotations;
+    }
+  }
+  return value;
+}

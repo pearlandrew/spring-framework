@@ -6,7 +6,7 @@
     Annotation annotation=getAnnotation(element,annotationType);
     if (annotation != null) {
       searchWithGetSemantics(annotation.annotationType(),annotationType,new SimpleAnnotationProcessor<Object>(){
-        @Override public Object process(        Annotation annotation,        int metaDepth){
+        @Override public Object process(        AnnotatedElement annotatedElement,        Annotation annotation,        int metaDepth){
           types.add(annotation.annotationType().getName());
           return CONTINUE;
         }
@@ -15,6 +15,7 @@
     }
   }
  catch (  Throwable ex) {
+    AnnotationUtils.rethrowAnnotationConfigurationException(ex);
     throw new IllegalStateException("Failed to introspect annotations on " + element,ex);
   }
   return (types.isEmpty() ? null : types);
