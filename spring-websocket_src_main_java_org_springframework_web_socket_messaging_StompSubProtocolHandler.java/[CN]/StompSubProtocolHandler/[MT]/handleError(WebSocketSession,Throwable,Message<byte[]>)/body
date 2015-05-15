@@ -1,0 +1,13 @@
+{
+  if (getErrorHandler() == null) {
+    sendErrorMessage(session,ex);
+    return;
+  }
+  Message<byte[]> message=getErrorHandler().handleClientMessageProcessingError(clientMessage,ex);
+  if (message == null) {
+    return;
+  }
+  StompHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
+  Assert.notNull(accessor,"Expected STOMP headers.");
+  sendToClient(session,accessor,message.getPayload());
+}

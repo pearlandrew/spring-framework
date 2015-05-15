@@ -31,31 +31,12 @@
       }
     }
   }
-  try {
-    byte[] payload=(byte[])message.getPayload();
-    byte[] bytes=this.stompEncoder.encode(stompAccessor.getMessageHeaders(),payload);
-    boolean useBinary=(payload.length > 0 && !(session instanceof SockJsSession) && MimeTypeUtils.APPLICATION_OCTET_STREAM.isCompatibleWith(stompAccessor.getContentType()));
-    if (useBinary) {
-      session.sendMessage(new BinaryMessage(bytes));
-    }
- else {
-      session.sendMessage(new TextMessage(bytes));
-    }
+  byte[] payload=(byte[])message.getPayload();
+  if (StompCommand.ERROR.equals(command) && getErrorHandler() != null) {
+    Message<byte[]> errorMessage=getErrorHandler().handleErrorMessageToClient((Message<byte[]>)message);
+    stompAccessor=MessageHeaderAccessor.getAccessor(errorMessage,StompHeaderAccessor.class);
+    Assert.notNull(stompAccessor,"Expected STOMP headers.");
+    payload=errorMessage.getPayload();
   }
- catch (  SessionLimitExceededException ex) {
-    throw ex;
-  }
-catch (  Throwable ex) {
-    logger.debug("Failed to send WebSocket message to client in session " + session.getId() + ".",ex);
-    command=StompCommand.ERROR;
-  }
- finally {
-    if (StompCommand.ERROR.equals(command)) {
-      try {
-        session.close(CloseStatus.PROTOCOL_ERROR);
-      }
- catch (      IOException ex) {
-      }
-    }
-  }
+  sendToClient(session,stompAccessor,payload);
 }
