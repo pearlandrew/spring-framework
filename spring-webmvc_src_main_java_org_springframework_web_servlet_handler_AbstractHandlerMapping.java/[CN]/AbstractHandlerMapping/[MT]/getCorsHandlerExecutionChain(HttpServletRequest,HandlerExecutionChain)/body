@@ -1,0 +1,21 @@
+{
+  CorsConfiguration globalConfig=null;
+  String lookupPath=this.urlPathHelper.getLookupPathForRequest(request);
+  for (  Map.Entry<String,CorsConfiguration> entry : this.corsConfigurations.entrySet()) {
+    if (this.pathMatcher.match(entry.getKey(),lookupPath)) {
+      globalConfig=entry.getValue();
+    }
+  }
+  CorsConfiguration config=getCorsConfiguration(chain.getHandler(),request);
+  config=(globalConfig == null ? config : globalConfig.combine(config));
+  if (config != null) {
+    if (CorsUtils.isPreFlightRequest(request)) {
+      HandlerInterceptor[] interceptors=chain.getInterceptors();
+      chain=new HandlerExecutionChain(new PreFlightHandler(config),interceptors);
+    }
+ else {
+      chain.addInterceptor(new CorsInterceptor(config));
+    }
+  }
+  return chain;
+}
