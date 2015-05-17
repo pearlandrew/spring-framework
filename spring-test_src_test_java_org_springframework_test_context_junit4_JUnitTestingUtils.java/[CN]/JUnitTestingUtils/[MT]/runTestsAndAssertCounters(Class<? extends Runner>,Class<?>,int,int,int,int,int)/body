@@ -1,0 +1,20 @@
+{
+  TrackingRunListener listener=new TrackingRunListener();
+  if (runnerClass != null) {
+    Constructor<?> constructor=runnerClass.getConstructor(Class.class);
+    Runner runner=(Runner)BeanUtils.instantiateClass(constructor,testClass);
+    RunNotifier notifier=new RunNotifier();
+    notifier.addListener(listener);
+    runner.run(notifier);
+  }
+ else {
+    JUnitCore junit=new JUnitCore();
+    junit.addListener(listener);
+    junit.run(testClass);
+  }
+  assertEquals("tests started for [" + testClass + "]:",expectedStartedCount,listener.getTestStartedCount());
+  assertEquals("tests failed for [" + testClass + "]:",expectedFailedCount,listener.getTestFailureCount());
+  assertEquals("tests finished for [" + testClass + "]:",expectedFinishedCount,listener.getTestFinishedCount());
+  assertEquals("tests ignored for [" + testClass + "]:",expectedIgnoredCount,listener.getTestIgnoredCount());
+  assertEquals("failed assumptions for [" + testClass + "]:",expectedAssumptionFailedCount,listener.getTestAssumptionFailureCount());
+}
