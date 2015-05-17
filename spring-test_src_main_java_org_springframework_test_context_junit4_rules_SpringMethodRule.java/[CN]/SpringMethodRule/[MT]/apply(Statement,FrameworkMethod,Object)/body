@@ -1,13 +1,16 @@
 {
+  Class<?> testClass=testInstance.getClass();
   if (logger.isDebugEnabled()) {
     logger.debug("Applying SpringMethodRule to test method [" + frameworkMethod.getMethod() + "].");
   }
+  validateSpringClassRuleConfiguration(testClass);
+  TestContextManager testContextManager=SpringClassRule.getTestContextManager(testClass);
   Statement statement=base;
-  statement=withBeforeTestMethodCallbacks(frameworkMethod,testInstance,statement);
-  statement=withAfterTestMethodCallbacks(frameworkMethod,testInstance,statement);
-  statement=withTestInstancePreparation(testInstance,statement);
-  statement=withPotentialRepeat(frameworkMethod,testInstance,statement);
-  statement=withPotentialTimeout(frameworkMethod,testInstance,statement);
-  statement=withProfileValueCheck(frameworkMethod,testInstance,statement);
+  statement=withBeforeTestMethodCallbacks(statement,frameworkMethod,testInstance,testContextManager);
+  statement=withAfterTestMethodCallbacks(statement,frameworkMethod,testInstance,testContextManager);
+  statement=withTestInstancePreparation(statement,testInstance,testContextManager);
+  statement=withPotentialRepeat(statement,frameworkMethod,testInstance);
+  statement=withPotentialTimeout(statement,frameworkMethod,testInstance);
+  statement=withProfileValueCheck(statement,frameworkMethod,testInstance);
   return statement;
 }

@@ -4,10 +4,11 @@
     logger.debug("Applying SpringClassRule to test class [" + testClass.getName() + "].");
   }
   validateSpringMethodRuleConfiguration(testClass);
-  this.testContextManager=createTestContextManager(testClass);
+  TestContextManager testContextManager=getTestContextManager(testClass);
   Statement statement=base;
-  statement=withBeforeTestClassCallbacks(statement);
-  statement=withAfterTestClassCallbacks(statement);
-  statement=withProfileValueCheck(testClass,statement);
+  statement=withBeforeTestClassCallbacks(statement,testContextManager);
+  statement=withAfterTestClassCallbacks(statement,testContextManager);
+  statement=withProfileValueCheck(statement,testClass);
+  statement=withTestContextManagerCacheEviction(statement,testClass);
   return statement;
 }
