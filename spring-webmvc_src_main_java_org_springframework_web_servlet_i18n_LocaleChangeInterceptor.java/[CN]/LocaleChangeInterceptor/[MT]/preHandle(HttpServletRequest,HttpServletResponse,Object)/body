@@ -1,11 +1,13 @@
 {
   String newLocale=request.getParameter(this.paramName);
   if (newLocale != null) {
-    LocaleResolver localeResolver=RequestContextUtils.getLocaleResolver(request);
-    if (localeResolver == null) {
-      throw new IllegalStateException("No LocaleResolver found: not in a DispatcherServlet request?");
+    if (checkHttpMethod(request.getMethod())) {
+      LocaleResolver localeResolver=RequestContextUtils.getLocaleResolver(request);
+      if (localeResolver == null) {
+        throw new IllegalStateException("No LocaleResolver found: not in a DispatcherServlet request?");
+      }
+      localeResolver.setLocale(request,response,StringUtils.parseLocaleString(newLocale));
     }
-    localeResolver.setLocale(request,response,StringUtils.parseLocaleString(newLocale));
   }
   return true;
 }
