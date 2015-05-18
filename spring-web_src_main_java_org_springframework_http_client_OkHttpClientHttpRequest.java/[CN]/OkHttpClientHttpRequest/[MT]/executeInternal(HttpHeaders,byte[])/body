@@ -1,6 +1,9 @@
 {
-  RequestBody body=bufferedOutput.length > 0 ? RequestBody.create(getContentType(headers),bufferedOutput) : null;
-  Request.Builder builder=new Request.Builder().url(this.uri.toURL()).method(this.method.name(),body);
+  MediaType contentType=getContentType(headers);
+  RequestBody body=(content.length > 0 ? RequestBody.create(contentType,content) : null);
+  URL url=this.uri.toURL();
+  String methodName=this.method.name();
+  Request.Builder builder=new Request.Builder().url(url).method(methodName,body);
   for (  Map.Entry<String,List<String>> entry : headers.entrySet()) {
     String headerName=entry.getKey();
     for (    String headerValue : entry.getValue()) {
@@ -8,5 +11,5 @@
     }
   }
   Request request=builder.build();
-  return new ListenableFutureCall(client.newCall(request));
+  return new OkHttpListenableFuture(this.client.newCall(request));
 }
