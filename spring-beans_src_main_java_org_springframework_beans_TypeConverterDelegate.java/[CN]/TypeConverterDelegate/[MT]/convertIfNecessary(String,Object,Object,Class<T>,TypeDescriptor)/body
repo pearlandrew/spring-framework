@@ -1,20 +1,19 @@
 {
-  Object convertedValue=newValue;
   PropertyEditor editor=this.propertyEditorRegistry.findCustomEditor(requiredType,propertyName);
-  ConversionFailedException firstAttemptEx=null;
+  ConversionFailedException conversionAttemptEx=null;
   ConversionService conversionService=this.propertyEditorRegistry.getConversionService();
-  if (editor == null && conversionService != null && convertedValue != null && typeDescriptor != null) {
+  if (editor == null && conversionService != null && newValue != null && typeDescriptor != null) {
     TypeDescriptor sourceTypeDesc=TypeDescriptor.forObject(newValue);
-    TypeDescriptor targetTypeDesc=typeDescriptor;
-    if (conversionService.canConvert(sourceTypeDesc,targetTypeDesc)) {
+    if (conversionService.canConvert(sourceTypeDesc,typeDescriptor)) {
       try {
-        return (T)conversionService.convert(convertedValue,sourceTypeDesc,targetTypeDesc);
+        return (T)conversionService.convert(newValue,sourceTypeDesc,typeDescriptor);
       }
  catch (      ConversionFailedException ex) {
-        firstAttemptEx=ex;
+        conversionAttemptEx=ex;
       }
     }
   }
+  Object convertedValue=newValue;
   if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType,convertedValue))) {
     if (requiredType != null && Collection.class.isAssignableFrom(requiredType) && convertedValue instanceof String) {
       TypeDescriptor elementType=typeDescriptor.getElementTypeDescriptor();
@@ -55,7 +54,7 @@
         return (T)convertedValue.toString();
       }
  else       if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
-        if (firstAttemptEx == null && !requiredType.isInterface() && !requiredType.isEnum()) {
+        if (conversionAttemptEx == null && !requiredType.isInterface() && !requiredType.isEnum()) {
           try {
             Constructor<T> strCtor=requiredType.getConstructor(String.class);
             return BeanUtils.instantiateClass(strCtor,convertedValue);
@@ -89,8 +88,14 @@ catch (          Exception ex) {
       }
     }
     if (!ClassUtils.isAssignableValue(requiredType,convertedValue)) {
-      if (firstAttemptEx != null) {
-        throw firstAttemptEx;
+      if (conversionAttemptEx != null) {
+        throw conversionAttemptEx;
+      }
+ else       if (conversionService != null) {
+        TypeDescriptor sourceTypeDesc=TypeDescriptor.forObject(newValue);
+        if (conversionService.canConvert(sourceTypeDesc,typeDescriptor)) {
+          return (T)conversionService.convert(newValue,sourceTypeDesc,typeDescriptor);
+        }
       }
       StringBuilder msg=new StringBuilder();
       msg.append("Cannot convert value of type [").append(ClassUtils.getDescriptiveType(newValue));
@@ -108,11 +113,11 @@ catch (          Exception ex) {
       }
     }
   }
-  if (firstAttemptEx != null) {
+  if (conversionAttemptEx != null) {
     if (editor == null && !standardConversion && requiredType != null && !Object.class.equals(requiredType)) {
-      throw firstAttemptEx;
+      throw conversionAttemptEx;
     }
-    logger.debug("Original ConversionService attempt failed - ignored since " + "PropertyEditor based conversion eventually succeeded",firstAttemptEx);
+    logger.debug("Original ConversionService attempt failed - ignored since " + "PropertyEditor based conversion eventually succeeded",conversionAttemptEx);
   }
   return (T)convertedValue;
 }
