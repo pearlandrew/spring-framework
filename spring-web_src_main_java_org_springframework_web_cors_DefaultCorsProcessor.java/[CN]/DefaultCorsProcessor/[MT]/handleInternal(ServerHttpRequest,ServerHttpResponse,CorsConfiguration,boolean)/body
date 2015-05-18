@@ -1,21 +1,21 @@
 {
   String requestOrigin=request.getHeaders().getOrigin();
   String allowOrigin=checkOrigin(config,requestOrigin);
-  HttpMethod requestMethod=getMethodToUse(request,isPreFlight);
+  HttpMethod requestMethod=getMethodToUse(request,preFlightRequest);
   List<HttpMethod> allowMethods=checkMethods(config,requestMethod);
-  List<String> requestHeaders=getHeadersToUse(request,isPreFlight);
+  List<String> requestHeaders=getHeadersToUse(request,preFlightRequest);
   List<String> allowHeaders=checkHeaders(config,requestHeaders);
-  if (allowOrigin == null || allowMethods == null || (isPreFlight && allowHeaders == null)) {
-    handleInvalidCorsRequest(response);
+  if (allowOrigin == null || allowMethods == null || (preFlightRequest && allowHeaders == null)) {
+    rejectRequest(response);
     return false;
   }
   HttpHeaders responseHeaders=response.getHeaders();
   responseHeaders.setAccessControlAllowOrigin(allowOrigin);
   responseHeaders.add(HttpHeaders.VARY,HttpHeaders.ORIGIN);
-  if (isPreFlight) {
+  if (preFlightRequest) {
     responseHeaders.setAccessControlAllowMethods(allowMethods);
   }
-  if (isPreFlight && !allowHeaders.isEmpty()) {
+  if (preFlightRequest && !allowHeaders.isEmpty()) {
     responseHeaders.setAccessControlAllowHeaders(allowHeaders);
   }
   if (!CollectionUtils.isEmpty(config.getExposedHeaders())) {
@@ -24,8 +24,9 @@
   if (Boolean.TRUE.equals(config.getAllowCredentials())) {
     responseHeaders.setAccessControlAllowCredentials(true);
   }
-  if (isPreFlight && config.getMaxAge() != null) {
+  if (preFlightRequest && config.getMaxAge() != null) {
     responseHeaders.setAccessControlMaxAge(config.getMaxAge());
   }
+  response.flush();
   return true;
 }

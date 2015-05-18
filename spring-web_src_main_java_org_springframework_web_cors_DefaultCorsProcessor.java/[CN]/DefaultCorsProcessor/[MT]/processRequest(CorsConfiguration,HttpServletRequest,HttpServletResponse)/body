@@ -1,0 +1,21 @@
+{
+  if (!CorsUtils.isCorsRequest(request)) {
+    return true;
+  }
+  ServletServerHttpResponse serverResponse=new ServletServerHttpResponse(response);
+  ServletServerHttpRequest serverRequest=new ServletServerHttpRequest(request);
+  if (responseHasCors(serverResponse)) {
+    return true;
+  }
+  boolean preFlightRequest=CorsUtils.isPreFlightRequest(request);
+  if (config == null) {
+    if (preFlightRequest) {
+      rejectRequest(serverResponse);
+      return false;
+    }
+ else {
+      return true;
+    }
+  }
+  return handleInternal(serverRequest,serverResponse,config,preFlightRequest);
+}
