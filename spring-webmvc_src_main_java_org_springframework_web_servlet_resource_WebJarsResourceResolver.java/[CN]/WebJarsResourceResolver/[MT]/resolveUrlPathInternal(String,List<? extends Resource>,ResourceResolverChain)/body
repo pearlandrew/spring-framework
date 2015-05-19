@@ -1,24 +1,8 @@
 {
   String path=chain.resolveUrlPath(resourceUrlPath,locations);
   if (path == null) {
-    try {
-      int startOffset=resourceUrlPath.startsWith("/") ? 1 : 0;
-      int endOffset=resourceUrlPath.indexOf("/",1);
-      if (endOffset != -1) {
-        String webjar=resourceUrlPath.substring(startOffset,endOffset);
-        String partialPath=resourceUrlPath.substring(endOffset);
-        String webJarPath=webJarAssetLocator.getFullPath(webjar,partialPath);
-        return chain.resolveUrlPath(webJarPath.substring(WEBJARS_LOCATION_LENGTH),locations);
-      }
-    }
- catch (    MultipleMatchesException ex) {
-      logger.warn("WebJar version conflict for \"" + resourceUrlPath + "\"",ex);
-    }
-catch (    IllegalArgumentException ex) {
-      if (logger.isTraceEnabled()) {
-        logger.trace("No WebJar resource found for \"" + resourceUrlPath + "\"");
-      }
-    }
+    String webJarResourcePath=findWebJarResourcePath(resourceUrlPath);
+    return chain.resolveUrlPath(webJarResourcePath,locations);
   }
   return path;
 }
