@@ -1,0 +1,13 @@
+{
+  MappingJackson2MessageConverter converter=new MappingJackson2MessageConverter();
+  Map<String,Object> map=new HashMap<>();
+  Method method=this.getClass().getDeclaredMethod("handle");
+  MethodParameter returnType=new MethodParameter(method,-1);
+  map.put(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER,returnType);
+  MessageHeaders headers=new MessageHeaders(map);
+  Message<?> message=converter.toMessage(handle(),headers);
+  String actual=new String((byte[])message.getPayload(),UTF_8);
+  assertThat(actual,containsString("\"withView1\":\"with\""));
+  assertThat(actual,not(containsString("\"withView2\":\"with\"")));
+  assertThat(actual,not(containsString("\"withoutView\":\"without\"")));
+}

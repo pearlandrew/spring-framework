@@ -4,6 +4,9 @@
   messagingTemplate.setMessageConverter(new StringMessageConverter());
   this.handler=new SendToMethodReturnValueHandler(messagingTemplate,true);
   this.handlerAnnotationNotRequired=new SendToMethodReturnValueHandler(messagingTemplate,false);
+  SimpMessagingTemplate jsonMessagingTemplate=new SimpMessagingTemplate(this.messageChannel);
+  jsonMessagingTemplate.setMessageConverter(new MappingJackson2MessageConverter());
+  this.jsonHandler=new SendToMethodReturnValueHandler(jsonMessagingTemplate,true);
   Method method=this.getClass().getDeclaredMethod("handleNoAnnotations");
   this.noAnnotationsReturnType=new MethodParameter(method,-1);
   method=this.getClass().getDeclaredMethod("handleAndSendToDefaultDestination");
@@ -11,7 +14,7 @@
   method=this.getClass().getDeclaredMethod("handleAndSendTo");
   this.sendToReturnType=new MethodParameter(method,-1);
   method=this.getClass().getDeclaredMethod("handleAndSendToWithPlaceholders");
-  this.sendToWithPlaceholdersType=new MethodParameter(method,-1);
+  this.sendToWithPlaceholdersReturnType=new MethodParameter(method,-1);
   method=this.getClass().getDeclaredMethod("handleAndSendToUser");
   this.sendToUserReturnType=new MethodParameter(method,-1);
   method=this.getClass().getDeclaredMethod("handleAndSendToUserSingleSession");
@@ -20,4 +23,6 @@
   this.sendToUserDefaultDestReturnType=new MethodParameter(method,-1);
   method=this.getClass().getDeclaredMethod("handleAndSendToUserDefaultDestinationSingleSession");
   this.sendToUserSingleSessionDefaultDestReturnType=new MethodParameter(method,-1);
+  method=this.getClass().getDeclaredMethod("handleAndSendToJsonView");
+  this.jsonViewReturnType=new MethodParameter(method,-1);
 }
