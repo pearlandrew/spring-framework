@@ -2,36 +2,34 @@
   TypedValue result=readProperty(contextObject,evalContext,this.name);
   if (result.getValue() == null && isAutoGrowNullReferences && nextChildIs(Indexer.class,PropertyOrFieldReference.class)) {
     TypeDescriptor resultDescriptor=result.getTypeDescriptor();
-    if ((resultDescriptor.getType().equals(List.class) || resultDescriptor.getType().equals(Map.class))) {
-      if (resultDescriptor.getType().equals(List.class)) {
-        try {
-          if (isWritableProperty(this.name,contextObject,evalContext)) {
-            List<?> newList=ArrayList.class.newInstance();
-            writeProperty(contextObject,evalContext,this.name,newList);
-            result=readProperty(contextObject,evalContext,this.name);
-          }
-        }
- catch (        InstantiationException ex) {
-          throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
-        }
-catch (        IllegalAccessException ex) {
-          throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+    if (List.class == resultDescriptor.getType()) {
+      try {
+        if (isWritableProperty(this.name,contextObject,evalContext)) {
+          List<?> newList=ArrayList.class.newInstance();
+          writeProperty(contextObject,evalContext,this.name,newList);
+          result=readProperty(contextObject,evalContext,this.name);
         }
       }
- else {
-        try {
-          if (isWritableProperty(this.name,contextObject,evalContext)) {
-            Map<?,?> newMap=HashMap.class.newInstance();
-            writeProperty(contextObject,evalContext,this.name,newMap);
-            result=readProperty(contextObject,evalContext,this.name);
-          }
+ catch (      InstantiationException ex) {
+        throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+      }
+catch (      IllegalAccessException ex) {
+        throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_CREATE_LIST_FOR_INDEXING);
+      }
+    }
+ else     if (Map.class == resultDescriptor.getType()) {
+      try {
+        if (isWritableProperty(this.name,contextObject,evalContext)) {
+          Map<?,?> newMap=HashMap.class.newInstance();
+          writeProperty(contextObject,evalContext,this.name,newMap);
+          result=readProperty(contextObject,evalContext,this.name);
         }
- catch (        InstantiationException ex) {
-          throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
-        }
-catch (        IllegalAccessException ex) {
-          throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
-        }
+      }
+ catch (      InstantiationException ex) {
+        throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
+      }
+catch (      IllegalAccessException ex) {
+        throw new SpelEvaluationException(getStartPosition(),ex,SpelMessage.UNABLE_TO_CREATE_MAP_FOR_INDEXING);
       }
     }
  else {
