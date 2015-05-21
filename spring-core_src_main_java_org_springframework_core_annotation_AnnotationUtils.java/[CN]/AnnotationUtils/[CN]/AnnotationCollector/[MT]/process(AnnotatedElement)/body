@@ -4,10 +4,10 @@
       for (      Annotation ann : element.getAnnotations()) {
         Class<? extends Annotation> currentAnnotationType=ann.annotationType();
         if (ObjectUtils.nullSafeEquals(this.annotationType,currentAnnotationType)) {
-          this.result.add((A)ann);
+          this.result.add(synthesizeAnnotation(element,(A)ann));
         }
  else         if (ObjectUtils.nullSafeEquals(this.containerAnnotationType,currentAnnotationType)) {
-          this.result.addAll(getValue(ann));
+          this.result.addAll(getValue(element,ann));
         }
  else         if (!isInJavaLangAnnotationPackage(ann)) {
           process(currentAnnotationType);
@@ -15,7 +15,7 @@
       }
     }
  catch (    Exception ex) {
-      logIntrospectionFailure(element,ex);
+      handleIntrospectionFailure(element,ex);
     }
   }
 }

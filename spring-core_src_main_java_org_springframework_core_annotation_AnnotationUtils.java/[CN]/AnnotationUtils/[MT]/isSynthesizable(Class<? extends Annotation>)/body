@@ -1,0 +1,21 @@
+{
+  for (  Method attribute : getAttributeMethods(annotationType)) {
+    if (getAliasedAttributeName(attribute) != null) {
+      return true;
+    }
+    Class<?> returnType=attribute.getReturnType();
+    if (Annotation[].class.isAssignableFrom(returnType)) {
+      Class<? extends Annotation> nestedAnnotationType=(Class<? extends Annotation>)returnType.getComponentType();
+      if (isSynthesizable(nestedAnnotationType)) {
+        return true;
+      }
+    }
+ else     if (Annotation.class.isAssignableFrom(returnType)) {
+      Class<? extends Annotation> nestedAnnotationType=(Class<? extends Annotation>)returnType;
+      if (isSynthesizable(nestedAnnotationType)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}

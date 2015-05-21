@@ -1,0 +1,29 @@
+{
+  annotation=AnnotationUtils.synthesizeAnnotation(annotation);
+  Class<? extends Annotation> targetAnnotationType=attributes.annotationType();
+  for (  Method attributeMethod : AnnotationUtils.getAttributeMethods(annotation.annotationType())) {
+    String attributeName=attributeMethod.getName();
+    String aliasedAttributeName=AnnotationUtils.getAliasedAttributeName(attributeMethod,targetAnnotationType);
+    if (StringUtils.hasText(aliasedAttributeName)) {
+      if (attributes.containsKey(aliasedAttributeName)) {
+        Object value=AnnotationUtils.getValue(annotation,attributeName);
+        attributes.put(aliasedAttributeName,AnnotationUtils.adaptValue(element,value,this.classValuesAsString,this.nestedAnnotationsAsMap));
+      }
+    }
+ else     if (!AnnotationUtils.VALUE.equals(attributeName) && attributes.containsKey(attributeName)) {
+      Object value=AnnotationUtils.getValue(annotation,attributeName);
+      Object adaptedValue=AnnotationUtils.adaptValue(element,value,this.classValuesAsString,this.nestedAnnotationsAsMap);
+      attributes.put(attributeName,adaptedValue);
+      Method attributeMethodInTarget=ReflectionUtils.findMethod(targetAnnotationType,attributeName);
+      if (attributeMethodInTarget != null) {
+        String aliasedAttributeNameInTarget=AnnotationUtils.getAliasedAttributeName(attributeMethodInTarget,null);
+        if (aliasedAttributeNameInTarget != null) {
+          Object aliasedValueInTarget=attributes.get(aliasedAttributeNameInTarget);
+          if (aliasedValueInTarget == null) {
+            attributes.put(aliasedAttributeNameInTarget,adaptedValue);
+          }
+        }
+      }
+    }
+  }
+}

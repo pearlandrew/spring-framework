@@ -1,0 +1,43 @@
+{
+  String attributeName=method.getName();
+  Class<?> returnType=method.getReturnType();
+  boolean nestedAnnotation=(Annotation[].class.isAssignableFrom(returnType) || Annotation.class.isAssignableFrom(returnType));
+  String aliasedAttributeName=aliasPairs.get(attributeName);
+  boolean aliasPresent=aliasedAttributeName != null;
+  ReflectionUtils.makeAccessible(method);
+  Object value=ReflectionUtils.invokeMethod(method,this.annotation,args);
+  if (!aliasPresent && !nestedAnnotation) {
+    return value;
+  }
+  if (aliasPresent) {
+    Method aliasedMethod=null;
+    try {
+      aliasedMethod=annotation.annotationType().getDeclaredMethod(aliasedAttributeName);
+    }
+ catch (    NoSuchMethodException e) {
+      String msg=String.format("In annotation [%s], attribute [%s] is declared as an @AliasFor [%s], " + "but attribute [%s] does not exist.",annotation.annotationType().getName(),attributeName,aliasedAttributeName,aliasedAttributeName);
+      throw new AnnotationConfigurationException(msg);
+    }
+    ReflectionUtils.makeAccessible(aliasedMethod);
+    Object aliasedValue=ReflectionUtils.invokeMethod(aliasedMethod,this.annotation,args);
+    Object defaultValue=AnnotationUtils.getDefaultValue(annotation,attributeName);
+    if (!ObjectUtils.nullSafeEquals(value,aliasedValue) && !ObjectUtils.nullSafeEquals(value,defaultValue) && !ObjectUtils.nullSafeEquals(aliasedValue,defaultValue)) {
+      String elementAsString=(annotatedElement == null ? "unknown element" : annotatedElement.toString());
+      String msg=String.format("In annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are " + "declared with values of [%s] and [%s], but only one declaration is permitted.",annotation.annotationType().getName(),elementAsString,attributeName,aliasedAttributeName,ObjectUtils.nullSafeToString(value),ObjectUtils.nullSafeToString(aliasedValue));
+      throw new AnnotationConfigurationException(msg);
+    }
+    if (ObjectUtils.nullSafeEquals(value,defaultValue)) {
+      value=aliasedValue;
+    }
+  }
+  if (value instanceof Annotation) {
+    value=AnnotationUtils.synthesizeAnnotation(annotatedElement,(Annotation)value);
+  }
+ else   if (value instanceof Annotation[]) {
+    Annotation[] annotations=(Annotation[])value;
+    for (int i=0; i < annotations.length; i++) {
+      annotations[i]=AnnotationUtils.synthesizeAnnotation(annotatedElement,annotations[i]);
+    }
+  }
+  return value;
+}

@@ -4,7 +4,7 @@
   if (visited.add(element)) {
     try {
       List<Annotation> declaredAnnotations=Arrays.asList(element.getDeclaredAnnotations());
-      T result=searchWithGetSemanticsInAnnotations(declaredAnnotations,annotationType,processor,visited,metaDepth);
+      T result=searchWithGetSemanticsInAnnotations(element,declaredAnnotations,annotationType,processor,visited,metaDepth);
       if (result != null) {
         return result;
       }
@@ -14,13 +14,13 @@
           inheritedAnnotations.add(annotation);
         }
       }
-      result=searchWithGetSemanticsInAnnotations(inheritedAnnotations,annotationType,processor,visited,metaDepth);
+      result=searchWithGetSemanticsInAnnotations(element,inheritedAnnotations,annotationType,processor,visited,metaDepth);
       if (result != null) {
         return result;
       }
     }
  catch (    Exception ex) {
-      AnnotationUtils.logIntrospectionFailure(element,ex);
+      AnnotationUtils.handleIntrospectionFailure(element,ex);
     }
   }
   return null;

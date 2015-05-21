@@ -1,12 +1,13 @@
 {
   if (annotationType.isInstance(ann)) {
-    return (A)ann;
+    return synthesizeAnnotation((A)ann);
   }
+  Class<? extends Annotation> annotatedElement=ann.annotationType();
   try {
-    return ann.annotationType().getAnnotation(annotationType);
+    return synthesizeAnnotation(annotatedElement,annotatedElement.getAnnotation(annotationType));
   }
  catch (  Exception ex) {
-    logIntrospectionFailure(ann.annotationType(),ex);
+    handleIntrospectionFailure(annotatedElement,ex);
     return null;
   }
 }

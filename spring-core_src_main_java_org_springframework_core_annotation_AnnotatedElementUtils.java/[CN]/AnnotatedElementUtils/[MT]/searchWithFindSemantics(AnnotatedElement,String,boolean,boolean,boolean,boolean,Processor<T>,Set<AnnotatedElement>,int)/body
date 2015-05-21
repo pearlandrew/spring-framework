@@ -6,7 +6,7 @@
       Annotation[] annotations=(searchOnSuperclasses ? element.getDeclaredAnnotations() : element.getAnnotations());
       for (      Annotation annotation : annotations) {
         if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0)) {
-          T result=processor.process(annotation,metaDepth);
+          T result=processor.process(element,annotation,metaDepth);
           if (result != null) {
             return result;
           }
@@ -16,7 +16,7 @@
         if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
           T result=searchWithFindSemantics(annotation.annotationType(),annotationType,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth + 1);
           if (result != null) {
-            processor.postProcess(annotation,result);
+            processor.postProcess(annotation.annotationType(),annotation,result);
             return result;
           }
         }
@@ -83,7 +83,7 @@
       }
     }
  catch (    Exception ex) {
-      AnnotationUtils.logIntrospectionFailure(element,ex);
+      AnnotationUtils.handleIntrospectionFailure(element,ex);
     }
   }
   return null;

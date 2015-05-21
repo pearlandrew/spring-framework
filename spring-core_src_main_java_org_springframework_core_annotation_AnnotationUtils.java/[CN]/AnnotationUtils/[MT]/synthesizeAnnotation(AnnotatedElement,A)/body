@@ -1,0 +1,15 @@
+{
+  if (annotation == null) {
+    return null;
+  }
+  if (annotation instanceof SynthesizedAnnotation) {
+    return annotation;
+  }
+  Class<? extends Annotation> annotationType=annotation.annotationType();
+  if (!isSynthesizable(annotationType)) {
+    return annotation;
+  }
+  InvocationHandler handler=new SynthesizedAnnotationInvocationHandler(annotatedElement,annotation,getAliasMap(annotationType));
+  A synthesizedAnnotation=(A)Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),new Class<?>[]{(Class<A>)annotationType,SynthesizedAnnotation.class},handler);
+  return synthesizedAnnotation;
+}

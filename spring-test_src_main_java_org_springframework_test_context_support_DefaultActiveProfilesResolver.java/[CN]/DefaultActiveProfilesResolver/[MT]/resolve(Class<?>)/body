@@ -14,19 +14,7 @@
     if (logger.isTraceEnabled()) {
       logger.trace(String.format("Retrieved @ActiveProfiles attributes [%s] for declaring class [%s].",annAttrs,declaringClass.getName()));
     }
-    String[] profiles=annAttrs.getStringArray("profiles");
-    String[] valueProfiles=annAttrs.getStringArray("value");
-    boolean valueDeclared=!ObjectUtils.isEmpty(valueProfiles);
-    boolean profilesDeclared=!ObjectUtils.isEmpty(profiles);
-    if (valueDeclared && profilesDeclared) {
-      String msg=String.format("Class [%s] has been configured with @ActiveProfiles' 'value' [%s] " + "and 'profiles' [%s] attributes. Only one declaration of active bean " + "definition profiles is permitted per @ActiveProfiles annotation.",declaringClass.getName(),ObjectUtils.nullSafeToString(valueProfiles),ObjectUtils.nullSafeToString(profiles));
-      logger.error(msg);
-      throw new IllegalStateException(msg);
-    }
-    if (valueDeclared) {
-      profiles=valueProfiles;
-    }
-    for (    String profile : profiles) {
+    for (    String profile : annAttrs.getStringArray("profiles")) {
       if (StringUtils.hasText(profile)) {
         activeProfiles.add(profile.trim());
       }

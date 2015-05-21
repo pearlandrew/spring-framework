@@ -1,0 +1,28 @@
+{
+  if (synthesizeAnnotation) {
+    annotation=synthesizeAnnotation(annotatedElement,annotation);
+  }
+  Class<? extends Annotation> annotationType=annotation.annotationType();
+  AnnotationAttributes attrs=new AnnotationAttributes(annotationType);
+  for (  Method method : getAttributeMethods(annotationType)) {
+    try {
+      ReflectionUtils.makeAccessible(method);
+      Object value=method.invoke(annotation);
+      Object defaultValue=method.getDefaultValue();
+      if (defaultValuesAsPlaceholder && (defaultValue != null)) {
+        if (ObjectUtils.nullSafeEquals(value,defaultValue)) {
+          value=DEFAULT_VALUE_PLACEHOLDER;
+        }
+      }
+      attrs.put(method.getName(),adaptValue(annotatedElement,value,classValuesAsString,nestedAnnotationsAsMap));
+    }
+ catch (    Exception ex) {
+      if (ex instanceof InvocationTargetException) {
+        Throwable targetException=((InvocationTargetException)ex).getTargetException();
+        rethrowAnnotationConfigurationException(targetException);
+      }
+      throw new IllegalStateException("Could not obtain annotation attribute value for " + method,ex);
+    }
+  }
+  return attrs;
+}
