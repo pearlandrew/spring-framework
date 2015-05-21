@@ -121,7 +121,17 @@
         }
  else {
           if (isExtractOldValueForEditor() && ph.isReadable()) {
-            oldValue=ph.getValue();
+            try {
+              oldValue=ph.getValue();
+            }
+ catch (            Exception ex) {
+              if (ex instanceof PrivilegedActionException) {
+                ex=((PrivilegedActionException)ex).getException();
+              }
+              if (logger.isDebugEnabled()) {
+                logger.debug("Could not read previous value of property '" + this.nestedPath + propertyName+ "'",ex);
+              }
+            }
           }
           valueToApply=convertForProperty(propertyName,oldValue,originalValue,ph.toTypeDescriptor());
         }
