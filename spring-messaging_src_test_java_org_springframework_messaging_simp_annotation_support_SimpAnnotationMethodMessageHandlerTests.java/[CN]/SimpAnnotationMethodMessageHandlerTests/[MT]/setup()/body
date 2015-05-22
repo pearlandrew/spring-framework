@@ -1,7 +1,8 @@
 {
-  SubscribableChannel channel=Mockito.mock(SubscribableChannel.class);
-  SimpMessageSendingOperations brokerTemplate=new SimpMessagingTemplate(channel);
-  this.messageHandler=new TestSimpAnnotationMethodMessageHandler(brokerTemplate,channel,channel);
+  MockitoAnnotations.initMocks(this);
+  SimpMessagingTemplate brokerTemplate=new SimpMessagingTemplate(this.channel);
+  brokerTemplate.setMessageConverter(converter);
+  this.messageHandler=new TestSimpAnnotationMethodMessageHandler(brokerTemplate,this.channel,this.channel);
   this.messageHandler.setApplicationContext(new StaticApplicationContext());
   this.messageHandler.setValidator(new StringTestValidator(TEST_INVALID_VALUE));
   this.messageHandler.afterPropertiesSet();

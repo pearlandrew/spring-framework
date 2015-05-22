@@ -11,7 +11,15 @@
     if (void.class == returnType.getParameterType()) {
       return;
     }
-    this.returnValueHandlers.handleReturnValue(returnValue,returnType,message);
+    if (this.returnValueHandlers.isAsyncReturnValue(returnValue,returnType)) {
+      ListenableFuture<?> future=this.returnValueHandlers.toListenableFuture(returnValue,returnType);
+      if (future != null) {
+        future.addCallback(new ReturnValueListenableFutureCallback(returnType,invocable,message));
+      }
+    }
+ else {
+      this.returnValueHandlers.handleReturnValue(returnValue,returnType,message);
+    }
   }
  catch (  Exception ex) {
     processHandlerMethodException(handlerMethod,ex,message);
