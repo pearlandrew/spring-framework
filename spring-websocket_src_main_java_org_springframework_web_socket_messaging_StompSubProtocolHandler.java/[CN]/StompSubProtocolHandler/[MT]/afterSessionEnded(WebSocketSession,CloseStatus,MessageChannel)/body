@@ -1,5 +1,10 @@
 {
   this.decoders.remove(session.getId());
+  Principal principal=session.getPrincipal();
+  if (principal != null && this.userSessionRegistry != null) {
+    String userName=getSessionRegistryUserName(principal);
+    this.userSessionRegistry.unregisterSessionId(userName,session.getId());
+  }
   Message<byte[]> message=createDisconnectMessage(session);
   SimpAttributes simpAttributes=SimpAttributes.fromMessage(message);
   try {
