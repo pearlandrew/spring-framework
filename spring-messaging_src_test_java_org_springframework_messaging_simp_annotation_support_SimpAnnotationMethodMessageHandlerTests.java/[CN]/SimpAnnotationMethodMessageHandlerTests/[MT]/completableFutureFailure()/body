@@ -1,0 +1,15 @@
+{
+  given(this.channel.send(any(Message.class))).willReturn(true);
+  given(this.converter.toMessage(anyObject(),any(MessageHeaders.class))).willReturn((Message)MessageBuilder.withPayload(new byte[0]).build());
+  CompletableFutureController controller=new CompletableFutureController();
+  this.messageHandler.registerHandler(controller);
+  this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1","/app2/"));
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.create();
+  headers.setSessionId("session1");
+  headers.setSessionAttributes(new HashMap<>());
+  headers.setDestination("/app1/completable-future");
+  Message<?> message=MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+  this.messageHandler.handleMessage(message);
+  controller.future.completeExceptionally(new IllegalStateException());
+  assertTrue(controller.exceptionCatched);
+}
