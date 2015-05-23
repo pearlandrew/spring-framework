@@ -1,10 +1,10 @@
 {
-  final CountDownLatch latch=new CountDownLatch(1);
-  final List<ClientResponse> responses=new CopyOnWriteArrayList<ClientResponse>();
+  CountDownLatch latch=new CountDownLatch(1);
+  List<ClientResponse> responses=new CopyOnWriteArrayList<ClientResponse>();
   try {
-    final ClientConnection connection=this.httpClient.connect(url,this.worker,this.bufferPool,this.optionMap).get();
+    ClientConnection connection=this.httpClient.connect(url,this.worker,this.bufferPool,this.optionMap).get();
     try {
-      final ClientRequest request=new ClientRequest().setMethod(method).setPath(url.getPath());
+      ClientRequest request=new ClientRequest().setMethod(method).setPath(url.getPath());
       request.getRequestHeaders().add(HttpString.tryFromString(HttpHeaders.HOST),url.getHost());
       if (body != null && !body.isEmpty()) {
         request.getRequestHeaders().add(HttpString.tryFromString(HttpHeaders.CONTENT_LENGTH),body.length());
@@ -12,7 +12,7 @@
       addHttpHeaders(request,headers);
       connection.sendRequest(request,createRequestCallback(body,responses,latch));
       latch.await();
-      final ClientResponse response=responses.iterator().next();
+      ClientResponse response=responses.iterator().next();
       HttpStatus status=HttpStatus.valueOf(response.getResponseCode());
       HttpHeaders responseHeaders=toHttpHeaders(response.getResponseHeaders());
       String responseBody=response.getAttachment(RESPONSE_BODY);
@@ -23,9 +23,9 @@
     }
   }
  catch (  IOException ex) {
-    throw new SockJsTransportFailureException("Failed to execute request to " + url,null,ex);
+    throw new SockJsTransportFailureException("Failed to execute request to " + url,ex);
   }
 catch (  InterruptedException ex) {
-    throw new SockJsTransportFailureException("Failed to execute request to " + url,null,ex);
+    throw new SockJsTransportFailureException("Interrupted while processing request to " + url,ex);
   }
 }
