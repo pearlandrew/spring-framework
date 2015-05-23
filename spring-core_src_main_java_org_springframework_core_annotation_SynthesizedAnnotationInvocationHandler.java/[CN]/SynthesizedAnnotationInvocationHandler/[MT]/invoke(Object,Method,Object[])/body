@@ -1,19 +1,17 @@
 {
-  String methodName=method.getName();
-  Class<?>[] parameterTypes=method.getParameterTypes();
-  int parameterCount=parameterTypes.length;
-  if ("equals".equals(methodName) && (parameterCount == 1) && (parameterTypes[0] == Object.class)) {
+  if (isEqualsMethod(method)) {
     return equals(proxy,args[0]);
   }
- else   if ("toString".equals(methodName) && (parameterCount == 0)) {
+  if (isToStringMethod(method)) {
     return toString(proxy);
   }
+  String methodName=method.getName();
   Class<?> returnType=method.getReturnType();
   boolean nestedAnnotation=(Annotation[].class.isAssignableFrom(returnType) || Annotation.class.isAssignableFrom(returnType));
   String aliasedAttributeName=aliasMap.get(methodName);
   boolean aliasPresent=(aliasedAttributeName != null);
-  ReflectionUtils.makeAccessible(method);
-  Object value=ReflectionUtils.invokeMethod(method,this.annotation,args);
+  makeAccessible(method);
+  Object value=invokeMethod(method,this.annotation,args);
   if (!aliasPresent && !nestedAnnotation) {
     return value;
   }
@@ -26,8 +24,8 @@
       String msg=String.format("In annotation [%s], attribute [%s] is declared as an @AliasFor [%s], " + "but attribute [%s] does not exist.",this.annotationType.getName(),methodName,aliasedAttributeName,aliasedAttributeName);
       throw new AnnotationConfigurationException(msg);
     }
-    ReflectionUtils.makeAccessible(aliasedMethod);
-    Object aliasedValue=ReflectionUtils.invokeMethod(aliasedMethod,this.annotation,args);
+    makeAccessible(aliasedMethod);
+    Object aliasedValue=invokeMethod(aliasedMethod,this.annotation,args);
     Object defaultValue=getDefaultValue(this.annotation,methodName);
     if (!ObjectUtils.nullSafeEquals(value,aliasedValue) && !ObjectUtils.nullSafeEquals(value,defaultValue) && !ObjectUtils.nullSafeEquals(aliasedValue,defaultValue)) {
       String elementName=(this.annotatedElement == null ? "unknown element" : this.annotatedElement.toString());
