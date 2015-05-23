@@ -1,8 +1,12 @@
 {
-  String attributeName=method.getName();
+  String methodName=method.getName();
+  int parameterCount=method.getParameterCount();
+  if ("toString".equals(methodName) && (parameterCount == 0)) {
+    return toString(proxy);
+  }
   Class<?> returnType=method.getReturnType();
   boolean nestedAnnotation=(Annotation[].class.isAssignableFrom(returnType) || Annotation.class.isAssignableFrom(returnType));
-  String aliasedAttributeName=aliasMap.get(attributeName);
+  String aliasedAttributeName=aliasMap.get(methodName);
   boolean aliasPresent=(aliasedAttributeName != null);
   ReflectionUtils.makeAccessible(method);
   Object value=ReflectionUtils.invokeMethod(method,this.annotation,args);
@@ -15,15 +19,15 @@
       aliasedMethod=this.annotationType.getDeclaredMethod(aliasedAttributeName);
     }
  catch (    NoSuchMethodException e) {
-      String msg=String.format("In annotation [%s], attribute [%s] is declared as an @AliasFor [%s], " + "but attribute [%s] does not exist.",this.annotationType.getName(),attributeName,aliasedAttributeName,aliasedAttributeName);
+      String msg=String.format("In annotation [%s], attribute [%s] is declared as an @AliasFor [%s], " + "but attribute [%s] does not exist.",this.annotationType.getName(),methodName,aliasedAttributeName,aliasedAttributeName);
       throw new AnnotationConfigurationException(msg);
     }
     ReflectionUtils.makeAccessible(aliasedMethod);
     Object aliasedValue=ReflectionUtils.invokeMethod(aliasedMethod,this.annotation,args);
-    Object defaultValue=AnnotationUtils.getDefaultValue(this.annotation,attributeName);
+    Object defaultValue=AnnotationUtils.getDefaultValue(this.annotation,methodName);
     if (!ObjectUtils.nullSafeEquals(value,aliasedValue) && !ObjectUtils.nullSafeEquals(value,defaultValue) && !ObjectUtils.nullSafeEquals(aliasedValue,defaultValue)) {
       String elementName=(this.annotatedElement == null ? "unknown element" : this.annotatedElement.toString());
-      String msg=String.format("In annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are " + "declared with values of [%s] and [%s], but only one declaration is permitted.",this.annotationType.getName(),elementName,attributeName,aliasedAttributeName,ObjectUtils.nullSafeToString(value),ObjectUtils.nullSafeToString(aliasedValue));
+      String msg=String.format("In annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are " + "declared with values of [%s] and [%s], but only one declaration is permitted.",this.annotationType.getName(),elementName,methodName,aliasedAttributeName,ObjectUtils.nullSafeToString(value),ObjectUtils.nullSafeToString(aliasedValue));
       throw new AnnotationConfigurationException(msg);
     }
     if (ObjectUtils.nullSafeEquals(value,defaultValue)) {
