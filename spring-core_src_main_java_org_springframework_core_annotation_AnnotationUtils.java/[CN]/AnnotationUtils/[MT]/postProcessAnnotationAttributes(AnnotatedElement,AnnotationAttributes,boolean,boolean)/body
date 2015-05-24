@@ -10,22 +10,22 @@
     if (validated.add(attributeName) && validated.add(aliasedAttributeName)) {
       Object value=attributes.get(attributeName);
       Object aliasedValue=attributes.get(aliasedAttributeName);
-      if (!ObjectUtils.nullSafeEquals(value,aliasedValue) && !DEFAULT_VALUE_PLACEHOLDER.equals(value) && !DEFAULT_VALUE_PLACEHOLDER.equals(aliasedValue)) {
+      if (!ObjectUtils.nullSafeEquals(value,aliasedValue) && (value != DEFAULT_VALUE_PLACEHOLDER) && (aliasedValue != DEFAULT_VALUE_PLACEHOLDER)) {
         String elementAsString=(element == null ? "unknown element" : element.toString());
         String msg=String.format("In AnnotationAttributes for annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are " + "declared with values of [%s] and [%s], but only one declaration is permitted.",annotationType.getName(),elementAsString,attributeName,aliasedAttributeName,ObjectUtils.nullSafeToString(value),ObjectUtils.nullSafeToString(aliasedValue));
         throw new AnnotationConfigurationException(msg);
       }
-      if (DEFAULT_VALUE_PLACEHOLDER.equals(value)) {
+      if (value == DEFAULT_VALUE_PLACEHOLDER) {
         attributes.put(attributeName,adaptValue(element,aliasedValue,classValuesAsString,nestedAnnotationsAsMap));
       }
-      if (DEFAULT_VALUE_PLACEHOLDER.equals(aliasedValue)) {
+      if (aliasedValue == DEFAULT_VALUE_PLACEHOLDER) {
         attributes.put(aliasedAttributeName,adaptValue(element,value,classValuesAsString,nestedAnnotationsAsMap));
       }
     }
   }
   for (  String attributeName : attributes.keySet()) {
     Object value=attributes.get(attributeName);
-    if (DEFAULT_VALUE_PLACEHOLDER.equals(value)) {
+    if (value == DEFAULT_VALUE_PLACEHOLDER) {
       attributes.put(attributeName,adaptValue(element,getDefaultValue(annotationType,attributeName),classValuesAsString,nestedAnnotationsAsMap));
     }
   }
