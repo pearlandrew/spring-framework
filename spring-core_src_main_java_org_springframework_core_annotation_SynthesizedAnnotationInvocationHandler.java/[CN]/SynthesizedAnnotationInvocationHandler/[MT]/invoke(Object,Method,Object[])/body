@@ -14,10 +14,14 @@
   String aliasedAttributeName=aliasMap.get(methodName);
   boolean aliasPresent=(aliasedAttributeName != null);
   makeAccessible(method);
-  Object value=invokeMethod(method,this.annotation,args);
   if (!aliasPresent && !nestedAnnotation) {
-    return value;
+    return invokeMethod(method,this.annotation,args);
   }
+  Object cachedValue=this.computedValueCache.get(methodName);
+  if (cachedValue != null) {
+    return cachedValue;
+  }
+  Object value=invokeMethod(method,this.annotation,args);
   if (aliasPresent) {
     Method aliasedMethod=null;
     try {
@@ -48,5 +52,6 @@
       annotations[i]=synthesizeAnnotation(annotations[i],this.annotatedElement);
     }
   }
+  this.computedValueCache.put(methodName,value);
   return value;
 }
