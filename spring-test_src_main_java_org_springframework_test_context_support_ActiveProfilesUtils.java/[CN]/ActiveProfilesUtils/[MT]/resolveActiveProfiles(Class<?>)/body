@@ -9,11 +9,11 @@
   while (descriptor != null) {
     Class<?> rootDeclaringClass=descriptor.getRootDeclaringClass();
     Class<?> declaringClass=descriptor.getDeclaringClass();
-    AnnotationAttributes annAttrs=descriptor.getAnnotationAttributes();
+    ActiveProfiles annotation=descriptor.getMergedAnnotation();
     if (logger.isTraceEnabled()) {
-      logger.trace(String.format("Retrieved @ActiveProfiles attributes [%s] for declaring class [%s].",annAttrs,declaringClass.getName()));
+      logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].",annotation,declaringClass.getName()));
     }
-    Class<? extends ActiveProfilesResolver> resolverClass=annAttrs.getClass("resolver");
+    Class<? extends ActiveProfilesResolver> resolverClass=annotation.resolver();
     if (ActiveProfilesResolver.class == resolverClass) {
       resolverClass=DefaultActiveProfilesResolver.class;
     }
@@ -37,7 +37,7 @@
         activeProfiles.add(profile.trim());
       }
     }
-    descriptor=annAttrs.getBoolean("inheritProfiles") ? MetaAnnotationUtils.findAnnotationDescriptor(rootDeclaringClass.getSuperclass(),annotationType) : null;
+    descriptor=(annotation.inheritProfiles() ? MetaAnnotationUtils.findAnnotationDescriptor(rootDeclaringClass.getSuperclass(),annotationType) : null);
   }
   return StringUtils.toStringArray(activeProfiles);
 }
