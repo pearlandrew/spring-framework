@@ -1,12 +1,10 @@
 {
   Assert.notNull(controllerType,"'controllerType' must not be null");
-  String annotType=RequestMapping.class.getName();
-  AnnotationAttributes attrs=AnnotatedElementUtils.findAnnotationAttributes(controllerType,annotType);
-  if (attrs == null) {
+  RequestMapping requestMapping=AnnotatedElementUtils.findAnnotation(controllerType,RequestMapping.class);
+  if (requestMapping == null) {
     return "/";
   }
-  String[] paths=attrs.getStringArray("path");
-  paths=ObjectUtils.isEmpty(paths) ? attrs.getStringArray("value") : paths;
+  String[] paths=requestMapping.path();
   if (ObjectUtils.isEmpty(paths) || StringUtils.isEmpty(paths[0])) {
     return "/";
   }

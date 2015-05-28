@@ -1,26 +1,5 @@
 {
-  RequestMapping annotation;
-  AnnotationAttributes attributes;
-  RequestCondition<?> customCondition;
-  String annotationType=RequestMapping.class.getName();
-  if (annotatedElement instanceof Class<?>) {
-    Class<?> type=(Class<?>)annotatedElement;
-    annotation=AnnotationUtils.findAnnotation(type,RequestMapping.class);
-    attributes=AnnotatedElementUtils.findAnnotationAttributes(type,annotationType);
-    customCondition=getCustomTypeCondition(type);
-  }
- else {
-    Method method=(Method)annotatedElement;
-    annotation=AnnotationUtils.findAnnotation(method,RequestMapping.class);
-    attributes=AnnotatedElementUtils.findAnnotationAttributes(method,annotationType);
-    customCondition=getCustomMethodCondition(method);
-  }
-  RequestMappingInfo info=null;
-  if (annotation != null) {
-    info=createRequestMappingInfo(annotation,customCondition);
-    if (info == null) {
-      info=createRequestMappingInfo(attributes,customCondition);
-    }
-  }
-  return info;
+  RequestMapping requestMapping=AnnotatedElementUtils.findAnnotation(annotatedElement,RequestMapping.class);
+  RequestCondition<?> customCondition=((annotatedElement instanceof Class<?>) ? getCustomTypeCondition((Class<?>)annotatedElement) : getCustomMethodCondition((Method)annotatedElement));
+  return ((requestMapping != null) ? createRequestMappingInfo(requestMapping,customCondition) : null);
 }

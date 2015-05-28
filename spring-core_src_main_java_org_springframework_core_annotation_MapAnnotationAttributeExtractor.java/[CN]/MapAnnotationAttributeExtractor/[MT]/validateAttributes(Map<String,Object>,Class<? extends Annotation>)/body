@@ -1,0 +1,13 @@
+{
+  for (  Method attributeMethod : getAttributeMethods(annotationType)) {
+    String attributeName=attributeMethod.getName();
+    Object attributeValue=attributes.get(attributeName);
+    if (attributeValue == null) {
+      throw new IllegalArgumentException(String.format("Attributes map [%s] returned null for required attribute [%s] defined by annotation type [%s].",attributes,attributeName,annotationType.getName()));
+    }
+    Class<?> returnType=attributeMethod.getReturnType();
+    if (!ClassUtils.isAssignable(returnType,attributeValue.getClass())) {
+      throw new IllegalArgumentException(String.format("Attributes map [%s] returned a value of type [%s] for attribute [%s], " + "but a value of type [%s] is required as defined by annotation type [%s].",attributes,attributeValue.getClass().getName(),attributeName,returnType.getName(),annotationType.getName()));
+    }
+  }
+}

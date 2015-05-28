@@ -1,0 +1,26 @@
+{
+  String attributeName=attributeMethod.getName();
+  Object value=this.valueCache.get(attributeName);
+  if (value == null) {
+    value=this.attributeExtractor.getAttributeValue(attributeMethod);
+    if (value == null) {
+      throw new IllegalStateException(String.format("%s returned null for attribute name [%s] from attribute source [%s]",this.attributeExtractor.getClass().getName(),attributeName,this.attributeExtractor.getSource()));
+    }
+    if (value instanceof Annotation) {
+      value=synthesizeAnnotation((Annotation)value,this.attributeExtractor.getAnnotatedElement());
+    }
+ else     if (value instanceof Annotation[]) {
+      Annotation[] orig=(Annotation[])value;
+      Annotation[] clone=(Annotation[])Array.newInstance(orig.getClass().getComponentType(),orig.length);
+      for (int i=0; i < orig.length; i++) {
+        clone[i]=synthesizeAnnotation(orig[i],this.attributeExtractor.getAnnotatedElement());
+      }
+      value=clone;
+    }
+    this.valueCache.put(attributeName,value);
+  }
+  if (value.getClass().isArray()) {
+    value=cloneArray(value);
+  }
+  return value;
+}

@@ -1,0 +1,18 @@
+{
+  String attributeName=attributeMethod.getName();
+  Object attributeValue=getRawAttributeValue(attributeMethod);
+  String aliasName=this.attributeAliasMap.get(attributeName);
+  if ((aliasName != null)) {
+    Object aliasValue=getRawAttributeValue(aliasName);
+    Object defaultValue=AnnotationUtils.getDefaultValue(getAnnotationType(),attributeName);
+    if (!nullSafeEquals(attributeValue,aliasValue) && !nullSafeEquals(attributeValue,defaultValue) && !nullSafeEquals(aliasValue,defaultValue)) {
+      String elementName=(getAnnotatedElement() == null ? "unknown element" : getAnnotatedElement().toString());
+      String msg=String.format("In annotation [%s] declared on [%s] and synthesized from [%s], " + "attribute [%s] and its alias [%s] are present with values of [%s] and [%s], " + "but only one is permitted.",getAnnotationType().getName(),elementName,getSource(),attributeName,aliasName,nullSafeToString(attributeValue),nullSafeToString(aliasValue));
+      throw new AnnotationConfigurationException(msg);
+    }
+    if (nullSafeEquals(attributeValue,defaultValue)) {
+      attributeValue=aliasValue;
+    }
+  }
+  return attributeValue;
+}
