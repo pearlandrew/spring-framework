@@ -1,8 +1,15 @@
 {
   if (sessionFactory instanceof SessionFactoryImplementor) {
-    Wrapped cp=((SessionFactoryImplementor)sessionFactory).getConnectionProvider();
-    if (cp != null) {
-      return cp.unwrap(DataSource.class);
+    try {
+      ConnectionProvider cp=((SessionFactoryImplementor)sessionFactory).getServiceRegistry().getService(ConnectionProvider.class);
+      if (cp != null) {
+        return cp.unwrap(DataSource.class);
+      }
+    }
+ catch (    UnknownServiceException ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("No ConnectionProvider found - cannot determine DataSource for SessionFactory: " + ex);
+      }
     }
   }
   return null;
