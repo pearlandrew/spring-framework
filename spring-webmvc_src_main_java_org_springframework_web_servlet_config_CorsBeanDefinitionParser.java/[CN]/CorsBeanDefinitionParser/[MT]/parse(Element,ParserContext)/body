@@ -1,0 +1,58 @@
+{
+  Map<String,CorsConfiguration> corsConfigurations=new LinkedHashMap<String,CorsConfiguration>();
+  List<Element> mappings=DomUtils.getChildElementsByTagName(element,"mapping");
+  if (mappings.isEmpty()) {
+    CorsConfiguration config=new CorsConfiguration();
+    config.setAllowedOrigins(DEFAULT_ALLOWED_ORIGINS);
+    config.setAllowedMethods(DEFAULT_ALLOWED_METHODS);
+    config.setAllowedHeaders(DEFAULT_ALLOWED_HEADERS);
+    config.setAllowCredentials(DEFAULT_ALLOW_CREDENTIALS);
+    config.setMaxAge(DEFAULT_MAX_AGE);
+    corsConfigurations.put("/**",config);
+  }
+ else {
+    for (    Element mapping : mappings) {
+      CorsConfiguration config=new CorsConfiguration();
+      if (mapping.hasAttribute("allowed-origins")) {
+        String[] allowedOrigins=StringUtils.tokenizeToStringArray(mapping.getAttribute("allowed-origins"),",");
+        config.setAllowedOrigins(Arrays.asList(allowedOrigins));
+      }
+ else {
+        config.setAllowedOrigins(DEFAULT_ALLOWED_ORIGINS);
+      }
+      if (mapping.hasAttribute("allowed-methods")) {
+        String[] allowedMethods=StringUtils.tokenizeToStringArray(mapping.getAttribute("allowed-methods"),",");
+        config.setAllowedMethods(Arrays.asList(allowedMethods));
+      }
+ else {
+        config.setAllowedMethods(DEFAULT_ALLOWED_METHODS);
+      }
+      if (mapping.hasAttribute("allowed-headers")) {
+        String[] allowedHeaders=StringUtils.tokenizeToStringArray(mapping.getAttribute("allowed-headers"),",");
+        config.setAllowedHeaders(Arrays.asList(allowedHeaders));
+      }
+ else {
+        config.setAllowedHeaders(DEFAULT_ALLOWED_HEADERS);
+      }
+      if (mapping.hasAttribute("exposed-headers")) {
+        String[] exposedHeaders=StringUtils.tokenizeToStringArray(mapping.getAttribute("exposed-headers"),",");
+        config.setExposedHeaders(Arrays.asList(exposedHeaders));
+      }
+      if (mapping.hasAttribute("allow-credentials")) {
+        config.setAllowCredentials(Boolean.parseBoolean(mapping.getAttribute("allow-credentials")));
+      }
+ else {
+        config.setAllowCredentials(DEFAULT_ALLOW_CREDENTIALS);
+      }
+      if (mapping.hasAttribute("max-age")) {
+        config.setMaxAge(Long.parseLong(mapping.getAttribute("max-age")));
+      }
+ else {
+        config.setMaxAge(DEFAULT_MAX_AGE);
+      }
+      corsConfigurations.put(mapping.getAttribute("path"),config);
+    }
+  }
+  MvcNamespaceUtils.registerCorsConfiguration(corsConfigurations,parserContext,parserContext.extractSource(element));
+  return null;
+}
