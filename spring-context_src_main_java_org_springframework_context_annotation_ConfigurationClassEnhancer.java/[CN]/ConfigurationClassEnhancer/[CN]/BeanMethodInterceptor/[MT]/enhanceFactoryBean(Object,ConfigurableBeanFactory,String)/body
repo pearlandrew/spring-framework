@@ -1,9 +1,19 @@
 {
   Enhancer enhancer=new Enhancer();
   enhancer.setSuperclass(factoryBean.getClass());
-  enhancer.setUseFactory(false);
   enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-  enhancer.setCallback(new MethodInterceptor(){
+  enhancer.setCallbackType(MethodInterceptor.class);
+  Class<?> fbClass=enhancer.createClass();
+  Objenesis objenesis=(enhancer.getUseCache() ? cachedObjenesis : nonCachedObjenesis);
+  Factory factory;
+  try {
+    factory=(Factory)objenesis.newInstance(fbClass);
+  }
+ catch (  ObjenesisException ex) {
+    logger.debug("Unable to instantiate enhanced FactoryBean using Objenesis, " + "falling back to regular construction",ex);
+    factory=(Factory)fbClass.newInstance();
+  }
+  factory.setCallback(0,new MethodInterceptor(){
     @Override public Object intercept(    Object obj,    Method method,    Object[] args,    MethodProxy proxy) throws Throwable {
       if (method.getName().equals("getObject") && args.length == 0) {
         return beanFactory.getBean(beanName);
@@ -12,5 +22,5 @@
     }
   }
 );
-  return enhancer.create();
+  return factory;
 }
