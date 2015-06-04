@@ -12,4 +12,20 @@
   assertEquals("20",future.get());
   ListenableFuture<String> listenableFuture=asyncTest.returnSomethingListenable(20);
   assertEquals("20",listenableFuture.get());
+  future=asyncTest.returnSomething(0);
+  try {
+    future.get();
+    fail("Should have thrown ExecutionException");
+  }
+ catch (  ExecutionException ex) {
+    assertTrue(ex.getCause() instanceof IllegalArgumentException);
+  }
+  future=asyncTest.returnSomething(-1);
+  try {
+    future.get();
+    fail("Should have thrown ExecutionException");
+  }
+ catch (  ExecutionException ex) {
+    assertTrue(ex.getCause() instanceof IOException);
+  }
 }
