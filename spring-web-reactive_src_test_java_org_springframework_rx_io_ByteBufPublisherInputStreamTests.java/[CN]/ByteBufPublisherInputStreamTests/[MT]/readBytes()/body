@@ -1,0 +1,22 @@
+{
+  ByteBuf abc=Unpooled.copiedBuffer(new byte[]{'a','b','c'});
+  ByteBuf def=Unpooled.copiedBuffer(new byte[]{'d','e','f'});
+  queue.putBuffer(abc);
+  queue.putBuffer(def);
+  queue.complete();
+  byte[] buf=new byte[2];
+  int read=this.is.read(buf);
+  assertEquals(2,read);
+  assertArrayEquals(new byte[]{'a','b'},buf);
+  read=this.is.read(buf);
+  assertEquals(1,read);
+  assertEquals('c',buf[0]);
+  read=this.is.read(buf);
+  assertEquals(2,read);
+  assertArrayEquals(new byte[]{'d','e'},buf);
+  read=this.is.read(buf);
+  assertEquals(1,read);
+  assertEquals('f',buf[0]);
+  read=this.is.read(buf);
+  assertEquals(-1,read);
+}
