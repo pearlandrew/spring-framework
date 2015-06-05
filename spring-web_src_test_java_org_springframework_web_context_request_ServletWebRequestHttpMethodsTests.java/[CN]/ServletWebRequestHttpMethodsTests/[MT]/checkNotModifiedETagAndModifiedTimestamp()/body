@@ -1,11 +1,11 @@
 {
   String eTag="\"Foo\"";
   servletRequest.addHeader("If-None-Match",eTag);
-  long currentTime=new Date().getTime();
-  long oneMinuteAgo=currentTime - (1000 * 60);
+  long currentEpoch=currentDate.getTime();
+  long oneMinuteAgo=currentEpoch - (1000 * 60);
   servletRequest.addHeader("If-Modified-Since",oneMinuteAgo);
-  assertFalse(request.checkNotModified(eTag,currentTime));
+  assertFalse(request.checkNotModified(eTag,currentEpoch));
   assertEquals(200,servletResponse.getStatus());
   assertEquals(eTag,servletResponse.getHeader("ETag"));
-  assertEquals("" + currentTime,servletResponse.getHeader("Last-Modified"));
+  assertEquals(dateFormat.format(currentDate),servletResponse.getHeader("Last-Modified"));
 }

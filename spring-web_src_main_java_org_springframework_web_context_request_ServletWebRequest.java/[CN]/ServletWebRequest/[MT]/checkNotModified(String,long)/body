@@ -1,7 +1,7 @@
 {
   HttpServletResponse response=getResponse();
   if (StringUtils.hasLength(etag) && !this.notModified) {
-    if (response == null || (!response.containsHeader(HEADER_ETAG) && !response.containsHeader(HEADER_LAST_MODIFIED))) {
+    if (response == null || isResponseCompatibleWithConditional(response,HEADER_ETAG,HEADER_LAST_MODIFIED)) {
       etag=addEtagPadding(etag);
       this.notModified=isETagNotModified(etag) && isTimeStampNotModified(lastModifiedTimestamp);
       if (response != null) {
@@ -9,7 +9,7 @@
           response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
         }
         response.setHeader(HEADER_ETAG,etag);
-        response.setDateHeader(HEADER_LAST_MODIFIED,lastModifiedTimestamp);
+        response.setHeader(HEADER_LAST_MODIFIED,formatDate(lastModifiedTimestamp));
       }
     }
   }
