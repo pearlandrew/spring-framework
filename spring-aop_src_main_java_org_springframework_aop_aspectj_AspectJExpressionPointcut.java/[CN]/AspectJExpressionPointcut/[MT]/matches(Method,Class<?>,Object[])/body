@@ -15,17 +15,27 @@
     thisObject=pmi.getProxy();
   }
  catch (  IllegalStateException ex) {
-    logger.debug("Couldn't access current invocation - matching with limited context: " + ex);
-  }
-  JoinPointMatch joinPointMatch=shadowMatch.matchesJoinPoint(thisObject,targetObject,args);
-  if (pmi != null) {
-    RuntimeTestWalker originalMethodResidueTest=getRuntimeTestWalker(originalShadowMatch);
-    if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject.getClass())) {
-      return false;
-    }
-    if (joinPointMatch.matches()) {
-      bindParameters(pmi,joinPointMatch);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Could not access current invocation - matching with limited context: " + ex);
     }
   }
-  return joinPointMatch.matches();
+  try {
+    JoinPointMatch joinPointMatch=shadowMatch.matchesJoinPoint(thisObject,targetObject,args);
+    if (pmi != null) {
+      RuntimeTestWalker originalMethodResidueTest=getRuntimeTestWalker(originalShadowMatch);
+      if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject.getClass())) {
+        return false;
+      }
+      if (joinPointMatch.matches()) {
+        bindParameters(pmi,joinPointMatch);
+      }
+    }
+    return joinPointMatch.matches();
+  }
+ catch (  Throwable ex) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Failed to evaluate join point for arguments " + Arrays.asList(args) + " - falling back to non-match",ex);
+    }
+    return false;
+  }
 }
