@@ -1,7 +1,18 @@
 {
   for (  SourceClass memberClass : sourceClass.getMemberClasses()) {
     if (ConfigurationClassUtils.isConfigurationCandidate(memberClass.getMetadata()) && !memberClass.getMetadata().getClassName().equals(configClass.getMetadata().getClassName())) {
-      processConfigurationClass(memberClass.asConfigClass(configClass));
+      if (this.importStack.contains(configClass)) {
+        this.problemReporter.error(new CircularImportProblem(configClass,this.importStack));
+      }
+ else {
+        this.importStack.push(configClass);
+        try {
+          processConfigurationClass(memberClass.asConfigClass(configClass));
+        }
+  finally {
+          this.importStack.pop();
+        }
+      }
     }
   }
 }
