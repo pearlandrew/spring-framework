@@ -2,15 +2,14 @@
   Assert.hasText(attributeName,"attributeName must not be null or empty");
   Assert.notNull(annotationType,"annotationType must not be null");
   Assert.notNull(expectedType,"expectedType must not be null");
-  Assert.isTrue(expectedType.isArray(),"expectedType must be an array");
   T attributeValue=getAttribute(attributeName,expectedType);
   String aliasName=AnnotationUtils.getAttributeAliasMap(annotationType).get(attributeName);
   T aliasValue=getAttribute(aliasName,expectedType);
-  boolean attributeDeclared=!ObjectUtils.isEmpty((Object[])attributeValue);
-  boolean aliasDeclared=!ObjectUtils.isEmpty((Object[])aliasValue);
+  boolean attributeDeclared=!ObjectUtils.isEmpty(attributeValue);
+  boolean aliasDeclared=!ObjectUtils.isEmpty(aliasValue);
   if (!ObjectUtils.nullSafeEquals(attributeValue,aliasValue) && attributeDeclared && aliasDeclared) {
     String elementName=(annotationSource == null ? "unknown element" : annotationSource.toString());
-    String msg=String.format("In annotation [%s] declared on [%s], " + "attribute [%s] and its alias [%s] are present with values of [%s] and [%s], " + "but only one is permitted.",this.displayName,elementName,attributeName,aliasName,ObjectUtils.nullSafeToString(attributeValue),ObjectUtils.nullSafeToString(aliasValue));
+    String msg=String.format("In annotation [%s] declared on [%s], " + "attribute [%s] and its alias [%s] are present with values of [%s] and [%s], " + "but only one is permitted.",annotationType.getName(),elementName,attributeName,aliasName,ObjectUtils.nullSafeToString(attributeValue),ObjectUtils.nullSafeToString(aliasValue));
     throw new AnnotationConfigurationException(msg);
   }
   if (!attributeDeclared) {
