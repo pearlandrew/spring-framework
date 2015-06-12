@@ -1,9 +1,8 @@
 {
-  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
-  ctx.register(EnableTxConfig.class,TxManagerConfig.class);
-  ctx.refresh();
+  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext(EnableTxConfig.class,TxManagerConfig.class);
   TransactionalTestBean bean=ctx.getBean(TransactionalTestBean.class);
-  assertThat("testBean is not a proxy",AopUtils.isAopProxy(bean),is(true));
+  assertTrue("testBean is not a proxy",AopUtils.isAopProxy(bean));
   Map<?,?> services=ctx.getBeansWithAnnotation(Service.class);
-  assertThat("Stereotype annotation not visible",services.containsKey("testBean"),is(true));
+  assertTrue("Stereotype annotation not visible",services.containsKey("testBean"));
+  ctx.close();
 }
