@@ -1,11 +1,11 @@
 {
   Assert.notNull(element,"AnnotatedElement must not be null");
-  Assert.hasText(annotationType,"annotationType must not be null or empty");
+  Assert.hasText(annotationName,"annotationName must not be null or empty");
   if (visited.add(element)) {
     try {
       Annotation[] annotations=(searchOnSuperclasses ? element.getDeclaredAnnotations() : element.getAnnotations());
       for (      Annotation annotation : annotations) {
-        if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && (annotation.annotationType().getName().equals(annotationType) || metaDepth > 0)) {
+        if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && (annotation.annotationType().getName().equals(annotationName) || metaDepth > 0)) {
           T result=processor.process(element,annotation,metaDepth);
           if (result != null) {
             return result;
@@ -14,7 +14,7 @@
       }
       for (      Annotation annotation : annotations) {
         if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-          T result=searchWithFindSemantics(annotation.annotationType(),annotationType,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth + 1);
+          T result=searchWithFindSemantics(annotation.annotationType(),annotationName,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth + 1);
           if (result != null) {
             processor.postProcess(annotation.annotationType(),annotation,result);
             return result;
@@ -24,13 +24,13 @@
       if (element instanceof Method) {
         Method method=(Method)element;
         Method resolvedMethod=BridgeMethodResolver.findBridgedMethod(method);
-        T result=searchWithFindSemantics(resolvedMethod,annotationType,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth);
+        T result=searchWithFindSemantics(resolvedMethod,annotationName,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth);
         if (result != null) {
           return result;
         }
         if (searchOnMethodsInInterfaces) {
           Class<?>[] ifcs=method.getDeclaringClass().getInterfaces();
-          result=searchOnInterfaces(method,annotationType,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth,ifcs);
+          result=searchOnInterfaces(method,annotationName,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth,ifcs);
           if (result != null) {
             return result;
           }
@@ -45,7 +45,7 @@
             try {
               Method equivalentMethod=clazz.getDeclaredMethod(method.getName(),method.getParameterTypes());
               Method resolvedEquivalentMethod=BridgeMethodResolver.findBridgedMethod(equivalentMethod);
-              result=searchWithFindSemantics(resolvedEquivalentMethod,annotationType,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth);
+              result=searchWithFindSemantics(resolvedEquivalentMethod,annotationName,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth);
               if (result != null) {
                 return result;
               }
@@ -53,7 +53,7 @@
  catch (            NoSuchMethodException ex) {
             }
             if (searchOnMethodsInInterfaces) {
-              result=searchOnInterfaces(method,annotationType,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth,clazz.getInterfaces());
+              result=searchOnInterfaces(method,annotationName,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth,clazz.getInterfaces());
               if (result != null) {
                 return result;
               }
@@ -65,7 +65,7 @@
         Class<?> clazz=(Class<?>)element;
         if (searchOnInterfaces) {
           for (          Class<?> ifc : clazz.getInterfaces()) {
-            T result=searchWithFindSemantics(ifc,annotationType,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth);
+            T result=searchWithFindSemantics(ifc,annotationName,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth);
             if (result != null) {
               return result;
             }
@@ -74,7 +74,7 @@
         if (searchOnSuperclasses) {
           Class<?> superclass=clazz.getSuperclass();
           if (superclass != null && Object.class != superclass) {
-            T result=searchWithFindSemantics(superclass,annotationType,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth);
+            T result=searchWithFindSemantics(superclass,annotationName,searchOnInterfaces,searchOnSuperclasses,searchOnMethodsInInterfaces,searchOnMethodsInSuperclasses,processor,visited,metaDepth);
             if (result != null) {
               return result;
             }

@@ -1,5 +1,5 @@
 {
-  List<AnnotationAttributes> attributesList=attributesMap.get(annotationType);
+  List<AnnotationAttributes> attributesList=attributesMap.get(annotationName);
   if (attributesList == null || attributesList.isEmpty()) {
     return null;
   }
@@ -8,12 +8,12 @@
   overridableAttributeNames.remove(AnnotationUtils.VALUE);
   List<String> annotationTypes=new ArrayList<String>(attributesMap.keySet());
   Collections.reverse(annotationTypes);
-  annotationTypes.remove(annotationType);
+  annotationTypes.remove(annotationName);
   for (  String currentAnnotationType : annotationTypes) {
     List<AnnotationAttributes> currentAttributesList=attributesMap.get(currentAnnotationType);
-    if (currentAttributesList != null && !currentAttributesList.isEmpty()) {
+    if (!ObjectUtils.isEmpty(currentAttributesList)) {
       Set<String> metaAnns=metaAnnotationMap.get(currentAnnotationType);
-      if (metaAnns != null && metaAnns.contains(annotationType)) {
+      if (metaAnns != null && metaAnns.contains(annotationName)) {
         AnnotationAttributes currentAttributes=currentAttributesList.get(0);
         for (        String overridableAttributeName : overridableAttributeNames) {
           Object value=currentAttributes.get(overridableAttributeName);
