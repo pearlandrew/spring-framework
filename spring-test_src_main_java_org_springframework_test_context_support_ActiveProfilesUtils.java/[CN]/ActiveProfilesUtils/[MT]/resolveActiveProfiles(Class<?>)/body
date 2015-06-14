@@ -1,6 +1,6 @@
 {
   Assert.notNull(testClass,"Class must not be null");
-  final Set<String> activeProfiles=new HashSet<String>();
+  final List<String[]> profileArrays=new ArrayList<String[]>();
   Class<ActiveProfiles> annotationType=ActiveProfiles.class;
   AnnotationDescriptor<ActiveProfiles> descriptor=MetaAnnotationUtils.findAnnotationDescriptor(testClass,annotationType);
   if (descriptor == null && logger.isDebugEnabled()) {
@@ -32,12 +32,17 @@
       logger.error(msg);
       throw new IllegalStateException(msg);
     }
+    profileArrays.add(profiles);
+    descriptor=(annotation.inheritProfiles() ? MetaAnnotationUtils.findAnnotationDescriptor(rootDeclaringClass.getSuperclass(),annotationType) : null);
+  }
+  Collections.reverse(profileArrays);
+  final Set<String> activeProfiles=new LinkedHashSet<String>();
+  for (  String[] profiles : profileArrays) {
     for (    String profile : profiles) {
       if (StringUtils.hasText(profile)) {
         activeProfiles.add(profile.trim());
       }
     }
-    descriptor=(annotation.inheritProfiles() ? MetaAnnotationUtils.findAnnotationDescriptor(rootDeclaringClass.getSuperclass(),annotationType) : null);
   }
   return StringUtils.toStringArray(activeProfiles);
 }
