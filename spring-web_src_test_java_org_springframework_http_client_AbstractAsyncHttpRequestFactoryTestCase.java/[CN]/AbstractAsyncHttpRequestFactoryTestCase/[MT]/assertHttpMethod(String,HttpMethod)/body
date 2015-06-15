@@ -2,6 +2,9 @@
   ClientHttpResponse response=null;
   try {
     AsyncClientHttpRequest request=this.factory.createAsyncRequest(new URI(baseUrl + "/methods/" + path),method);
+    if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
+      request.getBody().write(32);
+    }
     Future<ClientHttpResponse> futureResponse=request.executeAsync();
     response=futureResponse.get();
     assertEquals("Invalid response status",HttpStatus.OK,response.getStatusCode());
