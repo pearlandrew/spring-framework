@@ -1,0 +1,16 @@
+{
+  if (!CompletableFuture.class.isAssignableFrom(returnType)) {
+    return null;
+  }
+  return CompletableFuture.supplyAsync(new Supplier<T>(){
+    @Override public T get(){
+      try {
+        return task.call();
+      }
+ catch (      Throwable ex) {
+        throw new CompletionException(ex);
+      }
+    }
+  }
+,executor);
+}

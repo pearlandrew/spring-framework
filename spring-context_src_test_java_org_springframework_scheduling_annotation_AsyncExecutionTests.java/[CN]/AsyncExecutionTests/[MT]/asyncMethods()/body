@@ -12,20 +12,41 @@
   assertEquals("20",future.get());
   ListenableFuture<String> listenableFuture=asyncTest.returnSomethingListenable(20);
   assertEquals("20",listenableFuture.get());
-  future=asyncTest.returnSomething(0);
+  CompletableFuture<String> completableFuture=asyncTest.returnSomethingCompletable(20);
+  assertEquals("20",completableFuture.get());
   try {
-    future.get();
+    asyncTest.returnSomething(0).get();
     fail("Should have thrown ExecutionException");
   }
  catch (  ExecutionException ex) {
     assertTrue(ex.getCause() instanceof IllegalArgumentException);
   }
-  future=asyncTest.returnSomething(-1);
   try {
-    future.get();
+    asyncTest.returnSomething(-1).get();
     fail("Should have thrown ExecutionException");
   }
  catch (  ExecutionException ex) {
     assertTrue(ex.getCause() instanceof IOException);
+  }
+  try {
+    asyncTest.returnSomethingListenable(0).get();
+    fail("Should have thrown ExecutionException");
+  }
+ catch (  ExecutionException ex) {
+    assertTrue(ex.getCause() instanceof IllegalArgumentException);
+  }
+  try {
+    asyncTest.returnSomethingListenable(-1).get();
+    fail("Should have thrown ExecutionException");
+  }
+ catch (  ExecutionException ex) {
+    assertTrue(ex.getCause() instanceof IOException);
+  }
+  try {
+    asyncTest.returnSomethingCompletable(0).get();
+    fail("Should have thrown ExecutionException");
+  }
+ catch (  ExecutionException ex) {
+    assertTrue(ex.getCause() instanceof IllegalArgumentException);
   }
 }
