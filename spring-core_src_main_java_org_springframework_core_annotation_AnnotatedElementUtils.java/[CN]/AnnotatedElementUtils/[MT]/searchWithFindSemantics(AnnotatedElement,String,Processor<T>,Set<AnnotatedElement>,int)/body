@@ -1,0 +1,80 @@
+{
+  Assert.notNull(element,"AnnotatedElement must not be null");
+  Assert.hasText(annotationName,"annotationName must not be null or empty");
+  if (visited.add(element)) {
+    try {
+      Annotation[] annotations=element.getDeclaredAnnotations();
+      for (      Annotation annotation : annotations) {
+        if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && (annotation.annotationType().getName().equals(annotationName) || metaDepth > 0)) {
+          T result=processor.process(element,annotation,metaDepth);
+          if (result != null) {
+            return result;
+          }
+        }
+      }
+      for (      Annotation annotation : annotations) {
+        if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
+          T result=searchWithFindSemantics(annotation.annotationType(),annotationName,processor,visited,metaDepth + 1);
+          if (result != null) {
+            processor.postProcess(annotation.annotationType(),annotation,result);
+            return result;
+          }
+        }
+      }
+      if (element instanceof Method) {
+        Method method=(Method)element;
+        Method resolvedMethod=BridgeMethodResolver.findBridgedMethod(method);
+        T result=searchWithFindSemantics(resolvedMethod,annotationName,processor,visited,metaDepth);
+        if (result != null) {
+          return result;
+        }
+        Class<?>[] ifcs=method.getDeclaringClass().getInterfaces();
+        result=searchOnInterfaces(method,annotationName,processor,visited,metaDepth,ifcs);
+        if (result != null) {
+          return result;
+        }
+        Class<?> clazz=method.getDeclaringClass();
+        while (true) {
+          clazz=clazz.getSuperclass();
+          if (clazz == null || Object.class == clazz) {
+            break;
+          }
+          try {
+            Method equivalentMethod=clazz.getDeclaredMethod(method.getName(),method.getParameterTypes());
+            Method resolvedEquivalentMethod=BridgeMethodResolver.findBridgedMethod(equivalentMethod);
+            result=searchWithFindSemantics(resolvedEquivalentMethod,annotationName,processor,visited,metaDepth);
+            if (result != null) {
+              return result;
+            }
+          }
+ catch (          NoSuchMethodException ex) {
+          }
+          result=searchOnInterfaces(method,annotationName,processor,visited,metaDepth,clazz.getInterfaces());
+          if (result != null) {
+            return result;
+          }
+        }
+      }
+      if (element instanceof Class) {
+        Class<?> clazz=(Class<?>)element;
+        for (        Class<?> ifc : clazz.getInterfaces()) {
+          T result=searchWithFindSemantics(ifc,annotationName,processor,visited,metaDepth);
+          if (result != null) {
+            return result;
+          }
+        }
+        Class<?> superclass=clazz.getSuperclass();
+        if (superclass != null && Object.class != superclass) {
+          T result=searchWithFindSemantics(superclass,annotationName,processor,visited,metaDepth);
+          if (result != null) {
+            return result;
+          }
+        }
+      }
+    }
+ catch (    Exception ex) {
+      AnnotationUtils.handleIntrospectionFailure(element,ex);
+    }
+  }
+  return null;
+}
