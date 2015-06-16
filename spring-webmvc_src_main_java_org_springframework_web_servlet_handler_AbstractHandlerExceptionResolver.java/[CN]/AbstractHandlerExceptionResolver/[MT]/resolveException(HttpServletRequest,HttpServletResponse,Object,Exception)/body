@@ -1,11 +1,14 @@
 {
   if (shouldApplyTo(request,handler)) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Resolving exception from handler [" + handler + "]: "+ ex);
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug("Resolving exception from handler [" + handler + "]: "+ ex);
     }
-    logException(ex,request);
     prepareResponse(ex,response);
-    return doResolveException(request,response,handler,ex);
+    ModelAndView mav=doResolveException(request,response,handler,ex);
+    if (mav != null) {
+      logException(ex,request);
+    }
+    return mav;
   }
  else {
     return null;
