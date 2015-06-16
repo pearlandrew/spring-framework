@@ -1,12 +1,22 @@
 {
-  try {
-    Objenesis objenesis=(enhancer.getUseCache() ? cachedObjenesis : nonCachedObjenesis);
-    Factory factory=(Factory)objenesis.newInstance(enhancer.createClass());
-    factory.setCallbacks(callbacks);
-    return factory;
+  Class<?> proxyClass=enhancer.createClass();
+  Object proxyInstance=null;
+  if (objenesis.isWorthTrying()) {
+    try {
+      proxyInstance=objenesis.newInstance(proxyClass,enhancer.getUseCache());
+    }
+ catch (    ObjenesisException ex) {
+      logger.debug("Unable to instantiate proxy using Objenesis, " + "falling back to regular proxy construction",ex);
+    }
   }
- catch (  ObjenesisException ex) {
-    logger.debug("Unable to instantiate proxy using Objenesis, falling back to regular proxy construction",ex);
-    return super.createProxyClassAndInstance(enhancer,callbacks);
+  if (proxyInstance == null) {
+    try {
+      proxyInstance=(this.constructorArgs != null ? proxyClass.getConstructor(this.constructorArgTypes).newInstance(this.constructorArgs) : proxyClass.newInstance());
+    }
+ catch (    Exception ex) {
+      throw new AopConfigException("Unable to instantiate proxy using Objenesis, " + "and regular proxy instantiation via default constructor fails as well",ex);
+    }
   }
+  ((Factory)proxyInstance).setCallbacks(callbacks);
+  return proxyInstance;
 }

@@ -4,16 +4,24 @@
   enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
   enhancer.setCallbackType(MethodInterceptor.class);
   Class<?> fbClass=enhancer.createClass();
-  Objenesis objenesis=(enhancer.getUseCache() ? cachedObjenesis : nonCachedObjenesis);
-  Factory factory;
-  try {
-    factory=(Factory)objenesis.newInstance(fbClass);
+  Object fbProxy=null;
+  if (objenesis.isWorthTrying()) {
+    try {
+      fbProxy=objenesis.newInstance(fbClass,enhancer.getUseCache());
+    }
+ catch (    ObjenesisException ex) {
+      logger.debug("Unable to instantiate enhanced FactoryBean using Objenesis, " + "falling back to regular construction",ex);
+    }
   }
- catch (  ObjenesisException ex) {
-    logger.debug("Unable to instantiate enhanced FactoryBean using Objenesis, " + "falling back to regular construction",ex);
-    factory=(Factory)fbClass.newInstance();
+  if (fbProxy == null) {
+    try {
+      fbProxy=fbClass.newInstance();
+    }
+ catch (    Exception ex) {
+      throw new IllegalStateException("Unable to instantiate enhanced FactoryBean using Objenesis, " + "and regular FactoryBean instantiation via default constructor fails as well",ex);
+    }
   }
-  factory.setCallback(0,new MethodInterceptor(){
+  ((Factory)fbProxy).setCallback(0,new MethodInterceptor(){
     @Override public Object intercept(    Object obj,    Method method,    Object[] args,    MethodProxy proxy) throws Throwable {
       if (method.getName().equals("getObject") && args.length == 0) {
         return beanFactory.getBean(beanName);
@@ -22,5 +30,5 @@
     }
   }
 );
-  return factory;
+  return fbProxy;
 }

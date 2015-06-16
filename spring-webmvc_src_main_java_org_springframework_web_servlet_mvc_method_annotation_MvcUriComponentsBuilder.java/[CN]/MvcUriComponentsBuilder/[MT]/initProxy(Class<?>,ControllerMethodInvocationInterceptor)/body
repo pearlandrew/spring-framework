@@ -12,8 +12,25 @@
     enhancer.setInterfaces(new Class<?>[]{MethodInvocationInfo.class});
     enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
     enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
-    Factory factory=(Factory)objenesis.newInstance(enhancer.createClass());
-    factory.setCallbacks(new Callback[]{interceptor});
-    return (T)factory;
+    Class<?> proxyClass=enhancer.createClass();
+    Object proxy=null;
+    if (objenesis.isWorthTrying()) {
+      try {
+        proxy=objenesis.newInstance(proxyClass,enhancer.getUseCache());
+      }
+ catch (      ObjenesisException ex) {
+        logger.debug("Unable to instantiate controller proxy using Objenesis, " + "falling back to regular construction",ex);
+      }
+    }
+    if (proxy == null) {
+      try {
+        proxy=proxyClass.newInstance();
+      }
+ catch (      Exception ex) {
+        throw new IllegalStateException("Unable to instantiate controller proxy using Objenesis, " + "and regular controller instantiation via default constructor fails as well",ex);
+      }
+    }
+    ((Factory)proxy).setCallbacks(new Callback[]{interceptor});
+    return (T)proxy;
   }
 }
