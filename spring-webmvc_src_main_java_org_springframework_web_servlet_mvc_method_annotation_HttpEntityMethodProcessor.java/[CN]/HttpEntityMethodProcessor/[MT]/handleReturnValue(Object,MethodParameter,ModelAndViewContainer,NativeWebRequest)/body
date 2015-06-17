@@ -11,14 +11,21 @@
     outputMessage.setStatusCode(((ResponseEntity<?>)responseEntity).getStatusCode());
   }
   HttpHeaders entityHeaders=responseEntity.getHeaders();
-  if (!entityHeaders.isEmpty()) {
-    outputMessage.getHeaders().putAll(entityHeaders);
-  }
   Object body=responseEntity.getBody();
   if (responseEntity instanceof ResponseEntity) {
+    for (    String headerName : entityHeaders.keySet()) {
+      if (!HttpHeaders.LAST_MODIFIED.equals(headerName) && !HttpHeaders.ETAG.equals(headerName)) {
+        outputMessage.getHeaders().put(headerName,entityHeaders.get(headerName));
+      }
+    }
     if (isResourceNotModified(webRequest,(ResponseEntity<?>)responseEntity)) {
       outputMessage.flush();
       return;
+    }
+  }
+ else {
+    if (!entityHeaders.isEmpty()) {
+      outputMessage.getHeaders().putAll(entityHeaders);
     }
   }
   writeWithMessageConverters(body,returnType,inputMessage,outputMessage);
