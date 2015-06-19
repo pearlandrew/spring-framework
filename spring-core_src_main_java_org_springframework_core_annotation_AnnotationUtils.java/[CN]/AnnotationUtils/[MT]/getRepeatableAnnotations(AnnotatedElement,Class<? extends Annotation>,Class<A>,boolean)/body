@@ -1,0 +1,14 @@
+{
+  Assert.notNull(annotatedElement,"annotatedElement must not be null");
+  Assert.notNull(annotationType,"annotationType must not be null");
+  try {
+    if (annotatedElement instanceof Method) {
+      annotatedElement=BridgeMethodResolver.findBridgedMethod((Method)annotatedElement);
+    }
+    return new AnnotationCollector<A>(containerAnnotationType,annotationType,declaredMode).getResult(annotatedElement);
+  }
+ catch (  Exception ex) {
+    handleIntrospectionFailure(annotatedElement,ex);
+  }
+  return Collections.emptySet();
+}
