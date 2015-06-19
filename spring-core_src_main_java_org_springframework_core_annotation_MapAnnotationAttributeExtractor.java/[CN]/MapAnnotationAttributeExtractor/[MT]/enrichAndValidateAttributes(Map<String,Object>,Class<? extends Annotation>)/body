@@ -1,7 +1,25 @@
 {
+  Map<String,String> attributeAliasMap=getAttributeAliasMap(annotationType);
   for (  Method attributeMethod : getAttributeMethods(annotationType)) {
     String attributeName=attributeMethod.getName();
     Object attributeValue=attributes.get(attributeName);
+    if (attributeValue == null) {
+      String aliasName=attributeAliasMap.get(attributeName);
+      if (aliasName != null) {
+        Object aliasValue=attributes.get(aliasName);
+        if (aliasValue != null) {
+          attributeValue=aliasValue;
+          attributes.put(attributeName,attributeValue);
+        }
+      }
+    }
+    if (attributeValue == null) {
+      Object defaultValue=getDefaultValue(annotationType,attributeName);
+      if (defaultValue != null) {
+        attributeValue=defaultValue;
+        attributes.put(attributeName,attributeValue);
+      }
+    }
     if (attributeValue == null) {
       throw new IllegalArgumentException(String.format("Attributes map [%s] returned null for required attribute [%s] defined by annotation type [%s].",attributes,attributeName,annotationType.getName()));
     }
@@ -10,4 +28,5 @@
       throw new IllegalArgumentException(String.format("Attributes map [%s] returned a value of type [%s] for attribute [%s], " + "but a value of type [%s] is required as defined by annotation type [%s].",attributes,attributeValue.getClass().getName(),attributeName,returnType.getName(),annotationType.getName()));
     }
   }
+  return attributes;
 }

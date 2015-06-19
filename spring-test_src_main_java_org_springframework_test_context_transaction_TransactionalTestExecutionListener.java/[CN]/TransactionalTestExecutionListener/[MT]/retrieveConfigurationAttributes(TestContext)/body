@@ -5,19 +5,12 @@
     if (logger.isDebugEnabled()) {
       logger.debug(String.format("Retrieved @TransactionConfiguration [%s] for test class [%s].",txConfig,clazz));
     }
-    String transactionManagerName;
-    boolean defaultRollback;
-    if (txConfig != null) {
-      transactionManagerName=txConfig.transactionManager();
-      defaultRollback=txConfig.defaultRollback();
+    if (txConfig == null) {
+      txConfig=defaultTransactionConfiguration;
     }
- else {
-      transactionManagerName=DEFAULT_TRANSACTION_MANAGER_NAME;
-      defaultRollback=DEFAULT_DEFAULT_ROLLBACK;
-    }
-    TransactionConfigurationAttributes configAttributes=new TransactionConfigurationAttributes(transactionManagerName,defaultRollback);
+    TransactionConfigurationAttributes configAttributes=new TransactionConfigurationAttributes(txConfig.transactionManager(),txConfig.defaultRollback());
     if (logger.isDebugEnabled()) {
-      logger.debug(String.format("Retrieved TransactionConfigurationAttributes %s for class [%s].",configAttributes,clazz));
+      logger.debug(String.format("Using TransactionConfigurationAttributes %s for class [%s].",configAttributes,clazz));
     }
     this.configurationAttributes=configAttributes;
   }
