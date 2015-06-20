@@ -1,17 +1,19 @@
 {
-  if (requestOrigin == null) {
+  if (!StringUtils.hasText(requestOrigin)) {
     return null;
   }
-  List<String> allowedOrigins=this.allowedOrigins == null ? new ArrayList<String>() : this.allowedOrigins;
-  if (allowedOrigins.contains("*")) {
-    if (this.allowCredentials == null || !this.allowCredentials) {
-      return "*";
+  if (ObjectUtils.isEmpty(this.allowedOrigins)) {
+    return null;
+  }
+  if (this.allowedOrigins.contains(ALL)) {
+    if ((this.allowCredentials == null) || !this.allowCredentials.booleanValue()) {
+      return ALL;
     }
  else {
       return requestOrigin;
     }
   }
-  for (  String allowedOrigin : allowedOrigins) {
+  for (  String allowedOrigin : this.allowedOrigins) {
     if (requestOrigin.equalsIgnoreCase(allowedOrigin)) {
       return requestOrigin;
     }
