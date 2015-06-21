@@ -1,0 +1,18 @@
+{
+  if (completableFuturePresent) {
+    Future<Object> result=CompletableFutureDelegate.processCompletableFuture(returnType,task,executor);
+    if (result != null) {
+      return result;
+    }
+  }
+  if (ListenableFuture.class.isAssignableFrom(returnType)) {
+    return ((AsyncListenableTaskExecutor)executor).submitListenable(task);
+  }
+ else   if (Future.class.isAssignableFrom(returnType)) {
+    return executor.submit(task);
+  }
+ else {
+    executor.submit(task);
+    return null;
+  }
+}
