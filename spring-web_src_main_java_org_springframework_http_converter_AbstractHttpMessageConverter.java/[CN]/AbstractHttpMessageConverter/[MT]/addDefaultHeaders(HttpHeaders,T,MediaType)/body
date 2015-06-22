@@ -1,0 +1,21 @@
+{
+  if (headers.getContentType() == null) {
+    MediaType contentTypeToUse=contentType;
+    if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
+      contentTypeToUse=getDefaultContentType(t);
+    }
+ else     if (MediaType.APPLICATION_OCTET_STREAM.equals(contentType)) {
+      MediaType mediaType=getDefaultContentType(t);
+      contentTypeToUse=(mediaType != null ? mediaType : contentTypeToUse);
+    }
+    if (contentTypeToUse != null) {
+      headers.setContentType(contentTypeToUse);
+    }
+  }
+  if (headers.getContentLength() == -1) {
+    Long contentLength=getContentLength(t,headers.getContentType());
+    if (contentLength != null) {
+      headers.setContentLength(contentLength);
+    }
+  }
+}
