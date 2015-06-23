@@ -2,7 +2,12 @@
   if (!isRunning()) {
     this.running=true;
     try {
-      this.factory.init();
+      if (webSocketFactoryInitMethod != null) {
+        webSocketFactoryInitMethod.invoke(this.factory);
+      }
+ else {
+        this.factory.init(this.servletContext);
+      }
     }
  catch (    Exception ex) {
       throw new IllegalStateException("Unable to initialize Jetty WebSocketServerFactory",ex);
