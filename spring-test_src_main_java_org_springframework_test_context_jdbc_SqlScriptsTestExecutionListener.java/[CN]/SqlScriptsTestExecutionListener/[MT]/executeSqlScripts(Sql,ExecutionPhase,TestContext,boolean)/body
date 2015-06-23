@@ -16,9 +16,16 @@
   populator.setIgnoreFailedDrops(mergedSqlConfig.getErrorMode() == ErrorMode.IGNORE_FAILED_DROPS);
   String[] scripts=getScripts(sql,testContext,classLevel);
   scripts=TestContextResourceUtils.convertToClasspathResourcePaths(testContext.getTestClass(),scripts);
-  populator.setScripts(TestContextResourceUtils.convertToResources(testContext.getApplicationContext(),scripts));
+  List<Resource> scriptResources=TestContextResourceUtils.convertToResourceList(testContext.getApplicationContext(),scripts);
+  for (  String statement : sql.statements()) {
+    if (StringUtils.hasText(statement)) {
+      statement=statement.trim();
+      scriptResources.add(new ByteArrayResource(statement.getBytes(),"from inlined SQL statement: " + statement));
+    }
+  }
+  populator.setScripts(scriptResources.toArray(new Resource[scriptResources.size()]));
   if (logger.isDebugEnabled()) {
-    logger.debug("Executing SQL scripts: " + ObjectUtils.nullSafeToString(scripts));
+    logger.debug("Executing SQL scripts: " + ObjectUtils.nullSafeToString(scriptResources));
   }
   String dsName=mergedSqlConfig.getDataSource();
   String tmName=mergedSqlConfig.getTransactionManager();
