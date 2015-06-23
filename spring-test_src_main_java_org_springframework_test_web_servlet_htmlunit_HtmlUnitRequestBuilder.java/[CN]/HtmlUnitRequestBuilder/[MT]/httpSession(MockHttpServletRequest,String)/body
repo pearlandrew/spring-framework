@@ -1,0 +1,18 @@
+{
+  MockHttpSession session;
+synchronized (sessions) {
+    session=sessions.get(sessionid);
+    if (session == null) {
+      session=new HtmlUnitMockHttpSession(request,sessionid);
+      session.setNew(true);
+synchronized (sessions) {
+        sessions.put(sessionid,session);
+      }
+      addSessionCookie(request,sessionid);
+    }
+ else {
+      session.setNew(false);
+    }
+  }
+  return session;
+}

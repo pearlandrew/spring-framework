@@ -1,0 +1,12 @@
+{
+  Assert.notNull(defaultConnection,"defaultConnection cannot be null");
+  MockMvcWebConnection mockMvcWebConnection=new MockMvcWebConnection(mockMvc,contextPath);
+  if (alwaysUseMockMvc) {
+    return mockMvcWebConnection;
+  }
+  List<DelegatingWebConnection.DelegateWebConnection> delegates=new ArrayList<DelegatingWebConnection.DelegateWebConnection>(mockMvcRequestMatchers.size());
+  for (  WebRequestMatcher matcher : mockMvcRequestMatchers) {
+    delegates.add(new DelegatingWebConnection.DelegateWebConnection(matcher,mockMvcWebConnection));
+  }
+  return new DelegatingWebConnection(defaultConnection,delegates);
+}
