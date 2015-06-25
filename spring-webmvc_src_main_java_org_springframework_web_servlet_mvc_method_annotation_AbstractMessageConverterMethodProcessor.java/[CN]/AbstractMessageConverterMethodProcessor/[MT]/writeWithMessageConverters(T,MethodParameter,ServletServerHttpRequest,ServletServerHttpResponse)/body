@@ -1,8 +1,9 @@
 {
   Class<?> returnValueClass=getReturnValueType(returnValue,returnType);
+  Type returnValueType=getGenericType(returnType);
   HttpServletRequest servletRequest=inputMessage.getServletRequest();
   List<MediaType> requestedMediaTypes=getAcceptableMediaTypes(servletRequest);
-  List<MediaType> producibleMediaTypes=getProducibleMediaTypes(servletRequest,returnValueClass);
+  List<MediaType> producibleMediaTypes=getProducibleMediaTypes(servletRequest,returnValueClass,returnValueType);
   Assert.isTrue(returnValue == null || !producibleMediaTypes.isEmpty(),"No converter found for return value of type: " + returnValueClass);
   Set<MediaType> compatibleMediaTypes=new LinkedHashSet<MediaType>();
   for (  MediaType requestedType : requestedMediaTypes) {
@@ -34,23 +35,22 @@
   if (selectedMediaType != null) {
     selectedMediaType=selectedMediaType.removeQualityValue();
     for (    HttpMessageConverter<?> messageConverter : this.messageConverters) {
-      if (messageConverter.canWrite(returnValueClass,selectedMediaType)) {
+      if (messageConverter instanceof GenericHttpMessageConverter) {
+        if (((GenericHttpMessageConverter<T>)messageConverter).canWrite(returnValueType,returnValueClass,selectedMediaType)) {
+          returnValue=(T)getAdvice().beforeBodyWrite(returnValue,returnType,selectedMediaType,(Class<? extends HttpMessageConverter<?>>)messageConverter.getClass(),inputMessage,outputMessage);
+          if (returnValue != null) {
+            ((GenericHttpMessageConverter<T>)messageConverter).write(returnValue,returnValueType,selectedMediaType,outputMessage);
+            if (logger.isDebugEnabled()) {
+              logger.debug("Written [" + returnValue + "] as \""+ selectedMediaType+ "\" using ["+ messageConverter+ "]");
+            }
+          }
+          return;
+        }
+      }
+ else       if (messageConverter.canWrite(returnValueClass,selectedMediaType)) {
         returnValue=(T)getAdvice().beforeBodyWrite(returnValue,returnType,selectedMediaType,(Class<? extends HttpMessageConverter<?>>)messageConverter.getClass(),inputMessage,outputMessage);
         if (returnValue != null) {
-          if (messageConverter instanceof GenericHttpMessageConverter) {
-            Type type;
-            if (HttpEntity.class.isAssignableFrom(returnType.getParameterType())) {
-              returnType.increaseNestingLevel();
-              type=returnType.getNestedGenericParameterType();
-            }
- else {
-              type=returnType.getGenericParameterType();
-            }
-            ((GenericHttpMessageConverter<T>)messageConverter).write(returnValue,type,selectedMediaType,outputMessage);
-          }
- else {
-            ((HttpMessageConverter<T>)messageConverter).write(returnValue,selectedMediaType,outputMessage);
-          }
+          ((HttpMessageConverter<T>)messageConverter).write(returnValue,selectedMediaType,outputMessage);
           if (logger.isDebugEnabled()) {
             logger.debug("Written [" + returnValue + "] as \""+ selectedMediaType+ "\" using ["+ messageConverter+ "]");
           }

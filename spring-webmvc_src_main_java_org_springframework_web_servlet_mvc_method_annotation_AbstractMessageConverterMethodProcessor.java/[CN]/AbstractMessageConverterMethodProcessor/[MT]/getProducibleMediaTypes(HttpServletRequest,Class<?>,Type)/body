@@ -1,0 +1,23 @@
+{
+  Set<MediaType> mediaTypes=(Set<MediaType>)request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+  if (!CollectionUtils.isEmpty(mediaTypes)) {
+    return new ArrayList<MediaType>(mediaTypes);
+  }
+ else   if (!this.allSupportedMediaTypes.isEmpty()) {
+    List<MediaType> result=new ArrayList<MediaType>();
+    for (    HttpMessageConverter<?> converter : this.messageConverters) {
+      if (converter instanceof GenericHttpMessageConverter && returnValueType != null) {
+        if (((GenericHttpMessageConverter<?>)converter).canWrite(returnValueType,returnValueClass,null)) {
+          result.addAll(converter.getSupportedMediaTypes());
+        }
+      }
+ else       if (converter.canWrite(returnValueClass,null)) {
+        result.addAll(converter.getSupportedMediaTypes());
+      }
+    }
+    return result;
+  }
+ else {
+    return Collections.singletonList(MediaType.ALL);
+  }
+}
