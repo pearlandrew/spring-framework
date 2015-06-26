@@ -7,14 +7,14 @@
     FilterProvider filters=null;
     Object value=object;
     JavaType javaType=null;
-    if (type != null) {
-      javaType=getJavaType(type,null);
-    }
     if (object instanceof MappingJacksonValue) {
       MappingJacksonValue container=(MappingJacksonValue)object;
       value=container.getValue();
       serializationView=container.getSerializationView();
       filters=container.getFilters();
+    }
+    if (jackson26Available && type != null && value != null && TypeUtils.isAssignable(type,value.getClass())) {
+      javaType=getJavaType(type,null);
     }
     ObjectWriter objectWriter;
     if (serializationView != null) {
@@ -26,7 +26,7 @@
  else {
       objectWriter=this.objectMapper.writer();
     }
-    if (javaType != null && value != null && TypeUtils.isAssignable(type,value.getClass())) {
+    if (javaType != null) {
       objectWriter=objectWriter.withType(javaType);
     }
     objectWriter.writeValue(generator,value);
