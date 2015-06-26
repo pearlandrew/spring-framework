@@ -1,14 +1,16 @@
 {
   HttpServletResponse response=getResponse();
   if (StringUtils.hasLength(etag) && !this.notModified) {
-    if (response == null || isResponseCompatibleWithConditional(response,HEADER_ETAG)) {
+    if (response == null || HttpStatus.valueOf(response.getStatus()).is2xxSuccessful()) {
       etag=addEtagPadding(etag);
       this.notModified=isETagNotModified(etag);
       if (response != null) {
         if (this.notModified && supportsNotModifiedStatus()) {
           response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
         }
-        response.setHeader(HEADER_ETAG,etag);
+        if (response.getHeader(HEADER_ETAG) == null) {
+          response.setHeader(HEADER_ETAG,etag);
+        }
       }
     }
   }
