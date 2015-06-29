@@ -4,9 +4,9 @@
     if (this.logger.isDebugEnabled()) {
       this.logger.debug("Loading from YAML: " + resource);
     }
-    InputStream stream=resource.getInputStream();
+    Reader reader=new UnicodeReader(resource.getInputStream());
     try {
-      for (      Object object : yaml.loadAll(stream)) {
+      for (      Object object : yaml.loadAll(reader)) {
         if (object != null && process(asMap(object),callback)) {
           count++;
           if (this.resolutionMethod == ResolutionMethod.FIRST_FOUND) {
@@ -19,7 +19,7 @@
       }
     }
   finally {
-      stream.close();
+      reader.close();
     }
   }
  catch (  IOException ex) {
