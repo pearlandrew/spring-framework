@@ -15,6 +15,7 @@
     ResolvableType resolvableType=(param != null ? ResolvableType.forMethodParameter(param) : ResolvableType.forType(targetType));
     targetClass=(Class<T>)resolvableType.resolve();
   }
+  HttpMethod httpMethod=((HttpRequest)inputMessage).getMethod();
   inputMessage=new EmptyBodyCheckingHttpInputMessage(inputMessage);
   Object body=NO_VALUE;
   for (  HttpMessageConverter<?> converter : this.messageConverters) {
@@ -56,6 +57,9 @@
     }
   }
   if (body == NO_VALUE) {
+    if (!SUPPORTED_METHODS.contains(httpMethod)) {
+      return null;
+    }
     throw new HttpMediaTypeNotSupportedException(contentType,this.allSupportedMediaTypes);
   }
   return body;
