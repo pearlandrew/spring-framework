@@ -1,0 +1,23 @@
+{
+  try {
+    if (this.currentStream != null && this.currentStream.available() > 0) {
+      return this.currentStream;
+    }
+ else     if (this.queue.isComplete()) {
+      return null;
+    }
+ else     if (this.queue.isHeadSignal()) {
+      byte[] current=this.queue.pollSignal();
+      this.currentStream=new ByteArrayInputStream(current);
+      return this.currentStream;
+    }
+ else     if (this.queue.isHeadError()) {
+      Throwable t=this.queue.pollError();
+      throw t instanceof IOException ? (IOException)t : new IOException(t);
+    }
+  }
+ catch (  InterruptedException ex) {
+    Thread.currentThread().interrupt();
+  }
+  return null;
+}
