@@ -1,17 +1,11 @@
 {
-  ObjectMapper objectMapper;
+  ObjectMapper mapper;
   if (this.createXmlMapper) {
-    try {
-      Class<? extends ObjectMapper> xmlMapper=(Class<? extends ObjectMapper>)ClassUtils.forName("com.fasterxml.jackson.dataformat.xml.XmlMapper",this.moduleClassLoader);
-      objectMapper=BeanUtils.instantiate(xmlMapper);
-    }
- catch (    ClassNotFoundException ex) {
-      throw new IllegalStateException("Could not instantiate XmlMapper - not found on classpath");
-    }
+    mapper=new XmlObjectMapperInitializer().create();
   }
  else {
-    objectMapper=new ObjectMapper();
+    mapper=new ObjectMapper();
   }
-  configure(objectMapper);
-  return (T)objectMapper;
+  configure(mapper);
+  return (T)mapper;
 }

@@ -10,11 +10,14 @@
   ArgumentCaptor<SAXSource> sourceCaptor=ArgumentCaptor.forClass(SAXSource.class);
   verify(unmarshaller).unmarshal(sourceCaptor.capture());
   SAXSource result=sourceCaptor.getValue();
+  assertEquals(true,result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
   assertEquals(false,result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
   reset(unmarshaller);
   marshaller.setProcessExternalEntities(true);
+  marshaller.setSupportDtd(true);
   marshaller.unmarshal(new StreamSource("1"));
   verify(unmarshaller).unmarshal(sourceCaptor.capture());
   result=sourceCaptor.getValue();
+  assertEquals(false,result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
   assertEquals(true,result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
 }

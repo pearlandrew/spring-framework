@@ -10,7 +10,13 @@
       return jaxbElement.getValue();
     }
   }
- catch (  UnmarshalException ex) {
+ catch (  NullPointerException ex) {
+    if (!isSupportDtd()) {
+      throw new HttpMessageNotReadableException("NPE while unmarshalling. " + "This can happen on JDK 1.6 due to the presence of DTD " + "declarations, which are disabled.",ex);
+    }
+    throw ex;
+  }
+catch (  UnmarshalException ex) {
     throw new HttpMessageNotReadableException("Could not unmarshal to [" + clazz + "]: "+ ex.getMessage(),ex);
   }
 catch (  JAXBException ex) {
