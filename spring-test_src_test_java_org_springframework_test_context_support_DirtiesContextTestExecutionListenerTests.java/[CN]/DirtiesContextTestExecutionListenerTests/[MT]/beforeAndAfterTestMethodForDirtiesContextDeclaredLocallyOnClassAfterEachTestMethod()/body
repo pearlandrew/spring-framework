@@ -2,8 +2,10 @@
   Class<?> clazz=DirtiesContextDeclaredLocallyAfterEachTestMethod.class;
   BDDMockito.<Class<?>>given(testContext.getTestClass()).willReturn(clazz);
   given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("clean"));
-  listener.beforeTestMethod(testContext);
+  beforeListener.beforeTestMethod(testContext);
+  afterListener.beforeTestMethod(testContext);
   verify(testContext,times(0)).markApplicationContextDirty(any(HierarchyMode.class));
-  listener.afterTestMethod(testContext);
+  afterListener.afterTestMethod(testContext);
+  beforeListener.afterTestMethod(testContext);
   verify(testContext,times(1)).markApplicationContextDirty(EXHAUSTIVE);
 }
