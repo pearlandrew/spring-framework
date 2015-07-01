@@ -1,17 +1,20 @@
 {
-  ByteBuf abc=Unpooled.copiedBuffer(new byte[]{'a','b','c'});
-  ByteBuf def=Unpooled.copiedBuffer(new byte[]{'d','e','f'});
+  byte[] abc=new byte[]{'a','b','c'};
+  byte[] def=new byte[]{'d','e','f'};
   queue.putSignal(abc);
   queue.putSignal(def);
   queue.complete();
   final AtomicBoolean complete=new AtomicBoolean(false);
-  final List<ByteBuf> received=new ArrayList<ByteBuf>(2);
-  publisher.subscribe(new Subscriber<ByteBuf>(){
+  final List<byte[]> received=new ArrayList<byte[]>(2);
+  publisher.subscribe(new Subscriber<byte[]>(){
+    private Subscription subscription;
     @Override public void onSubscribe(    Subscription s){
-      s.request(2);
+      s.request(1);
+      this.subscription=s;
     }
-    @Override public void onNext(    ByteBuf byteBuf){
-      received.add(byteBuf);
+    @Override public void onNext(    byte[] bytes){
+      received.add(bytes);
+      this.subscription.request(1);
     }
     @Override public void onError(    Throwable t){
       fail("onError not expected");
