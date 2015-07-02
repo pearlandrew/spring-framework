@@ -17,9 +17,15 @@
   WebSocketSession session=new TestWebSocketSession("id");
   wsHttpRequestHandler.getWebSocketHandler().afterConnectionEstablished(session);
   assertEquals(true,session.getAttributes().get("decorated"));
-  WebSocketHandler wsHandler=unwrapWebSocketHandler(wsHttpRequestHandler.getWebSocketHandler());
-  assertNotNull(wsHandler);
+  WebSocketHandler wsHandler=wsHttpRequestHandler.getWebSocketHandler();
+  assertThat(wsHandler,Matchers.instanceOf(ExceptionWebSocketHandlerDecorator.class));
+  wsHandler=((ExceptionWebSocketHandlerDecorator)wsHandler).getDelegate();
+  assertThat(wsHandler,Matchers.instanceOf(LoggingWebSocketHandlerDecorator.class));
+  wsHandler=((LoggingWebSocketHandlerDecorator)wsHandler).getDelegate();
+  assertThat(wsHandler,Matchers.instanceOf(TestWebSocketHandlerDecorator.class));
+  wsHandler=((TestWebSocketHandlerDecorator)wsHandler).getDelegate();
   assertThat(wsHandler,Matchers.instanceOf(SubProtocolWebSocketHandler.class));
+  assertSame(wsHandler,this.appContext.getBean(MessageBrokerBeanDefinitionParser.WEB_SOCKET_HANDLER_BEAN_NAME));
   SubProtocolWebSocketHandler subProtocolWsHandler=(SubProtocolWebSocketHandler)wsHandler;
   assertEquals(Arrays.asList("v10.stomp","v11.stomp","v12.stomp"),subProtocolWsHandler.getSubProtocols());
   assertEquals(25 * 1000,subProtocolWsHandler.getSendTimeLimit());
