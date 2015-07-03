@@ -1,0 +1,9 @@
+{
+  StringWriter writer=new StringWriter();
+  MvcResult mvcResult=this.mockMvc.perform(get("/1").param("deferredResult","true")).andDo(print(writer)).andExpect(request().asyncStarted()).andReturn();
+  assertTrue(writer.toString().contains("Async started = true"));
+  writer=new StringWriter();
+  this.asyncController.onMessage("Joe");
+  this.mockMvc.perform(asyncDispatch(mvcResult)).andDo(print(writer)).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON)).andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+  assertTrue(writer.toString().contains("Async started = false"));
+}
