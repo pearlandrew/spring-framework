@@ -1,9 +1,9 @@
 {
 synchronized (this.updateCache) {
     Set<String> destinationsToRemove=new HashSet<String>();
-    for (    Map.Entry<String,MultiValueMap<String,String>> entry : this.updateCache.entrySet()) {
+    for (    Map.Entry<String,LinkedMultiValueMap<String,String>> entry : this.updateCache.entrySet()) {
       String destination=entry.getKey();
-      MultiValueMap<String,String> sessionMap=entry.getValue();
+      LinkedMultiValueMap<String,String> sessionMap=entry.getValue();
       List<String> subscriptions=sessionMap.get(sessionId);
       if (subscriptions != null) {
         subscriptions.remove(subsId);
@@ -14,7 +14,7 @@ synchronized (this.updateCache) {
           destinationsToRemove.add(destination);
         }
  else {
-          this.accessCache.put(destination,new LinkedMultiValueMap<String,String>(sessionMap));
+          this.accessCache.put(destination,sessionMap.deepCopy());
         }
       }
     }
