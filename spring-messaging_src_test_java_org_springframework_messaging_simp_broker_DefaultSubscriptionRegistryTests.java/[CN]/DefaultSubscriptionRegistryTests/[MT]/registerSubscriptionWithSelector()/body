@@ -9,10 +9,10 @@
   accessor.setNativeHeader("foo","bar");
   Message<?> message=MessageBuilder.createMessage("",accessor.getMessageHeaders());
   MultiValueMap<String,String> actual=this.registry.findSubscriptions(message);
+  assertNotNull(actual);
   assertEquals(1,actual.size());
-  assertEquals(Arrays.asList(subscriptionId),actual.get(sessionId));
-  accessor=SimpMessageHeaderAccessor.create();
-  accessor.setDestination(destination);
-  message=MessageBuilder.createMessage("",accessor.getMessageHeaders());
-  assertEquals(0,this.registry.findSubscriptions(message).size());
+  assertEquals(Collections.singletonList(subscriptionId),actual.get(sessionId));
+  actual=this.registry.findSubscriptions(createMessage(destination));
+  assertNotNull(actual);
+  assertEquals(0,actual.size());
 }
