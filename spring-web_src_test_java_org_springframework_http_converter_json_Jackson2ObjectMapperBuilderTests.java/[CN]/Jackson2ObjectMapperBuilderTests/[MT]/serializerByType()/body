@@ -1,7 +1,7 @@
 {
-  JsonSerializer<Number> serializer=new NumberSerializer();
+  JsonSerializer<Number> serializer=new NumberSerializer(Integer.class);
   ObjectMapper objectMapper=Jackson2ObjectMapperBuilder.json().modules(new ArrayList<>()).serializerByType(Boolean.class,serializer).build();
   assertTrue(getSerializerFactoryConfig(objectMapper).hasSerializers());
   Serializers serializers=getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
-  assertTrue(serializers.findSerializer(null,SimpleType.construct(Boolean.class),null) == serializer);
+  assertSame(serializer,serializers.findSerializer(null,SimpleType.construct(Boolean.class),null));
 }
