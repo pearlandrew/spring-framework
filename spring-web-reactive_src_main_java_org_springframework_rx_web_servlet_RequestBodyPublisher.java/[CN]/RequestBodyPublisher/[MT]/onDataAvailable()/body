@@ -1,0 +1,26 @@
+{
+  ServletInputStream input=this.synchronizer.getInputStream();
+  while (true) {
+    logger.debug("Demand: " + this.demand);
+    if (demand <= 0) {
+      break;
+    }
+    boolean ready=input.isReady();
+    logger.debug("Input " + ready + "/"+ input.isFinished());
+    if (!ready) {
+      break;
+    }
+    int read=input.read(buffer);
+    logger.debug("Input read:" + read);
+    if (read == -1) {
+      break;
+    }
+ else     if (read > 0) {
+      if (demand != Long.MAX_VALUE) {
+        demand--;
+      }
+      byte[] copy=Arrays.copyOf(this.buffer,read);
+      this.subscriber.onNext(copy);
+    }
+  }
+}

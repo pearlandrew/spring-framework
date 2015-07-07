@@ -1,0 +1,22 @@
+{
+  try {
+    while (!Thread.currentThread().isInterrupted()) {
+      if (demand > 0 && isHeadSignal()) {
+        subscriber.onNext(pollSignal());
+        if (demand != Long.MAX_VALUE) {
+          demand--;
+        }
+      }
+ else       if (isHeadError()) {
+        subscriber.onError(pollError());
+        break;
+      }
+ else       if (isComplete()) {
+        subscriber.onComplete();
+        break;
+      }
+    }
+  }
+ catch (  InterruptedException ex) {
+  }
+}
