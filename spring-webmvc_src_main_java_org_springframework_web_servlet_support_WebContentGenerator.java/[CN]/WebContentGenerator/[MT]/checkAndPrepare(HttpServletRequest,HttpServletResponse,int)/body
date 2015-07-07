@@ -9,5 +9,14 @@
  else {
     cControl=CacheControl.empty();
   }
-  checkAndPrepare(request,response,cControl);
+  checkRequest(request);
+  if (this.usePreviousHttpCachingBehavior) {
+    addHttp10CacheHeaders(cacheSeconds,response);
+  }
+ else {
+    String ccValue=cControl.getHeaderValue();
+    if (ccValue != null) {
+      response.setHeader(HEADER_CACHE_CONTROL,ccValue);
+    }
+  }
 }

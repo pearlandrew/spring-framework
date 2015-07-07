@@ -1,15 +1,7 @@
 {
-  String method=request.getMethod();
-  if (this.supportedMethods != null && !this.supportedMethods.contains(method)) {
-    throw new HttpRequestMethodNotSupportedException(method,StringUtils.toStringArray(this.supportedMethods));
-  }
-  if (this.requireSession) {
-    if (request.getSession(false) == null) {
-      throw new HttpSessionRequiredException("Pre-existing session required but none found");
-    }
-  }
+  checkRequest(request);
   if (this.usePreviousHttpCachingBehavior) {
-    addHttp10CacheHeaders(response);
+    addHttp10CacheHeaders(this.cacheSeconds,response);
   }
  else   if (cacheControl != null) {
     String ccValue=cacheControl.getHeaderValue();
