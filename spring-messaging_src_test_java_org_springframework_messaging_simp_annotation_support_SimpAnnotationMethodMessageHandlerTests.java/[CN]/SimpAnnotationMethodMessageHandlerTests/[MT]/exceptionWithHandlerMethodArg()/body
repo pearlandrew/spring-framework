@@ -1,0 +1,12 @@
+{
+  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.create();
+  headers.setSessionId("session1");
+  headers.setSessionAttributes(new ConcurrentHashMap<>());
+  headers.setDestination("/pre/illegalState");
+  Message<?> message=MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+  this.messageHandler.handleMessage(message);
+  assertEquals("handleExceptionWithHandlerMethodArg",this.testController.method);
+  HandlerMethod handlerMethod=(HandlerMethod)this.testController.arguments.get("handlerMethod");
+  assertNotNull(handlerMethod);
+  assertEquals("illegalState",handlerMethod.getMethod().getName());
+}
