@@ -1,7 +1,9 @@
 {
   MessageHeaders headers=message.getHeaders();
   SimpMessageType messageType=SimpMessageHeaderAccessor.getMessageType(headers);
-  Assert.isTrue(SimpMessageType.SUBSCRIBE.equals(messageType),"Expected SUBSCRIBE: " + message);
+  if (!SimpMessageType.SUBSCRIBE.equals(messageType)) {
+    throw new IllegalArgumentException("Expected SUBSCRIBE: " + message);
+  }
   String sessionId=SimpMessageHeaderAccessor.getSessionId(headers);
   if (sessionId == null) {
     logger.error("No sessionId in  " + message);

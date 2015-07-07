@@ -1,7 +1,9 @@
 {
   MessageHeaders headers=message.getHeaders();
   SimpMessageType type=SimpMessageHeaderAccessor.getMessageType(headers);
-  Assert.isTrue(SimpMessageType.MESSAGE.equals(type),"Unexpected message type: " + type);
+  if (!SimpMessageType.MESSAGE.equals(type)) {
+    throw new IllegalArgumentException("Unexpected message type: " + type);
+  }
   String destination=SimpMessageHeaderAccessor.getDestination(headers);
   if (destination == null) {
     logger.error("No destination in " + message);
