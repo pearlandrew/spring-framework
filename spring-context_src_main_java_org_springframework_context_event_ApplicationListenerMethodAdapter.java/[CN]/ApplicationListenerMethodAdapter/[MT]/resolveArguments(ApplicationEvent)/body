@@ -1,13 +1,15 @@
 {
-  if (!ApplicationEvent.class.isAssignableFrom(this.declaredEventType.getRawClass()) && event instanceof PayloadApplicationEvent) {
-    PayloadApplicationEvent<?> payloadEvent=(PayloadApplicationEvent<?>)event;
-    ResolvableType payloadType=payloadEvent.getResolvableType().as(PayloadApplicationEvent.class).getGeneric(0);
-    if (this.declaredEventType.isAssignableFrom(payloadType)) {
-      return new Object[]{payloadEvent.getPayload()};
-    }
+  ResolvableType declaredEventType=getResolvableType(event);
+  if (declaredEventType == null) {
+    return null;
+  }
+  if (this.method.getParameters().length == 0) {
+    return new Object[0];
+  }
+  if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.getRawClass()) && event instanceof PayloadApplicationEvent) {
+    return new Object[]{((PayloadApplicationEvent)event).getPayload()};
   }
  else {
     return new Object[]{event};
   }
-  return null;
 }
