@@ -1,0 +1,20 @@
+{
+  ServletOutputStream output=this.synchronizer.getOutputStream();
+  boolean ready=output.isReady();
+  logger.debug("Output: " + ready + " buffer: "+ (buffer == null));
+  if (ready) {
+    if (this.buffer != null) {
+      output.write(this.buffer);
+      this.buffer=null;
+      if (!subscriberComplete) {
+        this.subscription.request(1);
+      }
+ else {
+        this.synchronizer.writeComplete();
+      }
+    }
+ else {
+      this.subscription.request(1);
+    }
+  }
+}

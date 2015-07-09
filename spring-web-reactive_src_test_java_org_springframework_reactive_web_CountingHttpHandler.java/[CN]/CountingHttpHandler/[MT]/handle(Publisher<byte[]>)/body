@@ -1,0 +1,22 @@
+{
+  request.subscribe(new Subscriber<byte[]>(){
+    private Subscription subscription;
+    private int byteCount=0;
+    @Override public void onSubscribe(    Subscription s){
+      this.subscription=s;
+      this.subscription.request(1);
+    }
+    @Override public void onNext(    byte[] bytes){
+      byteCount+=bytes.length;
+      this.subscription.request(1);
+    }
+    @Override public void onError(    Throwable t){
+      logger.error("CountingHttpHandler Error",t);
+    }
+    @Override public void onComplete(){
+      logger.info("Processed " + byteCount + " bytes");
+    }
+  }
+);
+  return null;
+}
