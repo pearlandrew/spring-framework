@@ -1,24 +1,20 @@
 {
-  if (object == null) {
-    return;
-  }
-  if (this.handler == null) {
-synchronized (this) {
-      if (this.handler == null) {
-        this.initHandlerCache.put(object,mediaType);
-        return;
+  if (object != null) {
+    if (this.handler != null) {
+      try {
+        this.handler.send(object,mediaType);
+      }
+ catch (      IOException ex) {
+        this.handler.completeWithError(ex);
+        throw ex;
+      }
+catch (      Throwable ex) {
+        this.handler.completeWithError(ex);
+        throw new IllegalStateException("Failed to send " + object,ex);
       }
     }
-  }
-  try {
-    this.handler.send(object,mediaType);
-  }
- catch (  IOException ex) {
-    this.handler.completeWithError(ex);
-    throw ex;
-  }
-catch (  Throwable ex) {
-    this.handler.completeWithError(ex);
-    throw new IllegalStateException("Failed to send " + object,ex);
+ else {
+      this.earlySendAttempts.add(new DataWithMediaType(object,mediaType));
+    }
   }
 }

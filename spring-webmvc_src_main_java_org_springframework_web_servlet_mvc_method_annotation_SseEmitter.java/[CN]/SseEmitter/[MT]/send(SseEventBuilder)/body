@@ -1,6 +1,8 @@
 {
-  Map<Object,MediaType> map=builder.build();
-  for (  Map.Entry<Object,MediaType> entry : map.entrySet()) {
-    super.send(entry.getKey(),entry.getValue());
+  Set<DataWithMediaType> dataToSend=((SseEventBuilderImpl)builder).build();
+synchronized (this) {
+    for (    DataWithMediaType entry : dataToSend) {
+      super.send(entry.getData(),entry.getMediaType());
+    }
   }
 }

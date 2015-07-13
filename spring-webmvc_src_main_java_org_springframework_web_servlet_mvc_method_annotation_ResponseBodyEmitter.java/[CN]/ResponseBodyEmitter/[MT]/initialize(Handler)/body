@@ -1,27 +1,21 @@
 {
-synchronized (this) {
-    this.handler=handler;
-    for (    Map.Entry<Object,MediaType> entry : this.initHandlerCache.entrySet()) {
-      try {
-        sendInternal(entry.getKey(),entry.getValue());
-      }
- catch (      Throwable ex) {
-        return;
-      }
+  this.handler=handler;
+  for (  DataWithMediaType sendAttempt : this.earlySendAttempts) {
+    sendInternal(sendAttempt.getData(),sendAttempt.getMediaType());
+  }
+  this.earlySendAttempts.clear();
+  if (this.complete) {
+    if (this.failure != null) {
+      this.handler.completeWithError(this.failure);
     }
-    if (this.complete) {
-      if (this.failure != null) {
-        this.handler.completeWithError(this.failure);
-      }
  else {
-        this.handler.complete();
-      }
+      this.handler.complete();
     }
-    if (this.timeoutCallback != null) {
-      this.handler.onTimeout(this.timeoutCallback);
-    }
-    if (this.completionCallback != null) {
-      this.handler.onCompletion(this.completionCallback);
-    }
+  }
+  if (this.timeoutCallback != null) {
+    this.handler.onTimeout(this.timeoutCallback);
+  }
+  if (this.completionCallback != null) {
+    this.handler.onCompletion(this.completionCallback);
   }
 }
