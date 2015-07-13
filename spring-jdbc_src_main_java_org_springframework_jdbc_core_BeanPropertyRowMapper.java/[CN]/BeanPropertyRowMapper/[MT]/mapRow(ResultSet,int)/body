@@ -8,7 +8,7 @@
   Set<String> populatedProperties=(isCheckFullyPopulated() ? new HashSet<String>() : null);
   for (int index=1; index <= columnCount; index++) {
     String column=JdbcUtils.lookupColumnName(rsmd,index);
-    PropertyDescriptor pd=this.mappedFields.get(column.replaceAll(" ","").toLowerCase());
+    PropertyDescriptor pd=this.mappedFields.get(lowerCaseName(column.replaceAll(" ","")));
     if (pd != null) {
       try {
         Object value=getColumnValue(rs,index,pd);
@@ -18,12 +18,12 @@
         try {
           bw.setPropertyValue(pd.getName(),value);
         }
- catch (        TypeMismatchException e) {
-          if (value == null && primitivesDefaultedForNullValue) {
-            logger.debug("Intercepted TypeMismatchException for row " + rowNumber + " and column '"+ column+ "' with value "+ value+ " when setting property '"+ pd.getName()+ "' of type "+ pd.getPropertyType()+ " on object: "+ mappedObject);
+ catch (        TypeMismatchException ex) {
+          if (value == null && this.primitivesDefaultedForNullValue) {
+            logger.debug("Intercepted TypeMismatchException for row " + rowNumber + " and column '"+ column+ "' with null value when setting property '"+ pd.getName()+ "' of type "+ pd.getPropertyType()+ " on object: "+ mappedObject);
           }
  else {
-            throw e;
+            throw ex;
           }
         }
         if (populatedProperties != null) {
