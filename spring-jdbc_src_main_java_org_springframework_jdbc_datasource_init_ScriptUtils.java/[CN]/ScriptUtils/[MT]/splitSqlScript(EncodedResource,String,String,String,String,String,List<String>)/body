@@ -5,7 +5,8 @@
   Assert.hasText(blockCommentStartDelimiter,"blockCommentStartDelimiter must not be null or empty");
   Assert.hasText(blockCommentEndDelimiter,"blockCommentEndDelimiter must not be null or empty");
   StringBuilder sb=new StringBuilder();
-  boolean inLiteral=false;
+  boolean inSingleQuote=false;
+  boolean inDoubleQuote=false;
   boolean inEscape=false;
   char[] content=script.toCharArray();
   for (int i=0; i < script.length(); i++) {
@@ -20,10 +21,13 @@
       sb.append(c);
       continue;
     }
-    if (c == '\'') {
-      inLiteral=!inLiteral;
+    if (!inDoubleQuote && (c == '\'')) {
+      inSingleQuote=!inSingleQuote;
     }
-    if (!inLiteral) {
+ else     if (!inSingleQuote && (c == '"')) {
+      inDoubleQuote=!inDoubleQuote;
+    }
+    if (!inSingleQuote && !inDoubleQuote) {
       if (script.startsWith(separator,i)) {
         if (sb.length() > 0) {
           statements.add(sb.toString());
