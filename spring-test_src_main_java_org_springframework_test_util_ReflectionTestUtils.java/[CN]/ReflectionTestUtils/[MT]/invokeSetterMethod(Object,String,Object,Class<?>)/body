@@ -11,10 +11,12 @@
     setterMethodName=name;
     method=ReflectionUtils.findMethod(target.getClass(),setterMethodName,paramTypes);
   }
-  Assert.notNull(method,"Could not find setter method [" + setterMethodName + "] on target ["+ target+ "] with parameter type ["+ type+ "]");
+  if (method == null) {
+    throw new IllegalArgumentException("Could not find setter method '" + setterMethodName + "' on target ["+ target+ "] with parameter type ["+ type+ "]");
+  }
   if (logger.isDebugEnabled()) {
-    logger.debug("Invoking setter method [" + setterMethodName + "] on target ["+ target+ "]");
+    logger.debug("Invoking setter method '" + setterMethodName + "' on target ["+ target+ "]");
   }
   ReflectionUtils.makeAccessible(method);
-  ReflectionUtils.invokeMethod(method,target,new Object[]{value});
+  ReflectionUtils.invokeMethod(method,target,value);
 }

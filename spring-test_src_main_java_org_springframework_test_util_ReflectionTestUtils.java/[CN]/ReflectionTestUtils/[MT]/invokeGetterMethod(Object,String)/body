@@ -10,9 +10,11 @@
     getterMethodName=name;
     method=ReflectionUtils.findMethod(target.getClass(),getterMethodName);
   }
-  Assert.notNull(method,"Could not find getter method [" + getterMethodName + "] on target ["+ target+ "]");
+  if (method == null) {
+    throw new IllegalArgumentException("Could not find getter method '" + getterMethodName + "' on target ["+ target+ "]");
+  }
   if (logger.isDebugEnabled()) {
-    logger.debug("Invoking getter method [" + getterMethodName + "] on target ["+ target+ "]");
+    logger.debug("Invoking getter method '" + getterMethodName + "' on target ["+ target+ "]");
   }
   ReflectionUtils.makeAccessible(method);
   return ReflectionUtils.invokeMethod(method,target);
