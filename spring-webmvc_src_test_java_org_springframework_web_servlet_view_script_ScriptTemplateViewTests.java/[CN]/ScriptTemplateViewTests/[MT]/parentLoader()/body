@@ -1,0 +1,18 @@
+{
+  this.view.setEngine(mock(InvocableScriptEngine.class));
+  this.view.setRenderFunction("render");
+  this.view.setResourceLoaderPath(RESOURCE_LOADER_PATH);
+  this.view.setApplicationContext(this.applicationContext);
+  ClassLoader classLoader=this.view.createClassLoader();
+  assertNotNull(classLoader);
+  URLClassLoader urlClassLoader=(URLClassLoader)classLoader;
+  assertThat(Arrays.asList(urlClassLoader.getURLs()),Matchers.hasSize(1));
+  assertThat(Arrays.asList(urlClassLoader.getURLs()).get(0).toString(),Matchers.endsWith("org/springframework/web/servlet/view/script/"));
+  this.view.setResourceLoaderPath(RESOURCE_LOADER_PATH + ",classpath:org/springframework/web/servlet/view/");
+  classLoader=this.view.createClassLoader();
+  assertNotNull(classLoader);
+  urlClassLoader=(URLClassLoader)classLoader;
+  assertThat(Arrays.asList(urlClassLoader.getURLs()),Matchers.hasSize(2));
+  assertThat(Arrays.asList(urlClassLoader.getURLs()).get(0).toString(),Matchers.endsWith("org/springframework/web/servlet/view/script/"));
+  assertThat(Arrays.asList(urlClassLoader.getURLs()).get(1).toString(),Matchers.endsWith("org/springframework/web/servlet/view/"));
+}
