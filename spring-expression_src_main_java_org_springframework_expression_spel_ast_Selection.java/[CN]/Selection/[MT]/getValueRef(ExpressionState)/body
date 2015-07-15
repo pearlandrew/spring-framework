@@ -42,10 +42,8 @@
     }
     return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
   }
-  if ((operand instanceof Collection) || ObjectUtils.isArray(operand)) {
-    List<Object> data=new ArrayList<Object>();
-    Collection<?> coll=(operand instanceof Collection ? (Collection<?>)operand : Arrays.asList(ObjectUtils.toObjectArray(operand)));
-    data.addAll(coll);
+  if (operand instanceof Iterable || ObjectUtils.isArray(operand)) {
+    Iterable<?> data=(operand instanceof Iterable ? (Iterable<?>)operand : Arrays.asList(ObjectUtils.toObjectArray(operand)));
     List<Object> result=new ArrayList<Object>();
     int index=0;
     for (    Object element : data) {
@@ -71,13 +69,13 @@
         state.popActiveContextObject();
       }
     }
-    if ((this.variant == FIRST || this.variant == LAST) && result.size() == 0) {
+    if ((this.variant == FIRST || this.variant == LAST) && result.isEmpty()) {
       return ValueRef.NullValueRef.INSTANCE;
     }
     if (this.variant == LAST) {
       return new ValueRef.TypedValueHolderValueRef(new TypedValue(result.get(result.size() - 1)),this);
     }
-    if (operand instanceof Collection) {
+    if (operand instanceof Iterable) {
       return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
     }
     Class<?> elementType=ClassUtils.resolvePrimitiveIfNecessary(op.getTypeDescriptor().getElementTypeDescriptor().getType());
