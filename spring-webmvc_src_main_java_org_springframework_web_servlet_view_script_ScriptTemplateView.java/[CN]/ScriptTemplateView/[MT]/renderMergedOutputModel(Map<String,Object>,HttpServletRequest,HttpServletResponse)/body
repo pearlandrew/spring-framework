@@ -1,18 +1,19 @@
 {
-  Assert.notNull("Render function must not be null",this.renderFunction);
   try {
+    ScriptEngine engine=getEngine();
+    Invocable invocable=(Invocable)engine;
     String template=getTemplate(getUrl());
     Object html;
     if (this.renderObject != null) {
       Object thiz=engine.eval(this.renderObject);
-      html=((Invocable)getEngine()).invokeMethod(thiz,this.renderFunction,template,model);
+      html=invocable.invokeMethod(thiz,this.renderFunction,template,model);
     }
  else {
-      html=((Invocable)getEngine()).invokeFunction(this.renderFunction,template,model);
+      html=invocable.invokeFunction(this.renderFunction,template,model);
     }
     response.getWriter().write(String.valueOf(html));
   }
- catch (  Exception e) {
-    throw new IllegalStateException("failed to render template",e);
+ catch (  Exception ex) {
+    throw new IllegalStateException("Failed to render script template",ex);
   }
 }
