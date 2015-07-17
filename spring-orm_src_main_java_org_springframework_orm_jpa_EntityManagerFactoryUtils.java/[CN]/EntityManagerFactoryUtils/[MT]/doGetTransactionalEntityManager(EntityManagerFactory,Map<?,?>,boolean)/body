@@ -3,16 +3,20 @@
   EntityManagerHolder emHolder=(EntityManagerHolder)TransactionSynchronizationManager.getResource(emf);
   if (emHolder != null) {
     if (synchronizedWithTransaction) {
-      if (!emHolder.isSynchronizedWithTransaction() && TransactionSynchronizationManager.isSynchronizationActive()) {
-        try {
-          emHolder.getEntityManager().joinTransaction();
+      if (!emHolder.isSynchronizedWithTransaction()) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+          try {
+            emHolder.getEntityManager().joinTransaction();
+          }
+ catch (          TransactionRequiredException ex) {
+            logger.debug("Could not join transaction because none was actually active",ex);
+          }
         }
- catch (        TransactionRequiredException ex) {
-          logger.debug("Could not join transaction because none was actually active",ex);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+          Object transactionData=prepareTransaction(emHolder.getEntityManager(),emf);
+          TransactionSynchronizationManager.registerSynchronization(new TransactionalEntityManagerSynchronization(emHolder,emf,transactionData,false));
+          emHolder.setSynchronizedWithTransaction(true);
         }
-        Object transactionData=prepareTransaction(emHolder.getEntityManager(),emf);
-        TransactionSynchronizationManager.registerSynchronization(new TransactionalEntityManagerSynchronization(emHolder,emf,transactionData,false));
-        emHolder.setSynchronizedWithTransaction(true);
       }
       emHolder.requested();
       return emHolder.getEntityManager();
