@@ -47,8 +47,8 @@
     }
   }
  else   if (transactionRequiringMethods.contains(method.getName())) {
-    if (target == null) {
-      throw new TransactionRequiredException("No transactional EntityManager available");
+    if (target == null || !TransactionSynchronizationManager.isActualTransactionActive()) {
+      throw new TransactionRequiredException("No EntityManager with actual transaction available " + "for current thread - cannot reliably process '" + method.getName() + "' call");
     }
   }
   boolean isNewEm=false;
