@@ -1,9 +1,6 @@
 {
-  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
-  ctx.register(SchedulingEnabled_withTaskAddedVia_configureTasks.class);
-  ctx.refresh();
+  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext(SchedulingEnabled_withTaskAddedVia_configureTasks.class);
   Thread.sleep(20);
-  ThreadAwareWorker worker=ctx.getBean(ThreadAwareWorker.class);
+  assertThat(ctx.getBean(ThreadAwareWorker.class).executedByThread,startsWith("taskScheduler-"));
   ctx.close();
-  assertThat(worker.executedByThread,startsWith("taskScheduler-"));
 }

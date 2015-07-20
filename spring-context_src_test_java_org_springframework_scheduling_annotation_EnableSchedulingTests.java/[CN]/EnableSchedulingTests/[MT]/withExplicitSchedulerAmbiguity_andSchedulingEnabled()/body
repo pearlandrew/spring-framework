@@ -1,14 +1,5 @@
 {
-  AnnotationConfigApplicationContext ctx=new AnnotationConfigApplicationContext();
-  ctx.register(AmbiguousExplicitSchedulerConfig.class);
-  try {
-    ctx.refresh();
-  }
- catch (  IllegalStateException ex) {
-    assertThat(ex.getMessage(),startsWith("More than one TaskScheduler"));
-    throw ex;
-  }
- finally {
-    ctx.close();
-  }
+  exception.expect(IllegalStateException.class);
+  exception.expectMessage(startsWith("More than one TaskScheduler bean exists within the context"));
+  new AnnotationConfigApplicationContext(AmbiguousExplicitSchedulerConfig.class);
 }
