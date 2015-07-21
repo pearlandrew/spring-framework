@@ -1,0 +1,26 @@
+{
+  if (this.useExpiresHeader || !this.useCacheControlHeader) {
+    if (cacheSeconds > 0) {
+      cacheForSeconds(response,cacheSeconds);
+    }
+ else     if (cacheSeconds == 0) {
+      preventCaching(response);
+    }
+  }
+ else {
+    CacheControl cControl;
+    if (cacheSeconds > 0) {
+      cControl=CacheControl.maxAge(cacheSeconds,TimeUnit.SECONDS);
+      if (this.alwaysMustRevalidate) {
+        cControl=cControl.mustRevalidate();
+      }
+    }
+ else     if (cacheSeconds == 0) {
+      cControl=(this.useCacheControlNoStore ? CacheControl.noStore() : CacheControl.noCache());
+    }
+ else {
+      cControl=CacheControl.empty();
+    }
+    applyCacheControl(response,cControl);
+  }
+}
