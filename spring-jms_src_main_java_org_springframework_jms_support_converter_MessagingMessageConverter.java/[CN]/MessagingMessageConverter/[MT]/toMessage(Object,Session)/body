@@ -3,7 +3,9 @@
     throw new IllegalArgumentException("Could not convert [" + object + "] - only ["+ Message.class.getName()+ "] is handled by this converter");
   }
   Message<?> input=(Message<?>)object;
-  javax.jms.Message reply=createMessageForPayload(input.getPayload(),session);
-  this.headerMapper.fromHeaders(input.getHeaders(),reply);
+  MessageHeaders headers=input.getHeaders();
+  Object conversionHint=(headers != null ? headers.get(AbstractMessagingTemplate.CONVERSION_HINT_HEADER) : null);
+  javax.jms.Message reply=createMessageForPayload(input.getPayload(),session,conversionHint);
+  this.headerMapper.fromHeaders(headers,reply);
   return reply;
 }
