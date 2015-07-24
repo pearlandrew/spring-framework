@@ -1,5 +1,6 @@
 {
   MessageHeaders messageHeaders=null;
+  Object conversionHint=(headers != null ? headers.get(CONVERSION_HINT_HEADER) : null);
   Map<String,Object> headersToUse=processHeadersToSend(headers);
   if (headersToUse != null) {
     if (headersToUse instanceof MessageHeaders) {
@@ -9,7 +10,8 @@
       messageHeaders=new MessageHeaders(headersToUse);
     }
   }
-  Message<?> message=getMessageConverter().toMessage(payload,messageHeaders);
+  MessageConverter converter=getMessageConverter();
+  Message<?> message=(converter instanceof AbstractMessageConverter ? ((AbstractMessageConverter)converter).toMessage(payload,messageHeaders,conversionHint) : converter.toMessage(payload,messageHeaders));
   if (message == null) {
     String payloadType=(payload != null ? payload.getClass().getName() : null);
     Object contentType=(messageHeaders != null ? messageHeaders.get(MessageHeaders.CONTENT_TYPE) : null);

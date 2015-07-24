@@ -1,0 +1,23 @@
+{
+  if (!canConvertTo(payload,headers)) {
+    return null;
+  }
+  payload=convertToInternal(payload,headers,conversionHint);
+  if (payload == null) {
+    return null;
+  }
+  MimeType mimeType=getDefaultContentType(payload);
+  if (headers != null) {
+    MessageHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(headers,MessageHeaderAccessor.class);
+    if (accessor != null && accessor.isMutable()) {
+      accessor.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE,mimeType);
+      return MessageBuilder.createMessage(payload,accessor.getMessageHeaders());
+    }
+  }
+  MessageBuilder<?> builder=MessageBuilder.withPayload(payload);
+  if (headers != null) {
+    builder.copyHeaders(headers);
+  }
+  builder.setHeaderIfAbsent(MessageHeaders.CONTENT_TYPE,mimeType);
+  return builder.build();
+}
