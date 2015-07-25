@@ -1,3 +1,17 @@
 {
-  return retrieveConfigurationAttributes(testContext).isDefaultRollback();
+  Class<?> testClass=testContext.getTestClass();
+  Rollback rollback=findAnnotation(testClass,Rollback.class);
+  boolean rollbackPresent=(rollback != null);
+  TransactionConfigurationAttributes txConfigAttributes=retrieveConfigurationAttributes(testContext);
+  if (rollbackPresent && txConfigAttributes != defaultTxConfigAttributes) {
+    throw new IllegalStateException(String.format("Test class [%s] is annotated with both @Rollback " + "and @TransactionConfiguration, but only one is permitted.",testClass.getName()));
+  }
+  if (rollbackPresent) {
+    boolean defaultRollback=rollback.value();
+    if (logger.isDebugEnabled()) {
+      logger.debug(String.format("Retrieved default @Rollback(%s) for test class [%s].",defaultRollback,testClass.getName()));
+    }
+    return defaultRollback;
+  }
+  return txConfigAttributes.isDefaultRollback();
 }

@@ -3,14 +3,11 @@
     Class<?> clazz=testContext.getTestClass();
     TransactionConfiguration txConfig=AnnotatedElementUtils.findMergedAnnotation(clazz,TransactionConfiguration.class);
     if (logger.isDebugEnabled()) {
-      logger.debug(String.format("Retrieved @TransactionConfiguration [%s] for test class [%s].",txConfig,clazz));
+      logger.debug(String.format("Retrieved @TransactionConfiguration [%s] for test class [%s].",txConfig,clazz.getName()));
     }
-    if (txConfig == null) {
-      txConfig=defaultTransactionConfiguration;
-    }
-    TransactionConfigurationAttributes configAttributes=new TransactionConfigurationAttributes(txConfig.transactionManager(),txConfig.defaultRollback());
+    TransactionConfigurationAttributes configAttributes=(txConfig == null ? defaultTxConfigAttributes : new TransactionConfigurationAttributes(txConfig.transactionManager(),txConfig.defaultRollback()));
     if (logger.isDebugEnabled()) {
-      logger.debug(String.format("Using TransactionConfigurationAttributes %s for class [%s].",configAttributes,clazz));
+      logger.debug(String.format("Using TransactionConfigurationAttributes %s for test class [%s].",configAttributes,clazz.getName()));
     }
     this.configurationAttributes=configAttributes;
   }
