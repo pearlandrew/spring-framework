@@ -1,14 +1,11 @@
 {
+  Message emptyMessage=(Message)MessageBuilder.withPayload(new byte[0]).build();
   given(this.channel.send(any(Message.class))).willReturn(true);
-  given(this.converter.toMessage(anyObject(),any(MessageHeaders.class))).willReturn((Message)MessageBuilder.withPayload(new byte[0]).build());
+  given(this.converter.toMessage(anyObject(),any(MessageHeaders.class))).willReturn(emptyMessage);
   ListenableFutureController controller=new ListenableFutureController();
   this.messageHandler.registerHandler(controller);
   this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1","/app2/"));
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.create();
-  headers.setSessionId("session1");
-  headers.setSessionAttributes(new HashMap<>());
-  headers.setDestination("/app1/listenable-future/success");
-  Message<?> message=MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+  Message<?> message=createMessage("/app1/listenable-future/success");
   this.messageHandler.handleMessage(message);
   assertNotNull(controller.future);
   controller.future.run();

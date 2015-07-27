@@ -3,18 +3,10 @@
   this.messageHandler.setPathMatcher(new AntPathMatcher("."));
   this.messageHandler.registerHandler(controller);
   this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1","/app2/"));
-  SimpMessageHeaderAccessor headers=SimpMessageHeaderAccessor.create();
-  headers.setSessionId("session1");
-  headers.setSessionAttributes(new HashMap<>());
-  headers.setDestination("/app1/pre.foo");
-  Message<?> message=MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+  Message<?> message=createMessage("/app1/pre.foo");
   this.messageHandler.handleMessage(message);
   assertEquals("handleFoo",controller.method);
-  headers=SimpMessageHeaderAccessor.create();
-  headers.setSessionId("session1");
-  headers.setSessionAttributes(new HashMap<>());
-  headers.setDestination("/app2/pre.foo");
-  message=MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+  message=createMessage("/app2/pre.foo");
   this.messageHandler.handleMessage(message);
   assertEquals("handleFoo",controller.method);
 }
