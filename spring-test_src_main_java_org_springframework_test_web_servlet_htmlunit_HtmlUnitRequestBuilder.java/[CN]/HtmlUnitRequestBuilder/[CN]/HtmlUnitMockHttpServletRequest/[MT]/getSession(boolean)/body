@@ -1,0 +1,15 @@
+{
+  HttpSession result=super.getSession(false);
+  if (result == null && create) {
+    HtmlUnitMockHttpSession newSession=new HtmlUnitMockHttpSession(this);
+    setSession(newSession);
+    newSession.setNew(true);
+    String sessionid=newSession.getId();
+synchronized (HtmlUnitRequestBuilder.this.sessions) {
+      HtmlUnitRequestBuilder.this.sessions.put(sessionid,newSession);
+    }
+    addSessionCookie(this,sessionid);
+    result=newSession;
+  }
+  return result;
+}

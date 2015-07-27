@@ -1,0 +1,13 @@
+{
+  long startTime=System.currentTimeMillis();
+  HtmlUnitRequestBuilder requestBuilder=new HtmlUnitRequestBuilder(this.sessions,this.webClient,webRequest);
+  requestBuilder.setContextPath(this.contextPath);
+  MockHttpServletResponse httpServletResponse=getResponse(requestBuilder);
+  String forwardedUrl=httpServletResponse.getForwardedUrl();
+  while (forwardedUrl != null) {
+    requestBuilder.setForwardPostProcessor(new ForwardRequestPostProcessor(forwardedUrl));
+    httpServletResponse=getResponse(requestBuilder);
+    forwardedUrl=httpServletResponse.getForwardedUrl();
+  }
+  return new MockWebResponseBuilder(startTime,webRequest,httpServletResponse).build();
+}

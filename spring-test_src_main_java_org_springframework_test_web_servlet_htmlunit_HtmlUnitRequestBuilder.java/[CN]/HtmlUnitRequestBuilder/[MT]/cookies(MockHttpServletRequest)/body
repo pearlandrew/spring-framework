@@ -1,0 +1,28 @@
+{
+  String cookieHeaderValue=header("Cookie");
+  Cookie[] parentCookies=result.getCookies();
+  List<Cookie> cookies=new ArrayList<Cookie>();
+  if (cookieHeaderValue != null) {
+    StringTokenizer tokens=new StringTokenizer(cookieHeaderValue,"=;");
+    while (tokens.hasMoreTokens()) {
+      String cookieName=tokens.nextToken().trim();
+      if (!tokens.hasMoreTokens()) {
+        throw new IllegalArgumentException("Expected value for cookie name '" + cookieName + "'. Full cookie was "+ cookieHeaderValue);
+      }
+      String cookieValue=tokens.nextToken().trim();
+      processCookie(result,cookies,new Cookie(cookieName,cookieValue));
+    }
+  }
+  Set<com.gargoylesoftware.htmlunit.util.Cookie> managedCookies=this.webClient.getCookies(this.webRequest.getUrl());
+  for (  com.gargoylesoftware.htmlunit.util.Cookie cookie : managedCookies) {
+    processCookie(result,cookies,new Cookie(cookie.getName(),cookie.getValue()));
+  }
+  if (parentCookies != null) {
+    for (    Cookie cookie : parentCookies) {
+      cookies.add(cookie);
+    }
+  }
+  if (!cookies.isEmpty()) {
+    result.setCookies(cookies.toArray(new Cookie[0]));
+  }
+}
