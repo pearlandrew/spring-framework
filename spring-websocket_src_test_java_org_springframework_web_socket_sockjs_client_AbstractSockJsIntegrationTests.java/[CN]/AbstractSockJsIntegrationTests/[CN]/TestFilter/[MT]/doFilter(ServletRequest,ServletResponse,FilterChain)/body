@@ -1,7 +1,10 @@
 {
-  this.requests.add(request);
+  HttpServletRequest httpRequest=(HttpServletRequest)request;
+  String uri=httpRequest.getRequestURI();
+  HttpHeaders headers=new ServletServerHttpRequest(httpRequest).getHeaders();
+  this.requests.put(uri,headers);
   for (  String suffix : this.sleepDelayMap.keySet()) {
-    if (((HttpServletRequest)request).getRequestURI().endsWith(suffix)) {
+    if ((httpRequest).getRequestURI().endsWith(suffix)) {
       try {
         Thread.sleep(this.sleepDelayMap.get(suffix));
         break;
@@ -12,7 +15,7 @@
     }
   }
   for (  String suffix : this.sendErrorMap.keySet()) {
-    if (((HttpServletRequest)request).getRequestURI().endsWith(suffix)) {
+    if ((httpRequest).getRequestURI().endsWith(suffix)) {
       ((HttpServletResponse)response).sendError(this.sendErrorMap.get(suffix));
       return;
     }

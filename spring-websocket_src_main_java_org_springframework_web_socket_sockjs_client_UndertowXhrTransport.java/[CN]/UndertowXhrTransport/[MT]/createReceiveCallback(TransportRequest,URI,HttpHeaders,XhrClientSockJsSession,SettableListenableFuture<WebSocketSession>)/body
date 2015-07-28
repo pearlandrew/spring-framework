@@ -1,0 +1,56 @@
+{
+  return new ClientCallback<ClientExchange>(){
+    @Override public void completed(    final ClientExchange exchange){
+      exchange.setResponseListener(new ClientCallback<ClientExchange>(){
+        @Override public void completed(        ClientExchange result){
+          ClientResponse response=result.getResponse();
+          if (response.getResponseCode() != 200) {
+            HttpStatus status=HttpStatus.valueOf(response.getResponseCode());
+            IoUtils.safeClose(result.getConnection());
+            onFailure(new HttpServerErrorException(status,"Unexpected XHR receive status"));
+          }
+ else {
+            SockJsResponseListener listener=new SockJsResponseListener(transportRequest,result.getConnection(),url,headers,sockJsSession,connectFuture);
+            listener.setup(result.getResponseChannel());
+          }
+          if (logger.isTraceEnabled()) {
+            logger.trace("XHR receive headers: " + toHttpHeaders(response.getResponseHeaders()));
+          }
+          try {
+            StreamSinkChannel channel=result.getRequestChannel();
+            channel.shutdownWrites();
+            if (!channel.flush()) {
+              channel.getWriteSetter().set(ChannelListeners.<StreamSinkChannel>flushingChannelListener(null,null));
+              channel.resumeWrites();
+            }
+          }
+ catch (          IOException exc) {
+            IoUtils.safeClose(result.getConnection());
+            onFailure(exc);
+          }
+        }
+        @Override public void failed(        IOException exc){
+          IoUtils.safeClose(exchange.getConnection());
+          onFailure(exc);
+        }
+      }
+);
+    }
+    @Override public void failed(    IOException exc){
+      onFailure(exc);
+    }
+    private void onFailure(    Throwable failure){
+      if (connectFuture.setException(failure)) {
+        return;
+      }
+      if (sockJsSession.isDisconnected()) {
+        sockJsSession.afterTransportClosed(null);
+      }
+ else {
+        sockJsSession.handleTransportError(failure);
+        sockJsSession.afterTransportClosed(new CloseStatus(1006,failure.getMessage()));
+      }
+    }
+  }
+;
+}
