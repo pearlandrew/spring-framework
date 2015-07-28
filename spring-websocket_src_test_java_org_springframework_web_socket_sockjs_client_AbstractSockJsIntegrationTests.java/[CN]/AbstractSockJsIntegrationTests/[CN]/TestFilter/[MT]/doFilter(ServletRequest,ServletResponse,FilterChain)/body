@@ -1,0 +1,21 @@
+{
+  this.requests.add(request);
+  for (  String suffix : this.sleepDelayMap.keySet()) {
+    if (((HttpServletRequest)request).getRequestURI().endsWith(suffix)) {
+      try {
+        Thread.sleep(this.sleepDelayMap.get(suffix));
+        break;
+      }
+ catch (      InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+  for (  String suffix : this.sendErrorMap.keySet()) {
+    if (((HttpServletRequest)request).getRequestURI().endsWith(suffix)) {
+      ((HttpServletResponse)response).sendError(this.sendErrorMap.get(suffix));
+      return;
+    }
+  }
+  chain.doFilter(request,response);
+}

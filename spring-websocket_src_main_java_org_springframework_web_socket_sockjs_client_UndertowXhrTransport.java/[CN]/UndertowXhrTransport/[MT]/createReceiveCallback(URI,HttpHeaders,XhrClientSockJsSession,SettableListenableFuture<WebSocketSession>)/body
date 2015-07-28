@@ -1,7 +1,7 @@
 {
   return new ClientCallback<ClientExchange>(){
-    @Override public void completed(    final ClientExchange result){
-      result.setResponseListener(new ClientCallback<ClientExchange>(){
+    @Override public void completed(    final ClientExchange exchange){
+      exchange.setResponseListener(new ClientCallback<ClientExchange>(){
         @Override public void completed(        ClientExchange result){
           ClientResponse response=result.getResponse();
           if (response.getResponseCode() != 200) {
@@ -17,10 +17,11 @@
             logger.trace("XHR receive headers: " + toHttpHeaders(response.getResponseHeaders()));
           }
           try {
-            result.getRequestChannel().shutdownWrites();
-            if (!result.getRequestChannel().flush()) {
-              result.getRequestChannel().getWriteSetter().set(ChannelListeners.<StreamSinkChannel>flushingChannelListener(null,null));
-              result.getRequestChannel().resumeWrites();
+            StreamSinkChannel channel=result.getRequestChannel();
+            channel.shutdownWrites();
+            if (!channel.flush()) {
+              channel.getWriteSetter().set(ChannelListeners.<StreamSinkChannel>flushingChannelListener(null,null));
+              channel.resumeWrites();
             }
           }
  catch (          IOException exc) {
@@ -29,7 +30,7 @@
           }
         }
         @Override public void failed(        IOException exc){
-          IoUtils.safeClose(result.getConnection());
+          IoUtils.safeClose(exchange.getConnection());
           onFailure(exc);
         }
       }

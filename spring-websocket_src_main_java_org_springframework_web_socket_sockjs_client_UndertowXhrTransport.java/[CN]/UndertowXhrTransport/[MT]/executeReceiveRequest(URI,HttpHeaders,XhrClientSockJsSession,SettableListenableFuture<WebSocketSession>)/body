@@ -3,11 +3,12 @@
     logger.trace("Starting XHR receive request, url=" + url);
   }
   this.httpClient.connect(new ClientCallback<ClientConnection>(){
-    @Override public void completed(    ClientConnection result){
-      final ClientRequest httpRequest=new ClientRequest().setMethod(Methods.POST).setPath(url.getPath());
-      httpRequest.getRequestHeaders().add(HttpString.tryFromString(HttpHeaders.HOST),url.getHost());
-      addHttpHeaders(httpRequest,headers);
-      result.sendRequest(httpRequest,createConnectCallback(url,getRequestHeaders(),session,connectFuture));
+    @Override public void completed(    ClientConnection connection){
+      ClientRequest request=new ClientRequest().setMethod(Methods.POST).setPath(url.getPath());
+      HttpString headerName=HttpString.tryFromString(HttpHeaders.HOST);
+      request.getRequestHeaders().add(headerName,url.getHost());
+      addHttpHeaders(request,headers);
+      connection.sendRequest(request,createReceiveCallback(url,getRequestHeaders(),session,connectFuture));
     }
     @Override public void failed(    IOException ex){
       throw new SockJsTransportFailureException("Failed to execute request to " + url,ex);
