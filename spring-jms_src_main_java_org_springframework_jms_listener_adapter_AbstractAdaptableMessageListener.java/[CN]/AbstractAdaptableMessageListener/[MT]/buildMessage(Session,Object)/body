@@ -1,18 +1,14 @@
 {
   Object content=(result instanceof JmsResponse ? ((JmsResponse<?>)result).getResponse() : result);
+  if (content instanceof org.springframework.messaging.Message) {
+    return this.messagingMessageConverter.toMessage(content,session);
+  }
   MessageConverter converter=getMessageConverter();
   if (converter != null) {
-    if (content instanceof org.springframework.messaging.Message) {
-      return this.messagingMessageConverter.toMessage(content,session);
-    }
- else {
-      return converter.toMessage(content,session);
-    }
+    return converter.toMessage(content,session);
   }
- else {
-    if (!(content instanceof Message)) {
-      throw new MessageConversionException("No MessageConverter specified - cannot handle message [" + content + "]");
-    }
-    return (Message)content;
+  if (!(content instanceof Message)) {
+    throw new MessageConversionException("No MessageConverter specified - cannot handle message [" + content + "]");
   }
+  return (Message)content;
 }
