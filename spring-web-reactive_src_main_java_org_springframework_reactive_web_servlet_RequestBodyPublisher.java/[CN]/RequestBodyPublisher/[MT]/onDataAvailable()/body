@@ -2,7 +2,7 @@
   ServletInputStream input=this.synchronizer.getInputStream();
   while (true) {
     logger.debug("Demand: " + this.demand);
-    if (demand <= 0) {
+    if (!demand.hasDemand()) {
       break;
     }
     boolean ready=input.isReady();
@@ -16,9 +16,7 @@
       break;
     }
  else     if (read > 0) {
-      if (demand != Long.MAX_VALUE) {
-        demand--;
-      }
+      this.demand.decrement();
       byte[] copy=Arrays.copyOf(this.buffer,read);
       this.subscriber.onNext(copy);
     }
