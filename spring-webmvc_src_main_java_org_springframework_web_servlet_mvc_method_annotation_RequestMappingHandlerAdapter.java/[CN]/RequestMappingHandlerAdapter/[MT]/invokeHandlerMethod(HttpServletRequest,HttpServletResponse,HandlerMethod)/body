@@ -2,14 +2,18 @@
   ServletWebRequest webRequest=new ServletWebRequest(request,response);
   WebDataBinderFactory binderFactory=getDataBinderFactory(handlerMethod);
   ModelFactory modelFactory=getModelFactory(handlerMethod,binderFactory);
-  ServletInvocableHandlerMethod requestMappingMethod=createRequestMappingMethod(handlerMethod,binderFactory);
+  ServletInvocableHandlerMethod invocableMethod=createInvocableHandlerMethod(handlerMethod);
+  invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+  invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+  invocableMethod.setDataBinderFactory(binderFactory);
+  invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
   ModelAndViewContainer mavContainer=new ModelAndViewContainer();
   mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
-  modelFactory.initModel(webRequest,mavContainer,requestMappingMethod);
+  modelFactory.initModel(webRequest,mavContainer,invocableMethod);
   mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
   AsyncWebRequest asyncWebRequest=WebAsyncUtils.createAsyncWebRequest(request,response);
   asyncWebRequest.setTimeout(this.asyncRequestTimeout);
-  final WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
+  WebAsyncManager asyncManager=WebAsyncUtils.getAsyncManager(request);
   asyncManager.setTaskExecutor(this.taskExecutor);
   asyncManager.setAsyncWebRequest(asyncWebRequest);
   asyncManager.registerCallableInterceptors(this.callableInterceptors);
@@ -21,9 +25,9 @@
     if (logger.isDebugEnabled()) {
       logger.debug("Found concurrent result value [" + result + "]");
     }
-    requestMappingMethod=requestMappingMethod.wrapConcurrentResult(result);
+    invocableMethod=invocableMethod.wrapConcurrentResult(result);
   }
-  requestMappingMethod.invokeAndHandle(webRequest,mavContainer);
+  invocableMethod.invokeAndHandle(webRequest,mavContainer);
   if (asyncManager.isConcurrentHandlingStarted()) {
     return null;
   }
