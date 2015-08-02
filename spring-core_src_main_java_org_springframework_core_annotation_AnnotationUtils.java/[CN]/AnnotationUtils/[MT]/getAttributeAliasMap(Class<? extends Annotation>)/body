@@ -2,16 +2,15 @@
   if (annotationType == null) {
     return Collections.emptyMap();
   }
-  Map<String,String> map=attributeAliasesCache.get(annotationType);
+  Map<String,List<String>> map=attributeAliasesCache.get(annotationType);
   if (map != null) {
     return map;
   }
-  map=new HashMap<String,String>();
+  map=new HashMap<String,List<String>>();
   for (  Method attribute : getAttributeMethods(annotationType)) {
-    String attributeName=attribute.getName();
-    String aliasedAttributeName=getAliasedAttributeName(attribute);
-    if (aliasedAttributeName != null) {
-      map.put(attributeName,aliasedAttributeName);
+    List<String> aliasNames=getAliasedAttributeNames(attribute);
+    if (!aliasNames.isEmpty()) {
+      map.put(attribute.getName(),aliasNames);
     }
   }
   attributeAliasesCache.put(annotationType,map);
