@@ -2,14 +2,14 @@
   if (parent == null) {
     return;
   }
-  MockHttpServletRequest parentRequest=parent.buildRequest(result.getServletContext());
+  MockHttpServletRequest parentRequest=parent.buildRequest(request.getServletContext());
   HttpSession parentSession=parentRequest.getSession(false);
   if (parentSession != null) {
     Enumeration<String> attrNames=parentSession.getAttributeNames();
     while (attrNames.hasMoreElements()) {
       String attrName=attrNames.nextElement();
       Object attrValue=parentSession.getAttribute(attrName);
-      result.getSession().setAttribute(attrName,attrValue);
+      request.getSession().setAttribute(attrName,attrValue);
     }
   }
   Enumeration<String> headerNames=parentRequest.getHeaderNames();
@@ -18,22 +18,22 @@
     Enumeration<String> attrValues=parentRequest.getHeaders(attrName);
     while (attrValues.hasMoreElements()) {
       String attrValue=attrValues.nextElement();
-      result.addHeader(attrName,attrValue);
+      request.addHeader(attrName,attrValue);
     }
   }
   Map<String,String[]> parentParams=parentRequest.getParameterMap();
   for (  Map.Entry<String,String[]> parentParam : parentParams.entrySet()) {
     String paramName=parentParam.getKey();
     String[] paramValues=parentParam.getValue();
-    result.addParameter(paramName,paramValues);
+    request.addParameter(paramName,paramValues);
   }
   Cookie[] parentCookies=parentRequest.getCookies();
-  if (parentCookies != null) {
-    result.setCookies(parentCookies);
+  if (!ObjectUtils.isEmpty(parentCookies)) {
+    request.setCookies(parentCookies);
   }
   Enumeration<String> parentAttrNames=parentRequest.getAttributeNames();
   while (parentAttrNames.hasMoreElements()) {
     String parentAttrName=parentAttrNames.nextElement();
-    result.setAttribute(parentAttrName,parentRequest.getAttribute(parentAttrName));
+    request.setAttribute(parentAttrName,parentRequest.getAttribute(parentAttrName));
   }
 }
