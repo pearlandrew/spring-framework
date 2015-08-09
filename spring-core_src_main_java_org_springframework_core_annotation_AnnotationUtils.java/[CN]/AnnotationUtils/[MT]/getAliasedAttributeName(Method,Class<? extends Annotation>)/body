@@ -2,6 +2,7 @@
   Class<?> declaringClass=attribute.getDeclaringClass();
   Assert.isTrue(declaringClass.isAnnotation(),"attribute method must be from an annotation");
   Assert.isTrue(!Annotation.class.equals(targetAnnotationType),"targetAnnotationType must not be java.lang.annotation.Annotation");
+  String attributeName=attribute.getName();
   AliasFor aliasFor=attribute.getAnnotation(AliasFor.class);
   if (aliasFor == null) {
     return null;
@@ -13,17 +14,22 @@
   if (!searchWithinSameAnnotation && !targetAnnotationType.equals(aliasedAnnotationType)) {
     return null;
   }
-  if (searchWithinSameAnnotation && !sameTargetDeclared) {
-    return null;
-  }
-  String attributeName=attribute.getName();
   String aliasedAttributeName=getAliasedAttributeName(aliasFor,attribute);
   if (!StringUtils.hasText(aliasedAttributeName)) {
     String msg=String.format("@AliasFor declaration on attribute [%s] in annotation [%s] is missing required 'attribute' value.",attributeName,sourceAnnotationType.getName());
     throw new AnnotationConfigurationException(msg);
   }
-  if (sameTargetDeclared) {
+  if (!sameTargetDeclared) {
+    if (findAnnotation(sourceAnnotationType,aliasedAnnotationType) == null) {
+      String msg=String.format("@AliasFor declaration on attribute [%s] in annotation [%s] declares " + "an alias for attribute [%s] in meta-annotation [%s] which is not meta-present.",attributeName,sourceAnnotationType.getName(),aliasedAttributeName,aliasedAnnotationType.getName());
+      throw new AnnotationConfigurationException(msg);
+    }
+  }
+ else {
     aliasedAnnotationType=sourceAnnotationType;
+  }
+  if (searchWithinSameAnnotation && !sameTargetDeclared) {
+    return null;
   }
   Method aliasedAttribute;
   try {
