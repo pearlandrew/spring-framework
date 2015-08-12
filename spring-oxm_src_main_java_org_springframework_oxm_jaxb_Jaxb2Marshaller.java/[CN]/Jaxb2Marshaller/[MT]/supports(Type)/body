@@ -2,21 +2,14 @@
   if (genericType instanceof ParameterizedType) {
     ParameterizedType parameterizedType=(ParameterizedType)genericType;
     if (JAXBElement.class == parameterizedType.getRawType() && parameterizedType.getActualTypeArguments().length == 1) {
-      boolean isJdk6=(org.springframework.core.JdkVersion.getMajorJavaVersion() <= org.springframework.core.JdkVersion.JAVA_16);
-      boolean isJdk7=(org.springframework.core.JdkVersion.getMajorJavaVersion() >= org.springframework.core.JdkVersion.JAVA_17);
       Type typeArgument=parameterizedType.getActualTypeArguments()[0];
       if (typeArgument instanceof Class) {
         Class<?> classArgument=(Class<?>)typeArgument;
-        if (isJdk7 && classArgument.isArray()) {
-          return (classArgument.getComponentType() == Byte.TYPE);
-        }
- else {
-          return (isPrimitiveWrapper(classArgument) || isStandardClass(classArgument) || supportsInternal(classArgument,false));
-        }
+        return (((classArgument.isArray() && Byte.TYPE == classArgument.getComponentType())) || isPrimitiveWrapper(classArgument) || isStandardClass(classArgument)|| supportsInternal(classArgument,false));
       }
- else       if (isJdk6 && typeArgument instanceof GenericArrayType) {
+ else       if (typeArgument instanceof GenericArrayType) {
         GenericArrayType arrayType=(GenericArrayType)typeArgument;
-        return (arrayType.getGenericComponentType() == Byte.TYPE);
+        return (Byte.TYPE == arrayType.getGenericComponentType());
       }
     }
   }
