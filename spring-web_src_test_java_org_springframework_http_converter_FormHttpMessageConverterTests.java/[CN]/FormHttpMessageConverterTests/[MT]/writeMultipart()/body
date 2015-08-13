@@ -19,13 +19,14 @@
   HttpEntity<Source> entity=new HttpEntity<Source>(xml,entityHeaders);
   parts.add("xml",entity);
   MockHttpOutputMessage outputMessage=new MockHttpOutputMessage();
-  converter.setMultipartCharset(Charset.forName("UTF-8"));
-  converter.write(parts,new MediaType("multipart","form-data",Charset.forName("UTF-8")),outputMessage);
+  this.converter.setMultipartCharset(UTF_8);
+  this.converter.write(parts,new MediaType("multipart","form-data",UTF_8),outputMessage);
   final MediaType contentType=outputMessage.getHeaders().getContentType();
   assertNotNull("No boundary found",contentType.getParameter("boundary"));
   FileItemFactory fileItemFactory=new DiskFileItemFactory();
   FileUpload fileUpload=new FileUpload(fileItemFactory);
-  List<FileItem> items=fileUpload.parseRequest(new MockHttpOutputMessageRequestContext(outputMessage));
+  RequestContext requestContext=new MockHttpOutputMessageRequestContext(outputMessage);
+  List<FileItem> items=fileUpload.parseRequest(requestContext);
   assertEquals(6,items.size());
   FileItem item=items.get(0);
   assertTrue(item.isFormField());
