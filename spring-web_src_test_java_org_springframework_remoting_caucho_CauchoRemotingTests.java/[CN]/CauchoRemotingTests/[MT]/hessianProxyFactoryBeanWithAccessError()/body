@@ -1,21 +1,11 @@
 {
   HessianProxyFactoryBean factory=new HessianProxyFactoryBean();
-  try {
-    factory.setServiceInterface(TestBean.class);
-    fail("Should have thrown IllegalArgumentException");
-  }
- catch (  IllegalArgumentException ex) {
-  }
   factory.setServiceInterface(ITestBean.class);
   factory.setServiceUrl("http://localhosta/testbean");
   factory.afterPropertiesSet();
   assertTrue("Correct singleton value",factory.isSingleton());
   assertTrue(factory.getObject() instanceof ITestBean);
   ITestBean bean=(ITestBean)factory.getObject();
-  try {
-    bean.setName("test");
-    fail("Should have thrown RemoteAccessException");
-  }
- catch (  RemoteAccessException ex) {
-  }
+  exception.expect(RemoteAccessException.class);
+  bean.setName("test");
 }
