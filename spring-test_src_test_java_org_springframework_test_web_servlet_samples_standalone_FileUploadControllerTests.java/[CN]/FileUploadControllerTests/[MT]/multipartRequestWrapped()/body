@@ -1,0 +1,8 @@
+{
+  byte[] json="{\"name\":\"yeeeah\"}".getBytes(CHARSET);
+  MockMultipartFile jsonPart=new MockMultipartFile("json","json","application/json",json);
+  Filter filter=new RequestWrappingFilter();
+  MockMvc mockMvc=standaloneSetup(new MultipartController()).addFilter(filter).build();
+  Map<String,String> jsonMap=Collections.singletonMap("name","yeeeah");
+  mockMvc.perform(fileUpload("/testJson").file(jsonPart)).andExpect(model().attribute("json",jsonMap));
+}

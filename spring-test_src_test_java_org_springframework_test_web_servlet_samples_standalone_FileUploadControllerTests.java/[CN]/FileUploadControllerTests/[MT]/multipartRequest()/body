@@ -1,0 +1,8 @@
+{
+  byte[] fileContent="bar".getBytes(CHARSET);
+  MockMultipartFile filePart=new MockMultipartFile("file","orig",null,fileContent);
+  byte[] json="{\"name\":\"yeeeah\"}".getBytes(CHARSET);
+  MockMultipartFile jsonPart=new MockMultipartFile("json","json","application/json",json);
+  MockMvc mockMvc=standaloneSetup(new MultipartController()).build();
+  mockMvc.perform(fileUpload("/test").file(filePart).file(jsonPart)).andExpect(model().attribute("fileContent",fileContent)).andExpect(model().attribute("jsonContent",Collections.singletonMap("name","yeeeah")));
+}
