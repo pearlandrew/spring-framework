@@ -1,11 +1,12 @@
 {
+  jettyServer=new Server(0);
   ServletContextHandler handler=new ServletContextHandler();
   byte[] bytes=helloWorld.getBytes("utf-8");
   handler.addServlet(new ServletHolder(new GetServlet(bytes,textContentType)),"/get");
   handler.addServlet(new ServletHolder(new GetServlet(new byte[0],textContentType)),"/get/nothing");
   handler.addServlet(new ServletHolder(new GetServlet(bytes,null)),"/get/nocontenttype");
-  handler.addServlet(new ServletHolder(new PostServlet(helloWorld,baseUrl + "/post/1",bytes,textContentType)),"/post");
-  handler.addServlet(new ServletHolder(new JsonPostServlet(baseUrl + "/jsonpost/1",jsonContentType)),"/jsonpost");
+  handler.addServlet(new ServletHolder(new PostServlet(helloWorld,"/post/1",bytes,textContentType)),"/post");
+  handler.addServlet(new ServletHolder(new JsonPostServlet("/jsonpost/1",jsonContentType)),"/jsonpost");
   handler.addServlet(new ServletHolder(new StatusCodeServlet(204)),"/status/nocontent");
   handler.addServlet(new ServletHolder(new StatusCodeServlet(304)),"/status/notmodified");
   handler.addServlet(new ServletHolder(new ErrorServlet(404)),"/status/notfound");
@@ -17,4 +18,8 @@
   handler.addServlet(new ServletHolder(new PutServlet(helloWorld,bytes,textContentType)),"/put");
   jettyServer.setHandler(handler);
   jettyServer.start();
+  Connector[] connectors=jettyServer.getConnectors();
+  NetworkConnector connector=(NetworkConnector)connectors[0];
+  port=connector.getLocalPort();
+  baseUrl="http://localhost:" + port;
 }

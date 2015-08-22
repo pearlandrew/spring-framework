@@ -1,7 +1,5 @@
 {
-  int port=SocketUtils.findAvailableTcpPort();
-  baseUrl="http://localhost:" + port;
-  server=new Server(port);
+  server=new Server(0);
   ServletContextHandler handler=new ServletContextHandler();
   handler.setContextPath("/");
   Class<?> config=CommonsMultipartResolverTestConfig.class;
@@ -17,4 +15,7 @@
   handler.addServlet(standardResolverServlet,"/standard-resolver/*");
   server.setHandler(handler);
   server.start();
+  Connector[] connectors=server.getConnectors();
+  NetworkConnector connector=(NetworkConnector)connectors[0];
+  baseUrl="http://localhost:" + connector.getLocalPort();
 }

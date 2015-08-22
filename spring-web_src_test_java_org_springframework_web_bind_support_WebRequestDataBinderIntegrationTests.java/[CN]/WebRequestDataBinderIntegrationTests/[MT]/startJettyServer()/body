@@ -1,10 +1,6 @@
 {
-  int port=SocketUtils.findAvailableTcpPort();
-  jettyServer=new Server(port);
-  baseUrl="http://localhost:" + port;
+  jettyServer=new Server(0);
   ServletContextHandler handler=new ServletContextHandler();
-  partsServlet=new PartsServlet();
-  partListServlet=new PartListServlet();
   MultipartConfigElement multipartConfig=new MultipartConfigElement("");
   ServletHolder holder=new ServletHolder(partsServlet);
   holder.getRegistration().setMultipartConfig(multipartConfig);
@@ -14,4 +10,7 @@
   handler.addServlet(holder,"/partlist");
   jettyServer.setHandler(handler);
   jettyServer.start();
+  Connector[] connectors=jettyServer.getConnectors();
+  NetworkConnector connector=(NetworkConnector)connectors[0];
+  baseUrl="http://localhost:" + connector.getLocalPort();
 }

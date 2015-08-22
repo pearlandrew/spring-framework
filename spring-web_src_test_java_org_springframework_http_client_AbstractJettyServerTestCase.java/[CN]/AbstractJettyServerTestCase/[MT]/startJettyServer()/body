@@ -1,7 +1,5 @@
 {
-  int port=SocketUtils.findAvailableTcpPort();
-  jettyServer=new Server(port);
-  baseUrl="http://localhost:" + port;
+  jettyServer=new Server(0);
   ServletContextHandler handler=new ServletContextHandler();
   handler.setContextPath("/");
   handler.addServlet(new ServletHolder(new EchoServlet()),"/echo");
@@ -17,4 +15,7 @@
   handler.addServlet(new ServletHolder(new MethodServlet("PATCH")),"/methods/patch");
   jettyServer.setHandler(handler);
   jettyServer.start();
+  Connector[] connectors=jettyServer.getConnectors();
+  NetworkConnector connector=(NetworkConnector)connectors[0];
+  baseUrl="http://localhost:" + connector.getLocalPort();
 }
