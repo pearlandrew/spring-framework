@@ -1,0 +1,14 @@
+{
+  if (getPort() == -1) {
+    setPort(SocketUtils.findAvailableTcpPort(8080));
+  }
+  this.tomcatServer=new Tomcat();
+  this.tomcatServer.setPort(getPort());
+  Assert.notNull(getHttpHandler());
+  HttpHandlerServlet servlet=new HttpHandlerServlet();
+  servlet.setHandler(getHttpHandler());
+  File base=new File(System.getProperty("java.io.tmpdir"));
+  Context rootContext=tomcatServer.addContext("",base.getAbsolutePath());
+  Tomcat.addServlet(rootContext,"httpHandlerServlet",servlet);
+  rootContext.addServletMapping("/","httpHandlerServlet");
+}

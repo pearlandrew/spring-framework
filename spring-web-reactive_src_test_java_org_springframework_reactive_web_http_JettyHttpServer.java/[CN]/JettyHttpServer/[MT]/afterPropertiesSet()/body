@@ -1,0 +1,14 @@
+{
+  if (getPort() == -1) {
+    setPort(SocketUtils.findAvailableTcpPort(8080));
+  }
+  this.jettyServer=new Server();
+  HttpHandlerServlet servlet=new HttpHandlerServlet();
+  servlet.setHandler(new EchoHandler());
+  ServletHolder servletHolder=new ServletHolder(servlet);
+  ServletContextHandler contextHandler=new ServletContextHandler(this.jettyServer,"",false,false);
+  contextHandler.addServlet(servletHolder,"/");
+  ServerConnector connector=new ServerConnector(this.jettyServer);
+  connector.setPort(getPort());
+  this.jettyServer.addConnector(connector);
+}
