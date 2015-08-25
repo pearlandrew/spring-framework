@@ -1,19 +1,11 @@
 {
-  RequestContext requestContext=null;
-  if (getWebApplicationContext() != null) {
-    requestContext=createRequestContext(request,response,model);
+  WebApplicationContext wac=getWebApplicationContext();
+  if (wac == null) {
+    wac=RequestContextUtils.findWebApplicationContext(request,getServletContext());
   }
- else {
-    WebApplicationContext wac=ContextLoader.getCurrentWebApplicationContext();
-    if (wac != null && wac.getServletContext() != null) {
-      requestContext=new RequestContext(request,response,wac.getServletContext(),model);
-    }
-  }
-  if (requestContext != null) {
-    RequestDataValueProcessor processor=requestContext.getRequestDataValueProcessor();
-    if (processor != null) {
-      targetUrl=processor.processUrl(request,targetUrl);
-    }
+  if (wac != null && wac.containsBean(RequestContextUtils.REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME)) {
+    RequestDataValueProcessor processor=wac.getBean(RequestContextUtils.REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME,RequestDataValueProcessor.class);
+    return processor.processUrl(request,targetUrl);
   }
   return targetUrl;
 }

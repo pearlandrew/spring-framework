@@ -4,7 +4,10 @@
   this.model=model;
   this.webApplicationContext=(WebApplicationContext)request.getAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE);
   if (this.webApplicationContext == null) {
-    this.webApplicationContext=RequestContextUtils.getWebApplicationContext(request,servletContext);
+    this.webApplicationContext=RequestContextUtils.findWebApplicationContext(request,servletContext);
+    if (this.webApplicationContext == null) {
+      throw new IllegalStateException("No WebApplicationContext found: not in a DispatcherServlet " + "request and no ContextLoaderListener registered?");
+    }
   }
   LocaleResolver localeResolver=RequestContextUtils.getLocaleResolver(request);
   if (localeResolver instanceof LocaleContextResolver) {
@@ -26,7 +29,7 @@
   this.defaultHtmlEscape=WebUtils.getDefaultHtmlEscape(this.webApplicationContext.getServletContext());
   this.responseEncodedHtmlEscape=WebUtils.getResponseEncodedHtmlEscape(this.webApplicationContext.getServletContext());
   this.urlPathHelper=new UrlPathHelper();
-  if (this.webApplicationContext.containsBean(REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME)) {
-    this.requestDataValueProcessor=this.webApplicationContext.getBean(REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME,RequestDataValueProcessor.class);
+  if (this.webApplicationContext.containsBean(RequestContextUtils.REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME)) {
+    this.requestDataValueProcessor=this.webApplicationContext.getBean(RequestContextUtils.REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME,RequestDataValueProcessor.class);
   }
 }
