@@ -11,7 +11,11 @@ synchronized (this.aliasMap) {
       }
  else       if (!resolvedAlias.equals(alias)) {
         String existingName=this.aliasMap.get(resolvedAlias);
-        if (existingName != null && !existingName.equals(resolvedName)) {
+        if (existingName != null) {
+          if (existingName.equals(resolvedName)) {
+            this.aliasMap.remove(alias);
+            break;
+          }
           throw new IllegalStateException("Cannot register resolved alias '" + resolvedAlias + "' (original: '"+ alias+ "') for name '"+ resolvedName+ "': It is already registered for name '"+ registeredName+ "'.");
         }
         checkForAliasCircle(resolvedName,resolvedAlias);
