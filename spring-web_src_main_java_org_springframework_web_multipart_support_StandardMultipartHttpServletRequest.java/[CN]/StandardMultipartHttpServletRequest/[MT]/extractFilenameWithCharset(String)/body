@@ -1,0 +1,24 @@
+{
+  String filename=extractFilename(contentDisposition,FILENAME_WITH_CHARSET_KEY);
+  if (filename == null) {
+    return null;
+  }
+  int index=filename.indexOf("'");
+  if (index != -1) {
+    Charset charset=null;
+    try {
+      charset=Charset.forName(filename.substring(0,index));
+    }
+ catch (    IllegalArgumentException ex) {
+    }
+    filename=filename.substring(index + 1);
+    index=filename.indexOf("'");
+    if (index != -1) {
+      filename=filename.substring(index + 1);
+    }
+    if (charset != null) {
+      filename=new String(filename.getBytes(US_ASCII),charset);
+    }
+  }
+  return filename;
+}

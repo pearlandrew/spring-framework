@@ -4,7 +4,11 @@
     this.multipartParameterNames=new LinkedHashSet<String>(parts.size());
     MultiValueMap<String,MultipartFile> files=new LinkedMultiValueMap<String,MultipartFile>(parts.size());
     for (    Part part : parts) {
-      String filename=extractFilename(part.getHeader(CONTENT_DISPOSITION));
+      String disposition=part.getHeader(CONTENT_DISPOSITION);
+      String filename=extractFilename(disposition);
+      if (filename == null) {
+        filename=extractFilenameWithCharset(disposition);
+      }
       if (filename != null) {
         files.add(part.getName(),new StandardMultipartFile(part,filename));
       }
