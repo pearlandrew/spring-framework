@@ -2,21 +2,18 @@
   Object cacheKey=getCacheKey(method,targetClass);
   Collection<CacheOperation> cached=this.attributeCache.get(cacheKey);
   if (cached != null) {
-    if (cached == NULL_CACHING_ATTRIBUTE) {
-      return null;
-    }
-    return cached;
+    return (cached != NULL_CACHING_ATTRIBUTE ? cached : null);
   }
  else {
     Collection<CacheOperation> cacheOps=computeCacheOperations(method,targetClass);
-    if (cacheOps == null) {
-      this.attributeCache.put(cacheKey,NULL_CACHING_ATTRIBUTE);
-    }
- else {
+    if (cacheOps != null) {
       if (logger.isDebugEnabled()) {
         logger.debug("Adding cacheable method '" + method.getName() + "' with attribute: "+ cacheOps);
       }
       this.attributeCache.put(cacheKey,cacheOps);
+    }
+ else {
+      this.attributeCache.put(cacheKey,NULL_CACHING_ATTRIBUTE);
     }
     return cacheOps;
   }
