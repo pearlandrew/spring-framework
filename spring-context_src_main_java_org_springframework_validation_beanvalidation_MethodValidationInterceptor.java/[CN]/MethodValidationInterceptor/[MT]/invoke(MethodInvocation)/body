@@ -1,13 +1,21 @@
 {
   Class<?>[] groups=determineValidationGroups(invocation);
   if (forExecutablesMethod != null) {
-    Object executableValidator=ReflectionUtils.invokeMethod(forExecutablesMethod,this.validator);
-    Set<ConstraintViolation<?>> result=(Set<ConstraintViolation<?>>)ReflectionUtils.invokeMethod(validateParametersMethod,executableValidator,invocation.getThis(),invocation.getMethod(),invocation.getArguments(),groups);
+    Object execVal=ReflectionUtils.invokeMethod(forExecutablesMethod,this.validator);
+    Method methodToValidate=invocation.getMethod();
+    Set<ConstraintViolation<?>> result;
+    try {
+      result=(Set<ConstraintViolation<?>>)ReflectionUtils.invokeMethod(validateParametersMethod,execVal,invocation.getThis(),methodToValidate,invocation.getArguments(),groups);
+    }
+ catch (    IllegalArgumentException ex) {
+      methodToValidate=BridgeMethodResolver.findBridgedMethod(ClassUtils.getMostSpecificMethod(invocation.getMethod(),invocation.getThis().getClass()));
+      result=(Set<ConstraintViolation<?>>)ReflectionUtils.invokeMethod(validateParametersMethod,execVal,invocation.getThis(),methodToValidate,invocation.getArguments(),groups);
+    }
     if (!result.isEmpty()) {
       throw new ConstraintViolationException(result);
     }
     Object returnValue=invocation.proceed();
-    result=(Set<ConstraintViolation<?>>)ReflectionUtils.invokeMethod(validateReturnValueMethod,executableValidator,invocation.getThis(),invocation.getMethod(),returnValue,groups);
+    result=(Set<ConstraintViolation<?>>)ReflectionUtils.invokeMethod(validateReturnValueMethod,execVal,invocation.getThis(),methodToValidate,returnValue,groups);
     if (!result.isEmpty()) {
       throw new ConstraintViolationException(result);
     }
