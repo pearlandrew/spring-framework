@@ -5,12 +5,11 @@
   }
   boolean isolationLevelNeeded=(definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT);
   Integer previousIsolationLevel=null;
-  boolean resetConnection=false;
+  Connection preparedCon=null;
   if (isolationLevelNeeded || definition.isReadOnly()) {
     if (this.prepareConnection) {
-      Connection con=HibernateConnectionHandle.doGetConnection(session);
-      previousIsolationLevel=DataSourceUtils.prepareConnectionForTransaction(con,definition);
-      resetConnection=true;
+      preparedCon=HibernateConnectionHandle.doGetConnection(session);
+      previousIsolationLevel=DataSourceUtils.prepareConnectionForTransaction(preparedCon,definition);
     }
  else     if (isolationLevelNeeded) {
       throw new InvalidIsolationLevelException(getClass().getSimpleName() + " does not support custom isolation levels since the 'prepareConnection' flag is off. " + "This is the case on Hibernate 3.6 by default; either switch that flag at your own risk "+ "or upgrade to Hibernate 4.x, with 4.2+ recommended.");
@@ -18,5 +17,5 @@
   }
   entityManager.getTransaction().begin();
   FlushMode previousFlushMode=prepareFlushMode(session,definition.isReadOnly());
-  return new SessionTransactionData(session,previousFlushMode,resetConnection,previousIsolationLevel);
+  return new SessionTransactionData(session,previousFlushMode,preparedCon,previousIsolationLevel);
 }
