@@ -1,16 +1,21 @@
 {
   Map<String,Object> attributes=new HashMap<String,Object>(originalAttributes);
-  Map<String,String> attributeAliasMap=getAttributeAliasMap(annotationType);
+  Map<String,List<String>> attributeAliasMap=getAttributeAliasMap(annotationType);
   for (  Method attributeMethod : getAttributeMethods(annotationType)) {
     String attributeName=attributeMethod.getName();
     Object attributeValue=attributes.get(attributeName);
     if (attributeValue == null) {
-      String aliasName=attributeAliasMap.get(attributeName);
-      if (aliasName != null) {
-        Object aliasValue=attributes.get(aliasName);
-        if (aliasValue != null) {
-          attributeValue=aliasValue;
-          attributes.put(attributeName,attributeValue);
+      List<String> aliasNames=attributeAliasMap.get(attributeName);
+      if (aliasNames != null) {
+        for (        String aliasName : aliasNames) {
+          if (aliasName != null) {
+            Object aliasValue=attributes.get(aliasName);
+            if (aliasValue != null) {
+              attributeValue=aliasValue;
+              attributes.put(attributeName,attributeValue);
+              break;
+            }
+          }
         }
       }
     }
