@@ -3,33 +3,25 @@
     String msg=String.format("@AliasFor declaration on attribute [%s] in annotation [%s] declares " + "an alias for attribute [%s] in meta-annotation [%s] which is not meta-present.",this.sourceAttributeName,this.sourceAnnotationType.getName(),this.aliasedAttributeName,this.aliasedAnnotationType.getName());
     throw new AnnotationConfigurationException(msg);
   }
-  Method aliasedAttribute;
-  try {
-    aliasedAttribute=this.aliasedAnnotationType.getDeclaredMethod(this.aliasedAttributeName);
-  }
- catch (  NoSuchMethodException ex) {
-    String msg=String.format("Attribute [%s] in annotation [%s] is declared as an @AliasFor nonexistent attribute [%s] in annotation [%s].",this.sourceAttributeName,this.sourceAnnotationType.getName(),this.aliasedAttributeName,this.aliasedAnnotationType.getName());
-    throw new AnnotationConfigurationException(msg,ex);
-  }
   if (this.isAliasPair) {
-    AliasFor mirrorAliasFor=aliasedAttribute.getAnnotation(AliasFor.class);
+    AliasFor mirrorAliasFor=this.aliasedAttribute.getAnnotation(AliasFor.class);
     if (mirrorAliasFor == null) {
       String msg=String.format("Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s].",this.aliasedAttributeName,this.sourceAnnotationType.getName(),this.sourceAttributeName);
       throw new AnnotationConfigurationException(msg);
     }
-    String mirrorAliasedAttributeName=getAliasedAttributeName(mirrorAliasFor,aliasedAttribute);
+    String mirrorAliasedAttributeName=getAliasedAttributeName(mirrorAliasFor,this.aliasedAttribute);
     if (!this.sourceAttributeName.equals(mirrorAliasedAttributeName)) {
       String msg=String.format("Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",this.aliasedAttributeName,this.sourceAnnotationType.getName(),this.sourceAttributeName,mirrorAliasedAttributeName);
       throw new AnnotationConfigurationException(msg);
     }
   }
   Class<?> returnType=this.sourceAttribute.getReturnType();
-  Class<?> aliasedReturnType=aliasedAttribute.getReturnType();
+  Class<?> aliasedReturnType=this.aliasedAttribute.getReturnType();
   if (!returnType.equals(aliasedReturnType)) {
     String msg=String.format("Misconfigured aliases: attribute [%s] in annotation [%s] " + "and attribute [%s] in annotation [%s] must declare the same return type.",this.sourceAttributeName,this.sourceAnnotationType.getName(),this.aliasedAttributeName,this.aliasedAnnotationType.getName());
     throw new AnnotationConfigurationException(msg);
   }
   if (this.isAliasPair) {
-    validateDefaultValueConfiguration(aliasedAttribute);
+    validateDefaultValueConfiguration(this.aliasedAttribute);
   }
 }

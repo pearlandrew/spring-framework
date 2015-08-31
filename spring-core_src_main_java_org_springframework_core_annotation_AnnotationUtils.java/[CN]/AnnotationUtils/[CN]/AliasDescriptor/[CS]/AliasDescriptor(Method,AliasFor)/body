@@ -1,10 +1,17 @@
 {
   Class<?> declaringClass=sourceAttribute.getDeclaringClass();
-  Assert.isTrue(declaringClass.isAnnotation(),"attribute method must be from an annotation");
+  Assert.isTrue(declaringClass.isAnnotation(),"sourceAttribute must be from an annotation");
   this.sourceAttribute=sourceAttribute;
   this.sourceAnnotationType=(Class<? extends Annotation>)declaringClass;
   this.sourceAttributeName=this.sourceAttribute.getName();
   this.aliasedAnnotationType=(Annotation.class.equals(aliasFor.annotation()) ? this.sourceAnnotationType : aliasFor.annotation());
   this.aliasedAttributeName=getAliasedAttributeName(aliasFor,this.sourceAttribute);
+  try {
+    this.aliasedAttribute=this.aliasedAnnotationType.getDeclaredMethod(this.aliasedAttributeName);
+  }
+ catch (  NoSuchMethodException ex) {
+    String msg=String.format("Attribute [%s] in annotation [%s] is declared as an @AliasFor nonexistent attribute [%s] in annotation [%s].",this.sourceAttributeName,this.sourceAnnotationType.getName(),this.aliasedAttributeName,this.aliasedAnnotationType.getName());
+    throw new AnnotationConfigurationException(msg,ex);
+  }
   this.isAliasPair=this.sourceAnnotationType.equals(this.aliasedAnnotationType);
 }
