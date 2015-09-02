@@ -1,6 +1,9 @@
 {
   if (responseStatusCode >= 200 && responseStatusCode < 300 && HttpMethod.GET.name().equals(request.getMethod())) {
-    String cacheControl=(responseGetHeaderAvailable ? response.getHeader(HEADER_CACHE_CONTROL) : null);
+    String cacheControl=null;
+    if (servlet3Present) {
+      cacheControl=response.getHeader(HEADER_CACHE_CONTROL);
+    }
     if (cacheControl == null || !cacheControl.contains(DIRECTIVE_NO_STORE)) {
       return true;
     }

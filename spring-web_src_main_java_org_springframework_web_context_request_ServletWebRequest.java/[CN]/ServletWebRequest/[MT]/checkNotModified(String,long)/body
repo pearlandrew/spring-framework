@@ -3,15 +3,15 @@
   if (StringUtils.hasLength(etag) && !this.notModified) {
     if (isCompatibleWithConditionalRequests(response)) {
       etag=addEtagPadding(etag);
-      this.notModified=isETagNotModified(etag) && isTimestampNotModified(lastModifiedTimestamp);
+      this.notModified=isEtagNotModified(etag) && isTimestampNotModified(lastModifiedTimestamp);
       if (response != null) {
         if (this.notModified && supportsNotModifiedStatus()) {
           response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
         }
-        if (response.getHeader(HEADER_ETAG) == null) {
+        if (isHeaderAbsent(response,HEADER_ETAG)) {
           response.setHeader(HEADER_ETAG,etag);
         }
-        if (response.getHeader(HEADER_LAST_MODIFIED) == null) {
+        if (isHeaderAbsent(response,HEADER_LAST_MODIFIED)) {
           response.setDateHeader(HEADER_LAST_MODIFIED,lastModifiedTimestamp);
         }
       }
