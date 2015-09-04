@@ -1,0 +1,23 @@
+{
+  request.getBody().subscribe(new Subscriber<byte[]>(){
+    private Subscription s;
+    private int requestSize=0;
+    @Override public void onSubscribe(    Subscription s){
+      this.s=s;
+      s.request(Long.MAX_VALUE);
+    }
+    @Override public void onNext(    byte[] bytes){
+      requestSize+=bytes.length;
+    }
+    @Override public void onError(    Throwable t){
+      logger.error(t);
+    }
+    @Override public void onComplete(){
+      logger.debug("Complete");
+      assertEquals(RandomHandlerIntegrationTests.REQUEST_SIZE,requestSize);
+    }
+  }
+);
+  response.getHeaders().setContentLength(RESPONSE_SIZE);
+  return response.writeWith(Streams.<byte[]>just(randomBytes()));
+}
