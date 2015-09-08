@@ -1,4 +1,12 @@
 {
-  byte[] body=StreamUtils.copyToByteArray(inputMessage.getBody());
-  return new ByteArrayResource(body);
+  if (InputStreamResource.class == clazz) {
+    return new InputStreamResource(inputMessage.getBody());
+  }
+ else   if (clazz.isAssignableFrom(ByteArrayResource.class)) {
+    byte[] body=StreamUtils.copyToByteArray(inputMessage.getBody());
+    return new ByteArrayResource(body);
+  }
+ else {
+    throw new IllegalStateException("Unsupported resource class: " + clazz);
+  }
 }
