@@ -3,21 +3,31 @@
     if (this.currentStream != null && this.currentStream.available() > 0) {
       return this.currentStream;
     }
- else     if (this.queue.isComplete()) {
-      return null;
-    }
- else     if (this.queue.isHeadSignal()) {
-      byte[] current=this.queue.pollSignal();
-      this.currentStream=new ByteArrayInputStream(current);
-      return this.currentStream;
-    }
- else     if (this.queue.isHeadError()) {
-      Throwable t=this.queue.pollError();
-      throw t instanceof IOException ? (IOException)t : new IOException(t);
+ else {
+      PublisherSignal<byte[]> signal=this.queue.take();
+      if (signal.isData()) {
+        byte[] data=signal.data();
+        this.currentStream=new ByteArrayInputStream(data);
+        return this.currentStream;
+      }
+ else       if (signal.isComplete()) {
+        this.completed=true;
+        return null;
+      }
+ else       if (signal.isError()) {
+        Throwable error=signal.error();
+        this.completed=true;
+        if (error instanceof IOException) {
+          throw (IOException)error;
+        }
+ else {
+          throw new IOException(error);
+        }
+      }
     }
   }
  catch (  InterruptedException ex) {
     Thread.currentThread().interrupt();
   }
-  return null;
+  throw new IOException();
 }

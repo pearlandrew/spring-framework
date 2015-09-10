@@ -1,0 +1,22 @@
+{
+  ByteArrayPublisherOutputStream os=new ByteArrayPublisherOutputStream();
+  FileCopyUtils.copy(is,os);
+  Publisher<byte[]> publisher=os.toByteArrayPublisher();
+  publisher.subscribe(new Subscriber<byte[]>(){
+    List<byte[]> result=new ArrayList<>();
+    @Override public void onSubscribe(    Subscription s){
+      s.request(Long.MAX_VALUE);
+    }
+    @Override public void onNext(    byte[] bytes){
+      result.add(bytes);
+    }
+    @Override public void onError(    Throwable t){
+      fail(t.getMessage());
+    }
+    @Override public void onComplete(){
+      assertArrayEquals(result.get(0),new byte[]{'a','b','c'});
+      assertArrayEquals(result.get(0),new byte[]{'d','e'});
+    }
+  }
+);
+}
