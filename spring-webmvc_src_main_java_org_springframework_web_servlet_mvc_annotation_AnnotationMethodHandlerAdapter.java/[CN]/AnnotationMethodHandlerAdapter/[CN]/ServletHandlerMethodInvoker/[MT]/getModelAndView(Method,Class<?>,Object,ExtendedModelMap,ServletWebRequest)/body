@@ -1,15 +1,15 @@
 {
-  ResponseStatus responseStatusAnn=AnnotationUtils.findAnnotation(handlerMethod,ResponseStatus.class);
-  if (responseStatusAnn != null) {
-    HttpStatus responseStatus=responseStatusAnn.code();
-    String reason=responseStatusAnn.reason();
+  ResponseStatus responseStatus=AnnotatedElementUtils.findMergedAnnotation(handlerMethod,ResponseStatus.class);
+  if (responseStatus != null) {
+    HttpStatus statusCode=responseStatus.code();
+    String reason=responseStatus.reason();
     if (!StringUtils.hasText(reason)) {
-      webRequest.getResponse().setStatus(responseStatus.value());
+      webRequest.getResponse().setStatus(statusCode.value());
     }
  else {
-      webRequest.getResponse().sendError(responseStatus.value(),reason);
+      webRequest.getResponse().sendError(statusCode.value(),reason);
     }
-    webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE,responseStatus);
+    webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE,statusCode);
     this.responseArgumentUsed=true;
   }
   if (customModelAndViewResolvers != null) {
