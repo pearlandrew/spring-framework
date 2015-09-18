@@ -1,2 +1,37 @@
 {
+  MediaType mediaType=resolveMediaType(request);
+  ResolvableType type=ResolvableType.forMethodParameter(parameter);
+  List<Object> hints=new ArrayList<>();
+  hints.add(UTF_8);
+  ResolvableType readType=type;
+  if (Observable.class.isAssignableFrom(type.getRawClass()) || Publisher.class.isAssignableFrom(type.getRawClass())) {
+    readType=type.getGeneric(0);
+  }
+  ByteToMessageDecoder<?> deserializer=resolveDeserializers(request,type,mediaType,hints.toArray());
+  if (deserializer != null) {
+    Publisher<ByteBuffer> inputStream=request.getBody();
+    List<ByteToMessageDecoder<ByteBuffer>> preProcessors=resolvePreProcessors(request,type,mediaType,hints.toArray());
+    for (    ByteToMessageDecoder<ByteBuffer> preProcessor : preProcessors) {
+      inputStream=preProcessor.decode(inputStream,type,mediaType,hints.toArray());
+    }
+    Publisher<?> elementStream=deserializer.decode(inputStream,readType,mediaType,UTF_8);
+    if (Stream.class.isAssignableFrom(type.getRawClass())) {
+      return Streams.wrap(elementStream);
+    }
+ else     if (Observable.class.isAssignableFrom(type.getRawClass())) {
+      return RxReactiveStreams.toObservable(elementStream);
+    }
+ else     if (Publisher.class.isAssignableFrom(type.getRawClass())) {
+      return elementStream;
+    }
+ else {
+      try {
+        return Streams.wrap(elementStream).next().await();
+      }
+ catch (      InterruptedException ex) {
+        throw new IllegalStateException("Timeout before getter the value");
+      }
+    }
+  }
+  throw new IllegalStateException("Argument type not supported: " + type);
 }

@@ -1,2 +1,33 @@
 {
+  Object value=result.getValue();
+  HandlerMethod handlerMethod=(HandlerMethod)result.getHandler();
+  MethodParameter returnType=handlerMethod.getReturnValueType(value);
+  if (value == null) {
+    return Streams.empty();
+  }
+  MediaType mediaType=resolveMediaType(request);
+  ResolvableType type=ResolvableType.forMethodParameter(returnType);
+  List<Object> hints=new ArrayList<>();
+  hints.add(UTF_8);
+  MessageToByteEncoder<Object> serializer=(MessageToByteEncoder<Object>)resolveSerializer(request,type,mediaType,hints.toArray());
+  if (serializer != null) {
+    Publisher<Object> elementStream;
+    if (Observable.class.isAssignableFrom(type.getRawClass())) {
+      elementStream=RxReactiveStreams.toPublisher((Observable)value);
+    }
+ else     if (Publisher.class.isAssignableFrom(type.getRawClass())) {
+      elementStream=(Publisher)value;
+    }
+ else {
+      elementStream=Streams.just(value);
+    }
+    Publisher<ByteBuffer> outputStream=serializer.encode(elementStream,type,mediaType,hints.toArray());
+    List<MessageToByteEncoder<ByteBuffer>> postProcessors=resolvePostProcessors(request,type,mediaType,hints.toArray());
+    for (    MessageToByteEncoder<ByteBuffer> postProcessor : postProcessors) {
+      outputStream=postProcessor.encode(outputStream,type,mediaType,hints.toArray());
+    }
+    response.getHeaders().setContentType(mediaType);
+    return response.writeWith(Streams.wrap(outputStream));
+  }
+  return Streams.fail(new IllegalStateException("Return value type not supported: " + returnType));
 }
