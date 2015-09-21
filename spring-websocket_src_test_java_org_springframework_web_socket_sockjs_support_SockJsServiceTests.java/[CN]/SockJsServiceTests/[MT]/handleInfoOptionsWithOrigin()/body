@@ -6,11 +6,15 @@
   resetResponseAndHandleRequest("OPTIONS","/echo/info",HttpStatus.NO_CONTENT);
   assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
   this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
-  resetResponseAndHandleRequest("OPTIONS","/echo/info",HttpStatus.FORBIDDEN);
+  resetResponseAndHandleRequest("OPTIONS","/echo/info",HttpStatus.NO_CONTENT);
+  assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
   this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com","http://mydomain2.com","http://mydomain3.com"));
   resetResponseAndHandleRequest("OPTIONS","/echo/info",HttpStatus.NO_CONTENT);
   assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
   this.service.setAllowedOrigins(Arrays.asList("*"));
   resetResponseAndHandleRequest("OPTIONS","/echo/info",HttpStatus.NO_CONTENT);
   assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
+  this.servletRequest.setServerName("mydomain3.com");
+  this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+  resetResponseAndHandleRequest("OPTIONS","/echo/info",HttpStatus.FORBIDDEN);
 }
