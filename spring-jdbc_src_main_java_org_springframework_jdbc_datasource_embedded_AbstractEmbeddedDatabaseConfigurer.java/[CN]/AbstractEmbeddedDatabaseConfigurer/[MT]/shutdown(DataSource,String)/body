@@ -1,12 +1,20 @@
 {
+  Connection con=null;
   try {
-    Connection connection=dataSource.getConnection();
-    Statement stmt=connection.createStatement();
-    stmt.execute("SHUTDOWN");
+    con=dataSource.getConnection();
+    con.createStatement().execute("SHUTDOWN");
   }
  catch (  SQLException ex) {
-    if (logger.isWarnEnabled()) {
-      logger.warn("Could not shut down embedded database",ex);
+    logger.warn("Could not shut down embedded database",ex);
+  }
+ finally {
+    if (con != null) {
+      try {
+        con.close();
+      }
+ catch (      Throwable ex) {
+        logger.debug("Could not close JDBC Connection on shutdown",ex);
+      }
     }
   }
 }
