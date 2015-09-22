@@ -2,7 +2,7 @@
   if (logger.isTraceEnabled()) {
     logger.trace("Starting XHR receive request for " + url);
   }
-  this.httpClient.connect(new ClientCallback<ClientConnection>(){
+  ClientCallback<ClientConnection> clientCallback=new ClientCallback<ClientConnection>(){
     @Override public void completed(    ClientConnection connection){
       ClientRequest request=new ClientRequest().setMethod(Methods.POST).setPath(url.getPath());
       HttpString headerName=HttpString.tryFromString(HttpHeaders.HOST);
@@ -15,5 +15,6 @@
       throw new SockJsTransportFailureException("Failed to execute request to " + url,ex);
     }
   }
-,url,this.worker,this.bufferPool,this.optionMap);
+;
+  this.undertowBufferSupport.httpClientConnect(this.httpClient,clientCallback,url,worker,this.optionMap);
 }
