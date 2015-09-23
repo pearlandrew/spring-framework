@@ -1,16 +1,16 @@
 {
   MockHttpServletRequest request=createServletRequest(servletContext);
-  String requestUri=this.uriComponents.getPath();
+  String requestUri=this.url.getRawPath();
   request.setRequestURI(requestUri);
   updatePathRequestProperties(request,requestUri);
-  if (this.uriComponents.getScheme() != null) {
-    request.setScheme(this.uriComponents.getScheme());
+  if (this.url.getScheme() != null) {
+    request.setScheme(this.url.getScheme());
   }
-  if (this.uriComponents.getHost() != null) {
-    request.setServerName(uriComponents.getHost());
+  if (this.url.getHost() != null) {
+    request.setServerName(this.url.getHost());
   }
-  if (this.uriComponents.getPort() != -1) {
-    request.setServerPort(this.uriComponents.getPort());
+  if (this.url.getPort() != -1) {
+    request.setServerPort(this.url.getPort());
   }
   request.setMethod(this.method.name());
   for (  String name : this.headers.keySet()) {
@@ -19,10 +19,11 @@
     }
   }
   try {
-    if (this.uriComponents.getQuery() != null) {
-      request.setQueryString(this.uriComponents.getQuery());
+    if (this.url.getRawQuery() != null) {
+      request.setQueryString(this.url.getRawQuery());
     }
-    for (    Entry<String,List<String>> entry : this.uriComponents.getQueryParams().entrySet()) {
+    MultiValueMap<String,String> queryParams=UriComponentsBuilder.fromUri(this.url).build().getQueryParams();
+    for (    Entry<String,List<String>> entry : queryParams.entrySet()) {
       for (      String value : entry.getValue()) {
         value=(value != null) ? UriUtils.decode(value,"UTF-8") : null;
         request.addParameter(UriUtils.decode(entry.getKey(),"UTF-8"),value);
