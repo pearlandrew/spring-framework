@@ -1,0 +1,21 @@
+{
+  ScriptEngine engine=scriptEngineManager.getEngineByName(engineName);
+  if (engine == null) {
+    Set<String> engineNames=new LinkedHashSet<String>();
+    for (    ScriptEngineFactory engineFactory : scriptEngineManager.getEngineFactories()) {
+      List<String> factoryNames=engineFactory.getNames();
+      if (factoryNames.contains(engineName)) {
+        try {
+          engine=engineFactory.getScriptEngine();
+          engine.setBindings(scriptEngineManager.getBindings(),ScriptContext.GLOBAL_SCOPE);
+        }
+ catch (        Throwable ex) {
+          throw new IllegalStateException("Script engine with name '" + engineName + "' failed to initialize",ex);
+        }
+      }
+      engineNames.addAll(factoryNames);
+    }
+    throw new IllegalArgumentException("Script engine with name '" + engineName + "' not found; registered engine names: "+ engineNames);
+  }
+  return engine;
+}

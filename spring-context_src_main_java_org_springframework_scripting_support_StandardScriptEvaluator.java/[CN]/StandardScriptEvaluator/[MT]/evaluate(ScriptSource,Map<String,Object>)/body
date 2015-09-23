@@ -1,8 +1,13 @@
 {
   ScriptEngine engine=getScriptEngine(script);
-  Bindings bindings=(!CollectionUtils.isEmpty(arguments) ? new SimpleBindings(arguments) : null);
   try {
-    return (bindings != null ? engine.eval(script.getScriptAsString(),bindings) : engine.eval(script.getScriptAsString()));
+    if (CollectionUtils.isEmpty(argumentBindings)) {
+      return engine.eval(script.getScriptAsString());
+    }
+ else {
+      Bindings bindings=StandardScriptUtils.getBindings(argumentBindings);
+      return engine.eval(script.getScriptAsString(),bindings);
+    }
   }
  catch (  IOException ex) {
     throw new ScriptCompilationException(script,"Cannot access script",ex);

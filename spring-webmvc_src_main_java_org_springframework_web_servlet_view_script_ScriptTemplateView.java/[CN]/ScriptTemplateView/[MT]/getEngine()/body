@@ -1,9 +1,15 @@
 {
   if (Boolean.FALSE.equals(this.sharedEngine)) {
-    ScriptEngine engine=engineHolder.get();
+    Map<Object,ScriptEngine> engines=enginesHolder.get();
+    if (engines == null) {
+      engines=new HashMap<Object,ScriptEngine>(4);
+      enginesHolder.set(engines);
+    }
+    Object engineKey=(!ObjectUtils.isEmpty(this.scripts) ? new EngineKey(this.engineName,this.scripts) : this.engineName);
+    ScriptEngine engine=engines.get(engineKey);
     if (engine == null) {
       engine=createEngineFromName();
-      engineHolder.set(engine);
+      engines.put(engineKey,engine);
     }
     return engine;
   }
