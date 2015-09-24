@@ -1,6 +1,8 @@
 {
   Status status=getCacheManager().getStatus();
-  Assert.isTrue(Status.STATUS_ALIVE.equals(status),"An 'alive' EhCache CacheManager is required - current cache is " + status.toString());
+  if (!Status.STATUS_ALIVE.equals(status)) {
+    throw new IllegalStateException("An 'alive' EhCache CacheManager is required - current cache is " + status.toString());
+  }
   String[] names=getCacheManager().getCacheNames();
   Collection<Cache> caches=new LinkedHashSet<Cache>(names.length);
   for (  String name : names) {
