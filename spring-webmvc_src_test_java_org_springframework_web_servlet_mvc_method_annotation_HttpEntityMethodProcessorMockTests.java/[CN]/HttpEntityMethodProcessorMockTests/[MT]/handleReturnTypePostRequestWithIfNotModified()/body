@@ -1,0 +1,19 @@
+{
+  String wildcardValue="*";
+  String etagValue="\"some-etag\"";
+  servletRequest.setMethod("POST");
+  servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH,wildcardValue);
+  HttpHeaders responseHeaders=new HttpHeaders();
+  responseHeaders.set(HttpHeaders.ETAG,etagValue);
+  ResponseEntity<String> returnValue=new ResponseEntity<String>("body",responseHeaders,HttpStatus.OK);
+  given(messageConverter.canWrite(String.class,null)).willReturn(true);
+  given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+  given(messageConverter.canWrite(String.class,MediaType.TEXT_PLAIN)).willReturn(true);
+  processor.handleReturnValue(returnValue,returnTypeResponseEntity,mavContainer,webRequest);
+  assertTrue(mavContainer.isRequestHandled());
+  assertEquals(HttpStatus.OK.value(),servletResponse.getStatus());
+  assertEquals(1,servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
+  assertEquals(etagValue,servletResponse.getHeader(HttpHeaders.ETAG));
+  ArgumentCaptor<HttpOutputMessage> outputMessage=ArgumentCaptor.forClass(HttpOutputMessage.class);
+  verify(messageConverter).write(eq("body"),eq(MediaType.TEXT_PLAIN),outputMessage.capture());
+}
