@@ -1,14 +1,20 @@
 {
-  Cache cache=lookupCache(name);
+  Cache cache=this.cacheMap.get(name);
   if (cache != null) {
     return cache;
   }
  else {
-    Cache missingCache=getMissingCache(name);
-    if (missingCache != null) {
-      addCache(missingCache);
-      return lookupCache(name);
+synchronized (this.cacheMap) {
+      cache=this.cacheMap.get(name);
+      if (cache == null) {
+        cache=getMissingCache(name);
+        if (cache != null) {
+          cache=decorateCache(cache);
+          this.cacheMap.put(name,cache);
+          updateCacheNames(name);
+        }
+      }
+      return cache;
     }
-    return null;
   }
 }
