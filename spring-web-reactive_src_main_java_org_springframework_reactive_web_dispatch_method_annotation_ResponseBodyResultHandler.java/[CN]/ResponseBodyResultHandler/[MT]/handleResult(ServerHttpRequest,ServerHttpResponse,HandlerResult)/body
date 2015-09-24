@@ -12,8 +12,17 @@
   MessageToByteEncoder<Object> serializer=(MessageToByteEncoder<Object>)resolveSerializer(request,type,mediaType,hints.toArray());
   if (serializer != null) {
     Publisher<Object> elementStream;
-    if (Observable.class.isAssignableFrom(type.getRawClass())) {
+    if (Promise.class.isAssignableFrom(type.getRawClass())) {
+      elementStream=((Promise)value).stream();
+    }
+ else     if (Observable.class.isAssignableFrom(type.getRawClass())) {
       elementStream=RxReactiveStreams.toPublisher((Observable)value);
+    }
+ else     if (Single.class.isAssignableFrom(type.getRawClass())) {
+      elementStream=RxReactiveStreams.toPublisher(((Single)value).toObservable());
+    }
+ else     if (CompletableFuture.class.isAssignableFrom(type.getRawClass())) {
+      elementStream=CompletableFutureUtils.toPublisher((CompletableFuture)value);
     }
  else     if (Publisher.class.isAssignableFrom(type.getRawClass())) {
       elementStream=(Publisher)value;

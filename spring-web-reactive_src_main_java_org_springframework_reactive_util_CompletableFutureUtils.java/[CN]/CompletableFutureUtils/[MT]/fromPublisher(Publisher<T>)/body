@@ -1,0 +1,20 @@
+{
+  final CompletableFuture<List<T>> future=new CompletableFuture<>();
+  publisher.subscribe(new Subscriber<T>(){
+    private final List<T> values=new ArrayList<>();
+    @Override public void onSubscribe(    Subscription s){
+      s.request(Long.MAX_VALUE);
+    }
+    @Override public void onNext(    T t){
+      values.add(t);
+    }
+    @Override public void onError(    Throwable t){
+      future.completeExceptionally(t);
+    }
+    @Override public void onComplete(){
+      future.complete(values);
+    }
+  }
+);
+  return future;
+}
