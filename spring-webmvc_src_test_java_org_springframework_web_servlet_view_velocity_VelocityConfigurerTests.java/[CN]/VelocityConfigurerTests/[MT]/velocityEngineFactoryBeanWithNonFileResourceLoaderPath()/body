@@ -1,0 +1,25 @@
+{
+  VelocityEngineFactoryBean vefb=new VelocityEngineFactoryBean();
+  vefb.setResourceLoaderPath("file:/mydir");
+  vefb.setResourceLoader(new ResourceLoader(){
+    @Override public Resource getResource(    String location){
+      if (location.equals("file:/mydir") || location.equals("file:/mydir/test")) {
+        return new ByteArrayResource("test".getBytes(),"test");
+      }
+      try {
+        return new UrlResource(location);
+      }
+ catch (      MalformedURLException ex) {
+        throw new IllegalArgumentException(ex.toString());
+      }
+    }
+    @Override public ClassLoader getClassLoader(){
+      return getClass().getClassLoader();
+    }
+  }
+);
+  vefb.afterPropertiesSet();
+  assertThat(vefb.getObject(),instanceOf(VelocityEngine.class));
+  VelocityEngine ve=vefb.getObject();
+  assertEquals("test",VelocityEngineUtils.mergeTemplateIntoString(ve,"test",Collections.emptyMap()));
+}

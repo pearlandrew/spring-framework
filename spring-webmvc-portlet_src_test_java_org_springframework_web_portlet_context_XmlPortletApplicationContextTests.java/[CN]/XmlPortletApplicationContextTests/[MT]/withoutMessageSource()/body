@@ -1,0 +1,18 @@
+{
+  MockPortletContext portletContext=new MockPortletContext("");
+  MockPortletConfig portletConfig=new MockPortletConfig(portletContext);
+  XmlPortletApplicationContext pac=new XmlPortletApplicationContext();
+  pac.setParent(root);
+  pac.setPortletConfig(portletConfig);
+  pac.setNamespace("testNamespace");
+  pac.setConfigLocations(new String[]{"/org/springframework/web/portlet/context/WEB-INF/test-portlet.xml"});
+  pac.refresh();
+  try {
+    pac.getMessage("someMessage",null,Locale.getDefault());
+    fail("Should have thrown NoSuchMessageException");
+  }
+ catch (  NoSuchMessageException ex) {
+  }
+  String msg=pac.getMessage("someMessage",null,"default",Locale.getDefault());
+  assertEquals("Default message returned","default",msg);
+}

@@ -1,0 +1,15 @@
+{
+  PortletRequestDataBinder binder=new PortletRequestDataBinder(bean);
+  binder.registerCustomEditor(ITestBean.class,new PropertyEditorSupport(){
+    @Override public void setAsText(    String text) throws IllegalArgumentException {
+      setValue(new TestBean(text));
+    }
+  }
+);
+  request.addParameter("spouse","test");
+  request.addParameter("spouse.age","32");
+  binder.bind(request);
+  assertNotNull(bean.getSpouse());
+  assertEquals("test",bean.getSpouse().getName());
+  assertEquals(32,bean.getSpouse().getAge());
+}
