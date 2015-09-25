@@ -1,7 +1,19 @@
 {
   super.registerSingleton(beanName,singletonObject);
-  if (!this.beanDefinitionMap.containsKey(beanName)) {
-    this.manualSingletonNames.add(beanName);
+  if (hasBeanCreationStarted()) {
+synchronized (this.beanDefinitionMap) {
+      if (!this.beanDefinitionMap.containsKey(beanName)) {
+        Set<String> updatedSingletons=new LinkedHashSet<String>(this.manualSingletonNames.size() + 1);
+        updatedSingletons.addAll(this.manualSingletonNames);
+        updatedSingletons.add(beanName);
+        this.manualSingletonNames=updatedSingletons;
+      }
+    }
+  }
+ else {
+    if (!this.beanDefinitionMap.containsKey(beanName)) {
+      this.manualSingletonNames.add(beanName);
+    }
   }
   clearByTypeCache();
 }

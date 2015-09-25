@@ -7,7 +7,16 @@
     }
     throw new NoSuchBeanDefinitionException(beanName);
   }
-  this.beanDefinitionNames.remove(beanName);
+  if (hasBeanCreationStarted()) {
+synchronized (this.beanDefinitionMap) {
+      List<String> updatedDefinitions=new ArrayList<String>(this.beanDefinitionNames);
+      updatedDefinitions.remove(beanName);
+      this.beanDefinitionNames=updatedDefinitions;
+    }
+  }
+ else {
+    this.beanDefinitionNames.remove(beanName);
+  }
   this.frozenBeanDefinitionNames=null;
   resetBeanDefinition(beanName);
 }

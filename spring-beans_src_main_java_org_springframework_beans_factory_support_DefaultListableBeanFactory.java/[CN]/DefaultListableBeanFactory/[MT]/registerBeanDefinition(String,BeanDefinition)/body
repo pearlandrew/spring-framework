@@ -30,13 +30,30 @@
         this.logger.debug("Overriding bean definition for bean '" + beanName + "' with an equivalent definition: replacing ["+ oldBeanDefinition+ "] with ["+ beanDefinition+ "]");
       }
     }
+    this.beanDefinitionMap.put(beanName,beanDefinition);
   }
  else {
-    this.beanDefinitionNames.add(beanName);
-    this.manualSingletonNames.remove(beanName);
+    if (hasBeanCreationStarted()) {
+synchronized (this.beanDefinitionMap) {
+        this.beanDefinitionMap.put(beanName,beanDefinition);
+        List<String> updatedDefinitions=new ArrayList<String>(this.beanDefinitionNames.size() + 1);
+        updatedDefinitions.addAll(this.beanDefinitionNames);
+        updatedDefinitions.add(beanName);
+        this.beanDefinitionNames=updatedDefinitions;
+        if (this.manualSingletonNames.contains(beanName)) {
+          Set<String> updatedSingletons=new LinkedHashSet<String>(this.manualSingletonNames);
+          updatedSingletons.remove(beanName);
+          this.manualSingletonNames=updatedSingletons;
+        }
+      }
+    }
+ else {
+      this.beanDefinitionMap.put(beanName,beanDefinition);
+      this.beanDefinitionNames.add(beanName);
+      this.manualSingletonNames.remove(beanName);
+    }
     this.frozenBeanDefinitionNames=null;
   }
-  this.beanDefinitionMap.put(beanName,beanDefinition);
   if (oldBeanDefinition != null || containsSingleton(beanName)) {
     resetBeanDefinition(beanName);
   }
