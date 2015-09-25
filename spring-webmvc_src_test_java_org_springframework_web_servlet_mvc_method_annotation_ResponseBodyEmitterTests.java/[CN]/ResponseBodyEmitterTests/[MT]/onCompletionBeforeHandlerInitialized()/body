@@ -2,5 +2,10 @@
   Runnable runnable=mock(Runnable.class);
   this.emitter.onCompletion(runnable);
   this.emitter.initialize(this.handler);
-  verify(this.handler).onCompletion(runnable);
+  ArgumentCaptor<Runnable> captor=ArgumentCaptor.forClass(Runnable.class);
+  verify(this.handler).onTimeout(any());
+  verify(this.handler).onCompletion(captor.capture());
+  Assert.notNull(captor.getValue());
+  captor.getValue().run();
+  verify(runnable).run();
 }
