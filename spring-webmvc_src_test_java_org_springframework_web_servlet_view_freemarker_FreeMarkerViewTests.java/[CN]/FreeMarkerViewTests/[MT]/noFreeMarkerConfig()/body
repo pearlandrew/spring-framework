@@ -4,12 +4,7 @@
   given(wac.getBeansOfType(FreeMarkerConfig.class,true,false)).willReturn(new HashMap<String,FreeMarkerConfig>());
   given(wac.getServletContext()).willReturn(new MockServletContext());
   fv.setUrl("anythingButNull");
-  try {
-    fv.setApplicationContext(wac);
-    fv.afterPropertiesSet();
-    fail("Should have thrown BeanDefinitionStoreException");
-  }
- catch (  ApplicationContextException ex) {
-    assertTrue(ex.getMessage().contains("FreeMarkerConfig"));
-  }
+  exception.expect(ApplicationContextException.class);
+  exception.expectMessage(containsString("FreeMarkerConfig"));
+  fv.setApplicationContext(wac);
 }
