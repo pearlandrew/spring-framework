@@ -1,0 +1,13 @@
+{
+  GenericWebApplicationContext ac=new GenericWebApplicationContext();
+  ac.setServletContext(new MockServletContext());
+  BeanDefinitionReader reader=new PropertiesBeanDefinitionReader(ac);
+  reader.loadBeanDefinitions(new ClassPathResource("view.properties",getClass()));
+  ac.refresh();
+  AbstractJasperReportsView view=(AbstractJasperReportsView)ac.getBean("report");
+  String encoding=(String)view.getConvertedExporterParameters().get(net.sf.jasperreports.engine.export.JRHtmlExporterParameter.CHARACTER_ENCODING);
+  assertEquals("UTF-8",encoding);
+  request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE,ac);
+  view.render(getModel(),request,response);
+  assertEquals("Response content type is incorrect","text/html;charset=UTF-8",response.getContentType());
+}

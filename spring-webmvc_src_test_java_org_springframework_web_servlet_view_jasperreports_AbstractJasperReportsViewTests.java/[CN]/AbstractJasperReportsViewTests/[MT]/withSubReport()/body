@@ -1,0 +1,14 @@
+{
+  assumeTrue(canCompileReport);
+  Map<String,Object> model=getModel();
+  model.put("SubReportData",getProductData());
+  Properties subReports=new Properties();
+  subReports.put("ProductsSubReport","/org/springframework/ui/jasperreports/subReportChild.jrxml");
+  AbstractJasperReportsView view=getView(SUB_REPORT_PARENT);
+  view.setReportDataKey("dataSource");
+  view.setSubReportUrls(subReports);
+  view.setSubReportDataKeys(new String[]{"SubReportData"});
+  view.initApplicationContext();
+  view.render(model,request,response);
+  assertTrue(response.getContentAsByteArray().length > 0);
+}
