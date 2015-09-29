@@ -1,14 +1,14 @@
 {
-  String acceptHeader=webRequest.getHeader(ACCEPT_HEADER);
+  String header=request.getHeader(HttpHeaders.ACCEPT);
+  if (!StringUtils.hasText(header)) {
+    return Collections.emptyList();
+  }
   try {
-    if (StringUtils.hasText(acceptHeader)) {
-      List<MediaType> mediaTypes=MediaType.parseMediaTypes(acceptHeader);
-      MediaType.sortBySpecificityAndQuality(mediaTypes);
-      return mediaTypes;
-    }
+    List<MediaType> mediaTypes=MediaType.parseMediaTypes(header);
+    MediaType.sortBySpecificityAndQuality(mediaTypes);
+    return mediaTypes;
   }
  catch (  InvalidMediaTypeException ex) {
-    throw new HttpMediaTypeNotAcceptableException("Could not parse accept header [" + acceptHeader + "]: "+ ex.getMessage());
+    throw new HttpMediaTypeNotAcceptableException("Could not parse 'Accept' header [" + header + "]: "+ ex.getMessage());
   }
-  return Collections.emptyList();
 }
