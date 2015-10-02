@@ -1,8 +1,11 @@
 {
   Object handler=result.getHandler();
   if (handler instanceof HandlerMethod) {
-    Method method=((HandlerMethod)handler).getMethod();
-    return AnnotatedElementUtils.isAnnotated(method,ResponseBody.class.getName());
+    HandlerMethod handlerMethod=(HandlerMethod)handler;
+    Type publisherVoidType=new ParameterizedTypeReference<Publisher<Void>>(){
+    }
+.getType();
+    return AnnotatedElementUtils.isAnnotated(handlerMethod.getMethod(),ResponseBody.class.getName()) && !handlerMethod.getReturnType().getGenericParameterType().equals(publisherVoidType);
   }
   return false;
 }
