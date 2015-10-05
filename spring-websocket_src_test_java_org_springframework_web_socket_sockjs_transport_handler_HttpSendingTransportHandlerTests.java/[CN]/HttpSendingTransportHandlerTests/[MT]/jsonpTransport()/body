@@ -1,16 +1,8 @@
 {
-  JsonpPollingTransportHandler transportHandler=new JsonpPollingTransportHandler();
-  transportHandler.initialize(this.sockJsConfig);
-  PollingSockJsSession session=transportHandler.createSession("1",this.webSocketHandler,null);
-  transportHandler.handleRequest(this.request,this.response,this.webSocketHandler,session);
-  assertEquals(500,this.servletResponse.getStatus());
-  assertEquals("\"callback\" parameter required",this.servletResponse.getContentAsString());
-  resetRequestAndResponse();
-  setRequest("POST","/");
-  this.servletRequest.setQueryString("c=callback");
-  this.servletRequest.addParameter("c","callback");
-  transportHandler.handleRequest(this.request,this.response,this.webSocketHandler,session);
-  assertEquals("application/javascript;charset=UTF-8",this.response.getHeaders().getContentType().toString());
-  assertFalse("Polling request should complete after open frame",this.servletRequest.isAsyncStarted());
-  verify(this.webSocketHandler).afterConnectionEstablished(session);
+  testJsonpTransport(null,false);
+  testJsonpTransport("_jp123xYz",true);
+  testJsonpTransport("A..B__3..4",true);
+  testJsonpTransport("!jp!abc",false);
+  testJsonpTransport("<script>",false);
+  testJsonpTransport("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.",true);
 }

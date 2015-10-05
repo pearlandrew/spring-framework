@@ -41,6 +41,7 @@
         if (((GenericHttpMessageConverter<T>)messageConverter).canWrite(returnValueType,returnValueClass,selectedMediaType)) {
           returnValue=(T)getAdvice().beforeBodyWrite(returnValue,returnType,selectedMediaType,(Class<? extends HttpMessageConverter<?>>)messageConverter.getClass(),inputMessage,outputMessage);
           if (returnValue != null) {
+            addContentDispositionHeader(inputMessage,outputMessage);
             ((GenericHttpMessageConverter<T>)messageConverter).write(returnValue,returnValueType,selectedMediaType,outputMessage);
             if (logger.isDebugEnabled()) {
               logger.debug("Written [" + returnValue + "] as \""+ selectedMediaType+ "\" using ["+ messageConverter+ "]");
@@ -52,6 +53,7 @@
  else       if (messageConverter.canWrite(returnValueClass,selectedMediaType)) {
         returnValue=(T)getAdvice().beforeBodyWrite(returnValue,returnType,selectedMediaType,(Class<? extends HttpMessageConverter<?>>)messageConverter.getClass(),inputMessage,outputMessage);
         if (returnValue != null) {
+          addContentDispositionHeader(inputMessage,outputMessage);
           ((HttpMessageConverter<T>)messageConverter).write(returnValue,selectedMediaType,outputMessage);
           if (logger.isDebugEnabled()) {
             logger.debug("Written [" + returnValue + "] as \""+ selectedMediaType+ "\" using ["+ messageConverter+ "]");

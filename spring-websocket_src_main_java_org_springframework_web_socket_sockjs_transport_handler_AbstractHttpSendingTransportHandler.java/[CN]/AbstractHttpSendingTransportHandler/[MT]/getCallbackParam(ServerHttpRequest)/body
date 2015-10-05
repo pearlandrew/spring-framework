@@ -2,8 +2,12 @@
   String query=request.getURI().getQuery();
   MultiValueMap<String,String> params=UriComponentsBuilder.newInstance().query(query).build().getQueryParams();
   String value=params.getFirst("c");
+  if (StringUtils.isEmpty(value)) {
+    return null;
+  }
   try {
-    return (!StringUtils.isEmpty(value) ? UriUtils.decode(value,"UTF-8") : null);
+    String result=UriUtils.decode(value,"UTF-8");
+    return (CALLBACK_PARAM_PATTERN.matcher(result).matches() ? result : null);
   }
  catch (  UnsupportedEncodingException ex) {
     throw new SockJsException("Unable to decode callback query parameter",null,ex);
