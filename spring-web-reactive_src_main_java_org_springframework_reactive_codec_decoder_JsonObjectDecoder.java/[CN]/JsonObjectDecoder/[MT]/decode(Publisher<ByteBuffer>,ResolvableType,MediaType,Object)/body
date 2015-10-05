@@ -1,5 +1,5 @@
 {
-  return Streams.wrap(inputStream).flatMap(new Function<ByteBuffer,Publisher<? extends ByteBuffer>>(){
+  return Publishers.flatMap(inputStream,new Function<ByteBuffer,Publisher<? extends ByteBuffer>>(){
     int openBraces;
     int idx;
     int state;
@@ -18,12 +18,12 @@
       }
       if (state == ST_CORRUPTED) {
         in.skipBytes(in.readableBytes());
-        return Streams.fail(new IllegalStateException("Corrupted stream"));
+        return Publishers.error(new IllegalStateException("Corrupted stream"));
       }
       if (wrtIdx > maxObjectLength) {
         in.skipBytes(in.readableBytes());
         reset();
-        return Streams.fail(new IllegalStateException("object length exceeds " + maxObjectLength + ": "+ wrtIdx+ " bytes discarded"));
+        return Publishers.error(new IllegalStateException("object length exceeds " + maxObjectLength + ": "+ wrtIdx+ " bytes discarded"));
       }
       for (; idx < wrtIdx; idx++) {
         byte c=in.getByte(idx);
@@ -69,13 +69,13 @@
         }
  else {
           state=ST_CORRUPTED;
-          return Streams.fail(new IllegalStateException("invalid JSON received at byte position " + idx + ": "+ ByteBufUtil.hexDump(in)));
+          return Publishers.error(new IllegalStateException("invalid JSON received at byte position " + idx + ": "+ ByteBufUtil.hexDump(in)));
         }
       }
       if (in.readableBytes() == 0) {
         idx=0;
       }
-      return Streams.from(chunks);
+      return Publishers.from(chunks);
     }
     /** 
  * Override this method if you want to filter the json objects/arrays that get passed through the pipeline.

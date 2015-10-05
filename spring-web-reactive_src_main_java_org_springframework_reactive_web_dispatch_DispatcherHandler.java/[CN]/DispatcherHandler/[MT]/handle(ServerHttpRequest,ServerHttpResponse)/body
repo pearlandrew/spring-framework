@@ -5,7 +5,7 @@
   Object handler=getHandler(request);
   if (handler == null) {
     response.setStatusCode(HttpStatus.NOT_FOUND);
-    return Streams.empty();
+    return Publishers.empty();
   }
   HandlerAdapter handlerAdapter=getHandlerAdapter(handler);
   try {
@@ -15,9 +15,9 @@
         return resultHandler.handleResult(request,response,result);
       }
     }
-    return Streams.fail(new IllegalStateException("No HandlerResultHandler for " + result.getValue()));
+    return Publishers.error(new IllegalStateException("No HandlerResultHandler for " + result.getValue()));
   }
  catch (  Exception ex) {
-    return Streams.fail(ex);
+    return Publishers.error(ex);
   }
 }

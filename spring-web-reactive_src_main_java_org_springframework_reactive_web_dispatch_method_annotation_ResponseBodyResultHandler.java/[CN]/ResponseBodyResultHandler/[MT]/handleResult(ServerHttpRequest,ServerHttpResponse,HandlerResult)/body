@@ -3,7 +3,7 @@
   HandlerMethod handlerMethod=(HandlerMethod)result.getHandler();
   MethodParameter returnType=handlerMethod.getReturnValueType(value);
   if (value == null) {
-    return Streams.empty();
+    return Publishers.empty();
   }
   MediaType mediaType=resolveMediaType(request);
   ResolvableType type=ResolvableType.forMethodParameter(returnType);
@@ -28,7 +28,7 @@
       elementStream=(Publisher)value;
     }
  else {
-      elementStream=Streams.just(value);
+      elementStream=Publishers.just(value);
     }
     Publisher<ByteBuffer> outputStream=serializer.encode(elementStream,type,mediaType,hints.toArray());
     List<MessageToByteEncoder<ByteBuffer>> postProcessors=resolvePostProcessors(request,type,mediaType,hints.toArray());
@@ -36,7 +36,7 @@
       outputStream=postProcessor.encode(outputStream,type,mediaType,hints.toArray());
     }
     response.getHeaders().setContentType(mediaType);
-    return response.writeWith(Streams.wrap(outputStream));
+    return response.writeWith(outputStream);
   }
-  return Streams.fail(new IllegalStateException("Return value type not supported: " + returnType));
+  return Publishers.error(new IllegalStateException("Return value type not supported: " + returnType));
 }
