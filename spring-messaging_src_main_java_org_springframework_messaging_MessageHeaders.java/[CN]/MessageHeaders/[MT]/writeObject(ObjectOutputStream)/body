@@ -1,15 +1,17 @@
 {
-  List<String> keysToRemove=new ArrayList<String>();
+  Set<String> keysToIgnore=new HashSet<String>();
   for (  Map.Entry<String,Object> entry : this.headers.entrySet()) {
     if (!(entry.getValue() instanceof Serializable)) {
-      keysToRemove.add(entry.getKey());
+      keysToIgnore.add(entry.getKey());
     }
   }
-  for (  String key : keysToRemove) {
-    if (logger.isInfoEnabled()) {
-      logger.info("Removing non-serializable header: " + key);
-    }
-    this.headers.remove(key);
+  if (keysToIgnore.isEmpty()) {
+    out.defaultWriteObject();
   }
-  out.defaultWriteObject();
+ else {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Ignoring non-serializable message headers: " + keysToIgnore);
+    }
+    out.writeObject(new MessageHeaders(this,keysToIgnore));
+  }
 }
