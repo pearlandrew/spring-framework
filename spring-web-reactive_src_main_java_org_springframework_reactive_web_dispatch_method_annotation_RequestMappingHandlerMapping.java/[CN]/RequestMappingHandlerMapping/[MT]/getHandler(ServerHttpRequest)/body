@@ -1,8 +1,14 @@
 {
   String path=request.getURI().getPath();
-  HandlerMethod handlerMethod=this.methodMap.get(path);
-  if (logger.isDebugEnabled()) {
-    logger.debug("Mapped " + path + " to ["+ handlerMethod+ "]");
+  HttpMethod method=request.getMethod();
+  for (  Map.Entry<RequestMappingInfo,HandlerMethod> entry : this.methodMap.entrySet()) {
+    RequestMappingInfo info=entry.getKey();
+    if (path.equals(info.getPath()) && (info.getMethods().isEmpty() || info.getMethods().contains(RequestMethod.valueOf(method.name())))) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Mapped " + method + " "+ path+ " to ["+ entry.getValue()+ "]");
+      }
+      return entry.getValue();
+    }
   }
-  return handlerMethod;
+  return null;
 }
