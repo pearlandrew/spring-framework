@@ -11,21 +11,25 @@
   }
  catch (  InvalidMediaTypeException ex) {
   }
-  String requestInfo=logger.isDebugEnabled() ? request.getMethod() + " " + request.getURI() : "";
+  String requestInfo=(logger.isDebugEnabled() ? request.getMethod() + " " + request.getURI() : null);
   try {
     if (sockJsPath.equals("") || sockJsPath.equals("/")) {
-      logger.debug(requestInfo);
+      if (requestInfo != null) {
+        logger.debug("Processing transport request: " + requestInfo);
+      }
       response.getHeaders().setContentType(new MediaType("text","plain",UTF8_CHARSET));
       response.getBody().write("Welcome to SockJS!\n".getBytes(UTF8_CHARSET));
     }
  else     if (sockJsPath.equals("/info")) {
-      logger.debug(requestInfo);
+      if (requestInfo != null) {
+        logger.debug("Processing transport request: " + requestInfo);
+      }
       this.infoHandler.handle(request,response);
     }
  else     if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
       if (!this.allowedOrigins.isEmpty() && !this.allowedOrigins.contains("*")) {
-        if (logger.isDebugEnabled()) {
-          logger.debug("Iframe support is disabled when an origin check is required, ignoring " + requestInfo);
+        if (requestInfo != null) {
+          logger.debug("Iframe support is disabled when an origin check is required. " + "Ignoring transport request: " + requestInfo);
         }
         response.setStatusCode(HttpStatus.NOT_FOUND);
         return;
@@ -33,23 +37,30 @@
       if (this.allowedOrigins.isEmpty()) {
         response.getHeaders().add(XFRAME_OPTIONS_HEADER,"SAMEORIGIN");
       }
-      logger.debug(requestInfo);
+      if (requestInfo != null) {
+        logger.debug("Processing transport request: " + requestInfo);
+      }
       this.iframeHandler.handle(request,response);
     }
  else     if (sockJsPath.equals("/websocket")) {
       if (isWebSocketEnabled()) {
-        logger.debug(requestInfo);
+        if (requestInfo != null) {
+          logger.debug("Processing transport request: " + requestInfo);
+        }
         handleRawWebSocketRequest(request,response,wsHandler);
       }
- else       if (logger.isDebugEnabled()) {
-        logger.debug("WebSocket disabled, ignoring " + requestInfo);
+ else       if (requestInfo != null) {
+        logger.debug("WebSocket disabled. Ignoring transport request: " + requestInfo);
       }
     }
  else {
       String[] pathSegments=StringUtils.tokenizeToStringArray(sockJsPath.substring(1),"/");
       if (pathSegments.length != 3) {
         if (logger.isWarnEnabled()) {
-          logger.warn("Ignoring invalid transport request " + requestInfo);
+          logger.warn("Invalid SockJS path '" + sockJsPath + "' - required to have 3 path segments");
+        }
+        if (requestInfo != null) {
+          logger.debug("Ignoring transport request: " + requestInfo);
         }
         response.setStatusCode(HttpStatus.NOT_FOUND);
         return;
@@ -58,18 +69,21 @@
       String sessionId=pathSegments[1];
       String transport=pathSegments[2];
       if (!isWebSocketEnabled() && transport.equals("websocket")) {
-        if (logger.isDebugEnabled()) {
-          logger.debug("WebSocket transport is disabled, ignoring " + requestInfo);
+        if (requestInfo != null) {
+          logger.debug("WebSocket disabled. Ignoring transport request: " + requestInfo);
         }
         response.setStatusCode(HttpStatus.NOT_FOUND);
         return;
       }
  else       if (!validateRequest(serverId,sessionId,transport)) {
-        if (logger.isWarnEnabled()) {
-          logger.warn("Ignoring transport request " + requestInfo);
+        if (requestInfo != null) {
+          logger.debug("Ignoring transport request: " + requestInfo);
         }
         response.setStatusCode(HttpStatus.NOT_FOUND);
         return;
+      }
+      if (requestInfo != null) {
+        logger.debug("Processing transport request: " + requestInfo);
       }
       handleTransportRequest(request,response,wsHandler,sessionId,transport);
     }
