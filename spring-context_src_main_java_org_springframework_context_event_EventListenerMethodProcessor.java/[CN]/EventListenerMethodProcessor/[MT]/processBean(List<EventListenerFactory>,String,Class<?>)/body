@@ -1,5 +1,4 @@
 {
-  Class<?> targetType=getTargetClass(beanName,type);
   if (!this.nonAnnotatedClasses.contains(targetType)) {
     final Set<Method> annotatedMethods=new LinkedHashSet<Method>(1);
     Method[] methods=ReflectionUtils.getUniqueDeclaredMethods(targetType);
@@ -10,10 +9,7 @@
       }
       for (      EventListenerFactory factory : factories) {
         if (factory.supportsMethod(method)) {
-          if (!type.equals(targetType)) {
-            method=getProxyMethod(type,method);
-          }
-          ApplicationListener<?> applicationListener=factory.createApplicationListener(beanName,type,method);
+          ApplicationListener<?> applicationListener=factory.createApplicationListener(beanName,targetType,method);
           if (applicationListener instanceof ApplicationListenerMethodAdapter) {
             ((ApplicationListenerMethodAdapter)applicationListener).init(this.applicationContext,this.evaluator);
           }
@@ -24,9 +20,9 @@
       }
     }
     if (annotatedMethods.isEmpty()) {
-      this.nonAnnotatedClasses.add(type);
+      this.nonAnnotatedClasses.add(targetType);
       if (logger.isTraceEnabled()) {
-        logger.trace("No @EventListener annotations found on bean class: " + type);
+        logger.trace("No @EventListener annotations found on bean class: " + targetType);
       }
     }
  else {
