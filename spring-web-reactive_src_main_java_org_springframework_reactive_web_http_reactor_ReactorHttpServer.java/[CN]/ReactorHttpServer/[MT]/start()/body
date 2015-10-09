@@ -1,6 +1,11 @@
 {
   if (!this.running) {
-    this.running=true;
-    this.reactorServer.route(Selectors.matchAll(),this.reactorHandler).start();
+    try {
+      this.reactorServer.route(Selectors.matchAll(),this.reactorHandler).start().await();
+      this.running=true;
+    }
+ catch (    InterruptedException ex) {
+      throw new IllegalStateException(ex);
+    }
   }
 }

@@ -1,6 +1,11 @@
 {
   if (this.running) {
-    this.running=false;
-    this.reactorServer.shutdown();
+    try {
+      this.reactorServer.shutdown().await();
+      this.running=false;
+    }
+ catch (    InterruptedException ex) {
+      throw new IllegalStateException(ex);
+    }
   }
 }
