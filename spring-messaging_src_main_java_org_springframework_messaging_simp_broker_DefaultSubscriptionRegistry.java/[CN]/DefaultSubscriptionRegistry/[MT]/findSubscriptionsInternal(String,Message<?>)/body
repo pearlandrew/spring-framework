@@ -1,20 +1,4 @@
 {
-  LinkedMultiValueMap<String,String> result=this.destinationCache.getSubscriptions(destination);
-  if (result != null) {
-    return filterSubscriptions(result,message);
-  }
-  result=new LinkedMultiValueMap<String,String>();
-  for (  SessionSubscriptionInfo info : this.subscriptionRegistry.getAllSubscriptions()) {
-    for (    String destinationPattern : info.getDestinations()) {
-      if (this.pathMatcher.match(destinationPattern,destination)) {
-        for (        Subscription subscription : info.getSubscriptions(destinationPattern)) {
-          result.add(info.sessionId,subscription.getId());
-        }
-      }
-    }
-  }
-  if (!result.isEmpty()) {
-    this.destinationCache.addSubscriptions(destination,result);
-  }
+  MultiValueMap<String,String> result=this.destinationCache.getSubscriptions(destination,message);
   return filterSubscriptions(result,message);
 }
