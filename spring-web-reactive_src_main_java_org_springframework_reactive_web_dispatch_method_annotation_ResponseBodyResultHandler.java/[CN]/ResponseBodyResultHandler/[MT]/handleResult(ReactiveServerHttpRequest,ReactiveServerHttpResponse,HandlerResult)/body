@@ -1,0 +1,33 @@
+{
+  Object value=result.getValue();
+  HandlerMethod handlerMethod=(HandlerMethod)result.getHandler();
+  MethodParameter returnType=handlerMethod.getReturnValueType(value);
+  if (value == null) {
+    return Publishers.empty();
+  }
+  ResolvableType type=ResolvableType.forMethodParameter(returnType);
+  MediaType mediaType=resolveMediaType(request);
+  List<Object> hints=new ArrayList<>();
+  hints.add(UTF_8);
+  Publisher<Object> elementStream;
+  ResolvableType elementType;
+  if (conversionService.canConvert(type.getRawClass(),Publisher.class)) {
+    elementStream=conversionService.convert(value,Publisher.class);
+    elementType=type.getGeneric(0);
+  }
+ else {
+    elementStream=Publishers.just(value);
+    elementType=type;
+  }
+  MessageToByteEncoder<Object> serializer=(MessageToByteEncoder<Object>)resolveSerializer(request,elementType,mediaType,hints.toArray());
+  if (serializer != null) {
+    Publisher<ByteBuffer> outputStream=serializer.encode(elementStream,type,mediaType,hints.toArray());
+    List<MessageToByteEncoder<ByteBuffer>> postProcessors=resolvePostProcessors(request,elementType,mediaType,hints.toArray());
+    for (    MessageToByteEncoder<ByteBuffer> postProcessor : postProcessors) {
+      outputStream=postProcessor.encode(outputStream,elementType,mediaType,hints.toArray());
+    }
+    response.getHeaders().setContentType(mediaType);
+    return response.addBody(outputStream);
+  }
+  return Publishers.error(new IllegalStateException("Return value type '" + returnType.getParameterType().getName() + "' with media type '"+ mediaType+ "' not supported"));
+}
