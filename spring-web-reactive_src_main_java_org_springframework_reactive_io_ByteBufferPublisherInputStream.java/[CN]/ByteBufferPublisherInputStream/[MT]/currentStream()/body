@@ -4,30 +4,25 @@
       return this.currentStream;
     }
  else {
-      PublisherSignal<ByteBuffer> signal=this.queue.take();
-      if (signal.isData()) {
-        ByteBuffer data=signal.data();
-        this.currentStream=new ByteBufferInputStream(data);
-        return this.currentStream;
-      }
- else       if (signal.isComplete()) {
+      ByteBuffer signal=this.queue.take();
+      if (signal == null) {
         this.completed=true;
         return null;
       }
- else       if (signal.isError()) {
-        Throwable error=signal.error();
-        this.completed=true;
-        if (error instanceof IOException) {
-          throw (IOException)error;
-        }
- else {
-          throw new IOException(error);
-        }
-      }
+      this.currentStream=new ByteBufferInputStream(signal);
+      return this.currentStream;
     }
   }
- catch (  InterruptedException ex) {
+ catch (  CancelException ce) {
+    this.completed=true;
+    return null;
+  }
+catch (  InterruptedException ex) {
     Thread.currentThread().interrupt();
+  }
+catch (  Throwable error) {
+    this.completed=true;
+    throw new IOException(error);
   }
   throw new IOException();
 }
