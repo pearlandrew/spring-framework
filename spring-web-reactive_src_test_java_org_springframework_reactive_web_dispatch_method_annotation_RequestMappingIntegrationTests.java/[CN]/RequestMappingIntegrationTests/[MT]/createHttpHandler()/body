@@ -1,9 +1,12 @@
 {
   StaticWebApplicationContext wac=new StaticWebApplicationContext();
+  DefaultListableBeanFactory factory=wac.getDefaultListableBeanFactory();
   wac.registerSingleton("handlerMapping",RequestMappingHandlerMapping.class);
   wac.registerSingleton("handlerAdapter",RequestMappingHandlerAdapter.class);
-  wac.getDefaultListableBeanFactory().registerSingleton("responseBodyResultHandler",new ResponseBodyResultHandler(Arrays.asList(new StringEncoder(),new JacksonJsonEncoder()),Arrays.asList(new JsonObjectEncoder())));
-  wac.registerSingleton("controller",TestController.class);
+  factory.registerSingleton("responseBodyResultHandler",new ResponseBodyResultHandler(Arrays.asList(new ByteBufferEncoder(),new StringEncoder(),new JacksonJsonEncoder()),Arrays.asList(new JsonObjectEncoder())));
+  wac.registerSingleton("simpleResultHandler",SimpleHandlerResultHandler.class);
+  this.controller=new TestController();
+  factory.registerSingleton("controller",this.controller);
   wac.refresh();
   DispatcherHandler dispatcherHandler=new DispatcherHandler();
   dispatcherHandler.setApplicationContext(wac);

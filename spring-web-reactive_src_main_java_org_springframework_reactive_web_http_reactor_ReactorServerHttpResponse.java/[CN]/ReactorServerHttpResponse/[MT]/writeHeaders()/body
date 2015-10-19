@@ -1,9 +1,7 @@
 {
-  if (!this.headersWritten) {
-    for (    String name : this.headers.keySet()) {
-      for (      String value : this.headers.get(name)) {
-        this.channel.responseHeaders().add(name,value);
-      }
-    }
+  if (this.headersWritten) {
+    return Publishers.empty();
   }
+  applyHeaders();
+  return this.channel.writeHeaders();
 }

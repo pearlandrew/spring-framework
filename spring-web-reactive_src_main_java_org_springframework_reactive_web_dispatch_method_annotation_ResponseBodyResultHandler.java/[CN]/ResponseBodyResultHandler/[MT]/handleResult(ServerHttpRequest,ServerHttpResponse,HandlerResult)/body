@@ -5,35 +5,26 @@
   if (value == null) {
     return Publishers.empty();
   }
-  MediaType mediaType=resolveMediaType(request);
   ResolvableType type=ResolvableType.forMethodParameter(returnType);
+  MediaType mediaType=resolveMediaType(request);
   List<Object> hints=new ArrayList<>();
   hints.add(UTF_8);
-  MessageToByteEncoder<Object> serializer=(MessageToByteEncoder<Object>)resolveSerializer(request,type,mediaType,hints.toArray());
-  if (serializer != null) {
-    Publisher<Object> elementStream;
-    if (Promise.class.isAssignableFrom(type.getRawClass())) {
-      elementStream=((Promise)value).stream();
-    }
- else     if (Observable.class.isAssignableFrom(type.getRawClass())) {
-      elementStream=RxJava1Converter.from((Observable)value);
-    }
- else     if (Single.class.isAssignableFrom(type.getRawClass())) {
-      elementStream=RxJava1SingleConverter.from((Single)value);
-    }
- else     if (CompletableFuture.class.isAssignableFrom(type.getRawClass())) {
-      elementStream=CompletableFutureConverter.from((CompletableFuture)value);
-    }
- else     if (Publisher.class.isAssignableFrom(type.getRawClass())) {
-      elementStream=(Publisher)value;
-    }
+  Publisher<Object> elementStream;
+  ResolvableType elementType;
+  if (conversionService.canConvert(type.getRawClass(),Publisher.class)) {
+    elementStream=conversionService.convert(value,Publisher.class);
+    elementType=type.getGeneric(0);
+  }
  else {
-      elementStream=Publishers.just(value);
-    }
+    elementStream=Publishers.just(value);
+    elementType=type;
+  }
+  MessageToByteEncoder<Object> serializer=(MessageToByteEncoder<Object>)resolveSerializer(request,elementType,mediaType,hints.toArray());
+  if (serializer != null) {
     Publisher<ByteBuffer> outputStream=serializer.encode(elementStream,type,mediaType,hints.toArray());
-    List<MessageToByteEncoder<ByteBuffer>> postProcessors=resolvePostProcessors(request,type,mediaType,hints.toArray());
+    List<MessageToByteEncoder<ByteBuffer>> postProcessors=resolvePostProcessors(request,elementType,mediaType,hints.toArray());
     for (    MessageToByteEncoder<ByteBuffer> postProcessor : postProcessors) {
-      outputStream=postProcessor.encode(outputStream,type,mediaType,hints.toArray());
+      outputStream=postProcessor.encode(outputStream,elementType,mediaType,hints.toArray());
     }
     response.getHeaders().setContentType(mediaType);
     return response.writeWith(outputStream);
