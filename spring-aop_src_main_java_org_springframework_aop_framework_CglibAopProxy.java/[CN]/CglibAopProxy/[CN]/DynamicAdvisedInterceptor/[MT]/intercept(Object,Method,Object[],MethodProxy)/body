@@ -15,7 +15,8 @@
     List<Object> chain=this.advised.getInterceptorsAndDynamicInterceptionAdvice(method,targetClass);
     Object retVal;
     if (chain.isEmpty() && Modifier.isPublic(method.getModifiers())) {
-      retVal=methodProxy.invoke(target,args);
+      Object[] argsToUse=AopProxyUtils.adaptArgumentsIfNecessary(method,args);
+      retVal=methodProxy.invoke(target,argsToUse);
     }
  else {
       retVal=new CglibMethodInvocation(proxy,target,method,args,targetClass,chain,methodProxy).proceed();
