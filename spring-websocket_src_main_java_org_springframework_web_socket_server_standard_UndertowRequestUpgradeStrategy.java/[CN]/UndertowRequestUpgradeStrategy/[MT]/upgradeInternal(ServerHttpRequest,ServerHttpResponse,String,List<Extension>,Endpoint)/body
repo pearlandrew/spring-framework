@@ -1,22 +1,24 @@
 {
-  HttpServletRequest servletRequest=getHttpServletRequest(request);
-  HttpServletResponse servletResponse=getHttpServletResponse(response);
-  final ServletWebSocketHttpExchange exchange=createHttpExchange(servletRequest,servletResponse);
-  exchange.putAttachment(HandshakeUtil.PATH_PARAMS,Collections.<String,String>emptyMap());
-  ServerWebSocketContainer wsContainer=(ServerWebSocketContainer)getContainer(servletRequest);
-  final EndpointSessionHandler endpointSessionHandler=new EndpointSessionHandler(wsContainer);
-  final ConfiguredServerEndpoint configuredServerEndpoint=createConfiguredServerEndpoint(selectedProtocol,selectedExtensions,endpoint,servletRequest);
-  final Handshake handshake=getHandshakeToUse(exchange,configuredServerEndpoint);
-  exchange.upgradeChannel(new HttpUpgradeListener(){
-    @Override public void handleUpgrade(    StreamConnection connection,    HttpServerExchange serverExchange){
-      Object bufferPool=ReflectionUtils.invokeMethod(getBufferPoolMethod,exchange);
-      WebSocketChannel channel=(WebSocketChannel)ReflectionUtils.invokeMethod(createChannelMethod,handshake,exchange,connection,bufferPool);
-      if (peerConnections != null) {
-        peerConnections.add(channel);
-      }
-      endpointSessionHandler.onConnect(exchange,channel);
+  if (HAS_DO_UPGRADE) {
+    HttpServletRequest servletRequest=getHttpServletRequest(request);
+    HttpServletResponse servletResponse=getHttpServletResponse(response);
+    StringBuffer requestUrl=servletRequest.getRequestURL();
+    String path=servletRequest.getRequestURI();
+    Map<String,String> pathParams=Collections.<String,String>emptyMap();
+    ServerEndpointRegistration endpointConfig=new ServerEndpointRegistration(path,endpoint);
+    endpointConfig.setSubprotocols(Collections.singletonList(selectedProtocol));
+    endpointConfig.setExtensions(selectedExtensions);
+    try {
+      getContainer(servletRequest).doUpgrade(servletRequest,servletResponse,endpointConfig,pathParams);
+    }
+ catch (    ServletException ex) {
+      throw new HandshakeFailureException("Servlet request failed to upgrade to WebSocket: " + requestUrl,ex);
+    }
+catch (    IOException ex) {
+      throw new HandshakeFailureException("Response update failed during upgrade to WebSocket: " + requestUrl,ex);
     }
   }
-);
-  handshake.handshake(exchange);
+ else {
+    FALLBACK_STRATEGY.upgradeInternal(request,response,selectedProtocol,selectedExtensions,endpoint);
+  }
 }
