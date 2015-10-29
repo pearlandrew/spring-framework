@@ -15,6 +15,9 @@
   RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request,response));
   MockFilterChain filterChain=new MockFilterChain(this.servlet,this.filters);
   filterChain.doFilter(request,response);
+  if (DispatcherType.ASYNC.equals(request.getDispatcherType()) && request.getAsyncContext() != null & !request.isAsyncStarted()) {
+    request.getAsyncContext().complete();
+  }
   applyDefaultResultActions(mvcResult);
   RequestContextHolder.setRequestAttributes(previousAttributes);
   return new ResultActions(){
