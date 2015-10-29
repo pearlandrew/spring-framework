@@ -4,6 +4,7 @@
   TyrusServerContainer serverContainer=(TyrusServerContainer)getContainer(servletRequest);
   TyrusWebSocketEngine engine=(TyrusWebSocketEngine)serverContainer.getWebSocketEngine();
   Object tyrusEndpoint=null;
+  boolean success;
   try {
     String path="/" + random.nextLong();
     tyrusEndpoint=createTyrusEndpoint(endpoint,path,selectedProtocol,extensions,serverContainer,engine);
@@ -12,25 +13,20 @@
     RequestContext requestContext=createRequestContext(servletRequest,path,headers);
     TyrusUpgradeResponse upgradeResponse=new TyrusUpgradeResponse();
     UpgradeInfo upgradeInfo=engine.upgrade(requestContext,upgradeResponse);
-switch (upgradeInfo.getStatus()) {
-case SUCCESS:
+    success=SUCCESS.equals(upgradeInfo.getStatus());
+    if (success) {
       if (logger.isTraceEnabled()) {
         logger.trace("Successful upgrade: " + upgradeResponse.getHeaders());
       }
-    handleSuccess(servletRequest,servletResponse,upgradeInfo,upgradeResponse);
-  break;
-case HANDSHAKE_FAILED:
-throw new HandshakeFailureException("Unexpected handshake failure: " + request.getURI());
-case NOT_APPLICABLE:
-throw new HandshakeFailureException("Unexpected handshake mapping failure: " + request.getURI());
-}
-}
- catch (Exception ex) {
-throw new HandshakeFailureException("Error during handshake: " + request.getURI(),ex);
-}
- finally {
-if (tyrusEndpoint != null) {
-getEndpointHelper().unregister(engine,tyrusEndpoint);
-}
-}
+      handleSuccess(servletRequest,servletResponse,upgradeInfo,upgradeResponse);
+    }
+  }
+ catch (  Exception ex) {
+    unregisterTyrusEndpoint(engine,tyrusEndpoint);
+    throw new HandshakeFailureException("Error during handshake: " + request.getURI(),ex);
+  }
+  unregisterTyrusEndpoint(engine,tyrusEndpoint);
+  if (!success) {
+    throw new HandshakeFailureException("Unexpected handshake failure: " + request.getURI());
+  }
 }
