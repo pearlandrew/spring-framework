@@ -2,7 +2,7 @@
   count++;
   if (count == 1) {
     prev=next;
-    doRequest(1);
+    super.doRequest(1);
     return;
   }
   ByteBuffer tmp=prev;
@@ -14,5 +14,6 @@
   buffer.append(tmp);
   buffer.append(",");
   buffer.flip();
+  BackpressureUtils.getAndSub(REQUESTED,this,1L);
   subscriber.onNext(buffer.byteBuffer());
 }
