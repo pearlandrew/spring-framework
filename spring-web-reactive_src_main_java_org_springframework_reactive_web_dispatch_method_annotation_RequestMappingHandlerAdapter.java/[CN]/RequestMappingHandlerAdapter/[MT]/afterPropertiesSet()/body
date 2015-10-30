@@ -1,9 +1,9 @@
 {
   if (this.argumentResolvers == null) {
+    List<ByteToMessageDecoder<?>> decoders=Arrays.asList(new ByteBufferDecoder(),new StringDecoder(),new JacksonJsonDecoder());
+    List<ByteToMessageDecoder<ByteBuffer>> preProcessors=Collections.singletonList(new JsonObjectDecoder());
     this.argumentResolvers=new ArrayList<>();
     this.argumentResolvers.add(new RequestParamArgumentResolver());
-    List<ByteToMessageDecoder<?>> deserializers=Arrays.asList(new ByteBufferDecoder(),new StringDecoder(),new JacksonJsonDecoder());
-    List<ByteToMessageDecoder<ByteBuffer>> preProcessors=Arrays.asList(new JsonObjectDecoder());
-    this.argumentResolvers.add(new RequestBodyArgumentResolver(deserializers,new DefaultConversionService(),preProcessors));
+    this.argumentResolvers.add(new RequestBodyArgumentResolver(decoders,new DefaultConversionService(),preProcessors));
   }
 }

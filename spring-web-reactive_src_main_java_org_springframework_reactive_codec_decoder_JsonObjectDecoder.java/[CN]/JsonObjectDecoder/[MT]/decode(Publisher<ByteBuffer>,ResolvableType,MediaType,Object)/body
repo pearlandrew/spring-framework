@@ -1,58 +1,58 @@
 {
   return Publishers.flatMap(inputStream,new Function<ByteBuffer,Publisher<? extends ByteBuffer>>(){
     int openBraces;
-    int idx;
+    int index;
     int state;
     boolean insideString;
-    ByteBuf in;
-    Integer wrtIdx;
+    ByteBuf input;
+    Integer writerIndex;
     @Override public Publisher<? extends ByteBuffer> apply(    ByteBuffer b){
       List<ByteBuffer> chunks=new ArrayList<>();
-      if (in == null) {
-        in=Unpooled.copiedBuffer(b);
-        wrtIdx=in.writerIndex();
+      if (this.input == null) {
+        this.input=Unpooled.copiedBuffer(b);
+        this.writerIndex=this.input.writerIndex();
       }
  else {
-        in=Unpooled.copiedBuffer(in,Unpooled.copiedBuffer(b));
-        wrtIdx=in.writerIndex();
+        this.input=Unpooled.copiedBuffer(this.input,Unpooled.copiedBuffer(b));
+        this.writerIndex=this.input.writerIndex();
       }
-      if (state == ST_CORRUPTED) {
-        in.skipBytes(in.readableBytes());
+      if (this.state == ST_CORRUPTED) {
+        this.input.skipBytes(this.input.readableBytes());
         return Publishers.error(new IllegalStateException("Corrupted stream"));
       }
-      if (wrtIdx > maxObjectLength) {
-        in.skipBytes(in.readableBytes());
+      if (this.writerIndex > maxObjectLength) {
+        this.input.skipBytes(this.input.readableBytes());
         reset();
-        return Publishers.error(new IllegalStateException("object length exceeds " + maxObjectLength + ": "+ wrtIdx+ " bytes discarded"));
+        return Publishers.error(new IllegalStateException("object length exceeds " + maxObjectLength + ": "+ this.writerIndex+ " bytes discarded"));
       }
-      for (; idx < wrtIdx; idx++) {
-        byte c=in.getByte(idx);
-        if (state == ST_DECODING_NORMAL) {
-          decodeByte(c,in,idx);
-          if (openBraces == 0) {
-            ByteBuf json=extractObject(in,in.readerIndex(),idx + 1 - in.readerIndex());
+      for (; this.index < this.writerIndex; this.index++) {
+        byte c=this.input.getByte(this.index);
+        if (this.state == ST_DECODING_NORMAL) {
+          decodeByte(c,this.input,this.index);
+          if (this.openBraces == 0) {
+            ByteBuf json=extractObject(this.input,this.input.readerIndex(),this.index + 1 - this.input.readerIndex());
             if (json != null) {
               chunks.add(json.nioBuffer());
             }
-            in.readerIndex(idx + 1);
+            this.input.readerIndex(this.index + 1);
             reset();
           }
         }
- else         if (state == ST_DECODING_ARRAY_STREAM) {
-          decodeByte(c,in,idx);
-          if (!insideString && (openBraces == 1 && c == ',' || openBraces == 0 && c == ']')) {
-            for (int i=in.readerIndex(); Character.isWhitespace(in.getByte(i)); i++) {
-              in.skipBytes(1);
+ else         if (this.state == ST_DECODING_ARRAY_STREAM) {
+          decodeByte(c,this.input,this.index);
+          if (!this.insideString && (this.openBraces == 1 && c == ',' || this.openBraces == 0 && c == ']')) {
+            for (int i=this.input.readerIndex(); Character.isWhitespace(this.input.getByte(i)); i++) {
+              this.input.skipBytes(1);
             }
-            int idxNoSpaces=idx - 1;
-            while (idxNoSpaces >= in.readerIndex() && Character.isWhitespace(in.getByte(idxNoSpaces))) {
+            int idxNoSpaces=this.index - 1;
+            while (idxNoSpaces >= this.input.readerIndex() && Character.isWhitespace(this.input.getByte(idxNoSpaces))) {
               idxNoSpaces--;
             }
-            ByteBuf json=extractObject(in,in.readerIndex(),idxNoSpaces + 1 - in.readerIndex());
+            ByteBuf json=extractObject(this.input,this.input.readerIndex(),idxNoSpaces + 1 - this.input.readerIndex());
             if (json != null) {
               chunks.add(json.nioBuffer());
             }
-            in.readerIndex(idx + 1);
+            this.input.readerIndex(this.index + 1);
             if (c == ']') {
               reset();
             }
@@ -60,58 +60,59 @@
         }
  else         if (c == '{' || c == '[') {
           initDecoding(c,streamArrayElements);
-          if (state == ST_DECODING_ARRAY_STREAM) {
-            in.skipBytes(1);
+          if (this.state == ST_DECODING_ARRAY_STREAM) {
+            this.input.skipBytes(1);
           }
         }
  else         if (Character.isWhitespace(c)) {
-          in.skipBytes(1);
+          this.input.skipBytes(1);
         }
  else {
-          state=ST_CORRUPTED;
-          return Publishers.error(new IllegalStateException("invalid JSON received at byte position " + idx + ": "+ ByteBufUtil.hexDump(in)));
+          this.state=ST_CORRUPTED;
+          return Publishers.error(new IllegalStateException("invalid JSON received at byte position " + this.index + ": "+ ByteBufUtil.hexDump(this.input)));
         }
       }
-      if (in.readableBytes() == 0) {
-        idx=0;
+      if (this.input.readableBytes() == 0) {
+        this.index=0;
       }
       return Publishers.from(chunks);
     }
     /** 
- * Override this method if you want to filter the json objects/arrays that get passed through the pipeline.
+ * Override this method if you want to filter the json objects/arrays that
+ * get passed through the pipeline.
  */
     @SuppressWarnings("UnusedParameters") protected ByteBuf extractObject(    ByteBuf buffer,    int index,    int length){
       return buffer.slice(index,length).retain();
     }
-    private void decodeByte(    byte c,    ByteBuf in,    int idx){
-      if ((c == '{' || c == '[') && !insideString) {
-        openBraces++;
+    private void decodeByte(    byte c,    ByteBuf input,    int index){
+      if ((c == '{' || c == '[') && !this.insideString) {
+        this.openBraces++;
       }
- else       if ((c == '}' || c == ']') && !insideString) {
-        openBraces--;
+ else       if ((c == '}' || c == ']') && !this.insideString) {
+        this.openBraces--;
       }
  else       if (c == '"') {
-        if (!insideString) {
-          insideString=true;
+        if (!this.insideString) {
+          this.insideString=true;
         }
- else         if (in.getByte(idx - 1) != '\\') {
-          insideString=false;
+ else         if (input.getByte(index - 1) != '\\') {
+          this.insideString=false;
         }
       }
     }
     private void initDecoding(    byte openingBrace,    boolean streamArrayElements){
-      openBraces=1;
+      this.openBraces=1;
       if (openingBrace == '[' && streamArrayElements) {
-        state=ST_DECODING_ARRAY_STREAM;
+        this.state=ST_DECODING_ARRAY_STREAM;
       }
  else {
-        state=ST_DECODING_NORMAL;
+        this.state=ST_DECODING_NORMAL;
       }
     }
     private void reset(){
-      insideString=false;
-      state=ST_INIT;
-      openBraces=0;
+      this.insideString=false;
+      this.state=ST_INIT;
+      this.openBraces=0;
     }
   }
 );

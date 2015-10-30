@@ -19,9 +19,9 @@
     elementStream=Publishers.just(value);
     elementType=type;
   }
-  MessageToByteEncoder<Object> serializer=(MessageToByteEncoder<Object>)resolveSerializer(request,elementType,mediaType,hints.toArray());
-  if (serializer != null) {
-    Publisher<ByteBuffer> outputStream=serializer.encode(elementStream,type,mediaType,hints.toArray());
+  MessageToByteEncoder<Object> encoder=(MessageToByteEncoder<Object>)resolveEncoder(request,elementType,mediaType,hints.toArray());
+  if (encoder != null) {
+    Publisher<ByteBuffer> outputStream=encoder.encode(elementStream,type,mediaType,hints.toArray());
     List<MessageToByteEncoder<ByteBuffer>> postProcessors=resolvePostProcessors(request,elementType,mediaType,hints.toArray());
     for (    MessageToByteEncoder<ByteBuffer> postProcessor : postProcessors) {
       outputStream=postProcessor.encode(outputStream,elementType,mediaType,hints.toArray());
@@ -29,5 +29,6 @@
     response.getHeaders().setContentType(mediaType);
     return response.setBody(outputStream);
   }
-  return Publishers.error(new IllegalStateException("Return value type '" + returnType.getParameterType().getName() + "' with media type '"+ mediaType+ "' not supported"));
+  String returnTypeName=returnType.getParameterType().getName();
+  return Publishers.error(new IllegalStateException("Return value type '" + returnTypeName + "' with media type '"+ mediaType+ "' not supported"));
 }

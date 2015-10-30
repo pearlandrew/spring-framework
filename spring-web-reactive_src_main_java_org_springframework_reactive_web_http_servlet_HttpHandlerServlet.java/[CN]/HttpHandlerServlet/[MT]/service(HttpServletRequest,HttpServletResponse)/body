@@ -1,12 +1,12 @@
 {
   AsyncContext context=request.startAsync();
-  AsyncContextSynchronizer contextSynchronizer=new AsyncContextSynchronizer(context);
-  RequestBodyPublisher requestPublisher=new RequestBodyPublisher(contextSynchronizer,BUFFER_SIZE);
+  AsyncContextSynchronizer synchronizer=new AsyncContextSynchronizer(context);
+  RequestBodyPublisher requestPublisher=new RequestBodyPublisher(synchronizer,BUFFER_SIZE);
   request.getInputStream().setReadListener(requestPublisher);
   ServletServerHttpRequest httpRequest=new ServletServerHttpRequest(request,requestPublisher);
-  ResponseBodySubscriber responseSubscriber=new ResponseBodySubscriber(contextSynchronizer);
+  ResponseBodySubscriber responseSubscriber=new ResponseBodySubscriber(synchronizer);
   response.getOutputStream().setWriteListener(responseSubscriber);
   ServletServerHttpResponse httpResponse=new ServletServerHttpResponse(response,responseSubscriber);
-  HandlerResultSubscriber resultSubscriber=new HandlerResultSubscriber(contextSynchronizer,httpResponse);
+  HandlerResultSubscriber resultSubscriber=new HandlerResultSubscriber(synchronizer,httpResponse);
   this.handler.handle(httpRequest,httpResponse).subscribe(resultSubscriber);
 }

@@ -3,14 +3,16 @@
     for (    Map.Entry<String,List<String>> entry : this.headers.entrySet()) {
       String headerName=entry.getKey();
       for (      String headerValue : entry.getValue()) {
-        this.servletResponse.addHeader(headerName,headerValue);
+        this.response.addHeader(headerName,headerValue);
       }
     }
-    if (this.servletResponse.getContentType() == null && this.headers.getContentType() != null) {
-      this.servletResponse.setContentType(this.headers.getContentType().toString());
+    MediaType contentType=this.headers.getContentType();
+    if (this.response.getContentType() == null && contentType != null) {
+      this.response.setContentType(contentType.toString());
     }
-    if (this.servletResponse.getCharacterEncoding() == null && this.headers.getContentType() != null && this.headers.getContentType().getCharSet() != null) {
-      this.servletResponse.setCharacterEncoding(this.headers.getContentType().getCharSet().name());
+    Charset charset=(contentType != null ? contentType.getCharSet() : null);
+    if (this.response.getCharacterEncoding() == null && charset != null) {
+      this.response.setCharacterEncoding(charset.name());
     }
     this.headersWritten=true;
   }

@@ -1,19 +1,19 @@
 {
-  count++;
-  if (count == 1) {
-    prev=next;
+  this.count++;
+  if (this.count == 1) {
+    this.prev=next;
     super.doRequest(1);
     return;
   }
-  ByteBuffer tmp=prev;
-  prev=next;
+  ByteBuffer tmp=this.prev;
+  this.prev=next;
   Buffer buffer=new Buffer();
-  if (count == 2) {
+  if (this.count == 2) {
     buffer.append("[");
   }
   buffer.append(tmp);
   buffer.append(",");
   buffer.flip();
   BackpressureUtils.getAndSub(REQUESTED,this,1L);
-  subscriber.onNext(buffer.byteBuffer());
+  downstream().onNext(buffer.byteBuffer());
 }
