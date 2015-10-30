@@ -1,23 +1,2 @@
 {
-  MediaType mediaType=resolveMediaType(request);
-  ResolvableType type=ResolvableType.forMethodParameter(parameter);
-  List<Object> hints=new ArrayList<>();
-  hints.add(UTF_8);
-  Publisher<ByteBuffer> inputStream=request.getBody();
-  Publisher<?> elementStream=inputStream;
-  ResolvableType elementType=type.hasGenerics() ? type.getGeneric(0) : type;
-  ByteToMessageDecoder<?> deserializer=resolveDeserializers(request,elementType,mediaType,hints.toArray());
-  if (deserializer != null) {
-    List<ByteToMessageDecoder<ByteBuffer>> preProcessors=resolvePreProcessors(request,elementType,mediaType,hints.toArray());
-    for (    ByteToMessageDecoder<ByteBuffer> preProcessor : preProcessors) {
-      inputStream=preProcessor.decode(inputStream,elementType,mediaType,hints.toArray());
-    }
-    elementStream=deserializer.decode(inputStream,elementType,mediaType,hints.toArray());
-  }
-  if (conversionService.canConvert(Publisher.class,type.getRawClass())) {
-    return conversionService.convert(elementStream,type.getRawClass());
-  }
- else {
-    return elementStream;
-  }
 }
