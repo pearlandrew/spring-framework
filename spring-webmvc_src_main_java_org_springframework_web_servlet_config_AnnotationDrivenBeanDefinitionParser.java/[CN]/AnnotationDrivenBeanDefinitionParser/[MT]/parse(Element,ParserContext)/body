@@ -1,5 +1,6 @@
 {
   Object source=parserContext.extractSource(element);
+  XmlReaderContext readerContext=parserContext.getReaderContext();
   CompositeComponentDefinition compDefinition=new CompositeComponentDefinition(element.getTagName(),source);
   parserContext.pushContainingComponent(compDefinition);
   RuntimeBeanReference contentNegotiationManager=getContentNegotiationManager(element,source,parserContext);
@@ -8,7 +9,6 @@
   handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
   handlerMappingDef.getPropertyValues().add("order",0);
   handlerMappingDef.getPropertyValues().add("contentNegotiationManager",contentNegotiationManager);
-  String methodMappingName=parserContext.getReaderContext().registerWithGeneratedName(handlerMappingDef);
   if (element.hasAttribute("enable-matrix-variables")) {
     Boolean enableMatrixVariables=Boolean.valueOf(element.getAttribute("enable-matrix-variables"));
     handlerMappingDef.getPropertyValues().add("removeSemicolonContent",!enableMatrixVariables);
@@ -18,6 +18,7 @@
     handlerMappingDef.getPropertyValues().add("removeSemicolonContent",!enableMatrixVariables);
   }
   configurePathMatchingProperties(handlerMappingDef,element,parserContext);
+  readerContext.getRegistry().registerBeanDefinition(HANDLER_MAPPING_BEAN_NAME,handlerMappingDef);
   RuntimeBeanReference corsConfigurationsRef=MvcNamespaceUtils.registerCorsConfigurations(null,parserContext,source);
   handlerMappingDef.getPropertyValues().add("corsConfigurations",corsConfigurationsRef);
   RuntimeBeanReference conversionService=getConversionService(element,source,parserContext);
@@ -66,13 +67,13 @@
   }
   handlerAdapterDef.getPropertyValues().add("callableInterceptors",callableInterceptors);
   handlerAdapterDef.getPropertyValues().add("deferredResultInterceptors",deferredResultInterceptors);
-  String handlerAdapterName=parserContext.getReaderContext().registerWithGeneratedName(handlerAdapterDef);
+  readerContext.getRegistry().registerBeanDefinition(HANDLER_ADAPTER_BEAN_NAME,handlerAdapterDef);
   String uriCompContribName=MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME;
   RootBeanDefinition uriCompContribDef=new RootBeanDefinition(CompositeUriComponentsContributorFactoryBean.class);
   uriCompContribDef.setSource(source);
   uriCompContribDef.getPropertyValues().addPropertyValue("handlerAdapter",handlerAdapterDef);
   uriCompContribDef.getPropertyValues().addPropertyValue("conversionService",conversionService);
-  parserContext.getReaderContext().getRegistry().registerBeanDefinition(uriCompContribName,uriCompContribDef);
+  readerContext.getRegistry().registerBeanDefinition(uriCompContribName,uriCompContribDef);
   RootBeanDefinition csInterceptorDef=new RootBeanDefinition(ConversionServiceExposingInterceptor.class);
   csInterceptorDef.setSource(source);
   csInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0,conversionService);
@@ -81,7 +82,7 @@
   mappedCsInterceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
   mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0,(Object)null);
   mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1,csInterceptorDef);
-  String mappedInterceptorName=parserContext.getReaderContext().registerWithGeneratedName(mappedCsInterceptorDef);
+  String mappedInterceptorName=readerContext.registerWithGeneratedName(mappedCsInterceptorDef);
   RootBeanDefinition exceptionHandlerExceptionResolver=new RootBeanDefinition(ExceptionHandlerExceptionResolver.class);
   exceptionHandlerExceptionResolver.setSource(source);
   exceptionHandlerExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -89,19 +90,19 @@
   exceptionHandlerExceptionResolver.getPropertyValues().add("messageConverters",messageConverters);
   exceptionHandlerExceptionResolver.getPropertyValues().add("order",0);
   addResponseBodyAdvice(exceptionHandlerExceptionResolver);
-  String methodExceptionResolverName=parserContext.getReaderContext().registerWithGeneratedName(exceptionHandlerExceptionResolver);
+  String methodExceptionResolverName=readerContext.registerWithGeneratedName(exceptionHandlerExceptionResolver);
   RootBeanDefinition responseStatusExceptionResolver=new RootBeanDefinition(ResponseStatusExceptionResolver.class);
   responseStatusExceptionResolver.setSource(source);
   responseStatusExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
   responseStatusExceptionResolver.getPropertyValues().add("order",1);
-  String responseStatusExceptionResolverName=parserContext.getReaderContext().registerWithGeneratedName(responseStatusExceptionResolver);
+  String responseStatusExceptionResolverName=readerContext.registerWithGeneratedName(responseStatusExceptionResolver);
   RootBeanDefinition defaultExceptionResolver=new RootBeanDefinition(DefaultHandlerExceptionResolver.class);
   defaultExceptionResolver.setSource(source);
   defaultExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
   defaultExceptionResolver.getPropertyValues().add("order",2);
-  String defaultExceptionResolverName=parserContext.getReaderContext().registerWithGeneratedName(defaultExceptionResolver);
-  parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef,methodMappingName));
-  parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterDef,handlerAdapterName));
+  String defaultExceptionResolverName=readerContext.registerWithGeneratedName(defaultExceptionResolver);
+  parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef,HANDLER_MAPPING_BEAN_NAME));
+  parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterDef,HANDLER_ADAPTER_BEAN_NAME));
   parserContext.registerComponent(new BeanComponentDefinition(uriCompContribDef,uriCompContribName));
   parserContext.registerComponent(new BeanComponentDefinition(exceptionHandlerExceptionResolver,methodExceptionResolverName));
   parserContext.registerComponent(new BeanComponentDefinition(responseStatusExceptionResolver,responseStatusExceptionResolverName));
