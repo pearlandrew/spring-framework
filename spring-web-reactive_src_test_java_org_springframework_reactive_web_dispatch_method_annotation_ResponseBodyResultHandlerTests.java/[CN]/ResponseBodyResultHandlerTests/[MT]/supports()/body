@@ -2,9 +2,12 @@
   ResponseBodyResultHandler handler=new ResponseBodyResultHandler(Collections.singletonList(new StringEncoder()),new DefaultConversionService());
   TestController controller=new TestController();
   HandlerMethod hm=new HandlerMethod(controller,TestController.class.getMethod("notAnnotated"));
-  assertFalse(handler.supports(new HandlerResult(hm,null)));
+  ResolvableType type=ResolvableType.forMethodParameter(hm.getReturnType());
+  assertFalse(handler.supports(new HandlerResult(hm,null,type)));
   hm=new HandlerMethod(controller,TestController.class.getMethod("publisherString"));
-  assertTrue(handler.supports(new HandlerResult(hm,null)));
+  type=ResolvableType.forMethodParameter(hm.getReturnType());
+  assertTrue(handler.supports(new HandlerResult(hm,null,type)));
   hm=new HandlerMethod(controller,TestController.class.getMethod("publisherVoid"));
-  assertTrue(handler.supports(new HandlerResult(hm,null)));
+  type=ResolvableType.forMethodParameter(hm.getReturnType());
+  assertTrue(handler.supports(new HandlerResult(hm,null,type)));
 }
