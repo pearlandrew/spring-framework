@@ -7,9 +7,7 @@
   }
   ResolvableType type=ResolvableType.forMethodParameter(returnType);
   MediaType mediaType=resolveMediaType(request);
-  List<Object> hints=new ArrayList<>();
-  hints.add(UTF_8);
-  Publisher<Object> elementStream;
+  Publisher<?> elementStream;
   ResolvableType elementType;
   if (conversionService.canConvert(type.getRawClass(),Publisher.class)) {
     elementStream=conversionService.convert(value,Publisher.class);
@@ -19,14 +17,19 @@
     elementStream=Publishers.just(value);
     elementType=type;
   }
-  MessageToByteEncoder<Object> encoder=(MessageToByteEncoder<Object>)resolveEncoder(elementType,mediaType,hints.toArray());
-  if (encoder != null) {
-    Publisher<ByteBuffer> outputStream=encoder.encode(elementStream,type,mediaType,hints.toArray());
-    List<MessageToByteEncoder<ByteBuffer>> postProcessors=resolvePostProcessors(elementType,mediaType,hints.toArray());
-    for (    MessageToByteEncoder<ByteBuffer> postProcessor : postProcessors) {
-      outputStream=postProcessor.encode(outputStream,elementType,mediaType,hints.toArray());
+  Encoder<?> serializer=resolveSerializer(elementType,mediaType);
+  if (serializer != null) {
+    Publisher<ByteBuffer> outputStream=serializer.encode((Publisher)elementStream,type,mediaType);
+    if (mediaType == null || mediaType.isWildcardType() || mediaType.isWildcardSubtype()) {
+      List<MimeType> mimeTypes=serializer.getSupportedMimeTypes();
+      if (!mimeTypes.isEmpty()) {
+        MimeType mimeType=mimeTypes.get(0);
+        mediaType=new MediaType(mimeType.getType(),mimeType.getSubtype(),mimeType.getParameters());
+      }
     }
-    response.getHeaders().setContentType(mediaType);
+    if (mediaType != null && !mediaType.equals(MediaType.ALL)) {
+      response.getHeaders().setContentType(mediaType);
+    }
     return response.setBody(outputStream);
   }
   String returnTypeName=returnType.getParameterType().getName();
