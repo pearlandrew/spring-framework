@@ -1,6 +1,6 @@
 {
   for (  Annotation annotation : annotations) {
-    if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && (annotation.annotationType().getName().equals(annotationName) || metaDepth > 0)) {
+    if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && ((annotationType != null ? annotation.annotationType() == annotationType : annotation.annotationType().getName().equals(annotationName)) || metaDepth > 0)) {
       T result=processor.process(annotatedElement,annotation,metaDepth);
       if (result != null) {
         return result;
@@ -9,7 +9,7 @@
   }
   for (  Annotation annotation : annotations) {
     if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-      T result=searchWithGetSemantics(annotation.annotationType(),annotationName,processor,visited,metaDepth + 1);
+      T result=searchWithGetSemantics(annotation.annotationType(),annotationType,annotationName,processor,visited,metaDepth + 1);
       if (result != null) {
         processor.postProcess(annotatedElement,annotation,result);
         return result;

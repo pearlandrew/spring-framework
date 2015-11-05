@@ -1,0 +1,28 @@
+{
+  Assert.notNull(element,"AnnotatedElement must not be null");
+  if (visited.add(element)) {
+    try {
+      List<Annotation> declaredAnnotations=Arrays.asList(element.getDeclaredAnnotations());
+      T result=searchWithGetSemanticsInAnnotations(element,declaredAnnotations,annotationType,annotationName,processor,visited,metaDepth);
+      if (result != null) {
+        return result;
+      }
+      if (element instanceof Class) {
+        List<Annotation> inheritedAnnotations=new ArrayList<Annotation>();
+        for (        Annotation annotation : element.getAnnotations()) {
+          if (!declaredAnnotations.contains(annotation)) {
+            inheritedAnnotations.add(annotation);
+          }
+        }
+        result=searchWithGetSemanticsInAnnotations(element,inheritedAnnotations,annotationType,annotationName,processor,visited,metaDepth);
+        if (result != null) {
+          return result;
+        }
+      }
+    }
+ catch (    Exception ex) {
+      AnnotationUtils.handleIntrospectionFailure(element,ex);
+    }
+  }
+  return null;
+}
