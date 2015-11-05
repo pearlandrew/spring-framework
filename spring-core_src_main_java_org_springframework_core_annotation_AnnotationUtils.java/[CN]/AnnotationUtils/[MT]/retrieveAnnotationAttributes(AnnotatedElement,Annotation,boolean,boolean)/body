@@ -1,19 +1,14 @@
 {
-  if (!mergeMode) {
-    annotation=synthesizeAnnotation(annotation,annotatedElement);
-  }
   Class<? extends Annotation> annotationType=annotation.annotationType();
-  AnnotationAttributes attrs=new AnnotationAttributes(annotationType);
+  AnnotationAttributes attributes=new AnnotationAttributes(annotationType);
   for (  Method method : getAttributeMethods(annotationType)) {
     try {
-      Object value=method.invoke(annotation);
+      Object attributeValue=method.invoke(annotation);
       Object defaultValue=method.getDefaultValue();
-      if (mergeMode && defaultValue != null) {
-        if (ObjectUtils.nullSafeEquals(value,defaultValue)) {
-          value=DEFAULT_VALUE_PLACEHOLDER;
-        }
+      if (defaultValue != null && ObjectUtils.nullSafeEquals(attributeValue,defaultValue)) {
+        attributeValue=new DefaultValueHolder(defaultValue);
       }
-      attrs.put(method.getName(),adaptValue(annotatedElement,value,classValuesAsString,nestedAnnotationsAsMap));
+      attributes.put(method.getName(),adaptValue(annotatedElement,attributeValue,classValuesAsString,nestedAnnotationsAsMap));
     }
  catch (    Exception ex) {
       if (ex instanceof InvocationTargetException) {
@@ -23,5 +18,5 @@
       throw new IllegalStateException("Could not obtain annotation attribute value for " + method,ex);
     }
   }
-  return attrs;
+  return attributes;
 }

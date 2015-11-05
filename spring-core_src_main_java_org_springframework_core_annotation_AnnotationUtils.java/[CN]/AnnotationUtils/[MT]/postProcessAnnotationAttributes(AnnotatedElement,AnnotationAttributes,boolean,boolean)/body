@@ -10,27 +10,26 @@
       continue;
     }
     Object value=attributes.get(attributeName);
-    boolean valuePresent=(value != null && value != DEFAULT_VALUE_PLACEHOLDER);
+    boolean valuePresent=(value != null && !(value instanceof DefaultValueHolder));
     for (    String aliasedAttributeName : aliasMap.get(attributeName)) {
       if (valuesAlreadyReplaced.contains(aliasedAttributeName)) {
         continue;
       }
       Object aliasedValue=attributes.get(aliasedAttributeName);
-      boolean aliasPresent=(aliasedValue != null && aliasedValue != DEFAULT_VALUE_PLACEHOLDER);
+      boolean aliasPresent=(aliasedValue != null && !(aliasedValue instanceof DefaultValueHolder));
       if (valuePresent || aliasPresent) {
         if (valuePresent && aliasPresent) {
           if (!ObjectUtils.nullSafeEquals(value,aliasedValue)) {
-            String elementAsString=(element != null ? element.toString() : "unknown element");
-            String msg=String.format("In AnnotationAttributes for annotation [%s] declared on [%s], " + "attribute [%s] and its alias [%s] are declared with values of [%s] and [%s], " + "but only one declaration is permitted.",annotationType.getName(),elementAsString,attributeName,aliasedAttributeName,ObjectUtils.nullSafeToString(value),ObjectUtils.nullSafeToString(aliasedValue));
-            throw new AnnotationConfigurationException(msg);
+            String elementAsString=(annotatedElement != null ? annotatedElement.toString() : "unknown element");
+            throw new AnnotationConfigurationException(String.format("In AnnotationAttributes for annotation [%s] declared on %s, " + "attribute '%s' and its alias '%s' are declared with values of [%s] and [%s], " + "but only one is permitted.",annotationType.getName(),elementAsString,attributeName,aliasedAttributeName,ObjectUtils.nullSafeToString(value),ObjectUtils.nullSafeToString(aliasedValue)));
           }
         }
  else         if (aliasPresent) {
-          attributes.put(attributeName,adaptValue(element,aliasedValue,classValuesAsString,nestedAnnotationsAsMap));
+          attributes.put(attributeName,adaptValue(annotatedElement,aliasedValue,classValuesAsString,nestedAnnotationsAsMap));
           valuesAlreadyReplaced.add(attributeName);
         }
  else {
-          attributes.put(aliasedAttributeName,adaptValue(element,value,classValuesAsString,nestedAnnotationsAsMap));
+          attributes.put(aliasedAttributeName,adaptValue(annotatedElement,value,classValuesAsString,nestedAnnotationsAsMap));
           valuesAlreadyReplaced.add(aliasedAttributeName);
         }
       }
@@ -41,8 +40,9 @@
       continue;
     }
     Object value=attributes.get(attributeName);
-    if (value == DEFAULT_VALUE_PLACEHOLDER) {
-      attributes.put(attributeName,adaptValue(element,getDefaultValue(annotationType,attributeName),classValuesAsString,nestedAnnotationsAsMap));
+    if (value instanceof DefaultValueHolder) {
+      value=((DefaultValueHolder)value).defaultValue;
+      attributes.put(attributeName,adaptValue(annotatedElement,value,classValuesAsString,nestedAnnotationsAsMap));
     }
   }
 }
