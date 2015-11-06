@@ -4,7 +4,9 @@
   String eTag=addEtagPadding(outputMessage.getHeaders().getETag());
   long lastModified=outputMessage.getHeaders().getLastModified();
   boolean notModified=false;
-  if (lastModified != -1 && StringUtils.hasLength(eTag)) {
+  if (!ifNoneMatch.isEmpty() && (inputMessage.getHeaders().containsKey(HttpHeaders.IF_UNMODIFIED_SINCE) || inputMessage.getHeaders().containsKey(HttpHeaders.IF_MATCH))) {
+  }
+ else   if (lastModified != -1 && StringUtils.hasLength(eTag)) {
     notModified=isETagNotModified(ifNoneMatch,eTag) && isTimeStampNotModified(ifModifiedSince,lastModified);
   }
  else   if (lastModified != -1) {

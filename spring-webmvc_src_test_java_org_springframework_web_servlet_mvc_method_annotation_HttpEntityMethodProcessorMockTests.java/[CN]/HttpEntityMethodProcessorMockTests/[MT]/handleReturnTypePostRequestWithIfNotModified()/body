@@ -10,10 +10,7 @@
   given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
   given(messageConverter.canWrite(String.class,MediaType.TEXT_PLAIN)).willReturn(true);
   processor.handleReturnValue(returnValue,returnTypeResponseEntity,mavContainer,webRequest);
-  assertTrue(mavContainer.isRequestHandled());
-  assertEquals(HttpStatus.OK.value(),servletResponse.getStatus());
+  assertResponseOkWithBody("body");
   assertEquals(1,servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
   assertEquals(etagValue,servletResponse.getHeader(HttpHeaders.ETAG));
-  ArgumentCaptor<HttpOutputMessage> outputMessage=ArgumentCaptor.forClass(HttpOutputMessage.class);
-  verify(messageConverter).write(eq("body"),eq(MediaType.TEXT_PLAIN),outputMessage.capture());
 }

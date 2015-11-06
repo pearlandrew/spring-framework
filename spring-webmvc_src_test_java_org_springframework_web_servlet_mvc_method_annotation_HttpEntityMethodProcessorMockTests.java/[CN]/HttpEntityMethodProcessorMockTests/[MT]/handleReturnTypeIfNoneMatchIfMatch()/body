@@ -1,15 +1,15 @@
 {
-  long currentTime=new Date().getTime();
-  long oneMinuteAgo=currentTime - (1000 * 60);
-  servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE,dateFormat.format(currentTime));
+  String etagValue="\"some-etag\"";
+  servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH,etagValue);
+  servletRequest.addHeader(HttpHeaders.IF_MATCH,"ifmatch");
   HttpHeaders responseHeaders=new HttpHeaders();
-  responseHeaders.setDate(HttpHeaders.LAST_MODIFIED,oneMinuteAgo);
+  responseHeaders.set(HttpHeaders.ETAG,etagValue);
   ResponseEntity<String> returnValue=new ResponseEntity<String>("body",responseHeaders,HttpStatus.OK);
   given(messageConverter.canWrite(String.class,null)).willReturn(true);
   given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
   given(messageConverter.canWrite(String.class,MediaType.TEXT_PLAIN)).willReturn(true);
   processor.handleReturnValue(returnValue,returnTypeResponseEntity,mavContainer,webRequest);
-  assertResponseNotModified();
-  assertEquals(1,servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
-  assertEquals(dateFormat.format(oneMinuteAgo),servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
+  assertResponseOkWithBody("body");
+  assertEquals(1,servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
+  assertEquals(etagValue,servletResponse.getHeader(HttpHeaders.ETAG));
 }
