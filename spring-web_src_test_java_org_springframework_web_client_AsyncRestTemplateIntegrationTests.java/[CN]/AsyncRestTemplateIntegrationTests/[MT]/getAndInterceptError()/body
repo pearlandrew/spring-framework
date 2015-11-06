@@ -1,0 +1,14 @@
+{
+  RequestInterceptor interceptor=new RequestInterceptor();
+  template.setInterceptors(Arrays.<AsyncClientHttpRequestInterceptor>asList(interceptor));
+  ListenableFuture<ResponseEntity<String>> future=template.getForEntity(baseUrl + "/status/notfound",String.class);
+  try {
+    future.get();
+    fail("No exception thrown");
+  }
+ catch (  ExecutionException ex) {
+  }
+  assertNotNull(interceptor.response);
+  assertEquals(HttpStatus.NOT_FOUND,interceptor.response.getStatusCode());
+  assertNull(interceptor.exception);
+}
