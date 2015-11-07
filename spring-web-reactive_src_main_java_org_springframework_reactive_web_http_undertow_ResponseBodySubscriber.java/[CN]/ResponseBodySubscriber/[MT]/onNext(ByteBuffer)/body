@@ -1,0 +1,32 @@
+{
+  super.onNext(buffer);
+  if (responseChannel == null) {
+    responseChannel=exchange.getResponseChannel();
+  }
+  writing.incrementAndGet();
+  try {
+    int c;
+    do {
+      c=responseChannel.write(buffer);
+    }
+ while (buffer.hasRemaining() && c > 0);
+    if (buffer.hasRemaining()) {
+      writing.incrementAndGet();
+      enqueue(buffer);
+      responseChannel.getWriteSetter().set(this);
+      responseChannel.resumeWrites();
+    }
+ else {
+      this.subscription.request(1);
+    }
+  }
+ catch (  IOException ex) {
+    onError(ex);
+  }
+ finally {
+    writing.decrementAndGet();
+    if (closing.get()) {
+      closeIfDone();
+    }
+  }
+}

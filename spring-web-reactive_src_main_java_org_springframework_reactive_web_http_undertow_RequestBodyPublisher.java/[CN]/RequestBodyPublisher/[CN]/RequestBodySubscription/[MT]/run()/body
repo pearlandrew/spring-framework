@@ -1,0 +1,59 @@
+{
+  if (subscriptionClosed || draining) {
+    return;
+  }
+  if (0 == BackpressureUtils.getAndSub(DEMAND,this,1)) {
+    return;
+  }
+  draining=true;
+  if (channel == null) {
+    channel=exchange.getRequestChannel();
+    if (channel == null) {
+      if (exchange.isRequestComplete()) {
+        return;
+      }
+ else {
+        throw new IllegalStateException("Another party already acquired the channel!");
+      }
+    }
+  }
+  if (pooledBuffer == null) {
+    pooledBuffer=exchange.getConnection().getByteBufferPool().allocate();
+  }
+ else {
+    pooledBuffer.getBuffer().clear();
+  }
+  try {
+    ByteBuffer buffer=pooledBuffer.getBuffer();
+    int count;
+    do {
+      count=channel.read(buffer);
+      if (count == 0) {
+        channel.getReadSetter().set(this);
+        channel.resumeReads();
+      }
+ else       if (count == -1) {
+        if (buffer.position() > 0) {
+          doOnNext(buffer);
+        }
+        doOnComplete();
+      }
+ else {
+        if (buffer.remaining() == 0) {
+          if (demand == 0) {
+            channel.suspendReads();
+          }
+          doOnNext(buffer);
+          if (demand > 0) {
+            scheduleNextMessage();
+          }
+          break;
+        }
+      }
+    }
+ while (count > 0);
+  }
+ catch (  IOException e) {
+    doOnError(e);
+  }
+}
