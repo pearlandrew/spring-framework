@@ -1,20 +1,20 @@
 {
   super.onNext(buffer);
-  if (responseChannel == null) {
-    responseChannel=exchange.getResponseChannel();
+  if (this.responseChannel == null) {
+    this.responseChannel=this.exchange.getResponseChannel();
   }
-  writing.incrementAndGet();
+  this.writing.incrementAndGet();
   try {
     int c;
     do {
-      c=responseChannel.write(buffer);
+      c=this.responseChannel.write(buffer);
     }
  while (buffer.hasRemaining() && c > 0);
     if (buffer.hasRemaining()) {
-      writing.incrementAndGet();
+      this.writing.incrementAndGet();
       enqueue(buffer);
-      responseChannel.getWriteSetter().set(this);
-      responseChannel.resumeWrites();
+      this.responseChannel.getWriteSetter().set(this);
+      this.responseChannel.resumeWrites();
     }
  else {
       this.subscription.request(1);
@@ -24,8 +24,8 @@
     onError(ex);
   }
  finally {
-    writing.decrementAndGet();
-    if (closing.get()) {
+    this.writing.decrementAndGet();
+    if (this.closing.get()) {
       closeIfDone();
     }
   }

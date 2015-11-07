@@ -2,26 +2,26 @@
   try {
     int c;
     do {
-      ByteBuffer buffer=buffers.peek().getBuffer();
+      ByteBuffer buffer=this.buffers.peek().getBuffer();
       do {
         c=channel.write(buffer);
       }
  while (buffer.hasRemaining() && c > 0);
       if (!buffer.hasRemaining()) {
-        safeClose(buffers.remove());
+        safeClose(this.buffers.remove());
       }
     }
- while (!buffers.isEmpty() && c > 0);
-    if (!buffers.isEmpty()) {
+ while (!this.buffers.isEmpty() && c > 0);
+    if (!this.buffers.isEmpty()) {
       channel.resumeWrites();
     }
  else {
-      writing.decrementAndGet();
-      if (closing.get()) {
+      this.writing.decrementAndGet();
+      if (this.closing.get()) {
         closeIfDone();
       }
  else {
-        subscription.request(1);
+        this.subscription.request(1);
       }
     }
   }
