@@ -1,21 +1,16 @@
 {
   Class<?> handlerType=(handler instanceof String ? getApplicationContext().getType((String)handler) : handler.getClass());
-  final Map<Method,T> mappings=new IdentityHashMap<Method,T>();
   final Class<?> userType=ClassUtils.getUserClass(handlerType);
-  Set<Method> methods=HandlerMethodSelector.selectMethods(userType,new MethodFilter(){
-    @Override public boolean matches(    Method method){
-      T mapping=getMappingForMethod(method,userType);
-      if (mapping != null) {
-        mappings.put(method,mapping);
-        return true;
-      }
- else {
-        return false;
-      }
+  Map<Method,T> methods=MethodIntrospector.selectMethods(userType,new MethodIntrospector.MetadataLookup<T>(){
+    @Override public T inspect(    Method method){
+      return getMappingForMethod(method,userType);
     }
   }
 );
-  for (  Method method : methods) {
-    registerHandlerMethod(handler,method,mappings.get(method));
+  if (logger.isDebugEnabled()) {
+    logger.debug(methods.size() + " request handler methods found on " + userType+ ": "+ methods);
+  }
+  for (  Map.Entry<Method,T> entry : methods.entrySet()) {
+    registerHandlerMethod(handler,entry.getKey(),entry.getValue());
   }
 }

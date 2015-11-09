@@ -9,23 +9,31 @@
   AnnotationAwareOrderComparator.sort(beans);
   List<Object> requestResponseBodyAdviceBeans=new ArrayList<Object>();
   for (  ControllerAdviceBean bean : beans) {
-    Set<Method> attrMethods=HandlerMethodSelector.selectMethods(bean.getBeanType(),MODEL_ATTRIBUTE_METHODS);
+    Set<Method> attrMethods=MethodIntrospector.selectMethods(bean.getBeanType(),MODEL_ATTRIBUTE_METHODS);
     if (!attrMethods.isEmpty()) {
       this.modelAttributeAdviceCache.put(bean,attrMethods);
-      logger.info("Detected @ModelAttribute methods in " + bean);
+      if (logger.isInfoEnabled()) {
+        logger.info("Detected @ModelAttribute methods in " + bean);
+      }
     }
-    Set<Method> binderMethods=HandlerMethodSelector.selectMethods(bean.getBeanType(),INIT_BINDER_METHODS);
+    Set<Method> binderMethods=MethodIntrospector.selectMethods(bean.getBeanType(),INIT_BINDER_METHODS);
     if (!binderMethods.isEmpty()) {
       this.initBinderAdviceCache.put(bean,binderMethods);
-      logger.info("Detected @InitBinder methods in " + bean);
+      if (logger.isInfoEnabled()) {
+        logger.info("Detected @InitBinder methods in " + bean);
+      }
     }
     if (RequestBodyAdvice.class.isAssignableFrom(bean.getBeanType())) {
       requestResponseBodyAdviceBeans.add(bean);
-      logger.info("Detected RequestBodyAdvice bean in " + bean);
+      if (logger.isInfoEnabled()) {
+        logger.info("Detected RequestBodyAdvice bean in " + bean);
+      }
     }
     if (ResponseBodyAdvice.class.isAssignableFrom(bean.getBeanType())) {
       requestResponseBodyAdviceBeans.add(bean);
-      logger.info("Detected ResponseBodyAdvice bean in " + bean);
+      if (logger.isInfoEnabled()) {
+        logger.info("Detected ResponseBodyAdvice bean in " + bean);
+      }
     }
   }
   if (!requestResponseBodyAdviceBeans.isEmpty()) {

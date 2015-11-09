@@ -1,0 +1,18 @@
+{
+  if (method.getDeclaringClass().isAssignableFrom(targetType)) {
+    return method;
+  }
+  try {
+    for (    Class<?> ifc : targetType.getInterfaces()) {
+      try {
+        return ifc.getMethod(method.getName(),method.getParameterTypes());
+      }
+ catch (      NoSuchMethodException ex) {
+      }
+    }
+    return targetType.getMethod(method.getName(),method.getParameterTypes());
+  }
+ catch (  NoSuchMethodException ex) {
+    throw new IllegalStateException(String.format("Need to invoke method '%s' declared on target class '%s', " + "but not found in any interface(s) of the exposed proxy type. " + "Either pull the method up to an interface or switch to CGLIB "+ "proxies by enforcing proxy-target-class mode in your configuration.",method.getName(),method.getDeclaringClass().getSimpleName()));
+  }
+}
