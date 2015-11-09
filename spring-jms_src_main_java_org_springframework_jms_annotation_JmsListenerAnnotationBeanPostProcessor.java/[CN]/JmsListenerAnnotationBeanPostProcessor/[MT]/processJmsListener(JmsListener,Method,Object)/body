@@ -1,18 +1,9 @@
 {
-  if (AopUtils.isJdkDynamicProxy(bean)) {
-    try {
-      method=bean.getClass().getMethod(method.getName(),method.getParameterTypes());
-    }
- catch (    SecurityException ex) {
-      ReflectionUtils.handleReflectionException(ex);
-    }
-catch (    NoSuchMethodException ex) {
-      throw new IllegalStateException(String.format("@JmsListener method '%s' found on bean target class '%s', " + "but not found in any interface(s) for bean JDK proxy. Either " + "pull the method up to an interface or switch to subclass (CGLIB) "+ "proxies by setting proxy-target-class/proxyTargetClass "+ "attribute to 'true'",method.getName(),method.getDeclaringClass().getSimpleName()));
-    }
-  }
+  Method invocableMethod=MethodIntrospector.selectInvocableMethod(mostSpecificMethod,bean.getClass());
   MethodJmsListenerEndpoint endpoint=new MethodJmsListenerEndpoint();
   endpoint.setBean(bean);
-  endpoint.setMethod(method);
+  endpoint.setMethod(invocableMethod);
+  endpoint.setMostSpecificMethod(mostSpecificMethod);
   endpoint.setMessageHandlerMethodFactory(this.messageHandlerMethodFactory);
   endpoint.setBeanFactory(this.beanFactory);
   endpoint.setId(getEndpointId(jmsListener));
@@ -34,7 +25,7 @@ catch (    NoSuchMethodException ex) {
       factory=this.beanFactory.getBean(containerFactoryBeanName,JmsListenerContainerFactory.class);
     }
  catch (    NoSuchBeanDefinitionException ex) {
-      throw new BeanInitializationException("Could not register jms listener endpoint on [" + method + "], no "+ JmsListenerContainerFactory.class.getSimpleName()+ " with id '"+ containerFactoryBeanName+ "' was found in the application context",ex);
+      throw new BeanInitializationException("Could not register JMS listener endpoint on [" + mostSpecificMethod + "], no "+ JmsListenerContainerFactory.class.getSimpleName()+ " with id '"+ containerFactoryBeanName+ "' was found in the application context",ex);
     }
   }
   this.registrar.registerEndpoint(endpoint,factory);
