@@ -1,24 +1,11 @@
 {
   if (!this.nonAnnotatedClasses.contains(targetType)) {
-    final Set<Method> annotatedMethods=new LinkedHashSet<Method>(1);
-    Method[] methods=ReflectionUtils.getUniqueDeclaredMethods(targetType);
-    for (    Method method : methods) {
-      EventListener eventListener=AnnotationUtils.findAnnotation(method,EventListener.class);
-      if (eventListener == null) {
-        continue;
-      }
-      for (      EventListenerFactory factory : factories) {
-        if (factory.supportsMethod(method)) {
-          ApplicationListener<?> applicationListener=factory.createApplicationListener(beanName,targetType,method);
-          if (applicationListener instanceof ApplicationListenerMethodAdapter) {
-            ((ApplicationListenerMethodAdapter)applicationListener).init(this.applicationContext,this.evaluator);
-          }
-          this.applicationContext.addApplicationListener(applicationListener);
-          annotatedMethods.add(method);
-          break;
-        }
+    Map<Method,EventListener> annotatedMethods=MethodIntrospector.selectMethods(targetType,new MethodIntrospector.MetadataLookup<EventListener>(){
+      @Override public EventListener inspect(      Method method){
+        return AnnotationUtils.findAnnotation(method,EventListener.class);
       }
     }
+);
     if (annotatedMethods.isEmpty()) {
       this.nonAnnotatedClasses.add(targetType);
       if (logger.isTraceEnabled()) {
@@ -26,6 +13,19 @@
       }
     }
  else {
+      for (      Method method : annotatedMethods.keySet()) {
+        for (        EventListenerFactory factory : factories) {
+          if (factory.supportsMethod(method)) {
+            Method methodToUse=MethodIntrospector.selectInvocableMethod(method,this.applicationContext.getType(beanName));
+            ApplicationListener<?> applicationListener=factory.createApplicationListener(beanName,targetType,methodToUse);
+            if (applicationListener instanceof ApplicationListenerMethodAdapter) {
+              ((ApplicationListenerMethodAdapter)applicationListener).init(this.applicationContext,this.evaluator);
+            }
+            this.applicationContext.addApplicationListener(applicationListener);
+            break;
+          }
+        }
+      }
       if (logger.isDebugEnabled()) {
         logger.debug(annotatedMethods.size() + " @EventListener methods processed on bean '" + beanName+ "': "+ annotatedMethods);
       }

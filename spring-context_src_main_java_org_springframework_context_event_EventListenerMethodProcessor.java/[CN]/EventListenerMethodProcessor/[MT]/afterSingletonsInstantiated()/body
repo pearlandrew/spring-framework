@@ -3,12 +3,24 @@
   String[] allBeanNames=this.applicationContext.getBeanNamesForType(Object.class);
   for (  String beanName : allBeanNames) {
     if (!ScopedProxyUtils.isScopedTarget(beanName)) {
-      Class<?> type=this.applicationContext.getType(beanName);
-      try {
-        processBean(factories,beanName,type);
-      }
- catch (      Throwable ex) {
-        throw new BeanInitializationException("Failed to process @EventListener " + "annotation on bean with name '" + beanName + "'",ex);
+      Class<?> type=AutoProxyUtils.determineTargetClass(this.applicationContext.getBeanFactory(),beanName);
+      if (type != null) {
+        if (ScopedObject.class.isAssignableFrom(type)) {
+          try {
+            type=AutoProxyUtils.determineTargetClass(this.applicationContext.getBeanFactory(),ScopedProxyUtils.getTargetBeanName(beanName));
+          }
+ catch (          Throwable ex) {
+            if (logger.isDebugEnabled()) {
+              logger.debug("Could not resolve target bean for scoped proxy '" + beanName + "'",ex);
+            }
+          }
+        }
+        try {
+          processBean(factories,beanName,type);
+        }
+ catch (        Throwable ex) {
+          throw new BeanInitializationException("Failed to process @EventListener " + "annotation on bean with name '" + beanName + "'",ex);
+        }
       }
     }
   }

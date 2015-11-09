@@ -15,13 +15,12 @@
     }
   }
   if (isEligible(bean,beanName)) {
-    ProxyFactory proxyFactory=new ProxyFactory();
-    proxyFactory.copyFrom(this);
-    proxyFactory.setTarget(bean);
+    ProxyFactory proxyFactory=prepareProxyFactory(bean,beanName);
     if (!proxyFactory.isProxyTargetClass()) {
       evaluateProxyInterfaces(bean.getClass(),proxyFactory);
     }
     proxyFactory.addAdvisor(this.advisor);
+    customizeProxyFactory(proxyFactory);
     return proxyFactory.getProxy(getProxyClassLoader());
   }
   return bean;
