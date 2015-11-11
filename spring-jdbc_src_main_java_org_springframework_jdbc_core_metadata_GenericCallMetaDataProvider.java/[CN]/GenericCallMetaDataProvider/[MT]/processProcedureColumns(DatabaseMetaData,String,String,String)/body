@@ -1,11 +1,11 @@
 {
-  ResultSet procs=null;
   String metaDataCatalogName=metaDataCatalogNameToUse(catalogName);
   String metaDataSchemaName=metaDataSchemaNameToUse(schemaName);
   String metaDataProcedureName=procedureNameToUse(procedureName);
   if (logger.isDebugEnabled()) {
     logger.debug("Retrieving metadata for " + metaDataCatalogName + "/"+ metaDataSchemaName+ "/"+ metaDataProcedureName);
   }
+  ResultSet procs=null;
   try {
     procs=databaseMetaData.getProcedures(metaDataCatalogName,metaDataSchemaName,metaDataProcedureName);
     List<String> found=new ArrayList<String>();
@@ -14,12 +14,15 @@
     }
     procs.close();
     if (found.size() > 1) {
-      throw new InvalidDataAccessApiUsageException("Unable to determine the correct call signature - " + "multiple procedures/functions/signatures for " + metaDataProcedureName + " found "+ found);
+      throw new InvalidDataAccessApiUsageException("Unable to determine the correct call signature - multiple " + "procedures/functions/signatures for '" + metaDataProcedureName + "': found "+ found);
     }
-    if (found.size() < 1) {
+ else     if (found.isEmpty()) {
       if (metaDataProcedureName.contains(".") && !StringUtils.hasText(metaDataCatalogName)) {
         String packageName=metaDataProcedureName.substring(0,metaDataProcedureName.indexOf("."));
-        throw new InvalidDataAccessApiUsageException("Unable to determine the correct call signature for " + metaDataProcedureName + " - package name should be specified separately using "+ "'.withCatalogName(\""+ packageName+ "\")'");
+        throw new InvalidDataAccessApiUsageException("Unable to determine the correct call signature for '" + metaDataProcedureName + "' - package name should be specified separately using '.withCatalogName(\""+ packageName+ "\")'");
+      }
+ else {
+        throw new InvalidDataAccessApiUsageException("Unable to determine the correct call signature - no " + "procedure/function/signature for '" + metaDataProcedureName + "'");
       }
     }
     procs=databaseMetaData.getProcedureColumns(metaDataCatalogName,metaDataSchemaName,metaDataProcedureName,null);
