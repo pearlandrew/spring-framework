@@ -1,0 +1,27 @@
+{
+  RequestBodyPublisher requestPublisher=new RequestBodyPublisher(exchange);
+  ReactiveServerHttpRequest request=new UndertowServerHttpRequest(exchange,requestPublisher);
+  ResponseBodySubscriber responseSubscriber=new ResponseBodySubscriber(exchange);
+  ReactiveServerHttpResponse response=new UndertowServerHttpResponse(exchange,responseSubscriber);
+  exchange.dispatch();
+  this.delegate.handle(request,response).subscribe(new Subscriber<Void>(){
+    @Override public void onSubscribe(    Subscription subscription){
+      subscription.request(Long.MAX_VALUE);
+    }
+    @Override public void onNext(    Void aVoid){
+    }
+    @Override public void onError(    Throwable ex){
+      if (exchange.isResponseStarted() || exchange.getStatusCode() > 500) {
+        logger.error("Error from request handling. Completing the request.",ex);
+      }
+ else {
+        exchange.setStatusCode(500);
+      }
+      exchange.endExchange();
+    }
+    @Override public void onComplete(){
+      exchange.endExchange();
+    }
+  }
+);
+}
