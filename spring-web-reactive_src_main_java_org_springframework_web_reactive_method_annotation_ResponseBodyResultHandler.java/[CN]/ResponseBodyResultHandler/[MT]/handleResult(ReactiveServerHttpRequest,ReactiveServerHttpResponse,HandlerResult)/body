@@ -7,7 +7,7 @@
   List<MediaType> requestedMediaTypes=getAcceptableMediaTypes(request);
   List<MediaType> producibleMediaTypes=getProducibleMediaTypes(returnType);
   if (producibleMediaTypes.isEmpty()) {
-    Publishers.error(new IllegalArgumentException("No encoder found for return value of type: " + returnType));
+    producibleMediaTypes.add(MediaType.ALL);
   }
   Set<MediaType> compatibleMediaTypes=new LinkedHashSet<>();
   for (  MediaType requestedType : requestedMediaTypes) {
@@ -50,5 +50,5 @@
       return response.setBody(encoder.encode((Publisher)publisher,elementType,selectedMediaType));
     }
   }
-  return Publishers.error(new HttpMediaTypeNotAcceptableException(this.allSupportedMediaTypes));
+  return Publishers.error(new HttpMediaTypeNotAcceptableException(this.allMediaTypes));
 }
