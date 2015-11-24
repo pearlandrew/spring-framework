@@ -1,8 +1,10 @@
 {
   ReactiveServerHttpRequest request=new MockServerHttpRequest(HttpMethod.POST,"foo");
-  HandlerMethod handler=(HandlerMethod)this.mapping.getHandler(request);
-  assertEquals(TestController.class.getMethod("postFoo"),handler.getMethod());
+  Publisher<?> handlerPublisher=this.mapping.getHandler(request);
+  HandlerMethod handlerMethod=toHandlerMethod(handlerPublisher);
+  assertEquals(TestController.class.getMethod("postFoo"),handlerMethod.getMethod());
   request=new MockServerHttpRequest(HttpMethod.GET,"foo");
-  handler=(HandlerMethod)this.mapping.getHandler(request);
-  assertEquals(TestController.class.getMethod("getFoo"),handler.getMethod());
+  handlerPublisher=this.mapping.getHandler(request);
+  handlerMethod=toHandlerMethod(handlerPublisher);
+  assertEquals(TestController.class.getMethod("getFoo"),handlerMethod.getMethod());
 }
