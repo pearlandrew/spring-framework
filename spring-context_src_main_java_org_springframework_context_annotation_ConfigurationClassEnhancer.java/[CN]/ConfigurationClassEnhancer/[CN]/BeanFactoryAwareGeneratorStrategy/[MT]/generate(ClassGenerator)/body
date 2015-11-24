@@ -1,0 +1,25 @@
+{
+  if (this.classLoader == null) {
+    return super.generate(cg);
+  }
+  Thread currentThread=Thread.currentThread();
+  ClassLoader threadContextClassLoader;
+  try {
+    threadContextClassLoader=currentThread.getContextClassLoader();
+  }
+ catch (  Throwable ex) {
+    return super.generate(cg);
+  }
+  boolean overrideClassLoader=!this.classLoader.equals(threadContextClassLoader);
+  if (overrideClassLoader) {
+    currentThread.setContextClassLoader(this.classLoader);
+  }
+  try {
+    return super.generate(cg);
+  }
+  finally {
+    if (overrideClassLoader) {
+      currentThread.setContextClassLoader(threadContextClassLoader);
+    }
+  }
+}
