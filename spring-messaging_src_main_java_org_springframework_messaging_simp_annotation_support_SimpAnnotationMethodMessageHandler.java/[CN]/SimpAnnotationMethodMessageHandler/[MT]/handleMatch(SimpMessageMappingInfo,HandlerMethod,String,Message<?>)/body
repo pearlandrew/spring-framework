@@ -1,10 +1,13 @@
 {
-  String matchedPattern=mapping.getDestinationConditions().getPatterns().iterator().next();
-  Map<String,String> vars=getPathMatcher().extractUriTemplateVariables(matchedPattern,lookupDestination);
-  if (!CollectionUtils.isEmpty(vars)) {
-    MessageHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(message,MessageHeaderAccessor.class);
-    Assert.state(accessor != null && accessor.isMutable());
-    accessor.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER,vars);
+  Set<String> patterns=mapping.getDestinationConditions().getPatterns();
+  if (!CollectionUtils.isEmpty(patterns)) {
+    String pattern=patterns.iterator().next();
+    Map<String,String> vars=getPathMatcher().extractUriTemplateVariables(pattern,lookupDestination);
+    if (!CollectionUtils.isEmpty(vars)) {
+      MessageHeaderAccessor mha=MessageHeaderAccessor.getAccessor(message,MessageHeaderAccessor.class);
+      Assert.state(mha != null && mha.isMutable());
+      mha.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER,vars);
+    }
   }
   try {
     SimpAttributesContextHolder.setAttributesFromMessage(message);
