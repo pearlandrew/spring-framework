@@ -1,18 +1,4 @@
 {
-  ManagedOperationParameters params=AnnotationUtils.findAnnotation(method,ManagedOperationParameters.class);
-  ManagedOperationParameter[] result=null;
-  if (params == null) {
-    result=new ManagedOperationParameter[0];
-  }
- else {
-    Annotation[] paramData=params.value();
-    result=new ManagedOperationParameter[paramData.length];
-    for (int i=0; i < paramData.length; i++) {
-      Annotation annotation=paramData[i];
-      ManagedOperationParameter managedOperationParameter=new ManagedOperationParameter();
-      AnnotationBeanUtils.copyPropertiesToBean(annotation,managedOperationParameter);
-      result[i]=managedOperationParameter;
-    }
-  }
-  return result;
+  Set<ManagedOperationParameter> anns=AnnotationUtils.getRepeatableAnnotations(method,ManagedOperationParameter.class,ManagedOperationParameters.class);
+  return copyPropertiesToBeanArray(anns,org.springframework.jmx.export.metadata.ManagedOperationParameter.class);
 }
