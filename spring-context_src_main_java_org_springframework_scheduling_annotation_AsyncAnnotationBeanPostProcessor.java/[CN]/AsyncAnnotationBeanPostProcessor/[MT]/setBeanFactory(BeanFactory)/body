@@ -7,14 +7,14 @@
     }
  catch (    NoUniqueBeanDefinitionException ex) {
       try {
-        executorToUse=beanFactory.getBean(DEFAULT_TASK_EXECUTOR_BEAN_NAME,TaskExecutor.class);
+        executorToUse=beanFactory.getBean(DEFAULT_TASK_EXECUTOR_BEAN_NAME,Executor.class);
       }
  catch (      NoSuchBeanDefinitionException ex2) {
-        throw new IllegalStateException("More than one TaskExecutor bean exists within the context, " + "and none is named 'taskExecutor'. Mark one of them as primary or name it " + "'taskExecutor' (possibly as an alias); or specify the AsyncConfigurer interface "+ "and implement getAsyncExecutor() accordingly.",ex);
+        logger.info("More than one TaskExecutor bean found within the context, and none is " + "named 'taskExecutor'. Mark one of them as primary or name it 'taskExecutor' " + "(possibly as an alias) in order to use it for async annotation processing.");
       }
     }
 catch (    NoSuchBeanDefinitionException ex) {
-      logger.debug("Could not find default TaskExecutor bean",ex);
+      logger.info("No TaskExecutor bean found for async annotation processing.");
     }
   }
   AsyncAnnotationAdvisor advisor=new AsyncAnnotationAdvisor(executorToUse,this.exceptionHandler);
