@@ -3,7 +3,15 @@
   String[] allBeanNames=this.applicationContext.getBeanNamesForType(Object.class);
   for (  String beanName : allBeanNames) {
     if (!ScopedProxyUtils.isScopedTarget(beanName)) {
-      Class<?> type=AutoProxyUtils.determineTargetClass(this.applicationContext.getBeanFactory(),beanName);
+      Class<?> type=null;
+      try {
+        type=AutoProxyUtils.determineTargetClass(this.applicationContext.getBeanFactory(),beanName);
+      }
+ catch (      Throwable ex) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Could not resolve target class for bean with name '" + beanName + "'",ex);
+        }
+      }
       if (type != null) {
         if (ScopedObject.class.isAssignableFrom(type)) {
           try {
