@@ -6,8 +6,19 @@
     this.returnValueHandlers.addHandlers(initReturnValueHandlers());
   }
   for (  String beanName : this.applicationContext.getBeanNamesForType(Object.class)) {
-    if (isHandler(this.applicationContext.getType(beanName))) {
-      detectHandlerMethods(beanName);
+    if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
+      Class<?> beanType=null;
+      try {
+        beanType=getApplicationContext().getType(beanName);
+      }
+ catch (      Throwable ex) {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Could not resolve target class for bean with name '" + beanName + "'",ex);
+        }
+      }
+      if (beanType != null && isHandler(beanType)) {
+        detectHandlerMethods(beanName);
+      }
     }
   }
 }
