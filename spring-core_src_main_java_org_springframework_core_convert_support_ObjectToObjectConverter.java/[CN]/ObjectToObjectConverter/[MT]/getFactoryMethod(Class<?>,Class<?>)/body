@@ -1,10 +1,17 @@
 {
-  Method method=ClassUtils.getStaticMethod(targetClass,"valueOf",sourceClass);
-  if (method == null) {
-    method=ClassUtils.getStaticMethod(targetClass,"of",sourceClass);
+  Method method=factoryMethodCache.get(targetClass);
+  if (method == null || method.getParameterTypes()[0] != sourceClass) {
+    method=ClassUtils.getStaticMethod(targetClass,"valueOf",sourceClass);
     if (method == null) {
-      method=ClassUtils.getStaticMethod(targetClass,"from",sourceClass);
+      method=ClassUtils.getStaticMethod(targetClass,"of",sourceClass);
+      if (method == null) {
+        method=ClassUtils.getStaticMethod(targetClass,"from",sourceClass);
+        if (method == null) {
+          return null;
+        }
+      }
     }
+    factoryMethodCache.put(targetClass,method);
   }
   return method;
 }

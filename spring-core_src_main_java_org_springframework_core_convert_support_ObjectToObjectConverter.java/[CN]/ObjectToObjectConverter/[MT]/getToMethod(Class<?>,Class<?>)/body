@@ -1,4 +1,11 @@
 {
-  Method method=ClassUtils.getMethodIfAvailable(sourceClass,"to" + targetClass.getSimpleName());
-  return (method != null && targetClass.equals(method.getReturnType()) ? method : null);
+  Method method=toMethodCache.get(sourceClass);
+  if (method == null || !ClassUtils.isAssignable(targetClass,method.getReturnType())) {
+    method=ClassUtils.getMethodIfAvailable(sourceClass,"to" + targetClass.getSimpleName());
+    if (method == null || !ClassUtils.isAssignable(targetClass,method.getReturnType())) {
+      return null;
+    }
+    toMethodCache.put(sourceClass,method);
+  }
+  return method;
 }

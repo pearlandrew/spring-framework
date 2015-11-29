@@ -1,3 +1,11 @@
 {
-  return ClassUtils.getConstructorIfAvailable(targetClass,sourceClass);
+  Constructor<?> ctor=factoryConstructorCache.get(targetClass);
+  if (ctor == null || ctor.getParameterTypes()[0] != sourceClass) {
+    ctor=ClassUtils.getConstructorIfAvailable(targetClass,sourceClass);
+    if (ctor == null) {
+      return null;
+    }
+    factoryConstructorCache.put(targetClass,ctor);
+  }
+  return ctor;
 }
