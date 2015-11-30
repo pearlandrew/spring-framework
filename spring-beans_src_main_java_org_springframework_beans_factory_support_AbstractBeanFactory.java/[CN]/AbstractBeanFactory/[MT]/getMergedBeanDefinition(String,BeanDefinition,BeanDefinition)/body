@@ -36,10 +36,10 @@ synchronized (this.mergedBeanDefinitions) {
         mbd.overrideFrom(bd);
       }
       if (!StringUtils.hasLength(mbd.getScope())) {
-        mbd.setScope(RootBeanDefinition.SCOPE_SINGLETON);
+        mbd.setScope(BeanDefinition.SCOPE_SINGLETON);
       }
-      if (containingBd != null && !containingBd.isSingleton() && mbd.isSingleton()) {
-        mbd.setScope(containingBd.getScope());
+      if (containingBd != null && !mbd.isPrototype() && !mbd.getScope().equals(containingBd.getScope())) {
+        mbd.setScope(containingBd.isSingleton() ? BeanDefinition.SCOPE_PROTOTYPE : containingBd.getScope());
       }
       if (containingBd == null && isCacheBeanMetadata()) {
         this.mergedBeanDefinitions.put(beanName,mbd);
