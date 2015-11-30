@@ -1,5 +1,9 @@
 {
-  SimpleHandlerResultHandler resultHandler=new SimpleHandlerResultHandler();
+  GenericConversionService conversionService=new GenericConversionService();
+  conversionService.addConverter(new ReactiveStreamsToCompletableFutureConverter());
+  conversionService.addConverter(new ReactiveStreamsToReactorConverter());
+  conversionService.addConverter(new ReactiveStreamsToRxJava1Converter());
+  SimpleHandlerResultHandler resultHandler=new SimpleHandlerResultHandler(conversionService);
   TestController controller=new TestController();
   HandlerMethod hm=new HandlerMethod(controller,TestController.class.getMethod("voidReturnValue"));
   ResolvableType type=ResolvableType.forMethodParameter(hm.getReturnType());
@@ -15,8 +19,8 @@
   assertTrue(resultHandler.supports(new HandlerResult(hm,null,type)));
   hm=new HandlerMethod(controller,TestController.class.getMethod("observableVoid"));
   type=ResolvableType.forMethodParameter(hm.getReturnType());
-  assertFalse(resultHandler.supports(new HandlerResult(hm,null,type)));
+  assertTrue(resultHandler.supports(new HandlerResult(hm,null,type)));
   hm=new HandlerMethod(controller,TestController.class.getMethod("completableFutureVoid"));
   type=ResolvableType.forMethodParameter(hm.getReturnType());
-  assertFalse(resultHandler.supports(new HandlerResult(hm,null,type)));
+  assertTrue(resultHandler.supports(new HandlerResult(hm,null,type)));
 }

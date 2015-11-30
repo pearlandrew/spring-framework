@@ -1,4 +1,8 @@
 {
-  Publisher<Void> completion=Publishers.completable((Publisher<?>)result.getValue());
+  Object value=result.getValue();
+  if (Void.TYPE.equals(result.getValueType().getRawClass())) {
+    return response.writeHeaders();
+  }
+  Publisher<Void> completion=(value instanceof Publisher ? (Publisher<Void>)value : this.conversionService.convert(value,Publisher.class));
   return Publishers.concat(Publishers.from(Arrays.asList(completion,response.writeHeaders())));
 }
