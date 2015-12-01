@@ -4,22 +4,21 @@
   }
   Class<?> sourceClass=sourceType.getType();
   Class<?> targetClass=targetType.getType();
+  Member member=getValidatedMember(targetClass,sourceClass);
   try {
-    if (String.class != targetClass) {
-      Method method=getToMethod(targetClass,sourceClass);
-      if (method != null) {
-        ReflectionUtils.makeAccessible(method);
+    if (member instanceof Method) {
+      Method method=(Method)member;
+      ReflectionUtils.makeAccessible(method);
+      if (!Modifier.isStatic(method.getModifiers())) {
         return method.invoke(source);
       }
+ else {
+        return method.invoke(null,source);
+      }
     }
-    Method method=getFactoryMethod(targetClass,sourceClass);
-    if (method != null) {
-      ReflectionUtils.makeAccessible(method);
-      return method.invoke(null,source);
-    }
-    Constructor<?> constructor=getFactoryConstructor(targetClass,sourceClass);
-    if (constructor != null) {
-      return constructor.newInstance(source);
+ else     if (member instanceof Constructor) {
+      Constructor<?> ctor=(Constructor)member;
+      return ctor.newInstance(source);
     }
   }
  catch (  InvocationTargetException ex) {
@@ -28,6 +27,5 @@
 catch (  Throwable ex) {
     throw new ConversionFailedException(sourceType,targetType,source,ex);
   }
-  String message=String.format("No to%3$s() method exists on %1$s, and no static valueOf/of/from(%1$s) method or %3$s(%1$s) constructor exists on %2$s.",sourceClass.getName(),targetClass.getName(),targetClass.getSimpleName());
-  throw new IllegalStateException(message);
+  throw new IllegalStateException(String.format("No to%3$s() method exists on %1$s, " + "and no static valueOf/of/from(%1$s) method or %3$s(%1$s) constructor exists on %2$s.",sourceClass.getName(),targetClass.getName(),targetClass.getSimpleName()));
 }
