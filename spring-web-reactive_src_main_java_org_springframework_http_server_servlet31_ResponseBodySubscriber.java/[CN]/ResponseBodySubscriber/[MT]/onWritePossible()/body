@@ -4,8 +4,10 @@
   logger.debug("Output: " + ready + " buffer: "+ (buffer == null));
   if (ready) {
     if (this.buffer != null) {
-      output.write(new Buffer(this.buffer).asBytes());
+      byte[] bytes=new byte[this.buffer.remaining()];
+      this.buffer.get(bytes);
       this.buffer=null;
+      output.write(bytes);
       if (!subscriberComplete) {
         this.subscription.request(1);
       }
