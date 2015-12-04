@@ -34,7 +34,9 @@
     String allowedOriginsAttribute=element.getAttribute("allowed-origins");
     List<String> allowedOrigins=Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute,","));
     sockJsServiceDef.getPropertyValues().add("allowedOrigins",allowedOrigins);
-    interceptors.add(new OriginHandshakeInterceptor(allowedOrigins));
+    RootBeanDefinition originHandshakeInterceptor=new RootBeanDefinition(OriginHandshakeInterceptor.class);
+    originHandshakeInterceptor.getPropertyValues().add("allowedOrigins",allowedOrigins);
+    interceptors.add(originHandshakeInterceptor);
     sockJsServiceDef.getPropertyValues().add("handshakeInterceptors",interceptors);
     String attrValue=sockJsElement.getAttribute("name");
     if (!attrValue.isEmpty()) {
