@@ -1,0 +1,10 @@
+{
+  InvocableHandlerMethod hm=createHandlerMethod("singleArg",String.class);
+  addResolver(hm,Publishers.from(Arrays.asList("value1","value2","value3")));
+  Publisher<HandlerResult> publisher=hm.invokeForRequest(this.request);
+  List<Signal<HandlerResult>> signals=awaitSignals(publisher);
+  assertEquals("Expected only one value: " + signals.toString(),2,signals.size());
+  assertEquals(Signal.Type.NEXT,signals.get(0).getType());
+  assertEquals(Signal.Type.COMPLETE,signals.get(1).getType());
+  assertEquals("success:value1",signals.get(0).get().getValue());
+}
