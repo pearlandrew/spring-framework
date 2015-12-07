@@ -4,11 +4,13 @@
   final Class<ContextConfiguration> contextConfigType=ContextConfiguration.class;
   final Class<ContextHierarchy> contextHierarchyType=ContextHierarchy.class;
   final List<List<ContextConfigurationAttributes>> hierarchyAttributes=new ArrayList<List<ContextConfigurationAttributes>>();
-  UntypedAnnotationDescriptor descriptor=findAnnotationDescriptorForTypes(testClass,contextConfigType,contextHierarchyType);
-  Assert.notNull(descriptor,String.format("Could not find an 'annotation declaring class' for annotation type [%s] or [%s] and test class [%s]",contextConfigType.getName(),contextHierarchyType.getName(),testClass.getName()));
-  while (descriptor != null) {
-    Class<?> rootDeclaringClass=descriptor.getRootDeclaringClass();
-    Class<?> declaringClass=descriptor.getDeclaringClass();
+  UntypedAnnotationDescriptor desc=findAnnotationDescriptorForTypes(testClass,contextConfigType,contextHierarchyType);
+  if (desc == null) {
+    throw new IllegalArgumentException(String.format("Could not find an 'annotation declaring class' for annotation type [%s] or [%s] and test class [%s]",contextConfigType.getName(),contextHierarchyType.getName(),testClass.getName()));
+  }
+  while (desc != null) {
+    Class<?> rootDeclaringClass=desc.getRootDeclaringClass();
+    Class<?> declaringClass=desc.getDeclaringClass();
     boolean contextConfigDeclaredLocally=isAnnotationDeclaredLocally(contextConfigType,declaringClass);
     boolean contextHierarchyDeclaredLocally=isAnnotationDeclaredLocally(contextHierarchyType,declaringClass);
     if (contextConfigDeclaredLocally && contextHierarchyDeclaredLocally) {
@@ -18,7 +20,7 @@
     }
     final List<ContextConfigurationAttributes> configAttributesList=new ArrayList<ContextConfigurationAttributes>();
     if (contextConfigDeclaredLocally) {
-      ContextConfiguration contextConfiguration=AnnotationUtils.synthesizeAnnotation(descriptor.getAnnotationAttributes(),ContextConfiguration.class,descriptor.getRootDeclaringClass());
+      ContextConfiguration contextConfiguration=AnnotationUtils.synthesizeAnnotation(desc.getAnnotationAttributes(),ContextConfiguration.class,desc.getRootDeclaringClass());
       convertContextConfigToConfigAttributesAndAddToList(contextConfiguration,rootDeclaringClass,configAttributesList);
     }
  else     if (contextHierarchyDeclaredLocally) {
@@ -33,7 +35,7 @@
       throw new IllegalStateException(msg);
     }
     hierarchyAttributes.add(0,configAttributesList);
-    descriptor=findAnnotationDescriptorForTypes(rootDeclaringClass.getSuperclass(),contextConfigType,contextHierarchyType);
+    desc=findAnnotationDescriptorForTypes(rootDeclaringClass.getSuperclass(),contextConfigType,contextHierarchyType);
   }
   return hierarchyAttributes;
 }
