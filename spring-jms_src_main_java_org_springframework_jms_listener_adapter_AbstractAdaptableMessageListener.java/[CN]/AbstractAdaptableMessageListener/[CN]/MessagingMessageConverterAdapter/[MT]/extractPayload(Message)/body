@@ -1,3 +1,12 @@
 {
-  return extractMessage(message);
+  Object payload=extractMessage(message);
+  if (message instanceof BytesMessage) {
+    try {
+      ((BytesMessage)message).reset();
+    }
+ catch (    JMSException ex) {
+      logger.debug("Failed to reset BytesMessage after payload extraction",ex);
+    }
+  }
+  return payload;
 }
