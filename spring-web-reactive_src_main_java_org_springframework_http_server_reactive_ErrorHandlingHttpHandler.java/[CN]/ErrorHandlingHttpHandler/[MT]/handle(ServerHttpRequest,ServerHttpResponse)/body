@@ -1,0 +1,13 @@
+{
+  Publisher<Void> publisher;
+  try {
+    publisher=getDelegate().handle(request,response);
+  }
+ catch (  Throwable ex) {
+    publisher=Publishers.error(ex);
+  }
+  for (  HttpExceptionHandler handler : this.exceptionHandlers) {
+    publisher=applyExceptionHandler(publisher,handler,request,response);
+  }
+  return publisher;
+}

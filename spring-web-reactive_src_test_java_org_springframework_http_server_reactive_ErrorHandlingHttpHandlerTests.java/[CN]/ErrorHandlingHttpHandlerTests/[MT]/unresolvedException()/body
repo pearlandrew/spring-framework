@@ -1,0 +1,9 @@
+{
+  HttpExceptionHandler exceptionHandler=new UnresolvedExceptionHandler();
+  HttpHandler targetHandler=new TestHttpHandler(new IllegalStateException("boo"));
+  HttpHandler httpHandler=new ErrorHandlingHttpHandler(targetHandler,exceptionHandler);
+  Publisher<Void> publisher=httpHandler.handle(this.request,this.response);
+  Throwable ex=awaitErrorSignal(publisher);
+  assertEquals("boo",ex.getMessage());
+  assertNull(this.response.getStatus());
+}

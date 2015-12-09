@@ -1,0 +1,8 @@
+{
+  HttpExceptionHandler exceptionHandler=new HttpStatusExceptionHandler(HttpStatus.INTERNAL_SERVER_ERROR);
+  HttpHandler targetHandler=new TestHttpHandler(new IllegalStateException("boo"),true);
+  HttpHandler handler=new ErrorHandlingHttpHandler(targetHandler,exceptionHandler);
+  Publisher<Void> publisher=handler.handle(this.request,this.response);
+  Streams.wrap(publisher).toList().await(5,TimeUnit.SECONDS);
+  assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,this.response.getStatus());
+}

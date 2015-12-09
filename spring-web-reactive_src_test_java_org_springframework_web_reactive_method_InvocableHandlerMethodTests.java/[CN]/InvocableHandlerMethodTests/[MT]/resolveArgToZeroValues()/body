@@ -3,6 +3,7 @@
   InvocableHandlerMethod hm=createHandlerMethod("singleArg",String.class);
   hm.setHandlerMethodArgumentResolvers(Collections.singletonList(new RequestParamArgumentResolver()));
   Publisher<HandlerResult> publisher=hm.invokeForRequest(this.request);
-  Object value=awaitValue(publisher);
-  assertEquals("success:null",value);
+  List<HandlerResult> values=Streams.wrap(publisher).toList().await(5,TimeUnit.SECONDS);
+  assertEquals(1,values.size());
+  assertEquals("success:null",values.get(0).getValue());
 }
