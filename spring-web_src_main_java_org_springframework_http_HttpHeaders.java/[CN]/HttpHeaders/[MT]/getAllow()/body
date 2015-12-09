@@ -1,12 +1,15 @@
 {
   String value=getFirst(ALLOW);
   if (!StringUtils.isEmpty(value)) {
-    List<HttpMethod> allowedMethod=new ArrayList<HttpMethod>(5);
+    List<HttpMethod> result=new LinkedList<HttpMethod>();
     String[] tokens=value.split(",\\s*");
     for (    String token : tokens) {
-      allowedMethod.add(HttpMethod.valueOf(token));
+      HttpMethod resolved=HttpMethod.resolve(token);
+      if (resolved != null) {
+        result.add(resolved);
+      }
     }
-    return EnumSet.copyOf(allowedMethod);
+    return EnumSet.copyOf(result);
   }
  else {
     return EnumSet.noneOf(HttpMethod.class);
