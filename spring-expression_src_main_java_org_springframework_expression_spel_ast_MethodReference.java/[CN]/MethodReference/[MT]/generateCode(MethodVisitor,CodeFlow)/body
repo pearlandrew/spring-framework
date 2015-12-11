@@ -7,8 +7,15 @@
   Method method=methodExecutor.getMethod();
   boolean isStaticMethod=Modifier.isStatic(method.getModifiers());
   String descriptor=cf.lastDescriptor();
-  if (descriptor == null && !isStaticMethod) {
-    cf.loadTarget(mv);
+  if (descriptor == null) {
+    if (!isStaticMethod) {
+      cf.loadTarget(mv);
+    }
+  }
+ else {
+    if (isStaticMethod) {
+      mv.visitInsn(POP);
+    }
   }
   if (CodeFlow.isPrimitive(descriptor)) {
     CodeFlow.insertBoxIfNecessary(mv,descriptor.charAt(0));
