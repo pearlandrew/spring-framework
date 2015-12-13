@@ -4,12 +4,14 @@
     protocol=session.getAcceptedProtocol();
   }
  catch (  Exception ex) {
-    logger.error("Failed to obtain session.getAcceptedProtocol(). Will use the " + "default protocol handler (if configured).",ex);
+    logger.error("Failed to obtain session.getAcceptedProtocol(). " + "Will use the default protocol handler (if configured).",ex);
   }
   SubProtocolHandler handler;
   if (!StringUtils.isEmpty(protocol)) {
     handler=this.protocolHandlerLookup.get(protocol);
-    Assert.state(handler != null,"No handler for '" + protocol + "' among "+ this.protocolHandlerLookup);
+    if (handler == null) {
+      throw new IllegalStateException("No handler for '" + protocol + "' among "+ this.protocolHandlerLookup);
+    }
   }
  else {
     if (this.defaultProtocolHandler != null) {
