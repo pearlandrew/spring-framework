@@ -1,27 +1,28 @@
 {
   if (this.member instanceof Method) {
+    Method method=(Method)this.member;
     try {
-      if (this.needsToBeMadeAccessible) {
-        ReflectionUtils.makeAccessible((Method)this.member);
+      if (this.needsToBeMadeAccessible && !method.isAccessible()) {
+        method.setAccessible(true);
       }
-      Object value=((Method)this.member).invoke(target);
+      Object value=method.invoke(target);
       return new TypedValue(value,this.typeDescriptor.narrow(value));
     }
  catch (    Exception ex) {
-      throw new AccessException("Unable to access property '" + name + "' through getter",ex);
+      throw new AccessException("Unable to access property '" + name + "' through getter method",ex);
     }
   }
-  if (this.member instanceof Field) {
+ else {
+    Field field=(Field)this.member;
     try {
-      if (this.needsToBeMadeAccessible) {
-        ReflectionUtils.makeAccessible((Field)this.member);
+      if (this.needsToBeMadeAccessible && !field.isAccessible()) {
+        field.setAccessible(true);
       }
-      Object value=((Field)this.member).get(target);
+      Object value=field.get(target);
       return new TypedValue(value,this.typeDescriptor.narrow(value));
     }
  catch (    Exception ex) {
-      throw new AccessException("Unable to access field: " + name,ex);
+      throw new AccessException("Unable to access field '" + name + "'",ex);
     }
   }
-  throw new AccessException("Neither getter nor field found for property '" + name + "'");
 }

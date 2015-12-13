@@ -68,20 +68,20 @@
     ReflectivePropertyAccessor.OptimalPropertyAccessor accessor=(ReflectivePropertyAccessor.OptimalPropertyAccessor)this.cachedReadAccessor;
     Member member=accessor.member;
     boolean isStatic=Modifier.isStatic(member.getModifiers());
-    String memberDeclaringClassSlashedDescriptor=member.getDeclaringClass().getName().replace('.','/');
+    String classDesc=member.getDeclaringClass().getName().replace('.','/');
     if (!isStatic) {
       if (descriptor == null) {
         cf.loadTarget(mv);
       }
-      if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
-        mv.visitTypeInsn(CHECKCAST,memberDeclaringClassSlashedDescriptor);
+      if (descriptor == null || !classDesc.equals(descriptor.substring(1))) {
+        mv.visitTypeInsn(CHECKCAST,classDesc);
       }
     }
-    if (member instanceof Field) {
-      mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD,memberDeclaringClassSlashedDescriptor,member.getName(),CodeFlow.toJvmDescriptor(((Field)member).getType()));
+    if (member instanceof Method) {
+      mv.visitMethodInsn((isStatic ? INVOKESTATIC : INVOKEVIRTUAL),classDesc,member.getName(),CodeFlow.createSignatureDescriptor((Method)member),false);
     }
  else {
-      mv.visitMethodInsn(isStatic ? INVOKESTATIC : INVOKEVIRTUAL,memberDeclaringClassSlashedDescriptor,member.getName(),CodeFlow.createSignatureDescriptor((Method)member),false);
+      mv.visitFieldInsn((isStatic ? GETSTATIC : GETFIELD),classDesc,member.getName(),CodeFlow.toJvmDescriptor(((Field)member).getType()));
     }
   }
   cf.pushDescriptor(this.exitTypeDescriptor);
