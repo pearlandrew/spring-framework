@@ -1,7 +1,9 @@
 {
   String sessionId=resolveSessionId(message);
   if (sessionId == null) {
-    logger.error("Couldn't find sessionId in " + message);
+    if (logger.isErrorEnabled()) {
+      logger.error("Couldn't find session id in " + message);
+    }
     return;
   }
   WebSocketSessionHolder holder=this.sessions.get(sessionId);
@@ -28,7 +30,9 @@
       logger.debug("Failure while closing session " + sessionId + ".",secondException);
     }
   }
-catch (  Exception e) {
-    logger.debug("Failed to send message to client in " + session + ": "+ message,e);
+catch (  Exception ex) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Failed to send message to client in " + session + ": "+ message,ex);
+    }
   }
 }
