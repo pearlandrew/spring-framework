@@ -1,10 +1,15 @@
 {
-  Method[] methods=getIntrospectedClass().getDeclaredMethods();
-  Set<MethodMetadata> annotatedMethods=new LinkedHashSet<MethodMetadata>();
-  for (  Method method : methods) {
-    if (!method.isBridge() && method.getAnnotations().length > 0 && AnnotatedElementUtils.isAnnotated(method,annotationName)) {
-      annotatedMethods.add(new StandardMethodMetadata(method,this.nestedAnnotationsAsMap));
+  try {
+    Method[] methods=getIntrospectedClass().getDeclaredMethods();
+    Set<MethodMetadata> annotatedMethods=new LinkedHashSet<MethodMetadata>();
+    for (    Method method : methods) {
+      if (!method.isBridge() && method.getAnnotations().length > 0 && AnnotatedElementUtils.isAnnotated(method,annotationName)) {
+        annotatedMethods.add(new StandardMethodMetadata(method,this.nestedAnnotationsAsMap));
+      }
     }
+    return annotatedMethods;
   }
-  return annotatedMethods;
+ catch (  Throwable ex) {
+    throw new IllegalStateException("Failed to introspect annotated methods on " + getIntrospectedClass(),ex);
+  }
 }
