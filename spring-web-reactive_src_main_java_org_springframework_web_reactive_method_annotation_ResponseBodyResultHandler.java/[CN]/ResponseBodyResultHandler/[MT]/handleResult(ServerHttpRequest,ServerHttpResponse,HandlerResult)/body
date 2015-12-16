@@ -1,7 +1,7 @@
 {
   Object value=result.getResult();
   if (value == null) {
-    return Publishers.empty();
+    return Mono.empty();
   }
   Publisher<?> publisher;
   ResolvableType elementType;
@@ -11,7 +11,7 @@
     elementType=returnType.getGeneric(0);
   }
  else {
-    publisher=Publishers.just(value);
+    publisher=Mono.just(value);
     elementType=returnType;
   }
   List<MediaType> requestedMediaTypes=getAcceptableMediaTypes(request);
@@ -28,7 +28,7 @@
     }
   }
   if (compatibleMediaTypes.isEmpty()) {
-    return Publishers.error(new HttpMediaTypeNotAcceptableException(producibleMediaTypes));
+    return Mono.error(new HttpMediaTypeNotAcceptableException(producibleMediaTypes));
   }
   List<MediaType> mediaTypes=new ArrayList<>(compatibleMediaTypes);
   MediaType.sortBySpecificityAndQuality(mediaTypes);
@@ -50,5 +50,5 @@
       return response.setBody(encoder.encode((Publisher)publisher,elementType,selectedMediaType));
     }
   }
-  return Publishers.error(new HttpMediaTypeNotAcceptableException(this.allMediaTypes));
+  return Mono.error(new HttpMediaTypeNotAcceptableException(this.allMediaTypes));
 }

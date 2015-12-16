@@ -1,5 +1,5 @@
 {
-  return Publishers.flatMap(inputStream,new Function<ByteBuffer,Publisher<? extends ByteBuffer>>(){
+  return Flux.from(inputStream).flatMap(new Function<ByteBuffer,Publisher<? extends ByteBuffer>>(){
     int openBraces;
     int index;
     int state;
@@ -18,12 +18,12 @@
       }
       if (this.state == ST_CORRUPTED) {
         this.input.skipBytes(this.input.readableBytes());
-        return Publishers.error(new IllegalStateException("Corrupted stream"));
+        return Flux.error(new IllegalStateException("Corrupted stream"));
       }
       if (this.writerIndex > maxObjectLength) {
         this.input.skipBytes(this.input.readableBytes());
         reset();
-        return Publishers.error(new IllegalStateException("object length exceeds " + maxObjectLength + ": "+ this.writerIndex+ " bytes discarded"));
+        return Flux.error(new IllegalStateException("object length exceeds " + maxObjectLength + ": "+ this.writerIndex+ " bytes discarded"));
       }
       for (; this.index < this.writerIndex; this.index++) {
         byte c=this.input.getByte(this.index);
@@ -69,13 +69,13 @@
         }
  else {
           this.state=ST_CORRUPTED;
-          return Publishers.error(new IllegalStateException("invalid JSON received at byte position " + this.index + ": "+ ByteBufUtil.hexDump(this.input)));
+          return Flux.error(new IllegalStateException("invalid JSON received at byte position " + this.index + ": "+ ByteBufUtil.hexDump(this.input)));
         }
       }
       if (this.input.readableBytes() == 0) {
         this.index=0;
       }
-      return Publishers.from(chunks);
+      return Flux.fromIterable(chunks);
     }
     /** 
  * Override this method if you want to filter the json objects/arrays that

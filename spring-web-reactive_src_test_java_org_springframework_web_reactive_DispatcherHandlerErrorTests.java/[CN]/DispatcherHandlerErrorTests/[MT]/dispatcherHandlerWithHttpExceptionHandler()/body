@@ -3,6 +3,6 @@
   HttpExceptionHandler exceptionHandler=new ServerError500ExceptionHandler();
   HttpHandler httpHandler=new ErrorHandlingHttpHandler(this.dispatcherHandler,exceptionHandler);
   Publisher<Void> publisher=httpHandler.handle(this.request,this.response);
-  Streams.wrap(publisher).toList().await(5,TimeUnit.SECONDS);
+  Streams.from(publisher).toList().get();
   assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,this.response.getStatus());
 }

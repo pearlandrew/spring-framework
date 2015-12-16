@@ -1,8 +1,8 @@
 {
   InvocableHandlerMethod hm=createHandlerMethod("singleArg",String.class);
-  addResolver(hm,Publishers.just("value1"));
+  addResolver(hm,Mono.just("value1"));
   Publisher<HandlerResult> publisher=hm.invokeForRequest(this.request);
-  List<HandlerResult> values=Streams.wrap(publisher).toList().await(5,TimeUnit.SECONDS);
+  List<HandlerResult> values=Streams.from(publisher).toList().get();
   assertEquals(1,values.size());
   assertEquals("success:value1",values.get(0).getResult());
 }

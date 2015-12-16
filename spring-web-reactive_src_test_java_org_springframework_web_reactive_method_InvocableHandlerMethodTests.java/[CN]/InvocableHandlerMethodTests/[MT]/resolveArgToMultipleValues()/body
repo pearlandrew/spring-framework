@@ -1,8 +1,8 @@
 {
   InvocableHandlerMethod hm=createHandlerMethod("singleArg",String.class);
-  addResolver(hm,Publishers.from(Arrays.asList("value1","value2","value3")));
+  addResolver(hm,Flux.fromIterable(Arrays.asList("value1","value2","value3")));
   Publisher<HandlerResult> publisher=hm.invokeForRequest(this.request);
-  List<HandlerResult> values=Streams.wrap(publisher).toList().await(5,TimeUnit.SECONDS);
+  List<HandlerResult> values=Streams.from(publisher).toList().get();
   assertEquals(1,values.size());
   assertEquals("success:value1",values.get(0).getResult());
 }

@@ -1,2 +1,18 @@
 {
+  MediaType mediaType=request.getHeaders().getContentType();
+  if (mediaType == null) {
+    mediaType=MediaType.APPLICATION_OCTET_STREAM;
+  }
+  ResolvableType type=ResolvableType.forMethodParameter(parameter);
+  Flux<ByteBuffer> body=request.getBody();
+  Flux<?> elementStream=body;
+  ResolvableType elementType=type.hasGenerics() ? type.getGeneric(0) : type;
+  Decoder<?> decoder=resolveDecoder(elementType,mediaType);
+  if (decoder != null) {
+    elementStream=decoder.decode(body,elementType,mediaType);
+  }
+  if (this.conversionService.canConvert(Publisher.class,type.getRawClass())) {
+    return Mono.just(this.conversionService.convert(elementStream,type.getRawClass()));
+  }
+  return (Mono<Object>)Mono.from(elementStream);
 }

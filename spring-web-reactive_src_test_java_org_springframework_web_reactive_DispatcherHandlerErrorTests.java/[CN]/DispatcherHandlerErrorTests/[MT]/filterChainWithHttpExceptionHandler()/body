@@ -4,6 +4,6 @@
   httpHandler=new FilterChainHttpHandler(this.dispatcherHandler,new TestHttpFilter());
   httpHandler=new ErrorHandlingHttpHandler(httpHandler,new ServerError500ExceptionHandler());
   Publisher<Void> publisher=httpHandler.handle(this.request,this.response);
-  Streams.wrap(publisher).toList().await(5,TimeUnit.SECONDS);
+  Streams.from(publisher).toList().get();
   assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,this.response.getStatus());
 }
