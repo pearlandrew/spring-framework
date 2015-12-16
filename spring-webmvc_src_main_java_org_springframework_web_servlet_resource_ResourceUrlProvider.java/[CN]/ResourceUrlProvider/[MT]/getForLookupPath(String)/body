@@ -1,6 +1,6 @@
 {
   if (logger.isTraceEnabled()) {
-    logger.trace("Getting resource URL for lookupPath=" + lookupPath);
+    logger.trace("Getting resource URL for lookup path \"" + lookupPath + "\"");
   }
   List<String> matchingPatterns=new ArrayList<String>();
   for (  String pattern : this.handlerMap.keySet()) {
@@ -15,7 +15,7 @@
       String pathWithinMapping=getPathMatcher().extractPathWithinPattern(pattern,lookupPath);
       String pathMapping=lookupPath.substring(0,lookupPath.indexOf(pathWithinMapping));
       if (logger.isTraceEnabled()) {
-        logger.trace("Invoking ResourceResolverChain for URL pattern=\"" + pattern + "\"");
+        logger.trace("Invoking ResourceResolverChain for URL pattern \"" + pattern + "\"");
       }
       ResourceHttpRequestHandler handler=this.handlerMap.get(pattern);
       ResourceResolverChain chain=new DefaultResourceResolverChain(handler.getResourceResolvers());
@@ -24,11 +24,13 @@
         continue;
       }
       if (logger.isTraceEnabled()) {
-        logger.trace("Resolved public resource URL path=\"" + resolved + "\"");
+        logger.trace("Resolved public resource URL path \"" + resolved + "\"");
       }
       return pathMapping + resolved;
     }
   }
-  logger.debug("No matching resource mapping");
+  if (logger.isDebugEnabled()) {
+    logger.debug("No matching resource mapping for lookup path \"" + lookupPath + "\"");
+  }
   return null;
 }
