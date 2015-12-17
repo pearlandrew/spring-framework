@@ -6,7 +6,7 @@
       return;
     }
   }
-  if ((isSingleSession() && TransactionSynchronizationManager.hasResource(getSessionFactory())) || SessionFactoryUtils.isDeferredCloseActive(getSessionFactory())) {
+  if ((isSingleSession() && TransactionSynchronizationManager.hasResource(getSessionFactory())) || org.springframework.orm.hibernate3.SessionFactoryUtils.isDeferredCloseActive(getSessionFactory())) {
     Integer count=(Integer)request.getAttribute(participateAttributeName,WebRequest.SCOPE_REQUEST);
     int newCount=(count != null ? count + 1 : 1);
     request.setAttribute(getParticipateAttributeName(),newCount,WebRequest.SCOPE_REQUEST);
@@ -14,16 +14,16 @@
  else {
     if (isSingleSession()) {
       logger.debug("Opening single Hibernate Session in OpenSessionInViewInterceptor");
-      Session session=SessionFactoryUtils.getSession(getSessionFactory(),getEntityInterceptor(),getJdbcExceptionTranslator());
+      Session session=org.springframework.orm.hibernate3.SessionFactoryUtils.getSession(getSessionFactory(),getEntityInterceptor(),getJdbcExceptionTranslator());
       applyFlushMode(session,false);
-      SessionHolder sessionHolder=new SessionHolder(session);
+      org.springframework.orm.hibernate3.SessionHolder sessionHolder=new org.springframework.orm.hibernate3.SessionHolder(session);
       TransactionSynchronizationManager.bindResource(getSessionFactory(),sessionHolder);
       AsyncRequestInterceptor asyncRequestInterceptor=new AsyncRequestInterceptor(getSessionFactory(),sessionHolder);
       asyncManager.registerCallableInterceptor(participateAttributeName,asyncRequestInterceptor);
       asyncManager.registerDeferredResultInterceptor(participateAttributeName,asyncRequestInterceptor);
     }
  else {
-      SessionFactoryUtils.initDeferredClose(getSessionFactory());
+      org.springframework.orm.hibernate3.SessionFactoryUtils.initDeferredClose(getSessionFactory());
     }
   }
 }

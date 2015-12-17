@@ -12,7 +12,7 @@
       if (isFirstRequest || !applySessionBindingInterceptor(asyncManager,key)) {
         logger.debug("Opening single Hibernate Session in OpenSessionInViewFilter");
         Session session=getSession(sessionFactory);
-        SessionHolder sessionHolder=new SessionHolder(session);
+        org.springframework.orm.hibernate3.SessionHolder sessionHolder=new org.springframework.orm.hibernate3.SessionHolder(session);
         TransactionSynchronizationManager.bindResource(sessionFactory,sessionHolder);
         AsyncRequestInterceptor interceptor=new AsyncRequestInterceptor(sessionFactory,sessionHolder);
         asyncManager.registerCallableInterceptor(key,interceptor);
@@ -22,11 +22,11 @@
   }
  else {
     Assert.state(!isAsyncStarted(request),"Deferred close mode is not supported on async dispatches");
-    if (SessionFactoryUtils.isDeferredCloseActive(sessionFactory)) {
+    if (org.springframework.orm.hibernate3.SessionFactoryUtils.isDeferredCloseActive(sessionFactory)) {
       participate=true;
     }
  else {
-      SessionFactoryUtils.initDeferredClose(sessionFactory);
+      org.springframework.orm.hibernate3.SessionFactoryUtils.initDeferredClose(sessionFactory);
     }
   }
   try {
@@ -35,14 +35,14 @@
   finally {
     if (!participate) {
       if (isSingleSession()) {
-        SessionHolder sessionHolder=(SessionHolder)TransactionSynchronizationManager.unbindResource(sessionFactory);
+        org.springframework.orm.hibernate3.SessionHolder sessionHolder=(org.springframework.orm.hibernate3.SessionHolder)TransactionSynchronizationManager.unbindResource(sessionFactory);
         if (!isAsyncStarted(request)) {
           logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
           closeSession(sessionHolder.getSession(),sessionFactory);
         }
       }
  else {
-        SessionFactoryUtils.processDeferredClose(sessionFactory);
+        org.springframework.orm.hibernate3.SessionFactoryUtils.processDeferredClose(sessionFactory);
       }
     }
   }
