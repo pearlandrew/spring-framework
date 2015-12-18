@@ -1,0 +1,20 @@
+{
+  List<DestructionAwareBeanPostProcessor> filteredPostProcessors=null;
+  if (!CollectionUtils.isEmpty(processors)) {
+    filteredPostProcessors=new ArrayList<DestructionAwareBeanPostProcessor>(processors.size());
+    for (    BeanPostProcessor processor : processors) {
+      if (processor instanceof DestructionAwareBeanPostProcessor) {
+        DestructionAwareBeanPostProcessor dabpp=(DestructionAwareBeanPostProcessor)processor;
+        try {
+          if (dabpp.requiresDestruction(bean)) {
+            filteredPostProcessors.add(dabpp);
+          }
+        }
+ catch (        AbstractMethodError err) {
+          filteredPostProcessors.add(dabpp);
+        }
+      }
+    }
+  }
+  return filteredPostProcessors;
+}
