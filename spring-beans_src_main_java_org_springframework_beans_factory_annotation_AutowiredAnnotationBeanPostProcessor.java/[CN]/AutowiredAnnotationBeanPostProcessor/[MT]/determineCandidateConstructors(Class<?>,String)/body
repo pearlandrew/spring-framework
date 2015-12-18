@@ -29,6 +29,17 @@ synchronized (this.candidateConstructorsCache) {
         Constructor<?> defaultConstructor=null;
         for (        Constructor<?> candidate : rawCandidates) {
           AnnotationAttributes ann=findAutowiredAnnotation(candidate);
+          if (ann == null) {
+            Class<?> userClass=ClassUtils.getUserClass(beanClass);
+            if (userClass != beanClass) {
+              try {
+                Constructor<?> superCtor=userClass.getDeclaredConstructor(candidate.getParameterTypes());
+                ann=findAutowiredAnnotation(superCtor);
+              }
+ catch (              NoSuchMethodException ex) {
+              }
+            }
+          }
           if (ann != null) {
             if (requiredConstructor != null) {
               throw new BeanCreationException(beanName,"Invalid autowire-marked constructor: " + candidate + ". Found constructor with 'required' Autowired annotation already: "+ requiredConstructor);
