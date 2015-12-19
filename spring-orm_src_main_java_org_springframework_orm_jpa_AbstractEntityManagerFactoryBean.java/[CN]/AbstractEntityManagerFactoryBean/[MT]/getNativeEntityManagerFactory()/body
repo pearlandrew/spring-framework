@@ -1,3 +1,17 @@
 {
-  return this.nativeEntityManagerFactory;
+  if (this.nativeEntityManagerFactory != null) {
+    return this.nativeEntityManagerFactory;
+  }
+ else {
+    System.out.println("Requested: " + System.currentTimeMillis());
+    try {
+      return this.nativeEntityManagerFactoryFuture.get();
+    }
+ catch (    InterruptedException ex) {
+      throw new IllegalStateException("Interrupted during initialization of native EntityManagerFactory",ex);
+    }
+catch (    ExecutionException ex) {
+      throw new IllegalStateException("Failed to asynchronously initialize native EntityManagerFactory",ex);
+    }
+  }
 }

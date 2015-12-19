@@ -27,12 +27,17 @@
       this.jpaDialect=this.jpaVendorAdapter.getJpaDialect();
     }
   }
-  this.nativeEntityManagerFactory=createNativeEntityManagerFactory();
-  if (this.nativeEntityManagerFactory == null) {
-    throw new IllegalStateException("JPA PersistenceProvider returned null EntityManagerFactory - check your JPA provider setup!");
+  if (this.bootstrapExecutor != null) {
+    this.nativeEntityManagerFactoryFuture=this.bootstrapExecutor.submit(new Callable<EntityManagerFactory>(){
+      @Override public EntityManagerFactory call(){
+        return buildNativeEntityManagerFactory();
+      }
+    }
+);
   }
-  if (this.jpaVendorAdapter != null) {
-    this.jpaVendorAdapter.postProcessEntityManagerFactory(this.nativeEntityManagerFactory);
+ else {
+    this.nativeEntityManagerFactory=buildNativeEntityManagerFactory();
   }
   this.entityManagerFactory=createEntityManagerFactoryProxy(this.nativeEntityManagerFactory);
+  System.out.println("Returning: " + System.currentTimeMillis());
 }

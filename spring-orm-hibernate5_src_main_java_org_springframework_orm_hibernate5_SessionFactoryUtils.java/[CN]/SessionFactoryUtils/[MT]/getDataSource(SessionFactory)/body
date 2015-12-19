@@ -1,7 +1,12 @@
 {
   if (sessionFactory instanceof SessionFactoryImplementor) {
+    SessionFactoryImplementor sfi=(SessionFactoryImplementor)sessionFactory;
+    Object dataSourceValue=sfi.getProperties().get(Environment.DATASOURCE);
+    if (dataSourceValue instanceof DataSource) {
+      return (DataSource)dataSourceValue;
+    }
     try {
-      ConnectionProvider cp=((SessionFactoryImplementor)sessionFactory).getServiceRegistry().getService(ConnectionProvider.class);
+      ConnectionProvider cp=sfi.getServiceRegistry().getService(ConnectionProvider.class);
       if (cp != null) {
         return cp.unwrap(DataSource.class);
       }
