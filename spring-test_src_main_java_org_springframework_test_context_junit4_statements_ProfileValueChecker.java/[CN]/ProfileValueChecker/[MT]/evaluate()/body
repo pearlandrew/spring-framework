@@ -2,12 +2,12 @@
   if (this.testMethod == null) {
     if (!ProfileValueUtils.isTestEnabledInThisEnvironment(this.testClass)) {
       Annotation ann=AnnotationUtils.findAnnotation(this.testClass,IfProfileValue.class);
-      Assume.assumeTrue(String.format("Profile configured via [%s] is not enabled in this environment for test class [%s].",ann,this.testClass.getName()),false);
+      throw new AssumptionViolatedException(String.format("Profile configured via [%s] is not enabled in this environment for test class [%s].",ann,this.testClass.getName()));
     }
   }
  else {
     if (!ProfileValueUtils.isTestEnabledInThisEnvironment(this.testMethod,this.testClass)) {
-      Assume.assumeTrue(String.format("Profile configured via @IfProfileValue is not enabled in this environment for test method [%s].",this.testMethod),false);
+      throw new AssumptionViolatedException(String.format("Profile configured via @IfProfileValue is not enabled in this environment for test method [%s].",this.testMethod));
     }
   }
   this.next.evaluate();
