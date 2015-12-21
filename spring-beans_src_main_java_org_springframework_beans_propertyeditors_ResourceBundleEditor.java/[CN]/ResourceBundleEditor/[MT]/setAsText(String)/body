@@ -1,19 +1,17 @@
 {
   Assert.hasText(text,"'text' must not be empty");
-  ResourceBundle bundle;
-  String rawBaseName=text.trim();
-  int indexOfBaseNameSeparator=rawBaseName.indexOf(BASE_NAME_SEPARATOR);
-  if (indexOfBaseNameSeparator == -1) {
-    bundle=ResourceBundle.getBundle(rawBaseName);
+  String name=text.trim();
+  int separator=name.indexOf(BASE_NAME_SEPARATOR);
+  if (separator == -1) {
+    setValue(ResourceBundle.getBundle(name));
   }
  else {
-    String baseName=rawBaseName.substring(0,indexOfBaseNameSeparator);
+    String baseName=name.substring(0,separator);
     if (!StringUtils.hasText(baseName)) {
-      throw new IllegalArgumentException("Bad ResourceBundle name : received '" + text + "' as argument to 'setAsText(String value)'.");
+      throw new IllegalArgumentException("Invalid ResourceBundle name: '" + text + "'");
     }
-    String localeString=rawBaseName.substring(indexOfBaseNameSeparator + 1);
+    String localeString=name.substring(separator + 1);
     Locale locale=StringUtils.parseLocaleString(localeString);
-    bundle=(StringUtils.hasText(localeString)) ? ResourceBundle.getBundle(baseName,locale) : ResourceBundle.getBundle(baseName);
+    setValue((StringUtils.hasText(localeString)) ? ResourceBundle.getBundle(baseName,locale) : ResourceBundle.getBundle(baseName));
   }
-  setValue(bundle);
 }
