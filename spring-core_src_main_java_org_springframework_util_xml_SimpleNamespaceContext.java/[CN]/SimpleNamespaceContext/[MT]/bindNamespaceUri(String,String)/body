@@ -2,10 +2,15 @@
   Assert.notNull(prefix,"No prefix given");
   Assert.notNull(namespaceUri,"No namespaceUri given");
   if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-    defaultNamespaceUri=namespaceUri;
+    this.defaultNamespaceUri=namespaceUri;
   }
  else {
-    prefixToNamespaceUri.put(prefix,namespaceUri);
-    getPrefixesInternal(namespaceUri).add(prefix);
+    this.prefixToNamespaceUri.put(prefix,namespaceUri);
+    Set<String> prefixes=this.namespaceUriToPrefixes.get(namespaceUri);
+    if (prefixes == null) {
+      prefixes=new LinkedHashSet<String>();
+      this.namespaceUriToPrefixes.put(namespaceUri,prefixes);
+    }
+    prefixes.add(prefix);
   }
 }

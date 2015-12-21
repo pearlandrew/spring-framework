@@ -1,10 +1,17 @@
 {
   if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-    defaultNamespaceUri="";
+    this.defaultNamespaceUri="";
   }
- else {
-    String namespaceUri=prefixToNamespaceUri.remove(prefix);
-    List<String> prefixes=getPrefixesInternal(namespaceUri);
-    prefixes.remove(prefix);
+ else   if (prefix != null) {
+    String namespaceUri=this.prefixToNamespaceUri.remove(prefix);
+    if (namespaceUri != null) {
+      Set<String> prefixes=this.namespaceUriToPrefixes.get(namespaceUri);
+      if (prefixes != null) {
+        prefixes.remove(prefix);
+        if (prefixes.isEmpty()) {
+          this.namespaceUriToPrefixes.remove(namespaceUri);
+        }
+      }
+    }
   }
 }
