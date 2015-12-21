@@ -1,0 +1,13 @@
+{
+  ServletContext servletContext=getServletContext();
+  TilesContainer container=ServletUtil.getContainer(servletContext);
+  if (container == null) {
+    throw new ServletException("Tiles container is not initialized. " + "Have you added a TilesConfigurer to your web application context?");
+  }
+  exposeModelAsRequestAttributes(model,request);
+  JstlUtils.exposeLocalizationContext(new RequestContext(request,servletContext));
+  if (this.alwaysInclude) {
+    ServletUtil.setForceInclude(request,true);
+  }
+  container.render(getUrl(),request,response);
+}
