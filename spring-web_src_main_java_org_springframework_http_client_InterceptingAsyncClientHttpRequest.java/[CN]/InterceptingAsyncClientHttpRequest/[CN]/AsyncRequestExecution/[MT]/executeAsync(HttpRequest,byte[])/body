@@ -1,15 +1,17 @@
 {
-  if (nextInterceptor.hasNext()) {
-    AsyncClientHttpRequestInterceptor interceptor=nextInterceptor.next();
-    ListenableFuture<ClientHttpResponse> future=interceptor.interceptRequest(request,body,this);
-    return new IdentityListenableFutureAdapter<ClientHttpResponse>(future);
+  if (this.iterator.hasNext()) {
+    AsyncClientHttpRequestInterceptor interceptor=this.iterator.next();
+    return interceptor.intercept(request,body,this);
   }
  else {
-    AsyncClientHttpRequest req=requestFactory.createAsyncRequest(uri,httpMethod);
-    req.getHeaders().putAll(getHeaders());
+    URI theUri=request.getURI();
+    HttpMethod theMethod=request.getMethod();
+    HttpHeaders theHeaders=request.getHeaders();
+    AsyncClientHttpRequest delegate=requestFactory.createAsyncRequest(theUri,theMethod);
+    delegate.getHeaders().putAll(theHeaders);
     if (body.length > 0) {
-      StreamUtils.copy(body,req.getBody());
+      StreamUtils.copy(body,delegate.getBody());
     }
-    return req.executeAsync();
+    return delegate.executeAsync();
   }
 }

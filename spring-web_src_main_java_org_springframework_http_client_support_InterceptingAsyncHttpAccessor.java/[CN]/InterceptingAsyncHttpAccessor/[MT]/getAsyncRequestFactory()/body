@@ -1,7 +1,9 @@
 {
-  AsyncClientHttpRequestFactory asyncRequestFactory=super.getAsyncRequestFactory();
-  if (interceptors.isEmpty()) {
-    return asyncRequestFactory;
+  AsyncClientHttpRequestFactory delegate=super.getAsyncRequestFactory();
+  if (!CollectionUtils.isEmpty(getInterceptors())) {
+    return new InterceptingAsyncClientHttpRequestFactory(delegate,getInterceptors());
   }
-  return new InterceptingAsyncClientHttpRequestFactory(asyncRequestFactory,getInterceptors());
+ else {
+    return delegate;
+  }
 }
