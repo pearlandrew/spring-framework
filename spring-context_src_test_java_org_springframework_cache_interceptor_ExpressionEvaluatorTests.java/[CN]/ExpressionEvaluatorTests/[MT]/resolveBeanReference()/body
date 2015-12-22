@@ -1,0 +1,9 @@
+{
+  StaticApplicationContext applicationContext=new StaticApplicationContext();
+  BeanDefinition beanDefinition=new RootBeanDefinition(String.class);
+  applicationContext.registerBeanDefinition("myBean",beanDefinition);
+  applicationContext.refresh();
+  EvaluationContext context=createEvaluationContext(ExpressionEvaluator.NO_RESULT,applicationContext);
+  Object value=new SpelExpressionParser().parseExpression("@myBean.class.getName()").getValue(context);
+  assertThat(value,is(String.class.getName()));
+}
