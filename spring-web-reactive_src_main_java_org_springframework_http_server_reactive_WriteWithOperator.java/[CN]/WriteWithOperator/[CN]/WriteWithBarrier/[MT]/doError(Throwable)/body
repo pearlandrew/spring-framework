@@ -1,0 +1,18 @@
+{
+  if (this.readyToWrite) {
+    this.writeSubscriber.onError(ex);
+    return;
+  }
+synchronized (this) {
+    if (this.readyToWrite) {
+      this.writeSubscriber.onError(ex);
+    }
+ else     if (this.beforeFirstEmission) {
+      this.beforeFirstEmission=false;
+      downstream().onError(ex);
+    }
+ else {
+      this.error=ex;
+    }
+  }
+}

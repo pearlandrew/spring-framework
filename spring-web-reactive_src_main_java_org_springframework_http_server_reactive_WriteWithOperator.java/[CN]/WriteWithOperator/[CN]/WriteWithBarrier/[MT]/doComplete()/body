@@ -1,0 +1,19 @@
+{
+  if (this.readyToWrite) {
+    this.writeSubscriber.onComplete();
+    return;
+  }
+synchronized (this) {
+    if (this.readyToWrite) {
+      this.writeSubscriber.onComplete();
+    }
+ else     if (this.beforeFirstEmission) {
+      this.completed=true;
+      this.beforeFirstEmission=false;
+      writeFunction.apply(this).subscribe(downstream());
+    }
+ else {
+      this.completed=true;
+    }
+  }
+}

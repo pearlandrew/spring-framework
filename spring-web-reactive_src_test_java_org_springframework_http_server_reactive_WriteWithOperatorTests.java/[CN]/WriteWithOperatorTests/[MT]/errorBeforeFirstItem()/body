@@ -1,0 +1,7 @@
+{
+  IllegalStateException error=new IllegalStateException("boo");
+  Publisher<Void> completion=Publishers.lift(Publishers.error(error),this.operator);
+  List<Signal<Void>> signals=Streams.wrap(completion).materialize().toList().await(5,TimeUnit.SECONDS);
+  assertEquals(1,signals.size());
+  assertSame("Unexpected signal: " + signals.get(0),error,signals.get(0).getThrowable());
+}

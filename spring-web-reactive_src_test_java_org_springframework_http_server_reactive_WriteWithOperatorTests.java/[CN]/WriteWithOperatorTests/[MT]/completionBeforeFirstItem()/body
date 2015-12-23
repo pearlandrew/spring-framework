@@ -1,0 +1,8 @@
+{
+  Publisher<Void> completion=Publishers.lift(Publishers.empty(),this.operator);
+  List<Signal<Void>> signals=Streams.wrap(completion).materialize().toList().await(5,TimeUnit.SECONDS);
+  assertEquals(1,signals.size());
+  assertTrue("Unexpected signal: " + signals.get(0),signals.get(0).isOnComplete());
+  assertEquals(0,this.writer.items.size());
+  assertTrue(this.writer.completed);
+}
