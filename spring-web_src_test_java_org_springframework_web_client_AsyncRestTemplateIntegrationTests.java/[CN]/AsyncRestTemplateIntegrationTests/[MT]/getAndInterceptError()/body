@@ -1,13 +1,8 @@
 {
   RequestInterceptor interceptor=new RequestInterceptor();
   template.setInterceptors(Collections.singletonList(interceptor));
-  ListenableFuture<ResponseEntity<String>> future=template.getForEntity("/status/notfound",String.class);
-  try {
-    future.get();
-    fail("No exception thrown");
-  }
- catch (  ExecutionException ex) {
-  }
+  template.getForEntity("/status/notfound",String.class);
+  interceptor.latch.await(5,TimeUnit.SECONDS);
   assertNotNull(interceptor.response);
   assertEquals(HttpStatus.NOT_FOUND,interceptor.response.getStatusCode());
   assertNull(interceptor.exception);
