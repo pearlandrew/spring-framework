@@ -12,10 +12,17 @@
       if (bd instanceof RootBeanDefinition) {
         Method factoryMethod=((RootBeanDefinition)bd).getResolvedFactoryMethod();
         if (factoryMethod != null) {
-          Qualifier targetAnnotation=factoryMethod.getAnnotation(Qualifier.class);
-          if (targetAnnotation != null && qualifier.equals(targetAnnotation.value())) {
-            return true;
+          Qualifier targetAnnotation=AnnotationUtils.getAnnotation(factoryMethod,Qualifier.class);
+          if (targetAnnotation != null) {
+            return qualifier.equals(targetAnnotation.value());
           }
+        }
+      }
+      Class<?> beanType=bf.getType(beanName);
+      if (beanType != null) {
+        Qualifier targetAnnotation=AnnotationUtils.getAnnotation(beanType,Qualifier.class);
+        if (targetAnnotation != null) {
+          return qualifier.equals(targetAnnotation.value());
         }
       }
     }
