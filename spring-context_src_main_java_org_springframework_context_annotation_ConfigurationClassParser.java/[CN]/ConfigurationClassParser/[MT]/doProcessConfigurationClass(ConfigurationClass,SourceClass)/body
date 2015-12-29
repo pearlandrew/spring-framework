@@ -8,12 +8,14 @@
       logger.warn("Ignoring @PropertySource annotation on [" + sourceClass.getMetadata().getClassName() + "]. Reason: Environment must implement ConfigurableEnvironment");
     }
   }
-  AnnotationAttributes componentScan=AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(),ComponentScan.class);
-  if (componentScan != null && !this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(),ConfigurationPhase.REGISTER_BEAN)) {
-    Set<BeanDefinitionHolder> scannedBeanDefinitions=this.componentScanParser.parse(componentScan,sourceClass.getMetadata().getClassName());
-    for (    BeanDefinitionHolder holder : scannedBeanDefinitions) {
-      if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(),this.metadataReaderFactory)) {
-        parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
+  Set<AnnotationAttributes> componentScans=AnnotationConfigUtils.attributesForRepeatable(sourceClass.getMetadata(),ComponentScans.class,ComponentScan.class);
+  if (!componentScans.isEmpty() && !this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(),ConfigurationPhase.REGISTER_BEAN)) {
+    for (    AnnotationAttributes componentScan : componentScans) {
+      Set<BeanDefinitionHolder> scannedBeanDefinitions=this.componentScanParser.parse(componentScan,sourceClass.getMetadata().getClassName());
+      for (      BeanDefinitionHolder holder : scannedBeanDefinitions) {
+        if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(),this.metadataReaderFactory)) {
+          parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
+        }
       }
     }
   }
