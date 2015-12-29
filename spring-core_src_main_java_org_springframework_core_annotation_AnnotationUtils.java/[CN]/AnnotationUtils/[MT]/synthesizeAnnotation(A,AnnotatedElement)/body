@@ -2,7 +2,7 @@
   if (annotation == null) {
     return null;
   }
-  if (annotation instanceof SynthesizedAnnotation || (Proxy.isProxyClass(annotation.getClass()) && Proxy.getInvocationHandler(annotation) instanceof SynthesizedAnnotationInvocationHandler)) {
+  if (annotation instanceof SynthesizedAnnotation) {
     return annotation;
   }
   Class<? extends Annotation> annotationType=annotation.annotationType();
@@ -11,6 +11,6 @@
   }
   DefaultAnnotationAttributeExtractor attributeExtractor=new DefaultAnnotationAttributeExtractor(annotation,annotatedElement);
   InvocationHandler handler=new SynthesizedAnnotationInvocationHandler(attributeExtractor);
-  Class<?>[] exposedInterfaces=(canExposeSynthesizedMarker(annotationType) ? new Class<?>[]{annotationType,SynthesizedAnnotation.class} : new Class<?>[]{annotationType});
+  Class<?>[] exposedInterfaces=new Class<?>[]{annotationType,SynthesizedAnnotation.class};
   return (A)Proxy.newProxyInstance(annotation.getClass().getClassLoader(),exposedInterfaces,handler);
 }
