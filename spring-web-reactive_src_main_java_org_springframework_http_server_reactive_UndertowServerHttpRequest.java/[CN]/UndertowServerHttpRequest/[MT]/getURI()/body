@@ -1,8 +1,11 @@
 {
-  try {
-    return new URI(this.exchange.getRequestScheme(),null,this.exchange.getHostName(),this.exchange.getHostPort(),this.exchange.getRequestURI(),this.exchange.getQueryString(),null);
+  if (this.uri == null) {
+    try {
+      return new URI(this.getUndertowExchange().getRequestScheme(),null,this.getUndertowExchange().getHostName(),this.getUndertowExchange().getHostPort(),this.getUndertowExchange().getRequestURI(),this.getUndertowExchange().getQueryString(),null);
+    }
+ catch (    URISyntaxException ex) {
+      throw new IllegalStateException("Could not get URI: " + ex.getMessage(),ex);
+    }
   }
- catch (  URISyntaxException ex) {
-    throw new IllegalStateException("Could not get URI: " + ex.getMessage(),ex);
-  }
+  return this.uri;
 }

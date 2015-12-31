@@ -1,23 +1,23 @@
 {
   if (this.headers == null) {
     this.headers=new HttpHeaders();
-    for (Enumeration<?> names=this.servletRequest.getHeaderNames(); names.hasMoreElements(); ) {
+    for (Enumeration<?> names=getServletRequest().getHeaderNames(); names.hasMoreElements(); ) {
       String headerName=(String)names.nextElement();
-      for (Enumeration<?> headerValues=this.servletRequest.getHeaders(headerName); headerValues.hasMoreElements(); ) {
+      for (Enumeration<?> headerValues=getServletRequest().getHeaders(headerName); headerValues.hasMoreElements(); ) {
         String headerValue=(String)headerValues.nextElement();
         this.headers.add(headerName,headerValue);
       }
     }
     MediaType contentType=this.headers.getContentType();
     if (contentType == null) {
-      String requestContentType=this.servletRequest.getContentType();
+      String requestContentType=getServletRequest().getContentType();
       if (StringUtils.hasLength(requestContentType)) {
         contentType=MediaType.parseMediaType(requestContentType);
         this.headers.setContentType(contentType);
       }
     }
     if (contentType != null && contentType.getCharSet() == null) {
-      String requestEncoding=this.servletRequest.getCharacterEncoding();
+      String requestEncoding=getServletRequest().getCharacterEncoding();
       if (StringUtils.hasLength(requestEncoding)) {
         Charset charSet=Charset.forName(requestEncoding);
         Map<String,String> params=new LinkedCaseInsensitiveMap<>();
@@ -28,7 +28,7 @@
       }
     }
     if (this.headers.getContentLength() == -1) {
-      int requestContentLength=this.servletRequest.getContentLength();
+      int requestContentLength=getServletRequest().getContentLength();
       if (requestContentLength != -1) {
         this.headers.setContentLength(requestContentLength);
       }

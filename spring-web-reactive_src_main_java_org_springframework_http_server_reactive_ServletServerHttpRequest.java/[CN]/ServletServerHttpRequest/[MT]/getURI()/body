@@ -1,8 +1,11 @@
 {
-  try {
-    return new URI(this.servletRequest.getScheme(),null,this.servletRequest.getServerName(),this.servletRequest.getServerPort(),this.servletRequest.getRequestURI(),this.servletRequest.getQueryString(),null);
+  if (this.uri == null) {
+    try {
+      this.uri=new URI(getServletRequest().getScheme(),null,getServletRequest().getServerName(),getServletRequest().getServerPort(),getServletRequest().getRequestURI(),getServletRequest().getQueryString(),null);
+    }
+ catch (    URISyntaxException ex) {
+      throw new IllegalStateException("Could not get HttpServletRequest URI: " + ex.getMessage(),ex);
+    }
   }
- catch (  URISyntaxException ex) {
-    throw new IllegalStateException("Could not get HttpServletRequest URI: " + ex.getMessage(),ex);
-  }
+  return this.uri;
 }
