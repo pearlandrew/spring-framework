@@ -33,21 +33,28 @@
 );
   interceptorChain.applyBeforeConcurrentHandling(this.asyncWebRequest,callable);
   startAsyncProcessing(processingContext);
-  this.taskExecutor.submit(new Runnable(){
-    @Override public void run(){
-      Object result=null;
-      try {
-        interceptorChain.applyPreProcess(asyncWebRequest,callable);
-        result=callable.call();
-      }
- catch (      Throwable ex) {
-        result=ex;
-      }
+  try {
+    this.taskExecutor.submit(new Runnable(){
+      @Override public void run(){
+        Object result=null;
+        try {
+          interceptorChain.applyPreProcess(asyncWebRequest,callable);
+          result=callable.call();
+        }
+ catch (        Throwable ex) {
+          result=ex;
+        }
  finally {
-        result=interceptorChain.applyPostProcess(asyncWebRequest,callable,result);
+          result=interceptorChain.applyPostProcess(asyncWebRequest,callable,result);
+        }
+        setConcurrentResultAndDispatch(result);
       }
-      setConcurrentResultAndDispatch(result);
     }
-  }
 );
+  }
+ catch (  RejectedExecutionException ex) {
+    Object result=interceptorChain.applyPostProcess(this.asyncWebRequest,callable,ex);
+    setConcurrentResultAndDispatch(result);
+    throw ex;
+  }
 }
