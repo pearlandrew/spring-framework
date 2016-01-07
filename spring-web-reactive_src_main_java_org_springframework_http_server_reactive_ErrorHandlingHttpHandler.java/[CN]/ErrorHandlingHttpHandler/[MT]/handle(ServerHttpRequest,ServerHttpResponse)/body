@@ -1,13 +1,13 @@
 {
-  Mono<Void> publisher;
+  Mono<Void> mono;
   try {
-    publisher=getDelegate().handle(request,response);
+    mono=getDelegate().handle(request,response);
   }
  catch (  Throwable ex) {
-    publisher=Mono.error(ex);
+    mono=Mono.error(ex);
   }
   for (  HttpExceptionHandler handler : this.exceptionHandlers) {
-    publisher=applyExceptionHandler(publisher,handler,request,response);
+    mono=applyExceptionHandler(mono,handler,request,response);
   }
-  return publisher;
+  return mono;
 }
