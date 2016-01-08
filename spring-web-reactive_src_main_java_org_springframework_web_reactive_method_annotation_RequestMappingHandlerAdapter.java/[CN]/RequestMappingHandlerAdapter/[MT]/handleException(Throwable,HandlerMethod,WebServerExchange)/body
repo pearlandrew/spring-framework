@@ -1,0 +1,20 @@
+{
+  if (ex instanceof Exception) {
+    InvocableHandlerMethod invocable=findExceptionHandler(handlerMethod,(Exception)ex);
+    if (invocable != null) {
+      try {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Invoking @ExceptionHandler method: " + invocable);
+        }
+        invocable.setHandlerMethodArgumentResolvers(getArgumentResolvers());
+        return invocable.invokeForRequest(exchange,ex);
+      }
+ catch (      Exception invocationEx) {
+        if (logger.isErrorEnabled()) {
+          logger.error("Failed to invoke @ExceptionHandler method: " + invocable,invocationEx);
+        }
+      }
+    }
+  }
+  return Mono.error(ex);
+}

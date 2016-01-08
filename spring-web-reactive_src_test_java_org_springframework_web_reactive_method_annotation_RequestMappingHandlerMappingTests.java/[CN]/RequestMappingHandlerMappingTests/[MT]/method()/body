@@ -1,10 +1,12 @@
 {
   ServerHttpRequest request=new MockServerHttpRequest(HttpMethod.POST,new URI("foo"));
-  Publisher<?> handlerPublisher=this.mapping.getHandler(request);
+  WebServerExchange exchange=new DefaultWebServerExchange(request,new MockServerHttpResponse());
+  Publisher<?> handlerPublisher=this.mapping.getHandler(exchange);
   HandlerMethod handlerMethod=toHandlerMethod(handlerPublisher);
   assertEquals(TestController.class.getMethod("postFoo"),handlerMethod.getMethod());
   request=new MockServerHttpRequest(HttpMethod.GET,new URI("foo"));
-  handlerPublisher=this.mapping.getHandler(request);
+  exchange=new DefaultWebServerExchange(request,new MockServerHttpResponse());
+  handlerPublisher=this.mapping.getHandler(exchange);
   handlerMethod=toHandlerMethod(handlerPublisher);
   assertEquals(TestController.class.getMethod("getFoo"),handlerMethod.getMethod());
 }
