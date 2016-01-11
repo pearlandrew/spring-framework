@@ -1,0 +1,19 @@
+{
+  URI url=new URI("http://localhost:" + port);
+  String header="SID=31d4d96e407aad42; lang=en-US";
+  ResponseEntity<Void> response=new RestTemplate().exchange(RequestEntity.get(url).header("Cookie",header).build(),Void.class);
+  Map<String,Set<HttpCookie>> requestCookies=this.cookieHandler.requestCookies;
+  assertEquals(2,requestCookies.size());
+  Set<HttpCookie> set=requestCookies.get("SID");
+  assertEquals(1,set.size());
+  assertEquals("31d4d96e407aad42",set.iterator().next().getValue());
+  set=requestCookies.get("lang");
+  assertEquals(1,set.size());
+  assertEquals("en-US",set.iterator().next().getValue());
+  List<String> headerValues=response.getHeaders().get("Set-Cookie");
+  assertEquals(2,headerValues.size());
+  List<String> parts=splitCookieHeader(headerValues.get(0));
+  assertThat(parts,containsInAnyOrder(equalTo("SID=31d4d96e407aad42"),equalToIgnoringCase("Path=/"),equalToIgnoringCase("Secure"),equalToIgnoringCase("HttpOnly")));
+  parts=splitCookieHeader(headerValues.get(1));
+  assertThat(parts,containsInAnyOrder(equalTo("lang=en-US"),equalToIgnoringCase("Path=/"),equalToIgnoringCase("Domain=example.com")));
+}
