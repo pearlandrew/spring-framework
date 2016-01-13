@@ -1,11 +1,13 @@
 {
   ServerHttpRequest request=new MockServerHttpRequest(HttpMethod.POST,new URI("foo"));
-  WebServerExchange exchange=new DefaultWebServerExchange(request,new MockServerHttpResponse());
+  MockServerHttpResponse response=new MockServerHttpResponse();
+  WebSessionManager sessionManager=mock(WebSessionManager.class);
+  WebServerExchange exchange=new DefaultWebServerExchange(request,response,sessionManager);
   Publisher<?> handlerPublisher=this.mapping.getHandler(exchange);
   HandlerMethod handlerMethod=toHandlerMethod(handlerPublisher);
   assertEquals(TestController.class.getMethod("postFoo"),handlerMethod.getMethod());
   request=new MockServerHttpRequest(HttpMethod.GET,new URI("foo"));
-  exchange=new DefaultWebServerExchange(request,new MockServerHttpResponse());
+  exchange=new DefaultWebServerExchange(request,new MockServerHttpResponse(),sessionManager);
   handlerPublisher=this.mapping.getHandler(exchange);
   handlerMethod=toHandlerMethod(handlerPublisher);
   assertEquals(TestController.class.getMethod("getFoo"),handlerMethod.getMethod());

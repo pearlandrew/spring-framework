@@ -1,0 +1,12 @@
+{
+  Assert.isTrue(!session.isExpired(),"Sessions are checked for expiration and have their " + "access time updated when first accessed during request processing. " + "However this session is expired meaning that maxIdleTime elapsed "+ "since then and before the call to session.save().");
+  if (!session.isStarted()) {
+    return Mono.empty();
+  }
+  session.start();
+  Optional<String> requestedId=getSessionIdResolver().resolveSessionId(exchange);
+  if (!requestedId.isPresent() || !session.getId().equals(requestedId.get())) {
+    this.sessionIdResolver.setSessionId(exchange,session.getId());
+  }
+  return this.sessionStore.storeSession(session);
+}
