@@ -8,14 +8,14 @@
   TextMessage reply=mock(TextMessage.class);
   QueueSender queueSender=mock(QueueSender.class);
   Session session=mock(Session.class);
-  given(destinationResolver.resolveDestinationName(session,"replyDestination",pubSubDomain)).willReturn(replyDestination);
+  given(destinationResolver.resolveDestinationName(session,replyDestinationName,pubSubDomain)).willReturn(replyDestination);
   given(session.createTextMessage(body)).willReturn(reply);
   given(session.createProducer(replyDestination)).willReturn(queueSender);
   listener.setDestinationResolver(destinationResolver);
   StubTextMessage inputMessage=createSimpleJmsTextMessage(body);
   inputMessage.setJMSCorrelationID(correlationId);
   listener.onMessage(inputMessage,session);
-  verify(destinationResolver).resolveDestinationName(session,"replyDestination",pubSubDomain);
+  verify(destinationResolver).resolveDestinationName(session,replyDestinationName,pubSubDomain);
   verify(reply).setJMSCorrelationID(correlationId);
   verify(queueSender).send(reply);
   verify(queueSender).close();
