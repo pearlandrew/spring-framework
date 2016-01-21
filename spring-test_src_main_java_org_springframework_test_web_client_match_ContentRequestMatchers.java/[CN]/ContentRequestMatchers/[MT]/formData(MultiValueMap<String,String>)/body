@@ -1,0 +1,19 @@
+{
+  return new RequestMatcher(){
+    @Override public void match(    ClientHttpRequest request) throws IOException, AssertionError {
+      HttpInputMessage inputMessage=new HttpInputMessage(){
+        @Override public InputStream getBody() throws IOException {
+          MockClientHttpRequest mockRequest=(MockClientHttpRequest)request;
+          return new ByteArrayInputStream(mockRequest.getBodyAsBytes());
+        }
+        @Override public HttpHeaders getHeaders(){
+          return request.getHeaders();
+        }
+      }
+;
+      FormHttpMessageConverter converter=new FormHttpMessageConverter();
+      assertEquals("Request content",expectedContent,converter.read(null,inputMessage));
+    }
+  }
+;
+}
