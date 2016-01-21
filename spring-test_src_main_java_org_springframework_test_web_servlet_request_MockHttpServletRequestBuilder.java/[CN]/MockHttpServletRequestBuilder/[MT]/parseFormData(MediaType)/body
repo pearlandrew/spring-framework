@@ -1,0 +1,21 @@
+{
+  MultiValueMap<String,String> map;
+  HttpInputMessage message=new HttpInputMessage(){
+    @Override public InputStream getBody() throws IOException {
+      return new ByteArrayInputStream(content);
+    }
+    @Override public HttpHeaders getHeaders(){
+      HttpHeaders headers=new HttpHeaders();
+      headers.setContentType(mediaType);
+      return headers;
+    }
+  }
+;
+  try {
+    map=new FormHttpMessageConverter().read(null,message);
+  }
+ catch (  IOException ex) {
+    throw new IllegalStateException("Failed to parse form data in request body: ",ex);
+  }
+  return map;
+}

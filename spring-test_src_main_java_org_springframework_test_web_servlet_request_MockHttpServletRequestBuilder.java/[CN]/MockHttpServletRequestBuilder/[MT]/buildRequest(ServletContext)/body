@@ -18,20 +18,10 @@
       request.addHeader(name,value);
     }
   }
-  try {
-    if (this.url.getRawQuery() != null) {
-      request.setQueryString(this.url.getRawQuery());
-    }
-    MultiValueMap<String,String> queryParams=UriComponentsBuilder.fromUri(this.url).build().getQueryParams();
-    for (    Entry<String,List<String>> entry : queryParams.entrySet()) {
-      for (      String value : entry.getValue()) {
-        value=(value != null) ? UriUtils.decode(value,"UTF-8") : null;
-        request.addParameter(UriUtils.decode(entry.getKey(),"UTF-8"),value);
-      }
-    }
+  if (this.url.getRawQuery() != null) {
+    request.setQueryString(this.url.getRawQuery());
   }
- catch (  UnsupportedEncodingException ex) {
-  }
+  addRequestParams(request,UriComponentsBuilder.fromUri(this.url).build().getQueryParams());
   for (  String name : this.parameters.keySet()) {
     for (    String value : this.parameters.get(name)) {
       request.addParameter(name,value);
@@ -40,6 +30,12 @@
   request.setContentType(this.contentType);
   request.setContent(this.content);
   request.setCharacterEncoding(this.characterEncoding);
+  if (this.content != null && this.contentType != null) {
+    MediaType mediaType=MediaType.parseMediaType(this.contentType);
+    if (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType)) {
+      addRequestParams(request,parseFormData(mediaType));
+    }
+  }
   if (!ObjectUtils.isEmpty(this.cookies)) {
     request.setCookies(this.cookies.toArray(new Cookie[this.cookies.size()]));
   }
