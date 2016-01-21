@@ -1,0 +1,24 @@
+{
+  try {
+    if (this.currentStream != null && this.currentStream.available() > 0) {
+      return this.currentStream;
+    }
+ else {
+      DataBuffer signal=this.queue.take();
+      if (signal == null) {
+        this.completed.set(true);
+        return null;
+      }
+      this.currentStream=signal.asInputStream();
+      return this.currentStream;
+    }
+  }
+ catch (  InterruptedException ex) {
+    Thread.currentThread().interrupt();
+  }
+catch (  Throwable error) {
+    this.completed.set(true);
+    throw new IOException(error);
+  }
+  throw new IOException();
+}
