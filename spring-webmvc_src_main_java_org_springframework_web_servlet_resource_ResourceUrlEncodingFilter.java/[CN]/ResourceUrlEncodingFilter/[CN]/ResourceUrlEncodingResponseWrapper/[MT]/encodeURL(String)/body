@@ -4,15 +4,14 @@
     logger.debug("Request attribute exposing ResourceUrlProvider not found");
     return super.encodeURL(url);
   }
-  initIndexLookupPath(resourceUrlProvider);
-  if (url.length() >= this.indexLookupPath) {
-    String prefix=url.substring(0,this.indexLookupPath);
+  initLookupPath(resourceUrlProvider);
+  if (url.startsWith(this.prefixLookupPath)) {
     int suffixIndex=getQueryParamsIndex(url);
     String suffix=url.substring(suffixIndex);
     String lookupPath=url.substring(this.indexLookupPath,suffixIndex);
     lookupPath=resourceUrlProvider.getForLookupPath(lookupPath);
     if (lookupPath != null) {
-      return super.encodeURL(prefix + lookupPath + suffix);
+      return super.encodeURL(this.prefixLookupPath + lookupPath + suffix);
     }
   }
   return super.encodeURL(url);
