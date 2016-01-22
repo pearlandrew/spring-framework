@@ -1,19 +1,21 @@
 {
+  ModelAndView mav=null;
   checkRequest(request);
+  if (this.synchronizeOnSession) {
+    HttpSession session=request.getSession(false);
+    if (session != null) {
+      Object mutex=WebUtils.getSessionMutex(session);
+synchronized (mutex) {
+        mav=invokeHandlerMethod(request,response,handlerMethod);
+      }
+    }
+  }
+  mav=invokeHandlerMethod(request,response,handlerMethod);
   if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
     applyCacheSeconds(response,this.cacheSecondsForSessionAttributeHandlers);
   }
  else {
     prepareResponse(response);
   }
-  if (this.synchronizeOnSession) {
-    HttpSession session=request.getSession(false);
-    if (session != null) {
-      Object mutex=WebUtils.getSessionMutex(session);
-synchronized (mutex) {
-        return invokeHandlerMethod(request,response,handlerMethod);
-      }
-    }
-  }
-  return invokeHandlerMethod(request,response,handlerMethod);
+  return mav;
 }
