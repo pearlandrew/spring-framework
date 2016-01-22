@@ -1,13 +1,11 @@
 {
-  Charset utf8=Charset.forName("UTF-8");
-  MediaType requestedContentType=new MediaType("text","html");
-  MockHttpOutputMessage outputMessage=new MockHttpOutputMessage();
-  MediaType contentType=new MediaType("text","plain",utf8);
-  outputMessage.getHeaders().setContentType(contentType);
   String body="H\u00e9llo W\u00f6rld";
-  converter.write(body,requestedContentType,outputMessage);
-  assertEquals("Invalid result",body,outputMessage.getBodyAsString(utf8));
-  assertEquals("Invalid content-type",contentType,outputMessage.getHeaders().getContentType());
-  assertEquals("Invalid content-length",body.getBytes(utf8).length,outputMessage.getHeaders().getContentLength());
-  assertFalse("Invalid accept-charset",outputMessage.getHeaders().getAcceptCharset().isEmpty());
+  MediaType requestedContentType=new MediaType("text","html");
+  HttpHeaders headers=this.outputMessage.getHeaders();
+  headers.setContentType(TEXT_PLAIN_UTF_8);
+  this.converter.write(body,requestedContentType,this.outputMessage);
+  assertEquals(body,this.outputMessage.getBodyAsString(UTF_8));
+  assertEquals(TEXT_PLAIN_UTF_8,headers.getContentType());
+  assertEquals(body.getBytes(UTF_8).length,headers.getContentLength());
+  assertFalse(headers.getAcceptCharset().isEmpty());
 }
