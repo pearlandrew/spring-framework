@@ -1,17 +1,17 @@
 {
-  ExceptionHandlerExceptionResolver exceptionHandlerExceptionResolver=new ExceptionHandlerExceptionResolver();
-  exceptionHandlerExceptionResolver.setContentNegotiationManager(mvcContentNegotiationManager());
-  exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
+  ExceptionHandlerExceptionResolver exceptionHandlerResolver=createExceptionHandlerExceptionResolver();
+  exceptionHandlerResolver.setContentNegotiationManager(mvcContentNegotiationManager());
+  exceptionHandlerResolver.setMessageConverters(getMessageConverters());
   if (jackson2Present) {
     List<ResponseBodyAdvice<?>> interceptors=new ArrayList<ResponseBodyAdvice<?>>();
     interceptors.add(new JsonViewResponseBodyAdvice());
-    exceptionHandlerExceptionResolver.setResponseBodyAdvice(interceptors);
+    exceptionHandlerResolver.setResponseBodyAdvice(interceptors);
   }
-  exceptionHandlerExceptionResolver.setApplicationContext(this.applicationContext);
-  exceptionHandlerExceptionResolver.afterPropertiesSet();
-  exceptionResolvers.add(exceptionHandlerExceptionResolver);
-  ResponseStatusExceptionResolver responseStatusExceptionResolver=new ResponseStatusExceptionResolver();
-  responseStatusExceptionResolver.setMessageSource(this.applicationContext);
-  exceptionResolvers.add(responseStatusExceptionResolver);
+  exceptionHandlerResolver.setApplicationContext(this.applicationContext);
+  exceptionHandlerResolver.afterPropertiesSet();
+  exceptionResolvers.add(exceptionHandlerResolver);
+  ResponseStatusExceptionResolver responseStatusResolver=new ResponseStatusExceptionResolver();
+  responseStatusResolver.setMessageSource(this.applicationContext);
+  exceptionResolvers.add(responseStatusResolver);
   exceptionResolvers.add(new DefaultHandlerExceptionResolver());
 }
