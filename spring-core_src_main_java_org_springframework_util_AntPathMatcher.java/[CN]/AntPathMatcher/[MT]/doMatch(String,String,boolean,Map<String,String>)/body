@@ -2,7 +2,11 @@
   if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
     return false;
   }
-  String[] pattDirs=tokenizePattern(pattern);
+  PreprocessedPattern preprocessedPattern=tokenizePattern(pattern);
+  if (fullMatch && this.caseSensitive && preprocessedPattern.certainlyNotMatch(path)) {
+    return false;
+  }
+  String[] pattDirs=preprocessedPattern.tokenized;
   String[] pathDirs=tokenizePath(path);
   int pattIdxStart=0;
   int pattIdxEnd=pattDirs.length - 1;
