@@ -1,0 +1,11 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+  AutowiredAnnotationBeanPostProcessor bpp=new AutowiredAnnotationBeanPostProcessor();
+  bpp.setBeanFactory(bf);
+  bf.addBeanPostProcessor(bpp);
+  RootBeanDefinition bd=new RootBeanDefinition(SelfInjectionBean.class);
+  bf.registerBeanDefinition("annotatedBean",bd);
+  SelfInjectionBean bean=(SelfInjectionBean)bf.getBean("annotatedBean");
+  assertSame(bean,bean.selfReference);
+}

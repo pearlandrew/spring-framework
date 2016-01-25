@@ -1,0 +1,65 @@
+{
+  Class<?> type=descriptor.getDependencyType();
+  if (type.isArray()) {
+    Class<?> componentType=type.getComponentType();
+    DependencyDescriptor targetDesc=new DependencyDescriptor(descriptor);
+    targetDesc.increaseNestingLevel();
+    Map<String,Object> matchingBeans=findAutowireCandidates(beanName,componentType,targetDesc);
+    if (matchingBeans.isEmpty()) {
+      return null;
+    }
+    if (autowiredBeanNames != null) {
+      autowiredBeanNames.addAll(matchingBeans.keySet());
+    }
+    TypeConverter converter=(typeConverter != null ? typeConverter : getTypeConverter());
+    Object result=converter.convertIfNecessary(matchingBeans.values(),type);
+    if (getDependencyComparator() != null && result instanceof Object[]) {
+      Arrays.sort((Object[])result,adaptDependencyComparator(matchingBeans));
+    }
+    return result;
+  }
+ else   if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
+    Class<?> elementType=descriptor.getCollectionType();
+    if (elementType == null) {
+      return null;
+    }
+    DependencyDescriptor targetDesc=new DependencyDescriptor(descriptor);
+    targetDesc.increaseNestingLevel();
+    Map<String,Object> matchingBeans=findAutowireCandidates(beanName,elementType,targetDesc);
+    if (matchingBeans.isEmpty()) {
+      return null;
+    }
+    if (autowiredBeanNames != null) {
+      autowiredBeanNames.addAll(matchingBeans.keySet());
+    }
+    TypeConverter converter=(typeConverter != null ? typeConverter : getTypeConverter());
+    Object result=converter.convertIfNecessary(matchingBeans.values(),type);
+    if (getDependencyComparator() != null && result instanceof List) {
+      Collections.sort((List<?>)result,adaptDependencyComparator(matchingBeans));
+    }
+    return result;
+  }
+ else   if (Map.class.isAssignableFrom(type) && type.isInterface()) {
+    Class<?> keyType=descriptor.getMapKeyType();
+    if (String.class != keyType) {
+      return null;
+    }
+    Class<?> valueType=descriptor.getMapValueType();
+    if (valueType == null) {
+      return null;
+    }
+    DependencyDescriptor targetDesc=new DependencyDescriptor(descriptor);
+    targetDesc.increaseNestingLevel();
+    Map<String,Object> matchingBeans=findAutowireCandidates(beanName,valueType,targetDesc);
+    if (matchingBeans.isEmpty()) {
+      return null;
+    }
+    if (autowiredBeanNames != null) {
+      autowiredBeanNames.addAll(matchingBeans.keySet());
+    }
+    return matchingBeans;
+  }
+ else {
+    return NOT_MULTIPLE_BEANS;
+  }
+}
