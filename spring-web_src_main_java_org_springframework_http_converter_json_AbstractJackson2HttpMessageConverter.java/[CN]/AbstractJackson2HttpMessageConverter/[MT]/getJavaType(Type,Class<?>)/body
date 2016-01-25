@@ -1,3 +1,10 @@
 {
-  return this.objectMapper.getTypeFactory().constructType(type,contextClass);
+  TypeFactory typeFactory=this.objectMapper.getTypeFactory();
+  if (type instanceof TypeVariable && contextClass != null) {
+    ResolvableType resolvedType=resolveVariable((TypeVariable<?>)type,ResolvableType.forClass(contextClass));
+    if (resolvedType != ResolvableType.NONE) {
+      return typeFactory.constructType(resolvedType.resolve());
+    }
+  }
+  return typeFactory.constructType(type);
 }
