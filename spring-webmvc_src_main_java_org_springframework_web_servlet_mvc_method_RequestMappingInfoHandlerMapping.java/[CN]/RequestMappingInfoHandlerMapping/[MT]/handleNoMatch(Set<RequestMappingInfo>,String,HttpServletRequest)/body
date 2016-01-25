@@ -18,8 +18,14 @@
   if (patternMatches.isEmpty()) {
     return null;
   }
- else   if (patternAndMethodMatches.isEmpty() && !allowedMethods.isEmpty()) {
-    throw new HttpRequestMethodNotSupportedException(request.getMethod(),allowedMethods);
+ else   if (patternAndMethodMatches.isEmpty()) {
+    if (HttpMethod.OPTIONS.matches(request.getMethod())) {
+      HttpOptionsHandler handler=new HttpOptionsHandler(allowedMethods);
+      return new HandlerMethod(handler,HTTP_OPTIONS_HANDLE_METHOD);
+    }
+ else     if (!allowedMethods.isEmpty()) {
+      throw new HttpRequestMethodNotSupportedException(request.getMethod(),allowedMethods);
+    }
   }
   Set<MediaType> consumableMediaTypes;
   Set<MediaType> producibleMediaTypes;
