@@ -14,7 +14,9 @@
   Object body=responseEntity.getBody();
   if (responseEntity instanceof ResponseEntity) {
     outputMessage.setStatusCode(((ResponseEntity<?>)responseEntity).getStatusCode());
-    if (HttpMethod.GET == inputMessage.getMethod() && isResourceNotModified(inputMessage,outputMessage)) {
+    HttpMethod method=inputMessage.getMethod();
+    boolean isGetOrHead=(HttpMethod.GET == method || HttpMethod.HEAD == method);
+    if (isGetOrHead && isResourceNotModified(inputMessage,outputMessage)) {
       outputMessage.setStatusCode(HttpStatus.NOT_MODIFIED);
       outputMessage.flush();
       return;

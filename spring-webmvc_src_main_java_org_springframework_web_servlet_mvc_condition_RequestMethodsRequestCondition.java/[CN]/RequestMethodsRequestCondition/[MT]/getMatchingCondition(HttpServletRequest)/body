@@ -2,12 +2,15 @@
   if (this.methods.isEmpty()) {
     return this;
   }
-  RequestMethod incomingRequestMethod=getRequestMethod(request);
-  if (incomingRequestMethod != null) {
+  RequestMethod requestMethod=getRequestMethod(request);
+  if (requestMethod != null) {
     for (    RequestMethod method : this.methods) {
-      if (method.equals(incomingRequestMethod)) {
+      if (method.equals(requestMethod)) {
         return new RequestMethodsRequestCondition(method);
       }
+    }
+    if (isHeadRequest(requestMethod) && getMethods().contains(RequestMethod.GET)) {
+      return HEAD_CONDITION;
     }
   }
   return null;
