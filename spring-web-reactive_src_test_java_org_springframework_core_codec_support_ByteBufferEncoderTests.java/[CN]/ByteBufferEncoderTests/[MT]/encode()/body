@@ -1,0 +1,15 @@
+{
+  byte[] fooBytes="foo".getBytes(StandardCharsets.UTF_8);
+  byte[] barBytes="bar".getBytes(StandardCharsets.UTF_8);
+  Flux<ByteBuffer> source=Flux.just(ByteBuffer.wrap(fooBytes),ByteBuffer.wrap(barBytes));
+  Flux<DataBuffer> output=encoder.encode(source,ResolvableType.forClassWithGenerics(Publisher.class,ByteBuffer.class),null);
+  List<DataBuffer> results=StreamSupport.stream(output.toIterable().spliterator(),false).collect(toList());
+  assertEquals(2,results.size());
+  assertEquals(3,results.get(0).readableByteCount());
+  assertEquals(3,results.get(1).readableByteCount());
+  byte[] buf=new byte[3];
+  results.get(0).read(buf);
+  assertArrayEquals(fooBytes,buf);
+  results.get(1).read(buf);
+  assertArrayEquals(barBytes,buf);
+}

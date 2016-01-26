@@ -1,0 +1,10 @@
+{
+  DataBuffer fooBuffer=stringBuffer("foo");
+  DataBuffer barBuffer=stringBuffer("bar");
+  Flux<DataBuffer> source=Flux.just(fooBuffer,barBuffer);
+  Flux<ByteBuffer> output=decoder.decode(source,ResolvableType.forClassWithGenerics(Publisher.class,ByteBuffer.class),null);
+  List<ByteBuffer> results=StreamSupport.stream(output.toIterable().spliterator(),false).collect(toList());
+  assertEquals(2,results.size());
+  assertBufferEquals(fooBuffer,results.get(0));
+  assertBufferEquals(barBuffer,results.get(1));
+}
