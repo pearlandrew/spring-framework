@@ -1,14 +1,15 @@
 {
   String name="testBean";
   Object testBean=new TestBean(name);
-  mavContainer.addAttribute(name,testBean);
-  mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + name,testBean);
+  this.container.addAttribute(name,testBean);
+  this.container.addAttribute(BindingResult.MODEL_KEY_PREFIX + name,testBean);
   Object anotherTestBean=new TestBean();
-  mavContainer.addAttribute("anotherTestBean",anotherTestBean);
+  this.container.addAttribute("anotherTestBean",anotherTestBean);
   StubRequestDataBinder dataBinder=new StubRequestDataBinder(testBean,name);
   WebDataBinderFactory binderFactory=mock(WebDataBinderFactory.class);
-  given(binderFactory.createBinder(webRequest,testBean,name)).willReturn(dataBinder);
-  processor.resolveArgument(paramModelAttr,mavContainer,webRequest,binderFactory);
-  assertSame("Resolved attribute should be updated to be last in the order",testBean,mavContainer.getModel().values().toArray()[1]);
-  assertSame("BindingResult of resolved attribute should be last in the order",dataBinder.getBindingResult(),mavContainer.getModel().values().toArray()[2]);
+  given(binderFactory.createBinder(this.request,testBean,name)).willReturn(dataBinder);
+  this.processor.resolveArgument(this.paramModelAttr,this.container,this.request,binderFactory);
+  Object[] values=this.container.getModel().values().toArray();
+  assertSame("Resolved attribute should be updated to be last",testBean,values[1]);
+  assertSame("BindingResult of resolved attr should be last",dataBinder.getBindingResult(),values[2]);
 }

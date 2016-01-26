@@ -1,15 +1,16 @@
 {
   while (!this.modelMethods.isEmpty()) {
-    InvocableHandlerMethod attrMethod=getNextModelMethod(mavContainer).getHandlerMethod();
-    String modelName=attrMethod.getMethodAnnotation(ModelAttribute.class).value();
-    if (mavContainer.containsAttribute(modelName)) {
+    InvocableHandlerMethod modelMethod=getNextModelMethod(container).getHandlerMethod();
+    ModelAttribute annot=modelMethod.getMethodAnnotation(ModelAttribute.class);
+    String modelName=annot.value();
+    if (container.containsAttribute(modelName)) {
       continue;
     }
-    Object returnValue=attrMethod.invokeForRequest(request,mavContainer);
-    if (!attrMethod.isVoid()) {
-      String returnValueName=getNameForReturnValue(returnValue,attrMethod.getReturnType());
-      if (!mavContainer.containsAttribute(returnValueName)) {
-        mavContainer.addAttribute(returnValueName,returnValue);
+    Object returnValue=modelMethod.invokeForRequest(request,container);
+    if (!modelMethod.isVoid()) {
+      String returnValueName=getNameForReturnValue(returnValue,modelMethod.getReturnType());
+      if (!container.containsAttribute(returnValueName)) {
+        container.addAttribute(returnValueName,returnValue);
       }
     }
   }

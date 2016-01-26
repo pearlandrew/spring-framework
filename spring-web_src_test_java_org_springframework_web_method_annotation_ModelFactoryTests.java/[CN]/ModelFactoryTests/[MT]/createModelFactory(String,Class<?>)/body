@@ -1,10 +1,9 @@
 {
-  Method method=TestController.class.getMethod(methodName,parameterTypes);
-  HandlerMethodArgumentResolverComposite argResolvers=new HandlerMethodArgumentResolverComposite();
-  argResolvers.addResolver(new ModelMethodProcessor());
-  InvocableHandlerMethod handlerMethod=new InvocableHandlerMethod(this.controller,method);
-  handlerMethod.setHandlerMethodArgumentResolvers(argResolvers);
-  handlerMethod.setDataBinderFactory(null);
-  handlerMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
-  return new ModelFactory(Arrays.asList(handlerMethod),null,this.sessionAttrsHandler);
+  HandlerMethodArgumentResolverComposite resolvers=new HandlerMethodArgumentResolverComposite();
+  resolvers.addResolver(new ModelMethodProcessor());
+  InvocableHandlerMethod modelMethod=createHandlerMethod(methodName,parameterTypes);
+  modelMethod.setHandlerMethodArgumentResolvers(resolvers);
+  modelMethod.setDataBinderFactory(null);
+  modelMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
+  return new ModelFactory(Collections.singletonList(modelMethod),null,this.attributeHandler);
 }

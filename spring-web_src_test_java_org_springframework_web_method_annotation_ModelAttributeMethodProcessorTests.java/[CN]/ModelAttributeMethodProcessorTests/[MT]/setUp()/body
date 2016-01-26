@@ -1,13 +1,15 @@
 {
-  processor=new ModelAttributeMethodProcessor(false);
+  this.request=new ServletWebRequest(new MockHttpServletRequest());
+  this.container=new ModelAndViewContainer();
+  this.processor=new ModelAttributeMethodProcessor(false);
   Method method=ModelAttributeHandler.class.getDeclaredMethod("modelAttribute",TestBean.class,Errors.class,int.class,TestBean.class,TestBean.class);
-  paramNamedValidModelAttr=new MethodParameter(method,0);
-  paramErrors=new MethodParameter(method,1);
-  paramInt=new MethodParameter(method,2);
-  paramModelAttr=new MethodParameter(method,3);
-  paramNonSimpleType=new MethodParameter(method,4);
-  returnParamNamedModelAttr=new MethodParameter(getClass().getDeclaredMethod("annotatedReturnValue"),-1);
-  returnParamNonSimpleType=new MethodParameter(getClass().getDeclaredMethod("notAnnotatedReturnValue"),-1);
-  mavContainer=new ModelAndViewContainer();
-  webRequest=new ServletWebRequest(new MockHttpServletRequest());
+  this.paramNamedValidModelAttr=new SynthesizingMethodParameter(method,0);
+  this.paramErrors=new SynthesizingMethodParameter(method,1);
+  this.paramInt=new SynthesizingMethodParameter(method,2);
+  this.paramModelAttr=new SynthesizingMethodParameter(method,3);
+  this.paramNonSimpleType=new SynthesizingMethodParameter(method,4);
+  method=getClass().getDeclaredMethod("annotatedReturnValue");
+  this.returnParamNamedModelAttr=new MethodParameter(method,-1);
+  method=getClass().getDeclaredMethod("notAnnotatedReturnValue");
+  this.returnParamNonSimpleType=new MethodParameter(method,-1);
 }

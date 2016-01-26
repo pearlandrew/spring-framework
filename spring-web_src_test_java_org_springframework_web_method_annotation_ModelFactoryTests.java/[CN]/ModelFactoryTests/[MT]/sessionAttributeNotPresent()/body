@@ -1,13 +1,13 @@
 {
-  ModelFactory modelFactory=new ModelFactory(null,null,this.sessionAttrsHandler);
+  ModelFactory modelFactory=new ModelFactory(null,null,this.attributeHandler);
+  HandlerMethod handlerMethod=createHandlerMethod("handleSessionAttr",String.class);
   try {
-    modelFactory.initModel(this.webRequest,new ModelAndViewContainer(),this.handleSessionAttrMethod);
+    modelFactory.initModel(this.webRequest,this.mavContainer,handlerMethod);
     fail("Expected HttpSessionRequiredException");
   }
  catch (  HttpSessionRequiredException e) {
   }
-  this.sessionAttributeStore.storeAttribute(this.webRequest,"sessionAttr","sessionAttrValue");
-  ModelAndViewContainer mavContainer=new ModelAndViewContainer();
-  modelFactory.initModel(this.webRequest,mavContainer,this.handleSessionAttrMethod);
-  assertEquals("sessionAttrValue",mavContainer.getModel().get("sessionAttr"));
+  this.attributeStore.storeAttribute(this.webRequest,"sessionAttr","sessionAttrValue");
+  modelFactory.initModel(this.webRequest,this.mavContainer,handlerMethod);
+  assertEquals("sessionAttrValue",this.mavContainer.getModel().get("sessionAttr"));
 }
