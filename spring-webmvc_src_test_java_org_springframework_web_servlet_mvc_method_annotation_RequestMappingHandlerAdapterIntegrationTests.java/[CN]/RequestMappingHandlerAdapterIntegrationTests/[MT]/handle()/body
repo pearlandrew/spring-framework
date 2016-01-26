@@ -1,9 +1,10 @@
 {
-  Class<?>[] parameterTypes=new Class<?>[]{int.class,String.class,String.class,String.class,Map.class,Date.class,Map.class,String.class,String.class,TestBean.class,Errors.class,TestBean.class,Color.class,HttpServletRequest.class,HttpServletResponse.class,TestBean.class,User.class,OtherUser.class,Model.class,UriComponentsBuilder.class};
+  Class<?>[] parameterTypes=new Class<?>[]{int.class,String.class,String.class,String.class,Map.class,Date.class,Map.class,String.class,String.class,TestBean.class,Errors.class,TestBean.class,Color.class,HttpServletRequest.class,HttpServletResponse.class,TestBean.class,TestBean.class,User.class,OtherUser.class,Model.class,UriComponentsBuilder.class};
   String datePattern="yyyy.MM.dd";
   String formattedDate="2011.03.16";
   Date date=new GregorianCalendar(2011,Calendar.MARCH,16).getTime();
   TestBean sessionAttribute=new TestBean();
+  TestBean requestAttribute=new TestBean();
   request.addHeader("Content-Type","text/plain; charset=utf-8");
   request.addHeader("header","headerValue");
   request.addHeader("anotherHeader","anotherHeaderValue");
@@ -21,6 +22,7 @@
   uriTemplateVars.put("pathvar","pathvarValue");
   request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE,uriTemplateVars);
   request.getSession().setAttribute("sessionAttribute",sessionAttribute);
+  request.setAttribute("requestAttribute",requestAttribute);
   HandlerMethod handlerMethod=handlerMethod("handle",parameterTypes);
   ModelAndView mav=handlerAdapter.handle(request,response,handlerMethod);
   ModelMap model=mav.getModelMap();
@@ -55,5 +57,6 @@
   assertEquals(User.class,model.get("user").getClass());
   assertEquals(OtherUser.class,model.get("otherUser").getClass());
   assertSame(sessionAttribute,model.get("sessionAttribute"));
+  assertSame(requestAttribute,model.get("requestAttribute"));
   assertEquals(new URI("http://localhost/contextPath/main/path"),model.get("url"));
 }
