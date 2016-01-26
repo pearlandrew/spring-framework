@@ -1,14 +1,9 @@
 {
   super(request);
-  this.multipartRequest=asMultipartRequest(request);
+  this.multipartRequest=MultipartResolutionDelegate.asMultipartHttpServletRequest(request);
   this.partName=partName;
   this.headers=this.multipartRequest.getMultipartHeaders(this.partName);
   if (this.headers == null) {
-    if (request instanceof MultipartHttpServletRequest) {
-      throw new MissingServletRequestPartException(partName);
-    }
- else {
-      throw new IllegalArgumentException("Failed to obtain request part: " + partName + ". "+ "The part is missing or multipart processing is not configured. "+ "Check for a MultipartResolver bean or if Servlet 3.0 multipart processing is enabled.");
-    }
+    throw new MissingServletRequestPartException(partName);
   }
 }

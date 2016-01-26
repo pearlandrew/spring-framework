@@ -1,5 +1,5 @@
 {
-  @SuppressWarnings("unchecked") Map<String,MultiValueMap<String,String>> pathParameters=(Map<String,MultiValueMap<String,String>>)request.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE,RequestAttributes.SCOPE_REQUEST);
+  Map<String,MultiValueMap<String,String>> pathParameters=(Map<String,MultiValueMap<String,String>>)request.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE,RequestAttributes.SCOPE_REQUEST);
   if (CollectionUtils.isEmpty(pathParameters)) {
     return null;
   }
@@ -16,8 +16,8 @@
     for (    MultiValueMap<String,String> params : pathParameters.values()) {
       if (params.containsKey(name)) {
         if (found) {
-          String paramType=parameter.getParameterType().getName();
-          throw new ServletRequestBindingException("Found more than one match for URI path parameter '" + name + "' for parameter type ["+ paramType+ "]. Use pathVar attribute to disambiguate.");
+          String paramType=parameter.getNestedParameterType().getName();
+          throw new ServletRequestBindingException("Found more than one match for URI path parameter '" + name + "' for parameter type ["+ paramType+ "]. Use 'pathVar' attribute to disambiguate.");
         }
         paramValues.addAll(params.get(name));
         found=true;

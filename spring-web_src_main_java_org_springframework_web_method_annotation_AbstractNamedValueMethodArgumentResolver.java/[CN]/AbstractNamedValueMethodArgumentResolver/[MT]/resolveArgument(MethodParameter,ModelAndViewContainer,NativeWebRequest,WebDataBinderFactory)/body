@@ -1,15 +1,15 @@
 {
-  Class<?> paramType=parameter.getParameterType();
   NamedValueInfo namedValueInfo=getNamedValueInfo(parameter);
-  Object arg=resolveName(namedValueInfo.name,parameter,webRequest);
+  MethodParameter nestedParameter=parameter.nestedIfOptional();
+  Object arg=resolveName(namedValueInfo.name,nestedParameter,webRequest);
   if (arg == null) {
     if (namedValueInfo.defaultValue != null) {
       arg=resolveDefaultValue(namedValueInfo.defaultValue);
     }
- else     if (namedValueInfo.required && !parameter.getParameterType().getName().equals("java.util.Optional")) {
-      handleMissingValue(namedValueInfo.name,parameter);
+ else     if (namedValueInfo.required && !nestedParameter.isOptional()) {
+      handleMissingValue(namedValueInfo.name,nestedParameter,webRequest);
     }
-    arg=handleNullValue(namedValueInfo.name,arg,paramType);
+    arg=handleNullValue(namedValueInfo.name,arg,nestedParameter.getNestedParameterType());
   }
  else   if ("".equals(arg) && namedValueInfo.defaultValue != null) {
     arg=resolveDefaultValue(namedValueInfo.defaultValue);
@@ -17,7 +17,7 @@
   if (binderFactory != null) {
     WebDataBinder binder=binderFactory.createBinder(webRequest,null,namedValueInfo.name);
     try {
-      arg=binder.convertIfNecessary(arg,paramType,parameter);
+      arg=binder.convertIfNecessary(arg,parameter.getParameterType(),parameter);
     }
  catch (    ConversionNotSupportedException ex) {
       throw new MethodArgumentConversionNotSupportedException(arg,ex.getRequiredType(),namedValueInfo.name,parameter,ex.getCause());

@@ -1,64 +1,48 @@
 {
   HttpServletRequest servletRequest=request.getNativeRequest(HttpServletRequest.class);
-  assertIsMultipartRequest(servletRequest);
-  MultipartHttpServletRequest multipartRequest=WebUtils.getNativeRequest(servletRequest,MultipartHttpServletRequest.class);
-  Class<?> paramType=parameter.getParameterType();
-  boolean optional=paramType.getName().equals("java.util.Optional");
-  if (optional) {
-    parameter.increaseNestingLevel();
-    paramType=parameter.getNestedParameterType();
-  }
-  String partName=getPartName(parameter);
-  Object arg;
-  if (MultipartFile.class == paramType) {
-    Assert.notNull(multipartRequest,"Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
-    arg=multipartRequest.getFile(partName);
-  }
- else   if (isMultipartFileCollection(parameter)) {
-    Assert.notNull(multipartRequest,"Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
-    arg=multipartRequest.getFiles(partName);
-  }
- else   if (isMultipartFileArray(parameter)) {
-    Assert.notNull(multipartRequest,"Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
-    List<MultipartFile> files=multipartRequest.getFiles(partName);
-    arg=files.toArray(new MultipartFile[files.size()]);
-  }
- else   if ("javax.servlet.http.Part".equals(paramType.getName())) {
-    assertIsMultipartRequest(servletRequest);
-    arg=servletRequest.getPart(partName);
-  }
- else   if (isPartCollection(parameter)) {
-    assertIsMultipartRequest(servletRequest);
-    arg=new ArrayList<Object>(servletRequest.getParts());
-  }
- else   if (isPartArray(parameter)) {
-    assertIsMultipartRequest(servletRequest);
-    arg=RequestPartResolver.resolvePart(servletRequest);
+  RequestPart requestPart=parameter.getParameterAnnotation(RequestPart.class);
+  boolean isRequired=((requestPart == null || requestPart.required()) && !parameter.isOptional());
+  String name=getPartName(parameter,requestPart);
+  parameter=parameter.nestedIfOptional();
+  Object arg=null;
+  Object mpArg=MultipartResolutionDelegate.resolveMultipartArgument(name,parameter,servletRequest);
+  if (mpArg != MultipartResolutionDelegate.UNRESOLVABLE) {
+    arg=mpArg;
   }
  else {
     try {
-      HttpInputMessage inputMessage=new RequestPartServletServerHttpRequest(servletRequest,partName);
+      HttpInputMessage inputMessage=new RequestPartServletServerHttpRequest(servletRequest,name);
       arg=readWithMessageConverters(inputMessage,parameter,parameter.getNestedGenericParameterType());
-      WebDataBinder binder=binderFactory.createBinder(request,arg,partName);
+      WebDataBinder binder=binderFactory.createBinder(request,arg,name);
       if (arg != null) {
         validateIfApplicable(binder,parameter);
         if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder,parameter)) {
           throw new MethodArgumentNotValidException(parameter,binder.getBindingResult());
         }
       }
-      mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + partName,binder.getBindingResult());
+      mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + name,binder.getBindingResult());
     }
  catch (    MissingServletRequestPartException ex) {
-      arg=null;
+      if (isRequired) {
+        throw ex;
+      }
+    }
+catch (    MultipartException ex) {
+      if (isRequired) {
+        throw ex;
+      }
     }
   }
-  RequestPart requestPart=parameter.getParameterAnnotation(RequestPart.class);
-  boolean isRequired=((requestPart == null || requestPart.required()) && !optional);
   if (arg == null && isRequired) {
-    throw new MissingServletRequestPartException(partName);
+    if (!MultipartResolutionDelegate.isMultipartRequest(servletRequest)) {
+      throw new MultipartException("Current request is not a multipart request");
+    }
+ else {
+      throw new MissingServletRequestPartException(name);
+    }
   }
-  if (optional) {
-    arg=Optional.ofNullable(arg);
+  if (parameter.isOptional()) {
+    arg=OptionalResolver.resolveValue(arg);
   }
   return arg;
 }

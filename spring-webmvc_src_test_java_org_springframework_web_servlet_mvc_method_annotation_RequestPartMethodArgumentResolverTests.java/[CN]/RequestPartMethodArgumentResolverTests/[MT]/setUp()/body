@@ -1,5 +1,5 @@
 {
-  Method method=getClass().getMethod("handle",SimpleBean.class,SimpleBean.class,SimpleBean.class,MultipartFile.class,List.class,MultipartFile[].class,Integer.TYPE,MultipartFile.class,Part.class,List.class,Part[].class,MultipartFile.class,Optional.class,Optional.class,Optional.class);
+  Method method=ReflectionUtils.findMethod(getClass(),"handle",(Class<?>[])null);
   paramRequestPart=new SynthesizingMethodParameter(method,0);
   paramRequestPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
   paramNamedRequestPart=new SynthesizingMethodParameter(method,1);
@@ -17,9 +17,13 @@
   paramRequestParamAnnot=new SynthesizingMethodParameter(method,11);
   optionalMultipartFile=new SynthesizingMethodParameter(method,12);
   optionalMultipartFile.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-  optionalPart=new SynthesizingMethodParameter(method,13);
+  optionalMultipartFileList=new SynthesizingMethodParameter(method,13);
+  optionalMultipartFileList.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+  optionalPart=new SynthesizingMethodParameter(method,14);
   optionalPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-  optionalRequestPart=new SynthesizingMethodParameter(method,14);
+  optionalPartList=new SynthesizingMethodParameter(method,15);
+  optionalPartList.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+  optionalRequestPart=new SynthesizingMethodParameter(method,16);
   messageConverter=mock(HttpMessageConverter.class);
   given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
   resolver=new RequestPartMethodArgumentResolver(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
@@ -30,5 +34,6 @@
   multipartRequest=new MockMultipartHttpServletRequest();
   multipartRequest.addFile(multipartFile1);
   multipartRequest.addFile(multipartFile2);
+  multipartRequest.addFile(new MockMultipartFile("otherPart","","text/plain",content));
   webRequest=new ServletWebRequest(multipartRequest,new MockHttpServletResponse());
 }

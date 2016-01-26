@@ -1,8 +1,10 @@
 {
-  given(messageConverter.canRead(SimpleBean.class,MediaType.TEXT_PLAIN)).willReturn(true);
-  given(messageConverter.read(eq(SimpleBean.class),isA(RequestPartServletServerHttpRequest.class))).willReturn(null);
-  ModelAndViewContainer mavContainer=new ModelAndViewContainer();
-  Object actualValue=resolver.resolveArgument(optionalRequestPart,mavContainer,webRequest,new ValidatingBinderFactory());
+  MockHttpServletRequest request=new MockHttpServletRequest();
+  request.setMethod("POST");
+  request.setContentType("multipart/form-data");
+  webRequest=new ServletWebRequest(request);
+  Object actualValue=resolver.resolveArgument(optionalRequestPart,null,webRequest,null);
   assertEquals("Invalid argument value",Optional.empty(),actualValue);
-  assertFalse("The requestHandled flag shouldn't change",mavContainer.isRequestHandled());
+  actualValue=resolver.resolveArgument(optionalRequestPart,null,webRequest,null);
+  assertEquals("Invalid argument value",Optional.empty(),actualValue);
 }

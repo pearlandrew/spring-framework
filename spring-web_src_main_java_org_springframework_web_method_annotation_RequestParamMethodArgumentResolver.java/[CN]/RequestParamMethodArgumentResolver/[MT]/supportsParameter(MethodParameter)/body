@@ -1,7 +1,6 @@
 {
-  Class<?> paramType=parameter.getParameterType();
   if (parameter.hasParameterAnnotation(RequestParam.class)) {
-    if (Map.class.isAssignableFrom(paramType)) {
+    if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
       String paramName=parameter.getParameterAnnotation(RequestParam.class).name();
       return StringUtils.hasText(paramName);
     }
@@ -13,11 +12,12 @@
     if (parameter.hasParameterAnnotation(RequestPart.class)) {
       return false;
     }
- else     if (MultipartFile.class == paramType || "javax.servlet.http.Part".equals(paramType.getName())) {
+    parameter=parameter.nestedIfOptional();
+    if (MultipartResolutionDelegate.isMultipartArgument(parameter)) {
       return true;
     }
  else     if (this.useDefaultResolution) {
-      return BeanUtils.isSimpleProperty(paramType);
+      return BeanUtils.isSimpleProperty(parameter.getNestedParameterType());
     }
  else {
       return false;
