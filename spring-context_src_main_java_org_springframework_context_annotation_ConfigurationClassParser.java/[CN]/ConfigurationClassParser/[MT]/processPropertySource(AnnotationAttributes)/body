@@ -1,5 +1,6 @@
 {
   String name=propertySource.getString("name");
+  String encoding=propertySource.getString("encoding");
   String[] locations=propertySource.getStringArray("value");
   boolean ignoreResourceNotFound=propertySource.getBoolean("ignoreResourceNotFound");
   Assert.isTrue(locations.length > 0,"At least one @PropertySource(value) location is required");
@@ -7,8 +8,7 @@
     try {
       String resolvedLocation=this.environment.resolveRequiredPlaceholders(location);
       Resource resource=this.resourceLoader.getResource(resolvedLocation);
-      ResourcePropertySource rps=(StringUtils.hasText(name) ? new ResourcePropertySource(name,resource) : new ResourcePropertySource(resource));
-      addPropertySource(rps);
+      addPropertySource(createPropertySource(name,encoding,resource));
     }
  catch (    IllegalArgumentException ex) {
       if (!ignoreResourceNotFound) {
