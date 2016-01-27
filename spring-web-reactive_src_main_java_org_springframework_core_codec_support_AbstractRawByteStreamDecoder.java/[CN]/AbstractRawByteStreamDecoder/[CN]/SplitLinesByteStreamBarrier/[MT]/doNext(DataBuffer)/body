@@ -1,0 +1,19 @@
+{
+  this.buffer.write(dataBuffer);
+  while (REQUESTED.get(this) > 0) {
+    int separatorIndex=findEndOfLine(this.buffer);
+    if (separatorIndex != -1) {
+      if (BackpressureUtils.getAndSub(REQUESTED,this,1L) > 0) {
+        byte[] message=new byte[separatorIndex];
+        this.buffer.read(message);
+        consumeSeparator(this.buffer);
+        DataBuffer buffer2=allocator.allocateBuffer(message.length);
+        buffer2.write(message);
+        super.doNext(buffer2);
+      }
+    }
+ else {
+      super.doRequest(1);
+    }
+  }
+}

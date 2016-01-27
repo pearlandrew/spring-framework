@@ -1,5 +1,8 @@
 {
   Assert.notNull(getHttpHandler());
-  this.rxNettyHandler=new RxNettyHttpHandlerAdapter(getHttpHandler());
+  if (allocator == null) {
+    allocator=new NettyDataBufferAllocator(UnpooledByteBufAllocator.DEFAULT);
+  }
+  this.rxNettyHandler=new RxNettyHttpHandlerAdapter(getHttpHandler(),allocator);
   this.rxNettyServer=(getPort() != -1 ? io.reactivex.netty.protocol.http.server.HttpServer.newServer(getPort()) : io.reactivex.netty.protocol.http.server.HttpServer.newServer());
 }

@@ -1,13 +1,13 @@
 {
-  request.getBody().subscribe(new Subscriber<ByteBuffer>(){
+  request.getBody().subscribe(new Subscriber<DataBuffer>(){
     private Subscription s;
     private int requestSize=0;
     @Override public void onSubscribe(    Subscription s){
       this.s=s;
       s.request(Long.MAX_VALUE);
     }
-    @Override public void onNext(    ByteBuffer bytes){
-      requestSize+=new Buffer(bytes).limit();
+    @Override public void onNext(    DataBuffer bytes){
+      requestSize+=bytes.readableByteCount();
     }
     @Override public void onError(    Throwable t){
       logger.error(t);
@@ -19,5 +19,8 @@
   }
 );
   response.getHeaders().setContentLength(RESPONSE_SIZE);
-  return response.setBody(Mono.just(ByteBuffer.wrap(randomBytes())));
+  byte[] randomBytes=randomBytes();
+  DataBuffer buffer=new DefaultDataBufferAllocator().allocateBuffer(randomBytes.length);
+  buffer.write(randomBytes);
+  return response.setBody(Mono.just(buffer));
 }

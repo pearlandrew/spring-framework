@@ -1,10 +1,9 @@
 {
   if (BackpressureUtils.getAndSub(REQUESTED,this,1L) > 0) {
-    Buffer buffer=new Buffer();
-    buffer.append(this.prev);
-    buffer.append("]");
-    buffer.flip();
-    subscriber.onNext(buffer.byteBuffer());
+    DataBuffer buffer=allocator.allocateBuffer();
+    buffer.write(this.prev);
+    buffer.write((byte)']');
+    subscriber.onNext(buffer);
     super.doComplete();
   }
 }

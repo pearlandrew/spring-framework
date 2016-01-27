@@ -1,0 +1,9 @@
+{
+  StringDecoder decoder=new StringDecoder(allocator,false);
+  Flux<DataBuffer> source=Flux.just(stringBuffer("foo"),stringBuffer("bar"));
+  Flux<String> output=decoder.decode(source,ResolvableType.forClassWithGenerics(Flux.class,String.class),null);
+  List<String> results=StreamSupport.stream(output.toIterable().spliterator(),false).collect(toList());
+  assertEquals(2,results.size());
+  assertEquals("foo",results.get(0));
+  assertEquals("bar",results.get(1));
+}
