@@ -1,12 +1,12 @@
 {
-  Message<?> inputMessage=createInputMessage("sess1","sub1","/app","/dest",null);
+  Message<?> message=createMessage("sess1","sub1","/app","/dest",null);
   SimpMessageSendingOperations messagingTemplate=Mockito.mock(SimpMessageSendingOperations.class);
   SendToMethodReturnValueHandler handler=new SendToMethodReturnValueHandler(messagingTemplate,false);
-  handler.handleReturnValue(PAYLOAD,this.noAnnotationsReturnType,inputMessage);
+  handler.handleReturnValue(PAYLOAD,this.noAnnotationsReturnType,message);
   ArgumentCaptor<MessageHeaders> captor=ArgumentCaptor.forClass(MessageHeaders.class);
   verify(messagingTemplate).convertAndSend(eq("/topic/dest"),eq(PAYLOAD),captor.capture());
-  MessageHeaders messageHeaders=captor.getValue();
-  SimpMessageHeaderAccessor accessor=getAccessor(messageHeaders,SimpMessageHeaderAccessor.class);
+  MessageHeaders headers=captor.getValue();
+  SimpMessageHeaderAccessor accessor=getAccessor(headers,SimpMessageHeaderAccessor.class);
   assertNotNull(accessor);
   assertTrue(accessor.isMutable());
   assertEquals("sess1",accessor.getSessionId());
