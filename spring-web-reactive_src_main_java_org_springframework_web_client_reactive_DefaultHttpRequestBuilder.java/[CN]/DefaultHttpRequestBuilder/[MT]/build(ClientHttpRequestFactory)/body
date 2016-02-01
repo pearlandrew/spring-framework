@@ -1,0 +1,16 @@
+{
+  ClientHttpRequest request=factory.createRequest(this.httpMethod,this.url,this.httpHeaders);
+  request.getHeaders().putAll(this.httpHeaders);
+  if (this.contentPublisher != null) {
+    ResolvableType requestBodyType=ResolvableType.forInstance(this.contentPublisher);
+    MediaType mediaType=request.getHeaders().getContentType();
+    Optional<Encoder<?>> messageEncoder=resolveEncoder(requestBodyType,mediaType);
+    if (messageEncoder.isPresent()) {
+      request.setBody(messageEncoder.get().encode(this.contentPublisher,requestBodyType,mediaType));
+    }
+ else {
+      request.setBody(Flux.error(new IllegalStateException("Can't write request body" + "of type '" + requestBodyType.toString() + "' for content-type '"+ mediaType.toString()+ "'")));
+    }
+  }
+  return request;
+}
