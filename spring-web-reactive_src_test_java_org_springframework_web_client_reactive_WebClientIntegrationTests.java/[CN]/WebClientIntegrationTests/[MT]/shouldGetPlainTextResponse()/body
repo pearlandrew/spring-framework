@@ -1,0 +1,18 @@
+{
+  HttpUrl baseUrl=server.url("/greeting?name=Spring");
+  this.server.enqueue(new MockResponse().setHeader("Content-Type","text/plain").setBody("Hello Spring!"));
+  Mono<ResponseEntity<String>> result=this.webClient.perform(get(baseUrl.toString()).accept(MediaType.TEXT_PLAIN)).extract(response(String.class));
+  TestSubscriber<ResponseEntity<String>> ts=new TestSubscriber();
+  result.subscribe(ts);
+  ts.awaitAndAssertValuesWith(new Consumer<ResponseEntity<String>>(){
+    @Override public void accept(    ResponseEntity<String> response){
+      assertEquals(200,response.getStatusCode().value());
+      assertEquals(MediaType.TEXT_PLAIN,response.getHeaders().getContentType());
+      assertEquals("Hello Spring!",response.getBody());
+    }
+  }
+);
+  RecordedRequest request=server.takeRequest();
+  assertEquals("/greeting?name=Spring",request.getPath());
+  assertEquals("text/plain",request.getHeader(HttpHeaders.ACCEPT));
+}

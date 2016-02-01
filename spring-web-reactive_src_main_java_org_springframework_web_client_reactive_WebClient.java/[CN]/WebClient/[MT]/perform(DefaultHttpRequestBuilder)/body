@@ -1,0 +1,12 @@
+{
+  ClientHttpRequest request=builder.setMessageEncoders(messageEncoders).build(requestFactory);
+  final Mono<ClientHttpResponse> clientResponse=request.execute().log("org.springframework.http.client.reactive");
+  return new WebResponseActions(){
+    @Override public void doWithStatus(    Consumer<HttpStatus> consumer){
+    }
+    @Override public <T>T extract(    WebResponseExtractor<T> extractor){
+      return extractor.extract(new DefaultWebResponse(clientResponse,messageDecoders));
+    }
+  }
+;
+}
