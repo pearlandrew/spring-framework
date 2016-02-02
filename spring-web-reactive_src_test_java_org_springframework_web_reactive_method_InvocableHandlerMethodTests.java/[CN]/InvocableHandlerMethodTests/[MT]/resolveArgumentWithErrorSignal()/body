@@ -1,7 +1,7 @@
 {
   InvocableHandlerMethod hm=createHandlerMethod("singleArg",String.class);
   addResolver(hm,Mono.error(new IllegalStateException("boo")));
-  Publisher<HandlerResult> publisher=hm.invokeForRequest(this.exchange);
+  Publisher<HandlerResult> publisher=hm.invokeForRequest(this.exchange,this.model);
   Throwable ex=awaitErrorSignal(publisher);
   assertEquals(IllegalStateException.class,ex.getClass());
   assertEquals("Exception not wrapped with helpful argument details","Error resolving argument [0] of type [java.lang.String] on method " + "[" + hm.getMethod().toGenericString() + "]",ex.getMessage());
