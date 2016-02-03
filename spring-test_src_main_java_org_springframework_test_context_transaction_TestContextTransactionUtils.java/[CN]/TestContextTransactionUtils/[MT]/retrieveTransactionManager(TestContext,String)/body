@@ -17,6 +17,12 @@
       if (txMgrs.size() == 1) {
         return txMgrs.values().iterator().next();
       }
+      try {
+        return bf.getBean(PlatformTransactionManager.class);
+      }
+ catch (      BeansException ex) {
+        logBeansException(testContext,ex,PlatformTransactionManager.class);
+      }
       Map<String,TransactionManagementConfigurer> configurers=BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf,TransactionManagementConfigurer.class);
       if (configurers.size() > 1) {
         throw new IllegalStateException("Only one TransactionManagementConfigurer may exist in the ApplicationContext");
@@ -28,9 +34,7 @@
     return bf.getBean(DEFAULT_TRANSACTION_MANAGER_NAME,PlatformTransactionManager.class);
   }
  catch (  BeansException ex) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Caught exception while retrieving transaction manager for test context " + testContext,ex);
-    }
+    logBeansException(testContext,ex,PlatformTransactionManager.class);
     return null;
   }
 }

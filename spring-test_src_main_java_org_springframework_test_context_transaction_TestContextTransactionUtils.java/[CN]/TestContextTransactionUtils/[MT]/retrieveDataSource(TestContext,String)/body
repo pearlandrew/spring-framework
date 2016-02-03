@@ -17,13 +17,17 @@
       if (dataSources.size() == 1) {
         return dataSources.values().iterator().next();
       }
+      try {
+        return bf.getBean(DataSource.class);
+      }
+ catch (      BeansException ex) {
+        logBeansException(testContext,ex,PlatformTransactionManager.class);
+      }
     }
     return bf.getBean(DEFAULT_DATA_SOURCE_NAME,DataSource.class);
   }
  catch (  BeansException ex) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Caught exception while retrieving DataSource for test context " + testContext,ex);
-    }
+    logBeansException(testContext,ex,DataSource.class);
     return null;
   }
 }
