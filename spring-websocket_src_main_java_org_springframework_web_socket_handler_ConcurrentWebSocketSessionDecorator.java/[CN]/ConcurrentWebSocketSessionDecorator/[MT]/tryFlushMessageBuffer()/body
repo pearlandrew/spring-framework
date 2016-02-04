@@ -2,13 +2,13 @@
   if (this.flushLock.tryLock()) {
     try {
       while (true) {
-        WebSocketMessage<?> messageToSend=this.buffer.poll();
-        if (messageToSend == null || isDisabled()) {
+        WebSocketMessage<?> message=this.buffer.poll();
+        if (message == null || shouldNotSend()) {
           break;
         }
-        this.bufferSize.addAndGet(messageToSend.getPayloadLength() * -1);
+        this.bufferSize.addAndGet(message.getPayloadLength() * -1);
         this.sendStartTime=System.currentTimeMillis();
-        getDelegate().sendMessage(messageToSend);
+        getDelegate().sendMessage(message);
         this.sendStartTime=0;
       }
     }

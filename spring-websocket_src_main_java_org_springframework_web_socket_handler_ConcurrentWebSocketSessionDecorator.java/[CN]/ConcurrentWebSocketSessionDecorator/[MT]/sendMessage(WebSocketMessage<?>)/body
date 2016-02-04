@@ -1,5 +1,5 @@
 {
-  if (isDisabled()) {
+  if (shouldNotSend()) {
     return;
   }
   this.buffer.add(message);
@@ -7,11 +7,12 @@
   do {
     if (!tryFlushMessageBuffer()) {
       if (logger.isTraceEnabled()) {
-        logger.trace("Another send already in progress, session id '" + getId() + "'"+ ", in-progress send time "+ getTimeSinceSendStarted()+ " (ms)"+ ", buffer size "+ this.bufferSize+ " bytes");
+        String text=String.format("Another send already in progress: " + "session id '%s':, \"in-progress\" send time %d (ms), buffer size %d bytes",getId(),getTimeSinceSendStarted(),this.bufferSize.get());
+        logger.trace(text);
       }
       checkSessionLimits();
       break;
     }
   }
- while (!this.buffer.isEmpty() && !isDisabled());
+ while (!this.buffer.isEmpty() && !shouldNotSend());
 }
