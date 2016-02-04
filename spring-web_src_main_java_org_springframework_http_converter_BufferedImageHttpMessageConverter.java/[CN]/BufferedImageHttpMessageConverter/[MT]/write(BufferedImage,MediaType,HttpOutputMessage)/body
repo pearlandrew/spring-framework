@@ -1,14 +1,16 @@
 {
+  final MediaType selectedContentType=getContentType(contentType);
+  outputMessage.getHeaders().setContentType(selectedContentType);
   if (outputMessage instanceof StreamingHttpOutputMessage) {
     StreamingHttpOutputMessage streamingOutputMessage=(StreamingHttpOutputMessage)outputMessage;
     streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body(){
       @Override public void writeTo(      OutputStream outputStream) throws IOException {
-        writeInternal(image,contentType,outputMessage.getHeaders(),outputStream);
+        writeInternal(image,selectedContentType,outputStream);
       }
     }
 );
   }
  else {
-    writeInternal(image,contentType,outputMessage.getHeaders(),outputMessage.getBody());
+    writeInternal(image,selectedContentType,outputMessage.getBody());
   }
 }
