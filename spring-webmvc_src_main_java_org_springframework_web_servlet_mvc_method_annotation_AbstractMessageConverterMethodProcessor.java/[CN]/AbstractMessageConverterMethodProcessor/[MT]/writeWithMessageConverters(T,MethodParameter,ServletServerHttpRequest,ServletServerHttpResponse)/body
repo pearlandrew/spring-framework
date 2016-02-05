@@ -1,16 +1,16 @@
 {
-  Class<?> returnValueClass=getReturnValueType(returnValue,returnType);
-  Type returnValueType=getGenericType(returnType);
-  if (returnValue != null && returnValue instanceof CharSequence) {
-    returnValueClass=String.class;
-    returnValueType=String.class;
-    returnValue=(T)returnValue.toString();
+  Class<?> clazz=getReturnValueType(value,returnType);
+  Type type=getGenericType(returnType);
+  if (value != null && value instanceof CharSequence) {
+    clazz=String.class;
+    type=String.class;
+    value=(T)value.toString();
   }
   HttpServletRequest servletRequest=inputMessage.getServletRequest();
   List<MediaType> requestedMediaTypes=getAcceptableMediaTypes(servletRequest);
-  List<MediaType> producibleMediaTypes=getProducibleMediaTypes(servletRequest,returnValueClass,returnValueType);
-  if (returnValue != null && producibleMediaTypes.isEmpty()) {
-    throw new IllegalArgumentException("No converter found for return value of type: " + returnValueClass);
+  List<MediaType> producibleMediaTypes=getProducibleMediaTypes(servletRequest,clazz,type);
+  if (value != null && producibleMediaTypes.isEmpty()) {
+    throw new IllegalArgumentException("No converter found for return value of type: " + clazz);
   }
   Set<MediaType> compatibleMediaTypes=new LinkedHashSet<MediaType>();
   for (  MediaType requestedType : requestedMediaTypes) {
@@ -21,7 +21,7 @@
     }
   }
   if (compatibleMediaTypes.isEmpty()) {
-    if (returnValue != null) {
+    if (value != null) {
       throw new HttpMediaTypeNotAcceptableException(producibleMediaTypes);
     }
     return;
@@ -43,32 +43,32 @@
     selectedMediaType=selectedMediaType.removeQualityValue();
     for (    HttpMessageConverter<?> messageConverter : this.messageConverters) {
       if (messageConverter instanceof GenericHttpMessageConverter) {
-        if (((GenericHttpMessageConverter<T>)messageConverter).canWrite(returnValueType,returnValueClass,selectedMediaType)) {
-          returnValue=(T)getAdvice().beforeBodyWrite(returnValue,returnType,selectedMediaType,(Class<? extends HttpMessageConverter<?>>)messageConverter.getClass(),inputMessage,outputMessage);
-          if (returnValue != null) {
+        if (((GenericHttpMessageConverter<T>)messageConverter).canWrite(type,clazz,selectedMediaType)) {
+          value=(T)getAdvice().beforeBodyWrite(value,returnType,selectedMediaType,(Class<? extends HttpMessageConverter<?>>)messageConverter.getClass(),inputMessage,outputMessage);
+          if (value != null) {
             addContentDispositionHeader(inputMessage,outputMessage);
-            ((GenericHttpMessageConverter<T>)messageConverter).write(returnValue,returnValueType,selectedMediaType,outputMessage);
+            ((GenericHttpMessageConverter<T>)messageConverter).write(value,type,selectedMediaType,outputMessage);
             if (logger.isDebugEnabled()) {
-              logger.debug("Written [" + returnValue + "] as \""+ selectedMediaType+ "\" using ["+ messageConverter+ "]");
+              logger.debug("Written [" + value + "] as \""+ selectedMediaType+ "\" using ["+ messageConverter+ "]");
             }
           }
           return;
         }
       }
- else       if (messageConverter.canWrite(returnValueClass,selectedMediaType)) {
-        returnValue=(T)getAdvice().beforeBodyWrite(returnValue,returnType,selectedMediaType,(Class<? extends HttpMessageConverter<?>>)messageConverter.getClass(),inputMessage,outputMessage);
-        if (returnValue != null) {
+ else       if (messageConverter.canWrite(clazz,selectedMediaType)) {
+        value=(T)getAdvice().beforeBodyWrite(value,returnType,selectedMediaType,(Class<? extends HttpMessageConverter<?>>)messageConverter.getClass(),inputMessage,outputMessage);
+        if (value != null) {
           addContentDispositionHeader(inputMessage,outputMessage);
-          ((HttpMessageConverter<T>)messageConverter).write(returnValue,selectedMediaType,outputMessage);
+          ((HttpMessageConverter<T>)messageConverter).write(value,selectedMediaType,outputMessage);
           if (logger.isDebugEnabled()) {
-            logger.debug("Written [" + returnValue + "] as \""+ selectedMediaType+ "\" using ["+ messageConverter+ "]");
+            logger.debug("Written [" + value + "] as \""+ selectedMediaType+ "\" using ["+ messageConverter+ "]");
           }
         }
         return;
       }
     }
   }
-  if (returnValue != null) {
+  if (value != null) {
     throw new HttpMediaTypeNotAcceptableException(this.allSupportedMediaTypes);
   }
 }
