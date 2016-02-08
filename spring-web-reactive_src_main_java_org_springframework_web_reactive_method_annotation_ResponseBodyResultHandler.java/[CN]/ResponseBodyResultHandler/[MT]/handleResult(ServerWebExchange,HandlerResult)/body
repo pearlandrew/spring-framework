@@ -1,20 +1,20 @@
 {
-  Object value=result.getResult();
-  if (value == null) {
+  Optional<Object> value=result.getReturnValue();
+  if (!value.isPresent()) {
     return Mono.empty();
   }
   Publisher<?> publisher;
   ResolvableType elementType;
-  ResolvableType returnType=result.getResultType();
+  ResolvableType returnType=result.getReturnValueType();
   if (this.conversionService.canConvert(returnType.getRawClass(),Publisher.class)) {
-    publisher=this.conversionService.convert(value,Publisher.class);
+    publisher=this.conversionService.convert(value.get(),Publisher.class);
     elementType=returnType.getGeneric(0);
     if (Void.class.equals(elementType.getRawClass())) {
       return (Mono<Void>)Mono.from(publisher);
     }
   }
  else {
-    publisher=Mono.just(value);
+    publisher=Mono.just(value.get());
     elementType=returnType;
   }
   List<MediaType> requestedMediaTypes=getAcceptableMediaTypes(exchange.getRequest());
