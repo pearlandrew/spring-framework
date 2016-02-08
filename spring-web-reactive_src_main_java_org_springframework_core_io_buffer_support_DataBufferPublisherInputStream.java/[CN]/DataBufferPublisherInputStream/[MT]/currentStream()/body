@@ -4,21 +4,17 @@
       return this.currentStream;
     }
  else {
-      DataBuffer signal=this.queue.take();
-      if (signal == null) {
+      if (!this.queue.hasNext()) {
         this.completed.set(true);
         return null;
       }
+      DataBuffer signal=this.queue.next();
       this.currentStream=signal.asInputStream();
       return this.currentStream;
     }
   }
- catch (  InterruptedException ex) {
-    Thread.currentThread().interrupt();
-  }
-catch (  Throwable error) {
+ catch (  Throwable error) {
     this.completed.set(true);
     throw new IOException(error);
   }
-  throw new IOException();
 }
