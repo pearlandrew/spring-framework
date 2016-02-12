@@ -1,0 +1,16 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  AutowiredAnnotationBeanPostProcessor bpp=new AutowiredAnnotationBeanPostProcessor();
+  bpp.setBeanFactory(bf);
+  bf.addBeanPostProcessor(bpp);
+  bf.registerBeanDefinition("annotatedBean",new RootBeanDefinition(SmartObjectFactoryInjectionBean.class));
+  RootBeanDefinition tb1=new RootBeanDefinition(TestBean.class);
+  tb1.setPrimary(true);
+  bf.registerBeanDefinition("testBean1",tb1);
+  bf.registerBeanDefinition("testBean2",new RootBeanDefinition(TestBean.class));
+  SmartObjectFactoryInjectionBean bean=(SmartObjectFactoryInjectionBean)bf.getBean("annotatedBean");
+  assertSame(bf.getBean("testBean1"),bean.getTestBean());
+  assertSame(bf.getBean("testBean1"),bean.getOptionalTestBean());
+  assertSame(bf.getBean("testBean1"),bean.getUniqueTestBean());
+  bf.destroySingletons();
+}

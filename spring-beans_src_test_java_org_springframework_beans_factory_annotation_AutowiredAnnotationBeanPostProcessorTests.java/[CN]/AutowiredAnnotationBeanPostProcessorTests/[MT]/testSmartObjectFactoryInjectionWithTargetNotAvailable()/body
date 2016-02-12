@@ -1,0 +1,17 @@
+{
+  DefaultListableBeanFactory bf=new DefaultListableBeanFactory();
+  AutowiredAnnotationBeanPostProcessor bpp=new AutowiredAnnotationBeanPostProcessor();
+  bpp.setBeanFactory(bf);
+  bf.addBeanPostProcessor(bpp);
+  bf.registerBeanDefinition("annotatedBean",new RootBeanDefinition(SmartObjectFactoryInjectionBean.class));
+  SmartObjectFactoryInjectionBean bean=(SmartObjectFactoryInjectionBean)bf.getBean("annotatedBean");
+  try {
+    bean.getTestBean();
+    fail("Should have thrown NoSuchBeanDefinitionException");
+  }
+ catch (  NoSuchBeanDefinitionException ex) {
+  }
+  assertNull(bean.getOptionalTestBean());
+  assertNull(bean.getUniqueTestBean());
+  bf.destroySingletons();
+}
