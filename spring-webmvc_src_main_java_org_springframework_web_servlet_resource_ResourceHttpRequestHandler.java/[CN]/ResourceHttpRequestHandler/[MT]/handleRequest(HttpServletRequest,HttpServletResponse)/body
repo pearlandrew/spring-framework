@@ -1,15 +1,15 @@
 {
-  if (HttpMethod.OPTIONS.matches(request.getMethod())) {
-    response.setHeader("Allow",getAllowHeader());
-    return;
-  }
-  checkRequest(request);
   Resource resource=getResource(request);
   if (resource == null) {
     logger.trace("No matching resource found - returning 404");
     response.sendError(HttpServletResponse.SC_NOT_FOUND);
     return;
   }
+  if (HttpMethod.OPTIONS.matches(request.getMethod())) {
+    response.setHeader("Allow",getAllowHeader());
+    return;
+  }
+  checkRequest(request);
   if (new ServletWebRequest(request,response).checkNotModified(resource.lastModified())) {
     logger.trace("Resource not modified - returning 304");
     return;
