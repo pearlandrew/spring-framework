@@ -1,4 +1,7 @@
 {
+  if (this.recovering && this.interrupted) {
+    return false;
+  }
   long interval=execution.nextBackOff();
   if (interval == BackOffExecution.STOP) {
     return false;
@@ -9,7 +12,10 @@
     }
  catch (    InterruptedException interEx) {
       Thread.currentThread().interrupt();
+      if (this.recovering) {
+        this.interrupted=true;
+      }
     }
+    return true;
   }
-  return true;
 }
