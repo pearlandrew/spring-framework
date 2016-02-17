@@ -2,12 +2,13 @@
   GenericWebApplicationContext context=new GenericWebApplicationContext();
   context.refresh();
   resolver=new RequestHeaderMethodArgumentResolver(context.getBeanFactory());
-  Method method=getClass().getMethod("params",String.class,String[].class,String.class,String.class,Map.class);
+  Method method=ReflectionUtils.findMethod(getClass(),"params",(Class<?>[])null);
   paramNamedDefaultValueStringHeader=new SynthesizingMethodParameter(method,0);
   paramNamedValueStringArray=new SynthesizingMethodParameter(method,1);
   paramSystemProperty=new SynthesizingMethodParameter(method,2);
   paramContextPath=new SynthesizingMethodParameter(method,3);
-  paramNamedValueMap=new SynthesizingMethodParameter(method,4);
+  paramResolvedName=new SynthesizingMethodParameter(method,4);
+  paramNamedValueMap=new SynthesizingMethodParameter(method,5);
   servletRequest=new MockHttpServletRequest();
   webRequest=new ServletWebRequest(servletRequest,new MockHttpServletResponse());
   RequestContextHolder.setRequestAttributes(webRequest);
