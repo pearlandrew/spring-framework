@@ -1,14 +1,12 @@
 {
   String businessHoursCronExpression="0 0 9-17 * * MON-FRI";
   BeanDefinition processorDefinition=new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
-  BeanDefinition placeholderDefinition=new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
-  Properties properties=new Properties();
-  properties.setProperty("schedules.businessHours",businessHoursCronExpression);
-  placeholderDefinition.getPropertyValues().addPropertyValue("properties",properties);
-  BeanDefinition targetDefinition=new RootBeanDefinition(PropertyPlaceholderWithCronTestBean.class);
+  BeanDefinition targetDefinition=new RootBeanDefinition(ExpressionWithCronTestBean.class);
   context.registerBeanDefinition("postProcessor",processorDefinition);
-  context.registerBeanDefinition("placeholder",placeholderDefinition);
   context.registerBeanDefinition("target",targetDefinition);
+  Map<String,String> schedules=new HashMap<String,String>();
+  schedules.put("businessHours",businessHoursCronExpression);
+  context.getBeanFactory().registerSingleton("schedules",schedules);
   context.refresh();
   Object postProcessor=context.getBean("postProcessor");
   Object target=context.getBean("target");
