@@ -7,50 +7,50 @@
     String name=prop.merge(opElement,parserContext.getReaderContext());
     TypedStringValue nameHolder=new TypedStringValue(name);
     nameHolder.setSource(parserContext.extractSource(opElement));
-    CacheableOperation op=prop.merge(opElement,parserContext.getReaderContext(),new CacheableOperation());
-    op.setUnless(getAttributeValue(opElement,"unless",""));
-    op.setSync(Boolean.valueOf(getAttributeValue(opElement,"sync","false")));
+    CacheableOperation.Builder builder=prop.merge(opElement,parserContext.getReaderContext(),new CacheableOperation.Builder());
+    builder.setUnless(getAttributeValue(opElement,"unless",""));
+    builder.setSync(Boolean.valueOf(getAttributeValue(opElement,"sync","false")));
     Collection<CacheOperation> col=cacheOpMap.get(nameHolder);
     if (col == null) {
       col=new ArrayList<CacheOperation>(2);
       cacheOpMap.put(nameHolder,col);
     }
-    col.add(op);
+    col.add(builder.build());
   }
   List<Element> evictCacheMethods=DomUtils.getChildElementsByTagName(definition,CACHE_EVICT_ELEMENT);
   for (  Element opElement : evictCacheMethods) {
     String name=prop.merge(opElement,parserContext.getReaderContext());
     TypedStringValue nameHolder=new TypedStringValue(name);
     nameHolder.setSource(parserContext.extractSource(opElement));
-    CacheEvictOperation op=prop.merge(opElement,parserContext.getReaderContext(),new CacheEvictOperation());
+    CacheEvictOperation.Builder builder=prop.merge(opElement,parserContext.getReaderContext(),new CacheEvictOperation.Builder());
     String wide=opElement.getAttribute("all-entries");
     if (StringUtils.hasText(wide)) {
-      op.setCacheWide(Boolean.valueOf(wide.trim()));
+      builder.setCacheWide(Boolean.valueOf(wide.trim()));
     }
     String after=opElement.getAttribute("before-invocation");
     if (StringUtils.hasText(after)) {
-      op.setBeforeInvocation(Boolean.valueOf(after.trim()));
+      builder.setBeforeInvocation(Boolean.valueOf(after.trim()));
     }
     Collection<CacheOperation> col=cacheOpMap.get(nameHolder);
     if (col == null) {
       col=new ArrayList<CacheOperation>(2);
       cacheOpMap.put(nameHolder,col);
     }
-    col.add(op);
+    col.add(builder.build());
   }
   List<Element> putCacheMethods=DomUtils.getChildElementsByTagName(definition,CACHE_PUT_ELEMENT);
   for (  Element opElement : putCacheMethods) {
     String name=prop.merge(opElement,parserContext.getReaderContext());
     TypedStringValue nameHolder=new TypedStringValue(name);
     nameHolder.setSource(parserContext.extractSource(opElement));
-    CachePutOperation op=prop.merge(opElement,parserContext.getReaderContext(),new CachePutOperation());
-    op.setUnless(getAttributeValue(opElement,"unless",""));
+    CachePutOperation.Builder builder=prop.merge(opElement,parserContext.getReaderContext(),new CachePutOperation.Builder());
+    builder.setUnless(getAttributeValue(opElement,"unless",""));
     Collection<CacheOperation> col=cacheOpMap.get(nameHolder);
     if (col == null) {
       col=new ArrayList<CacheOperation>(2);
       cacheOpMap.put(nameHolder,col);
     }
-    col.add(op);
+    col.add(builder.build());
   }
   RootBeanDefinition attributeSourceDefinition=new RootBeanDefinition(NameMatchCacheOperationSource.class);
   attributeSourceDefinition.setSource(parserContext.extractSource(definition));
