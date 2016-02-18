@@ -1,14 +1,20 @@
 {
-  Class<?> paramType=parameter.getParameterType();
-  if (!paramType.isAssignableFrom(message.getClass())) {
+  Class<?> targetMessageType=parameter.getParameterType();
+  Class<?> targetPayloadType=getPayloadType(parameter);
+  if (!targetMessageType.isAssignableFrom(message.getClass())) {
     String actual=ClassUtils.getQualifiedName(message.getClass());
-    String expected=ClassUtils.getQualifiedName(paramType);
+    String expected=ClassUtils.getQualifiedName(targetMessageType);
     throw new MethodArgumentTypeMismatchException(message,parameter,"The actual message type " + "[" + actual + "] does not match the expected type ["+ expected+ "]");
   }
-  Class<?> targetPayloadType=getPayloadType(parameter);
   Object payload=message.getPayload();
-  if (payload != null && !targetPayloadType.isInstance(payload)) {
-    throw new MethodArgumentTypeMismatchException(message,parameter,"The expected Message<?> payload type [" + ClassUtils.getQualifiedName(targetPayloadType) + "] does not match the actual payload type ["+ ClassUtils.getQualifiedName(payload.getClass())+ "]");
+  if (payload == null || targetPayloadType.isInstance(payload)) {
+    return message;
   }
-  return message;
+  if (isEmptyPayload(payload)) {
+    String actual=ClassUtils.getQualifiedName(payload.getClass());
+    String expected=ClassUtils.getQualifiedName(targetPayloadType);
+    throw new MessageConversionException(message,"Cannot convert from the " + "expected payload type [" + expected + "] to the "+ "actual payload type ["+ actual+ "] when the payload is empty.");
+  }
+  payload=convertPayload(message,parameter,targetPayloadType);
+  return MessageBuilder.createMessage(payload,message.getHeaders());
 }
