@@ -7,13 +7,12 @@
   RootBeanDefinition bd=new RootBeanDefinition(MapConstructorInjectionBean.class);
   bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
   bf.registerBeanDefinition("annotatedBean",bd);
-  Map<String,TestBean> tbm=new LinkedHashMap<String,TestBean>();
-  tbm.put("testBean1",new TestBean("tb1"));
-  tbm.put("testBean2",new TestBean("tb2"));
-  bf.registerSingleton("testBeans",tbm);
-  bf.registerSingleton("otherMap",new Properties());
+  RootBeanDefinition tbm=new RootBeanDefinition(CollectionFactoryMethods.class);
+  tbm.setUniqueFactoryMethodName("testBeanMap");
+  bf.registerBeanDefinition("myTestBeanMap",tbm);
+  bf.registerSingleton("otherMap",new HashMap<Object,Object>());
   MapConstructorInjectionBean bean=(MapConstructorInjectionBean)bf.getBean("annotatedBean");
-  assertSame(tbm,bean.getTestBeanMap());
+  assertSame(bf.getBean("myTestBeanMap"),bean.getTestBeanMap());
   bean=(MapConstructorInjectionBean)bf.getBean("annotatedBean");
-  assertSame(tbm,bean.getTestBeanMap());
+  assertSame(bf.getBean("myTestBeanMap"),bean.getTestBeanMap());
 }
