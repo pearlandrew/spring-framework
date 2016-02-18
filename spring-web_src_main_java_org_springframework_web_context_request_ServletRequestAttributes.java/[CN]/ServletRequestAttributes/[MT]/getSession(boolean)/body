@@ -1,11 +1,20 @@
 {
   if (isRequestActive()) {
-    return this.request.getSession(allowCreate);
+    HttpSession session=this.request.getSession(allowCreate);
+    this.session=session;
+    return session;
   }
  else {
-    if (this.session == null && allowCreate) {
-      throw new IllegalStateException("No session found and request already completed - cannot create new session!");
+    HttpSession session=this.session;
+    if (session == null) {
+      if (allowCreate) {
+        throw new IllegalStateException("No session found and request already completed - cannot create new session!");
+      }
+ else {
+        session=this.request.getSession(false);
+        this.session=session;
+      }
     }
-    return this.session;
+    return session;
   }
 }

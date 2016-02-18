@@ -1,27 +1,29 @@
 {
-  this.session=this.request.getPortletSession(false);
-  if (this.session != null) {
-    try {
-      for (      Map.Entry<String,Object> entry : this.sessionAttributesToUpdate.entrySet()) {
-        String name=entry.getKey();
-        Object newValue=entry.getValue();
-        Object oldValue=this.session.getAttribute(name);
-        if (oldValue == newValue) {
-          this.session.setAttribute(name,newValue);
+  if (!this.sessionAttributesToUpdate.isEmpty() || !this.globalSessionAttributesToUpdate.isEmpty()) {
+    PortletSession session=getSession(false);
+    if (session != null) {
+      try {
+        for (        Map.Entry<String,Object> entry : this.sessionAttributesToUpdate.entrySet()) {
+          String name=entry.getKey();
+          Object newValue=entry.getValue();
+          Object oldValue=session.getAttribute(name);
+          if (oldValue == newValue) {
+            session.setAttribute(name,newValue);
+          }
+        }
+        for (        Map.Entry<String,Object> entry : this.globalSessionAttributesToUpdate.entrySet()) {
+          String name=entry.getKey();
+          Object newValue=entry.getValue();
+          Object oldValue=session.getAttribute(name,PortletSession.APPLICATION_SCOPE);
+          if (oldValue == newValue) {
+            session.setAttribute(name,newValue,PortletSession.APPLICATION_SCOPE);
+          }
         }
       }
-      for (      Map.Entry<String,Object> entry : this.globalSessionAttributesToUpdate.entrySet()) {
-        String name=entry.getKey();
-        Object newValue=entry.getValue();
-        Object oldValue=this.session.getAttribute(name,PortletSession.APPLICATION_SCOPE);
-        if (oldValue == newValue) {
-          this.session.setAttribute(name,newValue,PortletSession.APPLICATION_SCOPE);
-        }
+ catch (      IllegalStateException ex) {
       }
     }
- catch (    IllegalStateException ex) {
-    }
+    this.sessionAttributesToUpdate.clear();
+    this.globalSessionAttributesToUpdate.clear();
   }
-  this.sessionAttributesToUpdate.clear();
-  this.globalSessionAttributesToUpdate.clear();
 }

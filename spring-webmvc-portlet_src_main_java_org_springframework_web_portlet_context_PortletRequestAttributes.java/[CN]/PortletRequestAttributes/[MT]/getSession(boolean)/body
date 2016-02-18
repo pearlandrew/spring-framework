@@ -1,11 +1,20 @@
 {
   if (isRequestActive()) {
-    return this.request.getPortletSession(allowCreate);
+    PortletSession session=this.request.getPortletSession(allowCreate);
+    this.session=session;
+    return session;
   }
  else {
-    if (this.session == null && allowCreate) {
-      throw new IllegalStateException("No session found and request already completed - cannot create new session!");
+    PortletSession session=this.session;
+    if (session == null) {
+      if (allowCreate) {
+        throw new IllegalStateException("No session found and request already completed - cannot create new session!");
+      }
+ else {
+        session=this.request.getPortletSession(false);
+        this.session=session;
+      }
     }
-    return this.session;
+    return session;
   }
 }

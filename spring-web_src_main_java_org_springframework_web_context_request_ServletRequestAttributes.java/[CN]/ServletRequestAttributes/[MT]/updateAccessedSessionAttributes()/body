@@ -1,18 +1,20 @@
 {
-  this.session=this.request.getSession(false);
-  if (this.session != null) {
-    try {
-      for (      Map.Entry<String,Object> entry : this.sessionAttributesToUpdate.entrySet()) {
-        String name=entry.getKey();
-        Object newValue=entry.getValue();
-        Object oldValue=this.session.getAttribute(name);
-        if (oldValue == newValue && !isImmutableSessionAttribute(name,newValue)) {
-          this.session.setAttribute(name,newValue);
+  if (!this.sessionAttributesToUpdate.isEmpty()) {
+    HttpSession session=getSession(false);
+    if (session != null) {
+      try {
+        for (        Map.Entry<String,Object> entry : this.sessionAttributesToUpdate.entrySet()) {
+          String name=entry.getKey();
+          Object newValue=entry.getValue();
+          Object oldValue=session.getAttribute(name);
+          if (oldValue == newValue && !isImmutableSessionAttribute(name,newValue)) {
+            session.setAttribute(name,newValue);
+          }
         }
       }
+ catch (      IllegalStateException ex) {
+      }
     }
- catch (    IllegalStateException ex) {
-    }
+    this.sessionAttributesToUpdate.clear();
   }
-  this.sessionAttributesToUpdate.clear();
 }
