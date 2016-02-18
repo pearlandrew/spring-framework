@@ -7,10 +7,10 @@
     responseWrapper.copyBodyToResponse();
   }
  else   if (isEligibleForEtag(request,responseWrapper,statusCode,responseWrapper.getContentInputStream())) {
-    String responseETag=generateETagHeaderValue(responseWrapper.getContentInputStream());
+    String responseETag=generateETagHeaderValue(responseWrapper.getContentInputStream(),this.writeWeakETag);
     rawResponse.setHeader(HEADER_ETAG,responseETag);
     String requestETag=request.getHeader(HEADER_IF_NONE_MATCH);
-    if (responseETag.equals(requestETag)) {
+    if (requestETag != null && (responseETag.equals(requestETag) || responseETag.replaceFirst("^W/","").equals(requestETag.replaceFirst("^W/","")) || "*".equals(requestETag))) {
       if (logger.isTraceEnabled()) {
         logger.trace("ETag [" + responseETag + "] equal to If-None-Match, sending 304");
       }
