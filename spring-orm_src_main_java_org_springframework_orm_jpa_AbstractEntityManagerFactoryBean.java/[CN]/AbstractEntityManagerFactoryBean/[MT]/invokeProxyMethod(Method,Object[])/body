@@ -6,6 +6,18 @@
     EntityManager rawEntityManager=(args.length > 1 ? getNativeEntityManagerFactory().createEntityManager((Map<?,?>)args[1]) : getNativeEntityManagerFactory().createEntityManager());
     return ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager,this,true);
   }
+  if (args != null) {
+    for (int i=0; i < args.length; i++) {
+      Object arg=args[i];
+      if (arg instanceof Query && Proxy.isProxyClass(arg.getClass())) {
+        try {
+          args[i]=((Query)arg).unwrap(null);
+        }
+ catch (        RuntimeException ex) {
+        }
+      }
+    }
+  }
   Object retVal=method.invoke(getNativeEntityManagerFactory(),args);
   if (retVal instanceof EntityManager) {
     EntityManager rawEntityManager=(EntityManager)retVal;

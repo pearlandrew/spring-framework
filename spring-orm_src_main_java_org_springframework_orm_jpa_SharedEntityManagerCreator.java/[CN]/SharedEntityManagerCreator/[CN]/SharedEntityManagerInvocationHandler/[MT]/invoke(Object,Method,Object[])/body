@@ -21,7 +21,7 @@
   }
  else   if (method.getName().equals("unwrap")) {
     Class<?> targetClass=(Class<?>)args[0];
-    if (targetClass == null || targetClass.isInstance(proxy)) {
+    if (targetClass != null && targetClass.isInstance(proxy)) {
       return proxy;
     }
   }
@@ -42,6 +42,10 @@
     return target;
   }
  else   if (method.getName().equals("unwrap")) {
+    Class<?> targetClass=(Class<?>)args[0];
+    if (targetClass == null) {
+      return (target != null ? target : proxy);
+    }
     if (target == null) {
       throw new IllegalStateException("No transactional EntityManager available");
     }
