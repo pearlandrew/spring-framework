@@ -28,7 +28,12 @@
           stmt.execute(statement);
           int rowsAffected=stmt.getUpdateCount();
           if (logger.isDebugEnabled()) {
-            logger.debug(rowsAffected + " returned as updateCount for SQL: " + statement);
+            logger.debug(rowsAffected + " returned as update count for SQL: " + statement);
+            SQLWarning warningToLog=stmt.getWarnings();
+            while (warningToLog != null) {
+              logger.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() + "', error code '"+ warningToLog.getErrorCode()+ "', message ["+ warningToLog.getMessage()+ "]");
+              warningToLog=warningToLog.getNextWarning();
+            }
           }
         }
  catch (        SQLException ex) {
