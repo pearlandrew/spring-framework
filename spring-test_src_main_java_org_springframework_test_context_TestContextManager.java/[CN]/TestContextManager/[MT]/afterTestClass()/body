@@ -4,19 +4,21 @@
     logger.trace("afterTestClass(): class [" + testClass.getName() + "]");
   }
   getTestContext().updateState(null,null,null);
-  Exception afterTestClassException=null;
+  Throwable afterTestClassException=null;
   for (  TestExecutionListener testExecutionListener : getReversedTestExecutionListeners()) {
     try {
       testExecutionListener.afterTestClass(getTestContext());
     }
- catch (    Exception ex) {
-      logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener + "] to process 'after class' callback for test class ["+ testClass+ "]",ex);
-      if (afterTestClassException == null) {
-        afterTestClassException=ex;
+ catch (    Throwable ex) {
+      if (logger.isWarnEnabled()) {
+        logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener + "] to process 'after class' callback for test class ["+ testClass+ "]",ex);
+        if (afterTestClassException == null) {
+          afterTestClassException=ex;
+        }
       }
     }
   }
   if (afterTestClassException != null) {
-    throw afterTestClassException;
+    ReflectionUtils.rethrowException(afterTestClassException);
   }
 }

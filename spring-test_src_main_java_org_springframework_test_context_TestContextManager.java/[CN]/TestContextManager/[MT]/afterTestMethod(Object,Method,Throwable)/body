@@ -4,19 +4,21 @@
     logger.trace("afterTestMethod(): instance [" + testInstance + "], method ["+ testMethod+ "], exception ["+ exception+ "]");
   }
   getTestContext().updateState(testInstance,testMethod,exception);
-  Exception afterTestMethodException=null;
+  Throwable afterTestMethodException=null;
   for (  TestExecutionListener testExecutionListener : getReversedTestExecutionListeners()) {
     try {
       testExecutionListener.afterTestMethod(getTestContext());
     }
- catch (    Exception ex) {
-      logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener + "] to process 'after' execution for test: method ["+ testMethod+ "], instance ["+ testInstance+ "], exception ["+ exception+ "]",ex);
+ catch (    Throwable ex) {
+      if (logger.isWarnEnabled()) {
+        logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener + "] to process 'after' execution for test: method ["+ testMethod+ "], instance ["+ testInstance+ "], exception ["+ exception+ "]",ex);
+      }
       if (afterTestMethodException == null) {
         afterTestMethodException=ex;
       }
     }
   }
   if (afterTestMethodException != null) {
-    throw afterTestMethodException;
+    ReflectionUtils.rethrowException(afterTestMethodException);
   }
 }
