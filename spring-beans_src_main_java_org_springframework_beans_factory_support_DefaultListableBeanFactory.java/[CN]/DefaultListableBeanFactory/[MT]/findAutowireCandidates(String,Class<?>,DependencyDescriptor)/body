@@ -13,20 +13,20 @@
   }
   for (  String candidateName : candidateNames) {
     if (!isSelfReference(beanName,candidateName) && isAutowireCandidate(candidateName,descriptor)) {
-      result.put(candidateName,getBean(candidateName));
+      result.put(candidateName,descriptor.resolveCandidate(candidateName,this));
     }
   }
   if (result.isEmpty() && !indicatesMultipleBeans(requiredType)) {
     DependencyDescriptor fallbackDescriptor=descriptor.forFallbackMatch();
     for (    String candidateName : candidateNames) {
       if (!isSelfReference(beanName,candidateName) && isAutowireCandidate(candidateName,fallbackDescriptor)) {
-        result.put(candidateName,getBean(candidateName));
+        result.put(candidateName,descriptor.resolveCandidate(candidateName,this));
       }
     }
     if (result.isEmpty()) {
       for (      String candidateName : candidateNames) {
         if (isSelfReference(beanName,candidateName) && isAutowireCandidate(candidateName,fallbackDescriptor)) {
-          result.put(candidateName,getBean(candidateName));
+          result.put(candidateName,descriptor.resolveCandidate(candidateName,this));
         }
       }
     }
