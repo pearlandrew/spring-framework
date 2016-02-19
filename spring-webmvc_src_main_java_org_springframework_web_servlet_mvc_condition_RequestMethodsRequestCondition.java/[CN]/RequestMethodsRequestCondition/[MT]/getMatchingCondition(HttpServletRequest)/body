@@ -1,17 +1,12 @@
 {
-  RequestMethod requestMethod=getRequestMethod(request);
-  if (this.methods.isEmpty()) {
-    return (RequestMethod.OPTIONS.equals(requestMethod) ? null : this);
+  if (CorsUtils.isPreFlightRequest(request)) {
+    return matchPreFlight(request);
   }
-  if (requestMethod != null) {
-    for (    RequestMethod method : this.methods) {
-      if (method.equals(requestMethod)) {
-        return new RequestMethodsRequestCondition(method);
-      }
+  if (getMethods().isEmpty()) {
+    if (RequestMethod.OPTIONS.name().equals(request.getMethod())) {
+      return null;
     }
-    if (RequestMethod.HEAD.equals(requestMethod) && getMethods().contains(RequestMethod.GET)) {
-      return HEAD_CONDITION;
-    }
+    return this;
   }
-  return null;
+  return matchRequestMethod(request.getMethod());
 }
