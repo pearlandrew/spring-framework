@@ -3,15 +3,15 @@
   bf.registerBeanDefinition("testBean",genericBeanDefinition(TestBean.class).addPropertyValue("name","${my.name}").getBeanDefinition());
   MutablePropertySources propertySources=new MutablePropertySources();
   propertySources.addLast(new MockPropertySource());
-  PropertySourcesPlaceholderConfigurer pc=new PropertySourcesPlaceholderConfigurer();
-  pc.setPropertySources(propertySources);
-  pc.setProperties(new Properties(){
+  PropertySourcesPlaceholderConfigurer ppc=new PropertySourcesPlaceholderConfigurer();
+  ppc.setPropertySources(propertySources);
+  ppc.setProperties(new Properties(){
 {
       put("my.name","local");
     }
   }
 );
-  pc.setIgnoreUnresolvablePlaceholders(true);
-  pc.postProcessBeanFactory(bf);
+  ppc.setIgnoreUnresolvablePlaceholders(true);
+  ppc.postProcessBeanFactory(bf);
   assertThat(bf.getBean(TestBean.class).getName(),equalTo("${my.name}"));
 }

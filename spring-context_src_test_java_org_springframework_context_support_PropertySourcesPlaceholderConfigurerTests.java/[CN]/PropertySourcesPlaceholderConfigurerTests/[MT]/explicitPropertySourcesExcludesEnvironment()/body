@@ -3,11 +3,11 @@
   bf.registerBeanDefinition("testBean",genericBeanDefinition(TestBean.class).addPropertyValue("name","${my.name}").getBeanDefinition());
   MutablePropertySources propertySources=new MutablePropertySources();
   propertySources.addLast(new MockPropertySource());
-  PropertySourcesPlaceholderConfigurer pc=new PropertySourcesPlaceholderConfigurer();
-  pc.setPropertySources(propertySources);
-  pc.setEnvironment(new MockEnvironment().withProperty("my.name","env"));
-  pc.setIgnoreUnresolvablePlaceholders(true);
-  pc.postProcessBeanFactory(bf);
+  PropertySourcesPlaceholderConfigurer ppc=new PropertySourcesPlaceholderConfigurer();
+  ppc.setPropertySources(propertySources);
+  ppc.setEnvironment(new MockEnvironment().withProperty("my.name","env"));
+  ppc.setIgnoreUnresolvablePlaceholders(true);
+  ppc.postProcessBeanFactory(bf);
   assertThat(bf.getBean(TestBean.class).getName(),equalTo("${my.name}"));
-  assertEquals(pc.getAppliedPropertySources().iterator().next(),propertySources.iterator().next());
+  assertEquals(ppc.getAppliedPropertySources().iterator().next(),propertySources.iterator().next());
 }
