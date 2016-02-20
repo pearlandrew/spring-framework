@@ -4,7 +4,9 @@
     if (!factoryClass.isAssignableFrom(instanceClass)) {
       throw new IllegalArgumentException("Class [" + instanceClassName + "] is not assignable to ["+ factoryClass.getName()+ "]");
     }
-    return (T)instanceClass.newInstance();
+    Constructor<?> constructor=instanceClass.getDeclaredConstructor();
+    ReflectionUtils.makeAccessible(constructor);
+    return (T)constructor.newInstance();
   }
  catch (  Throwable ex) {
     throw new IllegalArgumentException("Cannot instantiate factory class: " + factoryClass.getName(),ex);
