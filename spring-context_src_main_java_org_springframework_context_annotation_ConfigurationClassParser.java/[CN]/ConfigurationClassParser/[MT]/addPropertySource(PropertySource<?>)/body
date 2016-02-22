@@ -3,15 +3,16 @@
   MutablePropertySources propertySources=((ConfigurableEnvironment)this.environment).getPropertySources();
   if (propertySources.contains(name) && this.propertySourceNames.contains(name)) {
     PropertySource<?> existing=propertySources.get(name);
+    PropertySource<?> newSource=(propertySource instanceof ResourcePropertySource ? ((ResourcePropertySource)propertySource).withResourceName() : propertySource);
     if (existing instanceof CompositePropertySource) {
-      ((CompositePropertySource)existing).addFirstPropertySource(propertySource.withResourceName());
+      ((CompositePropertySource)existing).addFirstPropertySource(newSource);
     }
  else {
       if (existing instanceof ResourcePropertySource) {
         existing=((ResourcePropertySource)existing).withResourceName();
       }
       CompositePropertySource composite=new CompositePropertySource(name);
-      composite.addPropertySource(propertySource.withResourceName());
+      composite.addPropertySource(newSource);
       composite.addPropertySource(existing);
       propertySources.replace(name,composite);
     }
