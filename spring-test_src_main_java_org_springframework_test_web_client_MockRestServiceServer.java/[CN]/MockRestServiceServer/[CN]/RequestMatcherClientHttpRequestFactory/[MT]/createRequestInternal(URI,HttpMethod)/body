@@ -1,15 +1,14 @@
 {
   Assert.notNull(uri,"'uri' must not be null");
   Assert.notNull(httpMethod,"'httpMethod' must not be null");
-  if (this.requestIterator == null) {
-    this.requestIterator=MockRestServiceServer.this.expectedRequests.iterator();
+  MockAsyncClientHttpRequest request=new MockAsyncClientHttpRequest(httpMethod,uri){
+    @Override protected ClientHttpResponse executeInternal() throws IOException {
+      ClientHttpResponse response=validateRequest(this);
+      setResponse(response);
+      return response;
+    }
   }
-  if (!this.requestIterator.hasNext()) {
-    throw new AssertionError("No further requests expected: HTTP " + httpMethod + " "+ uri);
-  }
-  RequestMatcherClientHttpRequest request=this.requestIterator.next();
-  request.setURI(uri);
-  request.setMethod(httpMethod);
-  MockRestServiceServer.this.actualRequests.add(request);
+;
+  MockRestServiceServer.this.requests.add(request);
   return request;
 }
