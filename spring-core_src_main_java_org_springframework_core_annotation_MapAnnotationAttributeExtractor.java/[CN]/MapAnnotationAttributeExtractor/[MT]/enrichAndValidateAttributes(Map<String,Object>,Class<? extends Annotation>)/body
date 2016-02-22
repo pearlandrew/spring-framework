@@ -1,5 +1,5 @@
 {
-  Map<String,Object> attributes=new HashMap<String,Object>(originalAttributes);
+  Map<String,Object> attributes=new LinkedHashMap<String,Object>(originalAttributes);
   Map<String,List<String>> attributeAliasMap=getAttributeAliasMap(annotationType);
   for (  Method attributeMethod : getAttributeMethods(annotationType)) {
     String attributeName=attributeMethod.getName();
@@ -25,7 +25,7 @@
       }
     }
     if (attributeValue == null) {
-      throw new IllegalArgumentException(String.format("Attributes map [%s] returned null for required attribute [%s] defined by annotation type [%s].",attributes,attributeName,annotationType.getName()));
+      throw new IllegalArgumentException(String.format("Attributes map %s returned null for required attribute '%s' defined by annotation type [%s].",attributes,attributeName,annotationType.getName()));
     }
     Class<?> requiredReturnType=attributeMethod.getReturnType();
     Class<? extends Object> actualReturnType=attributeValue.getClass();
@@ -44,7 +44,7 @@
         converted=true;
       }
       if (!converted) {
-        throw new IllegalArgumentException(String.format("Attributes map [%s] returned a value of type [%s] for attribute [%s], " + "but a value of type [%s] is required as defined by annotation type [%s].",attributes,actualReturnType.getName(),attributeName,requiredReturnType.getName(),annotationType.getName()));
+        throw new IllegalArgumentException(String.format("Attributes map %s returned a value of type [%s] for attribute '%s', " + "but a value of type [%s] is required as defined by annotation type [%s].",attributes,actualReturnType.getName(),attributeName,requiredReturnType.getName(),annotationType.getName()));
       }
     }
   }
