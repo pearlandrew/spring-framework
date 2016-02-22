@@ -9,7 +9,11 @@
       return false;
     }
     @Override public Object getTarget(){
-      return beanFactory.doResolveDependency(descriptor,beanName,null,null);
+      Object target=beanFactory.doResolveDependency(descriptor,beanName,null,null);
+      if (target == null) {
+        throw new NoSuchBeanDefinitionException(descriptor.getDependencyType(),"Optional dependency not present for lazy injection point");
+      }
+      return target;
     }
     @Override public void releaseTarget(    Object target){
     }
