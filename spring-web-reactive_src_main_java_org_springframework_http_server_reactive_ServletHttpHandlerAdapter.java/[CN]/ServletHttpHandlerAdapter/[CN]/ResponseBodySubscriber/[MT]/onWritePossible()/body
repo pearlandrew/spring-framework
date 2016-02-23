@@ -1,13 +1,15 @@
 {
   ServletOutputStream output=this.synchronizer.getOutputStream();
   boolean ready=output.isReady();
-  logger.debug("Output: " + ready + " buffer: "+ (buffer == null));
+  logger.debug("Output: " + ready + " buffer: "+ (dataBuffer == null));
   if (ready) {
-    if (this.buffer != null) {
-      byte[] bytes=new byte[this.buffer.readableByteCount()];
-      this.buffer.read(bytes);
-      this.buffer=null;
-      output.write(bytes);
+    if (this.dataBuffer != null) {
+      InputStream in=this.dataBuffer.asInputStream();
+      byte[] buffer=new byte[BUFFER_SIZE];
+      int bytesRead;
+      while ((bytesRead=in.read(buffer)) != -1) {
+        output.write(buffer,0,bytesRead);
+      }
       if (!subscriberComplete) {
         this.subscription.request(1);
       }
