@@ -1,17 +1,9 @@
 {
-  if (getRequests().isEmpty()) {
-    getRemainingExpectations().addAll(getExpectations());
+  RequestExpectation expectation=this.remainingExpectations.findExpectation(request);
+  if (expectation != null) {
+    ClientHttpResponse response=expectation.createResponse(request);
+    this.remainingExpectations.update(expectation);
+    return response;
   }
-  for (  RequestExpectation expectation : getExpectations()) {
-    try {
-      expectation.match(request);
-      getRemainingExpectations().remove(expectation);
-      return expectation.createResponse(request);
-    }
- catch (    AssertionError error) {
-    }
-  }
-  HttpMethod method=request.getMethod();
-  URI uri=request.getURI();
-  throw new AssertionError("Unexpected request: HTTP " + method + " "+ uri);
+  throw createUnexpectedRequestError(request);
 }
