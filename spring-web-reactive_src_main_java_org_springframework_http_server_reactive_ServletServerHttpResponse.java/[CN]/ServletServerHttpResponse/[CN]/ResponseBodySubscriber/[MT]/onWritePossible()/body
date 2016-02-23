@@ -1,0 +1,25 @@
+{
+  ServletOutputStream output=this.synchronizer.getOutputStream();
+  boolean ready=output.isReady();
+  logger.trace("onWritePossible. ready: " + ready + " buffer: "+ dataBuffer);
+  if (ready) {
+    if (this.dataBuffer != null) {
+      int toBeWritten=this.dataBuffer.readableByteCount();
+      InputStream input=this.dataBuffer.asInputStream();
+      int writeCount=write(input,output);
+      logger.trace("written: " + writeCount + " total: "+ toBeWritten);
+      if (writeCount == toBeWritten) {
+        this.dataBuffer=null;
+        if (!this.subscriberComplete) {
+          this.subscription.request(1);
+        }
+ else {
+          this.synchronizer.writeComplete();
+        }
+      }
+    }
+ else     if (this.subscription != null) {
+      this.subscription.request(1);
+    }
+  }
+}

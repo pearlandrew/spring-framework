@@ -1,0 +1,30 @@
+{
+  if (cancelled) {
+    return;
+  }
+  ServletInputStream input=this.synchronizer.getInputStream();
+  logger.trace("onDataAvailable: " + input);
+  while (true) {
+    logger.trace("Demand: " + this.demand);
+    if (!demand.hasDemand()) {
+      stalled=true;
+      break;
+    }
+    boolean ready=input.isReady();
+    logger.trace("Input ready: " + ready + " finished: "+ input.isFinished());
+    if (!ready) {
+      break;
+    }
+    int read=input.read(buffer);
+    logger.trace("Input read:" + read);
+    if (read == -1) {
+      break;
+    }
+ else     if (read > 0) {
+      this.demand.decrement();
+      DataBuffer dataBuffer=allocator.allocateBuffer(read);
+      dataBuffer.write(this.buffer,0,read);
+      this.subscriber.onNext(dataBuffer);
+    }
+  }
+}
