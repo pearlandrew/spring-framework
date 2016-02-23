@@ -1,0 +1,13 @@
+{
+  if (this.iterator == null) {
+    this.iterator=getExpectations().iterator();
+  }
+  if (!this.iterator.hasNext()) {
+    HttpMethod method=request.getMethod();
+    URI uri=request.getURI();
+    throw new AssertionError("No further requests expected: HTTP " + method + " "+ uri);
+  }
+  RequestExpectation expectation=this.iterator.next();
+  expectation.match(request);
+  return expectation.createResponse(request);
+}

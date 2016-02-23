@@ -1,0 +1,17 @@
+{
+  if (getRequests().isEmpty()) {
+    this.remainingExpectations.addAll(getExpectations());
+  }
+  for (  RequestExpectation expectation : getExpectations()) {
+    try {
+      expectation.match(request);
+      this.remainingExpectations.remove(expectation);
+      return expectation.createResponse(request);
+    }
+ catch (    AssertionError error) {
+    }
+  }
+  HttpMethod method=request.getMethod();
+  URI uri=request.getURI();
+  throw new AssertionError("Unexpected request: HTTP " + method + " "+ uri);
+}
