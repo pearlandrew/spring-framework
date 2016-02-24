@@ -1,0 +1,16 @@
+{
+  RequestExpectation expectation;
+  try {
+    expectation=next(request);
+    expectation.match(request);
+  }
+ catch (  AssertionError error) {
+    expectation=this.repeatExpectations.findExpectation(request);
+    if (expectation == null) {
+      throw error;
+    }
+  }
+  ClientHttpResponse response=expectation.createResponse(request);
+  this.repeatExpectations.update(expectation);
+  return response;
+}
