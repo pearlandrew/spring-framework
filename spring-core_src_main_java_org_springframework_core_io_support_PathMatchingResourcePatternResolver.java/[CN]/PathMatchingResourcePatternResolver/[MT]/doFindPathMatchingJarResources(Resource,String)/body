@@ -3,7 +3,7 @@
   JarFile jarFile;
   String jarFileUrl;
   String rootEntryPath;
-  boolean newJarFile=false;
+  boolean closeJarFile;
   if (con instanceof JarURLConnection) {
     JarURLConnection jarCon=(JarURLConnection)con;
     ResourceUtils.useCachesIfNecessary(jarCon);
@@ -11,6 +11,7 @@
     jarFileUrl=jarCon.getJarFileURL().toExternalForm();
     JarEntry jarEntry=jarCon.getJarEntry();
     rootEntryPath=(jarEntry != null ? jarEntry.getName() : "");
+    closeJarFile=!jarCon.getUseCaches();
   }
  else {
     String urlFile=rootDirResource.getURL().getFile();
@@ -26,7 +27,7 @@
         jarFileUrl=urlFile;
         rootEntryPath="";
       }
-      newJarFile=true;
+      closeJarFile=true;
     }
  catch (    ZipException ex) {
       if (logger.isDebugEnabled()) {
@@ -56,7 +57,7 @@
     return result;
   }
   finally {
-    if (newJarFile) {
+    if (closeJarFile) {
       jarFile.close();
     }
   }
