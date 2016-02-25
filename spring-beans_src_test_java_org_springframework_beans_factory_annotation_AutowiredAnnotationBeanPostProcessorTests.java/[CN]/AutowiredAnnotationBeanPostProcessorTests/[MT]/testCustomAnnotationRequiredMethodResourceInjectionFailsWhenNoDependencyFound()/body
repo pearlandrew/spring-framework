@@ -9,9 +9,10 @@
   bf.registerBeanDefinition("customBean",new RootBeanDefinition(CustomAnnotationRequiredMethodResourceInjectionBean.class));
   try {
     bf.getBean("customBean");
-    fail("expected BeanCreationException; no dependency available for required method");
+    fail("Should have thrown UnsatisfiedDependencyException");
   }
- catch (  BeanCreationException e) {
+ catch (  UnsatisfiedDependencyException ex) {
+    assertSame(CustomAnnotationRequiredMethodResourceInjectionBean.class,ex.getInjectionPoint().getMethodParameter().getDeclaringClass());
   }
   bf.destroySingletons();
 }

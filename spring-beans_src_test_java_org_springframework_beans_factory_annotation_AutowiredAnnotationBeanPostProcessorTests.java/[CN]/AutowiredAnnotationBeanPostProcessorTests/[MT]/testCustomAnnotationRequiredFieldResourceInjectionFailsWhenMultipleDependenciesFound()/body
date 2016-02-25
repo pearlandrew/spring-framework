@@ -13,9 +13,11 @@
   bf.registerSingleton("testBean2",tb2);
   try {
     bf.getBean("customBean");
-    fail("expected BeanCreationException; multiple beans of dependency type available");
+    fail("Should have thrown UnsatisfiedDependencyException");
   }
- catch (  BeanCreationException ex) {
+ catch (  UnsatisfiedDependencyException ex) {
+    ex.printStackTrace();
+    assertSame(CustomAnnotationRequiredFieldResourceInjectionBean.class,ex.getInjectionPoint().getField().getDeclaringClass());
   }
   bf.destroySingletons();
 }

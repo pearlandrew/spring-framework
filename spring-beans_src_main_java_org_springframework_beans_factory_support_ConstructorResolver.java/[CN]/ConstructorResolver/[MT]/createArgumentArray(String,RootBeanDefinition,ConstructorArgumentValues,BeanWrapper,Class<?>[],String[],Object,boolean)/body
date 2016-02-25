@@ -1,5 +1,4 @@
 {
-  String methodType=(methodOrCtor instanceof Constructor ? "constructor" : "factory method");
   TypeConverter converter=(this.beanFactory.getCustomTypeConverter() != null ? this.beanFactory.getCustomTypeConverter() : bw);
   ArgumentsHolder args=new ArgumentsHolder(paramTypes.length);
   Set<ConstructorArgumentValues.ValueHolder> usedValueHolders=new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
@@ -22,39 +21,40 @@
  else {
         ConstructorArgumentValues.ValueHolder sourceHolder=(ConstructorArgumentValues.ValueHolder)valueHolder.getSource();
         Object sourceValue=sourceHolder.getValue();
+        MethodParameter methodParam=MethodParameter.forMethodOrConstructor(methodOrCtor,paramIndex);
         try {
-          convertedValue=converter.convertIfNecessary(originalValue,paramType,MethodParameter.forMethodOrConstructor(methodOrCtor,paramIndex));
+          convertedValue=converter.convertIfNecessary(originalValue,paramType,methodParam);
           args.resolveNecessary=true;
           args.preparedArguments[paramIndex]=sourceValue;
         }
  catch (        TypeMismatchException ex) {
-          throw new UnsatisfiedDependencyException(mbd.getResourceDescription(),beanName,paramIndex,paramType,"Could not convert " + methodType + " argument value of type ["+ ObjectUtils.nullSafeClassName(valueHolder.getValue())+ "] to required type ["+ paramType.getName()+ "]: "+ ex.getMessage());
+          throw new UnsatisfiedDependencyException(mbd.getResourceDescription(),beanName,new InjectionPoint(methodParam),"Could not convert argument value of type [" + ObjectUtils.nullSafeClassName(valueHolder.getValue()) + "] to required type ["+ paramType.getName()+ "]: "+ ex.getMessage());
         }
       }
       args.arguments[paramIndex]=convertedValue;
       args.rawArguments[paramIndex]=originalValue;
     }
  else {
+      MethodParameter methodParam=MethodParameter.forMethodOrConstructor(methodOrCtor,paramIndex);
       if (!autowiring) {
-        throw new UnsatisfiedDependencyException(mbd.getResourceDescription(),beanName,paramIndex,paramType,"Ambiguous " + methodType + " argument types - "+ "did you specify the correct bean references as "+ methodType+ " arguments?");
+        throw new UnsatisfiedDependencyException(mbd.getResourceDescription(),beanName,new InjectionPoint(methodParam),"Ambiguous argument values for parameter of type [" + paramType.getName() + "] - did you specify the correct bean references as arguments?");
       }
       try {
-        MethodParameter param=MethodParameter.forMethodOrConstructor(methodOrCtor,paramIndex);
-        Object autowiredArgument=resolveAutowiredArgument(param,beanName,autowiredBeanNames,converter);
+        Object autowiredArgument=resolveAutowiredArgument(methodParam,beanName,autowiredBeanNames,converter);
         args.rawArguments[paramIndex]=autowiredArgument;
         args.arguments[paramIndex]=autowiredArgument;
         args.preparedArguments[paramIndex]=new AutowiredArgumentMarker();
         args.resolveNecessary=true;
       }
  catch (      BeansException ex) {
-        throw new UnsatisfiedDependencyException(mbd.getResourceDescription(),beanName,paramIndex,paramType,ex);
+        throw new UnsatisfiedDependencyException(mbd.getResourceDescription(),beanName,new InjectionPoint(methodParam),ex);
       }
     }
   }
   for (  String autowiredBeanName : autowiredBeanNames) {
     this.beanFactory.registerDependentBean(autowiredBeanName,beanName);
     if (this.beanFactory.logger.isDebugEnabled()) {
-      this.beanFactory.logger.debug("Autowiring by type from bean name '" + beanName + "' via "+ methodType+ " to bean named '"+ autowiredBeanName+ "'");
+      this.beanFactory.logger.debug("Autowiring by type from bean name '" + beanName + "' via "+ (methodOrCtor instanceof Constructor ? "constructor" : "factory method")+ " to bean named '"+ autowiredBeanName+ "'");
     }
   }
   return args;

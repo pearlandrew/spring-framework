@@ -1,43 +1,43 @@
 {
   Field field=(Field)this.member;
-  try {
-    Object value;
-    if (this.cached) {
-      value=resolvedCachedArgument(beanName,this.cachedFieldValue);
-    }
+  Object value;
+  if (this.cached) {
+    value=resolvedCachedArgument(beanName,this.cachedFieldValue);
+  }
  else {
-      DependencyDescriptor desc=new DependencyDescriptor(field,this.required);
-      desc.setContainingClass(bean.getClass());
-      Set<String> autowiredBeanNames=new LinkedHashSet<String>(1);
-      TypeConverter typeConverter=beanFactory.getTypeConverter();
+    DependencyDescriptor desc=new DependencyDescriptor(field,this.required);
+    desc.setContainingClass(bean.getClass());
+    Set<String> autowiredBeanNames=new LinkedHashSet<String>(1);
+    TypeConverter typeConverter=beanFactory.getTypeConverter();
+    try {
       value=beanFactory.resolveDependency(desc,beanName,autowiredBeanNames,typeConverter);
+    }
+ catch (    BeansException ex) {
+      throw new UnsatisfiedDependencyException(null,beanName,new InjectionPoint(field),ex);
+    }
 synchronized (this) {
-        if (!this.cached) {
-          if (value != null || this.required) {
-            this.cachedFieldValue=desc;
-            registerDependentBeans(beanName,autowiredBeanNames);
-            if (autowiredBeanNames.size() == 1) {
-              String autowiredBeanName=autowiredBeanNames.iterator().next();
-              if (beanFactory.containsBean(autowiredBeanName)) {
-                if (beanFactory.isTypeMatch(autowiredBeanName,field.getType())) {
-                  this.cachedFieldValue=new RuntimeBeanReference(autowiredBeanName);
-                }
+      if (!this.cached) {
+        if (value != null || this.required) {
+          this.cachedFieldValue=desc;
+          registerDependentBeans(beanName,autowiredBeanNames);
+          if (autowiredBeanNames.size() == 1) {
+            String autowiredBeanName=autowiredBeanNames.iterator().next();
+            if (beanFactory.containsBean(autowiredBeanName)) {
+              if (beanFactory.isTypeMatch(autowiredBeanName,field.getType())) {
+                this.cachedFieldValue=new RuntimeBeanReference(autowiredBeanName);
               }
             }
           }
- else {
-            this.cachedFieldValue=null;
-          }
-          this.cached=true;
         }
+ else {
+          this.cachedFieldValue=null;
+        }
+        this.cached=true;
       }
     }
-    if (value != null) {
-      ReflectionUtils.makeAccessible(field);
-      field.set(bean,value);
-    }
   }
- catch (  Throwable ex) {
-    throw new BeanCreationException("Could not autowire field: " + field,ex);
+  if (value != null) {
+    ReflectionUtils.makeAccessible(field);
+    field.set(bean,value);
   }
 }
