@@ -23,10 +23,11 @@
       break;
     }
   }
-  if (requireLocationsClassesOrInitializers && areAllEmpty(locations,classes,initializers)) {
-    throw new IllegalStateException(String.format("%s was unable to detect defaults, and no ApplicationContextInitializers " + "were declared for context configuration attributes %s",contextLoader.getClass().getSimpleName(),configAttributesList));
+  Set<ContextCustomizer> contextCustomizers=getContextCustomizers(testClass,Collections.unmodifiableList(configAttributesList));
+  if (requireLocationsClassesOrInitializers && areAllEmpty(locations,classes,initializers,contextCustomizers)) {
+    throw new IllegalStateException(String.format("%s was unable to detect defaults, and no ApplicationContextInitializers " + "or ContextCustomizers were declared for context configuration attributes %s",contextLoader.getClass().getSimpleName(),configAttributesList));
   }
   MergedTestPropertySources mergedTestPropertySources=TestPropertySourceUtils.buildMergedTestPropertySources(testClass);
-  MergedContextConfiguration mergedConfig=new MergedContextConfiguration(testClass,StringUtils.toStringArray(locations),ClassUtils.toClassArray(classes),ApplicationContextInitializerUtils.resolveInitializerClasses(configAttributesList),ActiveProfilesUtils.resolveActiveProfiles(testClass),mergedTestPropertySources.getLocations(),mergedTestPropertySources.getProperties(),contextLoader,cacheAwareContextLoaderDelegate,parentConfig);
+  MergedContextConfiguration mergedConfig=new MergedContextConfiguration(testClass,StringUtils.toStringArray(locations),ClassUtils.toClassArray(classes),ApplicationContextInitializerUtils.resolveInitializerClasses(configAttributesList),ActiveProfilesUtils.resolveActiveProfiles(testClass),mergedTestPropertySources.getLocations(),mergedTestPropertySources.getProperties(),contextCustomizers,contextLoader,cacheAwareContextLoaderDelegate,parentConfig);
   return processMergedContextConfiguration(mergedConfig);
 }
