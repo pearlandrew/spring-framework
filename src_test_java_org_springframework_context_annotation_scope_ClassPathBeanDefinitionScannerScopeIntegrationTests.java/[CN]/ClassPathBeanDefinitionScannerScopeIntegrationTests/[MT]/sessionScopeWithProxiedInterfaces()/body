@@ -1,10 +1,9 @@
 {
   RequestContextHolder.setRequestAttributes(oldRequestAttributesWithSession);
-  ApplicationContext context=createContext(ScopedProxyMode.TARGET_CLASS);
+  ApplicationContext context=createContext(INTERFACES);
   IScopedTestBean bean=(IScopedTestBean)context.getBean("session");
-  assertTrue(AopUtils.isCglibProxy(bean));
-  assertTrue(bean instanceof ScopedTestBean);
-  assertTrue(bean instanceof SessionScopedTestBean);
+  assertTrue(AopUtils.isJdkDynamicProxy(bean));
+  assertTrue(bean instanceof AnotherScopeTestInterface);
   assertEquals(DEFAULT_NAME,bean.getName());
   bean.setName(MODIFIED_NAME);
   RequestContextHolder.setRequestAttributes(newRequestAttributesWithSession);
