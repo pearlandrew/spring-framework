@@ -5,14 +5,21 @@
       etag=addEtagPadding(etag);
       this.notModified=isEtagNotModified(etag) && isTimestampNotModified(lastModifiedTimestamp);
       if (response != null) {
-        if (this.notModified && supportsNotModifiedStatus()) {
-          response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+        if (supportsNotModifiedStatus()) {
+          if (this.notModified) {
+            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+          }
+          if (isHeaderAbsent(response,HEADER_ETAG)) {
+            response.setHeader(HEADER_ETAG,etag);
+          }
+          if (isHeaderAbsent(response,HEADER_LAST_MODIFIED)) {
+            response.setDateHeader(HEADER_LAST_MODIFIED,lastModifiedTimestamp);
+          }
         }
-        if (isHeaderAbsent(response,HEADER_ETAG)) {
-          response.setHeader(HEADER_ETAG,etag);
-        }
-        if (isHeaderAbsent(response,HEADER_LAST_MODIFIED)) {
-          response.setDateHeader(HEADER_LAST_MODIFIED,lastModifiedTimestamp);
+ else         if (supportsConditionalUpdate()) {
+          if (this.notModified) {
+            response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+          }
         }
       }
     }

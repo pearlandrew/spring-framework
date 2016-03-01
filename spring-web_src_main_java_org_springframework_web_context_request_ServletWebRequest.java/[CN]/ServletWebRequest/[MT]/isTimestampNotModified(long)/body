@@ -1,19 +1,11 @@
 {
-  long ifModifiedSince=-1;
-  try {
-    ifModifiedSince=getRequest().getDateHeader(HEADER_IF_MODIFIED_SINCE);
+  long ifModifiedSince=parseDateHeader(HEADER_IF_MODIFIED_SINCE);
+  if (ifModifiedSince != -1) {
+    return (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
   }
- catch (  IllegalArgumentException ex) {
-    String headerValue=getRequest().getHeader(HEADER_IF_MODIFIED_SINCE);
-    int separatorIndex=headerValue.indexOf(';');
-    if (separatorIndex != -1) {
-      String datePart=headerValue.substring(0,separatorIndex);
-      try {
-        ifModifiedSince=Date.parse(datePart);
-      }
- catch (      IllegalArgumentException ex2) {
-      }
-    }
+  long ifUnmodifiedSince=parseDateHeader(HEADER_IF_UNMODIFIED_SINCE);
+  if (ifUnmodifiedSince != -1) {
+    return (ifUnmodifiedSince < (lastModifiedTimestamp / 1000 * 1000));
   }
-  return (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
+  return false;
 }
