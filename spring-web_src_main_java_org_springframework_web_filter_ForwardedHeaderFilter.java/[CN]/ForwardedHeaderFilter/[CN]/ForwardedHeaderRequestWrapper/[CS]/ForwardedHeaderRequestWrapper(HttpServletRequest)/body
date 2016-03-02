@@ -7,13 +7,6 @@
   this.secure="https".equals(scheme);
   this.host=uriComponents.getHost();
   this.port=(port == -1 ? (this.secure ? 443 : 80) : port);
-  this.portInUrl=(port == -1 ? "" : ":" + port);
-  Enumeration<String> headerNames=request.getHeaderNames();
-  while (headerNames.hasMoreElements()) {
-    String name=headerNames.nextElement();
-    this.headers.put(name,Collections.list(request.getHeaders(name)));
-  }
-  for (  String name : FORWARDED_HEADER_NAMES) {
-    this.headers.remove(name);
-  }
+  this.requestUrl=initRequestUrl(this.scheme,this.host,port,request.getRequestURI());
+  this.headers=initHeaders(request);
 }
