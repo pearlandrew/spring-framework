@@ -16,11 +16,13 @@ synchronized (mutex) {
  else {
     mav=invokeHandlerMethod(request,response,handlerMethod);
   }
-  if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
-    applyCacheSeconds(response,this.cacheSecondsForSessionAttributeHandlers);
-  }
+  if (!response.containsHeader(HEADER_CACHE_CONTROL)) {
+    if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
+      applyCacheSeconds(response,this.cacheSecondsForSessionAttributeHandlers);
+    }
  else {
-    prepareResponse(response);
+      prepareResponse(response);
+    }
   }
   return mav;
 }
