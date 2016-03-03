@@ -2,7 +2,7 @@
   this.request.setUri(new URI("/unknown-argument-type"));
   WebExceptionHandler exceptionHandler=new ServerError500ExceptionHandler();
   WebHandler webHandler=new ExceptionHandlingWebHandler(this.dispatcherHandler,exceptionHandler);
-  Publisher<Void> publisher=webHandler.handle(this.exchange);
-  Fluxion.from(publisher).toList().get();
+  Mono<Void> publisher=webHandler.handle(this.exchange);
+  publisher.get();
   assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,this.response.getStatus());
 }

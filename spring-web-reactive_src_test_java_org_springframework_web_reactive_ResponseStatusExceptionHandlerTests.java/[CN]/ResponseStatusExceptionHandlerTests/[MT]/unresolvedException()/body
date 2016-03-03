@@ -1,8 +1,8 @@
 {
   Throwable ex=new IllegalStateException();
-  Publisher<Void> publisher=this.handler.handle(this.exchange,ex);
-  List<Signal<Void>> signals=Fluxion.from(publisher).materialize().toList().get();
-  assertEquals(1,signals.size());
-  assertTrue(signals.get(0).hasError());
-  assertSame(ex,signals.get(0).getThrowable());
+  Mono<Void> publisher=this.handler.handle(this.exchange,ex);
+  Signal<Void> signal=publisher.materialize().get();
+  assertNotNull(signal);
+  assertTrue(signal.hasError());
+  assertSame(ex,signal.getThrowable());
 }
