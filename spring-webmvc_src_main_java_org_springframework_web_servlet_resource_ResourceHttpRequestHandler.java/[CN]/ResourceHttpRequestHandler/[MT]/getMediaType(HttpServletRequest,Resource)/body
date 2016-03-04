@@ -1,0 +1,20 @@
+{
+  MediaType mediaType=getMediaType(resource);
+  if (mediaType != null) {
+    return mediaType;
+  }
+  Class<PathExtensionContentNegotiationStrategy> clazz=PathExtensionContentNegotiationStrategy.class;
+  PathExtensionContentNegotiationStrategy strategy=this.contentNegotiationManager.getStrategy(clazz);
+  if (strategy != null) {
+    mediaType=strategy.getMediaTypeForResource(resource);
+  }
+  if (mediaType == null) {
+    ServletWebRequest webRequest=new ServletWebRequest(request);
+    try {
+      getContentNegotiationManager().resolveMediaTypes(webRequest);
+    }
+ catch (    HttpMediaTypeNotAcceptableException ex) {
+    }
+  }
+  return mediaType;
+}
