@@ -4,8 +4,8 @@
     return Mono.empty();
   }
   session.start();
-  Optional<String> requestedId=getSessionIdResolver().resolveSessionId(exchange);
-  if (!requestedId.isPresent() || !session.getId().equals(requestedId.get())) {
+  List<String> requestedIds=getSessionIdResolver().resolveSessionId(exchange);
+  if (requestedIds.isEmpty() || !session.getId().equals(requestedIds.get(0))) {
     this.sessionIdResolver.setSessionId(exchange,session.getId());
   }
   return this.sessionStore.storeSession(session);
