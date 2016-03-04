@@ -13,4 +13,12 @@
   request.setRequestURI("/foo");
   request.setParameter("f","json");
   assertEquals(Collections.singletonList(APPLICATION_JSON),manager.resolveMediaTypes(webRequest));
+  request.setRequestURI("/resources/foo.gif");
+  SimpleUrlHandlerMapping handlerMapping=(SimpleUrlHandlerMapping)this.config.resourceHandlerMapping();
+  handlerMapping.setApplicationContext(this.context);
+  HandlerExecutionChain chain=handlerMapping.getHandler(request);
+  assertNotNull(chain);
+  ResourceHttpRequestHandler handler=(ResourceHttpRequestHandler)chain.getHandler();
+  assertNotNull(handler);
+  assertSame(manager,handler.getContentNegotiationManager());
 }

@@ -1,29 +1,2 @@
 {
-  loadBeanDefinitions("mvc-config-resources.xml",10);
-  HttpRequestHandlerAdapter adapter=appContext.getBean(HttpRequestHandlerAdapter.class);
-  assertNotNull(adapter);
-  ResourceHttpRequestHandler handler=appContext.getBean(ResourceHttpRequestHandler.class);
-  assertNotNull(handler);
-  SimpleUrlHandlerMapping mapping=appContext.getBean(SimpleUrlHandlerMapping.class);
-  assertNotNull(mapping);
-  assertEquals(Ordered.LOWEST_PRECEDENCE - 1,mapping.getOrder());
-  BeanNameUrlHandlerMapping beanNameMapping=appContext.getBean(BeanNameUrlHandlerMapping.class);
-  assertNotNull(beanNameMapping);
-  assertEquals(2,beanNameMapping.getOrder());
-  ResourceUrlProvider urlProvider=appContext.getBean(ResourceUrlProvider.class);
-  assertNotNull(urlProvider);
-  MappedInterceptor mappedInterceptor=appContext.getBean(MappedInterceptor.class);
-  assertNotNull(urlProvider);
-  assertEquals(ResourceUrlProviderExposingInterceptor.class,mappedInterceptor.getInterceptor().getClass());
-  MockHttpServletRequest request=new MockHttpServletRequest();
-  request.setRequestURI("/resources/foo.css");
-  request.setMethod("GET");
-  HandlerExecutionChain chain=mapping.getHandler(request);
-  assertTrue(chain.getHandler() instanceof ResourceHttpRequestHandler);
-  MockHttpServletResponse response=new MockHttpServletResponse();
-  for (  HandlerInterceptor interceptor : chain.getInterceptors()) {
-    interceptor.preHandle(request,response,chain.getHandler());
-  }
-  ModelAndView mv=adapter.handle(request,response,chain.getHandler());
-  assertNull(mv);
 }
