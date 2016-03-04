@@ -1,12 +1,16 @@
 {
-  for (  String name : getHeaders().getCookies().keySet()) {
-    for (    HttpCookie httpCookie : getHeaders().getCookies().get(name)) {
+  for (  String name : getCookies().keySet()) {
+    for (    ServerHttpCookie httpCookie : getCookies().get(name)) {
       Cookie cookie=new DefaultCookie(name,httpCookie.getValue());
       if (!httpCookie.getMaxAge().isNegative()) {
         cookie.setMaxAge(httpCookie.getMaxAge().getSeconds());
       }
-      cookie.setDomain(httpCookie.getDomain());
-      cookie.setPath(httpCookie.getPath());
+      if (httpCookie.getDomain().isPresent()) {
+        cookie.setDomain(httpCookie.getDomain().get());
+      }
+      if (httpCookie.getPath().isPresent()) {
+        cookie.setPath(httpCookie.getPath().get());
+      }
       cookie.setSecure(httpCookie.isSecure());
       cookie.setHttpOnly(httpCookie.isHttpOnly());
       this.response.addCookie(cookie);
