@@ -31,7 +31,13 @@
     Class<? extends Object> actualReturnType=attributeValue.getClass();
     if (!ClassUtils.isAssignable(requiredReturnType,actualReturnType)) {
       boolean converted=false;
-      if (Annotation.class.isAssignableFrom(requiredReturnType) && Map.class.isAssignableFrom(actualReturnType)) {
+      if (requiredReturnType.isArray() && requiredReturnType.getComponentType() == actualReturnType) {
+        Object array=Array.newInstance(requiredReturnType.getComponentType(),1);
+        Array.set(array,0,attributeValue);
+        attributes.put(attributeName,array);
+        converted=true;
+      }
+ else       if (Annotation.class.isAssignableFrom(requiredReturnType) && Map.class.isAssignableFrom(actualReturnType)) {
         Class<? extends Annotation> nestedAnnotationType=(Class<? extends Annotation>)requiredReturnType;
         Map<String,Object> map=(Map<String,Object>)attributeValue;
         attributes.put(attributeName,synthesizeAnnotation(map,nestedAnnotationType,null));
