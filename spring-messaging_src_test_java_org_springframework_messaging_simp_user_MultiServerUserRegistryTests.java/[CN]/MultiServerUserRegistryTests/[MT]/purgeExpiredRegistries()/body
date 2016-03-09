@@ -1,13 +1,12 @@
 {
-  TestSimpUser remoteUser=new TestSimpUser("joe");
-  remoteUser.addSessions(new TestSimpSession("remote-sub"));
-  SimpUserRegistry remoteUserRegistry=mock(SimpUserRegistry.class);
-  when(remoteUserRegistry.getUsers()).thenReturn(Collections.singleton(remoteUser));
-  MultiServerUserRegistry remoteRegistry=new MultiServerUserRegistry(remoteUserRegistry);
-  Message<?> message=this.converter.toMessage(remoteRegistry.getLocalRegistryDto(),null);
-  long expirationPeriod=-1;
-  this.multiServerRegistry.addRemoteRegistryDto(message,this.converter,expirationPeriod);
-  assertEquals(1,this.multiServerRegistry.getUsers().size());
-  this.multiServerRegistry.purgeExpiredRegistries();
-  assertEquals(0,this.multiServerRegistry.getUsers().size());
+  TestSimpUser testUser=new TestSimpUser("joe");
+  testUser.addSessions(new TestSimpSession("remote-sub"));
+  SimpUserRegistry testRegistry=mock(SimpUserRegistry.class);
+  when(testRegistry.getUsers()).thenReturn(Collections.singleton(testUser));
+  Object registryDto=new MultiServerUserRegistry(testRegistry).getLocalRegistryDto();
+  Message<?> message=this.converter.toMessage(registryDto,null);
+  this.registry.addRemoteRegistryDto(message,this.converter,-1);
+  assertEquals(1,this.registry.getUsers().size());
+  this.registry.purgeExpiredRegistries();
+  assertEquals(0,this.registry.getUsers().size());
 }

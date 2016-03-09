@@ -2,5 +2,7 @@
   if (getBrokerRegistry().getUserRegistryBroadcast() == null) {
     return new NoOpMessageHandler();
   }
-  return new UserRegistryMessageHandler(userRegistry(),brokerMessagingTemplate(),getBrokerRegistry().getUserRegistryBroadcast(),messageBrokerTaskScheduler());
+  SimpUserRegistry userRegistry=userRegistry();
+  Assert.isInstanceOf(MultiServerUserRegistry.class,userRegistry);
+  return new UserRegistryMessageHandler((MultiServerUserRegistry)userRegistry,brokerMessagingTemplate(),getBrokerRegistry().getUserRegistryBroadcast(),messageBrokerTaskScheduler());
 }

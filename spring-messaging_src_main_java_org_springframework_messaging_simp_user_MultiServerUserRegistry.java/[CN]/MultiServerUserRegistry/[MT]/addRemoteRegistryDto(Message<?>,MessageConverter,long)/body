@@ -1,9 +1,7 @@
 {
-  UserRegistryDto registryDto=(UserRegistryDto)converter.fromMessage(message,UserRegistryDto.class);
-  if (registryDto != null && !registryDto.getId().equals(this.id)) {
-    long expirationTime=System.currentTimeMillis() + expirationPeriod;
-    registryDto.setExpirationTime(expirationTime);
-    registryDto.restoreParentReferences();
-    this.remoteRegistries.put(registryDto.getId(),registryDto);
+  UserRegistrySnapshot registry=(UserRegistrySnapshot)converter.fromMessage(message,UserRegistrySnapshot.class);
+  if (registry != null && !registry.getId().equals(this.id)) {
+    registry.init(expirationPeriod);
+    this.remoteRegistries.put(registry.getId(),registry);
   }
 }

@@ -4,7 +4,7 @@
   SimpMessageHeaderAccessor accessor=MessageHeaderAccessor.getAccessor(message,SimpMessageHeaderAccessor.class);
   String sessionId=accessor.getSessionId();
   if (event instanceof SessionSubscribeEvent) {
-    DefaultSimpSession session=this.sessions.get(sessionId);
+    LocalSimpSession session=this.sessions.get(sessionId);
     if (session != null) {
       String id=accessor.getSubscriptionId();
       String destination=accessor.getDestination();
@@ -20,23 +20,22 @@
     if (user instanceof DestinationUserNameProvider) {
       name=((DestinationUserNameProvider)user).getDestinationUserName();
     }
-synchronized (this) {
-      DefaultSimpUser simpUser=this.users.get(name);
+synchronized (this.sessionLock) {
+      LocalSimpUser simpUser=this.users.get(name);
       if (simpUser == null) {
-        simpUser=new DefaultSimpUser(name,sessionId);
+        simpUser=new LocalSimpUser(name);
         this.users.put(name,simpUser);
       }
- else {
-        simpUser.addSession(sessionId);
-      }
-      this.sessions.put(sessionId,(DefaultSimpSession)simpUser.getSession(sessionId));
+      LocalSimpSession session=new LocalSimpSession(sessionId,simpUser);
+      simpUser.addSession(session);
+      this.sessions.put(sessionId,session);
     }
   }
  else   if (event instanceof SessionDisconnectEvent) {
-synchronized (this) {
-      DefaultSimpSession session=this.sessions.remove(sessionId);
+synchronized (this.sessionLock) {
+      LocalSimpSession session=this.sessions.remove(sessionId);
       if (session != null) {
-        DefaultSimpUser user=session.getUser();
+        LocalSimpUser user=session.getUser();
         user.removeSession(sessionId);
         if (!user.hasSessions()) {
           this.users.remove(user.getName());
@@ -45,7 +44,7 @@ synchronized (this) {
     }
   }
  else   if (event instanceof SessionUnsubscribeEvent) {
-    DefaultSimpSession session=this.sessions.get(sessionId);
+    LocalSimpSession session=this.sessions.get(sessionId);
     if (session != null) {
       String subscriptionId=accessor.getSubscriptionId();
       session.removeSubscription(subscriptionId);
