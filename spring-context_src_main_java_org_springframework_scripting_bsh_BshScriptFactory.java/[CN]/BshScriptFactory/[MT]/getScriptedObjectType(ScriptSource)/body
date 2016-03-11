@@ -1,14 +1,15 @@
 {
-  try {
 synchronized (this.scriptClassMonitor) {
+    try {
       if (scriptSource.isModified()) {
         this.wasModifiedForTypeCheck=true;
         this.scriptClass=BshScriptUtils.determineBshObjectType(scriptSource.getScriptAsString(),this.beanClassLoader);
       }
       return this.scriptClass;
     }
-  }
- catch (  EvalError ex) {
-    throw new ScriptCompilationException(scriptSource,ex);
+ catch (    EvalError ex) {
+      this.scriptClass=null;
+      throw new ScriptCompilationException(scriptSource,ex);
+    }
   }
 }

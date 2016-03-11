@@ -1,6 +1,6 @@
 {
+  Class<?> clazz;
   try {
-    Class<?> clazz;
 synchronized (this.scriptClassMonitor) {
       boolean requiresScriptEvaluation=(this.wasModifiedForTypeCheck && this.scriptClass == null);
       this.wasModifiedForTypeCheck=false;
@@ -15,19 +15,25 @@ synchronized (this.scriptClassMonitor) {
       }
       clazz=this.scriptClass;
     }
-    if (clazz != null) {
-      try {
-        return clazz.newInstance();
-      }
- catch (      Throwable ex) {
-        throw new ScriptCompilationException(scriptSource,"Could not instantiate script class: " + clazz.getName(),ex);
-      }
-    }
- else {
-      return BshScriptUtils.createBshObject(scriptSource.getScriptAsString(),actualInterfaces,this.beanClassLoader);
-    }
   }
  catch (  EvalError ex) {
+    this.scriptClass=null;
     throw new ScriptCompilationException(scriptSource,ex);
+  }
+  if (clazz != null) {
+    try {
+      return clazz.newInstance();
+    }
+ catch (    Throwable ex) {
+      throw new ScriptCompilationException(scriptSource,"Could not instantiate script class: " + clazz.getName(),ex);
+    }
+  }
+ else {
+    try {
+      return BshScriptUtils.createBshObject(scriptSource.getScriptAsString(),actualInterfaces,this.beanClassLoader);
+    }
+ catch (    EvalError ex) {
+      throw new ScriptCompilationException(scriptSource,ex);
+    }
   }
 }

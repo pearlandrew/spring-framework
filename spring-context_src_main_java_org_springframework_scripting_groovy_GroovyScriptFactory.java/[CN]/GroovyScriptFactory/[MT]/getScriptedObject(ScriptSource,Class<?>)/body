@@ -1,7 +1,7 @@
 {
-  try {
-    Class<?> scriptClassToExecute;
 synchronized (this.scriptClassMonitor) {
+    try {
+      Class<?> scriptClassToExecute;
       this.wasModifiedForTypeCheck=false;
       if (this.cachedResult != null) {
         Object result=this.cachedResult.object;
@@ -20,10 +20,12 @@ synchronized (this.scriptClassMonitor) {
         }
       }
       scriptClassToExecute=this.scriptClass;
+      return executeScript(scriptSource,scriptClassToExecute);
     }
-    return executeScript(scriptSource,scriptClassToExecute);
-  }
- catch (  CompilationFailedException ex) {
-    throw new ScriptCompilationException(scriptSource,ex);
+ catch (    CompilationFailedException ex) {
+      this.scriptClass=null;
+      this.scriptResultClass=null;
+      throw new ScriptCompilationException(scriptSource,ex);
+    }
   }
 }

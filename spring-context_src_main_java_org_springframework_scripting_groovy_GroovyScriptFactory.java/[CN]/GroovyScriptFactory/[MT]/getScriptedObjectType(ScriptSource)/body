@@ -1,6 +1,6 @@
 {
-  try {
 synchronized (this.scriptClassMonitor) {
+    try {
       if (this.scriptClass == null || scriptSource.isModified()) {
         this.wasModifiedForTypeCheck=true;
         this.scriptClass=getGroovyClassLoader().parseClass(scriptSource.getScriptAsString(),scriptSource.suggestedClassName());
@@ -15,8 +15,11 @@ synchronized (this.scriptClassMonitor) {
       }
       return this.scriptResultClass;
     }
-  }
- catch (  CompilationFailedException ex) {
-    throw new ScriptCompilationException(scriptSource,ex);
+ catch (    CompilationFailedException ex) {
+      this.scriptClass=null;
+      this.scriptResultClass=null;
+      this.cachedResult=null;
+      throw new ScriptCompilationException(scriptSource,ex);
+    }
   }
 }
