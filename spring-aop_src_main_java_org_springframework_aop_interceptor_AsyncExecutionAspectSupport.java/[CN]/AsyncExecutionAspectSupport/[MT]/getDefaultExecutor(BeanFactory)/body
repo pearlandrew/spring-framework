@@ -1,0 +1,22 @@
+{
+  if (beanFactory != null) {
+    try {
+      return beanFactory.getBean(TaskExecutor.class);
+    }
+ catch (    NoUniqueBeanDefinitionException ex) {
+      try {
+        return beanFactory.getBean(DEFAULT_TASK_EXECUTOR_BEAN_NAME,Executor.class);
+      }
+ catch (      NoSuchBeanDefinitionException ex2) {
+        if (logger.isInfoEnabled()) {
+          logger.info("More than one TaskExecutor bean found within the context, and none is named " + "'taskExecutor'. Mark one of them as primary or name it 'taskExecutor' (possibly " + "as an alias) in order to use it for async processing: "+ ex.getBeanNamesFound());
+        }
+      }
+    }
+catch (    NoSuchBeanDefinitionException ex) {
+      logger.debug("Could not find default TaskExecutor bean",ex);
+      logger.info("No TaskExecutor bean found for async processing");
+    }
+  }
+  return null;
+}

@@ -18,7 +18,9 @@
         this.registrar.setTaskScheduler(this.beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME,TaskScheduler.class));
       }
  catch (      NoSuchBeanDefinitionException ex2) {
-        throw new IllegalStateException("More than one TaskScheduler bean exists within the context, and " + "none is named 'taskScheduler'. Mark one of them as primary or name it 'taskScheduler' " + "(possibly as an alias); or implement the SchedulingConfigurer interface and call "+ "ScheduledTaskRegistrar#setScheduler explicitly within the configureTasks() callback.",ex);
+        if (logger.isInfoEnabled()) {
+          logger.info("More than one TaskScheduler bean exists within the context, and " + "none is named 'taskScheduler'. Mark one of them as primary or name it 'taskScheduler' " + "(possibly as an alias); or implement the SchedulingConfigurer interface and call "+ "ScheduledTaskRegistrar#setScheduler explicitly within the configureTasks() callback: "+ ex.getBeanNamesFound());
+        }
       }
     }
 catch (    NoSuchBeanDefinitionException ex) {
@@ -27,10 +29,18 @@ catch (    NoSuchBeanDefinitionException ex) {
         this.registrar.setScheduler(this.beanFactory.getBean(ScheduledExecutorService.class));
       }
  catch (      NoUniqueBeanDefinitionException ex2) {
-        throw new IllegalStateException("More than one ScheduledExecutorService bean exists within " + "the context. Mark one of them as primary; or implement the SchedulingConfigurer " + "interface and call ScheduledTaskRegistrar#setScheduler explicitly within the "+ "configureTasks() callback.",ex);
+        try {
+          this.registrar.setScheduler(this.beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME,ScheduledExecutorService.class));
+        }
+ catch (        NoSuchBeanDefinitionException ex3) {
+          if (logger.isInfoEnabled()) {
+            logger.info("More than one ScheduledExecutorService bean exists within the context, and " + "none is named 'taskScheduler'. Mark one of them as primary or name it 'taskScheduler' " + "(possibly as an alias); or implement the SchedulingConfigurer interface and call "+ "ScheduledTaskRegistrar#setScheduler explicitly within the configureTasks() callback: "+ ex2.getBeanNamesFound());
+          }
+        }
       }
 catch (      NoSuchBeanDefinitionException ex2) {
-        logger.debug("Could not find default ScheduledExecutorService bean",ex);
+        logger.debug("Could not find default ScheduledExecutorService bean",ex2);
+        logger.info("No TaskScheduler/ScheduledExecutorService bean found for scheduled processing");
       }
     }
   }

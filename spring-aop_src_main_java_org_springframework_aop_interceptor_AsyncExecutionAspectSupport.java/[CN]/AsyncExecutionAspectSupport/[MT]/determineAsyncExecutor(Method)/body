@@ -1,18 +1,26 @@
 {
   AsyncTaskExecutor executor=this.executors.get(method);
   if (executor == null) {
-    Executor executorToUse=this.defaultExecutor;
+    Executor targetExecutor;
     String qualifier=getExecutorQualifier(method);
     if (StringUtils.hasLength(qualifier)) {
-      if (this.beanFactory == null) {
-        throw new IllegalStateException("BeanFactory must be set on " + getClass().getSimpleName() + " to access qualified executor '"+ qualifier+ "'");
-      }
-      executorToUse=BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory,Executor.class,qualifier);
+      targetExecutor=findQualifiedExecutor(this.beanFactory,qualifier);
     }
- else     if (executorToUse == null) {
+ else {
+      targetExecutor=this.defaultExecutor;
+      if (targetExecutor == null) {
+synchronized (this.executors) {
+          if (this.defaultExecutor == null) {
+            this.defaultExecutor=getDefaultExecutor(this.beanFactory);
+          }
+          targetExecutor=this.defaultExecutor;
+        }
+      }
+    }
+    if (targetExecutor == null) {
       return null;
     }
-    executor=(executorToUse instanceof AsyncListenableTaskExecutor ? (AsyncListenableTaskExecutor)executorToUse : new TaskExecutorAdapter(executorToUse));
+    executor=(targetExecutor instanceof AsyncListenableTaskExecutor ? (AsyncListenableTaskExecutor)targetExecutor : new TaskExecutorAdapter(targetExecutor));
     this.executors.put(method,executor);
   }
   return executor;
