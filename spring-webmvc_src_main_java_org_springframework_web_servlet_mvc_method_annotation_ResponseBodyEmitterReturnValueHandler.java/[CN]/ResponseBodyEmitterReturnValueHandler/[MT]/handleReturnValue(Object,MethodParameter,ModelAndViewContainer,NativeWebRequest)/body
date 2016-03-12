@@ -17,8 +17,9 @@
   }
   ServletRequest request=webRequest.getNativeRequest(ServletRequest.class);
   ShallowEtagHeaderFilter.disableContentCaching(request);
-  Assert.isInstanceOf(ResponseBodyEmitter.class,returnValue);
-  ResponseBodyEmitter emitter=(ResponseBodyEmitter)returnValue;
+  ResponseBodyEmitterAdapter adapter=getAdapterFor(returnValue.getClass());
+  Assert.notNull(adapter);
+  ResponseBodyEmitter emitter=adapter.adaptToEmitter(returnValue,outputMessage);
   emitter.extendResponse(outputMessage);
   outputMessage.getBody();
   outputMessage.flush();

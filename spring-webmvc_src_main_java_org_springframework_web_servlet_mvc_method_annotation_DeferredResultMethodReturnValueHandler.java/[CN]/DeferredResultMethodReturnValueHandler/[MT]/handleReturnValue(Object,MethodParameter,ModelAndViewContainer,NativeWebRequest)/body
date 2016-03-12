@@ -3,6 +3,8 @@
     mavContainer.setRequestHandled(true);
     return;
   }
-  DeferredResult<?> deferredResult=(DeferredResult<?>)returnValue;
-  WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(deferredResult,mavContainer);
+  DeferredResultAdapter adapter=getAdapterFor(returnValue.getClass());
+  Assert.notNull(adapter);
+  DeferredResult<?> result=adapter.adaptToDeferredResult(returnValue);
+  WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(result,mavContainer);
 }

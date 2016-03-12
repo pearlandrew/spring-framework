@@ -1,0 +1,11 @@
+{
+  MethodParameter returnType=returnType("handleListenableFuture");
+  SettableListenableFuture<String> future=new SettableListenableFuture<>();
+  handleReturnValue(future,returnType);
+  assertTrue(this.request.isAsyncStarted());
+  assertFalse(WebAsyncUtils.getAsyncManager(this.webRequest).hasConcurrentResult());
+  IllegalStateException ex=new IllegalStateException();
+  future.setException(ex);
+  assertTrue(WebAsyncUtils.getAsyncManager(this.webRequest).hasConcurrentResult());
+  assertSame(ex,WebAsyncUtils.getAsyncManager(this.webRequest).getConcurrentResult());
+}

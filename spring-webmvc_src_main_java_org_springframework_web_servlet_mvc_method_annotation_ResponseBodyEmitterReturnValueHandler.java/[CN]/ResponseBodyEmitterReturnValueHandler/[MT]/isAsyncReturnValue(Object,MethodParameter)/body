@@ -1,11 +1,11 @@
 {
   if (returnValue != null) {
-    if (returnValue instanceof ResponseBodyEmitter) {
-      return true;
+    Object adaptFrom=returnValue;
+    if (returnValue instanceof ResponseEntity) {
+      adaptFrom=((ResponseEntity)returnValue).getBody();
     }
- else     if (returnValue instanceof ResponseEntity) {
-      Object body=((ResponseEntity)returnValue).getBody();
-      return (body != null && body instanceof ResponseBodyEmitter);
+    if (adaptFrom != null) {
+      return (getAdapterFor(adaptFrom.getClass()) != null);
     }
   }
   return false;
