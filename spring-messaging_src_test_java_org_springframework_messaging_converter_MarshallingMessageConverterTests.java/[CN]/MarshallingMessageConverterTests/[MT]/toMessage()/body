@@ -4,5 +4,6 @@
   Message<?> message=this.converter.toMessage(payload,null);
   assertNotNull(message);
   String actual=new String((byte[])message.getPayload(),StandardCharsets.UTF_8);
-  assertXMLEqual("<myBean><name>Foo</name></myBean>",actual);
+  DifferenceEvaluator ev=chain(Default,downgradeDifferencesToEqual(XML_STANDALONE));
+  assertThat(actual,isSimilarTo("<myBean><name>Foo</name></myBean>").withDifferenceEvaluator(ev));
 }

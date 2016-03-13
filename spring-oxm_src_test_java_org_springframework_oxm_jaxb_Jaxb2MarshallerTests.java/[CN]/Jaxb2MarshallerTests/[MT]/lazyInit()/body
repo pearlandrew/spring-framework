@@ -6,5 +6,6 @@
   StringWriter writer=new StringWriter();
   StreamResult result=new StreamResult(writer);
   marshaller.marshal(flights,result);
-  assertXMLEqual("Marshaller writes invalid StreamResult",EXPECTED_STRING,writer.toString());
+  DifferenceEvaluator ev=chain(Default,downgradeDifferencesToEqual(XML_STANDALONE));
+  assertThat("Marshaller writes invalid StreamResult",writer.toString(),isSimilarTo(EXPECTED_STRING).withDifferenceEvaluator(ev));
 }

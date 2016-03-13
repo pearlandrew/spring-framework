@@ -2,10 +2,9 @@
   Map<String,String> namespaces=new HashMap<>();
   namespaces.put("tns","http://samples.springframework.org/flight");
   namespaces.put("xsi","http://www.w3.org/2001/XMLSchema-instance");
-  NamespaceContext ctx=new SimpleNamespaceContext(namespaces);
-  XpathEngine engine=XMLUnit.newXpathEngine();
-  engine.setNamespaceContext(ctx);
-  Document doc=XMLUnit.buildControlDocument(xmlDoc);
-  NodeList node=engine.getMatchingNodes(xpath,doc);
-  assertEquals(msg,expected,node.item(0).getNodeValue());
+  JAXPXPathEngine engine=new JAXPXPathEngine();
+  engine.setNamespaceContext(namespaces);
+  Source source=Input.fromString(xmlDoc).build();
+  Iterable<Node> nodeList=engine.selectNodes(xpath,source);
+  assertEquals(msg,expected,nodeList.iterator().next().getNodeValue());
 }

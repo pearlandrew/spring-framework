@@ -7,5 +7,6 @@
   StringWriter writer=new StringWriter();
   Result result=new StreamResult(writer);
   marshaller.marshal(airplane,result);
-  assertXMLEqual("Marshalling should use root Element",writer.toString(),"<airplane><name>test</name></airplane>");
+  DifferenceEvaluator ev=chain(Default,downgradeDifferencesToEqual(XML_STANDALONE));
+  assertThat("Marshalling should use root Element",writer.toString(),isSimilarTo("<airplane><name>test</name></airplane>").withDifferenceEvaluator(ev));
 }

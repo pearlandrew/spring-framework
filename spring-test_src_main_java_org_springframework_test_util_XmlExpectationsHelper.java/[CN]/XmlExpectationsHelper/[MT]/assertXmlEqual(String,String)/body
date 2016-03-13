@@ -1,11 +1,6 @@
 {
-  XMLUnit.setIgnoreWhitespace(true);
-  XMLUnit.setIgnoreComments(true);
-  XMLUnit.setIgnoreAttributeOrder(true);
-  Document control=XMLUnit.buildControlDocument(expected);
-  Document test=XMLUnit.buildTestDocument(actual);
-  Diff diff=new Diff(control,test);
-  if (!diff.similar()) {
-    AssertionErrors.fail("Body content " + diff.toString());
+  Diff diffSimilar=DiffBuilder.compare(expected).withTest(actual).ignoreWhitespace().ignoreComments().checkForSimilar().build();
+  if (diffSimilar.hasDifferences()) {
+    AssertionErrors.fail("Body content " + diffSimilar.toString());
   }
 }
