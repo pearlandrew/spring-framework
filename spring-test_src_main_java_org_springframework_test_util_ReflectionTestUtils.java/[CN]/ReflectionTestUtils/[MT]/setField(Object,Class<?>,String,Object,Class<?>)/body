@@ -1,7 +1,8 @@
 {
   Assert.isTrue(targetObject != null || targetClass != null,"Either targetObject or targetClass for the field must be specified");
+  Object ultimateTargetObject=AopTestUtils.getUltimateTargetObject(targetObject);
   if (targetClass == null) {
-    targetClass=targetObject.getClass();
+    targetClass=ultimateTargetObject.getClass();
   }
   Field field=ReflectionUtils.findField(targetClass,name,type);
   if (field == null) {
@@ -11,5 +12,5 @@
     logger.debug(String.format("Setting field '%s' of type [%s] on target object [%s] or target class [%s] to value [%s]",name,type,targetObject,targetClass,value));
   }
   ReflectionUtils.makeAccessible(field);
-  ReflectionUtils.setField(field,targetObject,value);
+  ReflectionUtils.setField(field,ultimateTargetObject,value);
 }
