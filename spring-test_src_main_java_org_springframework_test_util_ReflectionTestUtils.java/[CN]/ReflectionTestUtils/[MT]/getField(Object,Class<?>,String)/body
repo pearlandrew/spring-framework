@@ -1,16 +1,16 @@
 {
   Assert.isTrue(targetObject != null || targetClass != null,"Either targetObject or targetClass for the field must be specified");
-  Object ultimateTargetObject=(targetObject == null ? null : AopTestUtils.getUltimateTargetObject(targetObject));
+  Object ultimateTarget=(targetObject != null ? AopTestUtils.getUltimateTargetObject(targetObject) : null);
   if (targetClass == null) {
-    targetClass=ultimateTargetObject.getClass();
+    targetClass=ultimateTarget.getClass();
   }
   Field field=ReflectionUtils.findField(targetClass,name);
   if (field == null) {
-    throw new IllegalArgumentException(String.format("Could not find field '%s' on target object [%s] or target class [%s]",name,targetObject,targetClass));
+    throw new IllegalArgumentException(String.format("Could not find field '%s' on target object [%s] or target class [%s]",name,ultimateTarget,targetClass));
   }
   if (logger.isDebugEnabled()) {
-    logger.debug(String.format("Getting field '%s' from target object [%s] or target class [%s]",name,targetObject,targetClass));
+    logger.debug(String.format("Getting field '%s' from target object [%s] or target class [%s]",name,ultimateTarget,targetClass));
   }
   ReflectionUtils.makeAccessible(field);
-  return ReflectionUtils.getField(field,ultimateTargetObject);
+  return ReflectionUtils.getField(field,ultimateTarget);
 }
