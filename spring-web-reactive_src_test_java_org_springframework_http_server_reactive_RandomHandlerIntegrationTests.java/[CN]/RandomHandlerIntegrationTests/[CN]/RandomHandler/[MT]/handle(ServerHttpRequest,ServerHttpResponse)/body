@@ -1,26 +1,24 @@
 {
+  requestError=null;
   request.getBody().subscribe(new Subscriber<DataBuffer>(){
-    private Subscription s;
-    private int requestSize=0;
     @Override public void onSubscribe(    Subscription s){
-      this.s=s;
+      requestComplete=false;
+      requestSize=0;
+      requestError=null;
       s.request(Long.MAX_VALUE);
     }
     @Override public void onNext(    DataBuffer bytes){
       requestSize+=bytes.readableByteCount();
     }
     @Override public void onError(    Throwable t){
-      logger.error(t);
+      requestComplete=true;
+      requestError=t;
     }
     @Override public void onComplete(){
-      logger.debug("Complete");
-      assertEquals(RandomHandlerIntegrationTests.REQUEST_SIZE,requestSize);
+      requestComplete=true;
     }
   }
 );
   response.getHeaders().setContentLength(RESPONSE_SIZE);
-  byte[] randomBytes=randomBytes();
-  DataBuffer buffer=new DefaultDataBufferAllocator().allocateBuffer(randomBytes.length);
-  buffer.write(randomBytes);
-  return response.setBody(Mono.just(buffer));
+  return response.setBody(multipleChunks());
 }

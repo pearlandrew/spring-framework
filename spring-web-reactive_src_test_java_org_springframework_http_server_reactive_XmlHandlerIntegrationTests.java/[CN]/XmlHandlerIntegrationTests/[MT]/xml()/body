@@ -1,7 +1,16 @@
 {
+  assumeFalse(server instanceof ReactorHttpServer || server instanceof RxNettyHttpServer);
   RestTemplate restTemplate=new RestTemplate();
   Person johnDoe=new Person("John Doe");
+  Person janeDoe=new Person("Jane Doe");
   RequestEntity<Person> request=RequestEntity.post(new URI("http://localhost:" + port)).body(johnDoe);
   ResponseEntity<Person> response=restTemplate.exchange(request,Person.class);
-  System.out.println(response.getBody());
+  assertEquals(janeDoe,response.getBody());
+  while (!handler.requestComplete) {
+    Thread.sleep(100);
+  }
+  if (handler.requestError != null) {
+    throw handler.requestError;
+  }
+  assertEquals(johnDoe,handler.requestPerson);
 }
