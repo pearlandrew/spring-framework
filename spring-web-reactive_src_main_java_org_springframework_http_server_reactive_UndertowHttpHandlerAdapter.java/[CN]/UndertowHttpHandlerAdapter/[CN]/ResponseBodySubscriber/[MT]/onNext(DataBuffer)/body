@@ -1,33 +1,5 @@
 {
-  BaseSubscriber.super.onNext(dataBuffer);
-  ByteBuffer buffer=dataBuffer.asByteBuffer();
-  if (this.responseChannel == null) {
-    this.responseChannel=exchange.getResponseChannel();
-  }
-  this.writing.incrementAndGet();
-  try {
-    int c;
-    do {
-      c=this.responseChannel.write(buffer);
-    }
- while (buffer.hasRemaining() && c > 0);
-    if (buffer.hasRemaining()) {
-      this.writing.incrementAndGet();
-      enqueue(buffer);
-      this.responseChannel.getWriteSetter().set(this);
-      this.responseChannel.resumeWrites();
-    }
- else {
-      this.subscription.request(1);
-    }
-  }
- catch (  IOException ex) {
-    onError(ex);
-  }
- finally {
-    this.writing.decrementAndGet();
-    if (this.closing.get()) {
-      closeIfDone();
-    }
-  }
+  Assert.state(this.byteBuffer == null);
+  logger.trace("onNext. buffer: " + dataBuffer);
+  this.byteBuffer=dataBuffer.asByteBuffer();
 }

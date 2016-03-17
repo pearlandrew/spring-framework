@@ -1,0 +1,25 @@
+{
+  logger.trace("onWritePossible");
+  ServletOutputStream output=synchronizer.getResponse().getOutputStream();
+  boolean ready=output.isReady();
+  logger.trace("ready: " + ready + " buffer: "+ dataBuffer);
+  if (ready) {
+    if (dataBuffer != null) {
+      int total=dataBuffer.readableByteCount();
+      int written=writeDataBuffer();
+      logger.trace("written: " + written + " total: "+ total);
+      if (written == total) {
+        releaseBuffer();
+        if (!completed) {
+          subscription.request(1);
+        }
+ else {
+          synchronizer.writeComplete();
+        }
+      }
+    }
+ else     if (subscription != null) {
+      subscription.request(1);
+    }
+  }
+}
