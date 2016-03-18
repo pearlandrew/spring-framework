@@ -1,8 +1,9 @@
 {
-  WebConnectionHtmlUnitDriver delegateDriver=new WebConnectionHtmlUnitDriver();
+  WebConnectionHtmlUnitDriver otherDriver=new WebConnectionHtmlUnitDriver();
   this.mockMvc=MockMvcBuilders.standaloneSetup(new CookieController()).build();
-  this.driver=mockMvcSetup(this.mockMvc).withDelegate(delegateDriver).build();
+  this.driver=MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherDriver).build();
   assertThat(get("http://localhost/"),equalTo(""));
-  delegateDriver.getWebClient().getCookieManager().addCookie(new Cookie("localhost","cookie","cookieManagerShared"));
+  Cookie cookie=new Cookie("localhost","cookie","cookieManagerShared");
+  otherDriver.getWebClient().getCookieManager().addCookie(cookie);
   assertThat(get("http://localhost/"),equalTo("cookieManagerShared"));
 }

@@ -1,11 +1,11 @@
 {
-  MockMvcWebConnection mockMvcWebConnection=new MockMvcWebConnection(this.mockMvc,webClient,this.contextPath);
+  WebConnection connection=new MockMvcWebConnection(this.mockMvc,webClient,this.contextPath);
   if (this.alwaysUseMockMvc) {
-    return mockMvcWebConnection;
+    return connection;
   }
-  List<DelegatingWebConnection.DelegateWebConnection> delegates=new ArrayList<DelegatingWebConnection.DelegateWebConnection>(this.mockMvcRequestMatchers.size());
-  for (  WebRequestMatcher matcher : this.mockMvcRequestMatchers) {
-    delegates.add(new DelegatingWebConnection.DelegateWebConnection(matcher,mockMvcWebConnection));
+  List<DelegateWebConnection> delegates=new ArrayList<DelegateWebConnection>(this.requestMatchers.size());
+  for (  WebRequestMatcher matcher : this.requestMatchers) {
+    delegates.add(new DelegateWebConnection(matcher,connection));
   }
   return new DelegatingWebConnection(defaultConnection,delegates);
 }
