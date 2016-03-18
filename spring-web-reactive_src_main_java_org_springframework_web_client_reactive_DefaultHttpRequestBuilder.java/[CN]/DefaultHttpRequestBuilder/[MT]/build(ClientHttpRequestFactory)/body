@@ -6,7 +6,8 @@
     MediaType mediaType=request.getHeaders().getContentType();
     Optional<Encoder<?>> messageEncoder=resolveEncoder(requestBodyType,mediaType);
     if (messageEncoder.isPresent()) {
-      request.setBody(messageEncoder.get().encode(this.contentPublisher,requestBodyType,mediaType));
+      DataBufferAllocator allocator=request.allocator();
+      request.setBody(messageEncoder.get().encode(this.contentPublisher,allocator,requestBodyType,mediaType));
     }
  else {
       request.setBody(Flux.error(new IllegalStateException("Can't write request body" + "of type '" + requestBodyType.toString() + "' for content-type '"+ mediaType.toString()+ "'")));

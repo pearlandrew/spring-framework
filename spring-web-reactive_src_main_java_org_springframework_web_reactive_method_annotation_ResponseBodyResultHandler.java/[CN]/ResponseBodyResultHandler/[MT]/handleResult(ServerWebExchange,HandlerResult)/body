@@ -51,7 +51,8 @@
     if (encoder != null) {
       ServerHttpResponse response=exchange.getResponse();
       response.getHeaders().setContentType(selectedMediaType);
-      return response.setBody(encoder.encode((Publisher)publisher,elementType,selectedMediaType));
+      DataBufferAllocator allocator=response.allocator();
+      return response.setBody(encoder.encode((Publisher)publisher,allocator,elementType,selectedMediaType));
     }
   }
   return Mono.error(new HttpMediaTypeNotAcceptableException(this.allMediaTypes));
