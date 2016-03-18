@@ -9,10 +9,13 @@
     if (!this.equalsDefined && AopUtils.isEqualsMethod(method)) {
       return equals(args[0]);
     }
-    if (!this.hashCodeDefined && AopUtils.isHashCodeMethod(method)) {
+ else     if (!this.hashCodeDefined && AopUtils.isHashCodeMethod(method)) {
       return hashCode();
     }
-    if (!this.advised.opaque && method.getDeclaringClass().isInterface() && method.getDeclaringClass().isAssignableFrom(Advised.class)) {
+ else     if (method.getDeclaringClass() == DecoratingProxy.class) {
+      return AopProxyUtils.ultimateTargetClass(this.advised);
+    }
+ else     if (!this.advised.opaque && method.getDeclaringClass().isInterface() && method.getDeclaringClass().isAssignableFrom(Advised.class)) {
       return AopUtils.invokeJoinpointUsingReflection(this.advised,method,args);
     }
     Object retVal;
