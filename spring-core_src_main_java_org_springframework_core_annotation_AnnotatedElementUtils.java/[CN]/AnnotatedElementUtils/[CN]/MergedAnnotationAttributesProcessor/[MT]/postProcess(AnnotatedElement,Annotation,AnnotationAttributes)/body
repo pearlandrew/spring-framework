@@ -1,13 +1,27 @@
 {
   annotation=AnnotationUtils.synthesizeAnnotation(annotation,element);
   Class<? extends Annotation> targetAnnotationType=attributes.annotationType();
+  Set<String> valuesAlreadyReplaced=new HashSet<String>();
   for (  Method attributeMethod : AnnotationUtils.getAttributeMethods(annotation.annotationType())) {
     String attributeName=attributeMethod.getName();
     String attributeOverrideName=AnnotationUtils.getAttributeOverrideName(attributeMethod,targetAnnotationType);
     if (attributeOverrideName != null) {
-      if (attributes.containsKey(attributeOverrideName)) {
-        overrideAttribute(element,annotation,attributes,attributeName,attributeOverrideName);
+      if (valuesAlreadyReplaced.contains(attributeOverrideName)) {
+        continue;
       }
+      List<String> targetAttributeNames=new ArrayList<String>();
+      targetAttributeNames.add(attributeOverrideName);
+      valuesAlreadyReplaced.add(attributeOverrideName);
+      List<String> aliases=AnnotationUtils.getAttributeAliasMap(targetAnnotationType).get(attributeOverrideName);
+      if (aliases != null) {
+        for (        String alias : aliases) {
+          if (!valuesAlreadyReplaced.contains(alias)) {
+            targetAttributeNames.add(alias);
+            valuesAlreadyReplaced.add(alias);
+          }
+        }
+      }
+      overrideAttributes(element,annotation,attributes,attributeName,targetAttributeNames);
     }
  else     if (!AnnotationUtils.VALUE.equals(attributeName) && attributes.containsKey(attributeName)) {
       overrideAttribute(element,annotation,attributes,attributeName,attributeName);
