@@ -1,0 +1,12 @@
+{
+  Assert.notNull(element,"AnnotatedElement must not be null");
+  Assert.notNull(annotationType,"annotationType must not be null");
+  MergedAnnotationAttributesProcessor processor=new MergedAnnotationAttributesProcessor(annotationType,null,false,false,true);
+  searchWithFindSemantics(element,annotationType,annotationType.getName(),processor);
+  Set<A> annotations=new LinkedHashSet<A>();
+  for (  AnnotationAttributes attributes : processor.getAggregatedResults()) {
+    AnnotationUtils.postProcessAnnotationAttributes(element,attributes,false,false);
+    annotations.add(AnnotationUtils.synthesizeAnnotation(attributes,annotationType,element));
+  }
+  return annotations;
+}
