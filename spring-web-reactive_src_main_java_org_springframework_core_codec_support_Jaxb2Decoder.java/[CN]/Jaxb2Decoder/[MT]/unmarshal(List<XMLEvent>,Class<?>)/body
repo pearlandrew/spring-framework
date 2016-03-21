@@ -1,0 +1,16 @@
+{
+  try {
+    Unmarshaller unmarshaller=this.jaxbContexts.createUnmarshaller(outputClass);
+    XMLEventReader eventReader=new ListBasedXMLEventReader(eventFlux);
+    if (outputClass.isAnnotationPresent(XmlRootElement.class)) {
+      return unmarshaller.unmarshal(eventReader);
+    }
+ else {
+      JAXBElement<?> jaxbElement=unmarshaller.unmarshal(eventReader,outputClass);
+      return jaxbElement.getValue();
+    }
+  }
+ catch (  JAXBException ex) {
+    throw new CodecException(ex.getMessage(),ex);
+  }
+}
