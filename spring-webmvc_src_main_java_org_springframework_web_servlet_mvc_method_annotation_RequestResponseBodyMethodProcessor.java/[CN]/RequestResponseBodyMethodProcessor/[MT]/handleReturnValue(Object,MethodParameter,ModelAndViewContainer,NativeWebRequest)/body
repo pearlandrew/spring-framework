@@ -1,4 +1,19 @@
 {
   mavContainer.setRequestHandled(true);
-  writeWithMessageConverters(returnValue,returnType,webRequest);
+  ServletServerHttpRequest inputMessage=createInputMessage(webRequest);
+  ServletServerHttpResponse outputMessage=createOutputMessage(webRequest);
+  if (inputMessage.getHeaders().containsKey(HttpHeaders.RANGE) && Resource.class.isAssignableFrom(returnValue.getClass())) {
+    try {
+      List<HttpRange> httpRanges=inputMessage.getHeaders().getRange();
+      Resource bodyResource=(Resource)returnValue;
+      returnValue=new HttpRangeResource(httpRanges,bodyResource);
+      outputMessage.setStatusCode(HttpStatus.PARTIAL_CONTENT);
+    }
+ catch (    IllegalArgumentException exc) {
+      outputMessage.setStatusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+      outputMessage.flush();
+      return;
+    }
+  }
+  writeWithMessageConverters(returnValue,returnType,inputMessage,outputMessage);
 }

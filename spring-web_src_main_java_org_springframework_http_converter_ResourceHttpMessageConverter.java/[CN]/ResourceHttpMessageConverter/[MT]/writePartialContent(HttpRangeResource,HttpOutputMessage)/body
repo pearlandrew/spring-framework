@@ -1,0 +1,49 @@
+{
+  Assert.notNull(resource,"Resource should not be null");
+  List<HttpRange> ranges=resource.getHttpRanges();
+  HttpHeaders responseHeaders=outputMessage.getHeaders();
+  MediaType contentType=responseHeaders.getContentType();
+  Long length=getContentLength(resource,contentType);
+  if (ranges.size() == 1) {
+    HttpRange range=ranges.get(0);
+    long start=range.getRangeStart(length);
+    long end=range.getRangeEnd(length);
+    long rangeLength=end - start + 1;
+    responseHeaders.add("Content-Range","bytes " + start + "-"+ end+ "/"+ length);
+    responseHeaders.setContentLength((int)rangeLength);
+    InputStream in=resource.getInputStream();
+    try {
+      copyRange(in,outputMessage.getBody(),start,end);
+    }
+  finally {
+      try {
+        in.close();
+      }
+ catch (      IOException ex) {
+      }
+    }
+  }
+ else {
+    String boundaryString=MimeTypeUtils.generateMultipartBoundaryString();
+    responseHeaders.set(HttpHeaders.CONTENT_TYPE,"multipart/byteranges; boundary=" + boundaryString);
+    OutputStream out=outputMessage.getBody();
+    for (    HttpRange range : ranges) {
+      long start=range.getRangeStart(length);
+      long end=range.getRangeEnd(length);
+      InputStream in=resource.getInputStream();
+      println(out);
+      print(out,"--" + boundaryString);
+      println(out);
+      if (contentType != null) {
+        print(out,"Content-Type: " + contentType.toString());
+        println(out);
+      }
+      print(out,"Content-Range: bytes " + start + "-"+ end+ "/"+ length);
+      println(out);
+      println(out);
+      copyRange(in,out,start,end);
+    }
+    println(out);
+    print(out,"--" + boundaryString + "--");
+  }
+}

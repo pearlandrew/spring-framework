@@ -1,17 +1,21 @@
 {
-  messageConverter=mock(HttpMessageConverter.class);
-  given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-  processor=new RequestResponseBodyMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
+  stringMessageConverter=mock(HttpMessageConverter.class);
+  given(stringMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+  resourceMessageConverter=mock(HttpMessageConverter.class);
+  given(resourceMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
+  processor=new RequestResponseBodyMethodProcessor(Arrays.asList(stringMessageConverter,resourceMessageConverter));
   Method methodHandle1=getClass().getMethod("handle1",String.class,Integer.TYPE);
   paramRequestBodyString=new MethodParameter(methodHandle1,0);
   paramInt=new MethodParameter(methodHandle1,1);
   returnTypeString=new MethodParameter(methodHandle1,-1);
   returnTypeInt=new MethodParameter(getClass().getMethod("handle2"),-1);
   returnTypeStringProduces=new MethodParameter(getClass().getMethod("handle3"),-1);
+  returnTypeResource=new MethodParameter(getClass().getMethod("handle6"),-1);
   paramValidBean=new MethodParameter(getClass().getMethod("handle4",SimpleBean.class),0);
   paramStringNotRequired=new MethodParameter(getClass().getMethod("handle5",String.class),0);
   mavContainer=new ModelAndViewContainer();
   servletRequest=new MockHttpServletRequest();
   servletRequest.setMethod("POST");
-  webRequest=new ServletWebRequest(servletRequest,new MockHttpServletResponse());
+  servletResponse=new MockHttpServletResponse();
+  webRequest=new ServletWebRequest(servletRequest,servletResponse);
 }

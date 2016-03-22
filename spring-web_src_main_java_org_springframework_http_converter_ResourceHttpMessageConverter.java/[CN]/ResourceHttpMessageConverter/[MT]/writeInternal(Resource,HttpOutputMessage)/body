@@ -1,14 +1,9 @@
 {
-  InputStream in=resource.getInputStream();
-  try {
-    StreamUtils.copy(in,outputMessage.getBody());
+  outputMessage.getHeaders().add(HttpHeaders.ACCEPT_RANGES,"bytes");
+  if (resource instanceof HttpRangeResource) {
+    writePartialContent((HttpRangeResource)resource,outputMessage);
   }
-  finally {
-    try {
-      in.close();
-    }
- catch (    IOException ex) {
-    }
+ else {
+    writeContent(resource,outputMessage);
   }
-  outputMessage.getBody().flush();
 }

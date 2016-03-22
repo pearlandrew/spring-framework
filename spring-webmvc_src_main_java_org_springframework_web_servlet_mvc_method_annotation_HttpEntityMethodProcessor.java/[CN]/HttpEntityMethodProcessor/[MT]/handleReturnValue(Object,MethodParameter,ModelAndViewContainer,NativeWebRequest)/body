@@ -31,6 +31,19 @@
       return;
     }
   }
+  if (inputMessage.getHeaders().containsKey(HttpHeaders.RANGE) && Resource.class.isAssignableFrom(body.getClass())) {
+    try {
+      List<HttpRange> httpRanges=inputMessage.getHeaders().getRange();
+      Resource bodyResource=(Resource)body;
+      body=new HttpRangeResource(httpRanges,bodyResource);
+      outputMessage.setStatusCode(HttpStatus.PARTIAL_CONTENT);
+    }
+ catch (    IllegalArgumentException exc) {
+      outputMessage.setStatusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+      outputMessage.flush();
+      return;
+    }
+  }
   writeWithMessageConverters(body,returnType,inputMessage,outputMessage);
   outputMessage.flush();
 }

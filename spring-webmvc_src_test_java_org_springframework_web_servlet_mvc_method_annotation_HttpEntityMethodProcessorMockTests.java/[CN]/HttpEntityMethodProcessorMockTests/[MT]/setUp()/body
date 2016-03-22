@@ -1,12 +1,16 @@
 {
   dateFormat=new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",Locale.US);
   dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-  messageConverter=mock(HttpMessageConverter.class);
-  given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+  stringHttpMessageConverter=mock(HttpMessageConverter.class);
+  given(stringHttpMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+  resourceMessageConverter=mock(HttpMessageConverter.class);
+  given(resourceMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
   List<HttpMessageConverter<?>> converters=new ArrayList<>();
-  converters.add(messageConverter);
+  converters.add(stringHttpMessageConverter);
+  converters.add(resourceMessageConverter);
   processor=new HttpEntityMethodProcessor(converters);
-  reset(messageConverter);
+  reset(stringHttpMessageConverter);
+  reset(resourceMessageConverter);
   Method handle1=getClass().getMethod("handle1",HttpEntity.class,ResponseEntity.class,Integer.TYPE,RequestEntity.class);
   paramHttpEntity=new MethodParameter(handle1,0);
   paramRequestEntity=new MethodParameter(handle1,3);
@@ -17,6 +21,7 @@
   returnTypeHttpEntity=new MethodParameter(getClass().getMethod("handle2",HttpEntity.class),-1);
   returnTypeHttpEntitySubclass=new MethodParameter(getClass().getMethod("handle2x",HttpEntity.class),-1);
   returnTypeInt=new MethodParameter(getClass().getMethod("handle3"),-1);
+  returnTypeResponseEntityResource=new MethodParameter(getClass().getMethod("handle5"),-1);
   mavContainer=new ModelAndViewContainer();
   servletRequest=new MockHttpServletRequest("GET","/foo");
   servletResponse=new MockHttpServletResponse();

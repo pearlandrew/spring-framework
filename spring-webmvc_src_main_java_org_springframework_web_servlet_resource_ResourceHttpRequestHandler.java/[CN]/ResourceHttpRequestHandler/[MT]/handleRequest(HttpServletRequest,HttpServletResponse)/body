@@ -31,11 +31,25 @@
     logger.trace("HEAD request - skipping content");
     return;
   }
+  ServletServerHttpResponse outputMessage=new ServletServerHttpResponse(response);
   if (request.getHeader(HttpHeaders.RANGE) == null) {
     setHeaders(response,resource,mediaType);
-    writeContent(response,resource);
+    this.resourceHttpMessageConverter.write(resource,mediaType,outputMessage);
   }
  else {
-    writePartialContent(request,response,resource,mediaType);
+    ServletServerHttpRequest inputMessage=new ServletServerHttpRequest(request);
+    try {
+      List<HttpRange> httpRanges=inputMessage.getHeaders().getRange();
+      HttpRangeResource rangeResource=new HttpRangeResource(httpRanges,resource);
+      response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+      this.resourceHttpMessageConverter.write(rangeResource,mediaType,outputMessage);
+    }
+ catch (    IllegalArgumentException ex) {
+      Long contentLength=resource.contentLength();
+      if (contentLength != null) {
+        response.addHeader("Content-Range","bytes */" + resource.contentLength());
+      }
+      response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+    }
   }
 }

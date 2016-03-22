@@ -1,0 +1,10 @@
+{
+  Resource resource=new ByteArrayResource("Content".getBytes(Charset.forName("UTF-8")));
+  ResponseEntity<Resource> returnValue=ResponseEntity.ok(resource);
+  servletRequest.addHeader("Range","illegal");
+  given(resourceMessageConverter.canWrite(ByteArrayResource.class,null)).willReturn(true);
+  given(resourceMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
+  processor.handleReturnValue(returnValue,returnTypeResponseEntityResource,mavContainer,webRequest);
+  then(resourceMessageConverter).should(never()).write(any(ByteArrayResource.class),eq(MediaType.APPLICATION_OCTET_STREAM),any(HttpOutputMessage.class));
+  assertEquals(416,servletResponse.getStatus());
+}
