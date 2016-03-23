@@ -6,21 +6,31 @@
       Annotation[] annotations=element.getDeclaredAnnotations();
       List<T> aggregatedResults=(processor.aggregates() ? new ArrayList<T>() : null);
       for (      Annotation annotation : annotations) {
-        if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && ((annotationType != null ? annotation.annotationType() == annotationType : annotation.annotationType().getName().equals(annotationName)) || metaDepth > 0)) {
-          T result=processor.process(element,annotation,metaDepth);
-          if (result != null) {
-            if (processor.aggregates() && metaDepth == 0) {
-              aggregatedResults.add(result);
-            }
+        if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
+          if (annotation.annotationType() == annotationType || annotation.annotationType().getName().equals(annotationName)) {
+            T result=processor.process(element,annotation,metaDepth);
+            if (result != null) {
+              if (processor.aggregates() && metaDepth == 0) {
+                aggregatedResults.add(result);
+              }
  else {
-              return result;
+                return result;
+              }
+            }
+          }
+ else           if (annotation.annotationType() == containerType) {
+            for (            Annotation contained : getRawAnnotationsFromContainer(element,annotation)) {
+              T result=processor.process(element,contained,metaDepth);
+              if (result != null) {
+                aggregatedResults.add(result);
+              }
             }
           }
         }
       }
       for (      Annotation annotation : annotations) {
         if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-          T result=searchWithFindSemantics(annotation.annotationType(),annotationType,annotationName,processor,visited,metaDepth + 1);
+          T result=searchWithFindSemantics(annotation.annotationType(),annotationType,annotationName,containerType,processor,visited,metaDepth + 1);
           if (result != null) {
             processor.postProcess(annotation.annotationType(),annotation,result);
             if (processor.aggregates() && metaDepth == 0) {
@@ -38,12 +48,12 @@
       if (element instanceof Method) {
         Method method=(Method)element;
         Method resolvedMethod=BridgeMethodResolver.findBridgedMethod(method);
-        T result=searchWithFindSemantics(resolvedMethod,annotationType,annotationName,processor,visited,metaDepth);
+        T result=searchWithFindSemantics(resolvedMethod,annotationType,annotationName,containerType,processor,visited,metaDepth);
         if (result != null) {
           return result;
         }
         Class<?>[] ifcs=method.getDeclaringClass().getInterfaces();
-        result=searchOnInterfaces(method,annotationType,annotationName,processor,visited,metaDepth,ifcs);
+        result=searchOnInterfaces(method,annotationType,annotationName,containerType,processor,visited,metaDepth,ifcs);
         if (result != null) {
           return result;
         }
@@ -56,14 +66,14 @@
           try {
             Method equivalentMethod=clazz.getDeclaredMethod(method.getName(),method.getParameterTypes());
             Method resolvedEquivalentMethod=BridgeMethodResolver.findBridgedMethod(equivalentMethod);
-            result=searchWithFindSemantics(resolvedEquivalentMethod,annotationType,annotationName,processor,visited,metaDepth);
+            result=searchWithFindSemantics(resolvedEquivalentMethod,annotationType,annotationName,containerType,processor,visited,metaDepth);
             if (result != null) {
               return result;
             }
           }
  catch (          NoSuchMethodException ex) {
           }
-          result=searchOnInterfaces(method,annotationType,annotationName,processor,visited,metaDepth,clazz.getInterfaces());
+          result=searchOnInterfaces(method,annotationType,annotationName,containerType,processor,visited,metaDepth,clazz.getInterfaces());
           if (result != null) {
             return result;
           }
@@ -72,14 +82,14 @@
       if (element instanceof Class) {
         Class<?> clazz=(Class<?>)element;
         for (        Class<?> ifc : clazz.getInterfaces()) {
-          T result=searchWithFindSemantics(ifc,annotationType,annotationName,processor,visited,metaDepth);
+          T result=searchWithFindSemantics(ifc,annotationType,annotationName,containerType,processor,visited,metaDepth);
           if (result != null) {
             return result;
           }
         }
         Class<?> superclass=clazz.getSuperclass();
         if (superclass != null && Object.class != superclass) {
-          T result=searchWithFindSemantics(superclass,annotationType,annotationName,processor,visited,metaDepth);
+          T result=searchWithFindSemantics(superclass,annotationType,annotationName,containerType,processor,visited,metaDepth);
           if (result != null) {
             return result;
           }
