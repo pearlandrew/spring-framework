@@ -1,13 +1,11 @@
 {
   String etagValue="\"some-etag\"";
   servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH,etagValue);
-  servletRequest.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE,dateFormat.format(new Date().getTime()));
+  servletRequest.addHeader(HttpHeaders.IF_MATCH,"ifmatch");
   HttpHeaders responseHeaders=new HttpHeaders();
   responseHeaders.set(HttpHeaders.ETAG,etagValue);
-  ResponseEntity<String> returnValue=new ResponseEntity<String>("body",responseHeaders,HttpStatus.OK);
-  given(messageConverter.canWrite(String.class,null)).willReturn(true);
-  given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-  given(messageConverter.canWrite(String.class,MediaType.TEXT_PLAIN)).willReturn(true);
+  ResponseEntity<String> returnValue=new ResponseEntity<>("body",responseHeaders,HttpStatus.OK);
+  initStringMessageConversion(MediaType.TEXT_PLAIN);
   processor.handleReturnValue(returnValue,returnTypeResponseEntity,mavContainer,webRequest);
   assertResponseOkWithBody("body");
   assertEquals(1,servletResponse.getHeaderValues(HttpHeaders.ETAG).size());

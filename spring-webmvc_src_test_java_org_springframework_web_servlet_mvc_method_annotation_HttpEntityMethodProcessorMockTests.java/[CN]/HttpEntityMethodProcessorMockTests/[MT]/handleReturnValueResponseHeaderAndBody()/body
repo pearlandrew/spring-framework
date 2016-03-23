@@ -1,10 +1,8 @@
 {
   HttpHeaders responseHeaders=new HttpHeaders();
   responseHeaders.set("header","headerValue");
-  ResponseEntity<String> returnValue=new ResponseEntity<String>("body",responseHeaders,HttpStatus.ACCEPTED);
-  given(messageConverter.canWrite(String.class,null)).willReturn(true);
-  given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-  given(messageConverter.canWrite(String.class,MediaType.TEXT_PLAIN)).willReturn(true);
+  ResponseEntity<String> returnValue=new ResponseEntity<>("body",responseHeaders,HttpStatus.ACCEPTED);
+  initStringMessageConversion(MediaType.TEXT_PLAIN);
   processor.handleReturnValue(returnValue,returnTypeResponseEntity,mavContainer,webRequest);
   ArgumentCaptor<HttpOutputMessage> outputMessage=ArgumentCaptor.forClass(HttpOutputMessage.class);
   verify(messageConverter).write(eq("body"),eq(MediaType.TEXT_PLAIN),outputMessage.capture());

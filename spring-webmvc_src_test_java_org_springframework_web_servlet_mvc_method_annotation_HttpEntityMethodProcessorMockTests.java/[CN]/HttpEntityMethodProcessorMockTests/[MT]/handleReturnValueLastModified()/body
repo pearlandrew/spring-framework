@@ -4,10 +4,8 @@
   servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE,dateFormat.format(currentTime));
   HttpHeaders responseHeaders=new HttpHeaders();
   responseHeaders.setDate(HttpHeaders.LAST_MODIFIED,oneMinuteAgo);
-  ResponseEntity<String> returnValue=new ResponseEntity<String>("body",responseHeaders,HttpStatus.OK);
-  given(messageConverter.canWrite(String.class,null)).willReturn(true);
-  given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-  given(messageConverter.canWrite(String.class,MediaType.TEXT_PLAIN)).willReturn(true);
+  ResponseEntity<String> returnValue=new ResponseEntity<>("body",responseHeaders,HttpStatus.OK);
+  initStringMessageConversion(MediaType.TEXT_PLAIN);
   processor.handleReturnValue(returnValue,returnTypeResponseEntity,mavContainer,webRequest);
   assertResponseNotModified();
   assertEquals(1,servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
