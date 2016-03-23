@@ -1,0 +1,20 @@
+{
+  if (!responseHeaders.containsKey(HttpHeaders.VARY)) {
+    return entityHeaders.getVary();
+  }
+  List<String> entityHeadersVary=entityHeaders.getVary();
+  List<String> result=new ArrayList<String>(entityHeadersVary);
+  for (  String header : responseHeaders.get(HttpHeaders.VARY)) {
+    for (    String existing : StringUtils.tokenizeToStringArray(header,",")) {
+      if ("*".equals(existing)) {
+        return Collections.emptyList();
+      }
+      for (      String value : entityHeadersVary) {
+        if (value.equalsIgnoreCase(existing)) {
+          result.remove(value);
+        }
+      }
+    }
+  }
+  return result;
+}

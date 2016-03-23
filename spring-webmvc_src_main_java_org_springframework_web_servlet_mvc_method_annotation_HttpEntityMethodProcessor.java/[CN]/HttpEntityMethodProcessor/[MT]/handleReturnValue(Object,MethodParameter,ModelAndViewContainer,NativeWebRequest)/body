@@ -7,9 +7,18 @@
   ServletServerHttpResponse outputMessage=createOutputMessage(webRequest);
   Assert.isInstanceOf(HttpEntity.class,returnValue);
   HttpEntity<?> responseEntity=(HttpEntity<?>)returnValue;
+  HttpHeaders outputHeaders=outputMessage.getHeaders();
   HttpHeaders entityHeaders=responseEntity.getHeaders();
+  if (outputHeaders.containsKey(VARY) && entityHeaders.containsKey(VARY)) {
+    List<String> values=getVaryRequestHeadersToAdd(outputHeaders,entityHeaders);
+    if (!values.isEmpty()) {
+      outputHeaders.setVary(values);
+    }
+  }
   if (!entityHeaders.isEmpty()) {
-    outputMessage.getHeaders().putAll(entityHeaders);
+    for (    Map.Entry<String,List<String>> entry : entityHeaders.entrySet()) {
+      outputHeaders.putIfAbsent(entry.getKey(),entry.getValue());
+    }
   }
   Object body=responseEntity.getBody();
   if (responseEntity instanceof ResponseEntity) {

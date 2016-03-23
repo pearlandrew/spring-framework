@@ -1,0 +1,20 @@
+{
+  if (!response.containsHeader(HttpHeaders.VARY)) {
+    return Arrays.asList(getVaryByRequestHeaders());
+  }
+  Collection<String> result=new ArrayList<String>(getVaryByRequestHeaders().length);
+  Collections.addAll(result,getVaryByRequestHeaders());
+  for (  String header : response.getHeaders(HttpHeaders.VARY)) {
+    for (    String existing : StringUtils.tokenizeToStringArray(header,",")) {
+      if ("*".equals(existing)) {
+        return Collections.emptyList();
+      }
+      for (      String value : getVaryByRequestHeaders()) {
+        if (value.equalsIgnoreCase(existing)) {
+          result.remove(value);
+        }
+      }
+    }
+  }
+  return result;
+}
