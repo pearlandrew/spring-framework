@@ -1,7 +1,7 @@
 {
   Assert.notNull(testClass,"testClass must not be null");
   Class<ProfileValueSourceConfiguration> annotationType=ProfileValueSourceConfiguration.class;
-  ProfileValueSourceConfiguration config=findAnnotation(testClass,annotationType);
+  ProfileValueSourceConfiguration config=AnnotatedElementUtils.findMergedAnnotation(testClass,annotationType);
   if (logger.isDebugEnabled()) {
     logger.debug("Retrieved @ProfileValueSourceConfiguration [" + config + "] for test class ["+ testClass.getName()+ "]");
   }
@@ -23,9 +23,9 @@
     try {
       profileValueSource=profileValueSourceType.newInstance();
     }
- catch (    Exception e) {
+ catch (    Exception ex) {
       if (logger.isWarnEnabled()) {
-        logger.warn("Could not instantiate a ProfileValueSource of type [" + profileValueSourceType + "] for class ["+ testClass.getName()+ "]: using default.",e);
+        logger.warn("Could not instantiate a ProfileValueSource of type [" + profileValueSourceType + "] for class ["+ testClass.getName()+ "]: using default.",ex);
       }
       profileValueSource=SystemProfileValueSource.getInstance();
     }

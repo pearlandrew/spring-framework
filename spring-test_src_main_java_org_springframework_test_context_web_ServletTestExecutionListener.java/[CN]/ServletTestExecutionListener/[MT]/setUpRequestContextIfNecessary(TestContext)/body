@@ -6,7 +6,9 @@
   if (context instanceof WebApplicationContext) {
     WebApplicationContext wac=(WebApplicationContext)context;
     ServletContext servletContext=wac.getServletContext();
-    Assert.state(servletContext instanceof MockServletContext,String.format("The WebApplicationContext for test context %s must be configured with a MockServletContext.",testContext));
+    if (!(servletContext instanceof MockServletContext)) {
+      throw new IllegalStateException(String.format("The WebApplicationContext for test context %s must be configured with a MockServletContext.",testContext));
+    }
     if (logger.isDebugEnabled()) {
       logger.debug(String.format("Setting up MockHttpServletRequest, MockHttpServletResponse, ServletWebRequest, and RequestContextHolder for test context %s.",testContext));
     }
