@@ -1,12 +1,12 @@
 {
-  RequestMethod requestMethod=getRequestMethod(httpMethod);
-  if (requestMethod != null) {
+  HttpMethod httpMethod=HttpMethod.resolve(httpMethodValue);
+  if (httpMethod != null) {
     for (    RequestMethod method : getMethods()) {
-      if (method.equals(requestMethod)) {
+      if (httpMethod.matches(method.name())) {
         return new RequestMethodsRequestCondition(method);
       }
     }
-    if (RequestMethod.HEAD.equals(requestMethod) && getMethods().contains(RequestMethod.GET)) {
+    if (httpMethod == HttpMethod.HEAD && getMethods().contains(RequestMethod.GET)) {
       return HEAD_CONDITION;
     }
   }
