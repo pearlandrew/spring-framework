@@ -1,9 +1,14 @@
 {
   for (  Annotation annotation : annotations) {
-    if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && ((annotationType != null ? annotation.annotationType() == annotationType : annotation.annotationType().getName().equals(annotationName)) || metaDepth > 0)) {
+    if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && ((annotation.annotationType() == annotationType || annotation.annotationType().getName().equals(annotationName)) || metaDepth > 0)) {
       T result=processor.process(annotatedElement,annotation,metaDepth);
       if (result != null) {
-        return result;
+        if (processor.aggregates() && metaDepth == 0) {
+          processor.getAggregatedResults().add(result);
+        }
+ else {
+          return result;
+        }
       }
     }
   }
@@ -12,7 +17,12 @@
       T result=searchWithGetSemantics(annotation.annotationType(),annotationType,annotationName,processor,visited,metaDepth + 1);
       if (result != null) {
         processor.postProcess(annotatedElement,annotation,result);
-        return result;
+        if (processor.aggregates() && metaDepth == 0) {
+          processor.getAggregatedResults().add(result);
+        }
+ else {
+          return result;
+        }
       }
     }
   }
