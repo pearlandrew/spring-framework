@@ -1,16 +1,8 @@
 {
   for (  Annotation annotation : annotations) {
     if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-      if (annotation.annotationType() == containerType) {
-        for (        Annotation contained : getRawAnnotationsFromContainer(annotatedElement,annotation)) {
-          T result=processor.process(annotatedElement,contained,metaDepth);
-          if (result != null) {
-            processor.getAggregatedResults().add(result);
-          }
-        }
-      }
- else       if ((annotation.annotationType() == annotationType || annotation.annotationType().getName().equals(annotationName)) || metaDepth > 0) {
-        T result=processor.process(annotatedElement,annotation,metaDepth);
+      if ((annotation.annotationType() == annotationType || annotation.annotationType().getName().equals(annotationName)) || processor.alwaysProcesses()) {
+        T result=processor.process(element,annotation,metaDepth);
         if (result != null) {
           if (processor.aggregates() && metaDepth == 0) {
             processor.getAggregatedResults().add(result);
@@ -20,13 +12,21 @@
           }
         }
       }
+ else       if (annotation.annotationType() == containerType) {
+        for (        Annotation contained : getRawAnnotationsFromContainer(element,annotation)) {
+          T result=processor.process(element,contained,metaDepth);
+          if (result != null) {
+            processor.getAggregatedResults().add(result);
+          }
+        }
+      }
     }
   }
   for (  Annotation annotation : annotations) {
     if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
       T result=searchWithGetSemantics(annotation.annotationType(),annotationType,annotationName,containerType,processor,visited,metaDepth + 1);
       if (result != null) {
-        processor.postProcess(annotatedElement,annotation,result);
+        processor.postProcess(element,annotation,result);
         if (processor.aggregates() && metaDepth == 0) {
           processor.getAggregatedResults().add(result);
         }

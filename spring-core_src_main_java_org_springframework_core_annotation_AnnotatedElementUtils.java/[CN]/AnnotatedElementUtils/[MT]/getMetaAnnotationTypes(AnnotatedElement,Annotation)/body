@@ -1,0 +1,20 @@
+{
+  if (composed == null) {
+    return null;
+  }
+  try {
+    final Set<String> types=new LinkedHashSet<String>();
+    searchWithGetSemantics(composed.annotationType(),null,null,null,new SimpleAnnotationProcessor<Object>(true){
+      @Override public Object process(      AnnotatedElement annotatedElement,      Annotation annotation,      int metaDepth){
+        types.add(annotation.annotationType().getName());
+        return CONTINUE;
+      }
+    }
+,new HashSet<AnnotatedElement>(),1);
+    return (!types.isEmpty() ? types : null);
+  }
+ catch (  Throwable ex) {
+    AnnotationUtils.rethrowAnnotationConfigurationException(ex);
+    throw new IllegalStateException("Failed to introspect annotations on " + element,ex);
+  }
+}

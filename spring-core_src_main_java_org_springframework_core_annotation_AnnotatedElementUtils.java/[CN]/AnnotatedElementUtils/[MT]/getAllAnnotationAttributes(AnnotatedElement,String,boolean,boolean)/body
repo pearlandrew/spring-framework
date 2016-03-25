@@ -1,15 +1,12 @@
 {
   final MultiValueMap<String,Object> attributesMap=new LinkedMultiValueMap<String,Object>();
-  searchWithGetSemantics(element,null,annotationName,new SimpleAnnotationProcessor<Void>(){
-    @Override public Void process(    AnnotatedElement annotatedElement,    Annotation annotation,    int metaDepth){
-      boolean found=annotation.annotationType().getName().equals(annotationName);
-      if (found) {
-        AnnotationAttributes annotationAttributes=AnnotationUtils.getAnnotationAttributes(annotation,classValuesAsString,nestedAnnotationsAsMap);
-        for (        Map.Entry<String,Object> entry : annotationAttributes.entrySet()) {
-          attributesMap.add(entry.getKey(),entry.getValue());
-        }
+  searchWithGetSemantics(element,null,annotationName,new SimpleAnnotationProcessor<Object>(){
+    @Override public Object process(    AnnotatedElement annotatedElement,    Annotation annotation,    int metaDepth){
+      AnnotationAttributes annotationAttributes=AnnotationUtils.getAnnotationAttributes(annotation,classValuesAsString,nestedAnnotationsAsMap);
+      for (      Map.Entry<String,Object> entry : annotationAttributes.entrySet()) {
+        attributesMap.add(entry.getKey(),entry.getValue());
       }
-      return null;
+      return CONTINUE;
     }
   }
 );
