@@ -1,11 +1,22 @@
 {
-  if (fieldType != null && boolean.class == fieldType || Boolean.class == fieldType) {
-    return Boolean.FALSE;
+  if (fieldType != null) {
+    try {
+      if (boolean.class == fieldType || Boolean.class == fieldType) {
+        return Boolean.FALSE;
+      }
+ else       if (fieldType.isArray()) {
+        return Array.newInstance(fieldType.getComponentType(),0);
+      }
+ else       if (Collection.class.isAssignableFrom(fieldType)) {
+        return CollectionFactory.createCollection(fieldType,0);
+      }
+ else       if (Map.class.isAssignableFrom(fieldType)) {
+        return CollectionFactory.createMap(fieldType,0);
+      }
+    }
+ catch (    IllegalArgumentException exc) {
+      return null;
+    }
   }
- else   if (fieldType != null && fieldType.isArray()) {
-    return Array.newInstance(fieldType.getComponentType(),0);
-  }
- else {
-    return null;
-  }
+  return null;
 }
