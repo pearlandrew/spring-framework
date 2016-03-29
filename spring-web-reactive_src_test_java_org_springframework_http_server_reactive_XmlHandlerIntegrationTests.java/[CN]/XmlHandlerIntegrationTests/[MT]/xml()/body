@@ -6,9 +6,7 @@
   RequestEntity<Person> request=RequestEntity.post(new URI("http://localhost:" + port)).body(johnDoe);
   ResponseEntity<Person> response=restTemplate.exchange(request,Person.class);
   assertEquals(janeDoe,response.getBody());
-  while (!handler.requestComplete) {
-    Thread.sleep(100);
-  }
+  handler.requestComplete.await(10,TimeUnit.SECONDS);
   if (handler.requestError != null) {
     throw handler.requestError;
   }
