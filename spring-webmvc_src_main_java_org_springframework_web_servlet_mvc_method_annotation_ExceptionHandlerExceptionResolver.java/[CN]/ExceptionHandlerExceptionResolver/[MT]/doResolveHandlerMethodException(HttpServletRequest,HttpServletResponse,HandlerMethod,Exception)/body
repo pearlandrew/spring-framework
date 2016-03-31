@@ -11,7 +11,12 @@
     if (logger.isDebugEnabled()) {
       logger.debug("Invoking @ExceptionHandler method: " + exceptionHandlerMethod);
     }
-    exceptionHandlerMethod.invokeAndHandle(webRequest,mavContainer,exception,handlerMethod);
+    if (exception.getCause() != null) {
+      exceptionHandlerMethod.invokeAndHandle(webRequest,mavContainer,exception,exception.getCause(),handlerMethod);
+    }
+ else {
+      exceptionHandlerMethod.invokeAndHandle(webRequest,mavContainer,exception,handlerMethod);
+    }
   }
  catch (  Exception invocationEx) {
     if (logger.isDebugEnabled()) {

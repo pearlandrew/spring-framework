@@ -39,13 +39,16 @@
  catch (    Exception ex) {
       dispatchException=ex;
     }
+catch (    Error err) {
+      dispatchException=new NestedServletException("Handler dispatch failed",err);
+    }
     processDispatchResult(processedRequest,response,mappedHandler,mv,dispatchException);
   }
  catch (  Exception ex) {
     triggerAfterCompletion(processedRequest,response,mappedHandler,ex);
   }
 catch (  Error err) {
-    triggerAfterCompletionWithError(processedRequest,response,mappedHandler,err);
+    triggerAfterCompletion(processedRequest,response,mappedHandler,new NestedServletException("Handler processing failed",err));
   }
  finally {
     if (asyncManager.isConcurrentHandlingStarted()) {
