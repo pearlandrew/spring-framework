@@ -1,5 +1,19 @@
 {
-  @SuppressWarnings({"rawtypes","unchecked"}) Configuration<?> configuration=(this.providerClass != null ? Validation.byProvider(this.providerClass).configure() : Validation.byDefaultProvider().configure());
+  Configuration<?> configuration;
+  if (this.providerClass != null) {
+    ProviderSpecificBootstrap bootstrap=Validation.byProvider(this.providerClass);
+    if (this.validationProviderResolver != null) {
+      bootstrap=bootstrap.providerResolver(this.validationProviderResolver);
+    }
+    configuration=bootstrap.configure();
+  }
+ else {
+    GenericBootstrap bootstrap=Validation.byDefaultProvider();
+    if (this.validationProviderResolver != null) {
+      bootstrap=bootstrap.providerResolver(this.validationProviderResolver);
+    }
+    configuration=bootstrap.configure();
+  }
   if (this.applicationContext != null) {
     try {
       Method eclMethod=configuration.getClass().getMethod("externalClassLoader",ClassLoader.class);
