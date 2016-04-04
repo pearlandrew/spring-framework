@@ -4,7 +4,9 @@
   String id=endpoint.getId();
   Assert.notNull(id,"Endpoint id must not be null");
 synchronized (this.listenerContainers) {
-    Assert.state(!this.listenerContainers.containsKey(id),"Another endpoint is already registered with id '" + id + "'");
+    if (this.listenerContainers.containsKey(id)) {
+      throw new IllegalStateException("Another endpoint is already registered with id '" + id + "'");
+    }
     MessageListenerContainer container=createListenerContainer(endpoint,factory);
     this.listenerContainers.put(id,container);
     if (startImmediately) {
