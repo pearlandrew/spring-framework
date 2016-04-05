@@ -1,13 +1,17 @@
 {
   Resource resource=this.resourceLoader.getResource(name);
-  try {
-    return resource.getInputStream();
+  if (resource.exists()) {
+    try {
+      return resource.getInputStream();
+    }
+ catch (    IOException ex) {
+      if (logger.isWarnEnabled()) {
+        logger.warn("Could not load " + resource);
+      }
+      return null;
+    }
   }
- catch (  FileNotFoundException ex) {
-    return null;
-  }
-catch (  IOException ex) {
-    logger.warn("Could not load " + resource);
-    return null;
+ else {
+    return getClassLoader().getResourceAsStream(name);
   }
 }
