@@ -1,20 +1,17 @@
 {
-  BeanWrapper bw=new BeanWrapperImpl(ThreadPoolTaskExecutor.class);
-  determinePoolSizeRange(bw);
+  this.target=new ThreadPoolTaskExecutor();
+  determinePoolSizeRange();
   if (this.queueCapacity != null) {
-    bw.setPropertyValue("queueCapacity",this.queueCapacity);
+    this.target.setQueueCapacity(this.queueCapacity);
   }
   if (this.keepAliveSeconds != null) {
-    bw.setPropertyValue("keepAliveSeconds",this.keepAliveSeconds);
+    this.target.setKeepAliveSeconds(this.keepAliveSeconds);
   }
   if (this.rejectedExecutionHandler != null) {
-    bw.setPropertyValue("rejectedExecutionHandler",this.rejectedExecutionHandler);
+    this.target.setRejectedExecutionHandler(this.rejectedExecutionHandler);
   }
   if (this.beanName != null) {
-    bw.setPropertyValue("threadNamePrefix",this.beanName + "-");
+    this.target.setThreadNamePrefix(this.beanName + "-");
   }
-  this.target=(TaskExecutor)bw.getWrappedInstance();
-  if (this.target instanceof InitializingBean) {
-    ((InitializingBean)this.target).afterPropertiesSet();
-  }
+  this.target.afterPropertiesSet();
 }
