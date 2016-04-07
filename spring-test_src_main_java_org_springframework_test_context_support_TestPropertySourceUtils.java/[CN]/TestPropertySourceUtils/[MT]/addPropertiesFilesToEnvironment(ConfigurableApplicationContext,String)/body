@@ -1,15 +1,5 @@
 {
   Assert.notNull(context,"context must not be null");
   Assert.notNull(locations,"locations must not be null");
-  try {
-    ConfigurableEnvironment environment=context.getEnvironment();
-    for (    String location : locations) {
-      String resolvedLocation=environment.resolveRequiredPlaceholders(location);
-      Resource resource=context.getResource(resolvedLocation);
-      environment.getPropertySources().addFirst(new ResourcePropertySource(resource));
-    }
-  }
- catch (  IOException e) {
-    throw new IllegalStateException("Failed to add PropertySource to Environment",e);
-  }
+  addPropertiesFilesToEnvironment(context.getEnvironment(),context,locations);
 }
