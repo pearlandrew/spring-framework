@@ -1,9 +1,16 @@
 {
   long length=resource.contentLength();
   if (length > Integer.MAX_VALUE) {
-    throw new IOException("Resource content too long (beyond Integer.MAX_VALUE): " + resource);
+    if (contentLengthLongAvailable) {
+      response.setContentLengthLong(length);
+    }
+ else {
+      response.setHeader(HttpHeaders.CONTENT_LENGTH,Long.toString(length));
+    }
   }
-  response.setContentLength((int)length);
+ else {
+    response.setContentLength((int)length);
+  }
   if (mediaType != null) {
     response.setContentType(mediaType.toString());
   }
