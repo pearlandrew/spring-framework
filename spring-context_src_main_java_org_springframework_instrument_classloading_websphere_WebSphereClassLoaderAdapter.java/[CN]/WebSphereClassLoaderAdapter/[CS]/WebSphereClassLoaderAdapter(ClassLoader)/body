@@ -1,17 +1,19 @@
 {
-  Class<?> wsCompoundClassLoaderClass=null;
+  Class<?> wsCompoundClassLoaderClass;
   try {
     wsCompoundClassLoaderClass=classLoader.loadClass(COMPOUND_CLASS_LOADER_NAME);
-    cloneConstructor=classLoader.getClass().getDeclaredConstructor(wsCompoundClassLoaderClass);
-    cloneConstructor.setAccessible(true);
-    wsPreProcessorClass=classLoader.loadClass(CLASS_PRE_PROCESSOR_NAME);
-    addPreDefinePlugin=classLoader.getClass().getMethod("addPreDefinePlugin",wsPreProcessorClass);
-    transformerList=wsCompoundClassLoaderClass.getDeclaredField(PLUGINS_FIELD);
-    transformerList.setAccessible(true);
+    this.cloneConstructor=classLoader.getClass().getDeclaredConstructor(wsCompoundClassLoaderClass);
+    this.cloneConstructor.setAccessible(true);
+    this.wsPreProcessorClass=classLoader.loadClass(CLASS_PRE_PROCESSOR_NAME);
+    this.addPreDefinePlugin=classLoader.getClass().getMethod("addPreDefinePlugin",this.wsPreProcessorClass);
+    this.transformerList=wsCompoundClassLoaderClass.getDeclaredField(PLUGINS_FIELD);
+    this.transformerList.setAccessible(true);
   }
  catch (  Exception ex) {
-    throw new IllegalStateException("Could not initialize WebSphere LoadTimeWeaver because WebSphere 7 API classes are not available",ex);
+    throw new IllegalStateException("Could not initialize WebSphere LoadTimeWeaver because WebSphere API classes are not available",ex);
   }
-  Assert.isInstanceOf(wsCompoundClassLoaderClass,classLoader,"ClassLoader must be instance of [" + COMPOUND_CLASS_LOADER_NAME + "]");
+  if (!wsCompoundClassLoaderClass.isInstance(classLoader)) {
+    throw new IllegalArgumentException("ClassLoader must be instance of [" + COMPOUND_CLASS_LOADER_NAME + "]");
+  }
   this.classLoader=classLoader;
 }
