@@ -1,10 +1,13 @@
 {
   JavaType javaType=getJavaType(type,contextClass);
+  if (!canRead(mediaType)) {
+    return false;
+  }
   if (!logger.isWarnEnabled()) {
-    return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
+    return this.objectMapper.canDeserialize(javaType);
   }
   AtomicReference<Throwable> causeRef=new AtomicReference<Throwable>();
-  if (this.objectMapper.canDeserialize(javaType,causeRef) && canRead(mediaType)) {
+  if (this.objectMapper.canDeserialize(javaType,causeRef)) {
     return true;
   }
   Throwable cause=causeRef.get();
