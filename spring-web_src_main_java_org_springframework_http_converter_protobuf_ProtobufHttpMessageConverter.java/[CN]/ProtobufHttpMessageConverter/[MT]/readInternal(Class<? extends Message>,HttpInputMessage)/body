@@ -1,25 +1,30 @@
 {
   MediaType contentType=inputMessage.getHeaders().getContentType();
-  contentType=(contentType != null ? contentType : PROTOBUF);
-  Charset charset=getCharset(inputMessage.getHeaders());
-  InputStreamReader reader=new InputStreamReader(inputMessage.getBody(),charset);
+  if (contentType == null) {
+    contentType=PROTOBUF;
+  }
+  Charset charset=contentType.getCharSet();
+  if (charset == null) {
+    charset=DEFAULT_CHARSET;
+  }
   try {
     Message.Builder builder=getMessageBuilder(clazz);
-    if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
-      JsonFormat.merge(reader,this.extensionRegistry,builder);
-    }
- else     if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
+    if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
+      InputStreamReader reader=new InputStreamReader(inputMessage.getBody(),charset);
       TextFormat.merge(reader,this.extensionRegistry,builder);
     }
+ else     if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
+      JSON_FORMAT.merge(inputMessage.getBody(),charset,this.extensionRegistry,builder);
+    }
  else     if (MediaType.APPLICATION_XML.isCompatibleWith(contentType)) {
-      XmlFormat.merge(reader,this.extensionRegistry,builder);
+      XML_FORMAT.merge(inputMessage.getBody(),charset,this.extensionRegistry,builder);
     }
  else {
       builder.mergeFrom(inputMessage.getBody(),this.extensionRegistry);
     }
     return builder.build();
   }
- catch (  Exception e) {
-    throw new HttpMessageNotReadableException("Could not read Protobuf message: " + e.getMessage(),e);
+ catch (  Exception ex) {
+    throw new HttpMessageNotReadableException("Could not read Protobuf message: " + ex.getMessage(),ex);
   }
 }

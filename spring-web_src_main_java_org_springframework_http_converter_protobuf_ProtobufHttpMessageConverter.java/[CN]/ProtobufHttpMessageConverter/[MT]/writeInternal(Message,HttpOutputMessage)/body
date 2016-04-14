@@ -1,25 +1,25 @@
 {
   MediaType contentType=outputMessage.getHeaders().getContentType();
-  Charset charset=getCharset(contentType);
-  if (MediaType.TEXT_HTML.isCompatibleWith(contentType)) {
-    final OutputStreamWriter outputStreamWriter=new OutputStreamWriter(outputMessage.getBody(),charset);
-    HtmlFormat.print(message,outputStreamWriter);
-    outputStreamWriter.flush();
+  if (contentType == null) {
+    contentType=getDefaultContentType(message);
   }
- else   if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
-    final OutputStreamWriter outputStreamWriter=new OutputStreamWriter(outputMessage.getBody(),charset);
-    JsonFormat.print(message,outputStreamWriter);
-    outputStreamWriter.flush();
+  Charset charset=contentType.getCharSet();
+  if (charset == null) {
+    charset=DEFAULT_CHARSET;
   }
- else   if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
-    final OutputStreamWriter outputStreamWriter=new OutputStreamWriter(outputMessage.getBody(),charset);
+  if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
+    OutputStreamWriter outputStreamWriter=new OutputStreamWriter(outputMessage.getBody(),charset);
     TextFormat.print(message,outputStreamWriter);
     outputStreamWriter.flush();
   }
+ else   if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
+    JSON_FORMAT.print(message,outputMessage.getBody(),charset);
+  }
  else   if (MediaType.APPLICATION_XML.isCompatibleWith(contentType)) {
-    final OutputStreamWriter outputStreamWriter=new OutputStreamWriter(outputMessage.getBody(),charset);
-    XmlFormat.print(message,outputStreamWriter);
-    outputStreamWriter.flush();
+    XML_FORMAT.print(message,outputMessage.getBody(),charset);
+  }
+ else   if (MediaType.TEXT_HTML.isCompatibleWith(contentType)) {
+    HTML_FORMAT.print(message,outputMessage.getBody(),charset);
   }
  else   if (PROTOBUF.isCompatibleWith(contentType)) {
     setProtoHeader(outputMessage,message);
