@@ -1,24 +1,15 @@
 {
-  if (targetClass == null) {
+  if (targetClass == null || !supportsMimeType(message.getHeaders())) {
     return false;
   }
   JavaType javaType=this.objectMapper.constructType(targetClass);
   if (!logger.isWarnEnabled()) {
-    return (this.objectMapper.canDeserialize(javaType) && supportsMimeType(message.getHeaders()));
+    return this.objectMapper.canDeserialize(javaType);
   }
   AtomicReference<Throwable> causeRef=new AtomicReference<Throwable>();
-  if (this.objectMapper.canDeserialize(javaType,causeRef) && supportsMimeType(message.getHeaders())) {
+  if (this.objectMapper.canDeserialize(javaType,causeRef)) {
     return true;
   }
-  Throwable cause=causeRef.get();
-  if (cause != null) {
-    String msg="Failed to evaluate deserialization for type " + javaType;
-    if (logger.isDebugEnabled()) {
-      logger.warn(msg,cause);
-    }
- else {
-      logger.warn(msg + ": " + cause);
-    }
-  }
+  logWarningIfNecessary(javaType,causeRef.get());
   return false;
 }

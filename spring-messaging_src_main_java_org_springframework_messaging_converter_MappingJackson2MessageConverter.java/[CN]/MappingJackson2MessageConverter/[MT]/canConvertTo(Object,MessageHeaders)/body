@@ -1,20 +1,14 @@
 {
+  if (payload == null || !supportsMimeType(headers)) {
+    return false;
+  }
   if (!logger.isWarnEnabled()) {
-    return (this.objectMapper.canSerialize(payload.getClass()) && supportsMimeType(headers));
+    return this.objectMapper.canSerialize(payload.getClass());
   }
   AtomicReference<Throwable> causeRef=new AtomicReference<Throwable>();
-  if (this.objectMapper.canSerialize(payload.getClass(),causeRef) && supportsMimeType(headers)) {
+  if (this.objectMapper.canSerialize(payload.getClass(),causeRef)) {
     return true;
   }
-  Throwable cause=causeRef.get();
-  if (cause != null) {
-    String msg="Failed to evaluate serialization for type [" + payload.getClass() + "]";
-    if (logger.isDebugEnabled()) {
-      logger.warn(msg,cause);
-    }
- else {
-      logger.warn(msg + ": " + cause);
-    }
-  }
+  logWarningIfNecessary(payload.getClass(),causeRef.get());
   return false;
 }
