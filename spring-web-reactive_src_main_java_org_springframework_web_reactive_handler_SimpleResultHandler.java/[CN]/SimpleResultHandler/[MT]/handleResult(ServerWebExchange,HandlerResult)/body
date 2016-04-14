@@ -1,0 +1,11 @@
+{
+  Optional<Object> optional=result.getReturnValue();
+  if (!optional.isPresent()) {
+    return Mono.empty();
+  }
+  Object returnValue=optional.get();
+  if (returnValue instanceof Mono) {
+    return (Mono<Void>)returnValue;
+  }
+  return Mono.from(this.conversionService.convert(returnValue,Publisher.class));
+}
