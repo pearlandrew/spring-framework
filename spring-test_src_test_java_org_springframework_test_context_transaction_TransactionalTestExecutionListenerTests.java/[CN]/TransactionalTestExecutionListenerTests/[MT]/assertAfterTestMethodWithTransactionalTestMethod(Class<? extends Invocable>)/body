@@ -4,9 +4,10 @@
   given(testContext.getTestInstance()).willReturn(instance);
   given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("transactionalTest"));
   given(tm.getTransaction(BDDMockito.any(TransactionDefinition.class))).willReturn(new SimpleTransactionStatus());
-  assertFalse(instance.invoked);
+  assertFalse("callback not have been invoked",instance.invoked());
   TransactionContextHolder.removeCurrentTransactionContext();
   listener.beforeTestMethod(testContext);
+  assertFalse("callback not have been invoked",instance.invoked());
   listener.afterTestMethod(testContext);
-  assertTrue(instance.invoked);
+  assertTrue("callback should have been invoked",instance.invoked());
 }
