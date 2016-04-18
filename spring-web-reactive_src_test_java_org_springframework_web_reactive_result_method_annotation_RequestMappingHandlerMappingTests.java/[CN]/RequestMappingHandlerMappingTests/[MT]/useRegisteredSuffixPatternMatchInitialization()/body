@@ -1,0 +1,19 @@
+{
+  FileExtensionContentTypeResolver contentTypeResolver=mock(FileExtensionContentTypeResolver.class);
+  when(contentTypeResolver.getAllFileExtensions()).thenReturn(Collections.singletonList("json"));
+  final Set<String> actualExtensions=new HashSet<>();
+  RequestMappingHandlerMapping localHandlerMapping=new RequestMappingHandlerMapping(){
+    @Override protected RequestMappingInfo getMappingForMethod(    Method method,    Class<?> handlerType){
+      actualExtensions.addAll(getFileExtensions());
+      return super.getMappingForMethod(method,handlerType);
+    }
+  }
+;
+  this.wac.registerSingleton("testController",ComposedAnnotationController.class);
+  this.wac.refresh();
+  localHandlerMapping.setContentTypeResolver(contentTypeResolver);
+  localHandlerMapping.setUseRegisteredSuffixPatternMatch(true);
+  localHandlerMapping.setApplicationContext(this.wac);
+  localHandlerMapping.afterPropertiesSet();
+  assertEquals(Collections.singleton("json"),actualExtensions);
+}

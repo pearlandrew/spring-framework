@@ -1,0 +1,12 @@
+{
+  ServerWebExchange exchange=createExchange(HttpMethod.OPTIONS,requestURI);
+  HandlerMethod handlerMethod=getHandler(exchange);
+  ModelMap model=new ExtendedModelMap();
+  Mono<HandlerResult> mono=new InvocableHandlerMethod(handlerMethod).invokeForRequest(exchange,model);
+  HandlerResult result=mono.get();
+  assertNotNull(result);
+  Optional<Object> value=result.getReturnValue();
+  assertTrue(value.isPresent());
+  assertEquals(HttpHeaders.class,value.get().getClass());
+  assertEquals(allowHeader,((HttpHeaders)value.get()).getFirst("Allow"));
+}

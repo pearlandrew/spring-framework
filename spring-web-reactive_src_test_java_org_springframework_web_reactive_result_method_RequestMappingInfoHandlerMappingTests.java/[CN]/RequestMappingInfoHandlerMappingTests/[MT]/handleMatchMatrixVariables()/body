@@ -1,0 +1,29 @@
+{
+  ServerWebExchange exchange;
+  MultiValueMap<String,String> matrixVariables;
+  Map<String,String> uriVariables;
+  exchange=createExchange(HttpMethod.GET,"/");
+  handleMatch(exchange,"/{cars}","/cars;colors=red,blue,green;year=2012");
+  matrixVariables=getMatrixVariables(exchange,"cars");
+  uriVariables=getUriTemplateVariables(exchange);
+  assertNotNull(matrixVariables);
+  assertEquals(Arrays.asList("red","blue","green"),matrixVariables.get("colors"));
+  assertEquals("2012",matrixVariables.getFirst("year"));
+  assertEquals("cars",uriVariables.get("cars"));
+  exchange=createExchange(HttpMethod.GET,"/");
+  handleMatch(exchange,"/{cars:[^;]+}{params}","/cars;colors=red,blue,green;year=2012");
+  matrixVariables=getMatrixVariables(exchange,"params");
+  uriVariables=getUriTemplateVariables(exchange);
+  assertNotNull(matrixVariables);
+  assertEquals(Arrays.asList("red","blue","green"),matrixVariables.get("colors"));
+  assertEquals("2012",matrixVariables.getFirst("year"));
+  assertEquals("cars",uriVariables.get("cars"));
+  assertEquals(";colors=red,blue,green;year=2012",uriVariables.get("params"));
+  exchange=createExchange(HttpMethod.GET,"/");
+  handleMatch(exchange,"/{cars:[^;]+}{params}","/cars");
+  matrixVariables=getMatrixVariables(exchange,"params");
+  uriVariables=getUriTemplateVariables(exchange);
+  assertNull(matrixVariables);
+  assertEquals("cars",uriVariables.get("cars"));
+  assertEquals("",uriVariables.get("params"));
+}

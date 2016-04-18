@@ -1,0 +1,11 @@
+{
+  ServerWebExchange exchange=createExchange(HttpMethod.GET,"/content");
+  exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+  getHandler(exchange);
+  String name=HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
+  assertEquals(Collections.singleton(MediaType.APPLICATION_XML),exchange.getAttributes().get(name));
+  exchange=createExchange(HttpMethod.GET,"/content");
+  exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+  getHandler(exchange);
+  assertNull("Negated expression shouldn't be listed as producible type",exchange.getAttributes().get(name));
+}

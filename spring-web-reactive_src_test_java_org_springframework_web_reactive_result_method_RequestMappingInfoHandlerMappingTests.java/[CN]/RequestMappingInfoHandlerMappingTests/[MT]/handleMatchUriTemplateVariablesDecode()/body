@@ -1,0 +1,14 @@
+{
+  RequestMappingInfo key=RequestMappingInfo.paths("/{group}/{identifier}").build();
+  ServerWebExchange exchange=createExchange(HttpMethod.GET,"/group/a%2Fb");
+  HttpRequestPathHelper pathHelper=new HttpRequestPathHelper();
+  pathHelper.setUrlDecode(false);
+  String lookupPath=pathHelper.getLookupPathForRequest(exchange);
+  this.handlerMapping.setPathHelper(pathHelper);
+  this.handlerMapping.handleMatch(key,lookupPath,exchange);
+  String name=HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+  @SuppressWarnings("unchecked") Map<String,String> uriVariables=(Map<String,String>)exchange.getAttributes().get(name);
+  assertNotNull(uriVariables);
+  assertEquals("group",uriVariables.get("group"));
+  assertEquals("a/b",uriVariables.get("identifier"));
+}

@@ -1,0 +1,12 @@
+{
+  HttpRequestPathHelper urlPathHelper=new HttpRequestPathHelper();
+  urlPathHelper.setUrlDecode(false);
+  this.handlerMapping.setPathHelper(urlPathHelper);
+  ServerWebExchange exchange=createExchange(HttpMethod.GET,"/");
+  handleMatch(exchange,"/path{filter}","/path;mvar=a%2fb");
+  MultiValueMap<String,String> matrixVariables=getMatrixVariables(exchange,"filter");
+  Map<String,String> uriVariables=getUriTemplateVariables(exchange);
+  assertNotNull(matrixVariables);
+  assertEquals(Collections.singletonList("a/b"),matrixVariables.get("mvar"));
+  assertEquals(";mvar=a/b",uriVariables.get("filter"));
+}
