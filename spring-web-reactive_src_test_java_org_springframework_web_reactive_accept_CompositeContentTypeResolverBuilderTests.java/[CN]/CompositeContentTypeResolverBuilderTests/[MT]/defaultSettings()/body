@@ -1,0 +1,13 @@
+{
+  CompositeContentTypeResolver resolver=new CompositeContentTypeResolverBuilder().build();
+  ServerWebExchange exchange=createExchange("/flower.gif");
+  assertEquals("Should be able to resolve file extensions by default",Collections.singletonList(MediaType.IMAGE_GIF),resolver.resolveMediaTypes(exchange));
+  exchange=createExchange("/flower.xyz");
+  assertEquals("Should ignore unknown extensions by default",Collections.<MediaType>emptyList(),resolver.resolveMediaTypes(exchange));
+  exchange=createExchange("/flower");
+  exchange.getRequest().getQueryParams().add("format","gif");
+  assertEquals("Should not resolve request parameters by default",Collections.<MediaType>emptyList(),resolver.resolveMediaTypes(exchange));
+  exchange=createExchange("/flower");
+  exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.IMAGE_GIF));
+  assertEquals("Should resolve Accept header by default",Collections.singletonList(MediaType.IMAGE_GIF),resolver.resolveMediaTypes(exchange));
+}

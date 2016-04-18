@@ -1,0 +1,23 @@
+{
+  List<ContentTypeResolver> resolvers=new ArrayList<>();
+  if (this.favorPathExtension) {
+    PathExtensionContentTypeResolver resolver=new PathExtensionContentTypeResolver(this.mediaTypes);
+    resolver.setIgnoreUnknownExtensions(this.ignoreUnknownPathExtensions);
+    if (this.useJaf != null) {
+      resolver.setUseJaf(this.useJaf);
+    }
+    resolvers.add(resolver);
+  }
+  if (this.favorParameter) {
+    ParameterContentTypeResolver resolver=new ParameterContentTypeResolver(this.mediaTypes);
+    resolver.setParameterName(this.parameterName);
+    resolvers.add(resolver);
+  }
+  if (!this.ignoreAcceptHeader) {
+    resolvers.add(new HeaderContentTypeResolver());
+  }
+  if (this.contentTypeResolver != null) {
+    resolvers.add(this.contentTypeResolver);
+  }
+  return new CompositeContentTypeResolver(resolvers);
+}
