@@ -1,0 +1,28 @@
+{
+  Resource resource=new ClassPathResource("org/springframework/mail/javamail/mime.types");
+  if (resource.exists()) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("Loading JAF FileTypeMap from " + resource);
+    }
+    InputStream inputStream=null;
+    try {
+      inputStream=resource.getInputStream();
+      return new MimetypesFileTypeMap(inputStream);
+    }
+ catch (    IOException ex) {
+    }
+ finally {
+      if (inputStream != null) {
+        try {
+          inputStream.close();
+        }
+ catch (        IOException ex) {
+        }
+      }
+    }
+  }
+  if (logger.isTraceEnabled()) {
+    logger.trace("Loading default Java Activation Framework FileTypeMap");
+  }
+  return FileTypeMap.getDefaultFileTypeMap();
+}
