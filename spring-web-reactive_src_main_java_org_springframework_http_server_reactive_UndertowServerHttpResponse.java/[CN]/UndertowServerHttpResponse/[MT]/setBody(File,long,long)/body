@@ -1,0 +1,17 @@
+{
+  writeHeaders();
+  writeCookies();
+  try {
+    FileChannel in=new FileInputStream(file).getChannel();
+    long result=this.responseChannel.transferFrom(in,position,count);
+    if (result < count) {
+      return Mono.error(new IOException("Could only write " + result + " out of "+ count+ " bytes"));
+    }
+ else {
+      return Mono.empty();
+    }
+  }
+ catch (  IOException ex) {
+    return Mono.error(ex);
+  }
+}
