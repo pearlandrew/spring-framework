@@ -17,42 +17,16 @@
     publisher=Mono.just(value.get());
     elementType=returnType;
   }
-  List<MediaType> requestedMediaTypes=getAcceptableMediaTypes(exchange.getRequest());
-  List<MediaType> producibleMediaTypes=getProducibleMediaTypes(elementType);
-  if (producibleMediaTypes.isEmpty()) {
-    producibleMediaTypes.add(MediaType.ALL);
-  }
-  Set<MediaType> compatibleMediaTypes=new LinkedHashSet<>();
-  for (  MediaType requestedType : requestedMediaTypes) {
-    for (    MediaType producibleType : producibleMediaTypes) {
-      if (requestedType.isCompatibleWith(producibleType)) {
-        compatibleMediaTypes.add(getMostSpecificMediaType(requestedType,producibleType));
-      }
-    }
-  }
+  List<MediaType> compatibleMediaTypes=getCompatibleMediaTypes(exchange.getRequest(),elementType);
   if (compatibleMediaTypes.isEmpty()) {
-    return Mono.error(new NotAcceptableStatusException(producibleMediaTypes));
+    return Mono.error(new NotAcceptableStatusException(getProducibleMediaTypes(elementType)));
   }
-  List<MediaType> mediaTypes=new ArrayList<>(compatibleMediaTypes);
-  MediaType.sortBySpecificityAndQuality(mediaTypes);
-  MediaType selectedMediaType=null;
-  for (  MediaType mediaType : mediaTypes) {
-    if (mediaType.isConcrete()) {
-      selectedMediaType=mediaType;
-      break;
-    }
- else     if (mediaType.equals(MediaType.ALL) || mediaType.equals(MEDIA_TYPE_APPLICATION)) {
-      selectedMediaType=MediaType.APPLICATION_OCTET_STREAM;
-      break;
-    }
-  }
-  if (selectedMediaType != null) {
-    Encoder<?> encoder=resolveEncoder(elementType,selectedMediaType);
-    if (encoder != null) {
+  Optional<MediaType> selectedMediaType=selectBestMediaType(compatibleMediaTypes);
+  if (selectedMediaType.isPresent()) {
+    HttpMessageConverter<?> converter=resolveEncoder(elementType,selectedMediaType.get());
+    if (converter != null) {
       ServerHttpResponse response=exchange.getResponse();
-      response.getHeaders().setContentType(selectedMediaType);
-      DataBufferAllocator allocator=response.allocator();
-      return response.setBody(encoder.encode((Publisher)publisher,allocator,elementType,selectedMediaType));
+      return converter.write((Publisher)publisher,elementType,selectedMediaType.get(),response);
     }
   }
   return Mono.error(new NotAcceptableStatusException(this.allMediaTypes));

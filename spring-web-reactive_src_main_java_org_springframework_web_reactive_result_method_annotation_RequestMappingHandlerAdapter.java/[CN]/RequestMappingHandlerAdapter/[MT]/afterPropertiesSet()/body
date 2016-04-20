@@ -1,8 +1,8 @@
 {
   if (ObjectUtils.isEmpty(this.argumentResolvers)) {
-    List<Decoder<?>> decoders=Arrays.asList(new ByteBufferDecoder(),new StringDecoder(),new Jaxb2Decoder(),new JacksonJsonDecoder(new JsonObjectDecoder()));
+    List<HttpMessageConverter<?>> messageConverters=Arrays.asList(new CodecHttpMessageConverter<ByteBuffer>(new ByteBufferEncoder(),new ByteBufferDecoder()),new CodecHttpMessageConverter<String>(new StringEncoder(),new StringDecoder()),new CodecHttpMessageConverter<Object>(new Jaxb2Encoder(),new Jaxb2Decoder()),new CodecHttpMessageConverter<Object>(new JacksonJsonEncoder(),new JacksonJsonDecoder(new JsonObjectDecoder())));
     this.argumentResolvers.add(new RequestParamArgumentResolver());
-    this.argumentResolvers.add(new RequestBodyArgumentResolver(decoders,this.conversionService));
+    this.argumentResolvers.add(new RequestBodyArgumentResolver(messageConverters,this.conversionService));
     this.argumentResolvers.add(new ModelArgumentResolver());
   }
 }
