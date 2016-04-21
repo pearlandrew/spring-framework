@@ -1,0 +1,8 @@
+{
+  String s="foo";
+  Resource resource=new ByteArrayResource(s.getBytes(StandardCharsets.UTF_8));
+  Mono<Resource> source=Mono.just(resource);
+  Flux<DataBuffer> output=encoder.encode(source,allocator,ResolvableType.forClass(Resource.class),null);
+  TestSubscriber<DataBuffer> testSubscriber=new TestSubscriber<>();
+  testSubscriber.bindTo(output).assertNoError().assertComplete().assertValues(stringBuffer(s));
+}

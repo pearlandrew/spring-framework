@@ -2,8 +2,11 @@
   if (this.encoder == null) {
     return Mono.error(new IllegalStateException("No decoder set"));
   }
-  outputMessage.getHeaders().setContentType(contentType);
+  HttpHeaders headers=outputMessage.getHeaders();
+  if (headers.getContentType() == null) {
+    headers.setContentType(contentType);
+  }
   DataBufferAllocator allocator=outputMessage.allocator();
-  Flux<DataBuffer> body=encoder.encode(inputStream,allocator,type,contentType);
+  Flux<DataBuffer> body=this.encoder.encode(inputStream,allocator,type,contentType);
   return outputMessage.setBody(body);
 }
