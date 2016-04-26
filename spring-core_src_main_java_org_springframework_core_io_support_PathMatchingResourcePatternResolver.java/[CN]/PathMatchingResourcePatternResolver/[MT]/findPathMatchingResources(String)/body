@@ -5,11 +5,18 @@
   Set<Resource> result=new LinkedHashSet<Resource>(16);
   for (  Resource rootDirResource : rootDirResources) {
     rootDirResource=resolveRootDirResource(rootDirResource);
-    if (rootDirResource.getURL().getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
-      result.addAll(VfsResourceMatchingDelegate.findMatchingResources(rootDirResource,subPattern,getPathMatcher()));
+    URL rootDirURL=rootDirResource.getURL();
+    if (equinoxResolveMethod != null) {
+      if (rootDirURL.getProtocol().startsWith("bundle")) {
+        rootDirURL=(URL)ReflectionUtils.invokeMethod(equinoxResolveMethod,null,rootDirURL);
+        rootDirResource=new UrlResource(rootDirURL);
+      }
     }
- else     if (isJarResource(rootDirResource)) {
-      result.addAll(doFindPathMatchingJarResources(rootDirResource,subPattern));
+    if (rootDirURL.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
+      result.addAll(VfsResourceMatchingDelegate.findMatchingResources(rootDirURL,subPattern,getPathMatcher()));
+    }
+ else     if (ResourceUtils.isJarURL(rootDirURL) || isJarResource(rootDirResource)) {
+      result.addAll(doFindPathMatchingJarResources(rootDirResource,rootDirURL,subPattern));
     }
  else {
       result.addAll(doFindPathMatchingFileResources(rootDirResource,subPattern));
