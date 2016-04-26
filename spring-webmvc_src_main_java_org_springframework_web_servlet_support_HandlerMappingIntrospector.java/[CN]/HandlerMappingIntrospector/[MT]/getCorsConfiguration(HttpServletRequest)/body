@@ -1,0 +1,25 @@
+{
+  HttpServletRequest wrapper=new RequestAttributeChangeIgnoringWrapper(request);
+  for (  HandlerMapping handlerMapping : this.handlerMappings) {
+    HandlerExecutionChain handler=null;
+    try {
+      handler=handlerMapping.getHandler(wrapper);
+    }
+ catch (    Exception ex) {
+    }
+    if (handler == null) {
+      continue;
+    }
+    if (handler.getInterceptors() != null) {
+      for (      HandlerInterceptor interceptor : handler.getInterceptors()) {
+        if (interceptor instanceof CorsConfigurationSource) {
+          return ((CorsConfigurationSource)interceptor).getCorsConfiguration(wrapper);
+        }
+      }
+    }
+    if (handler.getHandler() instanceof CorsConfigurationSource) {
+      return ((CorsConfigurationSource)handler.getHandler()).getCorsConfiguration(wrapper);
+    }
+  }
+  return null;
+}
