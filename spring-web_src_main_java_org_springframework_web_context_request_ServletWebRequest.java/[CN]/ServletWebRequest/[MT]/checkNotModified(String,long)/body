@@ -3,7 +3,12 @@
   if (StringUtils.hasLength(etag) && !this.notModified) {
     if (isCompatibleWithConditionalRequests(response)) {
       etag=addEtagPadding(etag);
-      this.notModified=isEtagNotModified(etag) && isTimestampNotModified(lastModifiedTimestamp);
+      if (hasRequestHeader(HEADER_IF_NONE_MATCH)) {
+        this.notModified=isEtagNotModified(etag);
+      }
+ else       if (hasRequestHeader(HEADER_IF_MODIFIED_SINCE)) {
+        this.notModified=isTimestampNotModified(lastModifiedTimestamp);
+      }
       if (response != null) {
         if (supportsNotModifiedStatus()) {
           if (this.notModified) {
