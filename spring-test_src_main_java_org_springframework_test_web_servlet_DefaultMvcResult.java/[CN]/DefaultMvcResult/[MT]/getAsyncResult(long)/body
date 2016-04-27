@@ -6,13 +6,16 @@
     long endTime=System.currentTimeMillis() + timeToWait;
     while (System.currentTimeMillis() < endTime && this.asyncResult.get() == RESULT_NONE) {
       try {
-        Thread.sleep(200);
+        Thread.sleep(100);
       }
  catch (      InterruptedException ex) {
         throw new IllegalStateException("Interrupted while waiting for " + "async result to be set for handler [" + this.handler + "]",ex);
       }
     }
   }
-  Assert.state(this.asyncResult.get() != RESULT_NONE,"Async result for handler [" + this.handler + "] "+ "was not set during the specified timeToWait="+ timeToWait);
-  return this.asyncResult.get();
+  Object result=this.asyncResult.get();
+  if (result == RESULT_NONE) {
+    throw new IllegalStateException("Async result for handler [" + this.handler + "] "+ "was not set during the specified timeToWait="+ timeToWait);
+  }
+  return result;
 }
