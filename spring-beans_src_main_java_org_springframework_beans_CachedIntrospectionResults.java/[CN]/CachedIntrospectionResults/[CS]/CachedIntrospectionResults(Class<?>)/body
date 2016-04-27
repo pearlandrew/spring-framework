@@ -29,6 +29,21 @@
       pd=buildGenericTypeAwarePropertyDescriptor(beanClass,pd);
       this.propertyDescriptorCache.put(pd.getName(),pd);
     }
+    Class<?> clazz=beanClass;
+    while (clazz != null) {
+      Class<?>[] ifcs=clazz.getInterfaces();
+      for (      Class<?> ifc : ifcs) {
+        BeanInfo ifcInfo=Introspector.getBeanInfo(ifc,Introspector.IGNORE_ALL_BEANINFO);
+        PropertyDescriptor[] ifcPds=ifcInfo.getPropertyDescriptors();
+        for (        PropertyDescriptor pd : ifcPds) {
+          if (!this.propertyDescriptorCache.containsKey(pd.getName())) {
+            pd=buildGenericTypeAwarePropertyDescriptor(beanClass,pd);
+            this.propertyDescriptorCache.put(pd.getName(),pd);
+          }
+        }
+      }
+      clazz=clazz.getSuperclass();
+    }
     this.typeDescriptorCache=new ConcurrentReferenceHashMap<PropertyDescriptor,TypeDescriptor>();
   }
  catch (  IntrospectionException ex) {
