@@ -1,0 +1,55 @@
+{
+  if (contexts.isSynchronized()) {
+    CacheOperationContext context=contexts.get(CacheableOperation.class).iterator().next();
+    if (isConditionPassing(context,CacheOperationExpressionEvaluator.NO_RESULT)) {
+      Object key=generateKey(context,CacheOperationExpressionEvaluator.NO_RESULT);
+      Cache cache=context.getCaches().iterator().next();
+      try {
+        return cache.get(key,new Callable<Object>(){
+          @Override public Object call() throws Exception {
+            return invokeOperation(invoker);
+          }
+        }
+);
+      }
+ catch (      Cache.ValueRetrievalException ex) {
+        throw (CacheOperationInvoker.ThrowableWrapper)ex.getCause();
+      }
+    }
+ else {
+      return invokeOperation(invoker);
+    }
+  }
+  processCacheEvicts(contexts.get(CacheEvictOperation.class),true,CacheOperationExpressionEvaluator.NO_RESULT);
+  Cache.ValueWrapper cacheHit=findCachedItem(contexts.get(CacheableOperation.class));
+  List<CachePutRequest> cachePutRequests=new LinkedList<CachePutRequest>();
+  if (cacheHit == null) {
+    collectPutRequests(contexts.get(CacheableOperation.class),CacheOperationExpressionEvaluator.NO_RESULT,cachePutRequests);
+  }
+  Object cacheValue;
+  Object returnValue;
+  if (cacheHit != null && cachePutRequests.isEmpty() && !hasCachePut(contexts)) {
+    cacheValue=cacheHit.get();
+    if (method.getReturnType() == javaUtilOptionalClass && (cacheValue == null || cacheValue.getClass() != javaUtilOptionalClass)) {
+      returnValue=OptionalUnwrapper.wrap(cacheValue);
+    }
+ else {
+      returnValue=cacheValue;
+    }
+  }
+ else {
+    returnValue=invokeOperation(invoker);
+    if (returnValue != null && returnValue.getClass() == javaUtilOptionalClass) {
+      cacheValue=OptionalUnwrapper.unwrap(returnValue);
+    }
+ else {
+      cacheValue=returnValue;
+    }
+  }
+  collectPutRequests(contexts.get(CachePutOperation.class),cacheValue,cachePutRequests);
+  for (  CachePutRequest cachePutRequest : cachePutRequests) {
+    cachePutRequest.apply(cacheValue);
+  }
+  processCacheEvicts(contexts.get(CacheEvictOperation.class),false,cacheValue);
+  return returnValue;
+}
