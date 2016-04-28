@@ -3,6 +3,7 @@
   this.connectionHandler.afterConnected(new Reactor2TcpConnection<P>(channelStream,closePromise));
   channelStream.finallyDo(new Consumer<Signal<Message<P>>>(){
     @Override public void accept(    Signal<Message<P>> signal){
+      cleanupTask.run();
       if (signal.isOnError()) {
         connectionHandler.handleFailure(signal.getThrowable());
       }

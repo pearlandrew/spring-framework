@@ -1,6 +1,7 @@
 {
   Assert.notNull(connectionHandler,"TcpConnectionHandler must not be null");
-  TcpClient<Message<P>,Message<P>> tcpClient;
+  final TcpClient<Message<P>,Message<P>> tcpClient;
+  Runnable cleanupTask;
 synchronized (this.tcpClients) {
     if (this.stopping) {
       IllegalStateException ex=new IllegalStateException("Shutting down.");
@@ -9,8 +10,16 @@ synchronized (this.tcpClients) {
     }
     tcpClient=NetStreams.tcpClient(REACTOR_TCP_CLIENT_TYPE,this.tcpClientSpecFactory);
     this.tcpClients.add(tcpClient);
+    cleanupTask=new Runnable(){
+      @Override public void run(){
+synchronized (tcpClients) {
+          tcpClients.remove(tcpClient);
+        }
+      }
+    }
+;
   }
-  Promise<Void> promise=tcpClient.start(new MessageChannelStreamHandler<P>(connectionHandler));
+  Promise<Void> promise=tcpClient.start(new MessageChannelStreamHandler<P>(connectionHandler,cleanupTask));
   return new PassThroughPromiseToListenableFutureAdapter<Void>(promise.onError(new Consumer<Throwable>(){
     @Override public void accept(    Throwable ex){
       connectionHandler.afterConnectFailure(ex);

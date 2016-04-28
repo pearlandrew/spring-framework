@@ -1,7 +1,8 @@
 {
   Assert.notNull(connectionHandler,"TcpConnectionHandler must not be null");
   Assert.notNull(strategy,"ReconnectStrategy must not be null");
-  TcpClient<Message<P>,Message<P>> tcpClient;
+  final TcpClient<Message<P>,Message<P>> tcpClient;
+  Runnable cleanupTask;
 synchronized (this.tcpClients) {
     if (this.stopping) {
       IllegalStateException ex=new IllegalStateException("Shutting down.");
@@ -10,7 +11,15 @@ synchronized (this.tcpClients) {
     }
     tcpClient=NetStreams.tcpClient(REACTOR_TCP_CLIENT_TYPE,this.tcpClientSpecFactory);
     this.tcpClients.add(tcpClient);
+    cleanupTask=new Runnable(){
+      @Override public void run(){
+synchronized (tcpClients) {
+          tcpClients.remove(tcpClient);
+        }
+      }
+    }
+;
   }
-  Stream<Tuple2<InetSocketAddress,Integer>> stream=tcpClient.start(new MessageChannelStreamHandler<P>(connectionHandler),new ReactorReconnectAdapter(strategy));
+  Stream<Tuple2<InetSocketAddress,Integer>> stream=tcpClient.start(new MessageChannelStreamHandler<P>(connectionHandler,cleanupTask),new ReactorReconnectAdapter(strategy));
   return new PassThroughPromiseToListenableFutureAdapter<Void>(stream.next().after());
 }
