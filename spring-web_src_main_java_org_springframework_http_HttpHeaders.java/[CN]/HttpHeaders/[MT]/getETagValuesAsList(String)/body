@@ -1,0 +1,24 @@
+{
+  List<String> values=get(headerName);
+  if (values != null) {
+    List<String> result=new ArrayList<String>();
+    for (    String value : values) {
+      if (value != null) {
+        Matcher matcher=ETAG_HEADER_VALUE_PATTERN.matcher(value);
+        while (matcher.find()) {
+          if ("*".equals(matcher.group())) {
+            result.add(matcher.group());
+          }
+ else {
+            result.add(matcher.group(1));
+          }
+        }
+        if (result.size() == 0) {
+          throw new IllegalArgumentException("Could not parse '" + headerName + "' value="+ value);
+        }
+      }
+    }
+    return result;
+  }
+  return Collections.emptyList();
+}
