@@ -1,2 +1,8 @@
 {
+  DataBuffer fooBuffer=stringBuffer("foo");
+  DataBuffer barBuffer=stringBuffer("bar");
+  Flux<DataBuffer> source=Flux.just(fooBuffer,barBuffer);
+  Flux<ByteBuffer> output=this.decoder.decode(source,ResolvableType.forClassWithGenerics(Publisher.class,ByteBuffer.class),null);
+  TestSubscriber<ByteBuffer> testSubscriber=new TestSubscriber<>();
+  testSubscriber.bindTo(output).assertNoError().assertComplete().assertValues(ByteBuffer.wrap("foo".getBytes()),ByteBuffer.wrap("bar".getBytes()));
 }
