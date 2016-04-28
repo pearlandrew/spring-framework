@@ -1,9 +1,10 @@
 {
   final NioEventLoopGroup nioEventLoopGroup=initEventLoopGroup();
   this.eventLoopGroup=nioEventLoopGroup;
+  this.environment=new Environment(new SynchronousDispatcherConfigReader());
   this.tcpClientSpecFactory=new TcpClientFactory<Message<P>,Message<P>>(){
     @Override public TcpClientSpec<Message<P>,Message<P>> apply(    TcpClientSpec<Message<P>,Message<P>> spec){
-      return spec.env(new Environment(new SynchronousDispatcherConfigReader())).codec(codec).connect(host,port).options(createClientSocketOptions());
+      return spec.env(environment).codec(codec).connect(host,port).options(createClientSocketOptions());
     }
     private ClientSocketOptions createClientSocketOptions(){
       return (ClientSocketOptions)ReflectionUtils.invokeMethod(eventLoopGroupMethod,new NettyClientSocketOptions(),nioEventLoopGroup);

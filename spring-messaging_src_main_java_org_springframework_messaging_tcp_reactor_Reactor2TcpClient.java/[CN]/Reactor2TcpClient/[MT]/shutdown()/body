@@ -33,5 +33,13 @@ synchronized (this.tcpClients) {
 );
     promise=eventLoopPromise;
   }
+  if (this.environment != null) {
+    promise.onComplete(new Consumer<Promise<Void>>(){
+      @Override public void accept(      Promise<Void> voidPromise){
+        environment.shutdown();
+      }
+    }
+);
+  }
   return new PassThroughPromiseToListenableFutureAdapter<Void>(promise);
 }
