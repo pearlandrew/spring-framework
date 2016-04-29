@@ -1,13 +1,10 @@
 {
-  if (StringUtils.hasLength(etag)) {
-    String ifNoneMatch=getHeader(HEADER_IF_NONE_MATCH);
-    if (StringUtils.hasLength(ifNoneMatch)) {
-      String[] clientEtags=StringUtils.delimitedListToStringArray(ifNoneMatch,","," ");
-      for (      String clientEtag : clientEtags) {
-        if (StringUtils.hasLength(clientEtag) && (clientEtag.replaceFirst("^W/","").equals(etag.replaceFirst("^W/","")) || clientEtag.equals("*"))) {
-          return true;
-        }
-      }
+  String ifNoneMatch=getHeader(HEADER_IF_NONE_MATCH);
+  String serverETag=etag.replaceFirst("^W/","");
+  Matcher eTagMatcher=ETAG_HEADER_VALUE_PATTERN.matcher(ifNoneMatch);
+  while (eTagMatcher.find()) {
+    if ("*".equals(eTagMatcher.group()) || serverETag.equals(eTagMatcher.group(3))) {
+      return true;
     }
   }
   return false;

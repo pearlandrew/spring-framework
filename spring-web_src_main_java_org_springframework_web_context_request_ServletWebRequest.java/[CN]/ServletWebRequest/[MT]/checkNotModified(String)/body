@@ -3,7 +3,9 @@
   if (StringUtils.hasLength(etag) && !this.notModified) {
     if (isCompatibleWithConditionalRequests(response)) {
       etag=addEtagPadding(etag);
-      this.notModified=isEtagNotModified(etag);
+      if (hasRequestHeader(HEADER_IF_NONE_MATCH)) {
+        this.notModified=isEtagNotModified(etag);
+      }
       if (response != null) {
         if (this.notModified && supportsNotModifiedStatus()) {
           response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
