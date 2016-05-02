@@ -32,6 +32,7 @@
     return;
   }
   ServletServerHttpResponse outputMessage=new ServletServerHttpResponse(response);
+  outputMessage.getHeaders().add(HttpHeaders.ACCEPT_RANGES,"bytes");
   if (request.getHeader(HttpHeaders.RANGE) == null) {
     setHeaders(response,resource,mediaType);
     this.resourceHttpMessageConverter.write(resource,mediaType,outputMessage);
@@ -40,9 +41,14 @@
     ServletServerHttpRequest inputMessage=new ServletServerHttpRequest(request);
     try {
       List<HttpRange> httpRanges=inputMessage.getHeaders().getRange();
-      HttpRangeResource rangeResource=new HttpRangeResource(httpRanges,resource);
       response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-      this.resourceHttpMessageConverter.write(rangeResource,mediaType,outputMessage);
+      if (httpRanges.size() == 1) {
+        ResourceRegion resourceRegion=httpRanges.get(0).toResourceRegion(resource);
+        this.resourceRegionHttpMessageConverter.write(resourceRegion,mediaType,outputMessage);
+      }
+ else {
+        this.resourceRegionHttpMessageConverter.write(HttpRange.toResourceRegions(httpRanges,resource),mediaType,outputMessage);
+      }
     }
  catch (    IllegalArgumentException ex) {
       response.addHeader("Content-Range","bytes */" + resource.contentLength());

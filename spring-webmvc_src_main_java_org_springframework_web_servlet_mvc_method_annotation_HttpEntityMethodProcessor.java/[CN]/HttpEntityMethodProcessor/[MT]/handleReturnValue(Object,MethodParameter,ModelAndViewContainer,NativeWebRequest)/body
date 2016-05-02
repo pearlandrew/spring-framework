@@ -32,20 +32,6 @@
       return;
     }
   }
-  Object body=responseEntity.getBody();
-  if (inputMessage.getHeaders().containsKey(HttpHeaders.RANGE) && Resource.class.isAssignableFrom(body.getClass())) {
-    try {
-      List<HttpRange> httpRanges=inputMessage.getHeaders().getRange();
-      Resource bodyResource=(Resource)body;
-      body=new HttpRangeResource(httpRanges,bodyResource);
-      outputMessage.setStatusCode(HttpStatus.PARTIAL_CONTENT);
-    }
- catch (    IllegalArgumentException ex) {
-      outputMessage.setStatusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
-      outputMessage.flush();
-      return;
-    }
-  }
-  writeWithMessageConverters(body,returnType,inputMessage,outputMessage);
+  writeWithMessageConverters(responseEntity.getBody(),returnType,inputMessage,outputMessage);
   outputMessage.flush();
 }
