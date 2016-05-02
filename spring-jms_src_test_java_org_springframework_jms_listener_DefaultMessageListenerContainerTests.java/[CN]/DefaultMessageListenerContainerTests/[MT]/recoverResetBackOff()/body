@@ -1,12 +1,13 @@
 {
-  BackOff mock=mock(BackOff.class);
+  BackOff backOff=mock(BackOff.class);
   BackOffExecution execution=mock(BackOffExecution.class);
   given(execution.nextBackOff()).willReturn(50L,50L,50L);
-  given(mock.start()).willReturn(execution);
-  DefaultMessageListenerContainer container=createContainer(mock,createRecoverableContainerFactory(1));
+  given(backOff.start()).willReturn(execution);
+  DefaultMessageListenerContainer container=createContainer(createRecoverableContainerFactory(1));
+  container.setBackOff(backOff);
   container.start();
   container.refreshConnectionUntilSuccessful();
   assertEquals(true,container.isRunning());
-  verify(mock).start();
+  verify(backOff).start();
   verify(execution,times(1)).nextBackOff();
 }
