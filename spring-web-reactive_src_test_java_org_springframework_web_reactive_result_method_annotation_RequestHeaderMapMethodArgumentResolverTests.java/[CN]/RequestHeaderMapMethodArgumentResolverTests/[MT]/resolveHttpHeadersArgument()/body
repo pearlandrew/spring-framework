@@ -1,0 +1,14 @@
+{
+  String name="foo";
+  String value1="bar";
+  String value2="baz";
+  this.exchange.getRequest().getHeaders().add(name,value1);
+  this.exchange.getRequest().getHeaders().add(name,value2);
+  HttpHeaders expected=new HttpHeaders();
+  expected.add(name,value1);
+  expected.add(name,value2);
+  Mono<Object> mono=this.resolver.resolveArgument(paramHttpHeaders,null,this.exchange);
+  Object result=mono.get();
+  assertTrue(result instanceof HttpHeaders);
+  assertEquals("Invalid result",expected,result);
+}

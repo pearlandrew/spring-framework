@@ -1,0 +1,14 @@
+{
+  String expected="foo";
+  this.exchange.getRequest().getHeaders().add("bar",expected);
+  System.setProperty("systemProperty","bar");
+  try {
+    Mono<Object> mono=this.resolver.resolveArgument(paramResolvedNameWithPlaceholder,null,this.exchange);
+    Object result=mono.get();
+    assertTrue(result instanceof String);
+    assertEquals(expected,result);
+  }
+  finally {
+    System.clearProperty("systemProperty");
+  }
+}
