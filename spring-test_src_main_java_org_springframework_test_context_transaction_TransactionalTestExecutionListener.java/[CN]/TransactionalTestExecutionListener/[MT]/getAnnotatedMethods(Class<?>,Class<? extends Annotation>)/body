@@ -1,12 +1,9 @@
 {
-  List<Method> results=new ArrayList<Method>();
-  for (  Class<?> current : getSuperClasses(clazz)) {
-    for (    Method method : current.getDeclaredMethods()) {
-      Annotation annotation=AnnotationUtils.getAnnotation(method,annotationType);
-      if (annotation != null && !isShadowed(method,results)) {
-        results.add(method);
-      }
+  List<Method> methods=new ArrayList<Method>(4);
+  for (  Method method : ReflectionUtils.getUniqueDeclaredMethods(clazz)) {
+    if (AnnotationUtils.getAnnotation(method,annotationType) != null) {
+      methods.add(method);
     }
   }
-  return results;
+  return methods;
 }
