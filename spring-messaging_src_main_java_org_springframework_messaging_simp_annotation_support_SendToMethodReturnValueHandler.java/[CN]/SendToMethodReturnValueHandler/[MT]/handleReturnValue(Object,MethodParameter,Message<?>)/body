@@ -5,8 +5,9 @@
   MessageHeaders headers=message.getHeaders();
   String sessionId=SimpMessageHeaderAccessor.getSessionId(headers);
   PlaceholderResolver varResolver=initVarResolver(headers);
-  SendToUser sendToUser=getSendToUser(returnType);
-  if (sendToUser != null) {
+  Object annotation=findAnnotation(returnType);
+  if (annotation != null && annotation instanceof SendToUser) {
+    SendToUser sendToUser=(SendToUser)annotation;
     boolean broadcast=sendToUser.broadcast();
     String user=getUserName(message,headers);
     if (user == null) {
@@ -28,7 +29,7 @@
     }
   }
  else {
-    SendTo sendTo=getSendTo(returnType);
+    SendTo sendTo=(SendTo)annotation;
     String[] destinations=getTargetDestinations(sendTo,message,this.defaultDestinationPrefix);
     for (    String destination : destinations) {
       destination=this.placeholderHelper.replacePlaceholders(destination,varResolver);
