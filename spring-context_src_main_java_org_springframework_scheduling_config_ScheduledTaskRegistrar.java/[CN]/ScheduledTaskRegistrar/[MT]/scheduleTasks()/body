@@ -1,39 +1,26 @@
 {
-  long now=System.currentTimeMillis();
   if (this.taskScheduler == null) {
     this.localExecutor=Executors.newSingleThreadScheduledExecutor();
     this.taskScheduler=new ConcurrentTaskScheduler(this.localExecutor);
   }
   if (this.triggerTasks != null) {
     for (    TriggerTask task : this.triggerTasks) {
-      this.scheduledFutures.add(this.taskScheduler.schedule(task.getRunnable(),task.getTrigger()));
+      addScheduledTask(scheduleTriggerTask(task));
     }
   }
   if (this.cronTasks != null) {
     for (    CronTask task : this.cronTasks) {
-      this.scheduledFutures.add(this.taskScheduler.schedule(task.getRunnable(),task.getTrigger()));
+      addScheduledTask(scheduleCronTask(task));
     }
   }
   if (this.fixedRateTasks != null) {
     for (    IntervalTask task : this.fixedRateTasks) {
-      if (task.getInitialDelay() > 0) {
-        Date startTime=new Date(now + task.getInitialDelay());
-        this.scheduledFutures.add(this.taskScheduler.scheduleAtFixedRate(task.getRunnable(),startTime,task.getInterval()));
-      }
- else {
-        this.scheduledFutures.add(this.taskScheduler.scheduleAtFixedRate(task.getRunnable(),task.getInterval()));
-      }
+      addScheduledTask(scheduleFixedRateTask(task));
     }
   }
   if (this.fixedDelayTasks != null) {
     for (    IntervalTask task : this.fixedDelayTasks) {
-      if (task.getInitialDelay() > 0) {
-        Date startTime=new Date(now + task.getInitialDelay());
-        this.scheduledFutures.add(this.taskScheduler.scheduleWithFixedDelay(task.getRunnable(),startTime,task.getInterval()));
-      }
- else {
-        this.scheduledFutures.add(this.taskScheduler.scheduleWithFixedDelay(task.getRunnable(),task.getInterval()));
-      }
+      addScheduledTask(scheduleFixedDelayTask(task));
     }
   }
 }

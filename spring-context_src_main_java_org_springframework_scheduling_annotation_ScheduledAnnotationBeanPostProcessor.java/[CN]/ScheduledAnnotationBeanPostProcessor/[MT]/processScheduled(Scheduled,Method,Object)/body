@@ -5,6 +5,7 @@
     Runnable runnable=new ScheduledMethodRunnable(bean,invocableMethod);
     boolean processedSchedule=false;
     String errorMessage="Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
+    Set<ScheduledTask> tasks=new LinkedHashSet<ScheduledTask>(4);
     long initialDelay=scheduled.initialDelay();
     String initialDelayString=scheduled.initialDelayString();
     if (StringUtils.hasText(initialDelayString)) {
@@ -35,7 +36,7 @@
  else {
         timeZone=TimeZone.getDefault();
       }
-      this.registrar.addCronTask(new CronTask(runnable,new CronTrigger(cron,timeZone)));
+      tasks.add(this.registrar.scheduleCronTask(new CronTask(runnable,new CronTrigger(cron,timeZone))));
     }
     if (initialDelay < 0) {
       initialDelay=0;
@@ -44,7 +45,7 @@
     if (fixedDelay >= 0) {
       Assert.isTrue(!processedSchedule,errorMessage);
       processedSchedule=true;
-      this.registrar.addFixedDelayTask(new IntervalTask(runnable,fixedDelay,initialDelay));
+      tasks.add(this.registrar.scheduleFixedDelayTask(new IntervalTask(runnable,fixedDelay,initialDelay)));
     }
     String fixedDelayString=scheduled.fixedDelayString();
     if (StringUtils.hasText(fixedDelayString)) {
@@ -59,13 +60,13 @@
  catch (      NumberFormatException ex) {
         throw new IllegalArgumentException("Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into integer");
       }
-      this.registrar.addFixedDelayTask(new IntervalTask(runnable,fixedDelay,initialDelay));
+      tasks.add(this.registrar.scheduleFixedDelayTask(new IntervalTask(runnable,fixedDelay,initialDelay)));
     }
     long fixedRate=scheduled.fixedRate();
     if (fixedRate >= 0) {
       Assert.isTrue(!processedSchedule,errorMessage);
       processedSchedule=true;
-      this.registrar.addFixedRateTask(new IntervalTask(runnable,fixedRate,initialDelay));
+      tasks.add(this.registrar.scheduleFixedRateTask(new IntervalTask(runnable,fixedRate,initialDelay)));
     }
     String fixedRateString=scheduled.fixedRateString();
     if (StringUtils.hasText(fixedRateString)) {
@@ -80,9 +81,10 @@
  catch (      NumberFormatException ex) {
         throw new IllegalArgumentException("Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into integer");
       }
-      this.registrar.addFixedRateTask(new IntervalTask(runnable,fixedRate,initialDelay));
+      tasks.add(this.registrar.scheduleFixedRateTask(new IntervalTask(runnable,fixedRate,initialDelay)));
     }
     Assert.isTrue(processedSchedule,errorMessage);
+    this.scheduledTasks.put(bean,tasks);
   }
  catch (  IllegalArgumentException ex) {
     throw new IllegalStateException("Encountered invalid @Scheduled method '" + method.getName() + "': "+ ex.getMessage());
