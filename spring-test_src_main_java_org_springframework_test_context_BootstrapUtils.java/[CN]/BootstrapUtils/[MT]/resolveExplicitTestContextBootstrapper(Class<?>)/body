@@ -1,11 +1,10 @@
 {
-  MultiValueMap<String,Object> attributesMultiMap=AnnotatedElementUtils.getAllAnnotationAttributes(testClass,BootstrapWith.class.getName());
-  List<Object> values=(attributesMultiMap != null ? attributesMultiMap.get(AnnotationUtils.VALUE) : null);
-  if (values == null) {
+  Set<BootstrapWith> annotations=AnnotatedElementUtils.findAllMergedAnnotations(testClass,BootstrapWith.class);
+  if (annotations.size() < 1) {
     return null;
   }
-  if (values.size() != 1) {
-    throw new IllegalStateException(String.format("Configuration error: found multiple declarations of " + "@BootstrapWith on test class [%s] with values %s",testClass.getName(),values));
+  if (annotations.size() > 1) {
+    throw new IllegalStateException(String.format("Configuration error: found multiple declarations of @BootstrapWith for test class [%s]: %s",testClass.getName(),annotations));
   }
-  return (Class<?>)values.get(0);
+  return annotations.iterator().next().value();
 }
