@@ -1,0 +1,15 @@
+{
+  IOException ex=new IOException();
+  final Set<Throwable> values=new HashSet<>(1);
+  ListenableFuture<String> future=AsyncResult.forExecutionException(ex);
+  future.addCallback(new ListenableFutureCallback<String>(){
+    @Override public void onSuccess(    String result){
+      fail("Success callback not expected: " + result);
+    }
+    @Override public void onFailure(    Throwable ex){
+      values.add(ex);
+    }
+  }
+);
+  assertSame(ex,values.iterator().next());
+}
