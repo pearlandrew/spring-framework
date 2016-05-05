@@ -1,6 +1,7 @@
 {
+  SpelNodeImpl rightOperand=getRightOperand();
   TypedValue left=getLeftOperand().getValueInternal(state);
-  TypedValue right=getRightOperand().getValueInternal(state);
+  TypedValue right=rightOperand.getValueInternal(state);
   Object leftValue=left.getValue();
   Object rightValue=right.getValue();
   BooleanTypedValue result=null;
@@ -15,6 +16,8 @@
     result=BooleanTypedValue.forValue(rightClass.isAssignableFrom(leftValue.getClass()));
   }
   this.type=rightClass;
-  this.exitTypeDescriptor="Z";
+  if (rightOperand instanceof TypeReference) {
+    this.exitTypeDescriptor="Z";
+  }
   return result;
 }

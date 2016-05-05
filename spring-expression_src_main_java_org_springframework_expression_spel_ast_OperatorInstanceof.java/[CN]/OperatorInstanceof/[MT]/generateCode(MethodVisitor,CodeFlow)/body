@@ -1,5 +1,12 @@
 {
   getLeftOperand().generateCode(mv,cf);
-  mv.visitTypeInsn(INSTANCEOF,Type.getInternalName(this.type));
+  CodeFlow.insertBoxIfNecessary(mv,cf.lastDescriptor());
+  if (this.type.isPrimitive()) {
+    mv.visitInsn(POP);
+    mv.visitInsn(ICONST_0);
+  }
+ else {
+    mv.visitTypeInsn(INSTANCEOF,Type.getInternalName(this.type));
+  }
   cf.pushDescriptor(this.exitTypeDescriptor);
 }
