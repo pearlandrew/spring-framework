@@ -32,12 +32,12 @@
     return;
   }
   ServletServerHttpResponse outputMessage=new ServletServerHttpResponse(response);
-  outputMessage.getHeaders().add(HttpHeaders.ACCEPT_RANGES,"bytes");
   if (request.getHeader(HttpHeaders.RANGE) == null) {
     setHeaders(response,resource,mediaType);
     this.resourceHttpMessageConverter.write(resource,mediaType,outputMessage);
   }
  else {
+    response.setHeader(HttpHeaders.ACCEPT_RANGES,"bytes");
     ServletServerHttpRequest inputMessage=new ServletServerHttpRequest(request);
     try {
       List<HttpRange> httpRanges=inputMessage.getHeaders().getRange();
@@ -51,7 +51,7 @@
       }
     }
  catch (    IllegalArgumentException ex) {
-      response.addHeader("Content-Range","bytes */" + resource.contentLength());
+      response.setHeader("Content-Range","bytes */" + resource.contentLength());
       response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
     }
   }
