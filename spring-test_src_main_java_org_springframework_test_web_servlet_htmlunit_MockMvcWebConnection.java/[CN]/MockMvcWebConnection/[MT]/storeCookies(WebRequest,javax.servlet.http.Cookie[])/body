@@ -1,0 +1,20 @@
+{
+  if (cookies == null) {
+    return;
+  }
+  Date now=new Date();
+  CookieManager cookieManager=webClient.getCookieManager();
+  for (  javax.servlet.http.Cookie cookie : cookies) {
+    if (cookie.getDomain() == null) {
+      cookie.setDomain(webRequest.getUrl().getHost());
+    }
+    Cookie toManage=MockWebResponseBuilder.createCookie(cookie);
+    Date expires=toManage.getExpires();
+    if (expires == null || expires.after(now)) {
+      cookieManager.addCookie(toManage);
+    }
+ else {
+      cookieManager.removeCookie(toManage);
+    }
+  }
+}
