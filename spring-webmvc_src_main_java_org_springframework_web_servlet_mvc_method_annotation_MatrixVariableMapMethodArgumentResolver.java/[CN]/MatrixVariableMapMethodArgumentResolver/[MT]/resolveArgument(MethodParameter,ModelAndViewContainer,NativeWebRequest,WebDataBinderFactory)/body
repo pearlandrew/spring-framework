@@ -3,18 +3,23 @@
   if (CollectionUtils.isEmpty(matrixVariables)) {
     return Collections.emptyMap();
   }
+  MultiValueMap<String,String> map=new LinkedMultiValueMap<String,String>();
   String pathVariable=parameter.getParameterAnnotation(MatrixVariable.class).pathVar();
   if (!pathVariable.equals(ValueConstants.DEFAULT_NONE)) {
-    MultiValueMap<String,String> map=matrixVariables.get(pathVariable);
-    return (map != null) ? map : Collections.emptyMap();
+    MultiValueMap<String,String> mapForPathVariable=matrixVariables.get(pathVariable);
+    if (mapForPathVariable == null) {
+      return Collections.emptyMap();
+    }
+    map.putAll(mapForPathVariable);
   }
-  MultiValueMap<String,String> map=new LinkedMultiValueMap<String,String>();
-  for (  MultiValueMap<String,String> vars : matrixVariables.values()) {
-    for (    String name : vars.keySet()) {
-      for (      String value : vars.get(name)) {
-        map.add(name,value);
+ else {
+    for (    MultiValueMap<String,String> vars : matrixVariables.values()) {
+      for (      String name : vars.keySet()) {
+        for (        String value : vars.get(name)) {
+          map.add(name,value);
+        }
       }
     }
   }
-  return map;
+  return (isSingleValueMap(parameter) ? map.toSingleValueMap() : map);
 }
