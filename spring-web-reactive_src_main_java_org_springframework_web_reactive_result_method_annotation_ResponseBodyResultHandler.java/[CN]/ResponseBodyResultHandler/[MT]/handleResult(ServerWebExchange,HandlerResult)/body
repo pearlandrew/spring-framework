@@ -17,17 +17,19 @@
     publisher=Mono.just(value.get());
     elementType=returnType;
   }
-  List<MediaType> compatibleMediaTypes=getCompatibleMediaTypes(exchange.getRequest(),elementType);
+  ServerHttpRequest request=exchange.getRequest();
+  List<MediaType> compatibleMediaTypes=getCompatibleMediaTypes(request,elementType);
   if (compatibleMediaTypes.isEmpty()) {
-    return Mono.error(new NotAcceptableStatusException(getProducibleMediaTypes(elementType)));
+    List<MediaType> supported=getProducibleMediaTypes(elementType);
+    return Mono.error(new NotAcceptableStatusException(supported));
   }
-  Optional<MediaType> selectedMediaType=selectBestMediaType(compatibleMediaTypes);
-  if (selectedMediaType.isPresent()) {
-    HttpMessageConverter<?> converter=resolveEncoder(elementType,selectedMediaType.get());
+  MediaType bestMediaType=selectBestMediaType(compatibleMediaTypes);
+  if (bestMediaType != null) {
+    HttpMessageConverter<?> converter=resolveEncoder(elementType,bestMediaType);
     if (converter != null) {
       ServerHttpResponse response=exchange.getResponse();
-      return converter.write((Publisher)publisher,elementType,selectedMediaType.get(),response);
+      return converter.write((Publisher)publisher,elementType,bestMediaType,response);
     }
   }
-  return Mono.error(new NotAcceptableStatusException(this.allMediaTypes));
+  return Mono.error(new NotAcceptableStatusException(this.supportedMediaTypes));
 }

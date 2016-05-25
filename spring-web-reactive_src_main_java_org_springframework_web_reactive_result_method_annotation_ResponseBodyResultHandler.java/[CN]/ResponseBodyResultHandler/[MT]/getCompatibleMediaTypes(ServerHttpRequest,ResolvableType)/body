@@ -1,2 +1,15 @@
 {
+  List<MediaType> acceptableMediaTypes=getAcceptableMediaTypes(request);
+  List<MediaType> producibleMediaTypes=getProducibleMediaTypes(elementType);
+  Set<MediaType> compatibleMediaTypes=new LinkedHashSet<>();
+  for (  MediaType acceptable : acceptableMediaTypes) {
+    for (    MediaType producible : producibleMediaTypes) {
+      if (acceptable.isCompatibleWith(producible)) {
+        compatibleMediaTypes.add(getMostSpecificMediaType(acceptable,producible));
+      }
+    }
+  }
+  List<MediaType> result=new ArrayList<>(compatibleMediaTypes);
+  MediaType.sortBySpecificityAndQuality(result);
+  return result;
 }
