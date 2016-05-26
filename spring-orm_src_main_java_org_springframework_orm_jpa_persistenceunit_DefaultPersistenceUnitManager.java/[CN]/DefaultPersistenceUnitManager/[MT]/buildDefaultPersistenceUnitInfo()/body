@@ -37,8 +37,19 @@
       scannedUnit.addMappingFileName(mappingFileName);
     }
   }
- else   if (useOrmXmlForDefaultPersistenceUnit()) {
-    scannedUnit.addMappingFileName(DEFAULT_ORM_XML_RESOURCE);
+ else {
+    Resource ormXml=getOrmXmlForDefaultPersistenceUnit();
+    if (ormXml != null) {
+      scannedUnit.addMappingFileName(DEFAULT_ORM_XML_RESOURCE);
+      if (scannedUnit.getPersistenceUnitRootUrl() == null) {
+        try {
+          scannedUnit.setPersistenceUnitRootUrl(PersistenceUnitReader.determinePersistenceUnitRootUrl(ormXml));
+        }
+ catch (        IOException ex) {
+          logger.debug("Failed to determine persistence unit root URL from orm.xml location",ex);
+        }
+      }
+    }
   }
   return scannedUnit;
 }
