@@ -1,0 +1,9 @@
+{
+  MediaType contentType=MediaType.APPLICATION_JSON_UTF8;
+  ContentTypeResolver resolver=new FixedContentTypeResolver(contentType);
+  HandlerResultHandler handler=createHandler(resolver,new StringEncoder(),new JacksonJsonEncoder());
+  ServerWebExchange exchange=createExchange("/foo");
+  HandlerResult result=new HandlerResult(new Object(),"fooValue",ResolvableType.forClass(String.class));
+  handler.handleResult(exchange,result).get();
+  assertEquals(contentType,exchange.getResponse().getHeaders().getContentType());
+}

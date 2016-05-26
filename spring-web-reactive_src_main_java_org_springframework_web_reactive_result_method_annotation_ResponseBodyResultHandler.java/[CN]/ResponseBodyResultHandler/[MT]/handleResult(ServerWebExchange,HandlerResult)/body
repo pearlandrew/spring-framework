@@ -20,10 +20,13 @@
     elementType=returnType;
   }
   ServerHttpRequest request=exchange.getRequest();
-  List<MediaType> compatibleMediaTypes=getCompatibleMediaTypes(request,elementType);
+  List<MediaType> compatibleMediaTypes=getCompatibleMediaTypes(exchange,elementType);
   if (compatibleMediaTypes.isEmpty()) {
-    List<MediaType> supported=getProducibleMediaTypes(elementType);
-    return Mono.error(new NotAcceptableStatusException(supported));
+    if (result.getReturnValue().isPresent()) {
+      List<MediaType> mediaTypes=getProducibleMediaTypes(elementType);
+      return Mono.error(new NotAcceptableStatusException(mediaTypes));
+    }
+    return Mono.empty();
   }
   MediaType bestMediaType=selectBestMediaType(compatibleMediaTypes);
   if (bestMediaType != null) {
