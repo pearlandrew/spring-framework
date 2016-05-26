@@ -1,0 +1,9 @@
+{
+  ServerWebExchange exchange=createExchange("/foo");
+  Set<MediaType> mediaTypes=Collections.singleton(MediaType.APPLICATION_JSON);
+  exchange.getAttributes().put(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE,mediaTypes);
+  HandlerResultHandler handler=createHandler(new StringEncoder(),new JacksonJsonEncoder());
+  HandlerResult result=new HandlerResult(new Object(),"fooValue",ResolvableType.forClass(String.class));
+  handler.handleResult(exchange,result).get();
+  assertEquals(MediaType.APPLICATION_JSON,exchange.getResponse().getHeaders().getContentType());
+}

@@ -19,11 +19,10 @@
     publisher=Mono.justOrEmpty(result.getReturnValue());
     elementType=returnType;
   }
-  ServerHttpRequest request=exchange.getRequest();
   List<MediaType> compatibleMediaTypes=getCompatibleMediaTypes(exchange,elementType);
   if (compatibleMediaTypes.isEmpty()) {
     if (result.getReturnValue().isPresent()) {
-      List<MediaType> mediaTypes=getProducibleMediaTypes(elementType);
+      List<MediaType> mediaTypes=getProducibleMediaTypes(exchange,elementType);
       return Mono.error(new NotAcceptableStatusException(mediaTypes));
     }
     return Mono.empty();
