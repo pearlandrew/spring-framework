@@ -29,10 +29,11 @@
   }
   MediaType bestMediaType=selectBestMediaType(compatibleMediaTypes);
   if (bestMediaType != null) {
-    HttpMessageConverter<?> converter=resolveEncoder(elementType,bestMediaType);
-    if (converter != null) {
-      ServerHttpResponse response=exchange.getResponse();
-      return converter.write((Publisher)publisher,elementType,bestMediaType,response);
+    for (    HttpMessageConverter<?> converter : this.messageConverters) {
+      if (converter.canWrite(elementType,bestMediaType)) {
+        ServerHttpResponse response=exchange.getResponse();
+        return converter.write((Publisher)publisher,elementType,bestMediaType,response);
+      }
     }
   }
   return Mono.error(new NotAcceptableStatusException(this.supportedMediaTypes));
