@@ -1,0 +1,12 @@
+{
+  List<ViewResolver> resolverList=Arrays.asList(resolvers);
+  HandlerResultHandler handler=new ViewResolutionResultHandler(resolverList,this.conversionService);
+  HandlerResult handlerResult=new HandlerResult(new Object(),value,type,this.model);
+  ServerHttpRequest request=new MockServerHttpRequest(HttpMethod.GET,new URI(path));
+  this.response=new MockServerHttpResponse();
+  WebSessionManager sessionManager=new DefaultWebSessionManager();
+  ServerWebExchange exchange=new DefaultServerWebExchange(request,this.response,sessionManager);
+  Mono<Void> mono=handler.handleResult(exchange,handlerResult);
+  TestSubscriber<Void> subscriber=new TestSubscriber<>();
+  return subscriber.bindTo(mono).await(Duration.ofSeconds(1));
+}
