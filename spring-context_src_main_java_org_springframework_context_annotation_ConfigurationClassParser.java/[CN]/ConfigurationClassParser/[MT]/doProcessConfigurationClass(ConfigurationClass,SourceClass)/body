@@ -33,14 +33,7 @@
   for (  MethodMetadata methodMetadata : beanMethods) {
     configClass.addBeanMethod(new BeanMethod(methodMetadata,configClass));
   }
-  for (  SourceClass ifc : sourceClass.getInterfaces()) {
-    beanMethods=ifc.getMetadata().getAnnotatedMethods(Bean.class.getName());
-    for (    MethodMetadata methodMetadata : beanMethods) {
-      if (!methodMetadata.isAbstract()) {
-        configClass.addBeanMethod(new BeanMethod(methodMetadata,configClass));
-      }
-    }
-  }
+  processInterfaces(configClass,sourceClass);
   if (sourceClass.getMetadata().hasSuperClass()) {
     String superclass=sourceClass.getMetadata().getSuperClassName();
     if (!superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
