@@ -27,7 +27,7 @@
         reset();
         return Flux.error(new IllegalStateException("object length exceeds " + maxObjectLength + ": "+ this.writerIndex+ " bytes discarded"));
       }
-      DataBufferAllocator allocator=b.allocator();
+      DataBufferFactory dataBufferFactory=b.factory();
       for (; this.index < this.writerIndex; this.index++) {
         byte c=this.input.getByte(this.index);
         if (this.state == ST_DECODING_NORMAL) {
@@ -35,7 +35,7 @@
           if (this.openBraces == 0) {
             ByteBuf json=extractObject(this.input,this.input.readerIndex(),this.index + 1 - this.input.readerIndex());
             if (json != null) {
-              chunks.add(allocator.wrap(json.nioBuffer()));
+              chunks.add(dataBufferFactory.wrap(json.nioBuffer()));
             }
             this.input.readerIndex(this.index + 1);
             reset();
@@ -53,7 +53,7 @@
             }
             ByteBuf json=extractObject(this.input,this.input.readerIndex(),idxNoSpaces + 1 - this.input.readerIndex());
             if (json != null) {
-              chunks.add(allocator.wrap(json.nioBuffer()));
+              chunks.add(dataBufferFactory.wrap(json.nioBuffer()));
             }
             this.input.readerIndex(this.index + 1);
             if (c == ']') {

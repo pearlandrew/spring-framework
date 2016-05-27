@@ -1,0 +1,14 @@
+{
+  try {
+    DataBuffer buffer=dataBufferFactory.allocateBuffer(1024);
+    OutputStream outputStream=buffer.asOutputStream();
+    Class<?> clazz=ClassUtils.getUserClass(value);
+    Marshaller marshaller=jaxbContexts.createMarshaller(clazz);
+    marshaller.setProperty(Marshaller.JAXB_ENCODING,StandardCharsets.UTF_8.name());
+    marshaller.marshal(value,outputStream);
+    return Flux.just(buffer);
+  }
+ catch (  JAXBException ex) {
+    return Flux.error(ex);
+  }
+}
