@@ -1,11 +1,14 @@
 {
   Class<?> clazz=result.getReturnValueType().getRawClass();
-  if (isStringOrViewReference(clazz)) {
+  if (hasModelAttributeAnnotation(result)) {
+    return true;
+  }
+  if (isSupportedType(clazz)) {
     return true;
   }
   if (this.conversionService.canConvert(clazz,Mono.class)) {
     clazz=result.getReturnValueType().getGeneric(0).getRawClass();
-    return isStringOrViewReference(clazz);
+    return isSupportedType(clazz);
   }
   return false;
 }

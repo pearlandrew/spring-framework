@@ -1,7 +1,11 @@
 {
   List<ViewResolver> resolverList=Arrays.asList(resolvers);
-  HandlerResultHandler handler=new ViewResolutionResultHandler(resolverList,this.conversionService);
-  HandlerResult handlerResult=new HandlerResult(new Object(),value,type,this.model);
+  ConversionService conversionService=new DefaultConversionService();
+  HandlerResultHandler handler=new ViewResolutionResultHandler(resolverList,conversionService);
+  Method method=TestController.class.getMethod(methodName);
+  HandlerMethod handlerMethod=new HandlerMethod(new TestController(),method);
+  ResolvableType type=ResolvableType.forMethodReturnType(method);
+  HandlerResult handlerResult=new HandlerResult(handlerMethod,value,type,this.model);
   ServerHttpRequest request=new MockServerHttpRequest(HttpMethod.GET,new URI(path));
   this.response=new MockServerHttpResponse();
   WebSessionManager sessionManager=new DefaultWebSessionManager();
