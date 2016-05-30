@@ -2,10 +2,10 @@
   Publisher<?> publisher;
   ResolvableType elementType;
   ResolvableType returnType=result.getReturnValueType();
-  if (this.conversionService.canConvert(returnType.getRawClass(),Publisher.class)) {
+  if (getConversionService().canConvert(returnType.getRawClass(),Publisher.class)) {
     Optional<Object> optionalValue=result.getReturnValue();
     if (optionalValue.isPresent()) {
-      publisher=this.conversionService.convert(optionalValue.get(),Publisher.class);
+      publisher=getConversionService().convert(optionalValue.get(),Publisher.class);
     }
  else {
       publisher=Mono.empty();
@@ -19,15 +19,8 @@
     publisher=Mono.justOrEmpty(result.getReturnValue());
     elementType=returnType;
   }
-  List<MediaType> compatibleMediaTypes=getCompatibleMediaTypes(exchange,elementType);
-  if (compatibleMediaTypes.isEmpty()) {
-    if (result.getReturnValue().isPresent()) {
-      List<MediaType> mediaTypes=getProducibleMediaTypes(exchange,elementType);
-      return Mono.error(new NotAcceptableStatusException(mediaTypes));
-    }
-    return Mono.empty();
-  }
-  MediaType bestMediaType=selectBestMediaType(compatibleMediaTypes);
+  List<MediaType> producibleTypes=getProducibleMediaTypes(elementType);
+  MediaType bestMediaType=selectMediaType(exchange,producibleTypes);
   if (bestMediaType != null) {
     for (    HttpMessageConverter<?> converter : this.messageConverters) {
       if (converter.canWrite(elementType,bestMediaType)) {
@@ -36,5 +29,5 @@
       }
     }
   }
-  return Mono.error(new NotAcceptableStatusException(this.supportedMediaTypes));
+  return Mono.error(new NotAcceptableStatusException(producibleTypes));
 }
