@@ -7,16 +7,20 @@
  else {
     attributes.add(0,this.attributes);
   }
-  Set<String> metaAnnotationTypeNames=new LinkedHashSet<String>();
+  Set<Annotation> visited=new LinkedHashSet<Annotation>();
   Annotation[] metaAnnotations=AnnotationUtils.getAnnotations(annotationClass);
   if (!ObjectUtils.isEmpty(metaAnnotations)) {
     for (    Annotation metaAnnotation : metaAnnotations) {
       if (!AnnotationUtils.isInJavaLangAnnotationPackage(metaAnnotation)) {
-        recursivelyCollectMetaAnnotations(metaAnnotationTypeNames,metaAnnotation);
+        recursivelyCollectMetaAnnotations(visited,metaAnnotation);
       }
     }
   }
   if (this.metaAnnotationMap != null) {
+    Set<String> metaAnnotationTypeNames=new LinkedHashSet<String>(visited.size());
+    for (    Annotation ann : visited) {
+      metaAnnotationTypeNames.add(ann.annotationType().getName());
+    }
     this.metaAnnotationMap.put(annotationClass.getName(),metaAnnotationTypeNames);
   }
 }

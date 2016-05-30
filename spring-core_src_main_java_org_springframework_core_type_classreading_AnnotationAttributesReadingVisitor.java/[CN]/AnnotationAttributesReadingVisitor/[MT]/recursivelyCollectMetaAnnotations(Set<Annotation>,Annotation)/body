@@ -1,0 +1,18 @@
+{
+  if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && visited.add(annotation)) {
+    try {
+      if (Modifier.isPublic(annotation.annotationType().getModifiers())) {
+        String annotationName=annotation.annotationType().getName();
+        this.attributesMap.add(annotationName,AnnotationUtils.getAnnotationAttributes(annotation,false,true));
+      }
+      for (      Annotation metaMetaAnnotation : annotation.annotationType().getAnnotations()) {
+        recursivelyCollectMetaAnnotations(visited,metaMetaAnnotation);
+      }
+    }
+ catch (    Exception ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Failed to introspect meta-annotations on [" + annotation + "]: "+ ex);
+      }
+    }
+  }
+}
