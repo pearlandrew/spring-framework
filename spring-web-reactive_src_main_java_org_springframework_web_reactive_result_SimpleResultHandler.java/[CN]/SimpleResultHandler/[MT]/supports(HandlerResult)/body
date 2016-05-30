@@ -1,4 +1,11 @@
 {
   ResolvableType type=result.getReturnValueType();
-  return (type != null && (Void.TYPE.equals(type.getRawClass()) || isConvertibleToVoidPublisher(type)));
+  if (Void.TYPE.equals(type.getRawClass())) {
+    return true;
+  }
+  if (this.conversionService.canConvert(type.getRawClass(),Publisher.class)) {
+    Class<?> clazz=result.getReturnValueType().getGeneric(0).getRawClass();
+    return Void.class.equals(clazz);
+  }
+  return false;
 }
