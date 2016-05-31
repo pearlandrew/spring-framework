@@ -1,0 +1,21 @@
+{
+  ModelMap model=result.getModel();
+  Map<String,Object> map=new HashMap<>(model.size());
+  for (  Map.Entry<String,Object> entry : model.entrySet()) {
+    if (isEligibleAttribute(entry.getKey(),entry.getValue())) {
+      map.put(entry.getKey(),entry.getValue());
+    }
+  }
+  if (map.isEmpty()) {
+    return null;
+  }
+ else   if (map.size() == 1) {
+    return map.values().iterator().next();
+  }
+ else   if (getConverter().canWrite(ResolvableType.forClass(Map.class),null)) {
+    return map;
+  }
+ else {
+    throw new IllegalStateException("Multiple matching attributes found: " + map + ". "+ "However Map rendering is not supported by "+ getConverter());
+  }
+}

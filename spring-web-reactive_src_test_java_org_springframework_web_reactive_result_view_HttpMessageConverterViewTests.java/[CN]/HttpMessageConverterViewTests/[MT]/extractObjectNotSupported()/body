@@ -1,0 +1,14 @@
+{
+  HttpMessageConverter<?> converter=new CodecHttpMessageConverter<>(new Jaxb2Encoder());
+  HttpMessageConverterView view=new HttpMessageConverterView(converter);
+  view.setModelKeys(new HashSet<>(Collections.singletonList("foo1")));
+  this.model.addAttribute("foo1","bar1");
+  try {
+    view.extractObjectToRender(this.result);
+    fail();
+  }
+ catch (  IllegalStateException ex) {
+    String message=ex.getMessage();
+    assertTrue(message,message.contains("[foo1] is not supported"));
+  }
+}
