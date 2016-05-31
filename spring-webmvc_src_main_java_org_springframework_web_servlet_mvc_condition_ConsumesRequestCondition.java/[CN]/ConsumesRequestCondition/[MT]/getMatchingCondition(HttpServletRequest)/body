@@ -5,10 +5,17 @@
   if (isEmpty()) {
     return this;
   }
-  Set<ConsumeMediaTypeExpression> result=new LinkedHashSet<ConsumeMediaTypeExpression>(expressions);
+  MediaType contentType;
+  try {
+    contentType=StringUtils.hasLength(request.getContentType()) ? MediaType.parseMediaType(request.getContentType()) : MediaType.APPLICATION_OCTET_STREAM;
+  }
+ catch (  InvalidMediaTypeException ex) {
+    return null;
+  }
+  Set<ConsumeMediaTypeExpression> result=new LinkedHashSet<ConsumeMediaTypeExpression>(this.expressions);
   for (Iterator<ConsumeMediaTypeExpression> iterator=result.iterator(); iterator.hasNext(); ) {
     ConsumeMediaTypeExpression expression=iterator.next();
-    if (!expression.match(request)) {
+    if (!expression.match(contentType)) {
       iterator.remove();
     }
   }

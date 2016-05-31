@@ -5,22 +5,27 @@
   if (isEmpty()) {
     return this;
   }
+  List<MediaType> acceptedMediaTypes;
+  try {
+    acceptedMediaTypes=getAcceptedMediaTypes(request);
+  }
+ catch (  HttpMediaTypeException ex) {
+    return null;
+  }
   Set<ProduceMediaTypeExpression> result=new LinkedHashSet<ProduceMediaTypeExpression>(expressions);
   for (Iterator<ProduceMediaTypeExpression> iterator=result.iterator(); iterator.hasNext(); ) {
     ProduceMediaTypeExpression expression=iterator.next();
-    if (!expression.match(request)) {
+    if (!expression.match(acceptedMediaTypes)) {
       iterator.remove();
     }
   }
   if (!result.isEmpty()) {
     return new ProducesRequestCondition(result,this.contentNegotiationManager);
   }
-  try {
-    if (getAcceptedMediaTypes(request).contains(MediaType.ALL)) {
-      return new ProducesRequestCondition();
-    }
+ else   if (acceptedMediaTypes.contains(MediaType.ALL)) {
+    return EMPTY_CONDITION;
   }
- catch (  HttpMediaTypeException ex) {
+ else {
+    return null;
   }
-  return null;
 }
