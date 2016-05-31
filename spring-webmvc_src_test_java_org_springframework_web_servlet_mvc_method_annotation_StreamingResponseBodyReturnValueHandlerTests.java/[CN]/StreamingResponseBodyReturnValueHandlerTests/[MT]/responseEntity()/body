@@ -1,17 +1,2 @@
 {
-  CountDownLatch latch=new CountDownLatch(1);
-  MethodParameter returnType=returnType(TestController.class,"handleResponseEntity");
-  ResponseEntity<StreamingResponseBody> emitter=ResponseEntity.ok().header("foo","bar").body(new StreamingResponseBody(){
-    @Override public void writeTo(    OutputStream outputStream) throws IOException {
-      outputStream.write("foo".getBytes(Charset.forName("UTF-8")));
-      latch.countDown();
-    }
-  }
-);
-  this.handler.handleReturnValue(emitter,returnType,this.mavContainer,this.webRequest);
-  assertTrue(this.request.isAsyncStarted());
-  assertEquals(200,this.response.getStatus());
-  assertEquals("bar",this.response.getHeader("foo"));
-  assertTrue(latch.await(5,TimeUnit.SECONDS));
-  assertEquals("foo",this.response.getContentAsString());
 }
