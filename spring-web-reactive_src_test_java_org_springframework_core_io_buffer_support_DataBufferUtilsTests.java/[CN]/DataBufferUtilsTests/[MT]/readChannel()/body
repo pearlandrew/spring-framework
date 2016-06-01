@@ -2,7 +2,6 @@
   URI uri=DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt").toURI();
   FileChannel channel=FileChannel.open(Paths.get(uri),StandardOpenOption.READ);
   Flux<DataBuffer> flux=DataBufferUtils.read(channel,this.dataBufferFactory,4);
-  TestSubscriber<DataBuffer> testSubscriber=new TestSubscriber<>();
-  testSubscriber.bindTo(flux).assertNoError().assertComplete().assertValuesWith(stringConsumer("foo\n"),stringConsumer("bar\n"),stringConsumer("baz\n"),stringConsumer("qux\n"));
+  TestSubscriber.subscribe(flux).assertNoError().assertComplete().assertValuesWith(stringConsumer("foo\n"),stringConsumer("bar\n"),stringConsumer("baz\n"),stringConsumer("qux\n"));
   assertFalse(channel.isOpen());
 }
