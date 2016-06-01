@@ -1,0 +1,15 @@
+{
+  ConversionService conversionService=new DefaultConversionService();
+  ViewResolutionResultHandler handler=new ViewResolutionResultHandler(resolvers,conversionService);
+  handler.setDefaultViews(defaultViews);
+  Method method=TestController.class.getMethod(methodName);
+  HandlerMethod handlerMethod=new HandlerMethod(new TestController(),method);
+  ResolvableType type=ResolvableType.forMethodReturnType(method);
+  HandlerResult handlerResult=new HandlerResult(handlerMethod,value,type,this.model);
+  this.request.setUri(new URI(path));
+  WebSessionManager sessionManager=new DefaultWebSessionManager();
+  ServerWebExchange exchange=new DefaultServerWebExchange(this.request,this.response,sessionManager);
+  Mono<Void> mono=handler.handleResult(exchange,handlerResult);
+  TestSubscriber<Void> subscriber=new TestSubscriber<>();
+  return subscriber.bindTo(mono).await(Duration.ofSeconds(1));
+}
