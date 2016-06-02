@@ -9,7 +9,7 @@
     if (!sessionHolder.isSynchronizedWithTransaction() && TransactionSynchronizationManager.isSynchronizationActive()) {
       TransactionSynchronizationManager.registerSynchronization(new SpringSessionSynchronization(sessionHolder,this.sessionFactory,false));
       sessionHolder.setSynchronizedWithTransaction(true);
-      FlushMode flushMode=session.getFlushMode();
+      FlushMode flushMode=SessionFactoryUtils.getFlushMode(session);
       if (flushMode.equals(FlushMode.MANUAL) && !TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
         session.setFlushMode(FlushMode.AUTO);
         sessionHolder.setPreviousFlushMode(flushMode);
