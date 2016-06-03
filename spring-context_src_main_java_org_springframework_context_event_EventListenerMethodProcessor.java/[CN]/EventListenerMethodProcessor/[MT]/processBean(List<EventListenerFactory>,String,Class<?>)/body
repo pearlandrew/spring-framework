@@ -1,12 +1,20 @@
 {
   if (!this.nonAnnotatedClasses.contains(targetType)) {
-    Map<Method,EventListener> annotatedMethods=MethodIntrospector.selectMethods(targetType,new MethodIntrospector.MetadataLookup<EventListener>(){
-      @Override public EventListener inspect(      Method method){
-        return AnnotatedElementUtils.findMergedAnnotation(method,EventListener.class);
+    Map<Method,EventListener> annotatedMethods=null;
+    try {
+      annotatedMethods=MethodIntrospector.selectMethods(targetType,new MethodIntrospector.MetadataLookup<EventListener>(){
+        @Override public EventListener inspect(        Method method){
+          return AnnotatedElementUtils.findMergedAnnotation(method,EventListener.class);
+        }
+      }
+);
+    }
+ catch (    Throwable ex) {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Could not resolve methods for bean with name '" + beanName + "'",ex);
       }
     }
-);
-    if (annotatedMethods.isEmpty()) {
+    if (CollectionUtils.isEmpty(annotatedMethods)) {
       this.nonAnnotatedClasses.add(targetType);
       if (logger.isTraceEnabled()) {
         logger.trace("No @EventListener annotations found on bean class: " + targetType);
