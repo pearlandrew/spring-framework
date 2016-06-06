@@ -1,0 +1,18 @@
+{
+  ApplicationContext context=loadConfig(WebReactiveConfiguration.class);
+  String name="requestMappingHandlerMapping";
+  RequestMappingHandlerMapping mapping=context.getBean(name,RequestMappingHandlerMapping.class);
+  assertNotNull(mapping);
+  assertEquals(0,mapping.getOrder());
+  assertTrue(mapping.useSuffixPatternMatch());
+  assertTrue(mapping.useTrailingSlashMatch());
+  assertTrue(mapping.useRegisteredSuffixPatternMatch());
+  name="mvcContentTypeResolver";
+  RequestedContentTypeResolver resolver=context.getBean(name,RequestedContentTypeResolver.class);
+  assertSame(resolver,mapping.getContentTypeResolver());
+  this.request.setUri(new URI("/path.json"));
+  List<MediaType> list=Collections.singletonList(MediaType.APPLICATION_JSON);
+  assertEquals(list,resolver.resolveMediaTypes(this.exchange));
+  this.request.setUri(new URI("/path.xml"));
+  assertEquals(Collections.emptyList(),resolver.resolveMediaTypes(this.exchange));
+}
