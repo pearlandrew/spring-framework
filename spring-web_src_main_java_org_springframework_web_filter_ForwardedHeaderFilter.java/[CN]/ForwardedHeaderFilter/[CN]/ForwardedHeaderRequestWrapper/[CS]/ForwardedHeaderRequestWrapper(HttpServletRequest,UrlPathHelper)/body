@@ -7,8 +7,9 @@
   this.secure="https".equals(scheme);
   this.host=uriComponents.getHost();
   this.port=(port == -1 ? (this.secure ? 443 : 80) : port);
-  this.contextPath=initContextPath(request,pathHelper);
-  this.requestUri=initRequestUri(request,pathHelper);
-  this.requestUrl=initRequestUrl(this.scheme,this.host,port,this.requestUri);
+  String prefix=getForwardedPrefix(request);
+  this.contextPath=(prefix != null ? prefix : request.getContextPath());
+  this.requestUri=this.contextPath + pathHelper.getPathWithinApplication(request);
+  this.requestUrl=new StringBuffer(this.scheme + "://" + this.host+ (port == -1 ? "" : ":" + port)+ this.requestUri);
   this.headers=initHeaders(request);
 }
