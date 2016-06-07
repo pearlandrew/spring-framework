@@ -1,9 +1,13 @@
 {
   return new ResultMatcher(){
     @Override public void match(    MvcResult result) throws Exception {
-      HandlerMethod handlerMethod=getHandlerMethod(result);
-      Method method=((MvcUriComponentsBuilder.MethodInvocationInfo)info).getControllerMethod();
-      assertEquals("HandlerMethod",method,handlerMethod.getMethod());
+      if (!MethodInvocationInfo.class.isInstance(obj)) {
+        fail(String.format("The supplied object [%s] is not an instance of %s. " + "Ensure that you invoke the handler method via MvcUriComponentsBuilder.on().",obj,MethodInvocationInfo.class.getName()));
+      }
+      MethodInvocationInfo invocationInfo=(MethodInvocationInfo)obj;
+      Method expected=invocationInfo.getControllerMethod();
+      Method actual=getHandlerMethod(result).getMethod();
+      assertEquals("Handler method",expected,actual);
     }
   }
 ;
