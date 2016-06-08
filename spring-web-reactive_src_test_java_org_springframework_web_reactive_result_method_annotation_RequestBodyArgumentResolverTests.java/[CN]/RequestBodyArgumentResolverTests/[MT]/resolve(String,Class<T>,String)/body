@@ -1,0 +1,9 @@
+{
+  this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+  this.request.writeWith(Flux.just(dataBuffer(body)));
+  Mono<Object> result=this.resolver.resolveArgument(parameter(paramName),this.model,this.exchange);
+  Object value=result.block(Duration.ofSeconds(5));
+  assertNotNull(value);
+  assertTrue("Actual type: " + value.getClass(),valueType.isAssignableFrom(value.getClass()));
+  return (T)value;
+}
