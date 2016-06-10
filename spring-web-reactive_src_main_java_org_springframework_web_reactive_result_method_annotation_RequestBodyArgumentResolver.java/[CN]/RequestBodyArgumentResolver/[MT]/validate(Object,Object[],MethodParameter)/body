@@ -1,0 +1,13 @@
+{
+  String name=Conventions.getVariableNameForParameter(methodParam);
+  Errors errors=new BeanPropertyBindingResult(target,name);
+  if (!ObjectUtils.isEmpty(validationHints) && this.validator instanceof SmartValidator) {
+    ((SmartValidator)this.validator).validate(target,errors,validationHints);
+  }
+ else   if (this.validator != null) {
+    this.validator.validate(target,errors);
+  }
+  if (errors.hasErrors()) {
+    throw new ServerWebInputException("Validation failed",methodParam);
+  }
+}
