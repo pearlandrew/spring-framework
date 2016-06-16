@@ -1,0 +1,6 @@
+{
+  SseEventEncoder encoder=new SseEventEncoder(new StringEncoder(),Arrays.asList(new JacksonJsonEncoder()));
+  Flux<Pojo> source=Flux.just(new Pojo("foofoo","barbar"),new Pojo("foofoofoo","barbarbar"));
+  Flux<DataBuffer> output=encoder.encode(source,this.dataBufferFactory,ResolvableType.forClass(Pojo.class),new MimeType("text","event-stream"));
+  TestSubscriber.subscribe(output).assertNoError().assertValuesWith(stringConsumer("data:{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"),stringConsumer("\n"),stringConsumer("data:{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"),stringConsumer("\n"));
+}
