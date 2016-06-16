@@ -5,6 +5,9 @@
       int written=writeByteBuffer(channel);
       logger.trace("written: " + written + " total: "+ total);
       if (written == total) {
+        if (dataBuffer instanceof FlushingDataBuffer) {
+          flush(channel);
+        }
         releaseBuffer();
         if (!completed) {
           subscription.request(1);
