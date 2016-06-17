@@ -1,6 +1,13 @@
 {
   if (isActive()) {
-    writeFrame(SockJsFrame.heartbeatFrame());
-    scheduleHeartbeat();
+    if (heartbeatLock.tryLock()) {
+      try {
+        writeFrame(SockJsFrame.heartbeatFrame());
+        scheduleHeartbeat();
+      }
+  finally {
+        heartbeatLock.unlock();
+      }
+    }
   }
 }
