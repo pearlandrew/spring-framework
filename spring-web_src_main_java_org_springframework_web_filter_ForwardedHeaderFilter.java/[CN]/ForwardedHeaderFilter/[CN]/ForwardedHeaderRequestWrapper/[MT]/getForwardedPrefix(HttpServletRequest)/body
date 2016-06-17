@@ -1,9 +1,16 @@
 {
-  String header=request.getHeader("X-Forwarded-Prefix");
-  if (header != null) {
-    while (header.endsWith("/")) {
-      header=header.substring(0,header.length() - 1);
+  String prefix=null;
+  Enumeration<String> names=request.getHeaderNames();
+  while (names.hasMoreElements()) {
+    String name=names.nextElement();
+    if ("X-Forwarded-Prefix".equalsIgnoreCase(name)) {
+      prefix=request.getHeader(name);
     }
   }
-  return header;
+  if (prefix != null) {
+    while (prefix.endsWith("/")) {
+      prefix=prefix.substring(0,prefix.length() - 1);
+    }
+  }
+  return prefix;
 }
