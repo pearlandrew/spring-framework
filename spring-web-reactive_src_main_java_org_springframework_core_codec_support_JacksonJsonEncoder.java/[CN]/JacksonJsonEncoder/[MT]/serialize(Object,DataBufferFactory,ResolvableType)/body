@@ -1,8 +1,11 @@
 {
+  TypeFactory typeFactory=this.mapper.getTypeFactory();
+  JavaType javaType=typeFactory.constructType(type.getType());
+  ObjectWriter writer=this.mapper.writerFor(javaType);
   DataBuffer buffer=dataBufferFactory.allocateBuffer();
   OutputStream outputStream=buffer.asOutputStream();
   try {
-    this.mapper.writeValue(outputStream,value);
+    writer.writeValue(outputStream,value);
   }
  catch (  IOException e) {
     throw new CodecException("Error while writing the data",e);
