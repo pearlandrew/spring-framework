@@ -1,0 +1,31 @@
+{
+  Publisher<?> publisher;
+  ResolvableType elementType;
+  if (getConversionService().canConvert(bodyType.getRawClass(),Publisher.class)) {
+    if (body != null) {
+      publisher=getConversionService().convert(body,Publisher.class);
+    }
+ else {
+      publisher=Mono.empty();
+    }
+    elementType=bodyType.getGeneric(0);
+    if (Void.class.equals(elementType.getRawClass())) {
+      return Mono.from((Publisher<Void>)publisher);
+    }
+  }
+ else {
+    publisher=Mono.justOrEmpty(body);
+    elementType=bodyType;
+  }
+  List<MediaType> producibleTypes=getProducibleMediaTypes(elementType);
+  MediaType bestMediaType=selectMediaType(exchange,producibleTypes);
+  if (bestMediaType != null) {
+    for (    HttpMessageConverter<?> converter : getMessageConverters()) {
+      if (converter.canWrite(elementType,bestMediaType)) {
+        ServerHttpResponse response=exchange.getResponse();
+        return converter.write((Publisher)publisher,elementType,bestMediaType,response);
+      }
+    }
+  }
+  return Mono.error(new NotAcceptableStatusException(producibleTypes));
+}
