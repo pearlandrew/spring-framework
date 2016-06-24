@@ -1,0 +1,22 @@
+{
+  ServletOutputStream output=outputStream();
+  boolean ready=output.isReady();
+  if (this.flushOnNext) {
+    flush();
+    ready=output.isReady();
+  }
+  if (this.logger.isTraceEnabled()) {
+    this.logger.trace("write: " + dataBuffer + " ready: "+ ready);
+  }
+  if (ready) {
+    int total=dataBuffer.readableByteCount();
+    int written=writeDataBuffer(dataBuffer);
+    if (this.logger.isTraceEnabled()) {
+      this.logger.trace("written: " + written + " total: "+ total);
+    }
+    return written == total;
+  }
+ else {
+    return false;
+  }
+}

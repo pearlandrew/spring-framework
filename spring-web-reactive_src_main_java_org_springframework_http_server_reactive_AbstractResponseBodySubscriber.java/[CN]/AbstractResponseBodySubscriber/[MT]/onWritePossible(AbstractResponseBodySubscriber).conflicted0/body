@@ -1,0 +1,24 @@
+{
+  DataBuffer dataBuffer=subscriber.currentBuffer;
+  try {
+    boolean writeCompleted=subscriber.write(dataBuffer);
+    if (writeCompleted) {
+      if (dataBuffer instanceof FlushingDataBuffer) {
+        subscriber.flush();
+      }
+      subscriber.releaseBuffer();
+      boolean subscriptionCompleted=subscriber.subscriptionCompleted;
+      if (!subscriptionCompleted) {
+        subscriber.changeState(this,REQUESTED);
+        subscriber.subscription.request(1);
+      }
+ else {
+        subscriber.changeState(this,COMPLETED);
+        subscriber.close();
+      }
+    }
+  }
+ catch (  IOException ex) {
+    subscriber.onError(ex);
+  }
+}
