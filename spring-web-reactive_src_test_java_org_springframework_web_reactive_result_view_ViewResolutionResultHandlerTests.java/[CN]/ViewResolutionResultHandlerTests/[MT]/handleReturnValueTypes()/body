@@ -1,0 +1,31 @@
+{
+  Object handler=new Object();
+  Object returnValue;
+  ResolvableType returnType;
+  ViewResolver resolver=new TestViewResolver("account");
+  returnValue=new TestView("account");
+  returnType=ResolvableType.forClass(View.class);
+  testHandle("/path",handler,returnValue,returnType,"account: {id=123}");
+  returnValue=Mono.just(new TestView("account"));
+  returnType=ResolvableType.forClassWithGenerics(Mono.class,View.class);
+  testHandle("/path",handler,returnValue,returnType,"account: {id=123}");
+  returnValue="account";
+  returnType=ResolvableType.forClass(String.class);
+  testHandle("/path",handler,returnValue,returnType,"account: {id=123}",resolver);
+  returnValue=Mono.just("account");
+  returnType=ResolvableType.forClassWithGenerics(Mono.class,String.class);
+  testHandle("/path",handler,returnValue,returnType,"account: {id=123}",resolver);
+  returnValue=new ExtendedModelMap().addAttribute("name","Joe");
+  returnType=ResolvableType.forClass(Model.class);
+  testHandle("/account",handler,returnValue,returnType,"account: {id=123, name=Joe}",resolver);
+  returnValue=Collections.singletonMap("name","Joe");
+  returnType=ResolvableType.forClass(Map.class);
+  testHandle("/account",handler,returnValue,returnType,"account: {id=123, name=Joe}",resolver);
+  HandlerMethod hm=handlerMethod(new TestController(),"modelAttributeMethod");
+  returnValue="Joe";
+  returnType=ResolvableType.forMethodParameter(hm.getReturnType());
+  testHandle("/account",hm,returnValue,returnType,"account: {id=123, name=Joe}",resolver);
+  returnValue=new TestBean("Joe");
+  returnType=ResolvableType.forClass(TestBean.class);
+  testHandle("/account",handler,returnValue,returnType,"account: {id=123, testBean=TestBean[name=Joe]}",resolver);
+}

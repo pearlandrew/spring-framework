@@ -1,2 +1,11 @@
 {
+  TestBean value=new TestBean("Joe");
+  ResolvableType type=ResolvableType.forClass(TestBean.class);
+  HandlerResult handlerResult=new HandlerResult(new Object(),value,type,new ExtendedModelMap());
+  this.request.getHeaders().setAccept(Collections.singletonList(APPLICATION_JSON));
+  this.request.setUri(new URI("/account"));
+  TestView defaultView=new TestView("jsonView",APPLICATION_JSON);
+  createResultHandler(Collections.singletonList(defaultView),new TestViewResolver("account")).handleResult(this.exchange,handlerResult).block(Duration.ofSeconds(5));
+  assertEquals(APPLICATION_JSON,this.response.getHeaders().getContentType());
+  assertResponseBody("jsonView: {testBean=TestBean[name=Joe]}");
 }
