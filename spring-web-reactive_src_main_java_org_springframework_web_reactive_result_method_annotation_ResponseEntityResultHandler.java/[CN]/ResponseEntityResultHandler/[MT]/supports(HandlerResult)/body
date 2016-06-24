@@ -1,4 +1,11 @@
 {
   ResolvableType returnType=result.getReturnValueType();
-  return (HttpEntity.class.isAssignableFrom(returnType.getRawClass()) && !RequestEntity.class.isAssignableFrom(returnType.getRawClass()));
+  if (isSupportedType(returnType)) {
+    return true;
+  }
+ else   if (getConversionService().canConvert(returnType.getRawClass(),Mono.class)) {
+    ResolvableType genericType=result.getReturnValueType().getGeneric(0);
+    return isSupportedType(genericType);
+  }
+  return false;
 }

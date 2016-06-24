@@ -1,9 +1,14 @@
 {
   ModelMap model=new ExtendedModelMap();
-  ResolvableType type=ResolvableType.forClassWithGenerics(ResponseEntity.class,String.class);
-  assertTrue(this.resultHandler.supports(new HandlerResult(HANDLER,null,type,model)));
-  type=ResolvableType.forClassWithGenerics(ResponseEntity.class,Void.class);
-  assertTrue(this.resultHandler.supports(new HandlerResult(HANDLER,null,type,model)));
-  type=ResolvableType.forClass(Void.class);
-  assertFalse(this.resultHandler.supports(new HandlerResult(HANDLER,null,type,model)));
+  Object value=null;
+  ResolvableType type=responseEntityType(String.class);
+  assertTrue(this.resultHandler.supports(new HandlerResult(HANDLER,value,type,model)));
+  type=forClassWithGenerics(Mono.class,responseEntityType(String.class));
+  assertTrue(this.resultHandler.supports(new HandlerResult(HANDLER,value,type,model)));
+  type=forClassWithGenerics(Single.class,responseEntityType(String.class));
+  assertTrue(this.resultHandler.supports(new HandlerResult(HANDLER,value,type,model)));
+  type=forClassWithGenerics(CompletableFuture.class,responseEntityType(String.class));
+  assertTrue(this.resultHandler.supports(new HandlerResult(HANDLER,value,type,model)));
+  type=ResolvableType.forClass(String.class);
+  assertFalse(this.resultHandler.supports(new HandlerResult(HANDLER,value,type,model)));
 }
