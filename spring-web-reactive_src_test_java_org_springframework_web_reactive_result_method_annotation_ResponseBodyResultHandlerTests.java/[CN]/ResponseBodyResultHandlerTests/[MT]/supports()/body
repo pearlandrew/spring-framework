@@ -1,13 +1,9 @@
 {
-  ResponseBodyResultHandler handler=createHandler(new StringEncoder());
   TestController controller=new TestController();
-  HandlerMethod hm=new HandlerMethod(controller,TestController.class.getMethod("notAnnotated"));
-  ResolvableType type=ResolvableType.forMethodParameter(hm.getReturnType());
-  assertFalse(handler.supports(new HandlerResult(hm,null,type,new ExtendedModelMap())));
-  hm=new HandlerMethod(controller,TestController.class.getMethod("publisherString"));
-  type=ResolvableType.forMethodParameter(hm.getReturnType());
-  assertTrue(handler.supports(new HandlerResult(hm,null,type,new ExtendedModelMap())));
-  hm=new HandlerMethod(controller,TestController.class.getMethod("publisherVoid"));
-  type=ResolvableType.forMethodParameter(hm.getReturnType());
-  assertTrue(handler.supports(new HandlerResult(hm,null,type,new ExtendedModelMap())));
+  testSupports(controller,"handleReturningString",true);
+  testSupports(controller,"handleReturningVoid",true);
+  testSupports(controller,"doWork",false);
+  TestRestController restController=new TestRestController();
+  testSupports(restController,"handleReturningString",true);
+  testSupports(restController,"handleReturningVoid",true);
 }

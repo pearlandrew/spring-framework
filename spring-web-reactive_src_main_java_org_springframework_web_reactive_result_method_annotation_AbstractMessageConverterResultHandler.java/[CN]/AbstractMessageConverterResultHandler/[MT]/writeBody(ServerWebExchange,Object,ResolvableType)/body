@@ -9,15 +9,18 @@
       publisher=Mono.empty();
     }
     elementType=bodyType.getGeneric(0);
-    if (Void.class.equals(elementType.getRawClass())) {
-      return Mono.from((Publisher<Void>)publisher);
-    }
   }
  else {
     publisher=Mono.justOrEmpty(body);
     elementType=bodyType;
   }
+  if (Void.class.equals(elementType.getRawClass())) {
+    return Mono.from((Publisher<Void>)publisher);
+  }
   List<MediaType> producibleTypes=getProducibleMediaTypes(elementType);
+  if (producibleTypes.isEmpty()) {
+    return Mono.error(new IllegalStateException("No converter for return value type: " + elementType));
+  }
   MediaType bestMediaType=selectMediaType(exchange,producibleTypes);
   if (bestMediaType != null) {
     for (    HttpMessageConverter<?> converter : getMessageConverters()) {
