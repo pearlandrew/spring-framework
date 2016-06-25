@@ -1,10 +1,11 @@
 {
-  DefaultListableBeanFactory factory=initBeanFactory(ConfigWithPrototypeBean.class,AdaptiveInjectionPoints.class);
-  AutowiredAnnotationBeanPostProcessor aabpp=new AutowiredAnnotationBeanPostProcessor();
-  aabpp.setBeanFactory(factory);
-  factory.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
-  factory.addBeanPostProcessor(aabpp);
+  AnnotationConfigApplicationContext factory=new AnnotationConfigApplicationContext();
+  factory.register(ConfigWithPrototypeBean.class,AdaptiveInjectionPoints.class);
+  factory.refresh();
   AdaptiveInjectionPoints adaptive=factory.getBean(AdaptiveInjectionPoints.class);
   assertEquals("adaptiveInjectionPoint1",adaptive.adaptiveInjectionPoint1.getName());
-  assertEquals("adaptiveInjectionPoint2",adaptive.adaptiveInjectionPoint2.getName());
+  assertEquals("setAdaptiveInjectionPoint2",adaptive.adaptiveInjectionPoint2.getName());
+  adaptive=factory.getBean(AdaptiveInjectionPoints.class);
+  assertEquals("adaptiveInjectionPoint1",adaptive.adaptiveInjectionPoint1.getName());
+  assertEquals("setAdaptiveInjectionPoint2",adaptive.adaptiveInjectionPoint2.getName());
 }
