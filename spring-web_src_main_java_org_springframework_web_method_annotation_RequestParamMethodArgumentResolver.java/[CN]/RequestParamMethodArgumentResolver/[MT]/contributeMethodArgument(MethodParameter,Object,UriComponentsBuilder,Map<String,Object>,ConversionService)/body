@@ -6,6 +6,11 @@
   RequestParam requestParam=parameter.getParameterAnnotation(RequestParam.class);
   String name=(requestParam == null || StringUtils.isEmpty(requestParam.name()) ? parameter.getParameterName() : requestParam.name());
   if (value == null) {
+    if (requestParam != null) {
+      if (!requestParam.required() || !requestParam.defaultValue().equals(ValueConstants.DEFAULT_NONE)) {
+        return;
+      }
+    }
     builder.queryParam(name);
   }
  else   if (value instanceof Collection) {
