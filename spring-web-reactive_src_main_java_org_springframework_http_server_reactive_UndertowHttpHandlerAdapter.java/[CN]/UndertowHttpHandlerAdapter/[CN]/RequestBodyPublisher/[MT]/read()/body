@@ -1,0 +1,15 @@
+{
+  ByteBuffer byteBuffer=this.pooledByteBuffer.getBuffer();
+  int read=this.requestChannel.read(byteBuffer);
+  if (logger.isTraceEnabled()) {
+    logger.trace("read:" + read);
+  }
+  if (read > 0) {
+    byteBuffer.flip();
+    return this.dataBufferFactory.wrap(byteBuffer);
+  }
+ else   if (read == -1) {
+    onAllDataRead();
+  }
+  return null;
+}

@@ -1,0 +1,19 @@
+{
+  try {
+    while (hasDemand()) {
+      DataBuffer dataBuffer=read();
+      if (dataBuffer != null) {
+        BackpressureUtils.getAndSub(this.demand,1L);
+        this.subscriber.onNext(dataBuffer);
+      }
+ else {
+        return false;
+      }
+    }
+    return true;
+  }
+ catch (  IOException ex) {
+    onError(ex);
+    return false;
+  }
+}

@@ -1,27 +1,3 @@
 {
-  if (isSubscriptionCancelled()) {
-    return;
-  }
-  logger.trace("onDataAvailable");
-  ServletInputStream input=RequestBodyPublisher.this.synchronizer.getRequest().getInputStream();
-  while (true) {
-    if (!checkSubscriptionForDemand()) {
-      break;
-    }
-    boolean ready=input.isReady();
-    logger.trace("Input ready: " + ready + " finished: "+ input.isFinished());
-    if (!ready) {
-      break;
-    }
-    int read=input.read(RequestBodyPublisher.this.buffer);
-    logger.trace("Input read:" + read);
-    if (read == -1) {
-      break;
-    }
- else     if (read > 0) {
-      DataBuffer dataBuffer=RequestBodyPublisher.this.dataBufferFactory.allocateBuffer(read);
-      dataBuffer.write(RequestBodyPublisher.this.buffer,0,read);
-      publishOnNext(dataBuffer);
-    }
-  }
+  RequestBodyPublisher.this.onDataAvailable();
 }
