@@ -1,4 +1,5 @@
 {
+  List<Encoder<?>> sseDataEncoders=new ArrayList<>();
   converters.add(converter(new ByteBufferEncoder(),new ByteBufferDecoder()));
   converters.add(converter(new StringEncoder(),new StringDecoder()));
   converters.add(new ResourceHttpMessageConverter());
@@ -6,7 +7,12 @@
     converters.add(converter(new Jaxb2Encoder(),new Jaxb2Decoder()));
   }
   if (jackson2Present) {
-    JsonObjectDecoder objectDecoder=new JsonObjectDecoder();
-    converters.add(converter(new JacksonJsonEncoder(),new JacksonJsonDecoder(objectDecoder)));
+    JacksonJsonEncoder jacksonEncoder=new JacksonJsonEncoder();
+    JacksonJsonDecoder jacksonDecoder=new JacksonJsonDecoder(new JsonObjectDecoder());
+    converters.add(converter(jacksonEncoder,jacksonDecoder));
+    sseDataEncoders.add(jacksonEncoder);
   }
+ else {
+  }
+  converters.add(converter(new SseEventEncoder(sseDataEncoders),null));
 }
