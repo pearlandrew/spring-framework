@@ -1,46 +1,18 @@
 {
-  Set<String> allowedMethods=new LinkedHashSet<String>(4);
-  Set<RequestMappingInfo> patternMatches=new HashSet<RequestMappingInfo>();
-  Set<RequestMappingInfo> patternAndMethodMatches=new HashSet<RequestMappingInfo>();
-  for (  RequestMappingInfo info : requestMappingInfos) {
-    if (info.getPatternsCondition().getMatchingCondition(request) != null) {
-      patternMatches.add(info);
-      if (info.getMethodsCondition().getMatchingCondition(request) != null) {
-        patternAndMethodMatches.add(info);
-      }
- else {
-        for (        RequestMethod method : info.getMethodsCondition().getMethods()) {
-          allowedMethods.add(method.name());
-        }
-      }
-    }
-  }
-  if (patternMatches.isEmpty()) {
+  PartialMatchHelper helper=new PartialMatchHelper(infos,request);
+  if (helper.isEmpty()) {
     return null;
   }
- else   if (patternAndMethodMatches.isEmpty()) {
+  if (helper.hasMethodsMismatch()) {
+    Set<String> methods=helper.getAllowedMethods();
     if (HttpMethod.OPTIONS.matches(request.getMethod())) {
-      HttpOptionsHandler handler=new HttpOptionsHandler(allowedMethods);
+      HttpOptionsHandler handler=new HttpOptionsHandler(methods);
       return new HandlerMethod(handler,HTTP_OPTIONS_HANDLE_METHOD);
     }
- else     if (!allowedMethods.isEmpty()) {
-      throw new HttpRequestMethodNotSupportedException(request.getMethod(),allowedMethods);
-    }
+    throw new HttpRequestMethodNotSupportedException(request.getMethod(),methods);
   }
-  Set<MediaType> consumableMediaTypes;
-  Set<MediaType> producibleMediaTypes;
-  List<String[]> paramConditions;
-  if (patternAndMethodMatches.isEmpty()) {
-    consumableMediaTypes=getConsumableMediaTypes(request,patternMatches);
-    producibleMediaTypes=getProducibleMediaTypes(request,patternMatches);
-    paramConditions=getRequestParams(request,patternMatches);
-  }
- else {
-    consumableMediaTypes=getConsumableMediaTypes(request,patternAndMethodMatches);
-    producibleMediaTypes=getProducibleMediaTypes(request,patternAndMethodMatches);
-    paramConditions=getRequestParams(request,patternAndMethodMatches);
-  }
-  if (!consumableMediaTypes.isEmpty()) {
+  if (helper.hasConsumesMismatch()) {
+    Set<MediaType> mediaTypes=helper.getConsumableMediaTypes();
     MediaType contentType=null;
     if (StringUtils.hasLength(request.getContentType())) {
       try {
@@ -50,15 +22,15 @@
         throw new HttpMediaTypeNotSupportedException(ex.getMessage());
       }
     }
-    throw new HttpMediaTypeNotSupportedException(contentType,new ArrayList<MediaType>(consumableMediaTypes));
+    throw new HttpMediaTypeNotSupportedException(contentType,new ArrayList<MediaType>(mediaTypes));
   }
- else   if (!producibleMediaTypes.isEmpty()) {
-    throw new HttpMediaTypeNotAcceptableException(new ArrayList<MediaType>(producibleMediaTypes));
+  if (helper.hasProducesMismatch()) {
+    Set<MediaType> mediaTypes=helper.getProducibleMediaTypes();
+    throw new HttpMediaTypeNotAcceptableException(new ArrayList<MediaType>(mediaTypes));
   }
- else   if (!CollectionUtils.isEmpty(paramConditions)) {
-    throw new UnsatisfiedServletRequestParameterException(paramConditions,request.getParameterMap());
+  if (helper.hasParamsMismatch()) {
+    List<String[]> conditions=helper.getParamConditions();
+    throw new UnsatisfiedServletRequestParameterException(conditions,request.getParameterMap());
   }
- else {
-    return null;
-  }
+  return null;
 }
