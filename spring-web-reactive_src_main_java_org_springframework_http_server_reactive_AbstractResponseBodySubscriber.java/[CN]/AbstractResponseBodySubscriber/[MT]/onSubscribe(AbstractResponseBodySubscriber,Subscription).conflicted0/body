@@ -1,8 +1,10 @@
 {
-  if (BackpressureUtils.validate(subscriber.subscription,subscription)) {
+  Objects.requireNonNull(subscription,"Subscription cannot be null");
+  if (subscriber.changeState(this,REQUESTED)) {
     subscriber.subscription=subscription;
-    if (subscriber.changeState(this,REQUESTED)) {
-      subscription.request(1);
-    }
+    subscription.request(1);
+  }
+ else {
+    super.onSubscribe(subscriber,subscription);
   }
 }
