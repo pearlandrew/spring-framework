@@ -1,16 +1,12 @@
 {
-  boolean debugEnabled=logger.isDebugEnabled();
-  if (logger.isTraceEnabled()) {
-    logger.trace(String.format("getPropertyAsClass(\"%s\", %s)",key,targetValueType.getSimpleName()));
-  }
   if (this.propertySources != null) {
     for (    PropertySource<?> propertySource : this.propertySources) {
-      if (debugEnabled) {
-        logger.debug(String.format("Searching for key '%s' in [%s]",key,propertySource.getName()));
+      if (logger.isTraceEnabled()) {
+        logger.trace(String.format("Searching for key '%s' in [%s]",key,propertySource.getName()));
       }
       Object value=propertySource.getProperty(key);
       if (value != null) {
-        if (debugEnabled) {
+        if (logger.isDebugEnabled()) {
           logger.debug(String.format("Found key '%s' in [%s] with value '%s'",key,propertySource.getName(),value));
         }
         Class<?> clazz;
@@ -36,8 +32,8 @@
       }
     }
   }
-  if (debugEnabled) {
-    logger.debug(String.format("Could not find key '%s' in any property source. Returning [null]",key));
+  if (logger.isDebugEnabled()) {
+    logger.debug(String.format("Could not find key '%s' in any property source",key));
   }
   return null;
 }
