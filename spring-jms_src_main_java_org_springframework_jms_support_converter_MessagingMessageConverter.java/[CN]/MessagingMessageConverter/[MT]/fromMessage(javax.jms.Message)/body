@@ -2,5 +2,8 @@
   if (message == null) {
     return null;
   }
-  return new LazyResolutionMessage(message);
+  Map<String,Object> mappedHeaders=extractHeaders(message);
+  Object convertedObject=extractPayload(message);
+  MessageBuilder<Object> builder=(convertedObject instanceof org.springframework.messaging.Message) ? MessageBuilder.fromMessage((org.springframework.messaging.Message<Object>)convertedObject) : MessageBuilder.withPayload(convertedObject);
+  return builder.copyHeadersIfAbsent(mappedHeaders).build();
 }
