@@ -1,26 +1,29 @@
 {
-  DataBuffer dataBuffer=subscriber.currentBuffer;
-  try {
-    boolean writeCompleted=subscriber.write(dataBuffer);
-    if (writeCompleted) {
-      if (dataBuffer instanceof FlushingDataBuffer) {
-        subscriber.flush();
-      }
-      subscriber.releaseBuffer();
-      boolean subscriptionCompleted=subscriber.subscriptionCompleted;
-      if (!subscriptionCompleted) {
-        if (subscriber.changeState(this,REQUESTED)) {
+  if (subscriber.changeState(this,WRITING)) {
+    DataBuffer dataBuffer=subscriber.currentBuffer;
+    try {
+      boolean writeCompleted=subscriber.write(dataBuffer);
+      if (writeCompleted) {
+        if (dataBuffer instanceof FlushingDataBuffer) {
+          subscriber.flush();
+        }
+        subscriber.releaseBuffer();
+        boolean subscriptionCompleted=subscriber.subscriptionCompleted;
+        if (!subscriptionCompleted) {
+          subscriber.changeState(WRITING,REQUESTED);
           subscriber.subscription.request(1);
         }
-      }
  else {
-        if (subscriber.changeState(this,COMPLETED)) {
+          subscriber.changeState(WRITING,COMPLETED);
           subscriber.close();
         }
       }
+ else {
+        subscriber.changeState(WRITING,RECEIVED);
+      }
     }
-  }
- catch (  IOException ex) {
-    subscriber.onError(ex);
+ catch (    IOException ex) {
+      subscriber.onError(ex);
+    }
   }
 }
