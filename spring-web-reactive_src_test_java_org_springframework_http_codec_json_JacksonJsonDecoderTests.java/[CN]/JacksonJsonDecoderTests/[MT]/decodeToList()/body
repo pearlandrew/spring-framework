@@ -2,6 +2,6 @@
   Flux<DataBuffer> source=Flux.just(stringBuffer("[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
   Method method=getClass().getDeclaredMethod("handle",List.class);
   ResolvableType elementType=ResolvableType.forMethodParameter(method,0);
-  Flux<Object> flux=new JacksonJsonDecoder().decode(source,elementType,null);
-  TestSubscriber.subscribe(flux).assertNoError().assertComplete().assertValues(Arrays.asList(new Pojo("f1","b1"),new Pojo("f2","b2")));
+  Mono<Object> mono=new JacksonJsonDecoder().decodeOne(source,elementType,null);
+  TestSubscriber.subscribe(mono).assertNoError().assertComplete().assertValues(Arrays.asList(new Pojo("f1","b1"),new Pojo("f2","b2")));
 }
