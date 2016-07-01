@@ -7,5 +7,11 @@
   if (returnValue instanceof Mono) {
     return (Mono<Void>)returnValue;
   }
-  return Mono.from(this.conversionService.convert(returnValue,Publisher.class));
+  ResolvableType returnType=result.getReturnValueType();
+  if (getConversionService().canConvert(returnType.getRawClass(),Mono.class)) {
+    return this.conversionService.convert(returnValue,Mono.class);
+  }
+ else {
+    return this.conversionService.convert(returnValue,Flux.class).single();
+  }
 }
