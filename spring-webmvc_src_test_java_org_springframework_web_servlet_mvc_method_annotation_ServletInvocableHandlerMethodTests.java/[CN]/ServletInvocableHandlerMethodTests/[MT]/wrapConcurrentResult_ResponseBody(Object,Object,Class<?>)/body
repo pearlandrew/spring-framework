@@ -1,9 +1,11 @@
 {
   List<HttpMessageConverter<?>> converters=new ArrayList<>();
   converters.add(new StringHttpMessageConverter());
+  this.returnValueHandlers.addHandler(new ModelAndViewMethodReturnValueHandler());
   this.returnValueHandlers.addHandler(new RequestResponseBodyMethodProcessor(converters));
   ServletInvocableHandlerMethod handlerMethod=getHandlerMethod(handler,"handle");
-  handlerMethod=handlerMethod.wrapConcurrentResult("bar");
+  handlerMethod=handlerMethod.wrapConcurrentResult(result);
   handlerMethod.invokeAndHandle(this.webRequest,this.mavContainer);
-  assertEquals("bar",this.response.getContentAsString());
+  assertEquals((result != null ? result.toString() : ""),this.response.getContentAsString());
+  assertEquals(expectedReturnType,handlerMethod.getReturnValueType(result).getParameterType());
 }
