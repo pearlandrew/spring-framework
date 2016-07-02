@@ -1,26 +1,9 @@
 {
-  GenericConversionService conversionService=new GenericConversionService();
-  conversionService.addConverter(new MonoToCompletableFutureConverter());
-  conversionService.addConverter(new PublisherToFluxConverter());
-  conversionService.addConverter(new ReactorToRxJava1Converter());
-  SimpleResultHandler resultHandler=new SimpleResultHandler(conversionService);
-  TestController controller=new TestController();
-  HandlerMethod hm=new HandlerMethod(controller,TestController.class.getMethod("voidReturnValue"));
-  ResolvableType type=ResolvableType.forMethodParameter(hm.getReturnType());
-  assertTrue(resultHandler.supports(createHandlerResult(hm,type)));
-  hm=new HandlerMethod(controller,TestController.class.getMethod("publisherString"));
-  type=ResolvableType.forMethodParameter(hm.getReturnType());
-  assertFalse(resultHandler.supports(createHandlerResult(hm,type)));
-  hm=new HandlerMethod(controller,TestController.class.getMethod("publisherVoid"));
-  type=ResolvableType.forMethodParameter(hm.getReturnType());
-  assertTrue(resultHandler.supports(createHandlerResult(hm,type)));
-  hm=new HandlerMethod(controller,TestController.class.getMethod("streamVoid"));
-  type=ResolvableType.forMethodParameter(hm.getReturnType());
-  assertTrue(resultHandler.supports(createHandlerResult(hm,type)));
-  hm=new HandlerMethod(controller,TestController.class.getMethod("observableVoid"));
-  type=ResolvableType.forMethodParameter(hm.getReturnType());
-  assertTrue(resultHandler.supports(createHandlerResult(hm,type)));
-  hm=new HandlerMethod(controller,TestController.class.getMethod("completableFutureVoid"));
-  type=ResolvableType.forMethodParameter(hm.getReturnType());
-  assertTrue(resultHandler.supports(createHandlerResult(hm,type)));
+  testSupports(ResolvableType.forClass(void.class),true);
+  testSupports(ResolvableType.forClassWithGenerics(Publisher.class,Void.class),true);
+  testSupports(ResolvableType.forClassWithGenerics(Flux.class,Void.class),true);
+  testSupports(ResolvableType.forClassWithGenerics(Observable.class,Void.class),true);
+  testSupports(ResolvableType.forClassWithGenerics(CompletableFuture.class,Void.class),true);
+  testSupports(ResolvableType.forClass(String.class),false);
+  testSupports(ResolvableType.forClassWithGenerics(Publisher.class,String.class),false);
 }
