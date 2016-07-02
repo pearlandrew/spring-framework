@@ -1,9 +1,10 @@
 {
-  Class<? extends Exception> exceptionType=exception.getClass();
-  Method method=this.exceptionLookupCache.get(exceptionType);
+  Method method=resolveMethodByExceptionType(exception.getClass());
   if (method == null) {
-    method=getMappedMethod(exceptionType);
-    this.exceptionLookupCache.put(exceptionType,method != null ? method : NO_METHOD_FOUND);
+    Throwable cause=exception.getCause();
+    if (cause != null) {
+      method=resolveMethodByExceptionType(cause.getClass());
+    }
   }
-  return method != NO_METHOD_FOUND ? method : null;
+  return method;
 }
