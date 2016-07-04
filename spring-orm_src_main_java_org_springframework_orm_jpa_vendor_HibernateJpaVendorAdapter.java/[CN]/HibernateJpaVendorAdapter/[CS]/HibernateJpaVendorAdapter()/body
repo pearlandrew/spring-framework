@@ -1,26 +1,6 @@
 {
   ClassLoader cl=HibernateJpaVendorAdapter.class.getClassLoader();
-  Class<? extends EntityManagerFactory> emfIfcToUse;
-  Class<? extends EntityManager> emIfcToUse;
-  Class<?> providerClass;
-  PersistenceProvider providerToUse;
-  try {
-    try {
-      emfIfcToUse=(Class<? extends EntityManagerFactory>)cl.loadClass("org.hibernate.jpa.HibernateEntityManagerFactory");
-      emIfcToUse=(Class<? extends EntityManager>)cl.loadClass("org.hibernate.jpa.HibernateEntityManager");
-      providerClass=cl.loadClass("org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider");
-    }
- catch (    ClassNotFoundException ex) {
-      emfIfcToUse=(Class<? extends EntityManagerFactory>)cl.loadClass("org.hibernate.ejb.HibernateEntityManagerFactory");
-      emIfcToUse=(Class<? extends EntityManager>)cl.loadClass("org.hibernate.ejb.HibernateEntityManager");
-      providerClass=cl.loadClass("org.springframework.orm.jpa.vendor.SpringHibernateEjbPersistenceProvider");
-    }
-    providerToUse=(PersistenceProvider)providerClass.newInstance();
-  }
- catch (  Exception ex) {
-    throw new IllegalStateException("Failed to determine Hibernate PersistenceProvider",ex);
-  }
-  this.persistenceProvider=providerToUse;
-  this.entityManagerFactoryInterface=emfIfcToUse;
-  this.entityManagerInterface=emIfcToUse;
+  this.persistenceProvider=new SpringHibernateJpaPersistenceProvider();
+  this.entityManagerFactoryInterface=HibernateEntityManagerFactory.class;
+  this.entityManagerInterface=HibernateEntityManager.class;
 }
