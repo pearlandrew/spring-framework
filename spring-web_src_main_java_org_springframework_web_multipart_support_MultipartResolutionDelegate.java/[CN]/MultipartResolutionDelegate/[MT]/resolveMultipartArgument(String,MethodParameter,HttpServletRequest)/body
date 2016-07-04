@@ -3,19 +3,19 @@
   boolean isMultipart=(multipartRequest != null || isMultipartContent(request));
   if (MultipartFile.class == parameter.getNestedParameterType()) {
     if (multipartRequest == null && isMultipart) {
-      multipartRequest=adaptToMultipartHttpServletRequest(request);
+      multipartRequest=new StandardMultipartHttpServletRequest(request);
     }
     return (multipartRequest != null ? multipartRequest.getFile(name) : null);
   }
  else   if (isMultipartFileCollection(parameter)) {
     if (multipartRequest == null && isMultipart) {
-      multipartRequest=adaptToMultipartHttpServletRequest(request);
+      multipartRequest=new StandardMultipartHttpServletRequest(request);
     }
     return (multipartRequest != null ? multipartRequest.getFiles(name) : null);
   }
  else   if (isMultipartFileArray(parameter)) {
     if (multipartRequest == null && isMultipart) {
-      multipartRequest=adaptToMultipartHttpServletRequest(request);
+      multipartRequest=new StandardMultipartHttpServletRequest(request);
     }
     if (multipartRequest != null) {
       List<MultipartFile> multipartFiles=multipartRequest.getFiles(name);
@@ -25,7 +25,7 @@
       return null;
     }
   }
- else   if (parameter.getNestedParameterType() == servletPartClass) {
+ else   if (Part.class == parameter.getNestedParameterType()) {
     return (isMultipart ? RequestPartResolver.resolvePart(request,name) : null);
   }
  else   if (isPartCollection(parameter)) {
