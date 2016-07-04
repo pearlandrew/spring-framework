@@ -3,15 +3,10 @@
   if (!optional.isPresent()) {
     return Mono.empty();
   }
-  Object returnValue=optional.get();
-  if (returnValue instanceof Mono) {
-    return (Mono<Void>)returnValue;
+  Object value=optional.get();
+  if (Publisher.class.isAssignableFrom(result.getReturnType().getRawClass())) {
+    return Mono.from((Publisher<?>)value).then();
   }
-  ResolvableType returnType=result.getReturnType();
-  if (getConversionService().canConvert(returnType.getRawClass(),Mono.class)) {
-    return this.conversionService.convert(returnValue,Mono.class);
-  }
- else {
-    return this.conversionService.convert(returnValue,Flux.class).single();
-  }
+  TypeDescriptor source=new TypeDescriptor(result.getReturnTypeSource());
+  return canConvert(source,MONO_TYPE) ? ((Mono<Void>)getConversionService().convert(value,source,MONO_TYPE)) : ((Flux<Void>)getConversionService().convert(value,source,FLUX_TYPE)).single();
 }
