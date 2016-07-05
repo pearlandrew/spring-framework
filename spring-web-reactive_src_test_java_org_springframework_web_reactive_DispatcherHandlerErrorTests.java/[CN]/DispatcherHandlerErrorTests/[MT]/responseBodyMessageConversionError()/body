@@ -1,0 +1,8 @@
+{
+  DataBuffer dataBuffer=new DefaultDataBufferFactory().allocateBuffer();
+  this.request.setUri(new URI("/request-body"));
+  this.request.getHeaders().add("Accept",MediaType.APPLICATION_JSON_VALUE);
+  this.request.writeWith(Mono.just(dataBuffer.write("body".getBytes("UTF-8"))));
+  Mono<Void> publisher=this.dispatcherHandler.handle(this.exchange);
+  TestSubscriber.subscribe(publisher).assertError(NotAcceptableStatusException.class);
+}

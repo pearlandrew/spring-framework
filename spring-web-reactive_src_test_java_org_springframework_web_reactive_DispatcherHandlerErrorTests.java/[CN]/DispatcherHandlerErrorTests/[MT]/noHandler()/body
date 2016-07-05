@@ -1,7 +1,5 @@
 {
   this.request.setUri(new URI("/does-not-exist"));
   Mono<Void> publisher=this.dispatcherHandler.handle(this.exchange);
-  Throwable ex=awaitErrorSignal(publisher);
-  assertEquals(ResponseStatusException.class,ex.getClass());
-  assertEquals(HttpStatus.NOT_FOUND,((ResponseStatusException)ex).getStatus());
+  TestSubscriber.subscribe(publisher).assertError(ResponseStatusException.class).assertErrorMessage("Request failure [status: 404, reason: \"No matching handler\"]");
 }
