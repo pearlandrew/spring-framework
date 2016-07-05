@@ -2,11 +2,11 @@
   try {
     TypeConverter typeConverter=context.getTypeConverter();
     Class<?> type=(targetObject instanceof Class ? (Class<?>)targetObject : targetObject.getClass());
-    List<Method> methods=new ArrayList<Method>(getMethods(type,targetObject));
+    List<Method> methods=new ArrayList<>(getMethods(type,targetObject));
     MethodFilter filter=(this.filters != null ? this.filters.get(type) : null);
     if (filter != null) {
       List<Method> filtered=filter.filter(methods);
-      methods=(filtered instanceof ArrayList ? filtered : new ArrayList<Method>(filtered));
+      methods=(filtered instanceof ArrayList ? filtered : new ArrayList<>(filtered));
     }
     if (methods.size() > 1) {
       Collections.sort(methods,new Comparator<Method>(){
@@ -32,7 +32,7 @@
     for (int i=0; i < methods.size(); i++) {
       methods.set(i,BridgeMethodResolver.findBridgedMethod(methods.get(i)));
     }
-    Set<Method> methodsToIterate=new LinkedHashSet<Method>(methods);
+    Set<Method> methodsToIterate=new LinkedHashSet<>(methods);
     Method closeMatch=null;
     int closeMatchDistance=Integer.MAX_VALUE;
     Method matchRequiringConversion=null;
@@ -40,7 +40,7 @@
     for (    Method method : methodsToIterate) {
       if (method.getName().equals(name)) {
         Class<?>[] paramTypes=method.getParameterTypes();
-        List<TypeDescriptor> paramDescriptors=new ArrayList<TypeDescriptor>(paramTypes.length);
+        List<TypeDescriptor> paramDescriptors=new ArrayList<>(paramTypes.length);
         for (int i=0; i < paramTypes.length; i++) {
           paramDescriptors.add(new TypeDescriptor(new MethodParameter(method,i)));
         }

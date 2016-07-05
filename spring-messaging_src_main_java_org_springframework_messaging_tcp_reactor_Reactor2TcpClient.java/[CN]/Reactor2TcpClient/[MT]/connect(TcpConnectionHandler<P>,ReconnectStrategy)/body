@@ -7,7 +7,7 @@ synchronized (this.tcpClients) {
     if (this.stopping) {
       IllegalStateException ex=new IllegalStateException("Shutting down.");
       connectionHandler.afterConnectFailure(ex);
-      return new PassThroughPromiseToListenableFutureAdapter<Void>(Promises.<Void>error(ex));
+      return new PassThroughPromiseToListenableFutureAdapter<>(Promises.<Void>error(ex));
     }
     tcpClient=NetStreams.tcpClient(REACTOR_TCP_CLIENT_TYPE,this.tcpClientSpecFactory);
     this.tcpClients.add(tcpClient);
@@ -20,6 +20,6 @@ synchronized (tcpClients) {
     }
 ;
   }
-  Stream<Tuple2<InetSocketAddress,Integer>> stream=tcpClient.start(new MessageChannelStreamHandler<P>(connectionHandler,cleanupTask),new ReactorReconnectAdapter(strategy));
-  return new PassThroughPromiseToListenableFutureAdapter<Void>(stream.next().after());
+  Stream<Tuple2<InetSocketAddress,Integer>> stream=tcpClient.start(new MessageChannelStreamHandler<>(connectionHandler,cleanupTask),new ReactorReconnectAdapter(strategy));
+  return new PassThroughPromiseToListenableFutureAdapter<>(stream.next().after());
 }

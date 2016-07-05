@@ -6,7 +6,7 @@ synchronized (this.tcpClients) {
     if (this.stopping) {
       IllegalStateException ex=new IllegalStateException("Shutting down.");
       connectionHandler.afterConnectFailure(ex);
-      return new PassThroughPromiseToListenableFutureAdapter<Void>(Promises.<Void>error(ex));
+      return new PassThroughPromiseToListenableFutureAdapter<>(Promises.<Void>error(ex));
     }
     tcpClient=NetStreams.tcpClient(REACTOR_TCP_CLIENT_TYPE,this.tcpClientSpecFactory);
     this.tcpClients.add(tcpClient);
@@ -19,8 +19,8 @@ synchronized (tcpClients) {
     }
 ;
   }
-  Promise<Void> promise=tcpClient.start(new MessageChannelStreamHandler<P>(connectionHandler,cleanupTask));
-  return new PassThroughPromiseToListenableFutureAdapter<Void>(promise.onError(new Consumer<Throwable>(){
+  Promise<Void> promise=tcpClient.start(new MessageChannelStreamHandler<>(connectionHandler,cleanupTask));
+  return new PassThroughPromiseToListenableFutureAdapter<>(promise.onError(new Consumer<Throwable>(){
     @Override public void accept(    Throwable ex){
       cleanupTask.run();
       connectionHandler.afterConnectFailure(ex);

@@ -1,9 +1,9 @@
 {
-  Set<String> processedBeans=new HashSet<String>();
+  Set<String> processedBeans=new HashSet<>();
   if (beanFactory instanceof BeanDefinitionRegistry) {
     BeanDefinitionRegistry registry=(BeanDefinitionRegistry)beanFactory;
-    List<BeanFactoryPostProcessor> regularPostProcessors=new LinkedList<BeanFactoryPostProcessor>();
-    List<BeanDefinitionRegistryPostProcessor> registryPostProcessors=new LinkedList<BeanDefinitionRegistryPostProcessor>();
+    List<BeanFactoryPostProcessor> regularPostProcessors=new LinkedList<>();
+    List<BeanDefinitionRegistryPostProcessor> registryPostProcessors=new LinkedList<>();
     for (    BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {
       if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
         BeanDefinitionRegistryPostProcessor registryPostProcessor=(BeanDefinitionRegistryPostProcessor)postProcessor;
@@ -15,7 +15,7 @@
       }
     }
     String[] postProcessorNames=beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class,true,false);
-    List<BeanDefinitionRegistryPostProcessor> priorityOrderedPostProcessors=new ArrayList<BeanDefinitionRegistryPostProcessor>();
+    List<BeanDefinitionRegistryPostProcessor> priorityOrderedPostProcessors=new ArrayList<>();
     for (    String ppName : postProcessorNames) {
       if (beanFactory.isTypeMatch(ppName,PriorityOrdered.class)) {
         priorityOrderedPostProcessors.add(beanFactory.getBean(ppName,BeanDefinitionRegistryPostProcessor.class));
@@ -26,7 +26,7 @@
     registryPostProcessors.addAll(priorityOrderedPostProcessors);
     invokeBeanDefinitionRegistryPostProcessors(priorityOrderedPostProcessors,registry);
     postProcessorNames=beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class,true,false);
-    List<BeanDefinitionRegistryPostProcessor> orderedPostProcessors=new ArrayList<BeanDefinitionRegistryPostProcessor>();
+    List<BeanDefinitionRegistryPostProcessor> orderedPostProcessors=new ArrayList<>();
     for (    String ppName : postProcessorNames) {
       if (!processedBeans.contains(ppName) && beanFactory.isTypeMatch(ppName,Ordered.class)) {
         orderedPostProcessors.add(beanFactory.getBean(ppName,BeanDefinitionRegistryPostProcessor.class));
@@ -57,9 +57,9 @@
     invokeBeanFactoryPostProcessors(beanFactoryPostProcessors,beanFactory);
   }
   String[] postProcessorNames=beanFactory.getBeanNamesForType(BeanFactoryPostProcessor.class,true,false);
-  List<BeanFactoryPostProcessor> priorityOrderedPostProcessors=new ArrayList<BeanFactoryPostProcessor>();
-  List<String> orderedPostProcessorNames=new ArrayList<String>();
-  List<String> nonOrderedPostProcessorNames=new ArrayList<String>();
+  List<BeanFactoryPostProcessor> priorityOrderedPostProcessors=new ArrayList<>();
+  List<String> orderedPostProcessorNames=new ArrayList<>();
+  List<String> nonOrderedPostProcessorNames=new ArrayList<>();
   for (  String ppName : postProcessorNames) {
     if (processedBeans.contains(ppName)) {
     }
@@ -75,13 +75,13 @@
   }
   sortPostProcessors(beanFactory,priorityOrderedPostProcessors);
   invokeBeanFactoryPostProcessors(priorityOrderedPostProcessors,beanFactory);
-  List<BeanFactoryPostProcessor> orderedPostProcessors=new ArrayList<BeanFactoryPostProcessor>();
+  List<BeanFactoryPostProcessor> orderedPostProcessors=new ArrayList<>();
   for (  String postProcessorName : orderedPostProcessorNames) {
     orderedPostProcessors.add(beanFactory.getBean(postProcessorName,BeanFactoryPostProcessor.class));
   }
   sortPostProcessors(beanFactory,orderedPostProcessors);
   invokeBeanFactoryPostProcessors(orderedPostProcessors,beanFactory);
-  List<BeanFactoryPostProcessor> nonOrderedPostProcessors=new ArrayList<BeanFactoryPostProcessor>();
+  List<BeanFactoryPostProcessor> nonOrderedPostProcessors=new ArrayList<>();
   for (  String postProcessorName : nonOrderedPostProcessorNames) {
     nonOrderedPostProcessors.add(beanFactory.getBean(postProcessorName,BeanFactoryPostProcessor.class));
   }
