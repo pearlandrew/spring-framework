@@ -6,11 +6,11 @@
     IoUtils.safeClose(this.connection);
     throw new SockJsException("Session closed.",this.session.getId(),null);
   }
-  Object pooled=undertowBufferSupport.allocatePooledResource();
+  PooledByteBuffer pooled=bufferPool.allocate();
   try {
     int r;
     do {
-      ByteBuffer buffer=undertowBufferSupport.getByteBuffer(pooled);
+      ByteBuffer buffer=pooled.getBuffer();
       buffer.clear();
       r=channel.read(buffer);
       buffer.flip();
@@ -38,6 +38,6 @@
     onFailure(exc);
   }
  finally {
-    undertowBufferSupport.closePooledResource(pooled);
+    pooled.close();
   }
 }
