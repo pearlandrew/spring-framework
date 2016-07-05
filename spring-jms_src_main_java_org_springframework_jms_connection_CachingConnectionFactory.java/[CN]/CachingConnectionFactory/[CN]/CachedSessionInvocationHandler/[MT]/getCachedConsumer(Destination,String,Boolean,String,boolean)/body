@@ -9,19 +9,7 @@
  else {
     if (dest instanceof Topic) {
       if (noLocal == null) {
-        Method method=(durable ? createSharedDurableConsumerMethod : createSharedConsumerMethod);
-        try {
-          consumer=(MessageConsumer)method.invoke(this.target,dest,subscription,selector);
-        }
- catch (        InvocationTargetException ex) {
-          if (ex.getTargetException() instanceof JMSException) {
-            throw (JMSException)ex.getTargetException();
-          }
-          ReflectionUtils.handleInvocationTargetException(ex);
-        }
-catch (        IllegalAccessException ex) {
-          throw new IllegalStateException("Could not access JMS 2.0 API method: " + ex.getMessage());
-        }
+        consumer=(durable ? this.target.createSharedDurableConsumer((Topic)dest,subscription,selector) : this.target.createSharedConsumer((Topic)dest,subscription,selector));
       }
  else {
         consumer=(durable ? this.target.createDurableSubscriber((Topic)dest,subscription,selector,noLocal) : this.target.createConsumer(dest,selector,noLocal));
