@@ -1,0 +1,17 @@
+{
+  Objects.requireNonNull(subscriber);
+  if (processor.changePublisherState(this,SUBSCRIBED)) {
+    Subscription subscription=new ResponseBodySubscription(processor);
+    processor.subscriber=subscriber;
+    subscriber.onSubscribe(subscription);
+    if (processor.publisherCompleted) {
+      processor.publishComplete();
+    }
+ else     if (processor.publisherError != null) {
+      processor.publishError(processor.publisherError);
+    }
+  }
+ else {
+    throw new IllegalStateException(toString());
+  }
+}
