@@ -30,8 +30,8 @@
   Object returnValue;
   if (cacheHit != null && cachePutRequests.isEmpty() && !hasCachePut(contexts)) {
     cacheValue=cacheHit.get();
-    if (method.getReturnType() == javaUtilOptionalClass && (cacheValue == null || cacheValue.getClass() != javaUtilOptionalClass)) {
-      returnValue=OptionalUnwrapper.wrap(cacheValue);
+    if (method.getReturnType() == Optional.class && (cacheValue == null || cacheValue.getClass() != Optional.class)) {
+      returnValue=Optional.ofNullable(cacheValue);
     }
  else {
       returnValue=cacheValue;
@@ -39,12 +39,7 @@
   }
  else {
     returnValue=invokeOperation(invoker);
-    if (returnValue != null && returnValue.getClass() == javaUtilOptionalClass) {
-      cacheValue=OptionalUnwrapper.unwrap(returnValue);
-    }
- else {
-      cacheValue=returnValue;
-    }
+    cacheValue=ObjectUtils.unwrapOptional(returnValue);
   }
   collectPutRequests(contexts.get(CachePutOperation.class),cacheValue,cachePutRequests);
   for (  CachePutRequest cachePutRequest : cachePutRequests) {

@@ -42,7 +42,12 @@ catch (    MultipartException ex) {
     }
   }
   if (parameter.isOptional()) {
-    arg=OptionalResolver.resolveValue(arg);
+    if (arg == null || (arg instanceof Collection && ((Collection)arg).isEmpty()) || (arg instanceof Object[] && ((Object[])arg).length == 0)) {
+      arg=Optional.empty();
+    }
+ else {
+      arg=Optional.of(arg);
+    }
   }
   return arg;
 }
