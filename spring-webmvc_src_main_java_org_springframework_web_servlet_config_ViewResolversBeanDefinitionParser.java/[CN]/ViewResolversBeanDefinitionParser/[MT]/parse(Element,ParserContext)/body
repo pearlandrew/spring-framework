@@ -3,14 +3,14 @@
   context.pushContainingComponent(new CompositeComponentDefinition(element.getTagName(),source));
   ManagedList<Object> resolvers=new ManagedList<Object>(4);
   resolvers.setSource(context.extractSource(element));
-  String[] names=new String[]{"jsp","tiles","bean-name","freemarker","velocity","groovy","script-template","bean","ref"};
+  String[] names=new String[]{"jsp","tiles","bean-name","freemarker","groovy","script-template","bean","ref"};
   for (  Element resolverElement : DomUtils.getChildElementsByTagName(element,names)) {
     String name=resolverElement.getLocalName();
     if ("bean".equals(name) || "ref".equals(name)) {
       resolvers.add(context.getDelegate().parsePropertySubElement(resolverElement,null));
       continue;
     }
-    RootBeanDefinition resolverBeanDef=null;
+    RootBeanDefinition resolverBeanDef;
     if ("jsp".equals(name)) {
       resolverBeanDef=new RootBeanDefinition(InternalResourceViewResolver.class);
       resolverBeanDef.getPropertyValues().add("prefix","/WEB-INF/");
