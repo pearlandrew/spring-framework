@@ -1,7 +1,5 @@
 {
-  InvocableHandlerMethod hm=createHandlerMethod("exceptionMethod");
-  Publisher<HandlerResult> publisher=hm.invokeForRequest(this.exchange,this.model);
-  Throwable ex=awaitErrorSignal(publisher);
-  assertEquals(IllegalStateException.class,ex.getClass());
-  assertEquals("boo",ex.getMessage());
+  InvocableHandlerMethod hm=handlerMethod("exceptionMethod");
+  Mono<HandlerResult> mono=hm.invokeForRequest(this.exchange,this.model);
+  TestSubscriber.subscribe(mono).assertError(IllegalStateException.class).assertErrorMessage("boo");
 }
