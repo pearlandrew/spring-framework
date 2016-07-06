@@ -1,4 +1,7 @@
 {
   String body="{\"bar\":\"b1\",\"foo\":\"f1\"}";
-  assertEquals(new TestBean("f1","b1"),resolveValue("futureTestBean",CompletableFuture.class,body).get());
+  ResolvableType type=forClassWithGenerics(CompletableFuture.class,TestBean.class);
+  MethodParameter param=this.testMethod.resolveParam(type);
+  CompletableFuture future=resolveValue(param,CompletableFuture.class,body);
+  assertEquals(new TestBean("f1","b1"),future.get());
 }

@@ -1,5 +1,7 @@
 {
   String body="{\"bar\":\"b1\",\"foo\":\"f1\"}";
-  Single<TestBean> single=(Single<TestBean>)resolveValue("singleTestBean",Single.class,body);
+  ResolvableType type=forClassWithGenerics(Single.class,TestBean.class);
+  MethodParameter param=this.testMethod.resolveParam(type);
+  Single<TestBean> single=(Single<TestBean>)resolveValue(param,Single.class,body);
   assertEquals(new TestBean("f1","b1"),single.toBlocking().value());
 }

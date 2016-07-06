@@ -1,5 +1,7 @@
 {
   String body="[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\"}]";
-  Flux<TestBean> flux=(Flux<TestBean>)resolveValue("fluxTestBean",Flux.class,body);
+  ResolvableType type=forClassWithGenerics(Flux.class,TestBean.class);
+  MethodParameter param=this.testMethod.resolveParam(type);
+  Flux<TestBean> flux=resolveValue(param,Flux.class,body);
   TestSubscriber.subscribe(flux).assertValues(new TestBean("f1","b1")).assertError(ServerWebInputException.class);
 }
