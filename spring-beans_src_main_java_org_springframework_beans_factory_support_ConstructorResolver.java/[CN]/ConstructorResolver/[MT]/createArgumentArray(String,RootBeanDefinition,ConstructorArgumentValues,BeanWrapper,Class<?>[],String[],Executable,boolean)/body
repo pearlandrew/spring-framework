@@ -21,7 +21,7 @@
  else {
         ConstructorArgumentValues.ValueHolder sourceHolder=(ConstructorArgumentValues.ValueHolder)valueHolder.getSource();
         Object sourceValue=sourceHolder.getValue();
-        MethodParameter methodParam=MethodParameter.forMethodOrConstructor(methodOrCtor,paramIndex);
+        MethodParameter methodParam=MethodParameter.forExecutable(executable,paramIndex);
         try {
           convertedValue=converter.convertIfNecessary(originalValue,paramType,methodParam);
           args.resolveNecessary=true;
@@ -35,7 +35,7 @@
       args.rawArguments[paramIndex]=originalValue;
     }
  else {
-      MethodParameter methodParam=MethodParameter.forMethodOrConstructor(methodOrCtor,paramIndex);
+      MethodParameter methodParam=MethodParameter.forExecutable(executable,paramIndex);
       if (!autowiring) {
         throw new UnsatisfiedDependencyException(mbd.getResourceDescription(),beanName,new InjectionPoint(methodParam),"Ambiguous argument values for parameter of type [" + paramType.getName() + "] - did you specify the correct bean references as arguments?");
       }
@@ -54,7 +54,7 @@
   for (  String autowiredBeanName : autowiredBeanNames) {
     this.beanFactory.registerDependentBean(autowiredBeanName,beanName);
     if (this.beanFactory.logger.isDebugEnabled()) {
-      this.beanFactory.logger.debug("Autowiring by type from bean name '" + beanName + "' via "+ (methodOrCtor instanceof Constructor ? "constructor" : "factory method")+ " to bean named '"+ autowiredBeanName+ "'");
+      this.beanFactory.logger.debug("Autowiring by type from bean name '" + beanName + "' via "+ (executable instanceof Constructor ? "constructor" : "factory method")+ " to bean named '"+ autowiredBeanName+ "'");
     }
   }
   return args;

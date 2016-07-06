@@ -1,12 +1,12 @@
 {
-  Class<?>[] paramTypes=(methodOrCtor instanceof Method ? ((Method)methodOrCtor).getParameterTypes() : ((Constructor<?>)methodOrCtor).getParameterTypes());
+  Class<?>[] paramTypes=executable.getParameterTypes();
   TypeConverter converter=(this.beanFactory.getCustomTypeConverter() != null ? this.beanFactory.getCustomTypeConverter() : bw);
   BeanDefinitionValueResolver valueResolver=new BeanDefinitionValueResolver(this.beanFactory,beanName,mbd,converter);
   Object[] resolvedArgs=new Object[argsToResolve.length];
   for (int argIndex=0; argIndex < argsToResolve.length; argIndex++) {
     Object argValue=argsToResolve[argIndex];
-    MethodParameter methodParam=MethodParameter.forMethodOrConstructor(methodOrCtor,argIndex);
-    GenericTypeResolver.resolveParameterType(methodParam,methodOrCtor.getDeclaringClass());
+    MethodParameter methodParam=MethodParameter.forExecutable(executable,argIndex);
+    GenericTypeResolver.resolveParameterType(methodParam,executable.getDeclaringClass());
     if (argValue instanceof AutowiredArgumentMarker) {
       argValue=resolveAutowiredArgument(methodParam,beanName,null,converter);
     }
