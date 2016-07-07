@@ -1,0 +1,9 @@
+{
+  this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+  this.request.writeWith(Flux.just(dataBuffer(body)));
+  Mono<Object> result=this.resolver.readBody(param,this.exchange);
+  Object value=result.block(Duration.ofSeconds(5));
+  assertNotNull(value);
+  assertTrue("Unexpected return value type: " + value,param.getParameterType().isAssignableFrom(value.getClass()));
+  return (T)value;
+}
