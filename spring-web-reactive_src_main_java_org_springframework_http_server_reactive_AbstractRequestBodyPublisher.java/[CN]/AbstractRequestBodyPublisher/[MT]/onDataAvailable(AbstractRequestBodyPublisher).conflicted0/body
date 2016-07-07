@@ -1,3 +1,17 @@
 {
-  publisher.dataAvailable=true;
+  if (publisher.changeState(this,READING)) {
+    try {
+      boolean demandAvailable=publisher.readAndPublish();
+      if (demandAvailable) {
+        publisher.changeState(READING,DEMAND);
+        publisher.checkOnDataAvailable();
+      }
+ else {
+        publisher.changeState(READING,NO_DEMAND);
+      }
+    }
+ catch (    IOException ex) {
+      publisher.onError(ex);
+    }
+  }
 }
