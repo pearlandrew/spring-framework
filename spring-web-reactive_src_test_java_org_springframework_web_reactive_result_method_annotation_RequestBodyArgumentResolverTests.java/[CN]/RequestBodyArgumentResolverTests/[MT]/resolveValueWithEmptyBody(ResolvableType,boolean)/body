@@ -1,0 +1,10 @@
+{
+  this.request.writeWith(Flux.empty());
+  MethodParameter param=this.testMethod.resolveParam(type,requestBody(required));
+  Mono<Object> result=this.resolver.resolveArgument(param,new ExtendedModelMap(),this.exchange);
+  Object value=result.block(Duration.ofSeconds(5));
+  if (value != null) {
+    assertTrue("Unexpected return value type: " + value,param.getParameterType().isAssignableFrom(value.getClass()));
+  }
+  return (T)value;
+}
