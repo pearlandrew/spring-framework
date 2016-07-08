@@ -1,0 +1,17 @@
+{
+  HttpUrl baseUrl=server.url("/greeting?name=Spring");
+  this.server.enqueue(new MockResponse().setHeader("Content-Type","text/plain").setBody("Hello Spring!"));
+  Single<HttpHeaders> result=this.webClient.perform(get(baseUrl.toString())).extract(headers());
+  TestSubscriber<HttpHeaders> ts=new TestSubscriber<HttpHeaders>();
+  result.subscribe(ts);
+  ts.awaitTerminalEvent(2,TimeUnit.SECONDS);
+  HttpHeaders httpHeaders=ts.getOnNextEvents().get(0);
+  assertEquals(MediaType.TEXT_PLAIN,httpHeaders.getContentType());
+  assertEquals(13L,httpHeaders.getContentLength());
+  ts.assertValueCount(1);
+  ts.assertCompleted();
+  RecordedRequest request=server.takeRequest();
+  assertEquals(1,server.getRequestCount());
+  assertEquals("*/*",request.getHeader(HttpHeaders.ACCEPT));
+  assertEquals("/greeting?name=Spring",request.getPath());
+}
