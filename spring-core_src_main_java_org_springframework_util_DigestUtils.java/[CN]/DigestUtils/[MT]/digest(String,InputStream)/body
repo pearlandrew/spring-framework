@@ -5,6 +5,11 @@
     return messageDigest.digest();
   }
  else {
-    return messageDigest.digest(StreamUtils.copyToByteArray(inputStream));
+    final byte[] buffer=new byte[StreamUtils.BUFFER_SIZE];
+    int bytesRead=-1;
+    while ((bytesRead=inputStream.read(buffer)) != -1) {
+      messageDigest.update(buffer,0,bytesRead);
+    }
+    return messageDigest.digest();
   }
 }
