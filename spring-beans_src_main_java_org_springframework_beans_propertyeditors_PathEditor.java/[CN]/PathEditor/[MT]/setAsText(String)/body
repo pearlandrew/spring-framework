@@ -1,0 +1,23 @@
+{
+  if (!text.startsWith("/") && !text.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX)) {
+    try {
+      URI uri=new URI(text);
+      if (uri.getScheme() != null) {
+        setValue(Paths.get(uri).normalize());
+        return;
+      }
+    }
+ catch (    URISyntaxException ex) {
+    }
+catch (    FileSystemNotFoundException ex) {
+    }
+  }
+  this.resourceEditor.setAsText(text);
+  Resource resource=(Resource)this.resourceEditor.getValue();
+  try {
+    setValue(resource != null ? resource.getFile().toPath() : null);
+  }
+ catch (  IOException ex) {
+    throw new IllegalArgumentException("Failed to retrieve file for " + resource,ex);
+  }
+}
