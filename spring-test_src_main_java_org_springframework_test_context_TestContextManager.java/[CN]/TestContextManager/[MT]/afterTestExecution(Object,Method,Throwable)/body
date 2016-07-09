@@ -1,0 +1,19 @@
+{
+  String callbackName="afterTestExecution";
+  prepareForAfterCallback(callbackName,testInstance,testMethod,exception);
+  Throwable afterTestExecutionException=null;
+  for (  TestExecutionListener testExecutionListener : getReversedTestExecutionListeners()) {
+    try {
+      testExecutionListener.afterTestExecution(getTestContext());
+    }
+ catch (    Throwable ex) {
+      logException(ex,callbackName,testExecutionListener,testInstance,testMethod);
+      if (afterTestExecutionException == null) {
+        afterTestExecutionException=ex;
+      }
+    }
+  }
+  if (afterTestExecutionException != null) {
+    ReflectionUtils.rethrowException(afterTestExecutionException);
+  }
+}
