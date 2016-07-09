@@ -1,8 +1,25 @@
 {
-  callBack.runTestMethod(testResult);
-  Throwable testResultException=testResult.getThrowable();
-  if (testResultException instanceof InvocationTargetException) {
-    testResultException=((InvocationTargetException)testResultException).getCause();
+  Method testMethod=testResult.getMethod().getConstructorOrMethod().getMethod();
+  boolean beforeCallbacksExecuted=false;
+  try {
+    this.testContextManager.beforeTestExecution(this,testMethod);
+    beforeCallbacksExecuted=true;
   }
-  this.testException=testResultException;
+ catch (  Throwable ex) {
+    testResult.setThrowable(ex);
+    this.testException=ex;
+  }
+  if (beforeCallbacksExecuted) {
+    callBack.runTestMethod(testResult);
+    this.testException=getTestResultException(testResult);
+  }
+  try {
+    this.testContextManager.afterTestExecution(this,testMethod,this.testException);
+  }
+ catch (  Throwable ex) {
+    if (this.testException == null) {
+      testResult.setThrowable(ex);
+      this.testException=ex;
+    }
+  }
 }
