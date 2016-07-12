@@ -1,5 +1,5 @@
 {
-  if (processor.changeSubscriberState(this,WRITING)) {
+  if (processor.changeState(this,WRITING)) {
     DataBuffer dataBuffer=processor.currentBuffer;
     try {
       boolean writeCompleted=processor.write(dataBuffer);
@@ -9,18 +9,17 @@
         }
         processor.releaseBuffer();
         if (!processor.subscriberCompleted) {
-          processor.changeSubscriberState(WRITING,REQUESTED);
+          processor.changeState(WRITING,REQUESTED);
           processor.subscription.request(1);
         }
  else {
-          processor.changeSubscriberState(WRITING,COMPLETED);
-          processor.close();
-          processor.publishComplete();
+          processor.changeState(WRITING,COMPLETED);
+          processor.publisherDelegate.publishComplete();
         }
       }
  else {
-        processor.changeSubscriberState(WRITING,RECEIVED);
-        processor.checkOnWritePossible();
+        processor.changeState(WRITING,RECEIVED);
+        processor.writeIfPossible();
       }
     }
  catch (    IOException ex) {
