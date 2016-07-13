@@ -1,3 +1,17 @@
 {
-  return Flux.from(this.bodyPublisher);
+  try {
+    RequestBodyPublisher bodyPublisher=this.bodyPublisher;
+    if (bodyPublisher == null) {
+synchronized (this.bodyPublisherMonitor) {
+        bodyPublisher=this.bodyPublisher;
+        if (bodyPublisher == null) {
+          this.bodyPublisher=bodyPublisher=createBodyPublisher();
+        }
+      }
+    }
+    return Flux.from(bodyPublisher);
+  }
+ catch (  IOException ex) {
+    return Flux.error(ex);
+  }
 }
