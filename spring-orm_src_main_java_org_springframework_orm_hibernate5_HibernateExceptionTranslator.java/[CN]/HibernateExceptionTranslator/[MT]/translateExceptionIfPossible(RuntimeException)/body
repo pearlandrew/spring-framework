@@ -2,5 +2,8 @@
   if (ex instanceof HibernateException) {
     return convertHibernateAccessException((HibernateException)ex);
   }
-  return null;
+  if (ex instanceof PersistenceException && ex.getCause() instanceof HibernateException) {
+    return convertHibernateAccessException((HibernateException)ex.getCause());
+  }
+  return EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
 }
