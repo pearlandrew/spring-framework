@@ -21,6 +21,12 @@
  catch (  HibernateException ex) {
     throw SessionFactoryUtils.convertHibernateAccessException(ex);
   }
+catch (  PersistenceException ex) {
+    if (ex.getCause() instanceof HibernateException) {
+      throw SessionFactoryUtils.convertHibernateAccessException((HibernateException)ex.getCause());
+    }
+    throw ex;
+  }
 catch (  RuntimeException ex) {
     throw ex;
   }

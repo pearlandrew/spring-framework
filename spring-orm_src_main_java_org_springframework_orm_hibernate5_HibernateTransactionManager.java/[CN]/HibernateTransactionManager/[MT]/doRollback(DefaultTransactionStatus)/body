@@ -12,6 +12,12 @@
 catch (  HibernateException ex) {
     throw convertHibernateAccessException(ex);
   }
+catch (  PersistenceException ex) {
+    if (ex.getCause() instanceof HibernateException) {
+      throw convertHibernateAccessException((HibernateException)ex.getCause());
+    }
+    throw ex;
+  }
  finally {
     if (!txObject.isNewSession() && !this.hibernateManagedSession) {
       txObject.getSessionHolder().getSession().clear();
