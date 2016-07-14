@@ -1,0 +1,28 @@
+{
+  String lookupPath=getPathHelper().getLookupPathForRequest(exchange);
+  if (logger.isDebugEnabled()) {
+    logger.debug("Looking up handler method for path " + lookupPath);
+  }
+  this.mappingRegistry.acquireReadLock();
+  try {
+    HandlerMethod handlerMethod=null;
+    try {
+      handlerMethod=lookupHandlerMethod(lookupPath,exchange);
+    }
+ catch (    Exception ex) {
+      return Mono.error(ex);
+    }
+    if (logger.isDebugEnabled()) {
+      if (handlerMethod != null) {
+        logger.debug("Returning handler method [" + handlerMethod + "]");
+      }
+ else {
+        logger.debug("Did not find handler method for [" + lookupPath + "]");
+      }
+    }
+    return (handlerMethod != null ? Mono.just(handlerMethod.createWithResolvedBean()) : Mono.empty());
+  }
+  finally {
+    this.mappingRegistry.releaseReadLock();
+  }
+}

@@ -1,0 +1,9 @@
+{
+  MethodParameter param=initMethodParameter(0);
+  Mono<Object> mono=this.resolver.resolveArgument(param,null,this.exchange);
+  TestSubscriber.subscribe(mono).assertError(ServerWebInputException.class);
+  Foo foo=new Foo();
+  this.exchange.getAttributes().put("foo",foo);
+  mono=this.resolver.resolveArgument(param,null,this.exchange);
+  assertSame(foo,mono.block());
+}

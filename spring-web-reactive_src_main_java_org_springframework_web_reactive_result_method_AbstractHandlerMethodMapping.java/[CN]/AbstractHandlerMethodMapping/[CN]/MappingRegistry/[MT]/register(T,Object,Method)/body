@@ -1,0 +1,19 @@
+{
+  this.readWriteLock.writeLock().lock();
+  try {
+    HandlerMethod handlerMethod=createHandlerMethod(handler,method);
+    assertUniqueMethodMapping(handlerMethod,mapping);
+    if (logger.isInfoEnabled()) {
+      logger.info("Mapped \"" + mapping + "\" onto "+ handlerMethod);
+    }
+    this.mappingLookup.put(mapping,handlerMethod);
+    List<String> directUrls=getDirectUrls(mapping);
+    for (    String url : directUrls) {
+      this.urlLookup.add(url,mapping);
+    }
+    this.registry.put(mapping,new MappingRegistration<>(mapping,handlerMethod,directUrls));
+  }
+  finally {
+    this.readWriteLock.writeLock().unlock();
+  }
+}

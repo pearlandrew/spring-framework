@@ -1,0 +1,21 @@
+{
+  ProducesRequestCondition html=new ProducesRequestCondition("text/html");
+  ProducesRequestCondition xml=new ProducesRequestCondition("application/xml");
+  ProducesRequestCondition none=new ProducesRequestCondition();
+  ServerWebExchange exchange=createExchange("application/xml, text/html");
+  assertTrue(html.compareTo(xml,exchange) > 0);
+  assertTrue(xml.compareTo(html,exchange) < 0);
+  assertTrue(xml.compareTo(none,exchange) < 0);
+  assertTrue(none.compareTo(xml,exchange) > 0);
+  assertTrue(html.compareTo(none,exchange) < 0);
+  assertTrue(none.compareTo(html,exchange) > 0);
+  exchange=createExchange("application/xml, text/*");
+  assertTrue(html.compareTo(xml,exchange) > 0);
+  assertTrue(xml.compareTo(html,exchange) < 0);
+  exchange=createExchange("application/pdf");
+  assertTrue(html.compareTo(xml,exchange) == 0);
+  assertTrue(xml.compareTo(html,exchange) == 0);
+  exchange=createExchange("text/html;q=0.9,application/xml");
+  assertTrue(html.compareTo(xml,exchange) > 0);
+  assertTrue(xml.compareTo(html,exchange) < 0);
+}

@@ -1,0 +1,9 @@
+{
+  DataBuffer foo=stringBuffer("foo");
+  DataBuffer bar=stringBuffer("bar");
+  DataBuffer baz=stringBuffer("baz");
+  Flux<DataBuffer> flux=Flux.just(foo,bar,baz);
+  Flux<DataBuffer> result=DataBufferUtils.takeUntilByteCount(flux,5L);
+  TestSubscriber.subscribe(result).assertNoError().assertComplete().assertValuesWith(stringConsumer("foo"),stringConsumer("ba"));
+  release(baz);
+}

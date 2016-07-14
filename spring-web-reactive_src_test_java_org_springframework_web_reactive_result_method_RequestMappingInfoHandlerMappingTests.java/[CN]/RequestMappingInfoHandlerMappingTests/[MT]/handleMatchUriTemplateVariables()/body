@@ -1,0 +1,11 @@
+{
+  RequestMappingInfo key=paths("/{path1}/{path2}").build();
+  ServerWebExchange exchange=createExchange(HttpMethod.GET,"/1/2");
+  String lookupPath=exchange.getRequest().getURI().getPath();
+  this.handlerMapping.handleMatch(key,lookupPath,exchange);
+  String name=HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+  Map<String,String> uriVariables=(Map<String,String>)exchange.getAttributes().get(name);
+  assertNotNull(uriVariables);
+  assertEquals("1",uriVariables.get("path1"));
+  assertEquals("2",uriVariables.get("path2"));
+}

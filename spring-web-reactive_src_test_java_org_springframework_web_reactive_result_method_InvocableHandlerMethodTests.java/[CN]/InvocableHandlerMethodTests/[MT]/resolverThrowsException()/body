@@ -1,0 +1,6 @@
+{
+  InvocableHandlerMethod hm=handlerMethod("singleArg");
+  addResolver(hm,Mono.error(new IllegalStateException("boo")));
+  Mono<HandlerResult> mono=hm.invokeForRequest(this.exchange,this.model);
+  TestSubscriber.subscribe(mono).assertError(IllegalStateException.class).assertErrorMessage("Error resolving argument [0] of type [java.lang.String] " + "on method [" + hm.getMethod().toGenericString() + "]");
+}

@@ -1,0 +1,14 @@
+{
+  ModelMap model=new ExtendedModelMap().addAttribute("id","123");
+  HandlerResult result=new HandlerResult(new Object(),returnValue,returnType(type),model);
+  ViewResolutionResultHandler handler=createResultHandler(new TestViewResolver("account"));
+  this.request.setUri(new URI("/account"));
+  handler.handleResult(this.exchange,result).block(Duration.ofSeconds(5));
+  assertResponseBody("account: {id=123}");
+  this.request.setUri(new URI("/account/"));
+  handler.handleResult(this.exchange,result).block(Duration.ofSeconds(5));
+  assertResponseBody("account: {id=123}");
+  this.request.setUri(new URI("/account.123"));
+  handler.handleResult(this.exchange,result).block(Duration.ofSeconds(5));
+  assertResponseBody("account: {id=123}");
+}

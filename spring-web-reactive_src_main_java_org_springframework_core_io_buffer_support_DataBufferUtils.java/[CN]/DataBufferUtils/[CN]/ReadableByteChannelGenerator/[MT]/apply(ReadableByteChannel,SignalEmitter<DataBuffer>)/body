@@ -1,0 +1,28 @@
+{
+  try {
+    ByteBuffer byteBuffer=ByteBuffer.allocate(chunkSize);
+    int read;
+    if ((read=channel.read(byteBuffer)) > 0) {
+      byteBuffer.flip();
+      boolean release=true;
+      DataBuffer dataBuffer=this.dataBufferFactory.allocateBuffer(read);
+      try {
+        dataBuffer.write(byteBuffer);
+        release=false;
+        sub.next(dataBuffer);
+      }
+  finally {
+        if (release) {
+          release(dataBuffer);
+        }
+      }
+    }
+ else {
+      sub.complete();
+    }
+  }
+ catch (  IOException ex) {
+    sub.fail(ex);
+  }
+  return channel;
+}

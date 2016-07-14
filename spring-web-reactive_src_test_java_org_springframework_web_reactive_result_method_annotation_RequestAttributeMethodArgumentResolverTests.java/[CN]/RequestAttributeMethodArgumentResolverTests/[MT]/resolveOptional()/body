@@ -1,0 +1,15 @@
+{
+  MethodParameter param=initMethodParameter(3);
+  Mono<Object> mono=this.resolver.resolveArgument(param,null,this.exchange);
+  assertNotNull(mono.block());
+  assertEquals(Optional.class,mono.block().getClass());
+  assertFalse(((Optional)mono.block()).isPresent());
+  Foo foo=new Foo();
+  this.exchange.getAttributes().put("foo",foo);
+  mono=this.resolver.resolveArgument(param,null,this.exchange);
+  assertNotNull(mono.block());
+  assertEquals(Optional.class,mono.block().getClass());
+  Optional optional=(Optional)mono.block();
+  assertTrue(optional.isPresent());
+  assertSame(foo,optional.get());
+}

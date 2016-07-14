@@ -1,0 +1,20 @@
+{
+  if (this.readyToWrite) {
+    this.writeSubscriber.onNext(item);
+    return;
+  }
+synchronized (this) {
+    if (this.readyToWrite) {
+      this.writeSubscriber.onNext(item);
+    }
+ else     if (this.beforeFirstEmission) {
+      this.item=item;
+      this.beforeFirstEmission=false;
+      writeFunction.apply(this).subscribe(new DownstreamBridge(downstream()));
+    }
+ else {
+      subscription.cancel();
+      downstream().onError(new IllegalStateException("Unexpected item."));
+    }
+  }
+}

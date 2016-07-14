@@ -1,0 +1,8 @@
+{
+  this.request.writeWith(Flux.empty());
+  this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+  ResolvableType type=forClassWithGenerics(Mono.class,TestBean.class);
+  MethodParameter param=this.testMethod.resolveParam(type);
+  Mono<TestBean> result=(Mono<TestBean>)this.resolver.readBody(param,true,this.exchange).block();
+  TestSubscriber.subscribe(result).assertError(ServerWebInputException.class);
+}

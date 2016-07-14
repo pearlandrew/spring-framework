@@ -1,0 +1,36 @@
+{
+  Object handler=this.handlerMap.get(urlPath);
+  if (handler != null) {
+    return handleMatch(handler,urlPath,urlPath,exchange);
+  }
+  List<String> matches=new ArrayList<>();
+  for (  String pattern : this.handlerMap.keySet()) {
+    if (getPathMatcher().match(pattern,urlPath)) {
+      matches.add(pattern);
+    }
+ else     if (useTrailingSlashMatch()) {
+      if (!pattern.endsWith("/") && getPathMatcher().match(pattern + "/",urlPath)) {
+        matches.add(pattern + "/");
+      }
+    }
+  }
+  String bestMatch=null;
+  Comparator<String> comparator=getPathMatcher().getPatternComparator(urlPath);
+  if (!matches.isEmpty()) {
+    Collections.sort(matches,comparator);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Matching patterns for request [" + urlPath + "] are "+ matches);
+    }
+    bestMatch=matches.get(0);
+  }
+  if (bestMatch != null) {
+    handler=this.handlerMap.get(bestMatch);
+    if (handler == null) {
+      Assert.isTrue(bestMatch.endsWith("/"));
+      handler=this.handlerMap.get(bestMatch.substring(0,bestMatch.length() - 1));
+    }
+    String pathWithinMapping=getPathMatcher().extractPathWithinPattern(bestMatch,urlPath);
+    return handleMatch(handler,bestMatch,pathWithinMapping,exchange);
+  }
+  return null;
+}

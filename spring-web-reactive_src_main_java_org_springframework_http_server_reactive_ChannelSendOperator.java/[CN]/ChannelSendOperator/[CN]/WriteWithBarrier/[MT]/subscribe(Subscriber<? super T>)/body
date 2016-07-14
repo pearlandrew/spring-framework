@@ -1,0 +1,13 @@
+{
+synchronized (this) {
+    Assert.isNull(this.writeSubscriber,"Only one writeSubscriber supported.");
+    this.writeSubscriber=writeSubscriber;
+    if (this.error != null || this.completed) {
+      this.writeSubscriber.onSubscribe(EmptySubscription.INSTANCE);
+      emitCachedSignals();
+    }
+ else {
+      this.writeSubscriber.onSubscribe(this);
+    }
+  }
+}

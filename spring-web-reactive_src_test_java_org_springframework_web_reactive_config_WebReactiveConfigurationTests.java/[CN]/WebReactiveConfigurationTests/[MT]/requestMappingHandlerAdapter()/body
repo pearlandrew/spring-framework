@@ -1,0 +1,21 @@
+{
+  ApplicationContext context=loadConfig(WebReactiveConfiguration.class);
+  String name="requestMappingHandlerAdapter";
+  RequestMappingHandlerAdapter adapter=context.getBean(name,RequestMappingHandlerAdapter.class);
+  assertNotNull(adapter);
+  List<HttpMessageConverter<?>> converters=adapter.getMessageConverters();
+  assertEquals(6,converters.size());
+  assertHasConverter(converters,ByteBuffer.class,APPLICATION_OCTET_STREAM,APPLICATION_OCTET_STREAM);
+  assertHasConverter(converters,String.class,TEXT_PLAIN,TEXT_PLAIN);
+  assertHasConverter(converters,Resource.class,IMAGE_PNG,IMAGE_PNG);
+  assertHasConverter(converters,TestBean.class,APPLICATION_XML,APPLICATION_XML);
+  assertHasConverter(converters,TestBean.class,APPLICATION_JSON,APPLICATION_JSON);
+  assertHasConverter(converters,TestBean.class,null,MediaType.parseMediaType("text/event-stream"));
+  name="mvcConversionService";
+  ConversionService service=context.getBean(name,ConversionService.class);
+  assertSame(service,adapter.getConversionService());
+  name="mvcValidator";
+  Validator validator=context.getBean(name,Validator.class);
+  assertSame(validator,adapter.getValidator());
+  assertEquals(OptionalValidatorFactoryBean.class,validator.getClass());
+}

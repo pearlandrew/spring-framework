@@ -1,0 +1,12 @@
+{
+  StaticApplicationContext context=new StaticApplicationContext();
+  context.refresh();
+  UrlBasedViewResolver resolver=new UrlBasedViewResolver();
+  resolver.setViewClass(TestView.class);
+  resolver.setViewNames("my*");
+  resolver.setApplicationContext(context);
+  Mono<View> mono=resolver.resolveViewName("my-view",Locale.US);
+  assertNotNull(mono.block());
+  mono=resolver.resolveViewName("not-my-view",Locale.US);
+  assertNull(mono.block());
+}

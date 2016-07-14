@@ -1,0 +1,13 @@
+{
+  String name="foo";
+  String value1="bar";
+  String value2="baz";
+  this.exchange.getRequest().getQueryParams().put(name,Arrays.asList(value1,value2));
+  MultiValueMap<String,String> expected=new LinkedMultiValueMap<>(1);
+  expected.add(name,value1);
+  expected.add(name,value2);
+  Mono<Object> mono=this.resolver.resolveArgument(this.paramMultiValueMap,null,this.exchange);
+  Object result=mono.block();
+  assertTrue(result instanceof MultiValueMap);
+  assertEquals(expected,result);
+}

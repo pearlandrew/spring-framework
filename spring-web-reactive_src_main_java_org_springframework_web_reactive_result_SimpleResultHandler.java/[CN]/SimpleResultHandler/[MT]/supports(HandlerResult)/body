@@ -1,0 +1,12 @@
+{
+  ResolvableType type=result.getReturnType();
+  if (Void.TYPE.equals(type.getRawClass())) {
+    return true;
+  }
+  TypeDescriptor source=new TypeDescriptor(result.getReturnTypeSource());
+  if (Publisher.class.isAssignableFrom(type.getRawClass()) || canConvert(source,MONO_TYPE) || canConvert(source,FLUX_TYPE)) {
+    Class<?> clazz=result.getReturnType().getGeneric(0).getRawClass();
+    return Void.class.equals(clazz);
+  }
+  return false;
+}

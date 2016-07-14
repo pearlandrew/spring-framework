@@ -1,0 +1,17 @@
+{
+  Objects.requireNonNull(subscriber);
+  if (publisher.changeState(this,SUBSCRIBED)) {
+    Subscription subscription=new ResponseBodyWriteResultSubscription(publisher);
+    publisher.subscriber=subscriber;
+    subscriber.onSubscribe(subscription);
+    if (publisher.publisherCompleted) {
+      publisher.publishComplete();
+    }
+ else     if (publisher.publisherError != null) {
+      publisher.publishError(publisher.publisherError);
+    }
+  }
+ else {
+    throw new IllegalStateException(toString());
+  }
+}

@@ -1,0 +1,7 @@
+{
+  ServerWebExchange exchange=createExchange(HttpMethod.GET,"/users");
+  exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+  this.handlerMapping.registerHandler(new UserController());
+  Mono<Object> mono=this.handlerMapping.getHandler(exchange);
+  TestSubscriber.subscribe(mono).assertError(NotAcceptableStatusException.class);
+}

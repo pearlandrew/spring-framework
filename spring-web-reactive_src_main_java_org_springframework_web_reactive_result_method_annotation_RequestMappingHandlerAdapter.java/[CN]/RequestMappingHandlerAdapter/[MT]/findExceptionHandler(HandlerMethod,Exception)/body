@@ -1,0 +1,13 @@
+{
+  if (handlerMethod == null) {
+    return null;
+  }
+  Class<?> handlerType=handlerMethod.getBeanType();
+  ExceptionHandlerMethodResolver resolver=this.exceptionHandlerCache.get(handlerType);
+  if (resolver == null) {
+    resolver=new ExceptionHandlerMethodResolver(handlerType);
+    this.exceptionHandlerCache.put(handlerType,resolver);
+  }
+  Method method=resolver.resolveMethod(exception);
+  return (method != null ? new InvocableHandlerMethod(handlerMethod.getBean(),method) : null);
+}

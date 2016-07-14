@@ -1,0 +1,18 @@
+{
+  ApplicationContext context=loadConfig(WebReactiveConfiguration.class);
+  String name="responseEntityResultHandler";
+  ResponseEntityResultHandler handler=context.getBean(name,ResponseEntityResultHandler.class);
+  assertNotNull(handler);
+  assertEquals(0,handler.getOrder());
+  List<HttpMessageConverter<?>> converters=handler.getMessageConverters();
+  assertEquals(6,converters.size());
+  assertHasConverter(converters,ByteBuffer.class,APPLICATION_OCTET_STREAM,APPLICATION_OCTET_STREAM);
+  assertHasConverter(converters,String.class,TEXT_PLAIN,TEXT_PLAIN);
+  assertHasConverter(converters,Resource.class,IMAGE_PNG,IMAGE_PNG);
+  assertHasConverter(converters,TestBean.class,APPLICATION_XML,APPLICATION_XML);
+  assertHasConverter(converters,TestBean.class,APPLICATION_JSON,APPLICATION_JSON);
+  assertHasConverter(converters,TestBean.class,null,MediaType.parseMediaType("text/event-stream"));
+  name="mvcContentTypeResolver";
+  RequestedContentTypeResolver resolver=context.getBean(name,RequestedContentTypeResolver.class);
+  assertSame(resolver,handler.getContentTypeResolver());
+}

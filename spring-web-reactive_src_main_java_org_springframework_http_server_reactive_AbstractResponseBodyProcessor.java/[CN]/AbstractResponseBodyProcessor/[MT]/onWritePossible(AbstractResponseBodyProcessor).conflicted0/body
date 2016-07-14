@@ -1,0 +1,29 @@
+{
+  if (processor.changeState(this,WRITING)) {
+    DataBuffer dataBuffer=processor.currentBuffer;
+    try {
+      boolean writeCompleted=processor.write(dataBuffer);
+      if (writeCompleted) {
+        if (dataBuffer instanceof FlushingDataBuffer) {
+          processor.flush();
+        }
+        processor.releaseBuffer();
+        if (!processor.subscriberCompleted) {
+          processor.changeState(WRITING,REQUESTED);
+          processor.subscription.request(1);
+        }
+ else {
+          processor.changeState(WRITING,COMPLETED);
+          processor.publisherDelegate.publishComplete();
+        }
+      }
+ else {
+        processor.changeState(WRITING,RECEIVED);
+        processor.writeIfPossible();
+      }
+    }
+ catch (    IOException ex) {
+      processor.onError(ex);
+    }
+  }
+}

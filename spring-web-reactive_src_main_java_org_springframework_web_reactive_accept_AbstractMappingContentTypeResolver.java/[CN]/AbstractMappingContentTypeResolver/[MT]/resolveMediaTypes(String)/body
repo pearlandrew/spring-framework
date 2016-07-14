@@ -1,0 +1,18 @@
+{
+  if (StringUtils.hasText(key)) {
+    MediaType mediaType=getMediaType(key);
+    if (mediaType != null) {
+      handleMatch(key,mediaType);
+      return Collections.singletonList(mediaType);
+    }
+    mediaType=handleNoMatch(key);
+    if (mediaType != null) {
+      MediaType previous=this.mediaTypeLookup.putIfAbsent(key,mediaType);
+      if (previous == null) {
+        this.keyLookup.add(mediaType,key);
+      }
+      return Collections.singletonList(mediaType);
+    }
+  }
+  return Collections.emptyList();
+}

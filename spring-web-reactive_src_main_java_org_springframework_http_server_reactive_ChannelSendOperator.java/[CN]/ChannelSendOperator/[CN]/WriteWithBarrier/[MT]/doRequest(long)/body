@@ -1,0 +1,19 @@
+{
+  if (readyToWrite) {
+    super.doRequest(n);
+    return;
+  }
+synchronized (this) {
+    if (this.writeSubscriber != null) {
+      readyToWrite=true;
+      if (emitCachedSignals()) {
+        return;
+      }
+      n--;
+      if (n == 0) {
+        return;
+      }
+      super.doRequest(n);
+    }
+  }
+}

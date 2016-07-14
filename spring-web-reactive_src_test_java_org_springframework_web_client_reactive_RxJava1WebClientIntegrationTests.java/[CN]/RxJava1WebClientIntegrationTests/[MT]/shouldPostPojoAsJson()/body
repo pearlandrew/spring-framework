@@ -1,0 +1,19 @@
+{
+  HttpUrl baseUrl=server.url("/pojo/capitalize");
+  this.server.enqueue(new MockResponse().setHeader("Content-Type","application/json").setBody("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}"));
+  Pojo spring=new Pojo("foofoo","barbar");
+  Single<Pojo> result=this.webClient.perform(post(baseUrl.toString()).body(spring).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).extract(body(Pojo.class));
+  TestSubscriber<Pojo> ts=new TestSubscriber<Pojo>();
+  result.subscribe(ts);
+  ts.awaitTerminalEvent(2,TimeUnit.SECONDS);
+  assertThat(ts.getOnNextEvents().get(0).getBar(),Matchers.is("BARBAR"));
+  ts.assertValueCount(1);
+  ts.assertCompleted();
+  RecordedRequest request=server.takeRequest();
+  assertEquals(1,server.getRequestCount());
+  assertEquals("/pojo/capitalize",request.getPath());
+  assertEquals("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}",request.getBody().readUtf8());
+  assertEquals("chunked",request.getHeader(HttpHeaders.TRANSFER_ENCODING));
+  assertEquals("application/json",request.getHeader(HttpHeaders.ACCEPT));
+  assertEquals("application/json",request.getHeader(HttpHeaders.CONTENT_TYPE));
+}

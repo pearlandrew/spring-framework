@@ -1,0 +1,10 @@
+{
+  TestBean value=new TestBean("Joe");
+  ResolvableType type=ResolvableType.forClass(TestBean.class);
+  HandlerResult handlerResult=new HandlerResult(new Object(),value,returnType(type),this.model);
+  this.request.getHeaders().setAccept(Collections.singletonList(APPLICATION_JSON));
+  this.request.setUri(new URI("/account"));
+  ViewResolutionResultHandler resultHandler=createResultHandler(new TestViewResolver("account"));
+  Mono<Void> mono=resultHandler.handleResult(this.exchange,handlerResult);
+  TestSubscriber.subscribe(mono).assertError(NotAcceptableStatusException.class);
+}
