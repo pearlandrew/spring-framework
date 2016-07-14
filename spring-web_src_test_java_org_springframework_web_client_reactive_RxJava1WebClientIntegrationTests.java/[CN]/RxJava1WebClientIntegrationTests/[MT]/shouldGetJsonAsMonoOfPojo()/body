@@ -1,0 +1,16 @@
+{
+  HttpUrl baseUrl=server.url("/pojo");
+  this.server.enqueue(new MockResponse().setHeader("Content-Type","application/json").setBody("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}"));
+  Single<Pojo> result=this.webClient.perform(get(baseUrl.toString()).accept(MediaType.APPLICATION_JSON)).extract(body(Pojo.class));
+  TestSubscriber<Pojo> ts=new TestSubscriber<Pojo>();
+  result.subscribe(ts);
+  ts.awaitTerminalEvent(2,TimeUnit.SECONDS);
+  Pojo response=ts.getOnNextEvents().get(0);
+  assertEquals("barbar",response.getBar());
+  ts.assertValueCount(1);
+  ts.assertCompleted();
+  RecordedRequest request=server.takeRequest();
+  Assert.assertEquals(1,server.getRequestCount());
+  Assert.assertEquals("/pojo",request.getPath());
+  Assert.assertEquals("application/json",request.getHeader(HttpHeaders.ACCEPT));
+}

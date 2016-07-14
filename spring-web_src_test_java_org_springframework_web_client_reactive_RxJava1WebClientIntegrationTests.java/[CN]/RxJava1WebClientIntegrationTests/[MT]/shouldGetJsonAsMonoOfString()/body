@@ -1,0 +1,17 @@
+{
+  HttpUrl baseUrl=server.url("/json");
+  String content="{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
+  this.server.enqueue(new MockResponse().setHeader("Content-Type","application/json").setBody(content));
+  Single<String> result=this.webClient.perform(get(baseUrl.toString()).accept(MediaType.APPLICATION_JSON)).extract(body(String.class));
+  TestSubscriber<String> ts=new TestSubscriber<String>();
+  result.subscribe(ts);
+  ts.awaitTerminalEvent(2,TimeUnit.SECONDS);
+  String response=ts.getOnNextEvents().get(0);
+  assertEquals(content,response);
+  ts.assertValueCount(1);
+  ts.assertCompleted();
+  RecordedRequest request=server.takeRequest();
+  Assert.assertEquals(1,server.getRequestCount());
+  Assert.assertEquals("/json",request.getPath());
+  Assert.assertEquals("application/json",request.getHeader(HttpHeaders.ACCEPT));
+}

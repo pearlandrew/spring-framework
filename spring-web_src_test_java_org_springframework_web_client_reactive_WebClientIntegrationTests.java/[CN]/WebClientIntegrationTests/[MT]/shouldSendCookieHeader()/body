@@ -1,0 +1,10 @@
+{
+  HttpUrl baseUrl=server.url("/test");
+  this.server.enqueue(new MockResponse().setHeader("Content-Type","text/plain").setBody("test"));
+  Mono<String> result=this.webClient.perform(get(baseUrl.toString()).cookie("testkey","testvalue")).extract(body(String.class));
+  TestSubscriber.subscribe(result).awaitAndAssertNextValues("test").assertComplete();
+  RecordedRequest request=server.takeRequest();
+  Assert.assertEquals(1,server.getRequestCount());
+  Assert.assertEquals("/test",request.getPath());
+  Assert.assertEquals("testkey=testvalue",request.getHeader(HttpHeaders.COOKIE));
+}

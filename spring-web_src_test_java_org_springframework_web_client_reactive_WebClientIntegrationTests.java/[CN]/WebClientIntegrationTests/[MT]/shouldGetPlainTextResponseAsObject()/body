@@ -1,0 +1,11 @@
+{
+  HttpUrl baseUrl=server.url("/greeting?name=Spring");
+  this.server.enqueue(new MockResponse().setBody("Hello Spring!"));
+  Mono<String> result=this.webClient.perform(get(baseUrl.toString()).header("X-Test-Header","testvalue")).extract(body(String.class));
+  TestSubscriber.subscribe(result).awaitAndAssertNextValues("Hello Spring!").assertComplete();
+  RecordedRequest request=server.takeRequest();
+  Assert.assertEquals(1,server.getRequestCount());
+  Assert.assertEquals("testvalue",request.getHeader("X-Test-Header"));
+  Assert.assertEquals("*/*",request.getHeader(HttpHeaders.ACCEPT));
+  Assert.assertEquals("/greeting?name=Spring",request.getPath());
+}
