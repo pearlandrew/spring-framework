@@ -1,16 +1,3 @@
 {
-  if (annotation == null) {
-    return null;
-  }
-  if (annotation instanceof SynthesizedAnnotation) {
-    return annotation;
-  }
-  Class<? extends Annotation> annotationType=annotation.annotationType();
-  if (!isSynthesizable(annotationType)) {
-    return annotation;
-  }
-  DefaultAnnotationAttributeExtractor attributeExtractor=new DefaultAnnotationAttributeExtractor(annotation,annotatedElement);
-  InvocationHandler handler=new SynthesizedAnnotationInvocationHandler(attributeExtractor);
-  Class<?>[] exposedInterfaces=new Class<?>[]{annotationType,SynthesizedAnnotation.class};
-  return (A)Proxy.newProxyInstance(annotation.getClass().getClassLoader(),exposedInterfaces,handler);
+  return synthesizeAnnotation(annotation,(Object)annotatedElement);
 }
