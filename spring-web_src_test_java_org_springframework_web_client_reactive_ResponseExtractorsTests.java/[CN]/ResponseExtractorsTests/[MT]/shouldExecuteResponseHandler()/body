@@ -1,0 +1,8 @@
+{
+  this.headers.setContentType(MediaType.TEXT_PLAIN);
+  given(this.response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+  given(this.response.getBody()).willReturn(createFluxBody("test"," content"));
+  Mono<String> result=ResponseExtractors.body(String.class).extract(Mono.just(this.response),this.webClientConfig);
+  TestSubscriber.subscribe(result).assertValueCount(1).assertComplete();
+  then(this.errorHandler).should().handleError(eq(this.response),eq(this.messageConverters));
+}

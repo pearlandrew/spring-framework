@@ -1,13 +1,16 @@
 {
   HttpUrl baseUrl=server.url("/greeting?name=Spring");
-  this.server.enqueue(new MockResponse().setResponseCode(404));
+  this.server.enqueue(new MockResponse().setResponseCode(404).setHeader("Content-Type","text/plain").setBody("Not Found"));
   Single<String> result=this.webClient.perform(get(baseUrl.toString())).extract(body(String.class));
   TestSubscriber<String> ts=new TestSubscriber<String>();
   result.subscribe(ts);
   ts.awaitTerminalEvent(2,TimeUnit.SECONDS);
-  ts.assertError(WebClientException.class);
+  ts.assertError(WebClientErrorException.class);
+  WebClientErrorException exc=(WebClientErrorException)ts.getOnErrorEvents().get(0);
+  assertEquals(404,exc.getStatus().value());
+  assertEquals(MediaType.TEXT_PLAIN,exc.getResponseHeaders().getContentType());
   RecordedRequest request=server.takeRequest();
-  Assert.assertEquals(1,server.getRequestCount());
-  Assert.assertEquals("*/*",request.getHeader(HttpHeaders.ACCEPT));
-  Assert.assertEquals("/greeting?name=Spring",request.getPath());
+  assertEquals(1,server.getRequestCount());
+  assertEquals("*/*",request.getHeader(HttpHeaders.ACCEPT));
+  assertEquals("/greeting?name=Spring",request.getPath());
 }

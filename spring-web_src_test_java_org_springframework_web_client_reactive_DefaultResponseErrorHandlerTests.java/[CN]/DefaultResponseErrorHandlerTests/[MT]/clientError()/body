@@ -1,0 +1,18 @@
+{
+  HttpHeaders headers=new HttpHeaders();
+  headers.setContentType(MediaType.TEXT_PLAIN);
+  DataBuffer buffer=new DefaultDataBufferFactory().allocateBuffer();
+  buffer.write(new String("Page Not Found").getBytes("UTF-8"));
+  given(this.response.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
+  given(this.response.getHeaders()).willReturn(headers);
+  given(this.response.getBody()).willReturn(Flux.just(buffer));
+  try {
+    this.errorHandler.handleError(this.response,this.messageConverters);
+    fail("expected HttpClientErrorException");
+  }
+ catch (  WebClientErrorException exc) {
+    assertThat(exc.getMessage(),is("404 Not Found"));
+    assertThat(exc.getStatus(),is(HttpStatus.NOT_FOUND));
+    TestSubscriber.subscribe(exc.getResponseBody(as(String.class))).awaitAndAssertNextValues("Page Not Found").assertComplete();
+  }
+}

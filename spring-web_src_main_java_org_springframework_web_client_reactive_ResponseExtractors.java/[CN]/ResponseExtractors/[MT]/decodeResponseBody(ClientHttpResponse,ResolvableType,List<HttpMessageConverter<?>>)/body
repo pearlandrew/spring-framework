@@ -1,8 +1,5 @@
 {
   MediaType contentType=response.getHeaders().getContentType();
-  Optional<HttpMessageConverter<?>> converter=resolveConverter(messageConverters,responseType,contentType);
-  if (!converter.isPresent()) {
-    return Flux.error(new IllegalStateException("Could not decode response body of type '" + contentType + "' with target type '"+ responseType.toString()+ "'"));
-  }
-  return (Flux<T>)converter.get().read(responseType,response);
+  HttpMessageConverter<?> converter=resolveConverter(messageConverters,responseType,contentType);
+  return (Flux<T>)converter.read(responseType,response);
 }
