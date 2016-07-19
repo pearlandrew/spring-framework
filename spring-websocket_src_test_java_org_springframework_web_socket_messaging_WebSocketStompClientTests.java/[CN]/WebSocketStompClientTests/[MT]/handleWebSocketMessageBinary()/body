@@ -1,6 +1,6 @@
 {
   String text="SEND\na:alpha\n\nMessage payload\0";
-  connect().handleMessage(this.webSocketSession,new BinaryMessage(text.getBytes(UTF_8)));
+  connect().handleMessage(this.webSocketSession,new BinaryMessage(text.getBytes(StandardCharsets.UTF_8)));
   ArgumentCaptor<Message> captor=ArgumentCaptor.forClass(Message.class);
   verify(this.stompSession).handleMessage(captor.capture());
   Message<byte[]> message=captor.getValue();
@@ -9,5 +9,5 @@
   StompHeaders headers=StompHeaders.readOnlyStompHeaders(accessor.toNativeHeaderMap());
   assertEquals(StompCommand.SEND,accessor.getCommand());
   assertEquals("alpha",headers.getFirst("a"));
-  assertEquals("Message payload",new String(message.getPayload(),UTF_8));
+  assertEquals("Message payload",new String(message.getPayload(),StandardCharsets.UTF_8));
 }
