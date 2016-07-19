@@ -1,6 +1,6 @@
 {
   try {
-    GroovyObject goo=(GroovyObject)scriptClass.newInstance();
+    GroovyObject goo=(GroovyObject)ReflectionUtils.accessibleConstructor(scriptClass).newInstance();
     if (this.groovyObjectCustomizer != null) {
       this.groovyObjectCustomizer.customize(goo);
     }
@@ -11,10 +11,16 @@
       return goo;
     }
   }
- catch (  InstantiationException ex) {
-    throw new ScriptCompilationException(scriptSource,"Could not instantiate Groovy script class: " + scriptClass.getName(),ex);
+ catch (  NoSuchMethodException ex) {
+    throw new ScriptCompilationException("No default constructor on Groovy script class: " + scriptClass.getName(),ex);
+  }
+catch (  InstantiationException ex) {
+    throw new ScriptCompilationException(scriptSource,"Unable to instantiate Groovy script class: " + scriptClass.getName(),ex);
   }
 catch (  IllegalAccessException ex) {
     throw new ScriptCompilationException(scriptSource,"Could not access Groovy script constructor: " + scriptClass.getName(),ex);
+  }
+catch (  InvocationTargetException ex) {
+    throw new ScriptCompilationException("Failed to invoke Groovy script constructor: " + scriptClass.getName(),ex.getTargetException());
   }
 }

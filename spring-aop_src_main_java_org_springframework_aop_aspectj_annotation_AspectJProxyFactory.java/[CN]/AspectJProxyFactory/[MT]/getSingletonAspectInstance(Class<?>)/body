@@ -4,16 +4,8 @@ synchronized (aspectCache) {
     if (instance != null) {
       return instance;
     }
-    try {
-      instance=aspectClass.newInstance();
-      aspectCache.put(aspectClass,instance);
-      return instance;
-    }
- catch (    InstantiationException ex) {
-      throw new AopConfigException("Unable to instantiate aspect class [" + aspectClass.getName() + "]",ex);
-    }
-catch (    IllegalAccessException ex) {
-      throw new AopConfigException("Cannot access aspect class [" + aspectClass.getName() + "]",ex);
-    }
+    instance=new SimpleAspectInstanceFactory(aspectClass).getAspectInstance();
+    aspectCache.put(aspectClass,instance);
+    return instance;
   }
 }
