@@ -1,0 +1,7 @@
+{
+  ByteArrayOutputStream body=new ByteArrayOutputStream();
+  ResolvableType type=ResolvableType.forType(OutputStream.class);
+  HttpMessageWriter<?> writer=new EncoderHttpMessageWriter<>(new ByteBufferEncoder());
+  Mono<Void> mono=createResultHandler(writer).writeBody(this.exchange,body,type,returnType(type));
+  TestSubscriber.subscribe(mono).assertError(IllegalStateException.class);
+}
