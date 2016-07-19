@@ -1,14 +1,8 @@
 {
   ScriptSource script=mock(ScriptSource.class);
-  final String badScript="class Foo { protected Foo() {}}";
+  String badScript="class Foo { protected Foo() {} \n String toString() { 'X' }}";
   given(script.getScriptAsString()).willReturn(badScript);
   given(script.suggestedClassName()).willReturn("someName");
   GroovyScriptFactory factory=new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript);
-  try {
-    factory.getScriptedObject(script);
-    fail("Must have thrown a ScriptCompilationException (no oublic no-arg ctor in scripted class).");
-  }
- catch (  ScriptCompilationException expected) {
-    assertTrue(expected.contains(IllegalAccessException.class));
-  }
+  assertEquals("X",factory.getScriptedObject(script).toString());
 }
