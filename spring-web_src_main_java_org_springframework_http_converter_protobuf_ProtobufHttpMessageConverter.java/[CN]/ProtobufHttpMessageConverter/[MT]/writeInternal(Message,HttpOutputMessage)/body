@@ -7,22 +7,20 @@
   if (charset == null) {
     charset=DEFAULT_CHARSET;
   }
-  if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
-    OutputStreamWriter outputStreamWriter=new OutputStreamWriter(outputMessage.getBody(),charset);
+  if (PROTOBUF.isCompatibleWith(contentType)) {
+    setProtoHeader(outputMessage,message);
+    CodedOutputStream codedOutputStream=CodedOutputStream.newInstance(outputMessage.getBody());
+    message.writeTo(codedOutputStream);
+    codedOutputStream.flush();
+  }
+ else   if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
+    final OutputStreamWriter outputStreamWriter=new OutputStreamWriter(outputMessage.getBody(),charset);
     TextFormat.print(message,outputStreamWriter);
     outputStreamWriter.flush();
+    outputMessage.getBody().flush();
   }
- else   if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
-    JSON_FORMAT.print(message,outputMessage.getBody(),charset);
-  }
- else   if (MediaType.APPLICATION_XML.isCompatibleWith(contentType)) {
-    XML_FORMAT.print(message,outputMessage.getBody(),charset);
-  }
- else   if (MediaType.TEXT_HTML.isCompatibleWith(contentType)) {
-    HTML_FORMAT.print(message,outputMessage.getBody(),charset);
-  }
- else   if (PROTOBUF.isCompatibleWith(contentType)) {
-    setProtoHeader(outputMessage,message);
-    FileCopyUtils.copy(message.toByteArray(),outputMessage.getBody());
+ else   if (isProtobufJavaUtilPresent || isProtobufJavaFormatPresent) {
+    this.protobufFormatsSupport.print(message,outputMessage.getBody(),contentType,charset);
+    outputMessage.getBody().flush();
   }
 }

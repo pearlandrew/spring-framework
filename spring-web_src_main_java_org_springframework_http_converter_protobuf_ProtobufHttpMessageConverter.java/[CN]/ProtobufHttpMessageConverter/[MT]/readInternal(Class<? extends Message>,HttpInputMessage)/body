@@ -9,18 +9,15 @@
   }
   try {
     Message.Builder builder=getMessageBuilder(clazz);
-    if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
+    if (PROTOBUF.isCompatibleWith(contentType)) {
+      builder.mergeFrom(inputMessage.getBody(),this.extensionRegistry);
+    }
+ else     if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
       InputStreamReader reader=new InputStreamReader(inputMessage.getBody(),charset);
       TextFormat.merge(reader,this.extensionRegistry,builder);
     }
- else     if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
-      JSON_FORMAT.merge(inputMessage.getBody(),charset,this.extensionRegistry,builder);
-    }
- else     if (MediaType.APPLICATION_XML.isCompatibleWith(contentType)) {
-      XML_FORMAT.merge(inputMessage.getBody(),charset,this.extensionRegistry,builder);
-    }
- else {
-      builder.mergeFrom(inputMessage.getBody(),this.extensionRegistry);
+ else     if (isProtobufJavaUtilPresent || isProtobufJavaFormatPresent) {
+      this.protobufFormatsSupport.merge(inputMessage.getBody(),charset,contentType,this.extensionRegistry,builder);
     }
     return builder.build();
   }
