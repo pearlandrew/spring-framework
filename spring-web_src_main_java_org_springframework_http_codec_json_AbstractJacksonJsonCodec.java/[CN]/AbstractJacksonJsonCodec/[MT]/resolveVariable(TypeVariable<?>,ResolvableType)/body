@@ -1,0 +1,20 @@
+{
+  ResolvableType resolvedType;
+  if (contextType.hasGenerics()) {
+    resolvedType=ResolvableType.forType(typeVariable,contextType);
+    if (resolvedType.resolve() != null) {
+      return resolvedType;
+    }
+  }
+  resolvedType=resolveVariable(typeVariable,contextType.getSuperType());
+  if (resolvedType.resolve() != null) {
+    return resolvedType;
+  }
+  for (  ResolvableType ifc : contextType.getInterfaces()) {
+    resolvedType=resolveVariable(typeVariable,ifc);
+    if (resolvedType.resolve() != null) {
+      return resolvedType;
+    }
+  }
+  return ResolvableType.NONE;
+}

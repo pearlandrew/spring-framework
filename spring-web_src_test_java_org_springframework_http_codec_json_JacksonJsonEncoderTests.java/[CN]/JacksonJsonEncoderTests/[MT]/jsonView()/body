@@ -1,0 +1,9 @@
+{
+  JacksonViewBean bean=new JacksonViewBean();
+  bean.setWithView1("with");
+  bean.setWithView2("with");
+  bean.setWithoutView("without");
+  ResolvableType type=ResolvableType.forMethodReturnType(JacksonController.class.getMethod("foo"));
+  Flux<DataBuffer> output=this.encoder.encode(Mono.just(bean),this.bufferFactory,type,null);
+  TestSubscriber.subscribe(output).assertComplete().assertNoError().assertValuesWith(stringConsumer("{\"withView1\":\"with\"}"));
+}
