@@ -1,2 +1,16 @@
 {
+  if (processor.subscriberCompleted) {
+    if (processor.changeState(this,COMPLETED)) {
+      processor.publisherDelegate.publishComplete();
+    }
+  }
+ else {
+    try {
+      processor.flush();
+    }
+ catch (    IOException ex) {
+      processor.onError(ex);
+    }
+    processor.subscription.request(1);
+  }
 }
