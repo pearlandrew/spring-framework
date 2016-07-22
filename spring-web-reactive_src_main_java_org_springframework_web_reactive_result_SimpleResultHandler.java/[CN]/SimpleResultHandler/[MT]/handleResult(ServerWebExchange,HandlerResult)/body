@@ -1,12 +1,9 @@
 {
-  Optional<Object> optional=result.getReturnValue();
-  if (!optional.isPresent()) {
+  Optional<Object> optionalValue=result.getReturnValue();
+  if (!optionalValue.isPresent()) {
     return Mono.empty();
   }
-  Object value=optional.get();
-  if (Publisher.class.isAssignableFrom(result.getReturnType().getRawClass())) {
-    return Mono.from((Publisher<?>)value).then();
-  }
-  TypeDescriptor source=new TypeDescriptor(result.getReturnTypeSource());
-  return canConvert(source,MONO_TYPE) ? ((Mono<Void>)getConversionService().convert(value,source,MONO_TYPE)) : ((Flux<Void>)getConversionService().convert(value,source,FLUX_TYPE)).single();
+  Class<?> returnType=result.getReturnType().getRawClass();
+  ReactiveAdapter adapter=getAdapterRegistry().getAdapterFrom(returnType,optionalValue);
+  return adapter.toMono(optionalValue);
 }

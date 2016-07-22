@@ -1,17 +1,19 @@
 {
   List<HandlerMethodArgumentResolver> resolvers=new ArrayList<>();
   ConversionService cs=getConversionService();
+  ReactiveAdapterRegistry adapterRegistry=getReactiveAdapterRegistry();
   resolvers.add(new RequestParamMethodArgumentResolver(cs,getBeanFactory(),false));
   resolvers.add(new RequestParamMapMethodArgumentResolver());
   resolvers.add(new PathVariableMethodArgumentResolver(cs,getBeanFactory()));
   resolvers.add(new PathVariableMapMethodArgumentResolver());
-  resolvers.add(new RequestBodyArgumentResolver(getMessageReaders(),cs,getValidator()));
+  resolvers.add(new RequestBodyArgumentResolver(getMessageReaders(),getValidator(),adapterRegistry));
   resolvers.add(new RequestHeaderMethodArgumentResolver(cs,getBeanFactory()));
   resolvers.add(new RequestHeaderMapMethodArgumentResolver());
   resolvers.add(new CookieValueMethodArgumentResolver(cs,getBeanFactory()));
   resolvers.add(new ExpressionValueMethodArgumentResolver(cs,getBeanFactory()));
   resolvers.add(new SessionAttributeMethodArgumentResolver(cs,getBeanFactory()));
   resolvers.add(new RequestAttributeMethodArgumentResolver(cs,getBeanFactory()));
+  resolvers.add(new HttpEntityArgumentResolver(getMessageReaders(),getValidator(),adapterRegistry));
   resolvers.add(new ModelArgumentResolver());
   if (getCustomArgumentResolvers() != null) {
     resolvers.addAll(getCustomArgumentResolvers());

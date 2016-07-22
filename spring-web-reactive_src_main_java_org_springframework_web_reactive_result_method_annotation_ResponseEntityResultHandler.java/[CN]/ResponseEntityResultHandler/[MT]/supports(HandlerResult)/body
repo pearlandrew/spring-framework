@@ -1,11 +1,15 @@
 {
-  ResolvableType returnType=result.getReturnType();
+  Class<?> returnType=result.getReturnType().getRawClass();
   if (isSupportedType(returnType)) {
     return true;
   }
- else   if (getConversionService().canConvert(returnType.getRawClass(),Mono.class)) {
-    ResolvableType genericType=result.getReturnType().getGeneric(0);
-    return isSupportedType(genericType);
+ else {
+    Optional<Object> returnValue=result.getReturnValue();
+    ReactiveAdapter adapter=getReactiveAdapterRegistry().getAdapterFrom(returnType,returnValue);
+    if (adapter != null && !adapter.getDescriptor().isMultiValue()) {
+      ResolvableType genericType=result.getReturnType().getGeneric(0);
+      return isSupportedType(genericType.getRawClass());
+    }
   }
   return false;
 }

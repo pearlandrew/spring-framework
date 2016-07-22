@@ -1,0 +1,31 @@
+{
+  Class<?> bodyClass=bodyType.getParameterType();
+  ReactiveAdapter adapter=getReactiveAdapterRegistry().getAdapterFrom(bodyClass,body);
+  Publisher<?> publisher;
+  ResolvableType elementType;
+  if (adapter != null) {
+    publisher=adapter.toPublisher(body);
+    elementType=ResolvableType.forMethodParameter(bodyType).getGeneric(0);
+  }
+ else {
+    publisher=Mono.justOrEmpty(body);
+    elementType=ResolvableType.forMethodParameter(bodyType);
+  }
+  if (void.class == elementType.getRawClass() || Void.class == elementType.getRawClass()) {
+    return Mono.from((Publisher<Void>)publisher);
+  }
+  List<MediaType> producibleTypes=getProducibleMediaTypes(elementType);
+  if (producibleTypes.isEmpty()) {
+    return Mono.error(new IllegalStateException("No converter for return value type: " + elementType));
+  }
+  MediaType bestMediaType=selectMediaType(exchange,producibleTypes);
+  if (bestMediaType != null) {
+    for (    HttpMessageWriter<?> messageWriter : getMessageWriters()) {
+      if (messageWriter.canWrite(elementType,bestMediaType)) {
+        ServerHttpResponse response=exchange.getResponse();
+        return messageWriter.write((Publisher)publisher,elementType,bestMediaType,response);
+      }
+    }
+  }
+  return Mono.error(new NotAcceptableStatusException(producibleTypes));
+}
