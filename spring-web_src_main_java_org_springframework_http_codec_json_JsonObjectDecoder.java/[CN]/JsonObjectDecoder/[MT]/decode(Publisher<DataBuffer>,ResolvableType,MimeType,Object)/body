@@ -6,16 +6,16 @@
     boolean insideString;
     ByteBuf input;
     Integer writerIndex;
-    @Override public Publisher<? extends DataBuffer> apply(    DataBuffer b){
+    @Override public Publisher<? extends DataBuffer> apply(    DataBuffer buffer){
       List<DataBuffer> chunks=new ArrayList<>();
       if (this.input == null) {
-        this.input=Unpooled.copiedBuffer(b.asByteBuffer());
-        DataBufferUtils.release(b);
+        this.input=Unpooled.copiedBuffer(buffer.asByteBuffer());
+        DataBufferUtils.release(buffer);
         this.writerIndex=this.input.writerIndex();
       }
  else {
-        this.input=Unpooled.copiedBuffer(this.input,Unpooled.copiedBuffer(b.asByteBuffer()));
-        DataBufferUtils.release(b);
+        this.input=Unpooled.copiedBuffer(this.input,Unpooled.copiedBuffer(buffer.asByteBuffer()));
+        DataBufferUtils.release(buffer);
         this.writerIndex=this.input.writerIndex();
       }
       if (this.state == ST_CORRUPTED) {
@@ -27,7 +27,7 @@
         reset();
         return Flux.error(new IllegalStateException("object length exceeds " + maxObjectLength + ": "+ this.writerIndex+ " bytes discarded"));
       }
-      DataBufferFactory dataBufferFactory=b.factory();
+      DataBufferFactory dataBufferFactory=buffer.factory();
       for (; this.index < this.writerIndex; this.index++) {
         byte c=this.input.getByte(this.index);
         if (this.state == ST_DECODING_NORMAL) {
