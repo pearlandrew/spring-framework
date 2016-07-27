@@ -4,7 +4,9 @@
     return true;
   }
  else {
-    if (getReactiveAdapterRegistry().getAdapterFrom(rawClass,result.getReturnValue()) != null) {
+    Optional<Object> optional=result.getReturnValue();
+    ReactiveAdapter adapter=getReactiveAdapterRegistry().getAdapterFrom(rawClass,optional);
+    if (adapter != null && !adapter.getDescriptor().isNoValue()) {
       ResolvableType genericType=result.getReturnType().getGeneric(0);
       if (HttpEntity.class.isAssignableFrom(genericType.getRawClass())) {
         return true;
