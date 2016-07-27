@@ -1,17 +1,19 @@
 {
+  try {
+    processor.flush();
+  }
+ catch (  IOException ex) {
+    processor.cancel();
+    processor.onError(ex);
+  }
   if (processor.subscriberCompleted) {
     if (processor.changeState(this,COMPLETED)) {
       processor.publisherDelegate.publishComplete();
     }
   }
  else {
-    try {
-      processor.flush();
+    if (processor.changeState(this,REQUESTED)) {
       processor.subscription.request(1);
-    }
- catch (    IOException ex) {
-      processor.cancel();
-      processor.onError(ex);
     }
   }
 }
