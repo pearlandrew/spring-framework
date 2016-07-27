@@ -14,7 +14,14 @@
       Set<BeanDefinitionHolder> scannedBeanDefinitions=this.componentScanParser.parse(componentScan,sourceClass.getMetadata().getClassName());
       for (      BeanDefinitionHolder holder : scannedBeanDefinitions) {
         if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(),this.metadataReaderFactory)) {
-          parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
+          ImportStack previousStack=this.importStack;
+          this.importStack=new ImportStack();
+          try {
+            parse(holder.getBeanDefinition().getBeanClassName(),holder.getBeanName());
+          }
+  finally {
+            this.importStack=previousStack;
+          }
         }
       }
     }
