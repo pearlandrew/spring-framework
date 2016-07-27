@@ -2,7 +2,7 @@
   if (importCandidates.isEmpty()) {
     return;
   }
-  if (checkForCircularImports && this.importStack.contains(configClass)) {
+  if (checkForCircularImports && isChainedImportOnStack(configClass)) {
     this.problemReporter.error(new CircularImportProblem(configClass,this.importStack));
   }
  else {
@@ -37,7 +37,7 @@
  catch (    BeanDefinitionStoreException ex) {
       throw ex;
     }
-catch (    Exception ex) {
+catch (    Throwable ex) {
       throw new BeanDefinitionStoreException("Failed to process import candidates for configuration class [" + configClass.getMetadata().getClassName() + "]",ex);
     }
  finally {
