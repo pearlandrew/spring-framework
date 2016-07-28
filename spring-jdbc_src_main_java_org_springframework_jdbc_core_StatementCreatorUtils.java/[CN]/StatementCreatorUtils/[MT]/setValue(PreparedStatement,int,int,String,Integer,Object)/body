@@ -11,21 +11,13 @@
  else   if ((sqlType == Types.CLOB || sqlType == Types.NCLOB) && isStringValue(inValue.getClass())) {
     String strVal=inValue.toString();
     if (strVal.length() > 4000) {
-      try {
-        if (sqlType == Types.NCLOB) {
-          ps.setNClob(paramIndex,new StringReader(strVal),strVal.length());
-        }
+      if (sqlType == Types.NCLOB) {
+        ps.setNClob(paramIndex,new StringReader(strVal),strVal.length());
+      }
  else {
-          ps.setClob(paramIndex,new StringReader(strVal),strVal.length());
-        }
-        return;
+        ps.setClob(paramIndex,new StringReader(strVal),strVal.length());
       }
- catch (      AbstractMethodError err) {
-        logger.debug("JDBC driver does not implement JDBC 4.0 'setClob(int, Reader, long)' method",err);
-      }
-catch (      SQLFeatureNotSupportedException ex) {
-        logger.debug("JDBC driver does not support JDBC 4.0 'setClob(int, Reader, long)' method",ex);
-      }
+      return;
     }
     ps.setString(paramIndex,strVal);
   }

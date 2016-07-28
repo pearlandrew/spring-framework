@@ -2,51 +2,19 @@
   if (sqlType == SqlTypeValue.TYPE_UNKNOWN || sqlType == Types.OTHER) {
     boolean useSetObject=false;
     Integer sqlTypeToUse=null;
-    DatabaseMetaData dbmd=null;
-    String jdbcDriverName=null;
-    boolean checkGetParameterType=!shouldIgnoreGetParameterType;
-    if (checkGetParameterType && !driversWithNoSupportForGetParameterType.isEmpty()) {
-      try {
-        dbmd=ps.getConnection().getMetaData();
-        jdbcDriverName=dbmd.getDriverName();
-        checkGetParameterType=!driversWithNoSupportForGetParameterType.contains(jdbcDriverName);
-      }
- catch (      Throwable ex) {
-        logger.debug("Could not check connection metadata",ex);
-      }
-    }
-    if (checkGetParameterType) {
-      try {
-        sqlTypeToUse=ps.getParameterMetaData().getParameterType(paramIndex);
-      }
- catch (      Throwable ex) {
-        if (logger.isDebugEnabled()) {
-          logger.debug("JDBC 3.0 getParameterType call not supported - using fallback method instead: " + ex);
-        }
-      }
+    if (!shouldIgnoreGetParameterType) {
+      sqlTypeToUse=ps.getParameterMetaData().getParameterType(paramIndex);
     }
     if (sqlTypeToUse == null) {
       sqlTypeToUse=Types.NULL;
-      try {
-        if (dbmd == null) {
-          dbmd=ps.getConnection().getMetaData();
-        }
-        if (jdbcDriverName == null) {
-          jdbcDriverName=dbmd.getDriverName();
-        }
-        if (checkGetParameterType && !(jdbcDriverName.startsWith("Oracle") && dbmd.getDriverMajorVersion() >= 12)) {
-          driversWithNoSupportForGetParameterType.add(jdbcDriverName);
-        }
-        String databaseProductName=dbmd.getDatabaseProductName();
-        if (databaseProductName.startsWith("Informix") || (jdbcDriverName.startsWith("Microsoft") && jdbcDriverName.contains("SQL Server"))) {
-          useSetObject=true;
-        }
- else         if (databaseProductName.startsWith("DB2") || jdbcDriverName.startsWith("jConnect") || jdbcDriverName.startsWith("SQLServer")|| jdbcDriverName.startsWith("Apache Derby")) {
-          sqlTypeToUse=Types.VARCHAR;
-        }
+      DatabaseMetaData dbmd=ps.getConnection().getMetaData();
+      String jdbcDriverName=dbmd.getDriverName();
+      String databaseProductName=dbmd.getDatabaseProductName();
+      if (databaseProductName.startsWith("Informix") || (jdbcDriverName.startsWith("Microsoft") && jdbcDriverName.contains("SQL Server"))) {
+        useSetObject=true;
       }
- catch (      Throwable ex) {
-        logger.debug("Could not check connection metadata",ex);
+ else       if (databaseProductName.startsWith("DB2") || jdbcDriverName.startsWith("jConnect") || jdbcDriverName.startsWith("SQLServer")|| jdbcDriverName.startsWith("Apache Derby")) {
+        sqlTypeToUse=Types.VARCHAR;
       }
     }
     if (useSetObject) {
