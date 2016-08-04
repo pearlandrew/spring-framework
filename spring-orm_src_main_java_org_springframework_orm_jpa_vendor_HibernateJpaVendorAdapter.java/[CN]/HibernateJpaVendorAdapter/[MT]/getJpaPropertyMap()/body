@@ -16,7 +16,18 @@
     jpaProperties.put(Environment.SHOW_SQL,"true");
   }
   if (this.jpaDialect.prepareConnection) {
-    jpaProperties.put("hibernate.connection.handling_mode","DELAYED_ACQUISITION_AND_HOLD");
+    try {
+      AvailableSettings.class.getField("CONNECTION_HANDLING");
+      jpaProperties.put("hibernate.connection.handling_mode","DELAYED_ACQUISITION_AND_HOLD");
+    }
+ catch (    NoSuchFieldException ex) {
+      try {
+        AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
+        jpaProperties.put("hibernate.connection.release_mode","ON_CLOSE");
+      }
+ catch (      NoSuchFieldException ex2) {
+      }
+    }
   }
   return jpaProperties;
 }

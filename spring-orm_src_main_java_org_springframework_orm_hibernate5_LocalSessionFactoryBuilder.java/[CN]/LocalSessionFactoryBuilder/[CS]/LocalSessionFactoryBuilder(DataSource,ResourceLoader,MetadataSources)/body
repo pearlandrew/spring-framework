@@ -4,7 +4,18 @@
   if (dataSource != null) {
     getProperties().put(Environment.DATASOURCE,dataSource);
   }
-  getProperties().put("hibernate.connection.handling_mode","DELAYED_ACQUISITION_AND_HOLD");
+  try {
+    AvailableSettings.class.getField("CONNECTION_HANDLING");
+    getProperties().put("hibernate.connection.handling_mode","DELAYED_ACQUISITION_AND_HOLD");
+  }
+ catch (  NoSuchFieldException ex) {
+    try {
+      AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
+      getProperties().put("hibernate.connection.release_mode","ON_CLOSE");
+    }
+ catch (    NoSuchFieldException ex2) {
+    }
+  }
   getProperties().put(AvailableSettings.CLASSLOADERS,Collections.singleton(resourceLoader.getClassLoader()));
   this.resourcePatternResolver=ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 }

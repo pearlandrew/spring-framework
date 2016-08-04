@@ -19,6 +19,17 @@
  else {
     throw new IllegalArgumentException("Unknown transaction manager type: " + jtaTransactionManager.getClass().getName());
   }
-  getProperties().put("hibernate.connection.handling_mode","DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT");
+  try {
+    AvailableSettings.class.getField("CONNECTION_HANDLING");
+    getProperties().put("hibernate.connection.handling_mode","DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT");
+  }
+ catch (  NoSuchFieldException ex) {
+    try {
+      AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
+      getProperties().put("hibernate.connection.release_mode","AFTER_STATEMENT");
+    }
+ catch (    NoSuchFieldException ex2) {
+    }
+  }
   return this;
 }
