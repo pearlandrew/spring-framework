@@ -1,0 +1,21 @@
+{
+  Objects.requireNonNull(errorMessageSupplier);
+  Objects.requireNonNull(conditionSupplier);
+  Objects.requireNonNull(timeout);
+  long timeoutNs=timeout.toNanos();
+  long startTime=System.nanoTime();
+  do {
+    if (conditionSupplier.getAsBoolean()) {
+      return;
+    }
+    try {
+      Thread.sleep(100);
+    }
+ catch (    InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException(e);
+    }
+  }
+ while (System.nanoTime() - startTime < timeoutNs);
+  throw new AssertionError(errorMessageSupplier.get());
+}

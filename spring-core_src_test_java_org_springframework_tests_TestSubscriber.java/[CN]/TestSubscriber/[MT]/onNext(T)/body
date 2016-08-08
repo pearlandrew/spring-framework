@@ -1,0 +1,34 @@
+{
+  if (establishedFusionMode == Fuseable.ASYNC) {
+    for (; ; ) {
+      t=qs.poll();
+      if (t == null) {
+        break;
+      }
+      valueCount++;
+      if (valuesStorage) {
+        List<T> nextValuesSnapshot;
+        for (; ; ) {
+          nextValuesSnapshot=values;
+          nextValuesSnapshot.add(t);
+          if (NEXT_VALUES.compareAndSet(this,nextValuesSnapshot,nextValuesSnapshot)) {
+            break;
+          }
+        }
+      }
+    }
+  }
+ else {
+    valueCount++;
+    if (valuesStorage) {
+      List<T> nextValuesSnapshot;
+      for (; ; ) {
+        nextValuesSnapshot=values;
+        nextValuesSnapshot.add(t);
+        if (NEXT_VALUES.compareAndSet(this,nextValuesSnapshot,nextValuesSnapshot)) {
+          break;
+        }
+      }
+    }
+  }
+}

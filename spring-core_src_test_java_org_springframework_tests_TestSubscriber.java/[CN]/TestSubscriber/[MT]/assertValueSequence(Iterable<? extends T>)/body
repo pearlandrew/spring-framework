@@ -1,0 +1,30 @@
+{
+  if (!valuesStorage) {
+    throw new IllegalStateException("Using assertNoValues() requires enabling values storage");
+  }
+  Iterator<T> actual=values.iterator();
+  Iterator<? extends T> expected=expectedSequence.iterator();
+  int i=0;
+  for (; ; ) {
+    boolean n1=actual.hasNext();
+    boolean n2=expected.hasNext();
+    if (n1 && n2) {
+      T t1=actual.next();
+      T t2=expected.next();
+      if (!Objects.equals(t1,t2)) {
+        throw new AssertionError("The element with index " + i + " does not match: expected = "+ valueAndClass(t2)+ ", actual = "+ valueAndClass(t1),null);
+      }
+      i++;
+    }
+ else     if (n1 && !n2) {
+      throw new AssertionError("Actual contains more elements" + values,null);
+    }
+ else     if (!n1 && n2) {
+      throw new AssertionError("Actual contains fewer elements: " + values,null);
+    }
+ else {
+      break;
+    }
+  }
+  return this;
+}

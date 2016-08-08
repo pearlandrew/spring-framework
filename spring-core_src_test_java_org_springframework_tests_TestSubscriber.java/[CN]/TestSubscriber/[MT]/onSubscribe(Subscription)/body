@@ -1,0 +1,41 @@
+{
+  subscriptionCount++;
+  int requestMode=requestedFusionMode;
+  if (requestMode >= 0) {
+    if (!setWithoutRequesting(s)) {
+      if (!isCancelled()) {
+        errors.add(new IllegalStateException("Subscription already set: " + subscriptionCount));
+      }
+    }
+ else {
+      if (s instanceof Fuseable.QueueSubscription) {
+        this.qs=(Fuseable.QueueSubscription<T>)s;
+        int m=qs.requestFusion(requestMode);
+        establishedFusionMode=m;
+        if (m == Fuseable.SYNC) {
+          for (; ; ) {
+            T v=qs.poll();
+            if (v == null) {
+              onComplete();
+              break;
+            }
+            onNext(v);
+          }
+        }
+ else {
+          requestDeferred();
+        }
+      }
+ else {
+        requestDeferred();
+      }
+    }
+  }
+ else {
+    if (!set(s)) {
+      if (!isCancelled()) {
+        errors.add(new IllegalStateException("Subscription already set: " + subscriptionCount));
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  Objects.requireNonNull(s,"s");
+  Subscription a=this.s;
+  if (a == Operators.cancelledSubscription()) {
+    s.cancel();
+    return false;
+  }
+  if (a != null) {
+    s.cancel();
+    Operators.reportSubscriptionSet();
+    return false;
+  }
+  if (S.compareAndSet(this,null,s)) {
+    long r=REQUESTED.getAndSet(this,0L);
+    if (r != 0L) {
+      s.request(r);
+    }
+    return true;
+  }
+  a=this.s;
+  if (a != Operators.cancelledSubscription()) {
+    s.cancel();
+    return false;
+  }
+  Operators.reportSubscriptionSet();
+  return false;
+}
