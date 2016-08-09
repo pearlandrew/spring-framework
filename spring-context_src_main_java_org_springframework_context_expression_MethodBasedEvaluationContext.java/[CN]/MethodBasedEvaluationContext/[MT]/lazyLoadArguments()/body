@@ -1,15 +1,22 @@
 {
-  if (ObjectUtils.isEmpty(this.args)) {
+  if (ObjectUtils.isEmpty(this.arguments)) {
     return;
   }
-  for (int i=0; i < this.args.length; i++) {
-    setVariable("a" + i,this.args[i]);
-    setVariable("p" + i,this.args[i]);
-  }
-  String[] parameterNames=this.paramDiscoverer.getParameterNames(this.method);
-  if (parameterNames != null) {
-    for (int i=0; i < this.args.length; i++) {
-      setVariable(parameterNames[i],this.args[i]);
+  String[] paramNames=this.parameterNameDiscoverer.getParameterNames(this.method);
+  int paramCount=(paramNames != null ? paramNames.length : this.method.getParameterCount());
+  int argsCount=this.arguments.length;
+  for (int i=0; i < paramCount; i++) {
+    Object value=null;
+    if (argsCount > paramCount && i == paramCount - 1) {
+      value=Arrays.copyOfRange(this.arguments,i,argsCount);
+    }
+ else     if (argsCount > i) {
+      value=this.arguments[i];
+    }
+    setVariable("a" + i,value);
+    setVariable("p" + i,value);
+    if (paramNames != null) {
+      setVariable(paramNames[i],value);
     }
   }
 }
