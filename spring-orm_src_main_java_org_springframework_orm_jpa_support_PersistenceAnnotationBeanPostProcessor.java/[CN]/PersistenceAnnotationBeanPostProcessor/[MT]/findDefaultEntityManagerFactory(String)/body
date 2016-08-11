@@ -1,17 +1,11 @@
 {
-  String[] beanNames=BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory,EntityManagerFactory.class);
-  if (beanNames.length == 1) {
-    String unitName=beanNames[0];
-    EntityManagerFactory emf=(EntityManagerFactory)this.beanFactory.getBean(unitName);
-    if (this.beanFactory instanceof ConfigurableBeanFactory) {
-      ((ConfigurableBeanFactory)this.beanFactory).registerDependentBean(unitName,requestingBeanName);
-    }
-    return emf;
-  }
- else   if (beanNames.length > 1) {
-    throw new NoUniqueBeanDefinitionException(EntityManagerFactory.class,beanNames);
+  if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
+    ConfigurableListableBeanFactory clbf=(ConfigurableListableBeanFactory)this.beanFactory;
+    NamedBeanHolder<EntityManagerFactory> emfHolder=clbf.resolveNamedBean(EntityManagerFactory.class);
+    clbf.registerDependentBean(emfHolder.getBeanName(),requestingBeanName);
+    return emfHolder.getBeanInstance();
   }
  else {
-    throw new NoSuchBeanDefinitionException(EntityManagerFactory.class);
+    return this.beanFactory.getBean(EntityManagerFactory.class);
   }
 }
