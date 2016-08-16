@@ -1,0 +1,46 @@
+{
+  if (qualifier.test(beanName)) {
+    return true;
+  }
+  if (beanFactory != null) {
+    for (    String alias : beanFactory.getAliases(beanName)) {
+      if (qualifier.test(alias)) {
+        return true;
+      }
+    }
+    try {
+      if (beanFactory instanceof ConfigurableBeanFactory) {
+        BeanDefinition bd=((ConfigurableBeanFactory)beanFactory).getMergedBeanDefinition(beanName);
+        if (bd instanceof AbstractBeanDefinition) {
+          AbstractBeanDefinition abd=(AbstractBeanDefinition)bd;
+          AutowireCandidateQualifier candidate=abd.getQualifier(Qualifier.class.getName());
+          if (candidate != null) {
+            Object value=candidate.getAttribute(AutowireCandidateQualifier.VALUE_KEY);
+            if (value != null && qualifier.test(value.toString())) {
+              return true;
+            }
+          }
+        }
+        if (bd instanceof RootBeanDefinition) {
+          Method factoryMethod=((RootBeanDefinition)bd).getResolvedFactoryMethod();
+          if (factoryMethod != null) {
+            Qualifier targetAnnotation=AnnotationUtils.getAnnotation(factoryMethod,Qualifier.class);
+            if (targetAnnotation != null) {
+              return qualifier.test(targetAnnotation.value());
+            }
+          }
+        }
+      }
+      Class<?> beanType=beanFactory.getType(beanName);
+      if (beanType != null) {
+        Qualifier targetAnnotation=AnnotationUtils.getAnnotation(beanType,Qualifier.class);
+        if (targetAnnotation != null) {
+          return qualifier.test(targetAnnotation.value());
+        }
+      }
+    }
+ catch (    NoSuchBeanDefinitionException ex) {
+    }
+  }
+  return false;
+}
