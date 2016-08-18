@@ -1,10 +1,13 @@
 {
-  List<MessageCodesResolver> candidates=new ArrayList<>();
+  MessageCodesResolver selected=null;
   for (  WebMvcConfigurer configurer : this.delegates) {
     MessageCodesResolver messageCodesResolver=configurer.getMessageCodesResolver();
     if (messageCodesResolver != null) {
-      candidates.add(messageCodesResolver);
+      if (selected != null) {
+        throw new IllegalStateException("No unique MessageCodesResolver found: {" + selected + ", "+ messageCodesResolver+ "}");
+      }
+      selected=messageCodesResolver;
     }
   }
-  return selectSingleInstance(candidates,MessageCodesResolver.class);
+  return selected;
 }
