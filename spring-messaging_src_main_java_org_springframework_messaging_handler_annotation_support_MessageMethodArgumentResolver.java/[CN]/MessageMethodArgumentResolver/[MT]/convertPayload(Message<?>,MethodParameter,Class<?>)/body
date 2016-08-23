@@ -1,16 +1,16 @@
 {
-  Object result;
+  Object result=null;
   if (this.converter instanceof SmartMessageConverter) {
     SmartMessageConverter smartConverter=(SmartMessageConverter)this.converter;
     result=smartConverter.fromMessage(message,targetPayloadType,parameter);
   }
- else {
+ else   if (this.converter != null) {
     result=this.converter.fromMessage(message,targetPayloadType);
   }
   if (result == null) {
     String actual=ClassUtils.getQualifiedName(targetPayloadType);
     String expected=ClassUtils.getQualifiedName(message.getPayload().getClass());
-    throw new MessageConversionException(message,"No converter found to convert payload " + "type [" + actual + "] to expected payload type ["+ expected+ "].");
+    throw new MessageConversionException(message,"No converter found to convert payload type [" + actual + "] to expected payload type ["+ expected+ "]");
   }
   return result;
 }
