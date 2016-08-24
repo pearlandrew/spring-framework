@@ -9,14 +9,19 @@
     return null;
   }
   boolean allowAnyHeader=this.allowedHeaders.contains(ALL);
-  List<String> result=new ArrayList<>();
+  List<String> result=new ArrayList<>(requestHeaders.size());
   for (  String requestHeader : requestHeaders) {
     if (StringUtils.hasText(requestHeader)) {
       requestHeader=requestHeader.trim();
-      for (      String allowedHeader : this.allowedHeaders) {
-        if (allowAnyHeader || requestHeader.equalsIgnoreCase(allowedHeader)) {
-          result.add(requestHeader);
-          break;
+      if (allowAnyHeader) {
+        result.add(requestHeader);
+      }
+ else {
+        for (        String allowedHeader : this.allowedHeaders) {
+          if (requestHeader.equalsIgnoreCase(allowedHeader)) {
+            result.add(requestHeader);
+            break;
+          }
         }
       }
     }

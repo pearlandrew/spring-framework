@@ -2,24 +2,8 @@
   if (requestMethod == null) {
     return null;
   }
-  List<String> allowedMethods=(this.allowedMethods != null ? this.allowedMethods : new ArrayList<>());
-  if (allowedMethods.contains(ALL)) {
+  if (this.resolvedMethods == null) {
     return Collections.singletonList(requestMethod);
   }
-  if (allowedMethods.isEmpty()) {
-    allowedMethods.add(HttpMethod.GET.name());
-    allowedMethods.add(HttpMethod.HEAD.name());
-  }
-  List<HttpMethod> result=new ArrayList<>(allowedMethods.size());
-  boolean allowed=false;
-  for (  String method : allowedMethods) {
-    if (requestMethod.matches(method)) {
-      allowed=true;
-    }
-    HttpMethod resolved=HttpMethod.resolve(method);
-    if (resolved != null) {
-      result.add(resolved);
-    }
-  }
-  return (allowed ? result : null);
+  return (this.resolvedMethods.contains(requestMethod) ? this.resolvedMethods : null);
 }
