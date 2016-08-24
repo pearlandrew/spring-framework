@@ -1,7 +1,9 @@
 {
   String name=StompHeaderAccessor.CONNECT_MESSAGE_HEADER;
   Message<?> message=(Message<?>)connectAckHeaders.getHeader(name);
-  Assert.notNull(message,"Original STOMP CONNECT not found in " + connectAckHeaders);
+  if (message == null) {
+    throw new IllegalStateException("Original STOMP CONNECT not found in " + connectAckHeaders);
+  }
   StompHeaderAccessor connectHeaders=MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
   StompHeaderAccessor connectedHeaders=StompHeaderAccessor.create(StompCommand.CONNECTED);
   Set<String> acceptVersions=connectHeaders.getAcceptVersion();

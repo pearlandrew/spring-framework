@@ -1,24 +1,26 @@
 {
   if (!(message.getPayload() instanceof byte[])) {
-    logger.error("Expected byte[] payload. Ignoring " + message + ".");
+    if (logger.isErrorEnabled()) {
+      logger.error("Expected byte[] payload. Ignoring " + message + ".");
+    }
     return;
   }
-  StompHeaderAccessor stompAccessor=getStompHeaderAccessor(message);
-  StompCommand command=stompAccessor.getCommand();
+  StompHeaderAccessor accessor=getStompHeaderAccessor(message);
+  StompCommand command=accessor.getCommand();
   if (StompCommand.MESSAGE.equals(command)) {
-    if (stompAccessor.getSubscriptionId() == null) {
+    if (accessor.getSubscriptionId() == null && logger.isWarnEnabled()) {
       logger.warn("No STOMP \"subscription\" header in " + message);
     }
-    String origDestination=stompAccessor.getFirstNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
+    String origDestination=accessor.getFirstNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
     if (origDestination != null) {
-      stompAccessor=toMutableAccessor(stompAccessor,message);
-      stompAccessor.removeNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
-      stompAccessor.setDestination(origDestination);
+      accessor=toMutableAccessor(accessor,message);
+      accessor.removeNativeHeader(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
+      accessor.setDestination(origDestination);
     }
   }
  else   if (StompCommand.CONNECTED.equals(command)) {
     this.stats.incrementConnectedCount();
-    stompAccessor=afterStompSessionConnected(message,stompAccessor,session);
+    accessor=afterStompSessionConnected(message,accessor,session);
     if (this.eventPublisher != null && StompCommand.CONNECTED.equals(command)) {
       try {
         SimpAttributes simpAttributes=new SimpAttributes(session.getId(),session.getAttributes());
@@ -34,9 +36,9 @@
   byte[] payload=(byte[])message.getPayload();
   if (StompCommand.ERROR.equals(command) && getErrorHandler() != null) {
     Message<byte[]> errorMessage=getErrorHandler().handleErrorMessageToClient((Message<byte[]>)message);
-    stompAccessor=MessageHeaderAccessor.getAccessor(errorMessage,StompHeaderAccessor.class);
-    Assert.notNull(stompAccessor,"Expected STOMP headers");
+    accessor=MessageHeaderAccessor.getAccessor(errorMessage,StompHeaderAccessor.class);
+    Assert.state(accessor != null,"Expected STOMP headers");
     payload=errorMessage.getPayload();
   }
-  sendToClient(session,stompAccessor,payload);
+  sendToClient(session,accessor,payload);
 }
