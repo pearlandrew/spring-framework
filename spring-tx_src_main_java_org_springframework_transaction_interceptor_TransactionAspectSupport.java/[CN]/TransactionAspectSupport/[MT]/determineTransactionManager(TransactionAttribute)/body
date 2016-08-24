@@ -12,8 +12,11 @@
  else {
     PlatformTransactionManager defaultTransactionManager=getTransactionManager();
     if (defaultTransactionManager == null) {
-      defaultTransactionManager=this.beanFactory.getBean(PlatformTransactionManager.class);
-      this.transactionManagerCache.putIfAbsent(DEFAULT_TRANSACTION_MANAGER_KEY,defaultTransactionManager);
+      defaultTransactionManager=this.transactionManagerCache.get(DEFAULT_TRANSACTION_MANAGER_KEY);
+      if (defaultTransactionManager == null) {
+        defaultTransactionManager=this.beanFactory.getBean(PlatformTransactionManager.class);
+        this.transactionManagerCache.putIfAbsent(DEFAULT_TRANSACTION_MANAGER_KEY,defaultTransactionManager);
+      }
     }
     return defaultTransactionManager;
   }
