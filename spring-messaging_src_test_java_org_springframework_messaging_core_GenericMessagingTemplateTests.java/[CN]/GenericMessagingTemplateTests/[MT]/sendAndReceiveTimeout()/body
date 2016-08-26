@@ -1,5 +1,5 @@
 {
-  final AtomicReference<Throwable> failure=new AtomicReference<>();
+  final AtomicReference<Throwable> failure=new AtomicReference<Throwable>();
   final CountDownLatch latch=new CountDownLatch(1);
   this.template.setReceiveTimeout(1);
   this.template.setThrowExceptionOnLateReply(true);
@@ -30,7 +30,8 @@ catch (      MessageDeliveryException ex) {
 );
   assertNull(this.template.convertSendAndReceive(channel,"request",String.class));
   assertTrue(latch.await(1000,TimeUnit.MILLISECONDS));
-  if (failure.get() != null) {
-    throw new AssertionError(failure.get());
+  Throwable ex=failure.get();
+  if (ex != null) {
+    throw new AssertionError(ex);
   }
 }
