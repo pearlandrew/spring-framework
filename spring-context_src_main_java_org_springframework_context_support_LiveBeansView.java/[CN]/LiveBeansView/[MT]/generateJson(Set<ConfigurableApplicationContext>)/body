@@ -20,6 +20,9 @@
           result.append(",\n");
         }
         result.append("{\n\"bean\": \"").append(beanName).append("\",\n");
+        result.append("\"aliases\": ");
+        appendArray(result,bf.getAliases(beanName));
+        result.append(",\n");
         String scope=bd.getScope();
         if (!StringUtils.hasText(scope)) {
           scope=BeanDefinition.SCOPE_SINGLETON;
@@ -33,16 +36,9 @@
           result.append("\"type\": null,\n");
         }
         result.append("\"resource\": \"").append(getEscapedResourceDescription(bd)).append("\",\n");
-        result.append("\"dependencies\": [");
-        String[] dependencies=bf.getDependenciesForBean(beanName);
-        if (dependencies.length > 0) {
-          result.append("\"");
-        }
-        result.append(StringUtils.arrayToDelimitedString(dependencies,"\", \""));
-        if (dependencies.length > 0) {
-          result.append("\"");
-        }
-        result.append("]\n}");
+        result.append("\"dependencies\": ");
+        appendArray(result,bf.getDependenciesForBean(beanName));
+        result.append("\n}");
         elementAppended=true;
       }
     }
