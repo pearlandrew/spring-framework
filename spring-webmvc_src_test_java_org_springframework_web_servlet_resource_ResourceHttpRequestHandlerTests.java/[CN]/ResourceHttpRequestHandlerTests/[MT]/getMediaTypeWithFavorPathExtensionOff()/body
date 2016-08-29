@@ -1,6 +1,6 @@
 {
   ContentNegotiationManagerFactoryBean factory=new ContentNegotiationManagerFactoryBean();
-  factory.addMediaType("css",new MediaType("foo","bar"));
+  factory.setFavorPathExtension(false);
   factory.afterPropertiesSet();
   ContentNegotiationManager manager=factory.getObject();
   List<Resource> paths=Collections.singletonList(new ClassPathResource("test/",getClass()));
@@ -9,8 +9,8 @@
   handler.setLocations(paths);
   handler.setContentNegotiationManager(manager);
   handler.afterPropertiesSet();
-  this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,"foo.css");
+  this.request.addHeader("Accept","application/json,text/plain,*/*");
+  this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,"foo.html");
   handler.handleRequest(this.request,this.response);
-  assertEquals("foo/bar",this.response.getContentType());
-  assertEquals("h1 { color:red; }",this.response.getContentAsString());
+  assertEquals("text/html",this.response.getContentType());
 }
