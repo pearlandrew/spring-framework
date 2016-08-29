@@ -1,13 +1,8 @@
 {
-  if (isActive()) {
-    if (heartbeatLock.tryLock()) {
-      try {
-        writeFrame(SockJsFrame.heartbeatFrame());
-        scheduleHeartbeat();
-      }
-  finally {
-        heartbeatLock.unlock();
-      }
+synchronized (this.heartbeatLock) {
+    if (isActive() && !this.heartbeatDisabled) {
+      writeFrame(SockJsFrame.heartbeatFrame());
+      scheduleHeartbeat();
     }
   }
 }

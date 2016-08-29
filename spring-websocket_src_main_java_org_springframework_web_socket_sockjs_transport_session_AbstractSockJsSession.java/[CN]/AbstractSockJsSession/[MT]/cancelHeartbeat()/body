@@ -1,26 +1,15 @@
 {
-  try {
-    ScheduledFuture<?> task=this.heartbeatTask;
-    this.heartbeatTask=null;
-    if (task == null || task.isCancelled()) {
-      return;
+synchronized (this.heartbeatLock) {
+    if (this.heartbeatFuture != null) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Cancelling heartbeat in session " + getId());
+      }
+      this.heartbeatFuture.cancel(false);
+      this.heartbeatFuture=null;
     }
-    if (logger.isTraceEnabled()) {
-      logger.trace("Cancelling heartbeat in session " + getId());
+    if (this.heartbeatTask != null) {
+      this.heartbeatTask.cancel();
+      this.heartbeatTask=null;
     }
-    if (task.cancel(false)) {
-      return;
-    }
-    if (logger.isTraceEnabled()) {
-      logger.trace("Failed to cancel heartbeat, acquiring heartbeat write lock.");
-    }
-    this.heartbeatLock.lock();
-    if (logger.isTraceEnabled()) {
-      logger.trace("Releasing heartbeat lock.");
-    }
-    this.heartbeatLock.unlock();
-  }
- catch (  Throwable ex) {
-    logger.debug("Failure while cancelling heartbeat in session " + getId(),ex);
   }
 }

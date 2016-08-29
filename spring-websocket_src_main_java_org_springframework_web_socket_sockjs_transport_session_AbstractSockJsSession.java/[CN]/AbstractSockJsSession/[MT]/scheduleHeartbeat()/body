@@ -2,23 +2,16 @@
   if (this.heartbeatDisabled) {
     return;
   }
-  Assert.state(this.config.getTaskScheduler() != null,"Expected SockJS TaskScheduler");
-  cancelHeartbeat();
-  if (!isActive()) {
-    return;
-  }
-  Date time=new Date(System.currentTimeMillis() + this.config.getHeartbeatTime());
-  this.heartbeatTask=this.config.getTaskScheduler().schedule(new Runnable(){
-    public void run(){
-      try {
-        sendHeartbeat();
-      }
- catch (      Throwable ex) {
-      }
+synchronized (this.heartbeatLock) {
+    cancelHeartbeat();
+    if (!isActive()) {
+      return;
     }
-  }
-,time);
-  if (logger.isTraceEnabled()) {
-    logger.trace("Scheduled heartbeat in session " + getId());
+    Date time=new Date(System.currentTimeMillis() + this.config.getHeartbeatTime());
+    this.heartbeatTask=new HeartbeatTask();
+    this.heartbeatFuture=this.config.getTaskScheduler().schedule(this.heartbeatTask,time);
+    if (logger.isTraceEnabled()) {
+      logger.trace("Scheduled heartbeat in session " + getId());
+    }
   }
 }
