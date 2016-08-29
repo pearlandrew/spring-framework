@@ -14,8 +14,15 @@
       stompAccessor=convertConnectAcktoStompConnected(stompAccessor);
     }
  else     if (SimpMessageType.DISCONNECT_ACK.equals(messageType)) {
-      stompAccessor=StompHeaderAccessor.create(StompCommand.ERROR);
-      stompAccessor.setMessage("Session closed.");
+      String receipt=getDisconnectReceipt(stompAccessor);
+      if (receipt != null) {
+        stompAccessor=StompHeaderAccessor.create(StompCommand.RECEIPT);
+        stompAccessor.setReceiptId(receipt);
+      }
+ else {
+        stompAccessor=StompHeaderAccessor.create(StompCommand.ERROR);
+        stompAccessor.setMessage("Session closed.");
+      }
     }
  else     if (SimpMessageType.HEARTBEAT.equals(messageType)) {
       stompAccessor=StompHeaderAccessor.createForHeartbeat();
