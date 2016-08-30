@@ -4,14 +4,12 @@
     TransactionSynchronizationManager.registerSynchronization(transactionSynchronization);
   }
  else   if (this.annotation.fallbackExecution()) {
-    if (this.annotation.phase() == TransactionPhase.AFTER_ROLLBACK) {
-      logger.warn("Processing '" + event + "' as a fallback execution on AFTER_ROLLBACK phase.");
+    if (this.annotation.phase() == TransactionPhase.AFTER_ROLLBACK && logger.isWarnEnabled()) {
+      logger.warn("Processing " + event + " as a fallback execution on AFTER_ROLLBACK phase");
     }
     processEvent(event);
   }
- else {
-    if (logger.isDebugEnabled()) {
-      logger.debug("No transaction is running, skipping '" + event + "' for '"+ this+ "'");
-    }
+ else   if (logger.isDebugEnabled()) {
+    logger.debug("No transaction is running - skipping " + event);
   }
 }

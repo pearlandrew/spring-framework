@@ -3,6 +3,9 @@
   this.method=method;
   this.targetClass=targetClass;
   this.bridgedMethod=BridgeMethodResolver.findBridgedMethod(method);
-  this.declaredEventTypes=resolveDeclaredEventTypes();
-  this.methodKey=new AnnotatedElementKey(this.method,this.targetClass);
+  EventListener ann=AnnotatedElementUtils.findMergedAnnotation(method,EventListener.class);
+  this.declaredEventTypes=resolveDeclaredEventTypes(method,ann);
+  this.condition=(ann != null ? ann.condition() : null);
+  this.order=resolveOrder(method);
+  this.methodKey=new AnnotatedElementKey(method,targetClass);
 }
