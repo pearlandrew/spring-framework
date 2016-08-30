@@ -40,6 +40,20 @@
  else     if (gsonPresent) {
       messageConverters.add(createConverterDefinition(GsonHttpMessageConverter.class,source));
     }
+    if (jackson2SmilePresent) {
+      RootBeanDefinition jacksonConverterDef=createConverterDefinition(MappingJackson2SmileHttpMessageConverter.class,source);
+      GenericBeanDefinition jacksonFactoryDef=createObjectMapperFactoryDefinition(source);
+      jacksonFactoryDef.getPropertyValues().add("factory",new SmileFactory());
+      jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0,jacksonFactoryDef);
+      messageConverters.add(jacksonConverterDef);
+    }
+    if (jackson2CborPresent) {
+      RootBeanDefinition jacksonConverterDef=createConverterDefinition(MappingJackson2CborHttpMessageConverter.class,source);
+      GenericBeanDefinition jacksonFactoryDef=createObjectMapperFactoryDefinition(source);
+      jacksonFactoryDef.getPropertyValues().add("factory",new CBORFactory());
+      jacksonConverterDef.getConstructorArgumentValues().addIndexedArgumentValue(0,jacksonFactoryDef);
+      messageConverters.add(jacksonConverterDef);
+    }
   }
   return messageConverters;
 }
