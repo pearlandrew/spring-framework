@@ -1,0 +1,10 @@
+{
+  String eTag="\"Foo\"";
+  request.getHeaders().setIfNoneMatch(eTag);
+  Instant oneMinuteAgo=currentDate.minusSeconds(60);
+  request.getHeaders().setIfModifiedSince(oneMinuteAgo.toEpochMilli());
+  assertTrue(exchange.checkNotModified(eTag,currentDate));
+  assertEquals(304,response.getStatusCode().value());
+  assertEquals(eTag,response.getHeaders().getETag());
+  assertEquals(currentDate.toEpochMilli(),response.getHeaders().getLastModified());
+}
