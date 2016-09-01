@@ -1,0 +1,21 @@
+{
+  Class<?> paramType=parameter.getParameterType();
+  if (ServerWebExchange.class.isAssignableFrom(paramType)) {
+    return Mono.just(exchange);
+  }
+ else   if (ServerHttpRequest.class.isAssignableFrom(paramType)) {
+    return Mono.just(exchange.getRequest());
+  }
+ else   if (ServerHttpResponse.class.isAssignableFrom(paramType)) {
+    return Mono.just(exchange.getResponse());
+  }
+ else   if (WebSession.class.isAssignableFrom(paramType)) {
+    return exchange.getSession().cast(Object.class);
+  }
+ else   if (HttpMethod.class == paramType) {
+    return Mono.just(exchange.getRequest().getMethod());
+  }
+ else {
+    return Mono.error(new UnsupportedOperationException("Unknown parameter type: " + paramType + " in method: "+ parameter.getMethod()));
+  }
+}
