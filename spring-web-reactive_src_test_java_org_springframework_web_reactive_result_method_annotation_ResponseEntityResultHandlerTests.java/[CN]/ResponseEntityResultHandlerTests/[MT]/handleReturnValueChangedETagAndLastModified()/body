@@ -1,0 +1,12 @@
+{
+  String etag="\"deadb33f8badf00d\"";
+  String newEtag="\"changed-etag-value\"";
+  this.request.getHeaders().setIfNoneMatch(etag);
+  Instant currentTime=Instant.now().truncatedTo(ChronoUnit.SECONDS);
+  Instant oneMinAgo=currentTime.minusSeconds(60);
+  this.request.getHeaders().setIfModifiedSince(currentTime.toEpochMilli());
+  ResponseEntity<String> entity=ok().eTag(newEtag).lastModified(oneMinAgo.toEpochMilli()).body("body");
+  HandlerResult result=handlerResult(entity,responseEntity(String.class));
+  this.resultHandler.handleResult(this.exchange,result).block(Duration.ofSeconds(5));
+  assertConditionalResponse(HttpStatus.OK,"body",newEtag,oneMinAgo);
+}

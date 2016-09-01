@@ -1,0 +1,8 @@
+{
+  String etagValue="\"deadb33f8badf00d\"";
+  this.request.getHeaders().setIfNoneMatch(etagValue);
+  ResponseEntity<String> entity=ok().eTag(etagValue).body("body");
+  HandlerResult result=handlerResult(entity,responseEntity(String.class));
+  this.resultHandler.handleResult(this.exchange,result).block(Duration.ofSeconds(5));
+  assertConditionalResponse(HttpStatus.NOT_MODIFIED,null,etagValue,Instant.MIN);
+}

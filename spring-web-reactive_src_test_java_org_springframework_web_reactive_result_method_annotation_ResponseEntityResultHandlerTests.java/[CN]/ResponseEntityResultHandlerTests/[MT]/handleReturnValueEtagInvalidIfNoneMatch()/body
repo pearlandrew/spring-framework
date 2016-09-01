@@ -1,0 +1,8 @@
+{
+  this.request.getHeaders().setIfNoneMatch("unquoted");
+  ResponseEntity<String> entity=ok().eTag("\"deadb33f8badf00d\"").body("body");
+  HandlerResult result=handlerResult(entity,responseEntity(String.class));
+  this.resultHandler.handleResult(this.exchange,result).block(Duration.ofSeconds(5));
+  assertEquals(HttpStatus.OK,this.response.getStatusCode());
+  assertResponseBody("body");
+}
