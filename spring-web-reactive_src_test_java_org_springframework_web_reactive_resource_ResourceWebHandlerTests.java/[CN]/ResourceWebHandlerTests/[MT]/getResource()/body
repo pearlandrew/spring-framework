@@ -1,0 +1,13 @@
+{
+  this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,"foo.css");
+  this.handler.handle(this.exchange).blockMillis(5000);
+  HttpHeaders headers=this.response.getHeaders();
+  assertEquals(MediaType.parseMediaType("text/css"),headers.getContentType());
+  assertEquals(17,headers.getContentLength());
+  assertEquals("max-age=3600",headers.getCacheControl());
+  assertTrue(headers.containsKey("Last-Modified"));
+  assertEquals(headers.getLastModified(),resourceLastModifiedDate("test/foo.css"));
+  assertEquals("bytes",headers.getFirst("Accept-Ranges"));
+  assertEquals(1,headers.get("Accept-Ranges").size());
+  assertResponseBody("h1 { color:red; }");
+}

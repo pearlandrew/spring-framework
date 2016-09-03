@@ -1,0 +1,10 @@
+{
+  this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,"foo.css");
+  this.handler.setCacheControl(CacheControl.noStore());
+  this.handler.handle(this.exchange).blockMillis(5000);
+  assertEquals("no-store",this.response.getHeaders().getCacheControl());
+  assertTrue(this.response.getHeaders().containsKey("Last-Modified"));
+  assertEquals(this.response.getHeaders().getLastModified(),resourceLastModifiedDate("test/foo.css"));
+  assertEquals("bytes",this.response.getHeaders().getFirst("Accept-Ranges"));
+  assertEquals(1,this.response.getHeaders().get("Accept-Ranges").size());
+}

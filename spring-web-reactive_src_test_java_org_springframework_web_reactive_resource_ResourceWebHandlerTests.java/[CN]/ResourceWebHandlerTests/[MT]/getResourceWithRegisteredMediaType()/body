@@ -1,0 +1,13 @@
+{
+  CompositeContentTypeResolver contentTypeResolver=new RequestedContentTypeResolverBuilder().mediaType("css",new MediaType("foo","bar")).build();
+  List<Resource> paths=Collections.singletonList(new ClassPathResource("test/",getClass()));
+  ResourceWebHandler handler=new ResourceWebHandler();
+  handler.setLocations(paths);
+  handler.setContentTypeResolver(contentTypeResolver);
+  handler.afterPropertiesSet();
+  handler.afterSingletonsInstantiated();
+  this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,"foo.css");
+  handler.handle(this.exchange).blockMillis(5000);
+  assertEquals(MediaType.parseMediaType("foo/bar"),this.response.getHeaders().getContentType());
+  assertResponseBody("h1 { color:red; }");
+}

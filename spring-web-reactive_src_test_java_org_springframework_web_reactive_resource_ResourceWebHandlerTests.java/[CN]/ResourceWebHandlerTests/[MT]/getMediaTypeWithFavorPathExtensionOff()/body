@@ -1,0 +1,13 @@
+{
+  CompositeContentTypeResolver contentTypeResolver=new RequestedContentTypeResolverBuilder().favorPathExtension(false).build();
+  List<Resource> paths=Collections.singletonList(new ClassPathResource("test/",getClass()));
+  ResourceWebHandler handler=new ResourceWebHandler();
+  handler.setLocations(paths);
+  handler.setContentTypeResolver(contentTypeResolver);
+  handler.afterPropertiesSet();
+  handler.afterSingletonsInstantiated();
+  this.request.addHeader("Accept","application/json,text/plain,*/*");
+  this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,"foo.html");
+  handler.handle(this.exchange);
+  assertEquals(MediaType.TEXT_HTML,this.response.getHeaders().getContentType());
+}

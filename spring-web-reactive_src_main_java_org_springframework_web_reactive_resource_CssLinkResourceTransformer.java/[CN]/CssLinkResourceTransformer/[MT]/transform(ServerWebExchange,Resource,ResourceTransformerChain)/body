@@ -1,0 +1,46 @@
+{
+  resource=transformerChain.transform(exchange,resource);
+  String filename=resource.getFilename();
+  if (!"css".equals(StringUtils.getFilenameExtension(filename))) {
+    return resource;
+  }
+  if (logger.isTraceEnabled()) {
+    logger.trace("Transforming resource: " + resource);
+  }
+  byte[] bytes=FileCopyUtils.copyToByteArray(resource.getInputStream());
+  String content=new String(bytes,DEFAULT_CHARSET);
+  Set<CssLinkInfo> infos=new HashSet<>(8);
+  for (  CssLinkParser parser : this.linkParsers) {
+    parser.parseLink(content,infos);
+  }
+  if (infos.isEmpty()) {
+    if (logger.isTraceEnabled()) {
+      logger.trace("No links found.");
+    }
+    return resource;
+  }
+  List<CssLinkInfo> sortedInfos=new ArrayList<>(infos);
+  Collections.sort(sortedInfos);
+  int index=0;
+  StringWriter writer=new StringWriter();
+  for (  CssLinkInfo info : sortedInfos) {
+    writer.write(content.substring(index,info.getStart()));
+    String link=content.substring(info.getStart(),info.getEnd());
+    String newLink=null;
+    if (!hasScheme(link)) {
+      newLink=resolveUrlPath(link,exchange,resource,transformerChain);
+    }
+    if (logger.isTraceEnabled()) {
+      if (newLink != null && !link.equals(newLink)) {
+        logger.trace("Link modified: " + newLink + " (original: "+ link+ ")");
+      }
+ else {
+        logger.trace("Link not modified: " + link);
+      }
+    }
+    writer.write(newLink != null ? newLink : link);
+    index=info.getEnd();
+  }
+  writer.write(content.substring(index));
+  return new TransformedResource(resource,writer.toString().getBytes(DEFAULT_CHARSET));
+}

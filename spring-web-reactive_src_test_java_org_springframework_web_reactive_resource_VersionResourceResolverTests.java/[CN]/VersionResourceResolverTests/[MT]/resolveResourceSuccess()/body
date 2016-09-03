@@ -1,0 +1,21 @@
+{
+  String versionFile="bar-version.css";
+  String version="version";
+  String file="bar.css";
+  Resource expected=new ClassPathResource("test/" + file,getClass());
+  MockServerHttpRequest request=new MockServerHttpRequest(HttpMethod.GET,"/resources/bar-version.css");
+  MockServerHttpResponse response=new MockServerHttpResponse();
+  DefaultWebSessionManager sessionManager=new DefaultWebSessionManager();
+  ServerWebExchange exchange=new DefaultServerWebExchange(request,response,sessionManager);
+  given(this.chain.resolveResource(exchange,versionFile,this.locations)).willReturn(null);
+  given(this.chain.resolveResource(exchange,file,this.locations)).willReturn(expected);
+  given(this.versionStrategy.extractVersion(versionFile)).willReturn(version);
+  given(this.versionStrategy.removeVersion(versionFile,version)).willReturn(file);
+  given(this.versionStrategy.getResourceVersion(expected)).willReturn(version);
+  this.resolver.setStrategyMap(Collections.singletonMap("/**",this.versionStrategy));
+  Resource actual=this.resolver.resolveResourceInternal(exchange,versionFile,this.locations,this.chain);
+  assertEquals(expected.getFilename(),actual.getFilename());
+  verify(this.versionStrategy,times(1)).getResourceVersion(expected);
+  assertThat(actual,instanceOf(VersionedResource.class));
+  assertEquals(version,((VersionedResource)actual).getVersion());
+}

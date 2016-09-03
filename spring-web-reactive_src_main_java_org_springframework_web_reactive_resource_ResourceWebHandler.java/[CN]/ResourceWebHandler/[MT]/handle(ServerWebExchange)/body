@@ -1,0 +1,49 @@
+{
+  try {
+    Resource resource=getResource(exchange);
+    if (resource == null) {
+      logger.trace("No matching resource found - returning 404");
+      exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
+      return Mono.empty();
+    }
+    if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
+      exchange.getResponse().getHeaders().add("Allow","GET,HEAD,OPTIONS");
+      return Mono.empty();
+    }
+    String httpMehtod=exchange.getRequest().getMethod().name();
+    if (!SUPPORTED_METHODS.contains(httpMehtod)) {
+      return Mono.error(new MethodNotAllowedException(httpMehtod,SUPPORTED_METHODS));
+    }
+    if (exchange.checkNotModified(Instant.ofEpochMilli(resource.lastModified()))) {
+      logger.trace("Resource not modified - returning 304");
+      return Mono.empty();
+    }
+    if (getCacheControl() != null) {
+      String value=getCacheControl().getHeaderValue();
+      if (value != null) {
+        exchange.getResponse().getHeaders().setCacheControl(value);
+      }
+    }
+    MediaType mediaType=getMediaType(exchange,resource);
+    if (mediaType != null) {
+      if (logger.isTraceEnabled()) {
+        logger.trace("Determined media type '" + mediaType + "' for "+ resource);
+      }
+    }
+ else {
+      if (logger.isTraceEnabled()) {
+        logger.trace("No media type found for " + resource + " - not sending a content-type header");
+      }
+    }
+    if (HttpMethod.HEAD.equals(exchange.getRequest().getMethod())) {
+      setHeaders(exchange,resource,mediaType);
+      logger.trace("HEAD request - skipping content");
+      return Mono.empty();
+    }
+    setHeaders(exchange,resource,mediaType);
+    return this.resourceHttpMessageWriter.write(Mono.just(resource),ResolvableType.forClass(Resource.class),mediaType,exchange.getResponse());
+  }
+ catch (  IOException ex) {
+    return Mono.error(ex);
+  }
+}

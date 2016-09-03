@@ -1,0 +1,12 @@
+{
+  VersionResourceResolver versionResolver=new VersionResourceResolver();
+  versionResolver.addFixedVersionStrategy("versionString","/**");
+  this.handler.setResourceResolvers(Arrays.asList(versionResolver,new PathResourceResolver()));
+  this.handler.afterPropertiesSet();
+  this.handler.afterSingletonsInstantiated();
+  this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,"versionString/foo.css");
+  this.handler.handle(this.exchange).blockMillis(5000);
+  assertEquals("\"versionString\"",this.response.getHeaders().getETag());
+  assertEquals("bytes",this.response.getHeaders().getFirst("Accept-Ranges"));
+  assertEquals(1,this.response.getHeaders().get("Accept-Ranges").size());
+}

@@ -1,0 +1,10 @@
+{
+  this.response=new MockServerHttpResponse();
+  this.exchange=new DefaultServerWebExchange(this.request,this.response,this.sessionManager);
+  this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,requestPath);
+  this.handler.handle(this.exchange).blockMillis(5000);
+  if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
+    fail(requestPath + " doesn't actually exist as a relative path");
+  }
+  assertEquals(HttpStatus.NOT_FOUND,this.response.getStatusCode());
+}
