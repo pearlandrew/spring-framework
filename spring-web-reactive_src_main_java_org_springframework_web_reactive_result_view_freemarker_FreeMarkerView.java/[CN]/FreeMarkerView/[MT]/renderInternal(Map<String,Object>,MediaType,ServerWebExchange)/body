@@ -6,7 +6,8 @@
   Locale locale=Locale.getDefault();
   DataBuffer dataBuffer=exchange.getResponse().bufferFactory().allocateBuffer();
   try {
-    Writer writer=new OutputStreamWriter(dataBuffer.asOutputStream());
+    Charset charset=getCharset(contentType).orElse(getDefaultCharset());
+    Writer writer=new OutputStreamWriter(dataBuffer.asOutputStream(),charset);
     getTemplate(locale).process(freeMarkerModel,writer);
   }
  catch (  IOException ex) {
