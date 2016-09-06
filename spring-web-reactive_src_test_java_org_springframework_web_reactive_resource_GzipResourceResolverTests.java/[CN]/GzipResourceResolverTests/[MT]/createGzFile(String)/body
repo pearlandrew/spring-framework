@@ -1,10 +1,10 @@
 {
   Resource location=new ClassPathResource("test/",GzipResourceResolverTests.class);
   Resource fileResource=new FileSystemResource(location.createRelative(filePath).getFile());
-  Resource gzFileResource=location.createRelative(filePath + ".gz");
-  if (gzFileResource.getFile().createNewFile()) {
-    GZIPOutputStream out=new GZIPOutputStream(new FileOutputStream(gzFileResource.getFile()));
-    FileCopyUtils.copy(fileResource.getInputStream(),out);
-  }
-  assertTrue(gzFileResource.exists());
+  Path gzFilePath=Paths.get(fileResource.getFile().getAbsolutePath() + ".gz");
+  Files.deleteIfExists(gzFilePath);
+  File gzFile=Files.createFile(gzFilePath).toFile();
+  GZIPOutputStream out=new GZIPOutputStream(new FileOutputStream(gzFile));
+  FileCopyUtils.copy(fileResource.getInputStream(),out);
+  gzFile.deleteOnExit();
 }
