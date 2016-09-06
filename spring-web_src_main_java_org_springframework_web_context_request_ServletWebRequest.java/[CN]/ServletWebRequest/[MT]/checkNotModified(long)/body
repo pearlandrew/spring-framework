@@ -1,24 +1,3 @@
 {
-  HttpServletResponse response=getResponse();
-  if (lastModifiedTimestamp >= 0 && !this.notModified) {
-    if (isCompatibleWithConditionalRequests(response)) {
-      this.notModified=isTimestampNotModified(lastModifiedTimestamp);
-      if (response != null) {
-        if (supportsNotModifiedStatus()) {
-          if (this.notModified) {
-            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-          }
-          if (isHeaderAbsent(response,HEADER_LAST_MODIFIED)) {
-            response.setDateHeader(HEADER_LAST_MODIFIED,lastModifiedTimestamp);
-          }
-        }
- else         if (supportsConditionalUpdate()) {
-          if (this.notModified) {
-            response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-          }
-        }
-      }
-    }
-  }
-  return this.notModified;
+  return checkNotModified(null,lastModifiedTimestamp);
 }

@@ -1,0 +1,27 @@
+{
+  if (!StringUtils.hasLength(etag)) {
+    return false;
+  }
+  Enumeration<String> ifNoneMatch;
+  try {
+    ifNoneMatch=getRequest().getHeaders(IF_NONE_MATCH);
+  }
+ catch (  IllegalArgumentException ex) {
+    return false;
+  }
+  if (!ifNoneMatch.hasMoreElements()) {
+    return false;
+  }
+  etag=padEtagIfNecessary(etag);
+  while (ifNoneMatch.hasMoreElements()) {
+    String clientETags=ifNoneMatch.nextElement();
+    Matcher eTagMatcher=ETAG_HEADER_VALUE_PATTERN.matcher(clientETags);
+    while (eTagMatcher.find()) {
+      if (StringUtils.hasLength(eTagMatcher.group()) && etag.replaceFirst("^W/","").equals(eTagMatcher.group(3))) {
+        this.notModified=true;
+        break;
+      }
+    }
+  }
+  return true;
+}

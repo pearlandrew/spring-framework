@@ -23,13 +23,13 @@
     }
   }
   if (responseEntity instanceof ResponseEntity) {
-    outputMessage.getServletResponse().setStatus(((ResponseEntity<?>)responseEntity).getStatusCodeValue());
-    HttpMethod method=inputMessage.getMethod();
-    boolean isGetOrHead=(HttpMethod.GET == method || HttpMethod.HEAD == method);
-    if (isGetOrHead && isResourceNotModified(inputMessage,outputMessage)) {
-      outputMessage.setStatusCode(HttpStatus.NOT_MODIFIED);
-      outputMessage.flush();
-      return;
+    int returnStatus=((ResponseEntity<?>)responseEntity).getStatusCodeValue();
+    outputMessage.getServletResponse().setStatus(returnStatus);
+    if (returnStatus == 200) {
+      if (isResourceNotModified(inputMessage,outputMessage)) {
+        outputMessage.flush();
+        return;
+      }
     }
   }
   writeWithMessageConverters(responseEntity.getBody(),returnType,inputMessage,outputMessage);

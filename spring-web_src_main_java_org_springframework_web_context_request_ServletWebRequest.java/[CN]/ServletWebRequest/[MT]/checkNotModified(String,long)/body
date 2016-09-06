@@ -1,32 +1,28 @@
 {
   HttpServletResponse response=getResponse();
-  if (StringUtils.hasLength(etag) && !this.notModified) {
-    if (isCompatibleWithConditionalRequests(response)) {
-      etag=addEtagPadding(etag);
-      if (hasRequestHeader(HEADER_IF_NONE_MATCH)) {
-        this.notModified=isEtagNotModified(etag);
-      }
- else       if (hasRequestHeader(HEADER_IF_MODIFIED_SINCE)) {
-        this.notModified=isTimestampNotModified(lastModifiedTimestamp);
-      }
-      if (response != null) {
-        if (supportsNotModifiedStatus()) {
-          if (this.notModified) {
-            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-          }
-          if (isHeaderAbsent(response,HEADER_ETAG)) {
-            response.setHeader(HEADER_ETAG,etag);
-          }
-          if (isHeaderAbsent(response,HEADER_LAST_MODIFIED)) {
-            response.setDateHeader(HEADER_LAST_MODIFIED,lastModifiedTimestamp);
-          }
-        }
- else         if (supportsConditionalUpdate()) {
-          if (this.notModified) {
-            response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-          }
-        }
-      }
+  if (this.notModified || HttpStatus.OK.value() != response.getStatus()) {
+    return this.notModified;
+  }
+  if (validateIfUnmodifiedSince(lastModifiedTimestamp)) {
+    if (this.notModified) {
+      response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
+    }
+    return this.notModified;
+  }
+  boolean validated=validateIfNoneMatch(etag);
+  if (!validated) {
+    validateIfModifiedSince(lastModifiedTimestamp);
+  }
+  boolean isHttpGetOrHead=SAFE_METHODS.contains(getRequest().getMethod());
+  if (this.notModified) {
+    response.setStatus(isHttpGetOrHead ? HttpStatus.NOT_MODIFIED.value() : HttpStatus.PRECONDITION_FAILED.value());
+  }
+  if (isHttpGetOrHead) {
+    if (lastModifiedTimestamp > 0 && parseDateValue(response.getHeader(LAST_MODIFIED)) == -1) {
+      response.setDateHeader(LAST_MODIFIED,lastModifiedTimestamp);
+    }
+    if (StringUtils.hasLength(etag) && response.getHeader(ETAG) == null) {
+      response.setHeader(ETAG,padEtagIfNecessary(etag));
     }
   }
   return this.notModified;
