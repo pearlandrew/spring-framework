@@ -1,0 +1,22 @@
+{
+  Assert.notNull(username,"username cannot be null");
+  Assert.notNull(password,"password cannot be null");
+  return new ClientWebRequestPostProcessor(){
+    @Override public ClientWebRequest postProcess(    ClientWebRequest toPostProcess){
+      String authorization=authorization(username,password);
+      toPostProcess.getHttpHeaders().set(HttpHeaders.AUTHORIZATION,authorization);
+      return toPostProcess;
+    }
+    private String authorization(    String username,    String password){
+      String credentials=username + ":" + password;
+      return authorization(credentials);
+    }
+    private String authorization(    String credentials){
+      byte[] credentialBytes=credentials.getBytes(Charset.defaultCharset());
+      Encoder encoder=Base64.getEncoder();
+      String encodedCredentials=encoder.encodeToString(credentialBytes);
+      return "Basic " + encodedCredentials;
+    }
+  }
+;
+}
