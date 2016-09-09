@@ -7,13 +7,13 @@
   MockServerHttpResponse response=new MockServerHttpResponse();
   DefaultWebSessionManager sessionManager=new DefaultWebSessionManager();
   ServerWebExchange exchange=new DefaultServerWebExchange(request,response,sessionManager);
-  given(this.chain.resolveResource(exchange,versionFile,this.locations)).willReturn(null);
-  given(this.chain.resolveResource(exchange,file,this.locations)).willReturn(expected);
+  given(this.chain.resolveResource(exchange,versionFile,this.locations)).willReturn(Mono.empty());
+  given(this.chain.resolveResource(exchange,file,this.locations)).willReturn(Mono.just(expected));
   given(this.versionStrategy.extractVersion(versionFile)).willReturn(version);
   given(this.versionStrategy.removeVersion(versionFile,version)).willReturn(file);
   given(this.versionStrategy.getResourceVersion(expected)).willReturn(version);
   this.resolver.setStrategyMap(Collections.singletonMap("/**",this.versionStrategy));
-  Resource actual=this.resolver.resolveResourceInternal(exchange,versionFile,this.locations,this.chain);
+  Resource actual=this.resolver.resolveResourceInternal(exchange,versionFile,this.locations,this.chain).blockMillis(5000);
   assertEquals(expected.getFilename(),actual.getFilename());
   verify(this.versionStrategy,times(1)).getResourceVersion(expected);
   assertThat(actual,instanceOf(HttpResource.class));

@@ -1,0 +1,21 @@
+{
+  List<Segment> links=new ArrayList<>();
+  for (  LinkParser parser : this.linkParsers) {
+    links.addAll(parser.parseLinks(fullContent));
+  }
+  if (links.isEmpty()) {
+    return Collections.emptyList();
+  }
+  Collections.sort(links);
+  int index=0;
+  List<Segment> allSegments=new ArrayList<>(links);
+  for (  Segment link : links) {
+    allSegments.add(new Segment(index,link.getStart(),false));
+    index=link.getEnd();
+  }
+  if (index < fullContent.length()) {
+    allSegments.add(new Segment(index,fullContent.length(),false));
+  }
+  Collections.sort(allSegments);
+  return allSegments;
+}

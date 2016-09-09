@@ -2,7 +2,7 @@
   ResourceResolverChain resolverChain=Mockito.mock(DefaultResourceResolverChain.class);
   ResourceTransformerChain transformerChain=new DefaultResourceTransformerChain(resolverChain,Collections.singletonList(new CssLinkResourceTransformer()));
   Resource externalCss=new ClassPathResource("test/external.css",getClass());
-  Resource resource=transformerChain.transform(this.exchange,externalCss);
+  Resource resource=transformerChain.transform(this.exchange,externalCss).blockMillis(5000);
   TransformedResource transformedResource=(TransformedResource)resource;
   String expected="@import url(\"http://example.org/fonts/css\");\n" + "body { background: url(\"file:///home/spring/image.png\") }\n" + "figure { background: url(\"//example.org/style.css\")}";
   String result=new String(transformedResource.getByteArray(),"UTF-8");
