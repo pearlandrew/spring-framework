@@ -1,0 +1,9 @@
+{
+  Mono<Void> mono=Mono.empty();
+  Response<Mono<Void>> result=Response.ok().build(mono);
+  ServerWebExchange exchange=mock(ServerWebExchange.class);
+  MockServerHttpResponse response=new MockServerHttpResponse();
+  when(exchange.getResponse()).thenReturn(response);
+  result.writeTo(exchange).block();
+  assertNull(response.getBody());
+}

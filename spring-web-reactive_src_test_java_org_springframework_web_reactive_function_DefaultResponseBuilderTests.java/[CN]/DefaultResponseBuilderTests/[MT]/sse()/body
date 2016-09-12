@@ -1,0 +1,10 @@
+{
+  ServerSentEvent<String> sse=ServerSentEvent.<String>builder().data("42").build();
+  Mono<ServerSentEvent<String>> body=Mono.just(sse);
+  Response<Mono<ServerSentEvent<String>>> result=Response.ok().sse(body);
+  ServerWebExchange exchange=mock(ServerWebExchange.class);
+  MockServerHttpResponse response=new MockServerHttpResponse();
+  when(exchange.getResponse()).thenReturn(response);
+  result.writeTo(exchange).block();
+  assertNotNull(response.getBodyWithFlush());
+}

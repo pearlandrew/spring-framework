@@ -1,0 +1,10 @@
+{
+  Response<Void> result=Response.status(201).header("MyKey","MyValue").build();
+  ServerWebExchange exchange=mock(ServerWebExchange.class);
+  MockServerHttpResponse response=new MockServerHttpResponse();
+  when(exchange.getResponse()).thenReturn(response);
+  result.writeTo(exchange).block();
+  assertEquals(201,response.getStatusCode().value());
+  assertEquals("MyValue",response.getHeaders().getFirst("MyKey"));
+  assertNull(response.getBody());
+}
