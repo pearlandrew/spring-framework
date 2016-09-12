@@ -3,7 +3,8 @@
   bean.setWithView1("with");
   bean.setWithView2("with");
   bean.setWithoutView("without");
-  ResolvableType type=ResolvableType.forMethodReturnType(JacksonController.class.getMethod("foo"));
-  Flux<DataBuffer> output=this.encoder.encode(Mono.just(bean),this.bufferFactory,type,null);
+  ResolvableType type=ResolvableType.forClass(JacksonViewBean.class);
+  Map<String,Object> hints=Collections.singletonMap(Jackson2JsonEncoder.JSON_VIEW_HINT,MyJacksonView1.class);
+  Flux<DataBuffer> output=this.encoder.encode(Mono.just(bean),this.bufferFactory,type,null,hints);
   TestSubscriber.subscribe(output).assertComplete().assertNoError().assertValuesWith(stringConsumer("{\"withView1\":\"with\"}"));
 }
