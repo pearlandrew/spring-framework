@@ -1,0 +1,13 @@
+{
+  try {
+    List<HttpRange> httpRanges=request.getHeaders().getRange();
+    if (!httpRanges.isEmpty()) {
+      response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
+      return Collections.singletonMap(ResourceHttpMessageWriter.HTTP_RANGE_REQUEST_HINT,httpRanges);
+    }
+  }
+ catch (  IllegalArgumentException ex) {
+    throw new ResponseStatusException(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE,"Could not parse Range request header",ex);
+  }
+  return Collections.emptyMap();
+}

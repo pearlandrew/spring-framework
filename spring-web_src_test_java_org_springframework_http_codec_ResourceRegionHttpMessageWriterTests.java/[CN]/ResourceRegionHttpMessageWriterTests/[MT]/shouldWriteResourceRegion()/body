@@ -1,0 +1,9 @@
+{
+  ResourceRegion region=new ResourceRegion(this.resource,0,6);
+  TestSubscriber.subscribe(this.writer.write(Mono.just(region),ResolvableType.forClass(ResourceRegion.class),MediaType.TEXT_PLAIN,this.response,Collections.emptyMap())).assertComplete();
+  assertThat(this.response.getHeaders().getContentType(),is(MediaType.TEXT_PLAIN));
+  assertThat(this.response.getHeaders().getFirst(HttpHeaders.CONTENT_RANGE),is("bytes 0-5/39"));
+  assertThat(this.response.getHeaders().getContentLength(),is(6L));
+  Mono<String> result=reduceToString(this.response.getBody(),this.response.bufferFactory());
+  TestSubscriber.subscribe(result).assertComplete().assertValues("Spring");
+}

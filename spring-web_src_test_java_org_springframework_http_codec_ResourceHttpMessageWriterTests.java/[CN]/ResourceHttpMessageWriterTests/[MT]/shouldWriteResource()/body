@@ -1,0 +1,7 @@
+{
+  TestSubscriber.subscribe(this.writer.write(Mono.just(resource),null,ResolvableType.forClass(Resource.class),MediaType.TEXT_PLAIN,this.request,this.response,Collections.emptyMap())).assertComplete();
+  assertThat(this.response.getHeaders().getContentType(),is(MediaType.TEXT_PLAIN));
+  assertThat(this.response.getHeaders().getContentLength(),is(39L));
+  Mono<String> result=reduceToString(this.response.getBody(),this.response.bufferFactory());
+  TestSubscriber.subscribe(result).assertComplete().assertValues("Spring Framework test resource content.");
+}

@@ -1,0 +1,10 @@
+{
+  if (outputMessage instanceof ZeroCopyHttpOutputMessage) {
+    Optional<File> file=getFile(region.getResource());
+    if (file.isPresent()) {
+      ZeroCopyHttpOutputMessage zeroCopyResponse=(ZeroCopyHttpOutputMessage)outputMessage;
+      return zeroCopyResponse.writeWith(file.get(),region.getPosition(),region.getCount());
+    }
+  }
+  return super.write(Mono.just(region),type,outputMessage.getHeaders().getContentType(),outputMessage,Collections.emptyMap());
+}
