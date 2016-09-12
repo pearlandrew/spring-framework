@@ -1,0 +1,11 @@
+{
+  try {
+    ReadableByteChannel resourceChannel=region.getResource().readableChannel();
+    Flux<DataBuffer> in=DataBufferUtils.read(resourceChannel,bufferFactory,this.bufferSize);
+    Flux<DataBuffer> skipped=DataBufferUtils.skipUntilByteCount(in,region.getPosition());
+    return DataBufferUtils.takeUntilByteCount(skipped,region.getCount());
+  }
+ catch (  IOException exc) {
+    return Flux.error(exc);
+  }
+}
