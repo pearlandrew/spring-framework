@@ -12,7 +12,7 @@
         if (candidate.isAssignable(ImportSelector.class)) {
           Class<?> candidateClass=candidate.loadClass();
           ImportSelector selector=BeanUtils.instantiateClass(candidateClass,ImportSelector.class);
-          invokeAwareMethods(selector);
+          ParserStrategyUtils.invokeAwareMethods(selector,this.environment,this.resourceLoader,this.registry);
           if (this.deferredImportSelectors != null && selector instanceof DeferredImportSelector) {
             this.deferredImportSelectors.add(new DeferredImportSelectorHolder(configClass,(DeferredImportSelector)selector));
           }
@@ -25,7 +25,7 @@
  else         if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
           Class<?> candidateClass=candidate.loadClass();
           ImportBeanDefinitionRegistrar registrar=BeanUtils.instantiateClass(candidateClass,ImportBeanDefinitionRegistrar.class);
-          invokeAwareMethods(registrar);
+          ParserStrategyUtils.invokeAwareMethods(registrar,this.environment,this.resourceLoader,this.registry);
           configClass.addImportBeanDefinitionRegistrar(registrar,currentSourceClass.getMetadata());
         }
  else {
