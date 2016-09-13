@@ -5,11 +5,7 @@
     Runnable runnable=new ScheduledMethodRunnable(bean,invocableMethod);
     boolean processedSchedule=false;
     String errorMessage="Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
-    Set<ScheduledTask> tasks=this.scheduledTasks.get(bean);
-    if (tasks == null) {
-      tasks=new LinkedHashSet<>(4);
-      this.scheduledTasks.put(bean,tasks);
-    }
+    Set<ScheduledTask> tasks=new LinkedHashSet<>(4);
     long initialDelay=scheduled.initialDelay();
     String initialDelayString=scheduled.initialDelayString();
     if (StringUtils.hasText(initialDelayString)) {
@@ -88,6 +84,14 @@
       tasks.add(this.registrar.scheduleFixedRateTask(new IntervalTask(runnable,fixedRate,initialDelay)));
     }
     Assert.isTrue(processedSchedule,errorMessage);
+synchronized (this.scheduledTasks) {
+      Set<ScheduledTask> registeredTasks=this.scheduledTasks.get(bean);
+      if (registeredTasks == null) {
+        registeredTasks=new LinkedHashSet<>(4);
+        this.scheduledTasks.put(bean,registeredTasks);
+      }
+      registeredTasks.addAll(tasks);
+    }
   }
  catch (  IllegalArgumentException ex) {
     throw new IllegalStateException("Encountered invalid @Scheduled method '" + method.getName() + "': "+ ex.getMessage());
