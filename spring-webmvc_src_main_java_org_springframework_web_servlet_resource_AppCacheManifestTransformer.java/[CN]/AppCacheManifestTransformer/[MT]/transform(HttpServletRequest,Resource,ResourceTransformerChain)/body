@@ -1,5 +1,5 @@
 {
-  resource=transformerChain.transform(request,resource);
+  resource=chain.transform(request,resource);
   if (!this.fileExtension.equals(StringUtils.getFilenameExtension(resource.getFilename()))) {
     return resource;
   }
@@ -7,32 +7,22 @@
   String content=new String(bytes,DEFAULT_CHARSET);
   if (!content.startsWith(MANIFEST_HEADER)) {
     if (logger.isTraceEnabled()) {
-      logger.trace("AppCache manifest does not start with 'CACHE MANIFEST', skipping: " + resource);
+      logger.trace("Manifest should start with 'CACHE MANIFEST', skip: " + resource);
     }
     return resource;
   }
   if (logger.isTraceEnabled()) {
     logger.trace("Transforming resource: " + resource);
   }
-  StringWriter contentWriter=new StringWriter();
-  HashBuilder hashBuilder=new HashBuilder(content.length());
   Scanner scanner=new Scanner(content);
-  SectionTransformer currentTransformer=this.sectionTransformers.get(MANIFEST_HEADER);
-  while (scanner.hasNextLine()) {
+  LineInfo previous=null;
+  LineAggregator aggregator=new LineAggregator(resource,content);
+  while (scanner.hasNext()) {
     String line=scanner.nextLine();
-    if (this.sectionTransformers.containsKey(line.trim())) {
-      currentTransformer=this.sectionTransformers.get(line.trim());
-      contentWriter.write(line + "\n");
-      hashBuilder.appendString(line);
-    }
- else {
-      contentWriter.write(currentTransformer.transform(line,hashBuilder,resource,transformerChain,request) + "\n");
-    }
+    LineInfo current=new LineInfo(line,previous);
+    LineOutput lineOutput=processLine(current,request,resource,chain);
+    aggregator.add(lineOutput);
+    previous=current;
   }
-  String hash=hashBuilder.build();
-  contentWriter.write("\n" + "# Hash: " + hash);
-  if (logger.isTraceEnabled()) {
-    logger.trace("AppCache file: [" + resource.getFilename() + "] hash: ["+ hash+ "]");
-  }
-  return new TransformedResource(resource,contentWriter.toString().getBytes(DEFAULT_CHARSET));
+  return aggregator.createResource();
 }

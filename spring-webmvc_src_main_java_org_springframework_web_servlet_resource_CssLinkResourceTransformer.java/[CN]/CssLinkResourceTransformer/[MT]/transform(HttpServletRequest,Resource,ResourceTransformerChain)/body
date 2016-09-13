@@ -9,23 +9,22 @@
   }
   byte[] bytes=FileCopyUtils.copyToByteArray(resource.getInputStream());
   String content=new String(bytes,DEFAULT_CHARSET);
-  Set<CssLinkInfo> infos=new HashSet<>(8);
-  for (  CssLinkParser parser : this.linkParsers) {
-    parser.parseLink(content,infos);
+  List<Segment> linkSegments=new ArrayList<>(8);
+  for (  LinkParser parser : this.linkParsers) {
+    linkSegments.addAll(parser.parseLink(content));
   }
-  if (infos.isEmpty()) {
+  if (linkSegments.isEmpty()) {
     if (logger.isTraceEnabled()) {
       logger.trace("No links found.");
     }
     return resource;
   }
-  List<CssLinkInfo> sortedInfos=new ArrayList<>(infos);
-  Collections.sort(sortedInfos);
+  Collections.sort(linkSegments);
   int index=0;
   StringWriter writer=new StringWriter();
-  for (  CssLinkInfo info : sortedInfos) {
-    writer.write(content.substring(index,info.getStart()));
-    String link=content.substring(info.getStart(),info.getEnd());
+  for (  Segment linkSegment : linkSegments) {
+    writer.write(content.substring(index,linkSegment.getStart()));
+    String link=content.substring(linkSegment.getStart(),linkSegment.getEnd());
     String newLink=null;
     if (!hasScheme(link)) {
       newLink=resolveUrlPath(link,request,resource,transformerChain);
@@ -39,7 +38,7 @@
       }
     }
     writer.write(newLink != null ? newLink : link);
-    index=info.getEnd();
+    index=linkSegment.getEnd();
   }
   writer.write(content.substring(index));
   return new TransformedResource(resource,writer.toString().getBytes(DEFAULT_CHARSET));
