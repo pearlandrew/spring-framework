@@ -18,10 +18,11 @@
   rbd.setFactoryBeanName("mocksControl");
   rbd.setFactoryMethodName("createMock");
   rbd.getConstructorArgumentValues().addGenericArgumentValue(Repository.class);
-  bf.registerBeanDefinition("integerRepo",rbd);
+  rbd.setQualifiedElement(ReflectionUtils.findField(getClass(),"integerRepositoryQualifierProvider"));
+  bf.registerBeanDefinition("integerRepository",rbd);
   RepositoryFieldInjectionBeanWithQualifiers bean=(RepositoryFieldInjectionBeanWithQualifiers)bf.getBean("annotatedBean");
   Repository<?> sr=bf.getBean("stringRepo",Repository.class);
-  Repository<?> ir=bf.getBean("integerRepo",Repository.class);
+  Repository<?> ir=bf.getBean("integerRepository",Repository.class);
   assertSame(sr,bean.stringRepository);
   assertSame(ir,bean.integerRepository);
   assertSame(1,bean.stringRepositoryArray.length);
@@ -35,5 +36,5 @@
   assertSame(1,bean.stringRepositoryMap.size());
   assertSame(1,bean.integerRepositoryMap.size());
   assertSame(sr,bean.stringRepositoryMap.get("stringRepo"));
-  assertSame(ir,bean.integerRepositoryMap.get("integerRepo"));
+  assertSame(ir,bean.integerRepositoryMap.get("integerRepository"));
 }
