@@ -1,0 +1,11 @@
+{
+  BodyExtractor<Flux<String>> extractor=BodyExtractors.toFlux(String.class);
+  DefaultDataBufferFactory factory=new DefaultDataBufferFactory();
+  DefaultDataBuffer dataBuffer=factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+  Flux<DataBuffer> body=Flux.just(dataBuffer);
+  MockServerHttpRequest request=new MockServerHttpRequest();
+  request.setBody(body);
+  Configuration configuration=Configuration.builder().build();
+  Flux<String> result=extractor.extract(request,configuration);
+  TestSubscriber.subscribe(result).assertComplete().assertValues("foo");
+}

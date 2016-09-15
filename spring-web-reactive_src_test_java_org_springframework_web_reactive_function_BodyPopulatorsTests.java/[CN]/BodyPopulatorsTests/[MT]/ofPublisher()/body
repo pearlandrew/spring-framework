@@ -1,0 +1,12 @@
+{
+  Flux<String> body=Flux.just("foo");
+  BodyPopulator<Flux<String>> populator=BodyPopulators.fromPublisher(body,String.class);
+  assertEquals(body,populator.supplier().get());
+  BiFunction<ServerHttpResponse,Configuration,Mono<Void>> writer=populator.writer();
+  MockServerHttpResponse response=new MockServerHttpResponse();
+  Mono<Void> result=writer.apply(response,Configuration.builder().build());
+  TestSubscriber.subscribe(result).assertComplete();
+  ByteBuffer byteBuffer=ByteBuffer.wrap("foo".getBytes(UTF_8));
+  DataBuffer buffer=new DefaultDataBufferFactory().wrap(byteBuffer);
+  TestSubscriber.subscribe(response.getBody()).assertComplete().assertValues(buffer);
+}

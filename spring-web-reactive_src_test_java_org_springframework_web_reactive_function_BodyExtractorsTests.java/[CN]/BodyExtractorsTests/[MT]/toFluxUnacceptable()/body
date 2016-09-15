@@ -1,0 +1,12 @@
+{
+  BodyExtractor<Flux<String>> extractor=BodyExtractors.toFlux(String.class);
+  DefaultDataBufferFactory factory=new DefaultDataBufferFactory();
+  DefaultDataBuffer dataBuffer=factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+  Flux<DataBuffer> body=Flux.just(dataBuffer);
+  MockServerHttpRequest request=new MockServerHttpRequest();
+  request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+  request.setBody(body);
+  Configuration configuration=Configuration.empty().build();
+  Flux<String> result=extractor.extract(request,configuration);
+  TestSubscriber.subscribe(result).assertError(UnsupportedMediaTypeStatusException.class);
+}
