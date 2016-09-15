@@ -1,0 +1,12 @@
+{
+  if (requestCustomizer != null) {
+    this.requestCustomizers.add(requestCustomizer);
+  }
+  if (this.interceptors != null && this.index < this.interceptors.size()) {
+    ClientHttpRequestInterceptor interceptor=this.interceptors.get(this.index++);
+    return interceptor.intercept(method,uri,this);
+  }
+ else {
+    return this.connector.connect(method,uri,new DefaultRequestCallback(this.clientWebRequest,this.requestCustomizers));
+  }
+}
