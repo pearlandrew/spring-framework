@@ -6,9 +6,8 @@
   this.asyncManager.startDeferredResultProcessing(deferredResult);
   this.asyncWebRequest.onTimeout(ASYNC_EVENT);
   this.asyncWebRequest.onComplete(ASYNC_EVENT);
-  assertFalse(this.asyncManager.hasConcurrentResult());
-  assertEquals(DispatcherType.REQUEST,this.servletRequest.getDispatcherType());
-  assertEquals(503,this.servletResponse.getStatus());
+  assertTrue(this.asyncManager.hasConcurrentResult());
+  assertEquals(AsyncRequestTimeoutException.class,this.asyncManager.getConcurrentResult().getClass());
   verify(interceptor).beforeConcurrentHandling(this.asyncWebRequest,deferredResult);
   verify(interceptor).preProcess(this.asyncWebRequest,deferredResult);
   verify(interceptor).afterCompletion(this.asyncWebRequest,deferredResult);
