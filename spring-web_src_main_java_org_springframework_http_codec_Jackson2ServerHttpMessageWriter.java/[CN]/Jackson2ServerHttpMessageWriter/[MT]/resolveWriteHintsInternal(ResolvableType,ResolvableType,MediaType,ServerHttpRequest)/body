@@ -1,0 +1,15 @@
+{
+  Object source=streamType.getSource();
+  MethodParameter returnValue=(source instanceof MethodParameter ? (MethodParameter)source : null);
+  if (returnValue != null) {
+    JsonView annotation=returnValue.getMethodAnnotation(JsonView.class);
+    if (annotation != null) {
+      Class<?>[] classes=annotation.value();
+      if (classes.length != 1) {
+        throw new IllegalArgumentException("@JsonView only supported for write hints with exactly 1 class argument: " + returnValue);
+      }
+      return Collections.singletonMap(AbstractJackson2Codec.JSON_VIEW_HINT,classes[0]);
+    }
+  }
+  return Collections.emptyMap();
+}
