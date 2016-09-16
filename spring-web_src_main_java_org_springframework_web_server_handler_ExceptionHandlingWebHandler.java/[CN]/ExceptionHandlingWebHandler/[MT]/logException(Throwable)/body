@@ -1,0 +1,16 @@
+{
+  @SuppressWarnings("serial") NestedCheckedException nestedException=new NestedCheckedException("",ex){
+  }
+;
+  if ("Broken pipe".equalsIgnoreCase(nestedException.getMostSpecificCause().getMessage()) || DISCONNECTED_CLIENT_EXCEPTIONS.contains(ex.getClass().getSimpleName())) {
+    if (disconnectedClientLogger.isTraceEnabled()) {
+      disconnectedClientLogger.trace("Looks like the client has gone away",ex);
+    }
+ else     if (disconnectedClientLogger.isDebugEnabled()) {
+      disconnectedClientLogger.debug("Looks like the client has gone away: " + nestedException.getMessage() + " (For full stack trace, set the '"+ DISCONNECTED_CLIENT_LOG_CATEGORY+ "' log category to TRACE level)");
+    }
+  }
+ else {
+    logger.debug("Could not complete request",ex);
+  }
+}
