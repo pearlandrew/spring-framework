@@ -1,0 +1,9 @@
+{
+  Flux<String> body=Flux.just("foo");
+  BodyInsertor<Flux<String>> insertor=BodyInsertors.fromServerSentEvents(body,String.class);
+  assertEquals(body,insertor.supplier().get());
+  BiFunction<ServerHttpResponse,Configuration,Mono<Void>> writer=insertor.writer();
+  MockServerHttpResponse response=new MockServerHttpResponse();
+  Mono<Void> result=writer.apply(response,Configuration.builder().build());
+  TestSubscriber.subscribe(result).assertComplete();
+}
