@@ -1,0 +1,9 @@
+{
+  ServerSentEvent<String> event=ServerSentEvent.builder("foo").build();
+  Flux<ServerSentEvent<String>> body=Flux.just(event);
+  BodyInserter<Flux<ServerSentEvent<String>>> inserter=BodyInserters.fromServerSentEvents(body);
+  assertEquals(body,inserter.t());
+  MockServerHttpResponse response=new MockServerHttpResponse();
+  Mono<Void> result=inserter.insert(response,Configuration.builder().build());
+  TestSubscriber.subscribe(result).assertComplete();
+}

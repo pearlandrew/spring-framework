@@ -1,0 +1,11 @@
+{
+  Flux<String> body=Flux.just("foo");
+  BodyInserter<Flux<String>> inserter=BodyInserters.fromPublisher(body,String.class);
+  assertEquals(body,inserter.t());
+  MockServerHttpResponse response=new MockServerHttpResponse();
+  Mono<Void> result=inserter.insert(response,Configuration.builder().build());
+  TestSubscriber.subscribe(result).assertComplete();
+  ByteBuffer byteBuffer=ByteBuffer.wrap("foo".getBytes(UTF_8));
+  DataBuffer buffer=new DefaultDataBufferFactory().wrap(byteBuffer);
+  TestSubscriber.subscribe(response.getBody()).assertComplete().assertValues(buffer);
+}

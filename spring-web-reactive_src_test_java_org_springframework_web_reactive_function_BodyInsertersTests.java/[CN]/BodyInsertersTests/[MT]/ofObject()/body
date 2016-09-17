@@ -1,0 +1,11 @@
+{
+  String body="foo";
+  BodyInserter<String> inserter=BodyInserters.fromObject(body);
+  assertEquals(body,inserter.t());
+  MockServerHttpResponse response=new MockServerHttpResponse();
+  Mono<Void> result=inserter.insert(response,Configuration.builder().build());
+  TestSubscriber.subscribe(result).assertComplete();
+  ByteBuffer byteBuffer=ByteBuffer.wrap(body.getBytes(UTF_8));
+  DataBuffer buffer=new DefaultDataBufferFactory().wrap(byteBuffer);
+  TestSubscriber.subscribe(response.getBody()).assertComplete().assertValues(buffer);
+}
