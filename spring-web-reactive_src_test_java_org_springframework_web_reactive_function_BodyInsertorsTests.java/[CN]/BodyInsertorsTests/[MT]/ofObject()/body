@@ -1,10 +1,9 @@
 {
   String body="foo";
   BodyInsertor<String> insertor=BodyInsertors.fromObject(body);
-  assertEquals(body,insertor.supplier().get());
-  BiFunction<ServerHttpResponse,Configuration,Mono<Void>> writer=insertor.writer();
+  assertEquals(body,insertor.t());
   MockServerHttpResponse response=new MockServerHttpResponse();
-  Mono<Void> result=writer.apply(response,Configuration.builder().build());
+  Mono<Void> result=insertor.insert(response,Configuration.builder().build());
   TestSubscriber.subscribe(result).assertComplete();
   ByteBuffer byteBuffer=ByteBuffer.wrap(body.getBytes(UTF_8));
   DataBuffer buffer=new DefaultDataBufferFactory().wrap(byteBuffer);
