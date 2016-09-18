@@ -1,13 +1,16 @@
 {
   if (!ObjectUtils.isEmpty(this.scripts)) {
-    try {
-      for (      String script : this.scripts) {
-        Resource resource=getResource(script);
+    for (    String script : this.scripts) {
+      Resource resource=getResource(script);
+      if (resource == null) {
+        throw new IllegalStateException("Script resource [" + script + "] not found");
+      }
+      try {
         engine.eval(new InputStreamReader(resource.getInputStream()));
       }
-    }
- catch (    Exception ex) {
-      throw new IllegalStateException("Failed to load script",ex);
+ catch (      Throwable ex) {
+        throw new IllegalStateException("Failed to evaluate script [" + script + "]",ex);
+      }
     }
   }
 }
