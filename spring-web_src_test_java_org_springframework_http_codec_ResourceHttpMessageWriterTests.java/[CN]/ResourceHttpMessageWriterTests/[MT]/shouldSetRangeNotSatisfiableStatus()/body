@@ -1,5 +1,6 @@
 {
   this.request.getHeaders().set(HttpHeaders.RANGE,"invalid");
-  this.expectedException.expect(IllegalArgumentException.class);
   TestSubscriber.subscribe(this.writer.write(Mono.just(resource),null,ResolvableType.forClass(Resource.class),MediaType.TEXT_PLAIN,this.request,this.response,Collections.emptyMap()));
+  assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES),is("bytes"));
+  assertThat(this.response.getStatusCode(),is(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE));
 }
